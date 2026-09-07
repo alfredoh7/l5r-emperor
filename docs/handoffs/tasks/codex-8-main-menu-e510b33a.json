@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implemented approved Moonlit Study startup menu, real Clan selection, existing private/library entry points, local practice resume, persistent presentation options and bounded atmospheric animation. No authoritative game or protocol changes.",
-  "validation": "Native menu flow/input/fullscreen/options-persistence tests passed; reviewed native menu/options and alternate aspect captures; reduced-motion frames identical; board assignment and Border Keep refresh checks passed; 29 collaboration plus all 148 existing game/network checks passed across runs. Client builds zero warnings/errors. See docs/MAIN_MENU.md for evidence, socket retry and precise scope.",
-  "remaining": "Ready for PR review after final checks. Main.cs integration requires shared review; no expert rules acceptance or native Windows playtest claimed. Prior downloadable release is unchanged; launch this checkout with bash tools/run.sh.",
+  "summary": "Implemented animated moonlit menu; added a clickable Mac launcher for the current checkout and permanent instruction to include launcher links with playable updates.",
+  "validation": "Menu implementation evidence is in docs/MAIN_MENU.md. Launcher shell syntax and Info.plist passed. Initial direct app launch hit macOS Documents access restrictions; corrected app opens Play Latest.command through Terminal. Actual click-equivalent app launch built successfully with zero warnings/errors and started native Godot; verified artifacts/checks/latest-launch.log.",
+  "remaining": "PR #9 awaits shared review. Earlier downloaded release is unchanged. New launcher opens Terminal and builds/runs this checkout without fetching or switching branches.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/8",
   "branch": "codex/8-main-menu",
-  "updated": "2026-09-07T14:31:02.260157+00:00"
+  "updated": "2026-09-07T14:40:12.968630+00:00"
 }
