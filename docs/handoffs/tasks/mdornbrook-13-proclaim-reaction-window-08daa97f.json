@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Revised the Proclaim reaction-window fix: reverted the engine-level short-circuit (which would have silently weakened human-vs-human bluffing) and moved the friction fix to MatchSession.StepPracticeReaction(), which auto-declines on the player's behalf only in Practice mode (Online==false) and only when declining is their sole legal option.",
+  "validation": "bash tools/check.sh: all suites pass including client build/import/smoke (Core 36/36, Published 31/31, AI 13/13, client transport 4/4, Godot import/smoke clean).",
+  "remaining": "None; ready for review. Flagging for alfredoh7 since this touches src/L5R.Client/Main.cs and MatchSession.cs (both shared).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/13",
+  "branch": "mdornbrook/13-proclaim-reaction-window",
+  "updated": "2026-09-07T16:29:43.265541+00:00"
+}

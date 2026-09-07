@@ -71,6 +71,21 @@ public sealed class MatchSession : IDisposable
         return result.Accepted;
     }
 
+    /// <summary>Against a real opponent, a reaction window always waits for an explicit pass — bluffing is
+    /// part of the game, and silently skipping it would leak whether the passer held anything. Solo against
+    /// the practice bot there is no opponent to bluff, so silently pass on the player's behalf whenever
+    /// declining is their only legal option (a real reaction, e.g. an actual Proclaim decision, still prompts).</summary>
+    public bool StepPracticeReaction()
+    {
+        if (_engine is null || Online || _engine.State.WinnerId is not null) return false;
+        if (_engine.State.PendingChoice is null || _engine.State.PriorityPlayerId != _localSeat) return false;
+        var enabled = _engine.QueryActions(_localSeat).Where(a => a.Enabled).ToArray();
+        if (enabled is not [{ Type: "declineReaction" } only]) return false;
+        var result = _engine.Execute(only.Command!);
+        RefreshLocal();
+        return result.Accepted;
+    }
+
     public async Task Submit(GameCommand command)
     {
         if (Busy) return;
