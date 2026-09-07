@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added Spell/Event/Celestial/Region/Ring to CardType (Models.cs -- shared). New tools/content/build_deck_pool.py (rules-only) filters the full Oracle catalogue to the 2,143-card Age of Conquest (Emperor) legal pool (excludes 6 Proxy junk entries), written to content/deck-pool.json for the future deck builder. Confirmed all 40 lion-crane-v1 cards resolve cleanly inside this pool.",
+  "validation": "bash tools/check.sh: all suites pass, clean on retry (Core 46/46, Published 32/32, AI 13/13, content pipeline 65/65 incl. 6 new tests, client build/import/smoke clean -- one transient Godot import hiccup, reproduced-clean on rerun).",
+  "remaining": "None; ready for review. Companion issues #24 (deck format) and #25 (builder UI) build on this.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/23",
+  "branch": "mdornbrook/23-cardtype-deck-pool",
+  "updated": "2026-09-07T18:45:09.055645+00:00"
+}
