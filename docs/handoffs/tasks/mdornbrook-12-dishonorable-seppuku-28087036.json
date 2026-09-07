@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added Dishonorable status (CardInstance/CardView, both in Models.cs -- shared) and Order Seppuku as a true Open action (rules-only, in MatchEngine.cs, bypasses the priority gate like concede). Generalized DestroyUnits to apply the dishonorable-death Honor penalty (PersonalHonor loss) for any non-Seppuku destruction of a Dishonorable Personality. Entry-to-play hook via Effect 'enters-dishonored'. CardView.Dishonorable (Models.cs/MatchQueries.cs, both shared) exposes the status for the paired UI issue #21.",
+  "validation": "bash tools/check.sh: all suites pass (Core 46/46 incl. 7 new tests, Published 32/32, AI 13/13, client build/import/smoke clean on retry -- same known transient Godot import hiccup as prior branches, reproduced-clean on rerun).",
+  "remaining": "None; ready for review. UI display (180-degree rotation, Fallen-cards badge) tracked separately in #21.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/12",
+  "branch": "mdornbrook/12-dishonorable-seppuku",
+  "updated": "2026-09-07T17:37:27.122154+00:00"
+}
