@@ -239,17 +239,6 @@ public sealed partial class MatchEngine
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
     }
 
-    // No reaction-capable cards are implemented yet (see Limits above). Until the first one
-    // lands, no player ever has a legal reaction, so reaction windows must not stop and wait
-    // on a human/AI command that could only ever be a forced, meaningless pass.
-    private static bool HasLegalReaction(int playerId) => false;
-    private void CloseReactionWindow()
-    {
-        _state.PendingChoice=null;
-        _state.ConsecutivePasses=0;
-        _state.PriorityPlayerId=_state.ActivePlayerId;
-        Emit("reactionClosed","No player has a legal reaction; the window closed.");
-    }
     private void Proclaim(GameCommand command)
     {
         var pending=_state.PendingChoice!;
@@ -259,16 +248,20 @@ public sealed partial class MatchEngine
         var card=Card(pending.CardId);
         player.ProclaimUsedTurn=_state.TurnNumber;
         GainHonor(player.Id,Definition(card).PersonalHonor,"Proclaim");
-        if(HasLegalReaction(1-command.PlayerId)) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=1-command.PlayerId; }
-        else CloseReactionWindow();
+        _state.ConsecutivePasses=0;
+        _state.PriorityPlayerId=1-command.PlayerId;
     }
     private void PassReaction()
     {
-        var next=1-_state.PriorityPlayerId;
-        if(!HasLegalReaction(next)) { CloseReactionWindow(); return; }
         _state.ConsecutivePasses++;
-        if(_state.ConsecutivePasses==2) CloseReactionWindow();
-        else _state.PriorityPlayerId=next;
+        if(_state.ConsecutivePasses==2)
+        {
+            _state.PendingChoice=null;
+            _state.ConsecutivePasses=0;
+            _state.PriorityPlayerId=_state.ActivePlayerId;
+            Emit("reactionClosed","Both players passed; the reaction window closed.");
+        }
+        else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
     }
 
     private void Pass()

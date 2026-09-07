@@ -90,6 +90,9 @@ public partial class Main : Node
                 _opponentClock = 0;
                 _session.StepPracticeOpponent((view, actions) => TrainingOpponent.Choose(view, actions).Command);
             }
+            // No delay: this only fires when declining is the player's sole legal option, so there is
+            // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
+            _session.StepPracticeReaction();
         }
         if (_capturePath is not null && _captureMode == "published-tactile") { ProcessTactileCapture(); return; }
         if (_capturePath is not null)
