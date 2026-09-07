@@ -4,6 +4,12 @@ This private repository coordinates the owner, invited rules reviewers, Codex an
 
 For playing and reporting mechanics, begin with `docs/RULES_REVIEW.md`. For development, read `AI_HANDOFF.md` and `docs/PROJECT_STATUS.md`.
 
+## Automatic agent workflow
+
+Alfredo leads UI/QoL; mdornbrook leads mechanics/rules. Codex and Claude Code load the shared `AGENTS.md` policy and handle context refresh, task branches, handoffs and PRs for you. See [the operating guide](docs/COLLABORATION.md). You should normally just describe the improvement.
+
+Agents run `python3 tools/collab.py context` before implementation, write a per-task handoff with `handoff`, and run `audit --working` before the final commit. Use `python` on Windows if needed. Cross-lane work gets joint review; per-task handoffs avoid everyone editing one global memory file. GitHub labels/reviewer requests are automatic; protected-branch enforcement is unavailable on the current private plan.
+
 ## A shared task workflow
 
 1. Open an issue using **Rules / gameplay discrepancy** or **Development task**. Capture a concrete expected outcome. An expert can report findings without writing code.

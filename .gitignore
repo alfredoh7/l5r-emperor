@@ -29,3 +29,6 @@ runtime/
 # Bulk research scans are distributed as an optional private Release attachment.
 # The 40 playable Lion/Crane source scans and all runtime art remain in Git.
 assets/reference/oracle/emperor-edition/images/
+
+# Personal agent memory is not the team record.
+CLAUDE.local.md

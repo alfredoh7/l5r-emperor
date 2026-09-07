@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Configured shared agent instructions, role-aware live context, per-task handoffs, audits and automatic PR routing.",
+  "validation": "Local workflow tests and full game/client checks passed; Codex instruction-loading rehearsal passed. Claude live test awaits expired-login refresh; GitHub CI and live routing are pending.",
+  "remaining": "Finish GitHub CI and live routing rehearsals; rerun Claude acceptance after login refresh.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/3",
+  "branch": "codex/shared-collaboration",
+  "updated": "2026-09-07T13:04:12.499487+00:00"
+}

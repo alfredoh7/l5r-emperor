@@ -15,3 +15,11 @@ title: ''
 ## Coordination / handoff
 
 Owner, branch/worktree, related issues/PRs, dependencies, and resume notes:
+
+## Coordination
+
+Lane: ui / rules / shared
+
+Owner / related branch or PR:
+
+Shared interface or other active task affected:

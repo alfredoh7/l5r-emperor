@@ -9,7 +9,7 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 - Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.
 - Game: Godot **4.7.2 .NET**, C#/.NET SDK **10.0.400**; tools are pinned by `tools/bootstrap.py` and `global.json`.
 - Platforms: Mac and Windows exports. Native Mac play/rendering has been checked; a Windows package is not evidence of a native Windows playtest.
-- Immediate objective: have an experienced Emperor player validate full games, rules timing and card interactions. Pause broad UI redesign unless actual play exposes a necessary correction.
+- Current ownership: alfredoh7 develops UI/QoL; mdornbrook validates and develops mechanics/rules. Preserve the approved aesthetic while both lanes progress. Read docs/COLLABORATION.md for automatic coordination.
 - Start with `docs/PROJECT_STATUS.md`, open GitHub issues and recent PRs after reading this file. They may supersede this checkpoint.
 
 ## Product decisions to preserve
@@ -95,6 +95,9 @@ All included effects are implemented under the pinned profile, but expert full-m
 
 ## How people and AI sessions collaborate
 
+`AGENTS.md` is the current executable agent workflow; `CLAUDE.md` imports it. On every implementation request, run `python3 tools/collab.py context` (or `python` on Windows), read the task and shared records, and use the automatic handoff/audit routine before publishing. Roles and path routing live in `.github/collaboration.json`; per-task memory lives in `docs/handoffs/tasks/`, durable decisions in `docs/decisions/`. No repeated role prompt is required after loading these project instructions.
+
+
 1. Read `AGENTS.md` (Codex) or `CLAUDE.md` (Claude Code), this file, `docs/PROJECT_STATUS.md`, and the issue being worked on.
 2. Fetch origin, inspect `git status`, and work on a dedicated `codex/<issue>-<topic>` or `claude/<issue>-<topic>` branch. Preserve unrelated local changes. Separate concurrent work into separate clones or Git worktrees.
 3. Use one GitHub issue per defect or bounded task. Assign/comment that you are taking it so two agents do not edit the same subsystem unknowingly. Never assume another session's chat is shared.
@@ -109,4 +112,4 @@ Suggested prompt for the next AI:
 
 ## Next sequence
 
-See `docs/NEXT_PHASE.md`: full human Lion/Crane matches and corrections; native Windows/external private multiplayer acceptance; scripted beginner tutorial using the real engine; then incremental additional decks and a deck builder. Broad art work is paused at 0.3.10 unless requested.
+See `docs/NEXT_PHASE.md`: full human Lion/Crane matches and corrections; native Windows/external private multiplayer acceptance; scripted beginner tutorial using the real engine; then incremental additional decks and a deck builder. UI/QoL work continues in Alfredo’s lane while the mechanics review proceeds in parallel.
