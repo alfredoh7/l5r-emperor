@@ -384,7 +384,7 @@ public sealed partial class MatchEngine
         Require(target.Zone==Zone.Battlefield && target.ProvinceIndex==_state.CurrentBattleProvince && Definition(target).Type==CardType.Personality,"Target a Personality at the current battlefield.");
         switch(def.Effect)
         {
-            case "force-three": Require(target.OwnerId==command.PlayerId,"Training rally targets your Personality."); target.ForceBonus+=3; break;
+            case "force-three": Require(target.OwnerId==command.PlayerId,"Training rally targets your Personality."); ApplyModifier(target,card.Id,def.Effect,"Force",3); break;
             case "bow-small": Require(target.OwnerId!=command.PlayerId && PersonalityForce(target)<=3,"Training pressure targets an enemy Personality with 3 or less Force."); target.Bowed=true; break;
             default: throw new RuleViolation("This card effect is not implemented.");
         }
@@ -397,8 +397,10 @@ public sealed partial class MatchEngine
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     private bool AttachmentAllowed(CardInstance attachment,CardInstance target) => new[] {"Armor","Weapon"}.All(keyword=>!Keyword(attachment,keyword) || !Attachments(target.Id).Any(c=>Keyword(c,keyword)));
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+card.ForceBonus+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force));
-    private int BattleForce(CardInstance card) => (card.Bowed?0:PersonalityForce(card))+Attachments(card.Id).Where(c=>!c.Bowed && Definition(c).Type==CardType.Follower).Sum(c=>Math.Max(0,Definition(c).Force+c.ForceBonus));
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force));
+    // A bowed Personality or Follower normally drops out of its unit's Force; Elite is the printed
+    // (or granted) exception that keeps it in, whichever card carries the keyword.
+    private int BattleForce(CardInstance card) => ((card.Bowed && !Keyword(card,"Elite"))?0:PersonalityForce(card))+Attachments(card.Id).Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower).Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
     {
         var count=0;
@@ -444,7 +446,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) card.ForceBonus=0;
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); }
         _state.TurnNumber++; _state.ActivePlayerId=1-_state.ActivePlayerId;
         StartTurn();
     }

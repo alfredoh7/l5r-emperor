@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Extended Elite to Personalities in BattleForce (same rule as Followers: bowed Elite still counts). Replaced CardInstance.AddedKeywords with a duration-aware CardInstance.GrantedKeywords (Attachment/Turn/Permanent), with expiry wired into FinishTurn and DestroyAttachment. Generalized the Chi<=0 destruction check into ApplyModifier so any future Chi-reducing effect enforces it, not just the one prior call site. CardView exposes GrantedKeywords for the paired UI issue.",
+  "validation": "bash tools/check.sh: all suites pass (Core 39/39 incl. 2 new tests, Published 32/32 incl. 1 new test, AI 13/13, client build/import/smoke clean on retry -- transient Godot import hiccup unrelated to this change, reproduced-clean on rerun, same as the prior commit on this branch).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/19",
+  "branch": "mdornbrook/16-force-chi-modifier-tracking",
+  "updated": "2026-09-07T16:58:47.724300+00:00"
+}

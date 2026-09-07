@@ -26,6 +26,7 @@ internal static class PublishedTests
             ("Defensive Stance requires bowed performer and respects negation", Defensive),
             ("Crushing Strength requires opposition and offers two exclusive abilities", Crushing),
             ("Never Afraid may destroy either player's attachment", Never),
+            ("Destroying an attachment clears the Attachment-duration keyword it granted", AttachmentGrantedKeywordClears),
             ("Items add Force and Chi even bowed; Armor and Weapon limits enforced", Attachments),
             ("Followers meet Personal Honor requirement and stay separate from Personality Force", Followers),
             ("Lion attack traits turn on and off as units move", AttackTraits),
@@ -200,6 +201,14 @@ internal static class PublishedTests
     {
         foreach(var owner in new[]{0,1}){var s=State(true);var c=Add(s,9916,zone:Zone.Hand);var target=Add(s,10118,owner,Zone.Attached,province:0,parent:Unit(s,owner).Id);var e=MatchEngine.FromTestState(s);Accept(e,Use(e,c.Id,"never-afraid",target.Id));Eq(Card(e,target.Id).Zone,Zone.FateDiscard);}
     }
+    private static void AttachmentGrantedKeywordClears()
+    {
+        // An Attachment-duration grant is removed once its granting attachment is destroyed.
+        var s=State(true);var never=Add(s,9916,zone:Zone.Hand);var parent=Unit(s,0);var item=Add(s,10118,0,Zone.Attached,province:0,parent:parent.Id);
+        parent.GrantedKeywords=[new("Elite",item.Id,"Attachment")];
+        var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",item.Id));
+        Eq(Card(e,parent.Id).GrantedKeywords.Count,0);
+    }
     private static void Attachments()
     {
         var s=State();var p=Add(s,1645,bowed:true);var armor=Add(s,10118,zone:Zone.Hand);var sword=Add(s,9879,zone:Zone.Attached,bowed:true,parent:p.Id);var e=MatchEngine.FromTestState(s);
@@ -224,8 +233,8 @@ internal static class PublishedTests
     private static void Ancestor()
     {
         var s=State(true);var ancestor=Add(s,"training-fragile-ancestor",1,Zone.Battlefield,province:0);var sword=Add(s,9879,1,Zone.Attached,province:0,parent:ancestor.Id);var never=Add(s,9916,zone:Zone.Hand);var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",sword.Id));Eq(Card(e,ancestor.Id).Zone,Zone.Dead);Eq(e.State.Players[1].Honor,8);
-        s=State(true);var lion=Unit(s,1);lion.AddedKeywords=["Ancestor"];lion.ForceBonus=-2;var a=Unit(s,0);a.ForceBonus=30;e=MatchEngine.FromTestState(s);Pass(e);Pass(e);Eq(e.State.Players[1].Honor,7);
-        s=State(true);s.ActivePlayerId=1;lion=Unit(s,1);lion.AddedKeywords=["Ancestor"];e=MatchEngine.FromTestState(s);Eq(ViewCard(e,lion.Id).Force,1);
+        s=State(true);var lion=Unit(s,1);lion.GrantedKeywords=[new("Ancestor","test-fixture","Permanent")];lion.Modifiers=[new("test-fixture","test-fixture","Force",-2)];var a=Unit(s,0);a.Modifiers=[new("test-fixture","test-fixture","Force",30)];e=MatchEngine.FromTestState(s);Pass(e);Pass(e);Eq(e.State.Players[1].Honor,7);
+        s=State(true);s.ActivePlayerId=1;lion=Unit(s,1);lion.GrantedKeywords=[new("Ancestor","test-fixture","Permanent")];e=MatchEngine.FromTestState(s);Eq(ViewCard(e,lion.Id).Force,1);
     }
     private static void Favor()
     {
