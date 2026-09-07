@@ -21,6 +21,8 @@ var tests = new (string Name, Action Run)[]
     ("Tied armies destroy each other and gain one Honor per opposing card", BattleTie),
     ("Bowed Personality's unbowed Followers still count in army Force", FollowerForce),
     ("Bowed Elite Followers still count in unit Force; plain bowed Followers do not", EliteFollowerForce),
+    ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
+    ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
     ("Battle winner gains two Honor per destroyed card including attachments", BattleHonor),
     ("Successful attacking units and attachments return bowed; defenders stay", BattleReturn),
     ("Last province destruction immediately wins military victory", MilitaryVictory),
@@ -219,9 +221,18 @@ static void EliteFollowerForce()
     var s=Battle(5,0,1,true).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
     Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
     var elite=Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
-    elite.AddedKeywords=["Elite"];
+    elite.GrantedKeywords=[new("Elite","test-fixture","Permanent")];
     var e=MatchEngine.FromTestState(s); Resolve(e);
     Check(e.State.Players[1].Provinces[0].Destroyed,"Bowed Elite Follower's Force should still count toward the attacking unit");
+}
+static void ElitePersonalityForce()
+{
+    // A bowed Personality normally contributes nothing to its unit's Force; Elite is the exception,
+    // whether printed or granted, same as for a Follower.
+    var s=Battle(9,0,1,true).State; var attacker=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    attacker.GrantedKeywords=[new("Elite","test-fixture","Permanent")];
+    var e=MatchEngine.FromTestState(s); Resolve(e);
+    Check(e.State.Players[1].Provinces[0].Destroyed,"A bowed Elite Personality's own Force should still count toward its unit");
 }
 static void BattleHonor()
 {
@@ -288,6 +299,14 @@ static void ExpiringForce()
 {
     var s=MatchEngine.CreateEconomyScenario().State; var p=Add(s,"training-crane-samurai",0,Zone.Home); p.Modifiers=[new("test-fixture","test-fixture","Force",3)];
     var e=MatchEngine.FromTestState(s); Accept(e,Cmd(e,"endDynasty")); Equal(e.State.Cards[p.Id].Modifiers.Count,0);
+}
+static void GrantedKeywordDuration()
+{
+    // Turn-duration grants clear at turn end; Permanent grants do not.
+    var s=MatchEngine.CreateEconomyScenario().State; var p=Add(s,"training-crane-samurai",0,Zone.Home);
+    p.GrantedKeywords=[new("Elite","test-fixture","Turn"),new("Elite","test-fixture","Permanent")];
+    var e=MatchEngine.FromTestState(s); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Cards[p.Id].GrantedKeywords.Count,1); Equal(e.State.Cards[p.Id].GrantedKeywords[0].Duration,"Permanent");
 }
 static void Replay()
 {

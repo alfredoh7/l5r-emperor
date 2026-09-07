@@ -33,7 +33,11 @@ public static class AbilityCatalog
 public sealed partial class MatchEngine
 {
     private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
-    private static bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.AddedKeywords).Contains(keyword, StringComparer.Ordinal);
+    private static bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+    // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
+    // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
+    // "Permanent": only when the granting card's text says so; never auto-cleared.
+    private static void GrantKeyword(CardInstance card, string keyword, string source, string duration) => card.GrantedKeywords.Add(new(keyword, source, duration));
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
@@ -41,7 +45,13 @@ public sealed partial class MatchEngine
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
     private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount);
-    private static void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount) => card.Modifiers.Add(new(source, effect, stat, amount));
+    // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
+    // every current and future Chi-reducing effect enforces it without needing its own check.
+    private void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount)
+    {
+        card.Modifiers.Add(new(source, effect, stat, amount));
+        if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
+    }
     private static void RemoveModifiers(CardInstance card, Func<AppliedModifier, bool> match) => card.Modifiers.RemoveAll(m => match(m));
     private int CardForce(CardInstance card) => Definition(card).Type == CardType.Personality ? PersonalityForce(card) : Math.Max(0, Definition(card).Force + StatModifier(card, "Force"));
     private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi);
@@ -237,6 +247,7 @@ public sealed partial class MatchEngine
     {
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
+        parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }
