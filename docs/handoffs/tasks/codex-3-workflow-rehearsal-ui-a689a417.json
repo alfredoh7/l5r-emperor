@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Disposable ui routing rehearsal; comment-only fixture, never merge.",
+  "validation": "Local collaboration audit will verify the task record and lane; CI verifies the branch.",
+  "remaining": "Verify the lane label and close this test PR without merging.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/3",
+  "branch": "codex/3-workflow-rehearsal-ui",
+  "updated": "2026-09-07T13:07:34.388849+00:00"
+}

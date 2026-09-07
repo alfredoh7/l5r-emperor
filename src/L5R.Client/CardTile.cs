@@ -283,3 +283,5 @@ public partial class CardTile : Button
         if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || HasFocus()) DrawRect(new Rect2(1, 1, faceSize.X - 2, faceSize.Y - 2), border, false, 2);
     }
 }
+
+// Disposable collaboration routing rehearsal; never merge this test branch.
