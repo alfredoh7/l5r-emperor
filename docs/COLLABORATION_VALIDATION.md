@@ -20,4 +20,4 @@ The live `context` command identified alfredoh7, chose the UI default, fetched c
 
 ## Evidence location and scope
 
-Local detailed logs are under ignored `artifacts/collaboration/`; PRs and GitHub Actions preserve remote validation. The project status and game-version baseline remain separate from workflow testing. Final CI and live routing outcomes are recorded in the setup PR. Human rules acceptance and native Windows graphical playtesting remain open product gates.
+Local detailed logs are under ignored `artifacts/collaboration/`; PRs and GitHub Actions preserve remote validation. The project status and game-version baseline remain separate from workflow testing. The initial setup commit passed collaboration CI and full Mac/Windows CI. The live shared setup PR received lane:shared and a review request for mdornbrook. GitHub activates the automatic router only after its workflow reaches the default branch; disposable draft PRs exercise that final activation. Final routing outcomes are recorded in the setup PR. Human rules acceptance and native Windows graphical playtesting remain open product gates.

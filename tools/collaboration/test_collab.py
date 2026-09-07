@@ -71,6 +71,7 @@ class PolicyTests(unittest.TestCase):
         self.assertNotIn('github.head_ref',source)
         self.assertNotIn('pull_request.title',source)
         self.assertIn('persist-credentials: false',source)
+        self.assertIn("if: github.event.pull_request.base.ref == 'main'",source)
 
     def test_run_uses_argument_arrays_no_shell(self):
         with patch.object(c.subprocess,'run') as fake:

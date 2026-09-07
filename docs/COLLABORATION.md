@@ -18,7 +18,7 @@ A handoff command writes a local JSON file. The agent commits and pushes it with
 
 ## Ownership and review
 
-The single executable path map is `.github/collaboration.json`. UI artwork/client presentation belongs to Alfredo; engine/server/card data belongs to mdornbrook. State/query models, client/server boundaries, build and workflow files, unknown paths and changes spanning lanes get shared review. A metadata-only GitHub Action applies `lane:ui`, `lane:rules` or `lane:shared` and requests the responsible lead(s), excluding the PR author. Drafts receive labels; reviewer requests happen when ready. Repeated pushes don't repeatedly request someone who already participated.
+The single executable path map is `.github/collaboration.json`. UI artwork/client presentation belongs to Alfredo; engine/server/card data belongs to mdornbrook. State/query models, client/server boundaries, build and workflow files, unknown paths and changes spanning lanes get shared review. Desktop CI runs on PRs and merged main, avoiding duplicate push-plus-PR builds for each task. A metadata-only GitHub Action applies `lane:ui`, `lane:rules` or `lane:shared` and requests the responsible lead(s), excluding the PR author. Drafts receive labels; reviewer requests happen when ready. Repeated pushes don't repeatedly request someone who already participated.
 
 File ownership is a starting point. A UI change that alters legal targeting or automatic payments still needs the rules lead even if it touches only a UI file. For a shared change, describe the proposed contract in the issue first and ask the other lead through the PR. Each lane lead can accept their own isolated work with evidence; GitHub does not allow self-review. Do not make the other person a bottleneck for every minor change.
 
@@ -36,6 +36,6 @@ The current GitHub account returned HTTP 403 for private repository rulesets and
 
 ## Safe automation
 
-The review router runs on `pull_request_target` using **only the trusted base commit**, with no PR-head checkout or execution. PR titles, branch names and descriptions are not interpolated into shell commands. It reads filenames, applies labels and requests reviewers. The PR CI uses a read-only token and executes the ordinary candidate tests. New/untracked/deleted/renamed files are included in local auditing; renamed paths retain their old lane for review routing. No background process watches your computers.
+The review router runs for PRs targeting `main` on `pull_request_target` using **only the trusted base commit**, with no PR-head checkout or execution. PR titles, branch names and descriptions are not interpolated into shell commands. It reads filenames, applies labels and requests reviewers. The PR CI uses a read-only token and executes the ordinary candidate tests. New/untracked/deleted/renamed files are included in local auditing; renamed paths retain their old lane for review routing. No background process watches your computers.
 
 Official behavior references: [Codex project instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude project memory and AGENTS import](https://code.claude.com/docs/en/memory). See `docs/COLLABORATION_VALIDATION.md` for the actual tested scenarios and remaining limits.
