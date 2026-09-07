@@ -23,6 +23,13 @@ var tests = new (string Name, Action Run)[]
     ("Bowed Elite Followers still count in unit Force; plain bowed Followers do not", EliteFollowerForce),
     ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
     ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
+    ("A Personality with the enters-dishonored effect enters play Dishonorable", EntersPlayDishonored),
+    ("Seppuku requires Samurai, Courtier, or Shugenja", OrderSeppukuRequiresKeyword),
+    ("Seppuku requires a Dishonorable Personality", OrderSeppukuRequiresDishonorable),
+    ("Seppuku destroys honorably with no Honor change", OrderSeppukuHonorableDeath),
+    ("Seppuku is an Open action, available without priority", OrderSeppukuIsOpenAction),
+    ("Seppuku cannot be ordered for an opponent's Personality", CannotOrderSeppukuForOpponentsPersonality),
+    ("A Dishonorable Personality's death (other than Seppuku) costs its controller Honor", DishonorableDeathLosesHonor),
     ("Battle winner gains two Honor per destroyed card including attachments", BattleHonor),
     ("Successful attacking units and attachments return bowed; defenders stay", BattleReturn),
     ("Last province destruction immediately wins military victory", MilitaryVictory),
@@ -307,6 +314,61 @@ static void GrantedKeywordDuration()
     p.GrantedKeywords=[new("Elite","test-fixture","Turn"),new("Elite","test-fixture","Permanent")];
     var e=MatchEngine.FromTestState(s); Accept(e,Cmd(e,"endDynasty"));
     Equal(e.State.Cards[p.Id].GrantedKeywords.Count,1); Equal(e.State.Cards[p.Id].GrantedKeywords[0].Duration,"Permanent");
+}
+static void EntersPlayDishonored()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-dishonored-samurai";
+    e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
+    Accept(e,Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
+    Check(e.State.Cards[cardId].Dishonorable,"A Personality with Effect 'enters-dishonored' should enter play Dishonorable");
+}
+static void OrderSeppukuRequiresKeyword()
+{
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+    var veteran=Add(s,"training-crane-veteran",0,Zone.Home); veteran.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,Cmd(e,"orderSeppuku",id:veteran.Id));
+}
+static void OrderSeppukuRequiresDishonorable()
+{
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+    var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,Cmd(e,"orderSeppuku",id:samurai.Id));
+}
+static void OrderSeppukuHonorableDeath()
+{
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+    var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home); samurai.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s); var honorBefore=e.State.Players[0].Honor;
+    Accept(e,Cmd(e,"orderSeppuku",id:samurai.Id));
+    Equal(e.State.Cards[samurai.Id].Zone,Zone.Dead);
+    Check(!e.State.Cards[samurai.Id].Dishonorable,"Seppuku should leave the Personality honorable in death");
+    Equal(e.State.Players[0].Honor,honorBefore);
+}
+static void OrderSeppukuIsOpenAction()
+{
+    // Available regardless of who holds priority.
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1;
+    var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home); samurai.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,Cmd(e,"orderSeppuku",player:0,id:samurai.Id));
+    Equal(e.State.Cards[samurai.Id].Zone,Zone.Dead);
+}
+static void CannotOrderSeppukuForOpponentsPersonality()
+{
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+    var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home); samurai.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,Cmd(e,"orderSeppuku",player:1,id:samurai.Id));
+}
+static void DishonorableDeathLosesHonor()
+{
+    var s=Battle(9,2,6).State; var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+    defender.Dishonorable=true; // training-lion-veteran: PersonalHonor 3
+    var e=MatchEngine.FromTestState(s); Resolve(e);
+    Equal(e.State.Players[1].Honor,3);
 }
 static void Replay()
 {

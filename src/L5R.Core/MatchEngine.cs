@@ -122,6 +122,8 @@ public sealed partial class MatchEngine
     private void Apply(GameCommand command)
     {
         if (command.Type=="concede") { Win(1-command.PlayerId,"Concession"); return; }
+        // Open action: cuts through the normal priority gate and any pending choice, same as concede.
+        if (command.Type=="orderSeppuku") { OrderSeppuku(command); return; }
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
         {
@@ -163,6 +165,7 @@ public sealed partial class MatchEngine
         province.CardId=null;
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
         card.Bowed=Definition(card).Type==CardType.Holding;
+        if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
         if (quote.ProclaimEligible)
@@ -171,6 +174,21 @@ public sealed partial class MatchEngine
             _state.ConsecutivePasses=0;
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
+    }
+
+    private void OrderSeppuku(GameCommand command)
+    {
+        Require(_state.Phase==Phase.Action,"Order Seppuku is only available during the Action Phase.");
+        var card=Card(command.CardId);
+        Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
+        Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
+        Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
+        Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
+        // Honorable before destruction: this is what spares the controller the dishonorable-death
+        // Honor penalty applied generally in DestroyUnits.
+        card.Dishonorable=false;
+        DestroyUnits([card]);
+        Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
     }
 
     public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false)
@@ -409,6 +427,8 @@ public sealed partial class MatchEngine
             foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; count++; }
             card.Zone=Zone.Dead; card.ProvinceIndex=null; card.FaceUp=true; count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
+            // Seppuku clears Dishonorable before calling DestroyUnits, so it never pays this.
+            if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
         }
         return count;
