@@ -15,6 +15,10 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     bool ScenarioOnly = true, string? ArtworkKey = null, string[]? Keywords = null,
     string[]? Abilities = null, int Focus = 0);
 
+/// <summary>One applied Force/Chi change, in application order, so a future card can negate a
+/// specific prior effect instead of only ever resetting a flat running total.</summary>
+public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount);
+
 public sealed class CardInstance
 {
     public string Id { get; set; } = "";
@@ -25,7 +29,7 @@ public sealed class CardInstance
     public bool FaceUp { get; set; }
     public bool Bowed { get; set; }
     public string? AttachedTo { get; set; }
-    public int ForceBonus { get; set; }
+    public List<AppliedModifier> Modifiers { get; set; } = [];
     public int StraightenBlockedTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
     public string[] AddedKeywords { get; set; } = [];
@@ -89,7 +93,8 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null);
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
-    bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false);
+    bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
+    AppliedModifier[]? Modifiers = null);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,

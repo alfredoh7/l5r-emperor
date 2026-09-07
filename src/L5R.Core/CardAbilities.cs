@@ -38,8 +38,13 @@ public sealed partial class MatchEngine
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
-    private int CardForce(CardInstance card) => Definition(card).Type == CardType.Personality ? PersonalityForce(card) : Math.Max(0, Definition(card).Force + card.ForceBonus);
-    private int PersonalityChi(CardInstance card) => Definition(card).Chi + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi);
+    // Modifiers are kept in application order (not folded into one running total) so a future card
+    // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
+    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount);
+    private static void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount) => card.Modifiers.Add(new(source, effect, stat, amount));
+    private static void RemoveModifiers(CardInstance card, Func<AppliedModifier, bool> match) => card.Modifiers.RemoveAll(m => match(m));
+    private int CardForce(CardInstance card) => Definition(card).Type == CardType.Personality ? PersonalityForce(card) : Math.Max(0, Definition(card).Force + StatModifier(card, "Force"));
+    private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi);
 
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
     private void ValidateAbility(GameCommand command)
@@ -164,11 +169,11 @@ public sealed partial class MatchEngine
             case "air-straighten": case "paid-straighten": Straighten(target!); break;
             case "paid-bow": target!.Bowed = true; break;
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
-            case "kouki-force": source!.Bowed = true; target!.ForceBonus -= 3; break;
-            case "prepared-death": target!.ForceBonus += 2; break;
-            case "costly-feud": target!.ForceBonus -= 3; if (CardForce(target) == 0) target.Bowed = true; break;
-            case "defensive-stance": Straighten(target!); target!.ForceBonus += 3; break;
-            case "crushing-force": target!.ForceBonus += 3; break;
+            case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
+            case "prepared-death": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
+            case "costly-feud": ApplyModifier(target!, source!.Id, id, "Force", -3); if (CardForce(target!) == 0) target!.Bowed = true; break;
+            case "defensive-stance": Straighten(target!); ApplyModifier(target!, source!.Id, id, "Force", 3); break;
+            case "crushing-force": ApplyModifier(target!, source!.Id, id, "Force", 3); break;
             case "crushing-destroy": case "never-afraid": DestroyAttachment(target!); break;
             case "incapacitated": case "favor-battle": MoveHome(target!, false); break;
             case "block-supply": MoveHome(target!, true); break;

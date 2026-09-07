@@ -224,7 +224,7 @@ internal static class PublishedTests
     private static void Ancestor()
     {
         var s=State(true);var ancestor=Add(s,"training-fragile-ancestor",1,Zone.Battlefield,province:0);var sword=Add(s,9879,1,Zone.Attached,province:0,parent:ancestor.Id);var never=Add(s,9916,zone:Zone.Hand);var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",sword.Id));Eq(Card(e,ancestor.Id).Zone,Zone.Dead);Eq(e.State.Players[1].Honor,8);
-        s=State(true);var lion=Unit(s,1);lion.AddedKeywords=["Ancestor"];lion.ForceBonus=-2;var a=Unit(s,0);a.ForceBonus=30;e=MatchEngine.FromTestState(s);Pass(e);Pass(e);Eq(e.State.Players[1].Honor,7);
+        s=State(true);var lion=Unit(s,1);lion.AddedKeywords=["Ancestor"];lion.Modifiers=[new("test-fixture","test-fixture","Force",-2)];var a=Unit(s,0);a.Modifiers=[new("test-fixture","test-fixture","Force",30)];e=MatchEngine.FromTestState(s);Pass(e);Pass(e);Eq(e.State.Players[1].Honor,7);
         s=State(true);s.ActivePlayerId=1;lion=Unit(s,1);lion.AddedKeywords=["Ancestor"];e=MatchEngine.FromTestState(s);Eq(ViewCard(e,lion.Id).Force,1);
     }
     private static void Favor()
