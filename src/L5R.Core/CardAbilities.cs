@@ -273,3 +273,5 @@ public sealed partial class MatchEngine
         }
     }
 }
+
+// Disposable collaboration routing rehearsal; never merge this test branch.
