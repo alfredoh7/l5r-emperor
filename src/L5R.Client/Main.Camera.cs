@@ -155,7 +155,7 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
-        if (_tableSurface is null) return;
+        if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         if (@event is InputEventKey { Pressed: false } released && released.Keycode is Key.Enter or Key.KpEnter or Key.Tab && !CameraBlocked && GetViewport().GuiGetFocusOwner() is null && TableFocus is not null)
             _tableSurface.Canvas.PushInput(released, true);

@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Generated and visually reviewed three main-menu concepts; saved prompts and revised moonlit lantern framing. No game code changed.",
-  "validation": "Inspected all three generated concepts for text, scene composition, menu hierarchy and lantern framing. Corrected cropped lantern in C and rechecked. This is art review, not native runtime validation.",
-  "remaining": "Await Alfredo selection/approval of A, B or C before implementing main menu and options. Runtime implementation, settings behavior and native screenshot matching remain undone.",
+  "lane": "shared",
+  "summary": "Implemented approved Moonlit Study startup menu, real Clan selection, existing private/library entry points, local practice resume, persistent presentation options and bounded atmospheric animation. No authoritative game or protocol changes.",
+  "validation": "Native menu flow/input/fullscreen/options-persistence tests passed; reviewed native menu/options and alternate aspect captures; reduced-motion frames identical; board assignment and Border Keep refresh checks passed; 29 collaboration plus all 148 existing game/network checks passed across runs. Client builds zero warnings/errors. See docs/MAIN_MENU.md for evidence, socket retry and precise scope.",
+  "remaining": "Ready for PR review after final checks. Main.cs integration requires shared review; no expert rules acceptance or native Windows playtest claimed. Prior downloadable release is unchanged; launch this checkout with bash tools/run.sh.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/8",
   "branch": "codex/8-main-menu",
-  "updated": "2026-09-07T14:06:40.172436+00:00"
+  "updated": "2026-09-07T14:31:02.260157+00:00"
 }

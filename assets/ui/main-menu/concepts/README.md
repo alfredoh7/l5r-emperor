@@ -2,7 +2,7 @@
 
 Task: https://github.com/alfredoh7/l5r-emperor/issues/8
 
-These are generated visual targets for Alfredo to select, not implemented game screenshots. No main-menu direction has been approved yet. The existing game startup remains unchanged. The user explicitly requested approval before implementation.
+Historical concept options. Alfredo approved the attached original Moonlit Study on 2026-09-07, saved at ../approved-moonlit-study.png. The task branch now implements this direction; see docs/MAIN_MENU.md for current behavior and validation. These three images remain generated concepts, not native game captures.
 
 | Option | Direction | Image |
 | --- | --- | --- |
