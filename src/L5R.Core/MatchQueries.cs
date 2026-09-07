@@ -12,7 +12,7 @@ public sealed partial class MatchEngine
                 return new($"hidden-p{card.OwnerId}-province{card.ProvinceIndex}",null,card.OwnerId,card.Zone,false,false,card.ProvinceIndex,null,0);
             var def=Definition(card);
             var force=def.Type==CardType.Personality?PersonalityForce(card):Math.Max(0,def.Force+StatModifier(card,"Force"));
-            return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray());
+            return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable);
         }
         var players=_state.Players.Select(player=>
         {
@@ -43,6 +43,12 @@ public sealed partial class MatchEngine
             =>new(type,playerId,_state.Version,id,sources,province,discount,allegiance,assignments,cardIds,target);
         void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null)
             =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote));
+        // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
+        // the querying player controls during the Action Phase, independent of who holds priority.
+        if(_state.Phase==Phase.Action)
+            foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
+                (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
+                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
         if(playerId!=_state.PriorityPlayerId)
         {
             Add("wait",$"Waiting for {Player(_state.PriorityPlayerId).Name}",reason:"The other player has the action opportunity.");

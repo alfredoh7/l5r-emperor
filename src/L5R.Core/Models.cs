@@ -36,6 +36,7 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
 }
@@ -99,7 +100,7 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     int[]? Provinces = null, PurchaseQuote? Quote = null);
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
-    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null);
+    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,

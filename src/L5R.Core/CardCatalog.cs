@@ -12,6 +12,7 @@ public static class CardCatalog
     {
         CardDefinition[] cards = [
             new("training-fragile-ancestor", "Training fragile ancestor", CardType.Personality, "Lion", Force:4, Chi:0, Keywords:["Ancestor"], Text:"Synthetic Chi-death fixture, never included in a playable deck."),
+            new("training-dishonored-samurai", "Training dishonored samurai", CardType.Personality, "Crane", GoldCost:3, Force:2, Chi:2, PersonalHonor:2, Effect:"enters-dishonored", Keywords:["Samurai"], Text:"Synthetic Seppuku fixture: enters play Dishonorable. Never included in a playable deck."),
             new("training-crane-stronghold", "Crane training stronghold", CardType.Stronghold, "Crane", GoldProduction:4, ProvinceStrength:6, StartingHonor:8, Text:"Training fixture. Bow to produce 4 Gold for one payment."),
             new("training-lion-stronghold", "Lion training stronghold", CardType.Stronghold, "Lion", GoldProduction:4, ProvinceStrength:6, StartingHonor:6, Text:"Training fixture. Bow to produce 4 Gold for one payment."),
             new("training-border-keep", "Training border keep", CardType.Holding, GoldProduction:2, Text:"Training fixture: bow for 2 Gold. This is not the published Border Keep; its filtering abilities are absent."),
