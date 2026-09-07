@@ -27,3 +27,11 @@ Attach sanitized evidence here. Do not include seat tokens or room databases.
 ## Reproducibility and impact
 
 Always/intermittent; prevents finishing, changes outcome, or causes confusion:
+
+## Coordination
+
+Lane: rules
+
+Owner / related branch or PR:
+
+Shared interface or other active task affected:

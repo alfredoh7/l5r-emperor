@@ -1,19 +1,15 @@
-## Problem and resulting behavior
+## Change
 
-Closes #
+Explain the problem and resulting behavior. Link the issue and `docs/handoffs/tasks/` record.
 
-## Rules / printing evidence
+## Lane and coordination
 
-Required for a rules interpretation change; otherwise say not applicable.
+UI / rules / shared. Explain any semantic effect on the other lane, even if the changed paths look isolated. Shared interfaces and cross-lane work need the other lead's review. GitHub applies path-based lane labels automatically.
 
-## Validation actually performed
+## Validation
 
-Commands, platform and results. Link screenshots/replays where relevant. Distinguish export checks from native playtests.
+List actual commands/results and human/visual evidence where relevant. Do not claim Windows gameplay from CI or expert rules acceptance from automated tests.
 
-## Remaining work / review questions
+## Remaining work
 
-Note untested behavior, required expert decisions and next steps.
-
-## Handoff
-
-Status/handoff documents updated if the shared milestone changed. Include the branch/commit and resume instructions if this PR is unfinished.
+State any unresolved decisions or limitations, or explicitly say none. The agent refreshes current main and runs the collaboration audit before asking to merge.

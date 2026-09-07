@@ -7,12 +7,12 @@ Updated: 2026-09-07. This is the current summary for human collaborators and AI 
 - Desktop **0.3.10**, content profile `lion-crane-v1`, content version `emperor-lion-crane-0.2.0`.
 - All 40 distinct definitions in the selected Lion/Crane 40/40 decks have implementations and period scans.
 - Rules authority, automated payments/turn flow, choices, attachments, Favor, battles, victory, deterministic replays, a heuristic opponent and private-room networking exist.
-- UI baseline: full card faces, physical piles/stacks, pan/zoom, optional fullscreen, enlarged navy mat, upright lanterns, bitmap phase bar with Musashi Brush headings. Broad UI redesign is paused.
+- UI baseline: full card faces, physical piles/stacks, pan/zoom, optional fullscreen, enlarged navy mat, upright lanterns, bitmap phase bar with Musashi Brush headings. Preserve this aesthetic while Alfredo develops UI/QoL improvements.
 - The published rules profile is a reproducible playtest profile, not a certified final historical tournament legality claim.
 
 ## Current focus
 
-Invite an experienced Emperor player to validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
+mdornbrook has accepted repository access and is playing/reviewing mechanics. Alfredo owns UI/QoL improvements. Both lanes progress on separate task branches, coordinated through AGENTS.md and docs/COLLABORATION.md. Validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
 
 ## Open acceptance gates
 
