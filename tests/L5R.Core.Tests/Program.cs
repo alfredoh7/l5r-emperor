@@ -155,7 +155,9 @@ static void Proclaim()
     Accept(e,Cmd(e,"purchase",id:id,sources:e.QuotePurchase(0,id).Payments[0].SourceIds));
     Equal(e.State.Cards[id].Zone,Zone.Home); Equal(e.State.Players[0].Honor,8); Check(e.State.PendingChoice is not null);
     Reject(e,Cmd(e,"endDynasty")); Accept(e,Cmd(e,"proclaim")); Equal(e.State.Players[0].Honor,11);
-    Accept(e,Cmd(e,"declineReaction")); Reject(e,Cmd(e,"proclaim")); Accept(e,Cmd(e,"declineReaction"));
+    // No reaction-capable cards exist yet, so the window must close immediately after the
+    // entering player's decision rather than waiting on a forced, meaningless second pass.
+    Check(e.State.PendingChoice is null); Reject(e,Cmd(e,"proclaim")); Reject(e,Cmd(e,"declineReaction"));
     var next=ProvinceCard(e,1); Check(!e.QuotePurchase(0,next).ProclaimEligible);
     Accept(e,Cmd(e,"purchase",id:next,sources:e.QuotePurchase(0,next).Payments[0].SourceIds));
     Check(e.State.PendingChoice is null); Equal(e.State.Players[0].Honor,11);

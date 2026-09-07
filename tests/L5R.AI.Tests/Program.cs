@@ -18,20 +18,16 @@ Run("consumes only supplied detached player views",()=>
     Check(decision.Command is not null,"No decision");
     Check(game.Execute(decision.Command!).Accepted,"Detached inputs produced illegal command");
 });
-Run("resolves purchase and Proclaim with alternating reaction priority",()=>
+Run("resolves purchase and Proclaim; reaction window closes immediately with no legal reactions",()=>
 {
     var game=MatchEngine.CreateEconomyScenario(); var id=game.GetView(0).Players[0].Provinces[0].Card!.Id;
     var quote=game.QuotePurchase(0,id);
     Check(game.Execute(new("purchase",0,0,id,quote.Payments[0].SourceIds)).Accepted,"Purchase failed");
     var move=TrainingOpponent.Choose(game.GetView(0),game.QueryActions(0)); Check(move.Command?.Type=="proclaim","Proclaim not chosen");
     Check(game.Execute(move.Command!).Accepted,"Proclaim failed");
-    for(var i=0;i<2;i++)
-    {
-        var player=game.GetView(0).PriorityPlayerId;
-        move=TrainingOpponent.Choose(game.GetView(player),game.QueryActions(player));
-        Check(move.Command?.Type=="declineReaction","Reaction not passed"); Check(game.Execute(move.Command!).Accepted,"Reaction pass failed");
-    }
-    Check(game.GetView(0).PendingChoice is null,"Reaction window stuck");
+    // No reaction-capable cards exist yet, so the window must not wait on a forced,
+    // meaningless pass from either player: it closes the instant Proclaim resolves.
+    Check(game.GetView(0).PendingChoice is null,"Reaction window should close immediately when no player has a legal reaction");
 });
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
