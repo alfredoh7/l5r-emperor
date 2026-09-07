@@ -1,9 +1,9 @@
 {
   "lane": "rules",
-  "summary": "Added DeckFormat (src/L5R.Core/DeckFormat.cs): parses/writes the plain-text deck-list format proposed in #24 (Key: Value header + ## Dynasty Deck/## Fate Deck sections), resolving cards by name for cross-install portability. CheckLegality is a soft check (Unique cap 1, else 3) taking a keyword lookup as a parameter rather than loading content/deck-pool.json itself, keeping L5R.Core decoupled from that content artifact.",
-  "validation": "bash tools/check.sh: all suites pass, clean on retry (Core 46/46, Published 32/32, deck format 9/9 new tests, AI 13/13, client build/import/smoke clean -- one transient Godot import hiccup, reproduced-clean on rerun).",
-  "remaining": "None; ready for review. Open question from the issue (deck file storage location, id-vs-name resolution tolerance) still needs a decision before #29 (custom match setup) can consume this.",
+  "summary": "Revised DeckFormat (from the earlier commit on this branch) to match the real legacy deck-list convention the user provided (5 sample files: Crane Dominance, Crab Control, Dragon Destruction, Unicorn Maidens, Spider's Web) -- already parsed by tools/content/import_sources.py. Deck is now just a Legality label plus a flat, ordered DeckEntry[]; dropped the invented Name/Clan/Stronghold/Bamboo Harvesters/Border Keep header fields, since the real format has none -- that structure is resolved by callers with pool access (content/deck-pool.json from #23), not by this type.",
+  "validation": "bash tools/check.sh: all suites pass, clean on this run (Core 46/46, Published 32/32, deck format 8/8, AI 13/13, client build/import/smoke clean).",
+  "remaining": "None; ready for review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/24",
   "branch": "mdornbrook/24-deck-format",
-  "updated": "2026-09-07T18:49:00.261679+00:00"
+  "updated": "2026-09-07T19:01:21.626903+00:00"
 }
