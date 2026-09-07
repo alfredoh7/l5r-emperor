@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1049494,
+  "card_id": "oracle-l5r-1135",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1135-printing-1-image-1",
+  "image_index": 1,
+  "name": "Breath of the Heavens",
+  "numbers": [
+    "280"
+  ],
+  "oracle_id": 1135,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1135-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:06.019186+00:00",
+  "sha256": "e473ec5afc8d6b239866312725d022764c8b6ccb6ea670c281f202afbe7da771",
+  "source_image_hash": "8a/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8a/80/printing_1135_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8a/80/printing_1135_1_",
+  "width": 750
+}

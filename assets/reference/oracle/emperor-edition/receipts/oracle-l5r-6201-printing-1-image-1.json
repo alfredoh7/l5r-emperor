@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1086837,
+  "card_id": "oracle-l5r-6201",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6201-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rebuilding the Empire",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 6201,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6201-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:06.167089+00:00",
+  "sha256": "9ea3fa8edf14d4cc9a552b3b338811a8ed3d0b4474da54ecd27c958b01bb01a6",
+  "source_image_hash": "c9/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/be/printing_6201_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/be/printing_6201_1_",
+  "width": 750
+}

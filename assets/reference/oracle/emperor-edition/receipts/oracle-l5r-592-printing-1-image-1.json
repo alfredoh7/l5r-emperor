@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1139365,
+  "card_id": "oracle-l5r-592",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-592-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Ume",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 592,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-592-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:51.410067+00:00",
+  "sha256": "a7fe4c2f2e772eb0bc6fbc1db4f68d5be9d9383bb1c5e3dc93c9685abe33e373",
+  "source_image_hash": "e6/ab",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e6/ab/printing_592_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e6/ab/printing_592_1_",
+  "width": 750
+}

@@ -1,0 +1,281 @@
+{
+  "card_count": 79,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-e148f39b5669a03bf421",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Sinister Citadel of the Spider"
+    },
+    {
+      "card_reference_id": "card-ref-411f107e6bfbe0711029",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Daigotsu Kanpeki, the Shadow Emperor"
+    },
+    {
+      "card_reference_id": "card-ref-1afe1c876a5c37e12f19",
+      "line_number": 6,
+      "quantity": 2,
+      "raw_line": "2x Akodo Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-bde267cad7ed3c65632d",
+      "line_number": 7,
+      "quantity": 2,
+      "raw_line": "2x Ashigaru Fort"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 9,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 11,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-c23317794733dd6c250a",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x Nexus of Lies"
+    },
+    {
+      "card_reference_id": "card-ref-cf7d99745344d9f18544",
+      "line_number": 13,
+      "quantity": 1,
+      "raw_line": "1x Productive Mine"
+    },
+    {
+      "card_reference_id": "card-ref-b84b536272b0de552d0d",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3x Shinomen Marsh"
+    },
+    {
+      "card_reference_id": "card-ref-b0b0538ccb216ffb972f",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "1x Slave Pits"
+    },
+    {
+      "card_reference_id": "card-ref-21ece919147f7e3338d8",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "1x The Obsidian Dueling Grounds"
+    },
+    {
+      "card_reference_id": "card-ref-0f46312c1c63e5ad5577",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Daigotsu Roburo"
+    },
+    {
+      "card_reference_id": "card-ref-1be0a5a18a96c92af728",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Daigotsu Chiboshi"
+    },
+    {
+      "card_reference_id": "card-ref-7235c157b9bcb6984372",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Susumu Yanada"
+    },
+    {
+      "card_reference_id": "card-ref-afe417ada0eeca65530e",
+      "line_number": 21,
+      "quantity": 1,
+      "raw_line": "1x Daigotsu Hirose"
+    },
+    {
+      "card_reference_id": "card-ref-07871686a4c1c8cd5a22",
+      "line_number": 22,
+      "quantity": 1,
+      "raw_line": "1x Daigotsu Geiko"
+    },
+    {
+      "card_reference_id": "card-ref-ae43dc2b9220202a8ec3",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3x Daigotsu Konishi"
+    },
+    {
+      "card_reference_id": "card-ref-7add768b5fe31fc7b483",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Daigotsu Meguro"
+    },
+    {
+      "card_reference_id": "card-ref-c14fc4530fbec683ac0f",
+      "line_number": 25,
+      "quantity": 1,
+      "raw_line": "1x Daigotsu Ryuko"
+    },
+    {
+      "card_reference_id": "card-ref-188c2a7f6170ec80c82d",
+      "line_number": 26,
+      "quantity": 3,
+      "raw_line": "3x Daigotsu Onosaka"
+    },
+    {
+      "card_reference_id": "card-ref-3326214831a48f2f1988",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Spider Clan"
+    },
+    {
+      "card_reference_id": "card-ref-f26e8181ca7c140d27b5",
+      "line_number": 29,
+      "quantity": 2,
+      "raw_line": "2x Commander's Steed"
+    },
+    {
+      "card_reference_id": "card-ref-84343ab2054c54c81770",
+      "line_number": 30,
+      "quantity": 1,
+      "raw_line": "1x Incendiary Archers"
+    },
+    {
+      "card_reference_id": "card-ref-847b3f447c3f78e3c8a2",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Kikage Zumi Initiates"
+    },
+    {
+      "card_reference_id": "card-ref-792dd67b3e7b0f1fd70a",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3x Skeletal Troops"
+    },
+    {
+      "card_reference_id": "card-ref-2f59fda3a5c31b8a2fd2",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of Air"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-9bb97b8a477e371610a2",
+      "line_number": 36,
+      "quantity": 3,
+      "raw_line": "3x Allied Efforts"
+    },
+    {
+      "card_reference_id": "card-ref-cf112191e826e671b1db",
+      "line_number": 37,
+      "quantity": 1,
+      "raw_line": "1x Ascendance"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-9f7652404ef70b0f24de",
+      "line_number": 39,
+      "quantity": 3,
+      "raw_line": "3x Contentious Terrain"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 40,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-a09ecc4e4509a17b0b32",
+      "line_number": 41,
+      "quantity": 1,
+      "raw_line": "1x Hidden Storehouse of House Rafiq"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 42,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-0ed42678068640b8f39e",
+      "line_number": 43,
+      "quantity": 1,
+      "raw_line": "1x Insight"
+    },
+    {
+      "card_reference_id": "card-ref-003cf9cc2717e18ef1ce",
+      "line_number": 44,
+      "quantity": 1,
+      "raw_line": "1x New Cavalry Tactics"
+    },
+    {
+      "card_reference_id": "card-ref-d3fa5d046ce611f99a2e",
+      "line_number": 45,
+      "quantity": 2,
+      "raw_line": "2x Okura is Released"
+    },
+    {
+      "card_reference_id": "card-ref-1e040057b5aa96b16a68",
+      "line_number": 46,
+      "quantity": 2,
+      "raw_line": "2x Army Like a Tide"
+    },
+    {
+      "card_reference_id": "card-ref-a388f67735787a4d0f01",
+      "line_number": 47,
+      "quantity": 2,
+      "raw_line": "2x Suffer the Consequences"
+    },
+    {
+      "card_reference_id": "card-ref-f2798be6235188976cc4",
+      "line_number": 48,
+      "quantity": 2,
+      "raw_line": "2x Vigilant Eyes"
+    }
+  ],
+  "entry_count": 43,
+  "id": "deck-ec0149c477be012a4aec",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Spider",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-0ef4cd53441616689960"
+}

@@ -1,0 +1,38 @@
+namespace L5R.Core;
+
+public sealed partial class MatchEngine
+{
+    private static MatchEngine CreatePublished(ulong seed)
+    {
+        var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane" }, new() { Id = 1, Name = "Lion", Clan = "Lion" }] };
+        var random = new StableRandom(seed); var nextId = 0;
+        CardInstance Add(int owner, string definition, Zone zone, bool faceUp = false, bool bowed = false)
+        {
+            _ = CardCatalog.Get(definition);
+            var card = new CardInstance { Id = $"card-{++nextId:D4}", DefinitionId = definition, OwnerId = owner, Zone = zone, FaceUp = faceUp, Bowed = bowed };
+            state.Cards.Add(card.Id, card); return card;
+        }
+        foreach (var player in state.Players)
+        {
+            var deck = PublishedContent.Snapshot.Decks.Single(d => d.Clan == player.Clan);
+            var stronghold = CardCatalog.Get(deck.StrongholdId);
+            player.Honor = stronghold.StartingHonor;
+            player.StrongholdId = Add(player.Id, stronghold.Id, Zone.Stronghold, true).Id;
+            Add(player.Id, "oracle-l5r-1106", Zone.Home, true);
+            foreach (var id in deck.Dynasty) player.DynastyDeck.Add(Add(player.Id, id, Zone.DynastyDeck).Id);
+            foreach (var id in deck.Fate) player.FateDeck.Add(Add(player.Id, id, Zone.FateDeck).Id);
+            random.Shuffle(player.DynastyDeck); random.Shuffle(player.FateDeck);
+            player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength }).ToList();
+        }
+        state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
+        Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
+        var engine = new MatchEngine(state, seed, PublishedContent.Scenario);
+        foreach (var player in state.Players)
+        {
+            foreach (var province in player.Provinces) engine.Refill(player, province);
+            for (var i=0; i<6; i++) engine.Draw(player);
+        }
+        engine.Emit("publishedSetup", "Lion goes first (7 starting Honor); Crane starts at 6 Honor with bowed Bamboo Harvesters. Each player uses 40 Dynasty and 40 Fate cards.");
+        engine.StartTurn(); return engine;
+    }
+}

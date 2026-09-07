@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1214547,
+  "card_id": "oracle-l5r-4456",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4456-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Denhei",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 4456,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4456-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:29.369241+00:00",
+  "sha256": "b85faae252dce729970bb16389ffc7ba48eaf1743c4857af8b7b66dd2cae8683",
+  "source_image_hash": "d8/b6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d8/b6/printing_4456_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/b6/printing_4456_1_",
+  "width": 750
+}

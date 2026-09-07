@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1070373,
+  "card_id": "oracle-l5r-1939",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1939-printing-1-image-1",
+  "image_index": 1,
+  "name": "Delayed Arrival",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 1939,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1939-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:27.709314+00:00",
+  "sha256": "4803852611ffdd7f63255e00bbef84702be7aee15f69477c164161208c4a1a51",
+  "source_image_hash": "0b/2f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0b/2f/printing_1939_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0b/2f/printing_1939_1_",
+  "width": 750
+}

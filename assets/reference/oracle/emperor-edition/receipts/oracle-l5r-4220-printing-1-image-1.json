@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1149495,
+  "card_id": "oracle-l5r-4220",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4220-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Seishi",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 4220,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4220-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:24.201251+00:00",
+  "sha256": "3e3c8810b5f97c3835454f5b17e6eb2e1e9b2215b0238c25b011a3321059c7dd",
+  "source_image_hash": "a4/d3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a4/d3/printing_4220_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/d3/printing_4220_1_",
+  "width": 750
+}

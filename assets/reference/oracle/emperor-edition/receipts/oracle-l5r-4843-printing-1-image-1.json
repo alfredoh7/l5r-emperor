@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1164139,
+  "card_id": "oracle-l5r-4843",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4843-printing-1-image-1",
+  "image_index": 1,
+  "name": "Martial Instruction",
+  "numbers": [
+    "317"
+  ],
+  "oracle_id": 4843,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4843-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:38.109679+00:00",
+  "sha256": "9bfce571bcd808140beba72d1ad21c1b39011dfb019b9ed9e10b3ec1d0a8531b",
+  "source_image_hash": "f2/c6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f2/c6/printing_4843_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f2/c6/printing_4843_1_",
+  "width": 750
+}

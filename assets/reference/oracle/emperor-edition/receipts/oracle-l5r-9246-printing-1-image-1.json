@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1000282,
+  "card_id": "oracle-l5r-9246",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9246-printing-1-image-1",
+  "image_index": 1,
+  "name": "Watchful Eye Dojo",
+  "numbers": [
+    "403"
+  ],
+  "oracle_id": 9246,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9246-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:33.185506+00:00",
+  "sha256": "c54952103e9fd30c686a6ac73a55263df975e520338677ff62e0f1863bc09958",
+  "source_image_hash": "29/40",
+  "source_url": "https://images.oracleofthevoid.com/l5r/29/40/printing_9246_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/29/40/printing_9246_1_",
+  "width": 750
+}

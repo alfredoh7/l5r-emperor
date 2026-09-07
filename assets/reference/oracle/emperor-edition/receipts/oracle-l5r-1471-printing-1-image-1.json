@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1024265,
+  "card_id": "oracle-l5r-1471",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1471-printing-1-image-1",
+  "image_index": 1,
+  "name": "Contemplate the Void",
+  "numbers": [
+    "251"
+  ],
+  "oracle_id": 1471,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1471-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:13.346891+00:00",
+  "sha256": "5d3994e59c5f8d6b3abf9b50038e4eba10ced0358e77348d207c1ef6a28fcd29",
+  "source_image_hash": "6e/d5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/d5/printing_1471_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/d5/printing_1471_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1211712,
+  "card_id": "oracle-l5r-6698",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6698-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shameful Injury",
+  "numbers": [
+    "343"
+  ],
+  "oracle_id": 6698,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6698-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:17.606849+00:00",
+  "sha256": "f1bcf1b900bbdbd41c5fea63ca47a297a9e0370bb5f96497e1913e3336518b26",
+  "source_image_hash": "ee/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ee/be/printing_6698_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ee/be/printing_6698_1_",
+  "width": 750
+}

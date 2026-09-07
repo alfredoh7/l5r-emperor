@@ -1,0 +1,8 @@
+{
+  "table": "l5r",
+  "type_printing_set": "select",
+  "field_printing_set": "Emperor Edition",
+  "sort": "[{\"title.keyword\":{\"order\":\"asc\"}}]",
+  "size": 1000,
+  "from": 0
+}

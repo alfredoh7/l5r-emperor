@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1092926,
+  "card_id": "oracle-l5r-5649",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5649-printing-1-image-1",
+  "image_index": 1,
+  "name": "Obscured Pathways",
+  "numbers": [
+    "254"
+  ],
+  "oracle_id": 5649,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-5649-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:57.263945+00:00",
+  "sha256": "f3d5fdafd66f79507878e0120986046176ff23fb63c5b58cb9c325b334eaf5ef",
+  "source_image_hash": "87/13",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/13/printing_5649_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/13/printing_5649_1_",
+  "width": 750
+}

@@ -1,0 +1,287 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-f9e5112e8f3835fbc1f7",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Remote Monastery of the Dragon"
+    },
+    {
+      "card_reference_id": "card-ref-c58ac6104f0d8111282d",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Mirumoto Shikei, the Laughing Dragon"
+    },
+    {
+      "card_reference_id": "card-ref-bde267cad7ed3c65632d",
+      "line_number": 6,
+      "quantity": 2,
+      "raw_line": "2x Ashigaru Fort"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-2e90f1af589bde2c5e98",
+      "line_number": 9,
+      "quantity": 3,
+      "raw_line": "3x Exotic Market"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 11,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-c23317794733dd6c250a",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x Nexus of Lies"
+    },
+    {
+      "card_reference_id": "card-ref-36f4023c42b3c4034a28",
+      "line_number": 13,
+      "quantity": 1,
+      "raw_line": "1x Secluded Outpost"
+    },
+    {
+      "card_reference_id": "card-ref-79ebfb1af699d67e7115",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3x Gold Mine"
+    },
+    {
+      "card_reference_id": "card-ref-99c1638930077fe26623",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "1x Shrine to Hachiman"
+    },
+    {
+      "card_reference_id": "card-ref-c3174a2d6575a3b81310",
+      "line_number": 17,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Niwa"
+    },
+    {
+      "card_reference_id": "card-ref-4555d2301b09087e1384",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Bojan"
+    },
+    {
+      "card_reference_id": "card-ref-0921b10f8cefea115f77",
+      "line_number": 19,
+      "quantity": 1,
+      "raw_line": "1x Togashi Ogure"
+    },
+    {
+      "card_reference_id": "card-ref-e735f7decabbef25c0d7",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Mirumoto Hikuryo"
+    },
+    {
+      "card_reference_id": "card-ref-ae74692a831579382569",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Tsukazu"
+    },
+    {
+      "card_reference_id": "card-ref-c68304d36b877e702d90",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Omero"
+    },
+    {
+      "card_reference_id": "card-ref-f39dcc3392f3868f973d",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Higaru"
+    },
+    {
+      "card_reference_id": "card-ref-f12cd3a46eabfcedca0b",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Mirumoto Tsuda"
+    },
+    {
+      "card_reference_id": "card-ref-f583b368f51978717988",
+      "line_number": 25,
+      "quantity": 1,
+      "raw_line": "1x Mirumoto Yasushi"
+    },
+    {
+      "card_reference_id": "card-ref-adf8fa69c8758eb7853a",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Dragon Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-254903fd3d47e1969f56",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Lost Blade of the Maharaja"
+    },
+    {
+      "card_reference_id": "card-ref-7e074c18bafe6e9033a4",
+      "line_number": 29,
+      "quantity": 2,
+      "raw_line": "2x Sadamune Blade"
+    },
+    {
+      "card_reference_id": "card-ref-87e3ad8e84a06c9db19c",
+      "line_number": 30,
+      "quantity": 2,
+      "raw_line": "2x Reinforced Parangu"
+    },
+    {
+      "card_reference_id": "card-ref-e6b092b17b347620a38a",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Simple Spears"
+    },
+    {
+      "card_reference_id": "card-ref-282dc0dc681e3d0510e2",
+      "line_number": 32,
+      "quantity": 1,
+      "raw_line": "1x Tiger Claw"
+    },
+    {
+      "card_reference_id": "card-ref-dfa504a33f9be1796a54",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Versatile Blade"
+    },
+    {
+      "card_reference_id": "card-ref-2f59fda3a5c31b8a2fd2",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of Air"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-10b89698fa871c066f2d",
+      "line_number": 36,
+      "quantity": 1,
+      "raw_line": "1x Ring of Fire"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 37,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 38,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-115a7031bd4b38130d35",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "1x Aligned with the Elements"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-5c4bdfe6898dd5349b86",
+      "line_number": 42,
+      "quantity": 1,
+      "raw_line": "1x Claiming the Ruins"
+    },
+    {
+      "card_reference_id": "card-ref-4c9c3490c48df1b4ad77",
+      "line_number": 43,
+      "quantity": 2,
+      "raw_line": "2x Encircled Terrain"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 44,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-9190c301b60cdfe67f21",
+      "line_number": 45,
+      "quantity": 2,
+      "raw_line": "2x In Stillness, Forge the Soul"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 46,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-79e1a66eb28dad260f87",
+      "line_number": 47,
+      "quantity": 2,
+      "raw_line": "2x Never Without a Weapon"
+    },
+    {
+      "card_reference_id": "card-ref-5d574b52f1dfe891ba47",
+      "line_number": 48,
+      "quantity": 2,
+      "raw_line": "2x Stand or Run"
+    },
+    {
+      "card_reference_id": "card-ref-e67573fbd955b3ff3f6e",
+      "line_number": 49,
+      "quantity": 3,
+      "raw_line": "3x Tonfajutsu"
+    },
+    {
+      "card_reference_id": "card-ref-10e657b7c01c4da81249",
+      "line_number": 50,
+      "quantity": 2,
+      "raw_line": "2x Weakness Exposed"
+    }
+  ],
+  "entry_count": 44,
+  "id": "deck-ca4006c16924f58c69f8",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Dragon",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-a2de7e5adc42a275623c"
+}

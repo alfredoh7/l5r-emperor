@@ -1,0 +1,37 @@
+{
+  "mode": "built-in imagegen",
+  "date": "2026-09-06",
+  "preferred_reference": "assets/table/phase-1/environment-v2.png",
+  "selected_environment": "assets/table/phase-1/environment-v5-level.png",
+  "selected_card_back": "assets/cards/dynasty-back-v1.png",
+  "iterations": [
+    {
+      "role": "Table alignment attempt; rejected because perspective changed too much",
+      "references": [
+        "assets/table/phase-1/environment-v2.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Input image is the exact edit target: the user's preferred premium dark walnut table with olive floral brocade cloth, candle and brass corners. Correct ONLY the crooked table geometry. Its lower horizontal brass/wood edge currently drops approximately 10 pixels from left to right over 950 pixels. Make the top and bottom edges of the cloth and surrounding wooden playing frame precisely horizontal, with symmetric left/right perspective convergence. Preserve the original trapezoidal perspective, dimensions, composition, floral cloth design, fine material texture, lighting, shadows, candle, brushes, coin tray, outer tabletop and empty top/right/bottom spaces. Do not rotate the entire image because the outer header is already level. Locally straighten the playing frame and cloth. Keep exact image dimensions 1586x992. No cards, text, UI or new ornamentation. This is a tiny precision geometry correction, not a redesign; preserve the preferred artwork as closely as possible."
+    },
+    {
+      "role": "Closer preservation of original perspective",
+      "output": "assets/table/phase-1/environment-v4-level.png",
+      "references": [
+        "assets/table/phase-1/environment-v2.png"
+      ],
+      "prompt": "Use case: precise-object-edit. This is the user's selected table artwork; preserve it. Make ONE tiny correction: the lower horizontal trim line of the green playing surface is crooked. Its left end is approximately (100,774) and right end (1310,785). Make that line horizontal at y=780: move its left end DOWN 6 pixels and right end UP 5 pixels, smoothly deforming only the table/cloth in between. Preserve original trapezoid: cloth top-left near (229,85), top-right (1205,85), bottom-left (100,780), bottom-right (1310,780). The front must remain WIDER than the back by about 230 pixels. DO NOT make this rectangular or change the perspective, zoom, framing, or the position of any prop. Keep the floral olive cloth and every material design, candle, trays, brushes, dark walnut, antique brass, warmth and lighting unchanged. Keep the rest of the image as exact as possible. Zero added ornamentation, no cards, no text, no interface. Same 1586x992 dimensions. Visually the result should be almost indistinguishable from the input, except the lower playing frame is precisely level."
+    },
+    {
+      "role": "Selected table refinement",
+      "output": "assets/table/phase-1/environment-v5-level.png",
+      "references": [
+        "assets/table/phase-1/environment-v4-level.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Perform a tiny perspective calibration on this game-table image. Keep ALL materials, cloth pattern, color, candle, ornaments, camera, wide-front trapezoidal table silhouette and composition. There is still a slight unwanted downward bend/tilt at the RIGHT END of the long lower edge of the cloth. Make the long lower brass line from x100 to x1310 a perfectly straight horizontal line at y780. In particular, lift the last right-hand section by 6 pixels so it meets the rest; keep a straight unbroken horizontal line all the way to the lower right corner. The parallel lower wooden frame rails must also be straight and level end to end, with no sagging or descending right end. Keep the top edge horizontal and keep both sloping side edges and the wide front exactly as they are. This is NOT a scene redesign, not a rectangular table, not a new view. Preserve the original illustrated detail and floral textile. Same 1586x992 resolution. No cards, text, symbols, interfaces or added objects."
+    },
+    {
+      "role": "Selected hidden Dynasty card back",
+      "output": "assets/cards/dynasty-back-v1.png",
+      "prompt": "Use case: stylized-concept. Asset type: production card BACK texture for a premium Japanese samurai tabletop card game, portrait aspect ratio 5:7. A single flat rectangular card back filling the entire image edge to edge, viewed perfectly straight on with no perspective. Extremely dark olive-black lacquered paper with subtle woven floral texture. Fine double antique brass border inset from all four edges, delicate symmetrical engraved corner ornaments, and one centered circular antique gold medallion containing an elegant abstract five-petal Japanese floral mon. Restrained, exquisite engraved craftsmanship, aged matte gold, softly worn print edges, sophisticated dark walnut/olive/gold palette. This will be shown at small size on a candlelit dark walnut and olive silk game table, so the large central medallion must remain recognizable. Keep the central mon symmetrical and simple, with most of the card quiet and dark. No letters, words, numbers, banners, typography, game rules, characters, illustrated landscape, drop shadows, props, tabletop, mockup, hands, lighting flares, outer background or additional cards. Entire output is ONLY the finished rectangular card back texture. Not glossy, not bright yellow. Target resolution 1000x1400."
+    }
+  ]
+}

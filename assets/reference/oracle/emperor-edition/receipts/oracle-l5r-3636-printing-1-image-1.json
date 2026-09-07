@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1112763,
+  "card_id": "oracle-l5r-3636",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3636-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Shika",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 3636,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3636-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:09.420363+00:00",
+  "sha256": "adbe0926ab656b966b6bdbedb27a2ad45d8789a9869fc2932c41cdb0e86b0d49",
+  "source_image_hash": "0a/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/f6/printing_3636_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/f6/printing_3636_1_",
+  "width": 750
+}

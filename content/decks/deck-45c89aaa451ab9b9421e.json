@@ -1,0 +1,287 @@
+{
+  "card_count": 83,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-74005014a98763ef756a",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "1 The Shadowed Estate of the Scorpion"
+    },
+    {
+      "card_reference_id": "card-ref-e046b4bab1d58a42c05d",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Bayushi Nitoshi, the Poison Mask"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-8b22dbe9b078e479fb37",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Deeds and Words"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-3c3f5ed3432c1d2207fd",
+      "line_number": 10,
+      "quantity": 1,
+      "raw_line": "1x Farmer's Market"
+    },
+    {
+      "card_reference_id": "card-ref-43267c63fd0ba597883c",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3x Geisha House"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-9e484f3bf2f33fed56cc",
+      "line_number": 13,
+      "quantity": 1,
+      "raw_line": "1x Jiramu's Court"
+    },
+    {
+      "card_reference_id": "card-ref-c23317794733dd6c250a",
+      "line_number": 14,
+      "quantity": 2,
+      "raw_line": "2x Nexus of Lies"
+    },
+    {
+      "card_reference_id": "card-ref-95a523b63ae84f95baf0",
+      "line_number": 15,
+      "quantity": 2,
+      "raw_line": "2x Rice Paddy"
+    },
+    {
+      "card_reference_id": "card-ref-7fb7c6b8f07530501d2c",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "1x Small-Time Bully"
+    },
+    {
+      "card_reference_id": "card-ref-129966f3ed99476cd620",
+      "line_number": 17,
+      "quantity": 1,
+      "raw_line": "1x The Ivory Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-d6ce21a58ea925b2aee6",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Bayushi Aibako"
+    },
+    {
+      "card_reference_id": "card-ref-d0c33cc9e5657c9b2a87",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3x Bayushi Akane"
+    },
+    {
+      "card_reference_id": "card-ref-087f81dec09ff451dab4",
+      "line_number": 21,
+      "quantity": 1,
+      "raw_line": "1x Shosuro Hotaka"
+    },
+    {
+      "card_reference_id": "card-ref-7aea7f07b5dd3dc1fa1b",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Yogo Nobukai"
+    },
+    {
+      "card_reference_id": "card-ref-d9cb15369ccb15079d14",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "1x Yogo Takashi"
+    },
+    {
+      "card_reference_id": "card-ref-7306c0d5a5ad8b477348",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Bayushi Meiko"
+    },
+    {
+      "card_reference_id": "card-ref-b2f9b23b054abd0a4ad1",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Bayushi Mifuyu"
+    },
+    {
+      "card_reference_id": "card-ref-1ddd94abb7f1fb06230f",
+      "line_number": 26,
+      "quantity": 3,
+      "raw_line": "3x Bayushi Masashi"
+    },
+    {
+      "card_reference_id": "card-ref-71bf8be94a6594fbddc4",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Bayushi Toshimo"
+    },
+    {
+      "card_reference_id": "card-ref-820a655c58262d05ee38",
+      "line_number": 29,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Scorpion Clan"
+    },
+    {
+      "card_reference_id": "card-ref-43ae99886a2a30b3eb30",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3x Ashigaru Spearmen"
+    },
+    {
+      "card_reference_id": "card-ref-f10882eda9eaccf4ae6c",
+      "line_number": 31,
+      "quantity": 2,
+      "raw_line": "2x Bounty Hunter"
+    },
+    {
+      "card_reference_id": "card-ref-b92e0c7267ae8e2246e1",
+      "line_number": 32,
+      "quantity": 2,
+      "raw_line": "2x Floating Reserve"
+    },
+    {
+      "card_reference_id": "card-ref-c256edfa3c1b79e042e2",
+      "line_number": 33,
+      "quantity": 2,
+      "raw_line": "2x Sparrow Clan Aide"
+    },
+    {
+      "card_reference_id": "card-ref-10b89698fa871c066f2d",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of Fire"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 36,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-592629ae562c5962c206",
+      "line_number": 38,
+      "quantity": 1,
+      "raw_line": "1x Blind Honor"
+    },
+    {
+      "card_reference_id": "card-ref-4c9c3490c48df1b4ad77",
+      "line_number": 39,
+      "quantity": 2,
+      "raw_line": "2x Encircled Terrain"
+    },
+    {
+      "card_reference_id": "card-ref-acb278a93731ff4e4e4e",
+      "line_number": 40,
+      "quantity": 3,
+      "raw_line": "3x Flashy Technique"
+    },
+    {
+      "card_reference_id": "card-ref-29280e5ec5864a8885c3",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Inspired Devotion"
+    },
+    {
+      "card_reference_id": "card-ref-94393cb997c9341fd369",
+      "line_number": 42,
+      "quantity": 3,
+      "raw_line": "3x The Greater Threat"
+    },
+    {
+      "card_reference_id": "card-ref-3265d9694f44d98fa1d5",
+      "line_number": 43,
+      "quantity": 1,
+      "raw_line": "1x Planted Evidence"
+    },
+    {
+      "card_reference_id": "card-ref-3b302d99f88fe33af19f",
+      "line_number": 44,
+      "quantity": 2,
+      "raw_line": "2x Provoked Violence"
+    },
+    {
+      "card_reference_id": "card-ref-00e6992c86a36ec18310",
+      "line_number": 45,
+      "quantity": 2,
+      "raw_line": "2x Ramifications"
+    },
+    {
+      "card_reference_id": "card-ref-6310992741f0fe671c0a",
+      "line_number": 46,
+      "quantity": 1,
+      "raw_line": "1x Sneak Attack"
+    },
+    {
+      "card_reference_id": "card-ref-b05e971e973bb982ebed",
+      "line_number": 47,
+      "quantity": 3,
+      "raw_line": "3x Sudden Movement"
+    },
+    {
+      "card_reference_id": "card-ref-18fd0159a47e7ff4090a",
+      "line_number": 48,
+      "quantity": 2,
+      "raw_line": "2x Unpleasant Truths"
+    },
+    {
+      "card_reference_id": "card-ref-f2798be6235188976cc4",
+      "line_number": 49,
+      "quantity": 3,
+      "raw_line": "3x Vigilant Eyes"
+    },
+    {
+      "card_reference_id": "card-ref-7fc2cd571c9305222db3",
+      "line_number": 50,
+      "quantity": 3,
+      "raw_line": "3x Unassailable Defense"
+    }
+  ],
+  "entry_count": 44,
+  "id": "deck-45c89aaa451ab9b9421e",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Scorpion",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-9c24dde7512f0ca698a2"
+}

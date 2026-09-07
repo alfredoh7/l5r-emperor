@@ -1,0 +1,4 @@
+# Replace the hostname with the private server's actual DNS name.
+l5r.example.com {
+    reverse_proxy 127.0.0.1:5210
+}

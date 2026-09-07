@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1158101,
+  "card_id": "oracle-l5r-840",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-840-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Mitsuo",
+  "numbers": [
+    "151"
+  ],
+  "oracle_id": 840,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-840-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:58.390749+00:00",
+  "sha256": "ebce95c20f1dd662a585fdd233550c695611e1ba92e9c39f590f76a0b716fc0a",
+  "source_image_hash": "73/c5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/c5/printing_840_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/c5/printing_840_1_",
+  "width": 750
+}

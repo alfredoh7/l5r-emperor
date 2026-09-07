@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1098432,
+  "card_id": "oracle-l5r-241",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-241-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Makotai",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 241,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-241-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:42.283928+00:00",
+  "sha256": "2a052124f5d851569ac2f83e367ce36df28dcd0bb043393faa3b74ab7e81e48d",
+  "source_image_hash": "0e/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/ec/printing_241_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/ec/printing_241_1_",
+  "width": 750
+}

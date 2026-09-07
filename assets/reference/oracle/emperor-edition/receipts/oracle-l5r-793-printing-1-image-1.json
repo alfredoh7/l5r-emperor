@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1080893,
+  "card_id": "oracle-l5r-793",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-793-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Irezu",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 793,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-793-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:56.564353+00:00",
+  "sha256": "93a33f275e793e5283f7e659389023971d72444eb19365a9677212ab09e9ea1f",
+  "source_image_hash": "28/fa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/28/fa/printing_793_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/28/fa/printing_793_1_",
+  "width": 750
+}

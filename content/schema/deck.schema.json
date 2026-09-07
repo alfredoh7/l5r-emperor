@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:l5r:reference-deck:v1",
+  "title": "Imported reference deck (not executable)",
+  "type": "object",
+  "required": ["schema_version", "id", "name", "source_id", "declared_era", "source_era_labels", "legality_status", "playable", "entries", "entry_count", "card_count", "issues"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "id": { "type": "string", "pattern": "^deck-[0-9a-f]{20}$" },
+    "name": { "type": "string", "minLength": 1 },
+    "source_id": { "type": "string", "minLength": 1 },
+    "declared_era": { "type": ["string", "null"] },
+    "source_era_labels": { "type": "array", "items": { "type": "string" } },
+    "legality_status": { "const": "unverified" },
+    "playable": { "const": false },
+    "entry_count": { "type": "integer", "minimum": 0 },
+    "card_count": { "type": "integer", "minimum": 0 },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["card_reference_id", "quantity", "line_number", "raw_line"],
+        "properties": {
+          "card_reference_id": { "type": "string", "pattern": "^card-ref-[0-9a-f]{20}$" },
+          "quantity": { "type": "integer", "minimum": 1, "maximum": 999 },
+          "line_number": { "type": "integer", "minimum": 1 },
+          "raw_line": { "type": "string" }
+        }
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "message", "line_number"],
+        "properties": {
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "line_number": { "type": ["integer", "null"], "minimum": 1 }
+        }
+      }
+    }
+  }
+}

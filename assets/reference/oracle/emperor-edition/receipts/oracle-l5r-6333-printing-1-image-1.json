@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 952672,
+  "card_id": "oracle-l5r-6333",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6333-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ring of Air",
+  "numbers": [
+    "241"
+  ],
+  "oracle_id": 6333,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6333-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:09.553739+00:00",
+  "sha256": "04c646733646afdf1047cdcfe7730e927c0e9f220551b114c083a1babc407de6",
+  "source_image_hash": "d4/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/da/printing_6333_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/da/printing_6333_1_",
+  "width": 750
+}

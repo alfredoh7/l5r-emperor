@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1083415,
+  "card_id": "oracle-l5r-5595",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5595-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nishimura",
+  "numbers": [
+    "173"
+  ],
+  "oracle_id": 5595,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-5595-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:55.981468+00:00",
+  "sha256": "f3364f888e2a0900cc89e243a0f8e89a5edda946e40c65ba0079e688bee608c8",
+  "source_image_hash": "5e/78",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5e/78/printing_5595_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5e/78/printing_5595_1_",
+  "width": 750
+}

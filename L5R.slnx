@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/L5R.Core/L5R.Core.csproj" />
+    <Project Path="src/L5R.AI/L5R.AI.csproj" />
+    <Project Path="src/L5R.Server/L5R.Server.csproj" />
+    <Project Path="src/L5R.Client/L5R.Client.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/L5R.Core.Tests/L5R.Core.Tests.csproj" />
+    <Project Path="tests/L5R.AI.Tests/L5R.AI.Tests.csproj" />
+    <Project Path="tests/L5R.Server.Tests/L5R.Server.Tests.csproj" />
+    <Project Path="tests/L5R.Client.Transport.Tests/L5R.Client.Transport.Tests.csproj" />
+  </Folder>
+</Solution>

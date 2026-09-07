@@ -1,0 +1,33 @@
+config_version=5
+
+[application]
+config/name="L5R · Emperor"
+run/main_scene="res://Main.tscn"
+config/features=PackedStringArray("4.7", "C#", "GL Compatibility")
+config/icon="res://icon.svg"
+config/description="A new Emperor Edition rules and presentation foundation."
+
+[display]
+window/size/viewport_width=1600
+window/size/viewport_height=1000
+window/size/window_width_override=1440
+window/size/window_height_override=900
+window/stretch/mode="disabled"
+window/stretch/aspect="expand"
+
+[dotnet]
+project/assembly_name="L5R.Client"
+
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+textures/vram_compression/import_etc2_astc=true
+textures/vram_compression/import_s3tc_bptc=true
+environment/defaults/default_clear_color=Color(0.045,0.065,0.059,1)
+
+[audio]
+driver/enable_input=false
+
+[gui]
+timers/tooltip_delay_sec=0.3

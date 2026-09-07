@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1008276,
+  "card_id": "oracle-l5r-8741",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8741-printing-1-image-1",
+  "image_index": 1,
+  "name": "Treachery and Deceit",
+  "numbers": [
+    "380"
+  ],
+  "oracle_id": 8741,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-8741-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:18.711540+00:00",
+  "sha256": "2e9feb72036a411eca21af44fcc65b7b68e84a253bb690a6d5772bfb64db94bb",
+  "source_image_hash": "8e/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/6d/printing_8741_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/6d/printing_8741_1_",
+  "width": 750
+}

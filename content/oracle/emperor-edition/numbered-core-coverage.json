@@ -1,0 +1,3435 @@
+{
+  "ambiguous_numbers": [],
+  "cards_by_number": {
+    "1": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-311",
+        "name": "Akodo's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "10": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-105",
+        "name": "Abandoning the Fortunes",
+        "printing_id": "1"
+      }
+    ],
+    "100": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8591",
+        "name": "Togashi Tsukagi",
+        "printing_id": "1"
+      }
+    ],
+    "101": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8763",
+        "name": "Tsai-tsu",
+        "printing_id": "1"
+      }
+    ],
+    "102": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-200",
+        "name": "Akodo Dairuko",
+        "printing_id": "1"
+      }
+    ],
+    "103": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-226",
+        "name": "Akodo Kano",
+        "printing_id": "1"
+      }
+    ],
+    "104": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-229",
+        "name": "Akodo Kisho",
+        "printing_id": "1"
+      }
+    ],
+    "105": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-241",
+        "name": "Akodo Makotai",
+        "printing_id": "1"
+      }
+    ],
+    "106": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-288",
+        "name": "Akodo Suoh",
+        "printing_id": "1"
+      }
+    ],
+    "107": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3623",
+        "name": "Ikoma Natsu",
+        "printing_id": "1"
+      }
+    ],
+    "108": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3636",
+        "name": "Ikoma Shika",
+        "printing_id": "1"
+      }
+    ],
+    "109": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3638",
+        "name": "Ikoma Shinju",
+        "printing_id": "1"
+      }
+    ],
+    "11": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-336",
+        "name": "Alter History",
+        "printing_id": "1"
+      }
+    ],
+    "110": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4395",
+        "name": "Kitsu Sorano",
+        "printing_id": "1"
+      }
+    ],
+    "111": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4396",
+        "name": "Kitsu Suki",
+        "printing_id": "1"
+      }
+    ],
+    "112": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4397",
+        "name": "Kitsu Tamasine",
+        "printing_id": "1"
+      }
+    ],
+    "113": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4892",
+        "name": "Matsu Arata",
+        "printing_id": "1"
+      }
+    ],
+    "114": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4915",
+        "name": "Matsu Hachiro",
+        "printing_id": "1"
+      }
+    ],
+    "115": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4916",
+        "name": "Matsu Hana",
+        "printing_id": "1"
+      }
+    ],
+    "116": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5010",
+        "name": "Matsu Yuuto",
+        "printing_id": "1"
+      }
+    ],
+    "117": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4456",
+        "name": "Kitsune Denhei",
+        "printing_id": "1"
+      }
+    ],
+    "118": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4460",
+        "name": "Kitsune Gina",
+        "printing_id": "1"
+      }
+    ],
+    "119": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4467",
+        "name": "Kitsune Kohaki",
+        "printing_id": "1"
+      }
+    ],
+    "12": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-956",
+        "name": "Benefices of the Emperor",
+        "printing_id": "1"
+      }
+    ],
+    "120": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5271",
+        "name": "Moshi Madoka",
+        "printing_id": "1"
+      }
+    ],
+    "121": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5290",
+        "name": "Moshi Yokohime",
+        "printing_id": "1"
+      }
+    ],
+    "122": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8840",
+        "name": "Tsuruchi Isas",
+        "printing_id": "1"
+      }
+    ],
+    "123": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8852",
+        "name": "Tsuruchi Kosoko",
+        "printing_id": "1"
+      }
+    ],
+    "124": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8874",
+        "name": "Tsuruchi Samuru",
+        "printing_id": "1"
+      }
+    ],
+    "125": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8893",
+        "name": "Tsuruchi Tomaru",
+        "printing_id": "1"
+      }
+    ],
+    "126": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8995",
+        "name": "Unmei",
+        "printing_id": "1"
+      }
+    ],
+    "127": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9539",
+        "name": "Yoritomo Doho",
+        "printing_id": "1"
+      }
+    ],
+    "128": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9552",
+        "name": "Yoritomo Hama",
+        "printing_id": "1"
+      }
+    ],
+    "129": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9558",
+        "name": "Yoritomo Hiromi",
+        "printing_id": "1"
+      }
+    ],
+    "13": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1086",
+        "name": "Boastful Proclamation",
+        "printing_id": "1"
+      }
+    ],
+    "130": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9610",
+        "name": "Yoritomo Nakoshi",
+        "printing_id": "1"
+      }
+    ],
+    "131": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9611",
+        "name": "Yoritomo Naoto",
+        "printing_id": "1"
+      }
+    ],
+    "132": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-153",
+        "name": "Agasha Ryo",
+        "printing_id": "1"
+      }
+    ],
+    "133": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-571",
+        "name": "Asako Niou",
+        "printing_id": "1"
+      }
+    ],
+    "134": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-572",
+        "name": "Asako Nobunori",
+        "printing_id": "1"
+      }
+    ],
+    "135": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-577",
+        "name": "Asako Rinshi",
+        "printing_id": "1"
+      }
+    ],
+    "136": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-590",
+        "name": "Asako Tsunefusa",
+        "printing_id": "1"
+      }
+    ],
+    "137": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-592",
+        "name": "Asako Ume",
+        "printing_id": "1"
+      }
+    ],
+    "138": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-595",
+        "name": "Asako Yorisada",
+        "printing_id": "1"
+      }
+    ],
+    "139": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3847",
+        "name": "Isawa Kimi",
+        "printing_id": "1"
+      }
+    ],
+    "14": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1314",
+        "name": "Cherry Blossom Festival",
+        "printing_id": "1"
+      }
+    ],
+    "140": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3881",
+        "name": "Isawa Norimichi",
+        "printing_id": "1"
+      }
+    ],
+    "141": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3904",
+        "name": "Isawa Shunsuko",
+        "printing_id": "1"
+      }
+    ],
+    "142": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3918",
+        "name": "Isawa Tamaki",
+        "printing_id": "1"
+      }
+    ],
+    "143": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3930",
+        "name": "Isawa Tomohiro",
+        "printing_id": "1"
+      }
+    ],
+    "144": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6768",
+        "name": "Shiba Kataken",
+        "printing_id": "1"
+      }
+    ],
+    "145": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6803",
+        "name": "Shiba Sansesuke",
+        "printing_id": "1"
+      }
+    ],
+    "146": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6818",
+        "name": "Shiba Tsukimi",
+        "printing_id": "1"
+      }
+    ],
+    "147": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-790",
+        "name": "Bayushi Hurunayi",
+        "printing_id": "1"
+      }
+    ],
+    "148": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-793",
+        "name": "Bayushi Irezu",
+        "printing_id": "1"
+      }
+    ],
+    "149": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-806",
+        "name": "Bayushi Kahoku",
+        "printing_id": "1"
+      }
+    ],
+    "15": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1576",
+        "name": "Cross-Clan Wedding",
+        "printing_id": "1"
+      }
+    ],
+    "150": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-836",
+        "name": "Bayushi Manami",
+        "printing_id": "1"
+      }
+    ],
+    "151": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-840",
+        "name": "Bayushi Mitsuo",
+        "printing_id": "1"
+      }
+    ],
+    "152": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-850",
+        "name": "Bayushi Nitoshi",
+        "printing_id": "1"
+      }
+    ],
+    "153": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-866",
+        "name": "Bayushi Rentatsu",
+        "printing_id": "1"
+      }
+    ],
+    "154": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-923",
+        "name": "Bayushi Waru",
+        "printing_id": "1"
+      }
+    ],
+    "155": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-925",
+        "name": "Bayushi Yasashiku",
+        "printing_id": "1"
+      }
+    ],
+    "156": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7117",
+        "name": "Shosuro Kameyoi",
+        "printing_id": "1"
+      }
+    ],
+    "157": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7121",
+        "name": "Shosuro Konishi",
+        "printing_id": "1"
+      }
+    ],
+    "158": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7122",
+        "name": "Shosuro Koshiba",
+        "printing_id": "1"
+      }
+    ],
+    "159": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7156",
+        "name": "Shosuro Rokuta",
+        "printing_id": "1"
+      }
+    ],
+    "16": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1939",
+        "name": "Delayed Arrival",
+        "printing_id": "1"
+      }
+    ],
+    "160": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7169",
+        "name": "Shosuro Tanzaki",
+        "printing_id": "1"
+      }
+    ],
+    "161": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7371",
+        "name": "Soshi Yorimi",
+        "printing_id": "1"
+      }
+    ],
+    "162": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1704",
+        "name": "Daigotsu Aya",
+        "printing_id": "1"
+      }
+    ],
+    "163": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1720",
+        "name": "Daigotsu Gyoken",
+        "printing_id": "1"
+      }
+    ],
+    "164": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1728",
+        "name": "Daigotsu Ishibashi",
+        "printing_id": "1"
+      }
+    ],
+    "165": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1733",
+        "name": "Daigotsu Kanpeki",
+        "printing_id": "1"
+      }
+    ],
+    "166": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1736",
+        "name": "Daigotsu Kendo",
+        "printing_id": "1"
+      }
+    ],
+    "167": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1744",
+        "name": "Daigotsu Matsuda",
+        "printing_id": "1"
+      }
+    ],
+    "168": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1749",
+        "name": "Daigotsu Misaki",
+        "printing_id": "1"
+      }
+    ],
+    "169": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1751",
+        "name": "Daigotsu Negishi",
+        "printing_id": "1"
+      }
+    ],
+    "17": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2017",
+        "name": "Disgrace",
+        "printing_id": "1"
+      }
+    ],
+    "170": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2853",
+        "name": "Goju Kobashi",
+        "printing_id": "1"
+      }
+    ],
+    "171": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2855",
+        "name": "Goju Oyoto",
+        "printing_id": "1"
+      }
+    ],
+    "172": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5590",
+        "name": "Ninube Onchi",
+        "printing_id": "1"
+      }
+    ],
+    "173": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5595",
+        "name": "Nishimura",
+        "printing_id": "1"
+      }
+    ],
+    "174": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5685",
+        "name": "Ohaba",
+        "printing_id": "1"
+      }
+    ],
+    "175": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6467",
+        "name": "Sandayu",
+        "printing_id": "1"
+      }
+    ],
+    "176": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7943",
+        "name": "Tetsuo",
+        "printing_id": "1"
+      }
+    ],
+    "177": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1363",
+        "name": "Chuda Niiro",
+        "printing_id": "1"
+      }
+    ],
+    "178": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2286",
+        "name": "Ekichu no Oni",
+        "printing_id": "1"
+      }
+    ],
+    "179": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2793",
+        "name": "Genmyo",
+        "printing_id": "1"
+      }
+    ],
+    "18": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2824",
+        "name": "Glory of the Shogun",
+        "printing_id": "1"
+      }
+    ],
+    "180": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5626",
+        "name": "Nosloc no Oni",
+        "printing_id": "1"
+      }
+    ],
+    "181": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5812",
+        "name": "Otomo Demiyah",
+        "printing_id": "1"
+      }
+    ],
+    "182": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6117",
+        "name": "Qalyar",
+        "printing_id": "1"
+      }
+    ],
+    "183": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6620",
+        "name": "Seppun Washi",
+        "printing_id": "1"
+      }
+    ],
+    "184": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7618",
+        "name": "Suiteiru no Oni",
+        "printing_id": "1"
+      }
+    ],
+    "185": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8929",
+        "name": "Ugulu no Oni",
+        "printing_id": "1"
+      }
+    ],
+    "186": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9697",
+        "name": "Yung",
+        "printing_id": "1"
+      }
+    ],
+    "187": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4002",
+        "name": "Iuchi Shunshi",
+        "printing_id": "1"
+      }
+    ],
+    "188": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5354",
+        "name": "Moto Naleesh",
+        "printing_id": "1"
+      }
+    ],
+    "189": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5360",
+        "name": "Moto Rani",
+        "printing_id": "1"
+      }
+    ],
+    "19": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3694",
+        "name": "Imperial Gift",
+        "printing_id": "1"
+      }
+    ],
+    "190": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5370",
+        "name": "Moto Shigeru",
+        "printing_id": "1"
+      }
+    ],
+    "191": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5371",
+        "name": "Moto Shunsuke",
+        "printing_id": "1"
+      }
+    ],
+    "192": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5379",
+        "name": "Moto Taha",
+        "printing_id": "1"
+      }
+    ],
+    "193": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5382",
+        "name": "Moto Tetsuo",
+        "printing_id": "1"
+      }
+    ],
+    "194": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6863",
+        "name": "Shinjo Baeshuko",
+        "printing_id": "1"
+      }
+    ],
+    "195": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6872",
+        "name": "Shinjo Eun-Sahng",
+        "printing_id": "1"
+      }
+    ],
+    "196": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6885",
+        "name": "Shinjo Horibe",
+        "printing_id": "1"
+      }
+    ],
+    "197": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6895",
+        "name": "Shinjo Itao",
+        "printing_id": "1"
+      }
+    ],
+    "198": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6905",
+        "name": "Shinjo Ki-Chang",
+        "printing_id": "1"
+      }
+    ],
+    "199": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6950",
+        "name": "Shinjo Taeken",
+        "printing_id": "1"
+      }
+    ],
+    "2": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-934",
+        "name": "Bayushi's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "20": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5233",
+        "name": "Moon and Sun",
+        "printing_id": "1"
+      }
+    ],
+    "200": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9094",
+        "name": "Utaku Ryoko",
+        "printing_id": "1"
+      }
+    ],
+    "201": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9107",
+        "name": "Utaku Tsukiko",
+        "printing_id": "1"
+      }
+    ],
+    "202": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1042",
+        "name": "Blighted Region",
+        "printing_id": "1"
+      }
+    ],
+    "203": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4148",
+        "name": "Kaiu Village",
+        "printing_id": "1"
+      }
+    ],
+    "204": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5979",
+        "name": "Plains of Otosan Uchi",
+        "printing_id": "1"
+      }
+    ],
+    "205": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6226",
+        "name": "Refuge of the Three Sisters",
+        "printing_id": "1"
+      }
+    ],
+    "206": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7908",
+        "name": "Ten Thousand Temples",
+        "printing_id": "1"
+      }
+    ],
+    "207": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-419",
+        "name": "Apprentice Shinobi",
+        "printing_id": "1"
+      }
+    ],
+    "208": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-494",
+        "name": "Asahina House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "209": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-543",
+        "name": "Asako House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "21": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5510",
+        "name": "Naoharu's Gift",
+        "printing_id": "1"
+      }
+    ],
+    "210": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-683",
+        "name": "Bandit Gang",
+        "printing_id": "1"
+      }
+    ],
+    "211": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2851",
+        "name": "Goju House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "212": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3325",
+        "name": "Hiruma Sniper",
+        "printing_id": "1"
+      }
+    ],
+    "213": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3589",
+        "name": "Ikiryo",
+        "printing_id": "1"
+      }
+    ],
+    "214": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3611",
+        "name": "Ikoma House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "215": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4118",
+        "name": "Kaiu House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "216": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4338",
+        "name": "Khol Regulars",
+        "printing_id": "1"
+      }
+    ],
+    "217": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4699",
+        "name": "Legion of Pain",
+        "printing_id": "1"
+      }
+    ],
+    "218": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5329",
+        "name": "Moto House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "219": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5837",
+        "name": "Outriders",
+        "printing_id": "1"
+      }
+    ],
+    "22": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6201",
+        "name": "Rebuilding the Empire",
+        "printing_id": "1"
+      }
+    ],
+    "220": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6975",
+        "name": "Shinjo's Children",
+        "printing_id": "1"
+      }
+    ],
+    "221": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7347",
+        "name": "Soshi House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "222": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7450",
+        "name": "Stalking Tiger",
+        "printing_id": "1"
+      }
+    ],
+    "223": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7776",
+        "name": "Tamori House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "224": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8837",
+        "name": "Tsuruchi House Guard",
+        "printing_id": "1"
+      }
+    ],
+    "225": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9058",
+        "name": "Utaku Elite Guard",
+        "printing_id": "1"
+      }
+    ],
+    "226": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9144",
+        "name": "Veteran Advisor",
+        "printing_id": "1"
+      }
+    ],
+    "227": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9147",
+        "name": "Veteran Skirmishers",
+        "printing_id": "1"
+      }
+    ],
+    "228": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9162",
+        "name": "Village Guardian",
+        "printing_id": "1"
+      }
+    ],
+    "229": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-446",
+        "name": "Armor of the Heavens",
+        "printing_id": "1"
+      }
+    ],
+    "23": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7608",
+        "name": "Successful Bounty",
+        "printing_id": "1"
+      }
+    ],
+    "230": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1010",
+        "name": "Blade of Perfection",
+        "printing_id": "1"
+      }
+    ],
+    "231": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1340",
+        "name": "Chrysanthemum Blossom",
+        "printing_id": "1"
+      }
+    ],
+    "232": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1407",
+        "name": "Clan Standard",
+        "printing_id": "1"
+      }
+    ],
+    "233": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2798",
+        "name": "Gift Armor",
+        "printing_id": "1"
+      }
+    ],
+    "234": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4323",
+        "name": "Kensai's Blade",
+        "printing_id": "1"
+      }
+    ],
+    "235": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4790",
+        "name": "Maga-yari",
+        "printing_id": "1"
+      }
+    ],
+    "236": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5214",
+        "name": "Modifications",
+        "printing_id": "1"
+      }
+    ],
+    "237": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6269",
+        "name": "Reserve Weapon",
+        "printing_id": "1"
+      }
+    ],
+    "238": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6478",
+        "name": "Sasumata",
+        "printing_id": "1"
+      }
+    ],
+    "239": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7411",
+        "name": "Spiked Tetsubo",
+        "printing_id": "1"
+      }
+    ],
+    "24": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7675",
+        "name": "Suspicions",
+        "printing_id": "1"
+      }
+    ],
+    "240": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8823",
+        "name": "Tsuruchi Daikyu",
+        "printing_id": "1"
+      }
+    ],
+    "241": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6333",
+        "name": "Ring of Air",
+        "printing_id": "1"
+      }
+    ],
+    "242": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6334",
+        "name": "Ring of Earth",
+        "printing_id": "1"
+      }
+    ],
+    "243": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6335",
+        "name": "Ring of Fire",
+        "printing_id": "1"
+      }
+    ],
+    "244": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6338",
+        "name": "Ring of the Void",
+        "printing_id": "1"
+      }
+    ],
+    "245": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6339",
+        "name": "Ring of Water",
+        "printing_id": "1"
+      }
+    ],
+    "246": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1216",
+        "name": "Capturing the Soul",
+        "printing_id": "1"
+      }
+    ],
+    "247": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1323",
+        "name": "Chikushudo's Trickery",
+        "printing_id": "1"
+      }
+    ],
+    "248": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1416",
+        "name": "Cleansing the Path",
+        "printing_id": "1"
+      }
+    ],
+    "249": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1449",
+        "name": "Conflagration",
+        "printing_id": "1"
+      }
+    ],
+    "25": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9356",
+        "name": "Wisdom Gained",
+        "printing_id": "1"
+      }
+    ],
+    "250": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1458",
+        "name": "Consecration",
+        "printing_id": "1"
+      }
+    ],
+    "251": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1471",
+        "name": "Contemplate the Void",
+        "printing_id": "1"
+      }
+    ],
+    "252": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2954",
+        "name": "Hanabi",
+        "printing_id": "1"
+      }
+    ],
+    "253": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3541",
+        "name": "I Give You My Name",
+        "printing_id": "1"
+      }
+    ],
+    "254": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5649",
+        "name": "Obscured Pathways",
+        "printing_id": "1"
+      }
+    ],
+    "255": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6502",
+        "name": "Scouring Flood",
+        "printing_id": "1"
+      }
+    ],
+    "256": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6567",
+        "name": "Seeking the Way",
+        "printing_id": "1"
+      }
+    ],
+    "257": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7633",
+        "name": "Summon Swamp Spirits",
+        "printing_id": "1"
+      }
+    ],
+    "258": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8175",
+        "name": "The Kami's Blessing",
+        "printing_id": "1"
+      }
+    ],
+    "259": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8473",
+        "name": "Thunder's Favor",
+        "printing_id": "1"
+      }
+    ],
+    "26": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-309",
+        "name": "Akodo's Grave",
+        "printing_id": "1"
+      }
+    ],
+    "260": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8997",
+        "name": "Unnatural Flood",
+        "printing_id": "1"
+      }
+    ],
+    "261": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9196",
+        "name": "Walking the Way",
+        "printing_id": "1"
+      }
+    ],
+    "262": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9228",
+        "name": "Warded Paths",
+        "printing_id": "1"
+      }
+    ],
+    "263": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-23",
+        "name": "A Forefather's Vengeance",
+        "printing_id": "1"
+      }
+    ],
+    "264": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-61",
+        "name": "A Paragon's Strength",
+        "printing_id": "1"
+      }
+    ],
+    "265": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-68",
+        "name": "A Pure Stroke",
+        "printing_id": "1"
+      }
+    ],
+    "266": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-82",
+        "name": "A Stain Cleansed",
+        "printing_id": "1"
+      }
+    ],
+    "267": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-90",
+        "name": "A Time for Mortal Men",
+        "printing_id": "1"
+      }
+    ],
+    "268": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-344",
+        "name": "Ambush",
+        "printing_id": "1"
+      }
+    ],
+    "269": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-370",
+        "name": "Ancestral Protection",
+        "printing_id": "1"
+      }
+    ],
+    "27": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-679",
+        "name": "Bamboo Harvesters",
+        "printing_id": "1"
+      }
+    ],
+    "270": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-424",
+        "name": "Aramoro's Promise",
+        "printing_id": "1"
+      }
+    ],
+    "271": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-639",
+        "name": "At Any Cost",
+        "printing_id": "1"
+      }
+    ],
+    "272": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-657",
+        "name": "Awed Witness",
+        "printing_id": "1"
+      }
+    ],
+    "273": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-662",
+        "name": "Back to the Front",
+        "printing_id": "1"
+      }
+    ],
+    "274": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-663",
+        "name": "Bad Kharma",
+        "printing_id": "1"
+      }
+    ],
+    "275": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-690",
+        "name": "Banish All Doubt",
+        "printing_id": "1"
+      }
+    ],
+    "276": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-954",
+        "name": "Bend like a Reed",
+        "printing_id": "1"
+      }
+    ],
+    "277": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-963",
+        "name": "Besieged",
+        "printing_id": "1"
+      }
+    ],
+    "278": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1044",
+        "name": "Blind Rage",
+        "printing_id": "1"
+      }
+    ],
+    "279": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1045",
+        "name": "Block Supply Lines",
+        "printing_id": "1"
+      }
+    ],
+    "28": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1106",
+        "name": "Border Keep",
+        "printing_id": "1"
+      }
+    ],
+    "280": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1135",
+        "name": "Breath of the Heavens",
+        "printing_id": "1"
+      }
+    ],
+    "281": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1180",
+        "name": "Burn the Towers",
+        "printing_id": "1"
+      }
+    ],
+    "282": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1238",
+        "name": "Caught in the Act",
+        "printing_id": "1"
+      }
+    ],
+    "283": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1239",
+        "name": "Caught Unawares",
+        "printing_id": "1"
+      }
+    ],
+    "284": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1450",
+        "name": "Confusion at Court",
+        "printing_id": "1"
+      }
+    ],
+    "285": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1487",
+        "name": "Control the Field",
+        "printing_id": "1"
+      }
+    ],
+    "286": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1820",
+        "name": "Dangerous Indulgence",
+        "printing_id": "1"
+      }
+    ],
+    "287": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1885",
+        "name": "Deadly Orders",
+        "printing_id": "1"
+      }
+    ],
+    "288": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1908",
+        "name": "Deception Revealed",
+        "printing_id": "1"
+      }
+    ],
+    "289": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2246",
+        "name": "Duel of Serpents",
+        "printing_id": "1"
+      }
+    ],
+    "29": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1373",
+        "name": "Chugo Seido",
+        "printing_id": "1"
+      }
+    ],
+    "290": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2332",
+        "name": "Encircled Terrain",
+        "printing_id": "1"
+      }
+    ],
+    "291": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2419",
+        "name": "Extended Maneuvers",
+        "printing_id": "1"
+      }
+    ],
+    "292": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2431",
+        "name": "Face of Ninube",
+        "printing_id": "1"
+      }
+    ],
+    "293": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2445",
+        "name": "Fall Back!",
+        "printing_id": "1"
+      }
+    ],
+    "294": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2454",
+        "name": "Falling Leaf Strike",
+        "printing_id": "1"
+      }
+    ],
+    "295": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2503",
+        "name": "Feign Death",
+        "printing_id": "1"
+      }
+    ],
+    "296": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2530",
+        "name": "Fields of Mercy",
+        "printing_id": "1"
+      }
+    ],
+    "297": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2547",
+        "name": "Final Confrontation",
+        "printing_id": "1"
+      }
+    ],
+    "298": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2613",
+        "name": "Flooded Pass",
+        "printing_id": "1"
+      }
+    ],
+    "299": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2619",
+        "name": "Focus",
+        "printing_id": "1"
+      }
+    ],
+    "3": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1788",
+        "name": "Daigotsu's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "30": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1497",
+        "name": "Copper Mine",
+        "printing_id": "1"
+      }
+    ],
+    "300": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2629",
+        "name": "Footsteps of Madness",
+        "printing_id": "1"
+      }
+    ],
+    "301": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2671",
+        "name": "Fortitude",
+        "printing_id": "1"
+      }
+    ],
+    "302": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2865",
+        "name": "Gold and Steel",
+        "printing_id": "1"
+      }
+    ],
+    "303": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2919",
+        "name": "Guided by Honor",
+        "printing_id": "1"
+      }
+    ],
+    "304": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2972",
+        "name": "Hard Pressed",
+        "printing_id": "1"
+      }
+    ],
+    "305": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3008",
+        "name": "He's Mine!",
+        "printing_id": "1"
+      }
+    ],
+    "306": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3016",
+        "name": "Heart of Rokugan",
+        "printing_id": "1"
+      }
+    ],
+    "307": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3037",
+        "name": "Heavily Engaged",
+        "printing_id": "1"
+      }
+    ],
+    "308": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3254",
+        "name": "Hidden Defenses",
+        "printing_id": "1"
+      }
+    ],
+    "309": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3513",
+        "name": "Hundred-Fold Cut",
+        "printing_id": "1"
+      }
+    ],
+    "31": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1914",
+        "name": "Deeds and Words",
+        "printing_id": "1"
+      }
+    ],
+    "310": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3671",
+        "name": "Immovable Object",
+        "printing_id": "1"
+      }
+    ],
+    "311": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3725",
+        "name": "In the Heart of Battle",
+        "printing_id": "1"
+      }
+    ],
+    "312": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3730",
+        "name": "Incapacitated",
+        "printing_id": "1"
+      }
+    ],
+    "313": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3743",
+        "name": "Inexplicable Challenge",
+        "printing_id": "1"
+      }
+    ],
+    "314": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3774",
+        "name": "Inspired Devotion",
+        "printing_id": "1"
+      }
+    ],
+    "315": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3793",
+        "name": "Introspection",
+        "printing_id": "1"
+      }
+    ],
+    "316": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4480",
+        "name": "Knife in the Darkness",
+        "printing_id": "1"
+      }
+    ],
+    "317": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4843",
+        "name": "Martial Instruction",
+        "printing_id": "1"
+      }
+    ],
+    "318": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5018",
+        "name": "Meeting the Keepers",
+        "printing_id": "1"
+      }
+    ],
+    "319": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5444",
+        "name": "Murderous Intent",
+        "printing_id": "1"
+      }
+    ],
+    "32": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2455",
+        "name": "Falling Rain Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "320": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5457",
+        "name": "My Enemy's Mercy",
+        "printing_id": "1"
+      }
+    ],
+    "321": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5468",
+        "name": "Mysterious Deaths",
+        "printing_id": "1"
+      }
+    ],
+    "322": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5532",
+        "name": "Nerve Strike",
+        "printing_id": "1"
+      }
+    ],
+    "323": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5585",
+        "name": "Ninja Tricks",
+        "printing_id": "1"
+      }
+    ],
+    "324": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5599",
+        "name": "No Hiding Place",
+        "printing_id": "1"
+      }
+    ],
+    "325": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5681",
+        "name": "Ogre Savagery",
+        "printing_id": "1"
+      }
+    ],
+    "326": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5709",
+        "name": "One Koku",
+        "printing_id": "1"
+      }
+    ],
+    "327": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5766",
+        "name": "Opportunistic Advance",
+        "printing_id": "1"
+      }
+    ],
+    "328": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5853",
+        "name": "Oyo's Second Lesson",
+        "printing_id": "1"
+      }
+    ],
+    "329": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5861",
+        "name": "Paid Off",
+        "printing_id": "1"
+      }
+    ],
+    "33": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2463",
+        "name": "Family Library",
+        "printing_id": "1"
+      }
+    ],
+    "330": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5984",
+        "name": "Plans Within Plans",
+        "printing_id": "1"
+      }
+    ],
+    "331": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6051",
+        "name": "Prepared for Death",
+        "printing_id": "1"
+      }
+    ],
+    "332": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6060",
+        "name": "Preserving Honor",
+        "printing_id": "1"
+      }
+    ],
+    "333": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6247",
+        "name": "Relentless Conviction",
+        "printing_id": "1"
+      }
+    ],
+    "334": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6253",
+        "name": "Remember Your Ancestors",
+        "printing_id": "1"
+      }
+    ],
+    "335": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6260",
+        "name": "Rend the Soul",
+        "printing_id": "1"
+      }
+    ],
+    "336": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6290",
+        "name": "Retribution",
+        "printing_id": "1"
+      }
+    ],
+    "337": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6312",
+        "name": "Rhetoric",
+        "printing_id": "1"
+      }
+    ],
+    "338": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6406",
+        "name": "Rumors Travel",
+        "printing_id": "1"
+      }
+    ],
+    "339": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6439",
+        "name": "Sacrifice of Pawns",
+        "printing_id": "1"
+      }
+    ],
+    "34": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2662",
+        "name": "Fortifications",
+        "printing_id": "1"
+      }
+    ],
+    "340": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6465",
+        "name": "Sanctioned Duel",
+        "printing_id": "1"
+      }
+    ],
+    "341": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6584",
+        "name": "Selfless Defense",
+        "printing_id": "1"
+      }
+    ],
+    "342": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6676",
+        "name": "Shadows Walk",
+        "printing_id": "1"
+      }
+    ],
+    "343": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6698",
+        "name": "Shameful Injury",
+        "printing_id": "1"
+      }
+    ],
+    "344": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7310",
+        "name": "Snake Tattoo",
+        "printing_id": "1"
+      }
+    ],
+    "345": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7311",
+        "name": "Sneak Attack",
+        "printing_id": "1"
+      }
+    ],
+    "346": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7312",
+        "name": "Sniping",
+        "printing_id": "1"
+      }
+    ],
+    "347": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7329",
+        "name": "Solid Defense",
+        "printing_id": "1"
+      }
+    ],
+    "348": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7385",
+        "name": "Soul's Sacrifice",
+        "printing_id": "1"
+      }
+    ],
+    "349": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7413",
+        "name": "Spinning Heel Kick",
+        "printing_id": "1"
+      }
+    ],
+    "35": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2784",
+        "name": "Geisha House",
+        "printing_id": "1"
+      }
+    ],
+    "350": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7474",
+        "name": "Stay Put",
+        "printing_id": "1"
+      }
+    ],
+    "351": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7483",
+        "name": "Steel on Steel",
+        "printing_id": "1"
+      }
+    ],
+    "352": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7525",
+        "name": "Strategic Strike",
+        "printing_id": "1"
+      }
+    ],
+    "353": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7538",
+        "name": "Strength in Terror",
+        "printing_id": "1"
+      }
+    ],
+    "354": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7546",
+        "name": "Strength of Purity",
+        "printing_id": "1"
+      }
+    ],
+    "355": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7639",
+        "name": "Summoned to Justice",
+        "printing_id": "1"
+      }
+    ],
+    "356": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7654",
+        "name": "Superior Opponent",
+        "printing_id": "1"
+      }
+    ],
+    "357": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7665",
+        "name": "Surprise Attack",
+        "printing_id": "1"
+      }
+    ],
+    "358": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7862",
+        "name": "Tell the Tale",
+        "printing_id": "1"
+      }
+    ],
+    "359": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7991",
+        "name": "The Compassion of the Unicorn",
+        "printing_id": "1"
+      }
+    ],
+    "36": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2867",
+        "name": "Gold Mine",
+        "printing_id": "1"
+      }
+    ],
+    "360": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7995",
+        "name": "The Courage of the Mantis",
+        "printing_id": "1"
+      }
+    ],
+    "361": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7996",
+        "name": "The Courtesy of the Crane",
+        "printing_id": "1"
+      }
+    ],
+    "362": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8036",
+        "name": "The Duty of the Crab",
+        "printing_id": "1"
+      }
+    ],
+    "363": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8059",
+        "name": "The Empress' Address",
+        "printing_id": "1"
+      }
+    ],
+    "364": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8084",
+        "name": "The Fires of War",
+        "printing_id": "1"
+      }
+    ],
+    "365": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8126",
+        "name": "The Height of Courage",
+        "printing_id": "1"
+      }
+    ],
+    "366": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8137",
+        "name": "The Honesty of the Phoenix",
+        "printing_id": "1"
+      }
+    ],
+    "367": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8138",
+        "name": "The Honor of the Lion",
+        "printing_id": "1"
+      }
+    ],
+    "368": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8194",
+        "name": "The Law's Strength",
+        "printing_id": "1"
+      }
+    ],
+    "369": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8199",
+        "name": "The Light of Justice",
+        "printing_id": "1"
+      }
+    ],
+    "37": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2878",
+        "name": "Governor's Court",
+        "printing_id": "1"
+      }
+    ],
+    "370": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8207",
+        "name": "The Loyalty of the Scorpion",
+        "printing_id": "1"
+      }
+    ],
+    "371": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8262",
+        "name": "The Power of a Word",
+        "printing_id": "1"
+      }
+    ],
+    "372": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8265",
+        "name": "The Power of One",
+        "printing_id": "1"
+      }
+    ],
+    "373": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8311",
+        "name": "The Serpent's Deception",
+        "printing_id": "1"
+      }
+    ],
+    "374": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8313",
+        "name": "The Shadow Court",
+        "printing_id": "1"
+      }
+    ],
+    "375": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8338",
+        "name": "The Sincerity of the Dragon",
+        "printing_id": "1"
+      }
+    ],
+    "376": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8340",
+        "name": "The Slow Death",
+        "printing_id": "1"
+      }
+    ],
+    "377": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8362",
+        "name": "The Strength of the Spider",
+        "printing_id": "1"
+      }
+    ],
+    "378": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8394",
+        "name": "The Trap is Sprung!",
+        "printing_id": "1"
+      }
+    ],
+    "379": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8639",
+        "name": "Torch's Flame Flickers",
+        "printing_id": "1"
+      }
+    ],
+    "38": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3808",
+        "name": "Iron Mine",
+        "printing_id": "1"
+      }
+    ],
+    "380": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8741",
+        "name": "Treachery and Deceit",
+        "printing_id": "1"
+      }
+    ],
+    "381": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8917",
+        "name": "Twist of Fate",
+        "printing_id": "1"
+      }
+    ],
+    "382": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8961",
+        "name": "Undetectable Enemy",
+        "printing_id": "1"
+      }
+    ],
+    "383": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8989",
+        "name": "Unimpeachable Name",
+        "printing_id": "1"
+      }
+    ],
+    "384": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9011",
+        "name": "Unseen Assailant",
+        "printing_id": "1"
+      }
+    ],
+    "385": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9046",
+        "name": "Useful Connections",
+        "printing_id": "1"
+      }
+    ],
+    "386": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9130",
+        "name": "Veiled Menace",
+        "printing_id": "1"
+      }
+    ],
+    "387": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9156",
+        "name": "Vigilant Eyes",
+        "printing_id": "1"
+      }
+    ],
+    "388": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9198",
+        "name": "Wall of Honor",
+        "printing_id": "1"
+      }
+    ],
+    "389": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9287",
+        "name": "Well Prepared",
+        "printing_id": "1"
+      }
+    ],
+    "39": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4496",
+        "name": "Kobune Port",
+        "printing_id": "1"
+      }
+    ],
+    "390": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9323",
+        "name": "White Shore Plain",
+        "printing_id": "1"
+      }
+    ],
+    "391": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9377",
+        "name": "Words Have Strength",
+        "printing_id": "1"
+      }
+    ],
+    "392": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1218",
+        "name": "Carpenter Castle",
+        "printing_id": "1"
+      }
+    ],
+    "393": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2950",
+        "name": "Halls of the Forgotten",
+        "printing_id": "1"
+      }
+    ],
+    "394": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4638",
+        "name": "Kyuden Hida",
+        "printing_id": "1"
+      }
+    ],
+    "395": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9459",
+        "name": "Yasuki Palaces",
+        "printing_id": "1"
+      }
+    ],
+    "396": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3257",
+        "name": "Hidden Falls Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "397": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4646",
+        "name": "Kyuden Otomo",
+        "printing_id": "1"
+      }
+    ],
+    "398": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6855",
+        "name": "Shinden Asahina",
+        "printing_id": "1"
+      }
+    ],
+    "399": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7949",
+        "name": "The Aerie",
+        "printing_id": "1"
+      }
+    ],
+    "4": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2181",
+        "name": "Doji's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "40": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4664",
+        "name": "Large Farm",
+        "printing_id": "1"
+      }
+    ],
+    "400": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2219",
+        "name": "Dragon's Breath Castle",
+        "printing_id": "1"
+      }
+    ],
+    "401": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2626",
+        "name": "Foothills Keep",
+        "printing_id": "1"
+      }
+    ],
+    "402": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5957",
+        "name": "Pillars of Virtue",
+        "printing_id": "1"
+      }
+    ],
+    "403": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9246",
+        "name": "Watchful Eye Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "404": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2388",
+        "name": "Eternal Victory Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "405": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2949",
+        "name": "Halls of Memory",
+        "printing_id": "1"
+      }
+    ],
+    "406": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6691",
+        "name": "Shamate Keep",
+        "printing_id": "1"
+      }
+    ],
+    "407": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8105",
+        "name": "The Golden Plains",
+        "printing_id": "1"
+      }
+    ],
+    "408": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4252",
+        "name": "Kalani's Landing",
+        "printing_id": "1"
+      }
+    ],
+    "409": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4541",
+        "name": "Koshin Keep",
+        "printing_id": "1"
+      }
+    ],
+    "41": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4787",
+        "name": "Luxurious Silk",
+        "printing_id": "1"
+      }
+    ],
+    "410": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4642",
+        "name": "Kyuden Kitsune",
+        "printing_id": "1"
+      }
+    ],
+    "411": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7623",
+        "name": "Suitengu's Torch",
+        "printing_id": "1"
+      }
+    ],
+    "412": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4724",
+        "name": "Library of Rebirth",
+        "printing_id": "1"
+      }
+    ],
+    "413": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7017",
+        "name": "Shiro Shiba",
+        "printing_id": "1"
+      }
+    ],
+    "414": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7879",
+        "name": "Temple of Purity",
+        "printing_id": "1"
+      }
+    ],
+    "415": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9267",
+        "name": "Waystation of the Path",
+        "printing_id": "1"
+      }
+    ],
+    "416": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4676",
+        "name": "Law of Darkness Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "417": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5037",
+        "name": "Midday Shadow Court",
+        "printing_id": "1"
+      }
+    ],
+    "418": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7008",
+        "name": "Shiro Chugo",
+        "printing_id": "1"
+      }
+    ],
+    "419": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8246",
+        "name": "The Otoro Estate",
+        "printing_id": "1"
+      }
+    ],
+    "42": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4840",
+        "name": "Marketplace",
+        "printing_id": "1"
+      }
+    ],
+    "420": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4310",
+        "name": "Keep of the Dead",
+        "printing_id": "1"
+      }
+    ],
+    "421": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7484",
+        "name": "Steel Soul Dojo",
+        "printing_id": "1"
+      }
+    ],
+    "422": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8316",
+        "name": "The Shadow's Lair",
+        "printing_id": "1"
+      }
+    ],
+    "423": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8352",
+        "name": "The Spider's Web",
+        "printing_id": "1"
+      }
+    ],
+    "424": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5863",
+        "name": "Palace of the Breaking Dawn",
+        "printing_id": "1"
+      }
+    ],
+    "425": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4059",
+        "name": "Journey's End Keep",
+        "printing_id": "1"
+      }
+    ],
+    "426": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5982",
+        "name": "Plains of the Maiden",
+        "printing_id": "1"
+      }
+    ],
+    "427": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8182",
+        "name": "The Khan's Estate",
+        "printing_id": "1"
+      }
+    ],
+    "428": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8373",
+        "name": "The Temple of Death",
+        "printing_id": "1"
+      }
+    ],
+    "43": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5224",
+        "name": "Moneylender",
+        "printing_id": "1"
+      }
+    ],
+    "44": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6086",
+        "name": "Prosperous Village",
+        "printing_id": "1"
+      }
+    ],
+    "45": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6095",
+        "name": "Public Records",
+        "printing_id": "1"
+      }
+    ],
+    "46": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6396",
+        "name": "Rugashi Bazaar",
+        "printing_id": "1"
+      }
+    ],
+    "47": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6984",
+        "name": "Shinomen Marsh",
+        "printing_id": "1"
+      }
+    ],
+    "48": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7223",
+        "name": "Shrine to Hachiman",
+        "printing_id": "1"
+      }
+    ],
+    "49": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7265",
+        "name": "Silk Works",
+        "printing_id": "1"
+      }
+    ],
+    "5": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3250",
+        "name": "Hida's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "50": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7266",
+        "name": "Silver Mine",
+        "printing_id": "1"
+      }
+    ],
+    "51": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7303",
+        "name": "Small Farm",
+        "printing_id": "1"
+      }
+    ],
+    "52": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7443",
+        "name": "Stables",
+        "printing_id": "1"
+      }
+    ],
+    "53": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7898",
+        "name": "Temples of Gisei Toshi",
+        "printing_id": "1"
+      }
+    ],
+    "54": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8729",
+        "name": "Traveling Peddler",
+        "printing_id": "1"
+      }
+    ],
+    "55": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9131",
+        "name": "Venerable Master",
+        "printing_id": "1"
+      }
+    ],
+    "56": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9292",
+        "name": "Well-Tended Farm",
+        "printing_id": "1"
+      }
+    ],
+    "57": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3079",
+        "name": "Hida Bushotsu",
+        "printing_id": "1"
+      }
+    ],
+    "58": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3108",
+        "name": "Hida Horu",
+        "printing_id": "1"
+      }
+    ],
+    "59": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3127",
+        "name": "Hida Kisada (Emperor)",
+        "printing_id": "1"
+      }
+    ],
+    "6": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6836",
+        "name": "Shiba's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "60": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3130",
+        "name": "Hida Komatsu",
+        "printing_id": "1"
+      }
+    ],
+    "61": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3200",
+        "name": "Hida Takeuchi",
+        "printing_id": "1"
+      }
+    ],
+    "62": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3227",
+        "name": "Hida Watari",
+        "printing_id": "1"
+      }
+    ],
+    "63": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-3311",
+        "name": "Hiruma Nitani",
+        "printing_id": "1"
+      }
+    ],
+    "64": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4109",
+        "name": "Kaiu Esumi",
+        "printing_id": "1"
+      }
+    ],
+    "65": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4115",
+        "name": "Kaiu Hideaki",
+        "printing_id": "1"
+      }
+    ],
+    "66": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4122",
+        "name": "Kaiu Kawachi",
+        "printing_id": "1"
+      }
+    ],
+    "67": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4587",
+        "name": "Kuni Shinoda",
+        "printing_id": "1"
+      }
+    ],
+    "68": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8651",
+        "name": "Toritaka Shishido",
+        "printing_id": "1"
+      }
+    ],
+    "69": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9443",
+        "name": "Yasuki Jekku",
+        "printing_id": "1"
+      }
+    ],
+    "7": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-6978",
+        "name": "Shinjo's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "70": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9464",
+        "name": "Yasuki Tanimura",
+        "printing_id": "1"
+      }
+    ],
+    "71": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9467",
+        "name": "Yasuki Tono",
+        "printing_id": "1"
+      }
+    ],
+    "72": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-497",
+        "name": "Asahina Keigo",
+        "printing_id": "1"
+      }
+    ],
+    "73": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-501",
+        "name": "Asahina Kitiaru",
+        "printing_id": "1"
+      }
+    ],
+    "74": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-503",
+        "name": "Asahina Michiru",
+        "printing_id": "1"
+      }
+    ],
+    "75": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-521",
+        "name": "Asahina Yasutora",
+        "printing_id": "1"
+      }
+    ],
+    "76": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1645",
+        "name": "Daidoji Kenshi",
+        "printing_id": "1"
+      }
+    ],
+    "77": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-1682",
+        "name": "Daidoji Tametaka",
+        "printing_id": "1"
+      }
+    ],
+    "78": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2060",
+        "name": "Doji Atsumichi",
+        "printing_id": "1"
+      }
+    ],
+    "79": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2078",
+        "name": "Doji Genshin",
+        "printing_id": "1"
+      }
+    ],
+    "8": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8603",
+        "name": "Togashi's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "80": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2118",
+        "name": "Doji Makoto",
+        "printing_id": "1"
+      }
+    ],
+    "81": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2158",
+        "name": "Doji Shunya",
+        "printing_id": "1"
+      }
+    ],
+    "82": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-2166",
+        "name": "Doji Tatsuki",
+        "printing_id": "1"
+      }
+    ],
+    "83": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4166",
+        "name": "Kakita Genshi",
+        "printing_id": "1"
+      }
+    ],
+    "84": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4185",
+        "name": "Kakita Kazan",
+        "printing_id": "1"
+      }
+    ],
+    "85": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4220",
+        "name": "Kakita Seishi",
+        "printing_id": "1"
+      }
+    ],
+    "86": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4224",
+        "name": "Kakita Tadanobu",
+        "printing_id": "1"
+      }
+    ],
+    "87": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4406",
+        "name": "Kitsuki Daisuke",
+        "printing_id": "1"
+      }
+    ],
+    "88": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4420",
+        "name": "Kitsuki Kinaro",
+        "printing_id": "1"
+      }
+    ],
+    "89": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-4446",
+        "name": "Kitsuki Yataku",
+        "printing_id": "1"
+      }
+    ],
+    "9": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-9662",
+        "name": "Yoritomo's Guidance",
+        "printing_id": "1"
+      }
+    ],
+    "90": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5087",
+        "name": "Mirumoto Gobashi",
+        "printing_id": "1"
+      }
+    ],
+    "91": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5104",
+        "name": "Mirumoto Ichizo",
+        "printing_id": "1"
+      }
+    ],
+    "92": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5112",
+        "name": "Mirumoto Katagi",
+        "printing_id": "1"
+      }
+    ],
+    "93": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5138",
+        "name": "Mirumoto Reiyu",
+        "printing_id": "1"
+      }
+    ],
+    "94": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-5148",
+        "name": "Mirumoto Shikei",
+        "printing_id": "1"
+      }
+    ],
+    "95": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7780",
+        "name": "Tamori Kusugi",
+        "printing_id": "1"
+      }
+    ],
+    "96": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7783",
+        "name": "Tamori Muzu",
+        "printing_id": "1"
+      }
+    ],
+    "97": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-7800",
+        "name": "Tamori Tomaru",
+        "printing_id": "1"
+      }
+    ],
+    "98": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8545",
+        "name": "Togashi Korimi",
+        "printing_id": "1"
+      }
+    ],
+    "99": [
+      {
+        "all_images_present": true,
+        "card_id": "oracle-l5r-8590",
+        "name": "Togashi Torazu",
+        "printing_id": "1"
+      }
+    ]
+  },
+  "complete": true,
+  "first_number": 1,
+  "last_number": 428,
+  "missing_numbers": [],
+  "numbers_missing_images": [],
+  "represented_numbers": 428
+}

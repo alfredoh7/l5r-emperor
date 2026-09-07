@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1028034,
+  "card_id": "oracle-l5r-1728",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1728-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Ishibashi",
+  "numbers": [
+    "164"
+  ],
+  "oracle_id": 1728,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1728-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:19.274562+00:00",
+  "sha256": "e5f432ca36eddfaa0ec202d7ab1a7f6a6192caf06ab973814d7153679a356c4c",
+  "source_image_hash": "b4/bc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/bc/printing_1728_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/bc/printing_1728_1_",
+  "width": 750
+}

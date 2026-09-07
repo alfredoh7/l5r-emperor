@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1130857,
+  "card_id": "oracle-l5r-9558",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9558-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Hiromi",
+  "numbers": [
+    "129"
+  ],
+  "oracle_id": 9558,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9558-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:40.475282+00:00",
+  "sha256": "22a7a8a95279180e97bc548c3b196e113b19bfaaf30be4f0b3d04b7a4786bead",
+  "source_image_hash": "2c/58",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2c/58/printing_9558_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2c/58/printing_9558_1_",
+  "width": 750
+}

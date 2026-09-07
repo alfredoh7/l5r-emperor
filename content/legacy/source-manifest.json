@@ -1,0 +1,72 @@
+{
+  "counts": {
+    "artwork_mappings": {
+      "matched": 44
+    },
+    "canonical_link_statuses": {
+      "candidate": 226,
+      "resolved": 1883,
+      "unmatched": 9924
+    },
+    "emperor_labelled_records": 2165,
+    "global_ambiguous_image_paths": 4,
+    "image_references": 16681,
+    "packaged_legacy_references": 1883,
+    "records": 12033,
+    "source_types": {
+      "Ancestor": 77,
+      "Celestial": 58,
+      "Event": 542,
+      "Follower": 750,
+      "Holding": 815,
+      "Item": 847,
+      "Personality": 4644,
+      "Region": 251,
+      "Ring": 19,
+      "Sensei": 119,
+      "Spell": 565,
+      "Strategy": 3070,
+      "Stronghold": 266,
+      "Wind": 10
+    }
+  },
+  "notice": "Dated Sun and Moon reference data. Source legality tags, card text and image paths are evidence to review, not verified Emperor rules or executable card support.",
+  "schema_version": 1,
+  "source": {
+    "archive_member": "StreamingAssets/Database/database.xml",
+    "archive_path": "/Users/alfredo/Downloads/Sun and Moon - Mac/Sun and Moon.app/Contents/Resources/Data/l5r codex attachment 3.zip",
+    "archive_sha256": "d60f1ad077b12dbc9add61e75fe30a489cc8f9b5ceadeb7e9573026ccb0836b4",
+    "bytes": 8548435,
+    "database_version": "Oct 4, 2015 Kamisasori no Kaisho (Complete), updated Nov 28, 2017 by Kempy 1.3.4",
+    "ignored_members": [
+      {
+        "bytes": 0,
+        "path": "Resources/",
+        "reason": "Directory"
+      },
+      {
+        "bytes": 163,
+        "path": "__MACOSX/._Resources",
+        "reason": "macOS metadata"
+      },
+      {
+        "bytes": 302272,
+        "path": "Resources/unity_builtin_extra",
+        "reason": "Not reference XML; Unity assets/code are not imported"
+      },
+      {
+        "bytes": 163,
+        "path": "__MACOSX/Resources/._unity_builtin_extra",
+        "reason": "macOS metadata"
+      },
+      {
+        "bytes": 319,
+        "path": "__MACOSX/StreamingAssets/Database/._database.xml",
+        "reason": "macOS metadata"
+      }
+    ],
+    "name": "User-supplied Sun and Moon database",
+    "raw_path": "assets/reference/sun-and-moon/database/database.xml",
+    "sha256": "a1e62c29b7e70196adac8049da73971f3130ebc3e147f4dcc5571036f3903591"
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "card_count": 83,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-c213f5cdf2382f540997",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Eternal Temple of the Phoenix"
+    },
+    {
+      "card_reference_id": "card-ref-c16d34c1018c2e32991f",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Isawa Shunryu, the Infinite Eye"
+    },
+    {
+      "card_reference_id": "card-ref-99f6dedb8e23ae4d15b5",
+      "line_number": 5,
+      "quantity": 1,
+      "raw_line": "Shiba Tsukimi, the Blind Phoenix"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-85bb0744918d57a872db",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Collapsing Bridge"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-6e9c66e1baf69e8b34a9",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3x Kabuki Theater Troupe"
+    },
+    {
+      "card_reference_id": "card-ref-17bec1756922aad1b11b",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x Questionable Merchant"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 13,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-f88c1d21c209cbcf84a2",
+      "line_number": 14,
+      "quantity": 1,
+      "raw_line": "1x School of Wizardry"
+    },
+    {
+      "card_reference_id": "card-ref-da4a1512f0d07d0513c6",
+      "line_number": 15,
+      "quantity": 3,
+      "raw_line": "3x Silver Mine"
+    },
+    {
+      "card_reference_id": "card-ref-faee7f6c59a3b331a315",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "1x The Jade Temple"
+    },
+    {
+      "card_reference_id": "card-ref-3398078a13d036b3d796",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Agasha Kyokuta"
+    },
+    {
+      "card_reference_id": "card-ref-e9a108a4874e19878795",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Asako Ifukube"
+    },
+    {
+      "card_reference_id": "card-ref-21669d000e51282b0f74",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3x Asako Misora"
+    },
+    {
+      "card_reference_id": "card-ref-76669670fc885fcad877",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Isawa Hikarou"
+    },
+    {
+      "card_reference_id": "card-ref-96ae2428f31d502f2b85",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Isawa Kamiko"
+    },
+    {
+      "card_reference_id": "card-ref-20741d7553f205b0ca8b",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "1x Isawa Ikariya"
+    },
+    {
+      "card_reference_id": "card-ref-cb01d5170eb6897aadad",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Isawa Koizumi"
+    },
+    {
+      "card_reference_id": "card-ref-2ea077994c95589ea4e3",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Isawa Kosea"
+    },
+    {
+      "card_reference_id": "card-ref-bb95de4c106730c7fac0",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Phoenix Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-cd59923a08f7ac3cc0d0",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Blistering Rain"
+    },
+    {
+      "card_reference_id": "card-ref-bcdb82b7cf23d0974608",
+      "line_number": 29,
+      "quantity": 2,
+      "raw_line": "2x Deafening Thunder"
+    },
+    {
+      "card_reference_id": "card-ref-cfb4899dfb6f4080fb9c",
+      "line_number": 30,
+      "quantity": 2,
+      "raw_line": "2x Fueling the Flames"
+    },
+    {
+      "card_reference_id": "card-ref-0eb68b1a450a76aa3e28",
+      "line_number": 31,
+      "quantity": 1,
+      "raw_line": "1x Kiyoshi's Wrath"
+    },
+    {
+      "card_reference_id": "card-ref-62c1c14325fbb571d759",
+      "line_number": 32,
+      "quantity": 2,
+      "raw_line": "2x In Awe of the Earth"
+    },
+    {
+      "card_reference_id": "card-ref-8174f158c5a46e782ed1",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Sailor's Warning"
+    },
+    {
+      "card_reference_id": "card-ref-7b0ba9e4ec9745032812",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Seeking the Way"
+    },
+    {
+      "card_reference_id": "card-ref-ef0784e62060cec5e957",
+      "line_number": 35,
+      "quantity": 2,
+      "raw_line": "2x Shielded by Tempest"
+    },
+    {
+      "card_reference_id": "card-ref-940edd4afa4e32fe26ee",
+      "line_number": 36,
+      "quantity": 2,
+      "raw_line": "2x Suitengu's Embrace"
+    },
+    {
+      "card_reference_id": "card-ref-414c286a5e97835c7270",
+      "line_number": 37,
+      "quantity": 2,
+      "raw_line": "2x Tempest of Air"
+    },
+    {
+      "card_reference_id": "card-ref-76a66d812d186657ee4c",
+      "line_number": 38,
+      "quantity": 1,
+      "raw_line": "1x Words of Consecration"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 39,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-10b89698fa871c066f2d",
+      "line_number": 41,
+      "quantity": 1,
+      "raw_line": "1x Ring of Fire"
+    },
+    {
+      "card_reference_id": "card-ref-b6bb3f04ca40e333eb07",
+      "line_number": 43,
+      "quantity": 3,
+      "raw_line": "3x Block Supply Lines"
+    },
+    {
+      "card_reference_id": "card-ref-0ac37bdb472e98f53ba8",
+      "line_number": 44,
+      "quantity": 3,
+      "raw_line": "3x Hold the Walls"
+    },
+    {
+      "card_reference_id": "card-ref-92bed46655cf4544d749",
+      "line_number": 45,
+      "quantity": 3,
+      "raw_line": "3x Discretionary Valor"
+    },
+    {
+      "card_reference_id": "card-ref-e14fed6709c2098a8403",
+      "line_number": 46,
+      "quantity": 3,
+      "raw_line": "3x Strategic Withdrawal"
+    },
+    {
+      "card_reference_id": "card-ref-4055f3a34422d850063a",
+      "line_number": 47,
+      "quantity": 3,
+      "raw_line": "3x Tactical Setback"
+    },
+    {
+      "card_reference_id": "card-ref-e4f43535ef3988981a86",
+      "line_number": 48,
+      "quantity": 1,
+      "raw_line": "1x Unchecked Fury"
+    },
+    {
+      "card_reference_id": "card-ref-3bb516b11e5cab94f181",
+      "line_number": 49,
+      "quantity": 3,
+      "raw_line": "3x Wary Peace"
+    }
+  ],
+  "entry_count": 43,
+  "id": "deck-4fb0b5c940ee6c36e573",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Phoenix",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-fe23de5a58993ea23ecb"
+}

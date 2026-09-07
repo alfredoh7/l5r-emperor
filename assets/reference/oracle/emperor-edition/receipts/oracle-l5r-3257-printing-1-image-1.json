@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1032054,
+  "card_id": "oracle-l5r-3257",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3257-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hidden Falls Dojo",
+  "numbers": [
+    "396"
+  ],
+  "oracle_id": 3257,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3257-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:06.036829+00:00",
+  "sha256": "858eb5fda47b08652e4a156e360e66bf2901e6bc72163025491e11869b008e2d",
+  "source_image_hash": "d7/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/7a/printing_3257_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/7a/printing_3257_1_",
+  "width": 750
+}

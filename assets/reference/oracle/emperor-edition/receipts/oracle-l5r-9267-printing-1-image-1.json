@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1124795,
+  "card_id": "oracle-l5r-9267",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9267-printing-1-image-1",
+  "image_index": 1,
+  "name": "Waystation of the Path",
+  "numbers": [
+    "415"
+  ],
+  "oracle_id": 9267,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9267-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:34.046438+00:00",
+  "sha256": "a73e837275ddb65487b0de26074be773674804c50e9d7d5cf8fe209eb711ac31",
+  "source_image_hash": "3e/fb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/fb/printing_9267_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/fb/printing_9267_1_",
+  "width": 750
+}

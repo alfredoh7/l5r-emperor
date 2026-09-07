@@ -1,0 +1,281 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-a4a05173646e76f00d2d",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Impregnable Fortress of the Crab"
+    },
+    {
+      "card_reference_id": "card-ref-bb16f311ff37153c4ab2",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Hida Kisada, the Little Bear"
+    },
+    {
+      "card_reference_id": "card-ref-bde267cad7ed3c65632d",
+      "line_number": 6,
+      "quantity": 2,
+      "raw_line": "2x Ashigaru Fort"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-2e90f1af589bde2c5e98",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Exotic Market"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-f521aa5c9a4b6caa773d",
+      "line_number": 11,
+      "quantity": 2,
+      "raw_line": "2x Frontline Encampment"
+    },
+    {
+      "card_reference_id": "card-ref-73e7c2aae14d2a498256",
+      "line_number": 12,
+      "quantity": 1,
+      "raw_line": "1x Heavy Infantry Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 13,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-585020f48117c63c6e58",
+      "line_number": 14,
+      "quantity": 1,
+      "raw_line": "1x Humble House"
+    },
+    {
+      "card_reference_id": "card-ref-fdfb0f98918341f4ea69",
+      "line_number": 15,
+      "quantity": 3,
+      "raw_line": "3x Iron Mine"
+    },
+    {
+      "card_reference_id": "card-ref-d349d6b26a29444da445",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "1x The Topaz Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-c94b96d30bb1cf98a093",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Hida Gojiro"
+    },
+    {
+      "card_reference_id": "card-ref-0ca340aec3ef0c5f8a5f",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Hida Iguchi"
+    },
+    {
+      "card_reference_id": "card-ref-45ba2cd47b3e884a4ab2",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Hida Kurabi"
+    },
+    {
+      "card_reference_id": "card-ref-44efc8ba0b2533152df0",
+      "line_number": 21,
+      "quantity": 1,
+      "raw_line": "1x Hida Toranosuke"
+    },
+    {
+      "card_reference_id": "card-ref-eb7796fb6f3af3639f5f",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Hida Saiyuki"
+    },
+    {
+      "card_reference_id": "card-ref-2bbfb8befb0520df2b82",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3x Hiruma Koru"
+    },
+    {
+      "card_reference_id": "card-ref-61fcd1b3ee233547a529",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Hiruma Moritoki"
+    },
+    {
+      "card_reference_id": "card-ref-9201350771eb78b508f0",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Kaiu Gorobei"
+    },
+    {
+      "card_reference_id": "card-ref-c5aed9a929426de1252a",
+      "line_number": 26,
+      "quantity": 1,
+      "raw_line": "1x Toritaka Iabuchi"
+    },
+    {
+      "card_reference_id": "card-ref-4bfa49f26d9fd439dd3e",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Crab Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-0db330cb03019b16d8a1",
+      "line_number": 29,
+      "quantity": 2,
+      "raw_line": "2x Oriole Katana"
+    },
+    {
+      "card_reference_id": "card-ref-7753fc1e24438371171b",
+      "line_number": 30,
+      "quantity": 1,
+      "raw_line": "1x Khalimpeh-jiak"
+    },
+    {
+      "card_reference_id": "card-ref-1050f9eae64b7415a529",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Heavy Yari"
+    },
+    {
+      "card_reference_id": "card-ref-c75eaf5c5b8f94402a95",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3x Spiked Tetsubo"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-01572c15df9876d463fb",
+      "line_number": 37,
+      "quantity": 1,
+      "raw_line": "1x A Moving Battle"
+    },
+    {
+      "card_reference_id": "card-ref-5658ca3ab20f048cba9b",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3x A Warrior's Brutality"
+    },
+    {
+      "card_reference_id": "card-ref-d68ff8aa4297ffc78578",
+      "line_number": 39,
+      "quantity": 2,
+      "raw_line": "2x Advance Warning"
+    },
+    {
+      "card_reference_id": "card-ref-1e040057b5aa96b16a68",
+      "line_number": 40,
+      "quantity": 2,
+      "raw_line": "2x Army Like a Tide"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-9f7652404ef70b0f24de",
+      "line_number": 42,
+      "quantity": 2,
+      "raw_line": "2x Contentious Terrain"
+    },
+    {
+      "card_reference_id": "card-ref-f3d28fc74a22c58e75e7",
+      "line_number": 43,
+      "quantity": 2,
+      "raw_line": "2x Defensive Formation"
+    },
+    {
+      "card_reference_id": "card-ref-f4db88f026c85a8e9ae4",
+      "line_number": 44,
+      "quantity": 1,
+      "raw_line": "1x Determined Challenge"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 45,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 46,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-142e5f749ef6803e19e3",
+      "line_number": 47,
+      "quantity": 3,
+      "raw_line": "3x Ritual Preparation"
+    },
+    {
+      "card_reference_id": "card-ref-f22aa9fd26c2f473931a",
+      "line_number": 48,
+      "quantity": 1,
+      "raw_line": "1x Strength of the Bear"
+    },
+    {
+      "card_reference_id": "card-ref-b43b018039fb2d04d570",
+      "line_number": 49,
+      "quantity": 1,
+      "raw_line": "1x Today We Die"
+    }
+  ],
+  "entry_count": 43,
+  "id": "deck-b67883c541dc735d0144",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Crab",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-9a1a72d61ecd9e132080"
+}

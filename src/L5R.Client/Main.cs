@@ -1,0 +1,445 @@
+using Godot;
+using L5R.Core;
+using L5R.AI;
+using System.Collections.Concurrent;
+using System.Text.Json;
+
+namespace L5R.Client;
+
+public partial class Main : Node
+{
+    private readonly MatchSession _session = new();
+    private readonly ConcurrentQueue<Action> _uiQueue = new();
+    private int _renderQueued;
+    private Control _root = null!;
+    private Control _board = null!, _hand = null!, _unitDetail = null!;
+    private VBoxContainer _inspector = null!, _phaseActions = null!, _decisionActions = null!;
+    private PhaseTrack _timeline = null!;
+    private Control _clanHud = null!, _pileHud = null!;
+    private Label _status = null!, _notice = null!, _seatLabel = null!, _guide = null!;
+    private TableArtStage _table = null!;
+    private CardView? _selected;
+    private ActionOption? _chosen;
+    private readonly HashSet<string> _sources = [];
+    private readonly List<CardTile> _tiles = [];
+    private readonly Dictionary<string, bool> _previousBows = [];
+    private readonly Dictionary<string, bool> _currentBows = [];
+    private long _bowVersion = -1;
+    private long _displayedVersion = -1;
+    private ulong _bowChangedAt;
+    private readonly Dictionary<string, int> _assignments = [];
+    private readonly HashSet<string> _expandedUnits = [];
+    private string? _assignmentUnit;
+    private BoardIntentOverlay _intentOverlay = null!;
+    private readonly Dictionary<(int Owner, int Province), Button> _provinceButtons = [];
+    private readonly Dictionary<int, Button> _laneSummaries = [];
+    private bool _autoOpponent = true, _reducedMotion;
+    private double _opponentClock, _captureClock;
+    private string? _capturePath;
+    private string _captureMode = "table";
+    private bool _capturePrepared;
+    private int _captureFrames, _filmFrames;
+    private bool _fullscreenResumeSubmitted;
+    private bool _pileHoverSent;
+    private string? _hoverProbeCard;
+    private long _hoverProbeVersion;
+    private GameCommand? _hoverProbeCommand;
+    private Button? _paymentConfirm;
+    private RoomSeat? _savedSeat;
+    private string _savedServer = "http://localhost:5210";
+    private string _profile = "default";
+    private string SeatPath => ProjectSettings.GlobalizePath($"user://private-seat-{_profile}.json");
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
+    private MatchView View => _session.Snapshot!.View;
+    private ActionOption[] Actions => _session.Snapshot!.Actions;
+    private PlayerView Self => View.Players.Single(p => p.Id == View.ViewerId);
+
+    public override void _Ready()
+    {
+        GetWindow().MinSize = new Vector2I(1120, 700);
+        _session.Changed += () => { if (Interlocked.Exchange(ref _renderQueued, 1) == 0) _uiQueue.Enqueue(() => { Interlocked.Exchange(ref _renderQueued, 0); Render(); }); };
+        _session.Notice += message => _uiQueue.Enqueue(() => SetNotice(message));
+        _session.SeatCreated += (seat, server) => _uiQueue.Enqueue(() => SaveSeat(seat, server));
+        foreach (var arg in OS.GetCmdlineUserArgs())
+        {
+            if (arg.StartsWith("--capture=")) _capturePath = arg[10..];
+            if (arg.StartsWith("--capture-mode=")) _captureMode = arg[15..];
+            if (arg.StartsWith("--profile=") && arg[10..].Length is > 0 and <= 32 && arg[10..].All(c => char.IsAsciiLetterOrDigit(c) || c == '-')) _profile = arg[10..];
+        }
+        GetWindow().Mode = _captureMode.Contains("fullscreen", StringComparison.Ordinal) ? Window.ModeEnum.Fullscreen : Window.ModeEnum.Windowed;
+        if (_capturePath is not null) GetWindow().GrabFocus();
+        LoadSeat();
+        _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
+        BuildShell();
+        var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
+        _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
+        Render();
+        SetNotice(published ? "Published Lion vs Crane · choose Practice to change Clan or scenario." : "Economy practice · choose a province card to preview its payment.");
+    }
+
+    public override void _Process(double delta)
+    {
+        while (_uiQueue.TryDequeue(out var update)) update();
+        ProcessTableCamera(delta);
+        _fullscreenGate.Visible = false;
+        if (_autoOpponent && !_session.Online && _capturePath is null)
+        {
+            _opponentClock += delta;
+            if (_opponentClock > (_reducedMotion ? .12 : .7))
+            {
+                _opponentClock = 0;
+                _session.StepPracticeOpponent((view, actions) => TrainingOpponent.Choose(view, actions).Command);
+            }
+        }
+        if (_capturePath is not null && _captureMode == "published-tactile") { ProcessTactileCapture(); return; }
+        if (_capturePath is not null)
+        {
+            _captureClock += delta;
+            if (!_capturePrepared && _captureClock > 1.2)
+            {
+                _capturePrepared = true;
+                _captureClock = 0;
+                if (_captureMode is "published-choice" or "published-choice-confirm")
+                {
+                    var steps = 0;
+                    while (View.PendingChoice?.Type != "shinden" && View.WinnerId is null && steps++ < 800)
+                    {
+                        _session.FollowPracticePriority();
+                        var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Capture opponent had no action.");
+                        var version = View.Version;
+                        _session.Submit(command).GetAwaiter().GetResult();
+                        if (View.Version == version) throw new InvalidOperationException("Capture action was rejected.");
+                    }
+                    _session.FollowPracticePriority(); _uiQueue.Clear(); _selected = null; _chosen = null; Render();
+                    if (View.PendingChoice?.Type != "shinden") throw new InvalidOperationException("Capture did not reach a Shinden decision.");
+                    if (_captureMode == "published-choice-confirm")
+                    {
+                        var version = View.Version; var craneHonor = View.Players[0].Honor;
+                        var button = _phaseActions.GetChildren().OfType<Button>().Single(b => b.Text == "Allow opponent to gain 1 Honor");
+                        button.EmitSignal(Button.SignalName.Pressed);
+                        if (View.Version != version + 1 || View.PendingChoice is not null || View.Players[0].Honor != craneHonor + 1)
+                            throw new InvalidOperationException("Shinden choice UI smoke failed.");
+                        GD.Print("UI_SMOKE_PASS: real published match reached Shinden; opponent's Honor choice resolved through the button handler.");
+                    }
+                }
+                if (_captureMode is "published-refresh" or "published-refresh-confirm")
+                {
+                    var option = Actions.First(a => a.Enabled && a.Command?.AbilityId == "border-first");
+                    _selected = FindCard(option.CardId!); Choose(option);
+                    if (_captureMode == "published-refresh-confirm")
+                    {
+                        var before = Self.Provinces[0].Card!.Id;
+                        _inspector.GetChildren().OfType<CheckBox>().First().ButtonPressed = true;
+                        _decisionActions.GetChildren().OfType<Button>().First().EmitSignal(Button.SignalName.Pressed);
+                        if (View.Version != 1 || View.PendingChoice is not null || Self.Provinces[0].Card!.Id == before)
+                            throw new InvalidOperationException("Published province refresh UI smoke failed.");
+                        GD.Print("UI_SMOKE_PASS: published Border Keep selected and refreshed through the real controls.");
+                    }
+                }
+                if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
+                {
+                    try { PrepareBoardCapture(); }
+                    catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); _capturePath = null; return; }
+                }
+                if (_captureMode == "library") LibraryDialog.Show(this);
+                if (_captureMode == "published-rules") ShowRules();
+                if (_captureMode is "payment" or "purchase")
+                {
+                    var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });
+                    _selected = FindCard(option.CardId!);
+                    Choose(option);
+                    if (_captureMode == "purchase")
+                    {
+                        _paymentConfirm!.EmitSignal(Button.SignalName.Pressed);
+                        if (View.PendingChoice?.Type != "proclaim") throw new InvalidOperationException("UI purchase smoke failed: no Proclaim reaction.");
+                        GD.Print("UI_SMOKE_PASS: confirmed payment through button handler; Proclaim reaction opened.");
+                    }
+                }
+            }
+            if (_capturePrepared) _captureFrames++;
+            if (_capturePrepared && _captureMode.Contains("camera", StringComparison.Ordinal)) ProcessCameraCapture();
+            if (_capturePath is null) return;
+            if (_capturePrepared && _captureMode.EndsWith("piletip", StringComparison.Ordinal) && _captureClock > .4 && !_pileHoverSent)
+            {
+                _pileHoverSent = true; ReadingTooltip.LastText = null;
+                var pile = _pileHud.GetChildren().OfType<TablePile>().Single(p => p.OwnerId == View.ViewerId && p.PileZone == Zone.FateDeck);
+                var point = ScreenCenter(pile);
+                GetViewport().WarpMouse(point);
+                GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
+            }
+            if (_capturePrepared && _captureMode.EndsWith("gate-resume", StringComparison.Ordinal) && _captureClock > .6 && !_fullscreenResumeSubmitted)
+            {
+                _fullscreenResumeSubmitted = true;
+                _UnhandledKeyInput(new InputEventKey { Keycode = Key.F11, Pressed = true });
+            }
+            if (_capturePrepared && _captureMode.Contains("candle", StringComparison.Ordinal) && _captureClock >= .5 && _filmFrames < 72)
+            {
+                // Record the real renderer at evenly sampled light phases; match state
+                // and camera stay unchanged. No offline image compositing is involved.
+                _table.PresentLight(_filmFrames / 12f, !_reducedMotion); _timeline.PresentLight(_filmFrames / 12f, !_reducedMotion);
+                RenderingServer.ForceDraw(false); RenderingServer.ForceSync();
+                var folder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_capturePath)!, "candle-frames");
+                System.IO.Directory.CreateDirectory(folder);
+                var result = GetViewport().GetTexture().GetImage().SavePng(System.IO.Path.Combine(folder, $"frame-{_filmFrames:000}.png"));
+                if (result != Error.Ok) throw new InvalidOperationException("Could not save candle animation frame.");
+                _filmFrames++;
+            }
+
+            if (_capturePrepared && _captureClock > .6 && _hoverProbeCard is null && _captureMode.EndsWith("hover", StringComparison.Ordinal))
+            {
+                var tile = _tiles.First(t => t.Card.Id == _selected?.Id);
+                _hoverProbeCard = tile.Card.Id; _hoverProbeVersion = View.Version; _hoverProbeCommand = _chosen?.Command;
+                CardTile.LastPreviewCardId = null;
+                var point = ScreenCenter(tile);
+                GetViewport().WarpMouse(point);
+                GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
+                GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
+            }
+            if (_capturePrepared && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            {
+                if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
+                {
+                    try { ValidateBoardCapture(); }
+                    catch (Exception e) { GD.PushError(e.Message); GetViewport().GetTexture().GetImage().SavePng(_capturePath); GetTree().Quit(1); _capturePath = null; return; }
+                }
+                // An occluded macOS window may stop presenting while process frames continue.
+                // Capture an explicitly drawn, synchronized frame rather than its previous texture.
+                RenderingServer.ForceDraw(false);
+                RenderingServer.ForceSync();
+                var error = GetViewport().GetTexture().GetImage().SavePng(_capturePath);
+                GD.Print($"CAPTURE_RESULT: {error} {_capturePath}");
+                GetTree().Quit(error == Error.Ok ? 0 : 1);
+                _capturePath = null;
+            }
+        }
+    }
+
+    private Vector2 DesignSize => new(_layoutWidth, 1080);
+    private float _layoutWidth = 1920;
+    private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
+    private const float SidebarWidth = 300;
+    private HBoxContainer _menu = null!;
+    private Control _inspectorPanel = null!, _fullscreenGate = null!;
+    private bool IsFullscreen => GetWindow().Mode is Window.ModeEnum.Fullscreen or Window.ModeEnum.ExclusiveFullscreen;
+
+    private void FitPresentation()
+    {
+        var available = GetViewport().GetVisibleRect().Size;
+        var scale = available.Y / 1080f;
+        // Root controls use an explicit scale, so rasterize system fonts at the
+        // matching density instead of magnifying their 1080p glyph textures.
+        ((FontFile)Palette.Body).Oversampling = Math.Max(1, scale);
+        ((FontFile)Palette.Title).Oversampling = Math.Max(1, scale);
+        _layoutWidth = available.X / Math.Max(.1f, scale);
+        _root.Size = DesignSize;
+        _root.Scale = Vector2.One * scale;
+        _root.Position = Vector2.Zero;
+        if (_board is null) return;
+        FitTableViewport();
+        _hand.Position = new Vector2(250, 820); _hand.Size = new Vector2(BoardWidth - 12, 240);
+        _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
+        _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
+        _status.Visible = false;
+        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - 660, 100);
+        _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
+        _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
+        _unitDetail.Size = DesignSize;
+        _clanHud.Size = DesignSize;
+        _fullscreenGate.Size = DesignSize;
+        if (_session.Snapshot is not null) RenderBoard();
+    }
+
+    private static T Place<T>(Node parent, T child, float x, float y, float width, float height) where T : Control
+    {
+        parent.AddChild(child);
+        child.Position = new Vector2(x, y); child.Size = new Vector2(width, height);
+        return child;
+    }
+
+    private void BuildShell()
+    {
+        var canvas = new CanvasLayer(); AddChild(canvas);
+        _root = new Control { Theme = Palette.MakeTheme(), Size = DesignSize, MouseFilter = Control.MouseFilterEnum.Ignore };
+        canvas.AddChild(_root);
+        _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, 1920, 1080);
+        BuildTableViewport();
+        _status = Place(_root, Palette.Text("", 17, Palette.PaperDim), 295, 15, 750, 26);
+        _status.HorizontalAlignment = HorizontalAlignment.Center;
+        _status.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
+        _timeline = Place(_root, new PhaseTrack(), 300, 12, 1000, 100);
+        _menu = Place(_root, new HBoxContainer { Alignment = BoxContainer.AlignmentMode.End }, 1345, 27, 549, 35);
+        _menu.AddThemeConstantOverride("separation", 7);
+        foreach (var entry in new (string Text, Action Click)[] { ("Menu", ShowTableMenu), ("? Rules", ShowRules) })
+        {
+            var button = Palette.Button(entry.Text, entry.Click); button.AddThemeFontSizeOverride("font_size", 14);
+            button.AddThemeStyleboxOverride("normal", Palette.Box(new Color(.035f, .032f, .027f, .65f), new Color("75603e"), 9));
+            _menu.AddChild(button);
+        }
+        _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
+        _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
+        _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 820, BoardWidth - 12, 240);
+        var inspectorPanel = Place(_root, new LacquerPanel(), 1488, 94, SidebarWidth, 960);
+        _inspectorPanel = inspectorPanel;
+        inspectorPanel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.045f, .043f, .033f, .96f), new Color("766341"), 18));
+        var side = new VBoxContainer(); side.AddThemeConstantOverride("separation", 10); inspectorPanel.AddChild(side);
+        _seatLabel = Palette.Text("", 13, Palette.Gold); _seatLabel.Visible = false; side.AddChild(_seatLabel);
+        var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; side.AddChild(scroll);
+        _inspector = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _inspector.AddThemeConstantOverride("separation", 10); scroll.AddChild(_inspector);
+        side.AddChild(new HSeparator());
+        _guide = Palette.Wrapped("", 17, Palette.PaperDim); _guide.MouseFilter = Control.MouseFilterEnum.Stop; side.AddChild(_guide);
+        _decisionActions = new VBoxContainer(); side.AddChild(_decisionActions);
+        _phaseActions = new VBoxContainer(); side.AddChild(_phaseActions);
+        _notice = Place(_root, Palette.Text("", 13, Palette.PaperDim), 26, 1060, 1868, 19);
+        _notice.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _notice.MouseFilter = Control.MouseFilterEnum.Stop;
+        _intentOverlay = new BoardIntentOverlay { MouseFilter = Control.MouseFilterEnum.Ignore, Arrows = IntentArrows };
+        _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
+        BuildCameraControls();
+        BuildFullscreenGate();
+        GetViewport().SizeChanged += FitPresentation; FitPresentation();
+    }
+
+    private void BuildFullscreenGate()
+    {
+        _fullscreenGate = Place(_root, new ColorRect { Color = new Color(.025f, .022f, .017f, .97f), ZIndex = 100, Visible = false }, 0, 0, 1920, 1080);
+
+    }
+
+    public override void _UnhandledKeyInput(InputEvent @event)
+    {
+        if (@event is not InputEventKey { Pressed: true, Echo: false } key) return;
+        if (key.Keycode == Key.F11)
+        {
+            GetWindow().Mode = IsFullscreen ? Window.ModeEnum.Windowed : Window.ModeEnum.Fullscreen;
+            GetViewport().SetInputAsHandled();
+        }
+        else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
+        {
+            _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
+        }
+    }
+
+    private void Render()
+    {
+        Interlocked.Exchange(ref _renderQueued, 0);
+        if (_session.Snapshot is null)
+        {
+            _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
+            Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
+            return;
+        }
+        if (_displayedVersion != View.Version)
+        {
+            _displayedVersion = View.Version;
+            if (View.Events.LastOrDefault() is { } latest) SetNotice(latest.Message);
+        }
+        if (_chosen?.Command?.ExpectedVersion != View.Version) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
+        if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
+        if (_selected is not null) _selected = FindCard(_selected.Id);
+        _seatLabel.Text = _session.Online ? $"ROOM {_session.Snapshot.RoomCode} · {Self.Clan}" : $"PRACTICE · {Self.Clan}";
+        _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
+        if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
+        if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
+        RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
+    }
+
+    private void RenderTimeline()
+    {
+        _timeline.Present(View);
+    }
+
+    private CardTile Tile(CardView card, bool compact, float width, float height)
+    {
+        var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At Province {card.ProvinceIndex + 1}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
+        if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
+        {
+            var owner = View.Players.Single(p => p.Id == card.OwnerId);
+            tile.ContextHelp = $"{owner.Clan} · Province {province + 1} · {owner.Provinces.Single(p => p.Index == province).Strength} province strength";
+        }
+        if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
+        _tiles.Add(tile); return tile;
+    }
+
+    private void SelectCard(CardView card)
+    {
+        if (_session.Busy) return;
+        if (_chosen is { Type: "attack" or "assignDefense" } assignment)
+        {
+            if (assignment.TargetIds?.Contains(card.Id) == true) { _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
+            if (card.Zone == Zone.Province && card.OwnerId == 1 - View.ActivePlayerId && card.ProvinceIndex is int province) { SelectProvince(card.OwnerId, province); return; }
+            SetNotice("Choose one of your highlighted units, then a highlighted province. Cancel to inspect other cards."); return;
+        }
+        if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", Command.CardIds: null } targeted && targeted.TargetIds?.Contains(card.Id) == true)
+        {
+            _chosen = targeted with { Command = targeted.Command! with { TargetId = card.Id } };
+            RenderInspector(); Highlight(); return;
+        }
+        if (_chosen is { Type: "purchase" or "equip" or "useAbility" or "playStrategy" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
+        {
+            if (!_sources.Add(card.Id)) _sources.Remove(card.Id);
+            RenderInspector(); Highlight(); return;
+        }
+        // A misclick during a reviewed action must not silently discard its target or payment.
+        if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
+        _selected = card; _sources.Clear();
+        var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
+        if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
+        var purchase = Actions.FirstOrDefault(a => a.Type == "purchase" && a.CardId == card.Id && a.Enabled);
+        if (purchase is not null) Choose(purchase); else { RenderInspector(); RenderPhaseActions(); Highlight(); }
+    }
+
+    private void Highlight()
+    {
+        foreach (var tile in _tiles)
+        {
+            tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id);
+            tile.LegalTarget = _chosen?.TargetIds?.Contains(tile.Card.Id) == true;
+            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
+            tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
+        }
+        foreach (var (key, button) in _provinceButtons)
+        {
+            var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true;
+            button.Modulate = legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
+            var provinceState = View.Players.Single(p => p.Id == key.Owner).Provinces.Single(p => p.Index == key.Province);
+            button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal ? "Assign the selected unit here. Nothing moves until you confirm.\n" : "Inspect this province.\n") + RulesHelp.Topic("province"));
+        }
+        foreach (var (province, label) in _laneSummaries)
+        {
+            label.Text = "";
+            label.TooltipText = $"Province {province + 1} battlefield";
+        }
+        _intentOverlay?.QueueRedraw();
+    }
+
+    private void Choose(ActionOption option)
+    {
+        if (!option.Enabled || _session.Busy) return;
+        if (option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
+            option = option with { Command = command with { TargetId = target } };
+        _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
+        if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();
+        RenderInspector(); RenderPhaseActions(); Highlight();
+    }
+
+    private async void Submit(GameCommand command)
+    {
+        if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
+        {
+            SetNotice("Both players need to be connected before continuing."); return;
+        }
+        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        Highlight();
+        await _session.Submit(command);
+    }
+
+    private static string ShortName(CardView card) => card.Definition?.Name.Replace("training ", "").Replace("Training ", "") ?? "Hidden card";
+    private static int Production(CardView card, PlayerView owner) => (card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0;
+    private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
+    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
+    private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
+    private void SetNotice(string message) { _notice.Text = message; _notice.TooltipText = message; }
+    public override void _ExitTree() => _session.Dispose();
+}

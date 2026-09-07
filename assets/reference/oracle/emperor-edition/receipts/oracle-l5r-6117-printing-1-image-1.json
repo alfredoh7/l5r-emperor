@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1114841,
+  "card_id": "oracle-l5r-6117",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6117-printing-1-image-1",
+  "image_index": 1,
+  "name": "Qalyar",
+  "numbers": [
+    "182"
+  ],
+  "oracle_id": 6117,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6117-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:05.635687+00:00",
+  "sha256": "2b80087177f9278d3b2ec7c7ff337df4e50d4951c65691d0f3673dca72dcd4dc",
+  "source_image_hash": "69/ee",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/ee/printing_6117_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/ee/printing_6117_1_",
+  "width": 750
+}

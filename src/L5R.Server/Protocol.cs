@@ -1,0 +1,73 @@
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using L5R.Core;
+
+namespace L5R.Server;
+
+public static class Protocol
+{
+    public const int Version = 1;
+    public const string ContentVersion = MatchEngine.ContentVersion;
+    public const int MaximumMessageBytes = 32 * 1024;
+
+    public static JsonSerializerOptions Json { get; } = new(JsonSerializerDefaults.Web)
+    {
+        UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
+        RespectRequiredConstructorParameters = true
+    };
+}
+
+public sealed record SeatReservation(string RoomCode, int PlayerId, string SeatToken,
+    int ProtocolVersion = Protocol.Version, string ContentVersion = Protocol.ContentVersion);
+
+public sealed record ClientHello(string Type, int ProtocolVersion, string ContentVersion);
+
+public sealed record CommandEnvelope(string Type, string CommandId, long ExpectedVersion, WireGameCommand Command);
+
+// Actor and expected version deliberately do not exist inside the command payload.
+public sealed record WireGameCommand(string Type, string? CardId = null, string[]? SourceIds = null,
+    int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
+    Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null)
+{
+    public GameCommand BindToSeat(int playerId, long expectedVersion) => new(
+        Type, playerId, expectedVersion, CardId, SourceIds, Province,
+        ClanDiscount, ClanAllegiance, Assignments, CardIds, TargetId, AbilityId, PerformerId, Choice);
+
+    public static WireGameCommand FromCore(GameCommand command) => new(command.Type,
+        command.CardId, command.SourceIds, command.Province, command.ClanDiscount,
+        command.ClanAllegiance, command.Assignments, command.CardIds, command.TargetId, command.AbilityId, command.PerformerId, command.Choice);
+}
+
+public sealed record AvailableAction(string Type, string Label, bool Enabled, string? Reason,
+    WireGameCommand? Command, string? CardId, string[]? TargetIds, int[]? Provinces, PurchaseQuote? Quote)
+{
+    public static AvailableAction FromCore(ActionOption action) => new(action.Type, action.Label,
+        action.Enabled, action.Reason, action.Command is null ? null : WireGameCommand.FromCore(action.Command),
+        action.CardId, action.TargetIds, action.Provinces, action.Quote);
+}
+
+public sealed record ServerError(string Code, string Message);
+
+public sealed record StateMessage(string Type, string RoomCode, int PlayerId, long Sequence,
+    MatchView View, AvailableAction[] Actions, bool[] PlayersConnected,
+    int ProtocolVersion = Protocol.Version, string ContentVersion = Protocol.ContentVersion);
+
+public sealed record CommandReply(string Type, string CommandId, bool Accepted, bool Duplicate,
+    long Sequence, ServerError? Error = null);
+
+public sealed record ErrorMessage(string Type, ServerError Error,
+    int ProtocolVersion = Protocol.Version, string ContentVersion = Protocol.ContentVersion);
+
+public sealed record SeatCredential(int PlayerId, string TokenHash);
+public sealed record CommandReceipt(int PlayerId, string CommandId, string PayloadHash, long Version);
+
+// Entirely server-private: contains secret deck order/seed and token hashes.
+// Only StateMessage, CommandReply and ErrorMessage may cross the wire.
+public sealed record PersistedRoom(int StorageVersion, string RoomCode, DateTimeOffset CreatedAt,
+    SeatCredential[] Seats, ReplayRecord Replay, CommandReceipt[] Receipts);
+
+public sealed class RoomException(string code, string message, int statusCode = 400) : Exception(message)
+{
+    public string Code { get; } = code;
+    public int StatusCode { get; } = statusCode;
+}

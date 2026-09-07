@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1167160,
+  "card_id": "oracle-l5r-8840",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8840-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Isas",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 8840,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-8840-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:21.028858+00:00",
+  "sha256": "f817ff98f6ba3b7ecae1064329f5a5ab2d581b44381f31ee0f2ee4374a82958d",
+  "source_image_hash": "d1/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d1/f7/printing_8840_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d1/f7/printing_8840_1_",
+  "width": 750
+}

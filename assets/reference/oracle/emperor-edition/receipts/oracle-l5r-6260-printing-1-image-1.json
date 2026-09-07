@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1244532,
+  "card_id": "oracle-l5r-6260",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6260-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rend the Soul",
+  "numbers": [
+    "335"
+  ],
+  "oracle_id": 6260,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6260-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:07.866152+00:00",
+  "sha256": "0dc49370a817d2254efa7c171ceb57aea08cb84ddbe00ecd8208d67a65bd0f8e",
+  "source_image_hash": "fb/c3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fb/c3/printing_6260_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/c3/printing_6260_1_",
+  "width": 750
+}

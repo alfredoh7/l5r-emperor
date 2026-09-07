@@ -1,0 +1,30 @@
+{
+  "mode": "built-in imagegen",
+  "date": "2026-09-06",
+  "selected_output": "assets/table/phase-1/environment-v3.png",
+  "iterations": [
+    {
+      "output": "assets/table/phase-1/environment-v1.png",
+      "references": [
+        "assets/concepts/D-playable-lacquer.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Asset type: production 2.5D game environment plate, landscape EXACT 16:10, ideally 2560x1600. Input image 1 is the edit target and exact visual standard. Extract the empty physical environment from this approved card-game concept. Preserve its composition, camera angle, rich dark lacquer walnut, beautifully aged olive silk, delicate ink foliage, crafted antique brass corners, directional warm candlelight, ambient occlusion and depth. Preserve the original left-side candle and small physical coin/brush tray. Preserve the silk playing surface in the same location: roughly x=12%..78%, y=9%..79%, with subtly trapezoidal perspective and its beautiful dark wood frame. Preserve dark walnut perimeter including empty top header space, empty right-side area and empty bottom foreground. REMOVE ALL playing cards, card decks, clan banners/crests, numbers, typography, UI controls, buttons, HUD panels, menus, arrows, battlefield/province grid lines and labels. Where these were removed, convincingly restore the underlying olive silk or dark walnut material. The right 21% is just beautifully textured dark lacquer tabletop, not a bordered UI panel. Bottom foreground is just the physical walnut table, with no fanned card tray or guidance panel. A very faint central five-interlocking-rings ink watermark on the cloth is acceptable, no numbered circles or logos. Keep the craftsmanship and rich cinematic yet readable material shading EXACTLY as the reference, not simplified primitives, not uniform flat textures, not a new design. Do not add any furniture outside the frame, characters, new ornaments or prominent props. This image is a final background asset for live cards and controls to be placed on later, so absolutely zero text and zero game information."
+    },
+    {
+      "output": "assets/table/phase-1/environment-v2.png",
+      "references": [
+        "assets/table/phase-1/environment-v1.png",
+        "assets/concepts/D-playable-lacquer.png"
+      ],
+      "prompt": "Use case: precise-object-edit. Image 1 is the edit target, image 2 is the original visual reference. Change ONLY the olive cloth surface inside the table frame in image 1. The surface has acquired an ornate repetitive damask/brocade pattern that is not in the original reference: remove that all-over pattern and the malformed circular emblem at its center. Replace with the original reference's quiet aged olive silk, softly mottled and finely woven, with restrained worn ink foliage confined to the side edges. The central 70% of the playing cloth should be restful, organic fine fabric and gentle tonal variation, free of logos, circles, symbols and repeated floral pattern. Preserve EVERY OTHER PIXEL as closely as possible: exact framing, trapezoidal table shape, candle, metal holders, brushes, coin tray, brass fittings, wood grain, black lacquer right and bottom areas, light and shadows. Keep the exact aspect ratio and resolution. Do not introduce cards, text, game interface, diagrams, decorative motifs, extra objects, or camera changes. This is refinement of a final production background plate, not a redesign."
+    },
+    {
+      "output": "assets/table/phase-1/environment-v3.png",
+      "references": [
+        "assets/table/phase-1/environment-v2.png",
+        "assets/table/olive-silk-generated.png"
+      ],
+      "prompt": "Use case: compositing / precise-object-edit. Image 1 is the scene to edit. Image 2 supplies the EXACT desired cloth material. Replace ONLY the patterned green textile within the wooden frame of image 1 with the plain, finely woven olive cloth from image 2, mapped into the same trapezoid and lit with image 1's soft lighting. The existing scene cloth has thousands of tiny looping floral/damask curls: ELIMINATE those completely, using the smooth quiet plain weave in image 2 instead. Preserve the edge-only ink bamboo/pine treatment from material 2 at a restrained size. Keep the center quiet and slightly worn, no medallion, no logo, no diagram. Do not simply erase a central logo and leave the brocade: the ENTIRE cloth material must be replaced. Everything outside the cloth is invariant: exact camera, wooden frame, gold corner plates, candle, brush and coin tray, upper/right/lower wood border, color and shadows. Maintain exact same 16:10 framing/resolution. Zero typography, cards or interface. Output a finished premium illustrated table environment plate."
+    }
+  ]
+}

@@ -1,0 +1,2530 @@
+{
+  "reader_version": "1.25.2",
+  "bundle": "/Users/alfredo/Downloads/Sun and Moon - Mac/Sun and Moon.app",
+  "input_files": [
+    "Contents/Resources/Data/globalgamemanagers",
+    "Contents/Resources/Data/globalgamemanagers.assets",
+    "Contents/Resources/Data/level0",
+    "Contents/Resources/Data/level1",
+    "Contents/Resources/Data/level2",
+    "Contents/Resources/Data/level3",
+    "Contents/Resources/Data/level4",
+    "Contents/Resources/Data/level5",
+    "Contents/Resources/Data/level6",
+    "Contents/Resources/Data/level7",
+    "Contents/Resources/Data/level8",
+    "Contents/Resources/Data/resources.assets",
+    "Contents/Resources/Data/sharedassets0.assets",
+    "Contents/Resources/Data/sharedassets1.assets",
+    "Contents/Resources/Data/sharedassets2.assets",
+    "Contents/Resources/Data/sharedassets3.assets",
+    "Contents/Resources/Data/sharedassets4.assets",
+    "Contents/Resources/Data/sharedassets5.assets",
+    "Contents/Resources/Data/sharedassets6.assets",
+    "Contents/Resources/Data/sharedassets7.assets",
+    "Contents/Resources/Data/sharedassets8.assets",
+    "Contents/Resources/Data/Resources/unity_builtin_extra",
+    "Contents/Resources/unity default resources"
+  ],
+  "object_counts": {
+    "PlayerSettings": 1,
+    "InputManager": 1,
+    "TagManager": 1,
+    "AudioManager": 1,
+    "ScriptMapper": 1,
+    "MonoManager": 1,
+    "GraphicsSettings": 1,
+    "TimeManager": 1,
+    "DelayedCallManager": 1,
+    "PhysicsManager": 1,
+    "BuildSettings": 1,
+    "QualitySettings": 1,
+    "ResourceManager": 1,
+    "NetworkManager": 1,
+    "MasterServerInterface": 1,
+    "NavMeshProjectSettings": 1,
+    "Physics2DSettings": 1,
+    "RuntimeInitializeOnLoadManager": 1,
+    "CloudWebServicesManager": 1,
+    "UnityConnectSettings": 1,
+    "PreloadData": 10,
+    "Material": 25,
+    "Shader": 37,
+    "MonoScript": 375,
+    "GameObject": 3068,
+    "Transform": 114,
+    "Camera": 13,
+    "AudioListener": 9,
+    "GUILayer": 9,
+    "RenderSettings": 9,
+    "FlareLayer": 9,
+    "LightmapSettings": 9,
+    "CanvasRenderer": 2746,
+    "Canvas": 26,
+    "RectTransform": 2954,
+    "CanvasGroup": 385,
+    "MonoBehaviour": 4746,
+    "AudioSource": 26,
+    "MeshRenderer": 53,
+    "MeshFilter": 53,
+    "Rigidbody": 16,
+    "BoxCollider": 24,
+    "Animator": 13,
+    "Light": 4,
+    "Texture2D": 114,
+    "Mesh": 19,
+    "AudioClip": 7,
+    "Avatar": 1,
+    "Font": 5,
+    "Sprite": 69,
+    "TextAsset": 2
+  },
+  "textures": [
+    {
+      "asset_file": "resources.assets",
+      "path_id": 19,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-card table-2048x2048-fmt4",
+      "width": 2048,
+      "height": 2048,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 20,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-general (Group 1)-64x128-fmt12",
+      "width": 64,
+      "height": 128,
+      "format": "12"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 21,
+      "type": "Texture2D",
+      "name": "Personality_Crane_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 22,
+      "type": "Texture2D",
+      "name": "Personality_Spider_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 23,
+      "type": "Texture2D",
+      "name": "scorpion",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 24,
+      "type": "Texture2D",
+      "name": "Personality_Phoenix_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 25,
+      "type": "Texture2D",
+      "name": "region_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 26,
+      "type": "Texture2D",
+      "name": "lion",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 27,
+      "type": "Texture2D",
+      "name": "Stronghold_Dragon_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 28,
+      "type": "Texture2D",
+      "name": "line dots",
+      "width": 8,
+      "height": 4,
+      "format": "12"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 29,
+      "type": "Texture2D",
+      "name": "follower_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 30,
+      "type": "Texture2D",
+      "name": "Stronghold_Mantis_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 31,
+      "type": "Texture2D",
+      "name": "crab",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 32,
+      "type": "Texture2D",
+      "name": "crane",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 33,
+      "type": "Texture2D",
+      "name": "Stronghold_Spider_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 34,
+      "type": "Texture2D",
+      "name": "celestial",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 35,
+      "type": "Texture2D",
+      "name": "spell_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 36,
+      "type": "Texture2D",
+      "name": "spider",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 37,
+      "type": "Texture2D",
+      "name": "Stronghold_Crab_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 38,
+      "type": "Texture2D",
+      "name": "Stronghold_Crane_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 39,
+      "type": "Texture2D",
+      "name": "ring_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 40,
+      "type": "Texture2D",
+      "name": "unicorn",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 41,
+      "type": "Texture2D",
+      "name": "dragon",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 42,
+      "type": "Texture2D",
+      "name": "Personality_Unicorn_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 43,
+      "type": "Texture2D",
+      "name": "phoenix",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 44,
+      "type": "Texture2D",
+      "name": "cancel",
+      "width": 600,
+      "height": 600,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 45,
+      "type": "Texture2D",
+      "name": "Personality_Scorpion_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 46,
+      "type": "Texture2D",
+      "name": "hantei",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 47,
+      "type": "Texture2D",
+      "name": "Personality_Unaligned_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 48,
+      "type": "Texture2D",
+      "name": "hantei",
+      "width": 512,
+      "height": 512,
+      "format": "12"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 49,
+      "type": "Texture2D",
+      "name": "Stronghold_Unicorn_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 50,
+      "type": "Texture2D",
+      "name": "holding_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 51,
+      "type": "Texture2D",
+      "name": "dynasty_back",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 52,
+      "type": "Texture2D",
+      "name": "fate_back",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 53,
+      "type": "Texture2D",
+      "name": "strategy_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 54,
+      "type": "Texture2D",
+      "name": "sensei",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 55,
+      "type": "Texture2D",
+      "name": "Font Texture",
+      "width": 0,
+      "height": 0,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 56,
+      "type": "Texture2D",
+      "name": "stronghold_unaligned_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 57,
+      "type": "Texture2D",
+      "name": "eye",
+      "width": 64,
+      "height": 36,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 58,
+      "type": "Texture2D",
+      "name": "Stronghold_Scorpion_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 59,
+      "type": "Texture2D",
+      "name": "Personality_Naga_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 60,
+      "type": "Texture2D",
+      "name": "item_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 61,
+      "type": "Texture2D",
+      "name": "Personality_Lion_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 62,
+      "type": "Texture2D",
+      "name": "outline mask",
+      "width": 256,
+      "height": 256,
+      "format": "12"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 63,
+      "type": "Texture2D",
+      "name": "Font Texture",
+      "width": 0,
+      "height": 0,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 64,
+      "type": "Texture2D",
+      "name": "tiling_flame",
+      "width": 128,
+      "height": 128,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 65,
+      "type": "Texture2D",
+      "name": "dynasty_back",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 66,
+      "type": "Texture2D",
+      "name": "Font Texture",
+      "width": 0,
+      "height": 0,
+      "format": "4"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 67,
+      "type": "Texture2D",
+      "name": "Personality_Dragon_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 68,
+      "type": "Texture2D",
+      "name": "Stronghold_Phoenix_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 69,
+      "type": "Texture2D",
+      "name": "Personality_Mantis_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 70,
+      "type": "Texture2D",
+      "name": "Personality_Crab_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 71,
+      "type": "Texture2D",
+      "name": "mantis",
+      "width": 512,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 72,
+      "type": "Texture2D",
+      "name": "Stronghold_Lion_Frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 73,
+      "type": "Texture2D",
+      "name": "event_frame_flat",
+      "width": 256,
+      "height": 512,
+      "format": "10"
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 92,
+      "type": "Sprite",
+      "name": "tilt_arrow",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 93,
+      "type": "Sprite",
+      "name": "token_fan",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 94,
+      "type": "Sprite",
+      "name": "token_circle",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 95,
+      "type": "Sprite",
+      "name": "plus",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 96,
+      "type": "Sprite",
+      "name": "clone",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 97,
+      "type": "Sprite",
+      "name": "cancel",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 98,
+      "type": "Sprite",
+      "name": "sun_flare",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 99,
+      "type": "Sprite",
+      "name": "scroll_icon",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 100,
+      "type": "Sprite",
+      "name": "eye",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 101,
+      "type": "Sprite",
+      "name": "shuffle",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "resources.assets",
+      "path_id": 102,
+      "type": "Sprite",
+      "name": "highlight_icon",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 3,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-general (Group 0)-1024x2048-fmt4",
+      "width": 1024,
+      "height": 2048,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 4,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-main menu (Group 0)-512x256-fmt4",
+      "width": 512,
+      "height": 256,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 5,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-main menu (Group 1)-1024x512-fmt4",
+      "width": 1024,
+      "height": 512,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 6,
+      "type": "Texture2D",
+      "name": "UISprite",
+      "width": 32,
+      "height": 32,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 7,
+      "type": "Texture2D",
+      "name": "scroll tile y",
+      "width": 1024,
+      "height": 1024,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 8,
+      "type": "Texture2D",
+      "name": "Font Texture",
+      "width": 0,
+      "height": 0,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 9,
+      "type": "Texture2D",
+      "name": "Horizontal Paper",
+      "width": 549,
+      "height": 110,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 11,
+      "type": "Sprite",
+      "name": "UISprite",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 12,
+      "type": "Sprite",
+      "name": "spell",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 13,
+      "type": "Sprite",
+      "name": "YinYang Symbol",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 14,
+      "type": "Sprite",
+      "name": "follower",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 15,
+      "type": "Sprite",
+      "name": "scroll tile y",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 16,
+      "type": "Sprite",
+      "name": "L5R Logo",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 17,
+      "type": "Sprite",
+      "name": "rack",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 18,
+      "type": "Sprite",
+      "name": "Horizontal Paper",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 19,
+      "type": "Sprite",
+      "name": "Scroll Head",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 20,
+      "type": "Sprite",
+      "name": "Weapon Symbol",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 21,
+      "type": "Sprite",
+      "name": "Horizontal Scroll Edge",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 22,
+      "type": "Sprite",
+      "name": "Koku Symbol",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets0.assets",
+      "path_id": 23,
+      "type": "Sprite",
+      "name": "Armor Symbol",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 2,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-general (Group 2)-2048x2048-fmt12",
+      "width": 2048,
+      "height": 2048,
+      "format": "12"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 3,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-general (Group 5)-1024x512-fmt12",
+      "width": 1024,
+      "height": 512,
+      "format": "12"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 4,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-general (Group 4)-128x128-fmt4",
+      "width": 128,
+      "height": 128,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 5,
+      "type": "Texture2D",
+      "name": "Crease",
+      "width": 175,
+      "height": 1024,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 6,
+      "type": "Texture2D",
+      "name": "ninja",
+      "width": 512,
+      "height": 512,
+      "format": "12"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 7,
+      "type": "Texture2D",
+      "name": "mca",
+      "width": 512,
+      "height": 512,
+      "format": "12"
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 8,
+      "type": "Sprite",
+      "name": "dragon",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 9,
+      "type": "Sprite",
+      "name": "spinner",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 10,
+      "type": "Sprite",
+      "name": "phoenix",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 11,
+      "type": "Sprite",
+      "name": "Crease",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 12,
+      "type": "Sprite",
+      "name": "crane",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 13,
+      "type": "Sprite",
+      "name": "nezumi",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 14,
+      "type": "Sprite",
+      "name": "toturi",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 15,
+      "type": "Sprite",
+      "name": "crab",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 16,
+      "type": "Sprite",
+      "name": "ninja",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 17,
+      "type": "Sprite",
+      "name": "unicorn",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 18,
+      "type": "Sprite",
+      "name": "shinsei",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 19,
+      "type": "Sprite",
+      "name": "dot",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 20,
+      "type": "Sprite",
+      "name": "circle",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 21,
+      "type": "Sprite",
+      "name": "mantis",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 22,
+      "type": "Sprite",
+      "name": "spider",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 23,
+      "type": "Sprite",
+      "name": "mca",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 24,
+      "type": "Sprite",
+      "name": "shadowlands",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 25,
+      "type": "Sprite",
+      "name": "arrow",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 26,
+      "type": "Sprite",
+      "name": "scorpion",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 27,
+      "type": "Sprite",
+      "name": "lion",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets1.assets",
+      "path_id": 28,
+      "type": "Sprite",
+      "name": "naga",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 2,
+      "type": "Texture2D",
+      "name": "SpriteAtlasTexture-deck builder-128x128-fmt4",
+      "width": 128,
+      "height": 128,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 3,
+      "type": "Texture2D",
+      "name": "bookmark merged",
+      "width": 526,
+      "height": 136,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 4,
+      "type": "Texture2D",
+      "name": "key",
+      "width": 332,
+      "height": 296,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 5,
+      "type": "Texture2D",
+      "name": "splotch",
+      "width": 422,
+      "height": 394,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 6,
+      "type": "Sprite",
+      "name": "lock",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 7,
+      "type": "Sprite",
+      "name": "bookmark merged",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 8,
+      "type": "Sprite",
+      "name": "smear",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 9,
+      "type": "Sprite",
+      "name": "cardAlphaMask",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 10,
+      "type": "Sprite",
+      "name": "fan",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 11,
+      "type": "Sprite",
+      "name": "coin",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 12,
+      "type": "Sprite",
+      "name": "focus_container",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 13,
+      "type": "Sprite",
+      "name": "key",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 14,
+      "type": "Sprite",
+      "name": "honor_req",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 15,
+      "type": "Sprite",
+      "name": "checkmark_black",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets2.assets",
+      "path_id": 16,
+      "type": "Sprite",
+      "name": "splotch",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets3.assets",
+      "path_id": 3,
+      "type": "Sprite",
+      "name": "torii",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 4,
+      "type": "Texture2D",
+      "name": "wood_AlternatingSquareTiles_1k_d1",
+      "width": 1024,
+      "height": 1024,
+      "format": "10"
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 5,
+      "type": "Texture2D",
+      "name": "Tile_checkered_1k_d",
+      "width": 1024,
+      "height": 1024,
+      "format": "10"
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 12,
+      "type": "Sprite",
+      "name": "token_star",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 13,
+      "type": "Sprite",
+      "name": "honor_counter",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 14,
+      "type": "Sprite",
+      "name": "moon",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 15,
+      "type": "Sprite",
+      "name": "sun",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 16,
+      "type": "Sprite",
+      "name": "sun center",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 17,
+      "type": "Sprite",
+      "name": "five circles",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 18,
+      "type": "Sprite",
+      "name": "token_diamond",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 19,
+      "type": "Sprite",
+      "name": "dialogue_bubble",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 20,
+      "type": "Sprite",
+      "name": "box",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets5.assets",
+      "path_id": 21,
+      "type": "Sprite",
+      "name": "circles",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "sharedassets8.assets",
+      "path_id": 2,
+      "type": "Texture2D",
+      "name": "chrysanthemum",
+      "width": 400,
+      "height": 402,
+      "format": "4"
+    },
+    {
+      "asset_file": "sharedassets8.assets",
+      "path_id": 3,
+      "type": "Sprite",
+      "name": "chrysanthemum",
+      "width": null,
+      "height": null,
+      "format": ""
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10001,
+      "type": "Texture2D",
+      "name": "Soft",
+      "width": 128,
+      "height": 128,
+      "format": "1"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10103,
+      "type": "Texture2D",
+      "name": "Font Texture",
+      "width": 0,
+      "height": 0,
+      "format": "4"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10400,
+      "type": "Texture2D",
+      "name": "UnityWatermark-small",
+      "width": 128,
+      "height": 58,
+      "format": "4"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10401,
+      "type": "Texture2D",
+      "name": "EscToExit_back",
+      "width": 74,
+      "height": 71,
+      "format": "4"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10402,
+      "type": "Texture2D",
+      "name": "EscToExit_Text",
+      "width": 267,
+      "height": 20,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10403,
+      "type": "Texture2D",
+      "name": "UnitySplash-cube",
+      "width": 1024,
+      "height": 256,
+      "format": "12"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10407,
+      "type": "Texture2D",
+      "name": "UnityWatermark-trial",
+      "width": 76,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10408,
+      "type": "Texture2D",
+      "name": "UnityWatermark-beta",
+      "width": 127,
+      "height": 17,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10409,
+      "type": "Texture2D",
+      "name": "UnityWatermark-edu",
+      "width": 148,
+      "height": 17,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10410,
+      "type": "Texture2D",
+      "name": "UnityWatermark-dev",
+      "width": 115,
+      "height": 17,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10411,
+      "type": "Texture2D",
+      "name": "WarningSign",
+      "width": 64,
+      "height": 64,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10413,
+      "type": "Texture2D",
+      "name": "UnityWatermark-proto",
+      "width": 87,
+      "height": 13,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 10414,
+      "type": "Texture2D",
+      "name": "UnityWatermarkPlugin-beta",
+      "width": 66,
+      "height": 17,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11001,
+      "type": "Texture2D",
+      "name": "box",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11002,
+      "type": "Texture2D",
+      "name": "button active",
+      "width": 12,
+      "height": 12,
+      "format": "4"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11003,
+      "type": "Texture2D",
+      "name": "button hover",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11004,
+      "type": "Texture2D",
+      "name": "button on hover",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11005,
+      "type": "Texture2D",
+      "name": "button on",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11006,
+      "type": "Texture2D",
+      "name": "button",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11007,
+      "type": "Texture2D",
+      "name": "horizontal scrollbar thumb",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11008,
+      "type": "Texture2D",
+      "name": "horizontal scrollbar",
+      "width": 18,
+      "height": 15,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11009,
+      "type": "Texture2D",
+      "name": "horizontalslider",
+      "width": 8,
+      "height": 7,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11010,
+      "type": "Texture2D",
+      "name": "slider thumb active",
+      "width": 8,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11011,
+      "type": "Texture2D",
+      "name": "slider thumb",
+      "width": 8,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11012,
+      "type": "Texture2D",
+      "name": "slidert humb hover",
+      "width": 8,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11013,
+      "type": "Texture2D",
+      "name": "toggle active",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11014,
+      "type": "Texture2D",
+      "name": "toggle hover",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11015,
+      "type": "Texture2D",
+      "name": "toggle on hover",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11016,
+      "type": "Texture2D",
+      "name": "toggle on",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11017,
+      "type": "Texture2D",
+      "name": "toggle on active",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11018,
+      "type": "Texture2D",
+      "name": "toggle",
+      "width": 14,
+      "height": 14,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11019,
+      "type": "Texture2D",
+      "name": "vertical scrollbar thumb",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11020,
+      "type": "Texture2D",
+      "name": "vertical scrollbar",
+      "width": 15,
+      "height": 18,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11021,
+      "type": "Texture2D",
+      "name": "verticalslider",
+      "width": 7,
+      "height": 8,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11022,
+      "type": "Texture2D",
+      "name": "window on",
+      "width": 17,
+      "height": 27,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11023,
+      "type": "Texture2D",
+      "name": "window",
+      "width": 17,
+      "height": 27,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11024,
+      "type": "Texture2D",
+      "name": "textfield",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11025,
+      "type": "Texture2D",
+      "name": "textfield on",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    },
+    {
+      "asset_file": "unity default resources",
+      "path_id": 11026,
+      "type": "Texture2D",
+      "name": "textfield hover",
+      "width": 12,
+      "height": 12,
+      "format": "2"
+    }
+  ],
+  "errors": [
+    {
+      "file": "unity default resources",
+      "path_id": 10404,
+      "type": "Sprite",
+      "error": "Expected to read 2308 bytes, but only read 2300 bytes"
+    }
+  ],
+  "decoded_game_textures": [
+    {
+      "name": "SpriteAtlasTexture-card table-2048x2048-fmt4",
+      "asset_file": "resources.assets",
+      "path_id": 19,
+      "width": 2048,
+      "height": 2048,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-19-SpriteAtlasTexture-card_table-2048x2048-fmt4.png",
+      "png_sha256": "715378737fcf2ebf0945c0c22a521de29941fc4e55bdc6842f48b37d32da7b51"
+    },
+    {
+      "name": "SpriteAtlasTexture-general (Group 1)-64x128-fmt12",
+      "asset_file": "resources.assets",
+      "path_id": 20,
+      "width": 64,
+      "height": 128,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-20-SpriteAtlasTexture-general_Group_1_-64x128-fmt12.png",
+      "png_sha256": "141c1365f689d888e4fce59fbd33c07e97c8ffd03b2ba8bc01f21071bb19ba08"
+    },
+    {
+      "name": "Personality_Crane_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 21,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-21-Personality_Crane_Frame_flat.png",
+      "png_sha256": "37342fa7717263a36fb4192be2ce7c4aae604ad4ded7b95f88725c620f395734"
+    },
+    {
+      "name": "Personality_Spider_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 22,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-22-Personality_Spider_Frame_flat.png",
+      "png_sha256": "a1835899bbfea8518384098fab5bc73efe81bcb658f1232edaeecbc96ed480f0"
+    },
+    {
+      "name": "scorpion",
+      "asset_file": "resources.assets",
+      "path_id": 23,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-23-scorpion.png",
+      "png_sha256": "7f7b3fea44ec26c2d74bfa9a6d7800e54ada3e7d77277fa9c2c8fecac844ba73"
+    },
+    {
+      "name": "Personality_Phoenix_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 24,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-24-Personality_Phoenix_Frame_flat.png",
+      "png_sha256": "333925657edc8a743ee00ac2fdd42cf61952f91a668b3e817a68fc7257e44bfe"
+    },
+    {
+      "name": "region_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 25,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-25-region_frame_flat.png",
+      "png_sha256": "2daf8717cf368ba1556a3a8dc963fe563372567fad1e4a01373905149ea73486"
+    },
+    {
+      "name": "lion",
+      "asset_file": "resources.assets",
+      "path_id": 26,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-26-lion.png",
+      "png_sha256": "2a8500cf91e303edb1de73fcb213dc42f7b92a1948dca83127c78ea1dda64d7e"
+    },
+    {
+      "name": "Stronghold_Dragon_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 27,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-27-Stronghold_Dragon_Frame_flat.png",
+      "png_sha256": "a494d51fe7edf94808dbbb8b7ea1df8cd949f15a5dc366400b305518349e968a"
+    },
+    {
+      "name": "line dots",
+      "asset_file": "resources.assets",
+      "path_id": 28,
+      "width": 8,
+      "height": 4,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-28-line_dots.png",
+      "png_sha256": "a0fa2c04b4bf27169da5d50f63506dcb16f1e301ce90782881a6565a5a06ff15"
+    },
+    {
+      "name": "follower_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 29,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-29-follower_frame_flat.png",
+      "png_sha256": "c1582042e5d35b69941ff2199a08464a03fe1bd28d9a5bd6abe27d0bf7a9a31b"
+    },
+    {
+      "name": "Stronghold_Mantis_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 30,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-30-Stronghold_Mantis_Frame_flat.png",
+      "png_sha256": "dbf02236b4beadf2d4fdf2b918174c6920f0b690b8cb8cc5b4b39202d53c40dd"
+    },
+    {
+      "name": "crab",
+      "asset_file": "resources.assets",
+      "path_id": 31,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-31-crab.png",
+      "png_sha256": "939536c81fb00ad9e57399070e2d5bfa178e4e16c1061bd2a7c4d9ae21a123fe"
+    },
+    {
+      "name": "crane",
+      "asset_file": "resources.assets",
+      "path_id": 32,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-32-crane.png",
+      "png_sha256": "7fcdde6fb8967a5726c4cc31aa9667b70c148c150eced3c7ba9cc86ab21465f0"
+    },
+    {
+      "name": "Stronghold_Spider_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 33,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-33-Stronghold_Spider_Frame_flat.png",
+      "png_sha256": "fbc70b1e4dd6d1be3c95cf6eb318321c0f6d89b53470079d7f4407d43cda25c7"
+    },
+    {
+      "name": "celestial",
+      "asset_file": "resources.assets",
+      "path_id": 34,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-34-celestial.png",
+      "png_sha256": "c7e4764f0783f9ba51561429bf8412ba3842c5d4610dc72edd50c82e5577ebbf"
+    },
+    {
+      "name": "spell_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 35,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-35-spell_frame_flat.png",
+      "png_sha256": "d836d1b1fbbbe1d9ea9fe5efb30e2bd36ae902ecad4824601046334484ea8666"
+    },
+    {
+      "name": "spider",
+      "asset_file": "resources.assets",
+      "path_id": 36,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-36-spider.png",
+      "png_sha256": "4cd8ba0f0c312fea6e0caa28b20564e320dcb0f6cf10b505bd15b0c8e8a3f0be"
+    },
+    {
+      "name": "Stronghold_Crab_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 37,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-37-Stronghold_Crab_Frame_flat.png",
+      "png_sha256": "519b9cf71306d8753ceac3ccdfe4e7290f289885c0e283d08f32617eeab4d503"
+    },
+    {
+      "name": "Stronghold_Crane_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 38,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-38-Stronghold_Crane_Frame_flat.png",
+      "png_sha256": "ac78274209d6d09e1d81367b4ec5f068094973019d4b71677e756ea4f954fef2"
+    },
+    {
+      "name": "ring_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 39,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-39-ring_frame_flat.png",
+      "png_sha256": "d3702f34c73ed737141ea262da37345d70a0c2b48faa7922bdb5bb91fe308d16"
+    },
+    {
+      "name": "unicorn",
+      "asset_file": "resources.assets",
+      "path_id": 40,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-40-unicorn.png",
+      "png_sha256": "fbac224b54892e31b363a3521bd4fea03f6282174c93e91100b15d33fc7ce4b7"
+    },
+    {
+      "name": "dragon",
+      "asset_file": "resources.assets",
+      "path_id": 41,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-41-dragon.png",
+      "png_sha256": "bed144abb30d027a165c41196a04770e7a8c6dbc44317b76ba6a50fba4a42d20"
+    },
+    {
+      "name": "Personality_Unicorn_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 42,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-42-Personality_Unicorn_Frame_flat.png",
+      "png_sha256": "d4cbd4a4541f025b37fac5c508dee18d724aee304dbabba92eec39c3adc2bda7"
+    },
+    {
+      "name": "phoenix",
+      "asset_file": "resources.assets",
+      "path_id": 43,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-43-phoenix.png",
+      "png_sha256": "100882382caac1dd559977de6b4652a77b572290e8890b8cfdc07f54d9607e05"
+    },
+    {
+      "name": "cancel",
+      "asset_file": "resources.assets",
+      "path_id": 44,
+      "width": 600,
+      "height": 600,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-44-cancel.png",
+      "png_sha256": "e9bdde0b7e14ef15cd2172fc71a11178a937f95c1a5709a93f69a5f2387cae8b"
+    },
+    {
+      "name": "Personality_Scorpion_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 45,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-45-Personality_Scorpion_Frame_flat.png",
+      "png_sha256": "ad63e6a36fee224627787724d7da8374439fdfa04497401eef212dafa952bb0f"
+    },
+    {
+      "name": "hantei",
+      "asset_file": "resources.assets",
+      "path_id": 46,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-46-hantei.png",
+      "png_sha256": "4df6f0c7e12b5cb36643d57ba6e673a679b1cbbca664beed693dd3b1ad29567d"
+    },
+    {
+      "name": "Personality_Unaligned_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 47,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-47-Personality_Unaligned_Frame_flat.png",
+      "png_sha256": "37f78172c8ad342d1af07a0d51903cf3db82f85d81ad1dbad71d9ba74c7ab96a"
+    },
+    {
+      "name": "hantei",
+      "asset_file": "resources.assets",
+      "path_id": 48,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-48-hantei.png",
+      "png_sha256": "103f0d84b4bdefa7e1fc5fc2bf15d90740164ff1803c1e160f818b1abcdf0b67"
+    },
+    {
+      "name": "Stronghold_Unicorn_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 49,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-49-Stronghold_Unicorn_Frame_flat.png",
+      "png_sha256": "914fc615ed36fe050919f456dfc81caad5c15b14cb49643694a3656e8d4dbe01"
+    },
+    {
+      "name": "holding_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 50,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-50-holding_frame_flat.png",
+      "png_sha256": "8b9114ea0f489b7d9ac31d7ee1a74decd6c32051f3885e8813a482382d751ccc"
+    },
+    {
+      "name": "dynasty_back",
+      "asset_file": "resources.assets",
+      "path_id": 51,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-51-dynasty_back.png",
+      "png_sha256": "d9d7255490c4bf40d8dd8356a25f5ee8d77682b4ebec15a4881b710496c56edc"
+    },
+    {
+      "name": "fate_back",
+      "asset_file": "resources.assets",
+      "path_id": 52,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-52-fate_back.png",
+      "png_sha256": "f22e798337f309f57a8f76df9cc975e6a686514dbc114dd4ec8a87334a2e1bb9"
+    },
+    {
+      "name": "strategy_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 53,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-53-strategy_frame_flat.png",
+      "png_sha256": "f886f0ac89546a0e859eff93ff1af1bf24a215ac0bfffd9c68141ec67ff3e21e"
+    },
+    {
+      "name": "sensei",
+      "asset_file": "resources.assets",
+      "path_id": 54,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-54-sensei.png",
+      "png_sha256": "1838afc7274caba030eafcd313bb6e6ecc8daebde15307bebbd20ce48880834f"
+    },
+    {
+      "name": "stronghold_unaligned_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 56,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-56-stronghold_unaligned_frame_flat.png",
+      "png_sha256": "cff8bd4481ed17a129fb007b5148f2c39d042ec14d2531e2d6e99a383001c517"
+    },
+    {
+      "name": "eye",
+      "asset_file": "resources.assets",
+      "path_id": 57,
+      "width": 64,
+      "height": 36,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-57-eye.png",
+      "png_sha256": "8dc4831a4a92d77c301b85dea909dd6ff227f99bf4eb265f3c08a34e5763e97d"
+    },
+    {
+      "name": "Stronghold_Scorpion_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 58,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-58-Stronghold_Scorpion_Frame_flat.png",
+      "png_sha256": "0f3bcec96290ee8b31907810b2c32222b3c56acbe02feac689b2ba19149be725"
+    },
+    {
+      "name": "Personality_Naga_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 59,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-59-Personality_Naga_Frame_flat.png",
+      "png_sha256": "ee62b59f8d61fd20dee83ad50d10dbcf266cd866f6be063bf787298c63d0bd5c"
+    },
+    {
+      "name": "item_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 60,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-60-item_frame_flat.png",
+      "png_sha256": "79f122415b57ed347bfc2f08fba32ab85085d0749c00ad50d4ab88cb5dfd48a9"
+    },
+    {
+      "name": "Personality_Lion_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 61,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-61-Personality_Lion_Frame_flat.png",
+      "png_sha256": "bc21decffd715859fcef025fc0334199f4501ab0b1430515280e86410133622b"
+    },
+    {
+      "name": "outline mask",
+      "asset_file": "resources.assets",
+      "path_id": 62,
+      "width": 256,
+      "height": 256,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-62-outline_mask.png",
+      "png_sha256": "ca6d0b6f4aea0b06919f2bdc6e9fbb9b59a6c63b4156195b9d809393b0a17785"
+    },
+    {
+      "name": "tiling_flame",
+      "asset_file": "resources.assets",
+      "path_id": 64,
+      "width": 128,
+      "height": 128,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-64-tiling_flame.png",
+      "png_sha256": "a45fc2b03e6a064064ce38375b02e0d3acca51b43f571f40e6b68b8a8eb7c64e"
+    },
+    {
+      "name": "dynasty_back",
+      "asset_file": "resources.assets",
+      "path_id": 65,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-65-dynasty_back.png",
+      "png_sha256": "d9d7255490c4bf40d8dd8356a25f5ee8d77682b4ebec15a4881b710496c56edc"
+    },
+    {
+      "name": "Personality_Dragon_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 67,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-67-Personality_Dragon_Frame_flat.png",
+      "png_sha256": "0f3567094a0fa892185630cab8d43c7ec7777a88b24cfe87b0f3958cbb731e4a"
+    },
+    {
+      "name": "Stronghold_Phoenix_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 68,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-68-Stronghold_Phoenix_Frame_flat.png",
+      "png_sha256": "8b1c3f6503ee4f54c7ea40b363b5713fb79ccbdc3ce874b0d3c5a42189a08b3a"
+    },
+    {
+      "name": "Personality_Mantis_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 69,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-69-Personality_Mantis_Frame_flat.png",
+      "png_sha256": "d5684e86b2fd858923c156ad916e1787c7a836af7fb2c0a5c0249cc6a5e2402b"
+    },
+    {
+      "name": "Personality_Crab_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 70,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-70-Personality_Crab_Frame_flat.png",
+      "png_sha256": "a0f124df5c50d01a69321a9f4c9690533d023a05bda45f7955c104fe63ea2952"
+    },
+    {
+      "name": "mantis",
+      "asset_file": "resources.assets",
+      "path_id": 71,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-71-mantis.png",
+      "png_sha256": "2dd5215ab9c1ff7638e889cb0d5157742e85aba3327a0c9480f315069bdb238b"
+    },
+    {
+      "name": "Stronghold_Lion_Frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 72,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-72-Stronghold_Lion_Frame_flat.png",
+      "png_sha256": "9c1f6fd4cadc589ffdb10c2e85197cc64392aed46c6d7938e517c4112415259c"
+    },
+    {
+      "name": "event_frame_flat",
+      "asset_file": "resources.assets",
+      "path_id": 73,
+      "width": 256,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/resources.assets-73-event_frame_flat.png",
+      "png_sha256": "8071d7dd6e1c65ccb958e8fe3f0fb04839e269c5f75f9838217b5c5e816ba919"
+    },
+    {
+      "name": "SpriteAtlasTexture-general (Group 0)-1024x2048-fmt4",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 3,
+      "width": 1024,
+      "height": 2048,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-3-SpriteAtlasTexture-general_Group_0_-1024x2048-fmt4.png",
+      "png_sha256": "0d15804dcef43361509c97f0495ebff63065bc888b7e7c827e499960895e8c91"
+    },
+    {
+      "name": "SpriteAtlasTexture-main menu (Group 0)-512x256-fmt4",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 4,
+      "width": 512,
+      "height": 256,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-4-SpriteAtlasTexture-main_menu_Group_0_-512x256-fmt4.png",
+      "png_sha256": "8a96cf9d759df64a46d72cb8a536913135ac249daaf063845bbe734163175d67"
+    },
+    {
+      "name": "SpriteAtlasTexture-main menu (Group 1)-1024x512-fmt4",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 5,
+      "width": 1024,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-5-SpriteAtlasTexture-main_menu_Group_1_-1024x512-fmt4.png",
+      "png_sha256": "3c051ec6a683265a47b279b98d0dc9c71dcf0dcafe5f8d8cf96d7df5b1f800d9"
+    },
+    {
+      "name": "UISprite",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 6,
+      "width": 32,
+      "height": 32,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-6-UISprite.png",
+      "png_sha256": "939482653a8a5bab226b325b6d0f4ad5e671a8fd6090bc1ad289907bca784999"
+    },
+    {
+      "name": "scroll tile y",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 7,
+      "width": 1024,
+      "height": 1024,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-7-scroll_tile_y.png",
+      "png_sha256": "6caae8457069293126cec0b97c21e568531ddbc86adef8db012f40b315d9d02f"
+    },
+    {
+      "name": "Horizontal Paper",
+      "asset_file": "sharedassets0.assets",
+      "path_id": 9,
+      "width": 549,
+      "height": 110,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets0.assets-9-Horizontal_Paper.png",
+      "png_sha256": "1898ad7131964d436e4c6556eccf4c4597707fcd325fb12d3cb80408af1fb54f"
+    },
+    {
+      "name": "SpriteAtlasTexture-general (Group 2)-2048x2048-fmt12",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 2,
+      "width": 2048,
+      "height": 2048,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-2-SpriteAtlasTexture-general_Group_2_-2048x2048-fmt12.png",
+      "png_sha256": "5657d8bfebad0f6ae692ccc41ccb6a7d2f9e2af615f61da78cb795833c44a211"
+    },
+    {
+      "name": "SpriteAtlasTexture-general (Group 5)-1024x512-fmt12",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 3,
+      "width": 1024,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-3-SpriteAtlasTexture-general_Group_5_-1024x512-fmt12.png",
+      "png_sha256": "5661dd0eaf0beabf1c43d059e327b119a474ec66b3c365be870e8cb129a88fcd"
+    },
+    {
+      "name": "SpriteAtlasTexture-general (Group 4)-128x128-fmt4",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 4,
+      "width": 128,
+      "height": 128,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-4-SpriteAtlasTexture-general_Group_4_-128x128-fmt4.png",
+      "png_sha256": "bba57186b81be60f0636ee888bd152165962cf3d3a975f7a391d49c82bf5433b"
+    },
+    {
+      "name": "Crease",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 5,
+      "width": 175,
+      "height": 1024,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-5-Crease.png",
+      "png_sha256": "6ea5434bf65c9019b0d763ebad65d90a5de2b8c2fd30b42853e05309982641d8"
+    },
+    {
+      "name": "ninja",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 6,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-6-ninja.png",
+      "png_sha256": "86118593e2db90aa702c05dc024af3cba4b3545c3f1002d8b99a63e88e590c11"
+    },
+    {
+      "name": "mca",
+      "asset_file": "sharedassets1.assets",
+      "path_id": 7,
+      "width": 512,
+      "height": 512,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets1.assets-7-mca.png",
+      "png_sha256": "49861224a035615bd13c5dffbafe09ef5d8fb738cab064406e6756900b9e3da3"
+    },
+    {
+      "name": "SpriteAtlasTexture-deck builder-128x128-fmt4",
+      "asset_file": "sharedassets2.assets",
+      "path_id": 2,
+      "width": 128,
+      "height": 128,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets2.assets-2-SpriteAtlasTexture-deck_builder-128x128-fmt4.png",
+      "png_sha256": "fa87321b6b803f589cf55df222c550435b6022b2a09283e137958f5d182b374c"
+    },
+    {
+      "name": "bookmark merged",
+      "asset_file": "sharedassets2.assets",
+      "path_id": 3,
+      "width": 526,
+      "height": 136,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets2.assets-3-bookmark_merged.png",
+      "png_sha256": "8601e16281ef637fd73827acbb1fa8a0e368d16416a2a7fe6471acf0a4d7e616"
+    },
+    {
+      "name": "key",
+      "asset_file": "sharedassets2.assets",
+      "path_id": 4,
+      "width": 332,
+      "height": 296,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets2.assets-4-key.png",
+      "png_sha256": "316cbfe66a78bf29c27d50db7773bfc5e150a45cfb39d8737c8338e9d535a3a5"
+    },
+    {
+      "name": "splotch",
+      "asset_file": "sharedassets2.assets",
+      "path_id": 5,
+      "width": 422,
+      "height": 394,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets2.assets-5-splotch.png",
+      "png_sha256": "6879198de222ca8467c7a19bfd3bbbf9613a042af951fc3bf85a9bca1206e9b0"
+    },
+    {
+      "name": "wood_AlternatingSquareTiles_1k_d1",
+      "asset_file": "sharedassets5.assets",
+      "path_id": 4,
+      "width": 1024,
+      "height": 1024,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets5.assets-4-wood_AlternatingSquareTiles_1k_d1.png",
+      "png_sha256": "411e0d0b34f23ad0a37b1d2411787f80ee873babece39700955b35b831faba9a"
+    },
+    {
+      "name": "Tile_checkered_1k_d",
+      "asset_file": "sharedassets5.assets",
+      "path_id": 5,
+      "width": 1024,
+      "height": 1024,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets5.assets-5-Tile_checkered_1k_d.png",
+      "png_sha256": "6f81de18508226fe7ae60a43ec4ae906b664efc01c09bb9653c236ffbbee8b1e"
+    },
+    {
+      "name": "chrysanthemum",
+      "asset_file": "sharedassets8.assets",
+      "path_id": 2,
+      "width": 400,
+      "height": 402,
+      "decoded_path": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/asset-inspection/decoded-textures/sharedassets8.assets-2-chrysanthemum.png",
+      "png_sha256": "a1d901b548668f6cae047217f956a2eec01de4f4931db8cd3bcaa8d061c52737"
+    }
+  ],
+  "decode_errors": [],
+  "inspection_notes": [
+    {
+      "type": "Empty font texture",
+      "source": "resources.assets",
+      "id": 55
+    },
+    {
+      "type": "Empty font texture",
+      "source": "resources.assets",
+      "id": 63
+    },
+    {
+      "type": "Empty font texture",
+      "source": "resources.assets",
+      "id": 66
+    },
+    {
+      "type": "Empty font texture",
+      "source": "sharedassets0.assets",
+      "id": 8
+    },
+    {
+      "type": "TextAsset",
+      "name": "Crab",
+      "source": "sharedassets6.assets"
+    },
+    {
+      "type": "TextAsset",
+      "name": "Crane",
+      "source": "sharedassets6.assets"
+    },
+    {
+      "type": "Engine Sprite",
+      "name": "UnitySplash-cube",
+      "source": "unity default resources",
+      "id": 10404
+    }
+  ],
+  "inspected_source_hashes": {
+    "Contents/Resources/Data/globalgamemanagers": "2f76820346abb50bf67f25133f305d6d5d4fc6302a9ecb6bcd92da392a6ca66b",
+    "Contents/Resources/Data/globalgamemanagers.assets": "85b145e4fddb9a0bc7050d6499902abadd37a62a0a97901285d6c00e05c28198",
+    "Contents/Resources/Data/level0": "360009a5c3bedfec8cd35ed1973ea28d5b74bafb340a12d49b66c41d2a43092e",
+    "Contents/Resources/Data/level1": "9c68e4fa28112cb77e0a4186ed5e9670e169450ff6b1f8119c707da69b7b6043",
+    "Contents/Resources/Data/level2": "39255acf5106c120b7b17ab49e06b4a3f034751b982e247488b156be73dc59cf",
+    "Contents/Resources/Data/level3": "2427c1dfbe6528497b7a674403e3871f7267a92797ee1584d8d44af86848ee7c",
+    "Contents/Resources/Data/level4": "f777695bd2dae68d8f62419731a9370d3c2ed16f9c3fca2321b0b334231632e8",
+    "Contents/Resources/Data/level5": "e134403da3c2cfcdfb8d16e1de7dcca70843f8f576ee4e964132c48952e9bb0f",
+    "Contents/Resources/Data/level6": "f1906488fd443ff98e6d3601857ceedc79af0cbff8eb86a06fd16fd5b68d792a",
+    "Contents/Resources/Data/level7": "12cbd7ec21ef1feec67bed70fa5cd21332810deb6efac1362405fb987b5a3c62",
+    "Contents/Resources/Data/level8": "04ae0fc4315aad25d764c6663050b4d66c14a10c4316d91f8eb82caeb5533501",
+    "Contents/Resources/Data/resources.assets": "db6d38b7a70c4f93de303189d80cf24471c138443ddb31d1434f62e80fc482c3",
+    "Contents/Resources/Data/sharedassets0.assets": "d7cf103e1a8a14f4de46613d64a9beef05abf3857a9c408bfea9dfb30ca61daf",
+    "Contents/Resources/Data/sharedassets1.assets": "5582c3d1bcb2ca364493f870d1ede695a65428c956013bd9856f8fa2c1c46d25",
+    "Contents/Resources/Data/sharedassets2.assets": "dda056ade3b39de974eacab2e47622c0785c38dfceb532ca1d2e29a6533107ec",
+    "Contents/Resources/Data/sharedassets3.assets": "48a36b4a49bc64ef4ebe887371a88d5c60b1a760c7f1ad640201cafaa70e154a",
+    "Contents/Resources/Data/sharedassets4.assets": "bf4b6b0742c5027922533ee96a55332704ade7211107a468558be589599a28e7",
+    "Contents/Resources/Data/sharedassets5.assets": "483991d20ac8c8a26816f841723280a3a235307cd7eab47382ad62648be04085",
+    "Contents/Resources/Data/sharedassets6.assets": "431a5a8fcccbd6e79755268b705961bf0321209c46652b0c7e8d614a7d7813d1",
+    "Contents/Resources/Data/sharedassets7.assets": "7585ac051d933a8fd74314d90ad43cb9f31d01c4145fa73268a318c575faba43",
+    "Contents/Resources/Data/sharedassets8.assets": "8d69e6e855fcb1b712309552b40c060299171c00a00c048786d90c686da65ce0",
+    "Contents/Resources/Data/Resources/unity_builtin_extra": "ec0aea2cba6a38d79e381535ddae573564c8c4421ed7cf4513628c95c21640f9",
+    "Contents/Resources/unity default resources": "70445c3d626b69a12096a42cce316d9b72122a58482858f0d5db7a9f6e734711",
+    "Contents/Resources/Data/resources.assets.resS": "39d7203b15a0d437526fcb431554865096036af3ea9e4cdda37859407212840a",
+    "Contents/Resources/Data/sharedassets0.assets.resS": "4dbd0070981e50a6dce467eaf14a20d7b961dff8cbddc61d9cb3b9051a6b9cb2",
+    "Contents/Resources/Data/sharedassets1.assets.resS": "093ded0e99e89c58124c81e62d90132f25524f7886d8811d79c837c6c89d57b2",
+    "Contents/Resources/Data/sharedassets2.assets.resS": "2322031634fb3012773bc15725d209e5f7be7417dfe2690e1b2f63a527d482ec",
+    "Contents/Resources/Data/sharedassets5.assets.resS": "f8323f0516c845d8f0a9db2a91dee7c82db3efe05a7b171aedda214ff7293a2d",
+    "Contents/Resources/Data/sharedassets8.assets.resS": "dfb177e9c15d1ae4dd610d17f34825d2e0acb20a9efaba4ced33d17c74faa870"
+  },
+  "source_unchanged": true,
+  "loose_images": [
+    {
+      "path": "Contents/Resources/Ageia.tif",
+      "width": 120,
+      "height": 43,
+      "format": "TIFF"
+    },
+    {
+      "path": "Contents/Resources/UnityPlayerIcon.png",
+      "width": 64,
+      "height": 64,
+      "format": "PNG"
+    },
+    {
+      "path": "Contents/Resources/Mono.tif",
+      "width": 80,
+      "height": 70,
+      "format": "TIFF"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/unicorn.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/spider.jpg",
+      "width": 600,
+      "height": 600,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/lion.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/dragon.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/mantis_green.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/crab.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/crane.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/default.jpg",
+      "width": 1024,
+      "height": 1024,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/phoenix.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    },
+    {
+      "path": "Contents/Resources/Data/StreamingAssets/Backgrounds/scorpion.jpg",
+      "width": 450,
+      "height": 450,
+      "format": "JPEG"
+    }
+  ],
+  "reviewed_on": "2026-09-06",
+  "conclusion": "No additional illustrated deck-card fronts found. Additional graphics are frames, Favor graphics, card backs and interface textures.",
+  "visual_classification_counts": {
+    "blank_card_frames": 31,
+    "imperial_favor_graphics_and_template": 10,
+    "card_back_textures": 3,
+    "other_interface_and_table_textures": 27
+  }
+}

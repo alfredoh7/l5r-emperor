@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1353425,
+  "card_id": "oracle-l5r-6253",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6253-printing-1-image-1",
+  "image_index": 1,
+  "name": "Remember Your Ancestors",
+  "numbers": [
+    "334"
+  ],
+  "oracle_id": 6253,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6253-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:07.359477+00:00",
+  "sha256": "ccb24b47b8fe62272e7f3ef8a4b07157d66e89e0257053c9a0c5479cc00c41f4",
+  "source_image_hash": "ff/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ff/f6/printing_6253_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ff/f6/printing_6253_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1044823,
+  "card_id": "oracle-l5r-934",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-934-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi's Guidance",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 934,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-934-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:01.785161+00:00",
+  "sha256": "08e912bbaf3632072a6b3a09fe08c6f27bd33d5a4267251a8d0e2d38fe91bb33",
+  "source_image_hash": "63/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/b3/printing_934_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/b3/printing_934_1_",
+  "width": 750
+}

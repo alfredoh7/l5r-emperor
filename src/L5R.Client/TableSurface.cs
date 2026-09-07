@@ -1,0 +1,67 @@
+using Godot;
+
+namespace L5R.Client;
+
+/// <summary>One perspective-correct table plane. Native controls render flat into
+/// an isolated viewport; the same inverse projection routes mouse input to them.</summary>
+public partial class TableSurface : TextureRect
+{
+    public const float Pitch = .64f, Depth = .00065f;
+    public SubViewport Canvas { get; private set; } = null!;
+    public Vector2 CanvasSize { get; private set; }
+    public float RenderScale { get; private set; } = 1;
+    private ShaderMaterial _projection = null!;
+    private bool _mouseInside;
+    public override void _Ready()
+    {
+        MouseFilter = MouseFilterEnum.Stop;
+        TextureFilter = TextureFilterEnum.Linear;
+        ExpandMode = ExpandModeEnum.IgnoreSize;
+        Canvas = new SubViewport { TransparentBg = true, Disable3D = true,
+            RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
+            HandleInputLocally = true, GuiSnapControlsToPixels = false };
+        AddChild(Canvas);
+        Texture = Canvas.GetTexture();
+        Material = _projection = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/table-perspective.gdshader") };
+    }
+    public void ResizePlane(Vector2 size, float density)
+    {
+        Size = size; CanvasSize = size * new Vector2(1.7f, 2.7f);
+        RenderScale = Math.Min(density, 8192 / Math.Max(CanvasSize.X, CanvasSize.Y));
+        Canvas.Size = (Vector2I)(CanvasSize * RenderScale).Ceil();
+        CanvasSize = (Vector2)Canvas.Size / RenderScale;
+        Canvas.CanvasTransform = Transform2D.Identity.Scaled(Vector2.One * RenderScale);
+        _projection.SetShaderParameter("display_size", Size);
+        _projection.SetShaderParameter("canvas_size", CanvasSize);
+        _projection.SetShaderParameter("pitch", Pitch);
+        _projection.SetShaderParameter("depth", Depth);
+    }
+    public static Vector2 ProjectOffset(Vector2 plane)
+    {
+        var divisor = 1 - plane.Y * Depth;
+        return new Vector2(plane.X, plane.Y * Pitch) / divisor;
+    }
+    public static Vector2 UnprojectOffset(Vector2 screen)
+    {
+        var y = screen.Y / (Pitch + Depth * screen.Y);
+        return new Vector2(screen.X * (1 - Depth * y), y);
+    }
+    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (Size / 2 + ProjectOffset(plane - CanvasSize / 2));
+    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - Size / 2);
+    public void ForwardMouse(InputEventMouse mouse)
+    {
+        var forwarded = (InputEventMouse)mouse.Duplicate();
+        var point = ScreenToCanvas(mouse.Position) * RenderScale;
+        forwarded.Position = point; forwarded.GlobalPosition = point;
+        if (forwarded is InputEventMouseMotion motion && mouse is InputEventMouseMotion original)
+            motion.Relative = point - ScreenToCanvas(mouse.Position - original.Relative) * RenderScale;
+        if (!_mouseInside) { Canvas.NotifyMouseEntered(); _mouseInside = true; }
+        Canvas.PushInput(forwarded, true);
+    }
+    public void ExitMouse()
+    {
+        if (!_mouseInside) return;
+        Canvas.NotifyMouseExited(); _mouseInside = false;
+    }
+
+}

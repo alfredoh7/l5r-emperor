@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1173703,
+  "card_id": "oracle-l5r-501",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-501-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Kitiaru",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 501,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-501-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:47.498743+00:00",
+  "sha256": "c10f06eff50a45a34b7322be5c8764a6daba836277a0a38e32f49dd7d6fb4751",
+  "source_image_hash": "ef/8f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ef/8f/printing_501_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/8f/printing_501_1_",
+  "width": 750
+}

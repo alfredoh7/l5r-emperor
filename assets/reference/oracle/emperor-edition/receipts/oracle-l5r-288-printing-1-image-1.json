@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1011324,
+  "card_id": "oracle-l5r-288",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-288-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Suoh",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 288,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-288-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:42.900094+00:00",
+  "sha256": "7b41c88d197afe530f24bc2aa08065f509551daaab0960d4a326c935d8beb1c1",
+  "source_image_hash": "12/99",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/99/printing_288_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/99/printing_288_1_",
+  "width": 750
+}

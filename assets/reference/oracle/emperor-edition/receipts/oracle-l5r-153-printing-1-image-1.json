@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1118759,
+  "card_id": "oracle-l5r-153",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-153-printing-1-image-1",
+  "image_index": 1,
+  "name": "Agasha Ryo",
+  "numbers": [
+    "132"
+  ],
+  "oracle_id": 153,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-153-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:38.072743+00:00",
+  "sha256": "dc9e4e62c43554865a41e9dae5fcfd4093eabb53f489384a079a87e509ac353f",
+  "source_image_hash": "63/18",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/18/printing_153_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/18/printing_153_1_",
+  "width": 750
+}

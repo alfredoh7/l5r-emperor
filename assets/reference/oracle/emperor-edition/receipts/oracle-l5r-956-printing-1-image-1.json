@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1206426,
+  "card_id": "oracle-l5r-956",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-956-printing-1-image-1",
+  "image_index": 1,
+  "name": "Benefices of the Emperor",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 956,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-956-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:02.606648+00:00",
+  "sha256": "32abc70145bccccca6fb582efd45be39df86b1ad004c62c12e259f575daa94ed",
+  "source_image_hash": "8c/bf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8c/bf/printing_956_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8c/bf/printing_956_1_",
+  "width": 750
+}

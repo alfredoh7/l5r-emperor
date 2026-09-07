@@ -1,0 +1,10 @@
+.git
+.tools
+.cache
+**/bin
+**/obj
+assets
+artifacts
+runtime
+**/.godot
+**/__pycache__

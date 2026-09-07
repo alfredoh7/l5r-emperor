@@ -1,0 +1,24 @@
+* text=auto
+*.sh text eol=lf
+*.command text eol=lf
+*.py text eol=lf
+*.cs text eol=lf
+*.md text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.png -text
+*.jpg -text
+*.jpeg -text
+*.webp -text
+*.blend -text
+*.glb -text
+*.ttf -text
+*.otf -text
+*.zip -text
+
+# Preserve exact imported reference bytes for provenance/checksums.
+assets/reference/** -text
+assets/fonts/** -text
+content/oracle/** -text
+src/L5R.Client/Art/Fonts/** -text

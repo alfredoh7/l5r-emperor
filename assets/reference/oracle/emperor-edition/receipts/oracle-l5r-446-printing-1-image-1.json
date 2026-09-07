@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1099159,
+  "card_id": "oracle-l5r-446",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-446-printing-1-image-1",
+  "image_index": 1,
+  "name": "Armor of the Heavens",
+  "numbers": [
+    "229"
+  ],
+  "oracle_id": 446,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-446-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:46.396185+00:00",
+  "sha256": "5b85f215fc4d8adbb8f73036d153d0b5dda0e2dd9ff2586a42bdaedf899b860e",
+  "source_image_hash": "fb/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fb/2b/printing_446_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/2b/printing_446_1_",
+  "width": 750
+}

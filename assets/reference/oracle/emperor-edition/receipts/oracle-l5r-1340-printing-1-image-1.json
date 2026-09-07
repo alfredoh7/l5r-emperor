@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1113448,
+  "card_id": "oracle-l5r-1340",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1340-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chrysanthemum Blossom",
+  "numbers": [
+    "231"
+  ],
+  "oracle_id": 1340,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1340-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:09.937347+00:00",
+  "sha256": "5ae701130a7f11fdc7489726e6de52234ce52b1a7251097b7a97e3c3814aba50",
+  "source_image_hash": "4a/d8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4a/d8/printing_1340_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/d8/printing_1340_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1001128,
+  "card_id": "oracle-l5r-2017",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2017-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disgrace",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 2017,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2017-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:28.583962+00:00",
+  "sha256": "937cccab757a27e5646c262291d386a1368ec13bcdfb4e9fb3b2df954ab038ba",
+  "source_image_hash": "19/43",
+  "source_url": "https://images.oracleofthevoid.com/l5r/19/43/printing_2017_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/19/43/printing_2017_1_",
+  "width": 750
+}

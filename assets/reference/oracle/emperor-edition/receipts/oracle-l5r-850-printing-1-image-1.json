@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1123693,
+  "card_id": "oracle-l5r-850",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-850-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Nitoshi",
+  "numbers": [
+    "152"
+  ],
+  "oracle_id": 850,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-850-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:59.210525+00:00",
+  "sha256": "8eac2d6aa2bffa583ff5ef2f140c2f984c03bb84be12850f7ba1f6900b2cecbb",
+  "source_image_hash": "f3/10",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f3/10/printing_850_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f3/10/printing_850_1_",
+  "width": 750
+}

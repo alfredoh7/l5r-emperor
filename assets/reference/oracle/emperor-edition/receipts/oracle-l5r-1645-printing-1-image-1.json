@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1058915,
+  "card_id": "oracle-l5r-1645",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1645-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Kenshi",
+  "numbers": [
+    "76"
+  ],
+  "oracle_id": 1645,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1645-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:15.942024+00:00",
+  "sha256": "2c8be86a584556a7a7a5a2e00320fbb872cdf00d40dd209f66909abc27b96cc2",
+  "source_image_hash": "88/0b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/88/0b/printing_1645_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/88/0b/printing_1645_1_",
+  "width": 750
+}

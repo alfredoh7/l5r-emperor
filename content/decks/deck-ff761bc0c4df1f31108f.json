@@ -1,0 +1,275 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-2631ff2ba4254d5fe8d1",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Honorable Garrison of the Lion"
+    },
+    {
+      "card_reference_id": "card-ref-84a773edc7683c2fb25d",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Akodo Dairuko, the Steel Lion"
+    },
+    {
+      "card_reference_id": "card-ref-e7cf86bf75a6c2590521",
+      "line_number": 6,
+      "quantity": 2,
+      "raw_line": "2x General's Hatamoto"
+    },
+    {
+      "card_reference_id": "card-ref-70990383ae4588a8cdf7",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Imperial Explorer's Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-030efc0b93129dbdf265",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Hida Advisor"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-e8e3a1f16e8c83d65601",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3x Jade Works"
+    },
+    {
+      "card_reference_id": "card-ref-b592db42e86f652a043b",
+      "line_number": 12,
+      "quantity": 1,
+      "raw_line": "1x Suana Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 13,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-556b8e6b9c420b9ca742",
+      "line_number": 14,
+      "quantity": 1,
+      "raw_line": "1x Yukihime's Hot Springs"
+    },
+    {
+      "card_reference_id": "card-ref-9398dbd1d755fabe4e80",
+      "line_number": 15,
+      "quantity": 3,
+      "raw_line": "3x Copper Mine"
+    },
+    {
+      "card_reference_id": "card-ref-2258ed43162aa027ed4b",
+      "line_number": 17,
+      "quantity": 3,
+      "raw_line": "3x Akodo Daiken"
+    },
+    {
+      "card_reference_id": "card-ref-470d2aec0c25f4f1fda8",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Akodo Kenaro"
+    },
+    {
+      "card_reference_id": "card-ref-3613f5296372f3116d63",
+      "line_number": 19,
+      "quantity": 1,
+      "raw_line": "1x Matsu Misato"
+    },
+    {
+      "card_reference_id": "card-ref-0ea35b2095cdbb8aea87",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Ikoma Yoshimoko"
+    },
+    {
+      "card_reference_id": "card-ref-b1df91f34c33ce38ec7d",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Matsu Agai"
+    },
+    {
+      "card_reference_id": "card-ref-4773dd6d59005a051cef",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Matsu Tayuko"
+    },
+    {
+      "card_reference_id": "card-ref-0a15723d776578cea5ef",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3x Matsu Choiko"
+    },
+    {
+      "card_reference_id": "card-ref-2021956bb62595eca517",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Ikoma Ichimoko"
+    },
+    {
+      "card_reference_id": "card-ref-0cdccbab4cf62cef35e5",
+      "line_number": 25,
+      "quantity": 1,
+      "raw_line": "1x Matsu Morito"
+    },
+    {
+      "card_reference_id": "card-ref-78197258747570aa1a56",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Lion Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-43ae99886a2a30b3eb30",
+      "line_number": 28,
+      "quantity": 3,
+      "raw_line": "3x Ashigaru Spearmen"
+    },
+    {
+      "card_reference_id": "card-ref-2c0fa824e8a91e58847d",
+      "line_number": 29,
+      "quantity": 1,
+      "raw_line": "1x Band of Brothers"
+    },
+    {
+      "card_reference_id": "card-ref-6f2fbb3fac60ee5cc57c",
+      "line_number": 30,
+      "quantity": 2,
+      "raw_line": "2x Light Infantry"
+    },
+    {
+      "card_reference_id": "card-ref-c7281ba01a7a67973a41",
+      "line_number": 31,
+      "quantity": 2,
+      "raw_line": "2x Medium Infantry"
+    },
+    {
+      "card_reference_id": "card-ref-eab08e982412e327aa61",
+      "line_number": 32,
+      "quantity": 2,
+      "raw_line": "2x Naga Remnants"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-e3e6c2e653cb5c816998",
+      "line_number": 38,
+      "quantity": 2,
+      "raw_line": "2x Death of the Winds"
+    },
+    {
+      "card_reference_id": "card-ref-be9758cf90a7d2addf0c",
+      "line_number": 39,
+      "quantity": 1,
+      "raw_line": "1x Directing the Battle"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 40,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-e567312f8899026eb8d2",
+      "line_number": 42,
+      "quantity": 1,
+      "raw_line": "1x Move the Troops"
+    },
+    {
+      "card_reference_id": "card-ref-652243c9adf82339bb44",
+      "line_number": 43,
+      "quantity": 3,
+      "raw_line": "3x Outnumbered"
+    },
+    {
+      "card_reference_id": "card-ref-1e040057b5aa96b16a68",
+      "line_number": 44,
+      "quantity": 2,
+      "raw_line": "2x Army Like a Tide"
+    },
+    {
+      "card_reference_id": "card-ref-27379be9c5a62a572729",
+      "line_number": 45,
+      "quantity": 1,
+      "raw_line": "1x Recovering What Was Lost"
+    },
+    {
+      "card_reference_id": "card-ref-f68429db1d1ff4a67f20",
+      "line_number": 46,
+      "quantity": 3,
+      "raw_line": "3x Strength of my Father"
+    },
+    {
+      "card_reference_id": "card-ref-e1dd9ae4ecddc2abb06f",
+      "line_number": 47,
+      "quantity": 3,
+      "raw_line": "3x The Eternal Rainbows"
+    },
+    {
+      "card_reference_id": "card-ref-15fceae94899c9bbea61",
+      "line_number": 48,
+      "quantity": 1,
+      "raw_line": "1x The Sun Returns"
+    }
+  ],
+  "entry_count": 42,
+  "id": "deck-ff761bc0c4df1f31108f",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Lion",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-22e2d6f2121e4ac00e7a"
+}

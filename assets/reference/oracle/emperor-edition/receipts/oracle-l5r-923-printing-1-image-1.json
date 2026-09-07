@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1169073,
+  "card_id": "oracle-l5r-923",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-923-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Waru",
+  "numbers": [
+    "154"
+  ],
+  "oracle_id": 923,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-923-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:00.669436+00:00",
+  "sha256": "e1fb3e10c4890c739d2e5c1ecccde393080a8922667dcfdf0ee2358ca8f26d3c",
+  "source_image_hash": "6a/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6a/8a/printing_923_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/8a/printing_923_1_",
+  "width": 750
+}

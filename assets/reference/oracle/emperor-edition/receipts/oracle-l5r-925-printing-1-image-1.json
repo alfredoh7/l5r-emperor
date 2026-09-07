@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1132052,
+  "card_id": "oracle-l5r-925",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-925-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Yasashiku",
+  "numbers": [
+    "155"
+  ],
+  "oracle_id": 925,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-925-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:01.505518+00:00",
+  "sha256": "c061ff14f10155431d3de8f8169f7e9c2f766763703f9a9b43e41dc64428109c",
+  "source_image_hash": "74/1b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/1b/printing_925_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/1b/printing_925_1_",
+  "width": 750
+}

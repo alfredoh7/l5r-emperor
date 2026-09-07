@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1091786,
+  "card_id": "oracle-l5r-10002",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10002-printing-1-image-1",
+  "image_index": 1,
+  "name": "Denhei's Snake",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10002,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10002-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:28.119469+00:00",
+  "sha256": "ab2e7e6ac96bd84334c8f1315dc878e3b88c4fd07d768981646479bd7181b71e",
+  "source_image_hash": "76/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/5a/printing_10002_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/5a/printing_10002_1_",
+  "width": 750
+}

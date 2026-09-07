@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1158622,
+  "card_id": "oracle-l5r-8929",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8929-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ugulu no Oni",
+  "numbers": [
+    "185"
+  ],
+  "oracle_id": 8929,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-8929-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:24.403979+00:00",
+  "sha256": "c9acea016b441e44c5e3e9b98b58f5aef50663b3171d9ac0c183c9b98d4ffa7a",
+  "source_image_hash": "68/1f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/1f/printing_8929_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/1f/printing_8929_1_",
+  "width": 750
+}

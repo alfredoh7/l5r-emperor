@@ -1,0 +1,269 @@
+{
+  "card_count": 88,
+  "declared_era": "Emperor",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-b6e4e6084d3b176cd31e",
+      "line_number": 3,
+      "quantity": 3,
+      "raw_line": "3 Again!"
+    },
+    {
+      "card_reference_id": "card-ref-43e075daf5fc0970ab89",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Bamboo Harvesters "
+    },
+    {
+      "card_reference_id": "card-ref-f406d02863b1b438f86a",
+      "line_number": 5,
+      "quantity": 1,
+      "raw_line": "Blade of Champions "
+    },
+    {
+      "card_reference_id": "card-ref-00d070ca2789a1276a83",
+      "line_number": 6,
+      "quantity": 3,
+      "raw_line": "3 Blade of Perfection"
+    },
+    {
+      "card_reference_id": "card-ref-19d638066b6faa57b9ca",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "Border Keep "
+    },
+    {
+      "card_reference_id": "card-ref-52304d8efc7d25b93ba8",
+      "line_number": 8,
+      "quantity": 3,
+      "raw_line": "3 Breath of the Heavens"
+    },
+    {
+      "card_reference_id": "card-ref-f65f336e81a2b2b9d02c",
+      "line_number": 9,
+      "quantity": 1,
+      "raw_line": "Celestial Sword of the Dragon - exp "
+    },
+    {
+      "card_reference_id": "card-ref-4cfea6df7b8928dd61ec",
+      "line_number": 10,
+      "quantity": 3,
+      "raw_line": "3 Deadly Discipline"
+    },
+    {
+      "card_reference_id": "card-ref-136e84e9cc6a85c76088",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3 Engulfing Flames"
+    },
+    {
+      "card_reference_id": "card-ref-3c3f5ed3432c1d2207fd",
+      "line_number": 12,
+      "quantity": 1,
+      "raw_line": "Farmer's Market "
+    },
+    {
+      "card_reference_id": "card-ref-79ebfb1af699d67e7115",
+      "line_number": 13,
+      "quantity": 3,
+      "raw_line": "3 Gold Mine"
+    },
+    {
+      "card_reference_id": "card-ref-326452c89c7f32a171ae",
+      "line_number": 14,
+      "quantity": 2,
+      "raw_line": "2 Incense Mill"
+    },
+    {
+      "card_reference_id": "card-ref-0c5e923816235fca7712",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "Mirumoto Shikei "
+    },
+    {
+      "card_reference_id": "card-ref-45ee1b642b9db2470c1b",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "Mirumoto Yozo - exp "
+    },
+    {
+      "card_reference_id": "card-ref-015767db28de189901e5",
+      "line_number": 17,
+      "quantity": 1,
+      "raw_line": "Monastery of New Thought "
+    },
+    {
+      "card_reference_id": "card-ref-d1acbcd6045b60db9a66",
+      "line_number": 18,
+      "quantity": 2,
+      "raw_line": "2 Nightingale Blade"
+    },
+    {
+      "card_reference_id": "card-ref-2bf7d65fe7afcd6c0b19",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3 Prosperous Village"
+    },
+    {
+      "card_reference_id": "card-ref-a16bf815c385a307b3c3",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3 Remote Village"
+    },
+    {
+      "card_reference_id": "card-ref-8f841cd4121aad844540",
+      "line_number": 21,
+      "quantity": 1,
+      "raw_line": "Tattoos & Trinkets "
+    },
+    {
+      "card_reference_id": "card-ref-73f551984763a761fb4c",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3 Togashi Hiroto"
+    },
+    {
+      "card_reference_id": "card-ref-35ee345b0f74a39e591a",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "Togashi Korimi - exp2 "
+    },
+    {
+      "card_reference_id": "card-ref-15839199740b17f90efc",
+      "line_number": 24,
+      "quantity": 1,
+      "raw_line": "1 Traveling Peddler"
+    },
+    {
+      "card_reference_id": "card-ref-25653dbe624162784df9",
+      "line_number": 25,
+      "quantity": 2,
+      "raw_line": "2 Mirumoto Yumaru"
+    },
+    {
+      "card_reference_id": "card-ref-d30fb27dcd4f33a2deca",
+      "line_number": 26,
+      "quantity": 3,
+      "raw_line": "3 Togashi Torazu"
+    },
+    {
+      "card_reference_id": "card-ref-b735268e3c445f37380a",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "Mirumoto Katagi "
+    },
+    {
+      "card_reference_id": "card-ref-d8fb81624fde07a022ec",
+      "line_number": 28,
+      "quantity": 3,
+      "raw_line": "3 Large Farm"
+    },
+    {
+      "card_reference_id": "card-ref-3ea7484a315344cd8fd7",
+      "line_number": 29,
+      "quantity": 3,
+      "raw_line": "3 Togashi Meiyu"
+    },
+    {
+      "card_reference_id": "card-ref-01219b3b0ab207eb1604",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3 Mirumoto Michi"
+    },
+    {
+      "card_reference_id": "card-ref-b39b2fb40bdc6923e317",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3 Mirumoto Gobashi"
+    },
+    {
+      "card_reference_id": "card-ref-1966405e1645b4a7eecd",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3 Small Farm"
+    },
+    {
+      "card_reference_id": "card-ref-1d71b643370fcbe5ad3d",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "Lady Matsu's Rage "
+    },
+    {
+      "card_reference_id": "card-ref-4b62d18dff9eef4144da",
+      "line_number": 34,
+      "quantity": 2,
+      "raw_line": "2 Two Hands"
+    },
+    {
+      "card_reference_id": "card-ref-77164a5d03820201b56c",
+      "line_number": 35,
+      "quantity": 3,
+      "raw_line": "3 Unparalleled Sword"
+    },
+    {
+      "card_reference_id": "card-ref-4157d4181316429c670e",
+      "line_number": 36,
+      "quantity": 2,
+      "raw_line": "2 Unstoppable Strike"
+    },
+    {
+      "card_reference_id": "card-ref-1ceaa69ed11175b96ab1",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3 Moving and Unmoving"
+    },
+    {
+      "card_reference_id": "card-ref-dc4ee18bee87f8bd4d10",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3 Hundred-Fold Cut"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 39,
+      "quantity": 1,
+      "raw_line": "Ring of the Void "
+    },
+    {
+      "card_reference_id": "card-ref-3cc88a7d0f23c50d37cb",
+      "line_number": 40,
+      "quantity": 3,
+      "raw_line": "3 Effortless Counterattack"
+    },
+    {
+      "card_reference_id": "card-ref-ed77cc0358a148aaf15a",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3 Superior Reach"
+    },
+    {
+      "card_reference_id": "card-ref-89ab752b01d7fea9e8c4",
+      "line_number": 42,
+      "quantity": 1,
+      "raw_line": "Blades of the Black Dragon "
+    },
+    {
+      "card_reference_id": "card-ref-10dab7060886fcf6160d",
+      "line_number": 43,
+      "quantity": 3,
+      "raw_line": "3 Revenge"
+    }
+  ],
+  "entry_count": 41,
+  "id": "deck-0b1fbca7b3696ed66909",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Dragon Destruction",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Emperor"
+  ],
+  "source_id": "source-71eb51db3de499dddb94"
+}

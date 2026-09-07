@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1111591,
+  "card_id": "oracle-l5r-639",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-639-printing-1-image-1",
+  "image_index": 1,
+  "name": "At Any Cost",
+  "numbers": [
+    "271"
+  ],
+  "oracle_id": 639,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-639-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:52.229594+00:00",
+  "sha256": "449469e160452282ae910f22544fa73760c2b82089fa65176dae647089be235a",
+  "source_image_hash": "e2/0b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/0b/printing_639_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/0b/printing_639_1_",
+  "width": 750
+}

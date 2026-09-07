@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1035598,
+  "card_id": "oracle-l5r-424",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-424-printing-1-image-1",
+  "image_index": 1,
+  "name": "Aramoro's Promise",
+  "numbers": [
+    "270"
+  ],
+  "oracle_id": 424,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-424-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:45.746726+00:00",
+  "sha256": "afd619dd31fc3d5f9f3aab0c0878f79d86ac01808ab251b888e9ae8972ef2456",
+  "source_image_hash": "c1/64",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c1/64/printing_424_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c1/64/printing_424_1_",
+  "width": 750
+}

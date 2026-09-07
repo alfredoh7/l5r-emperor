@@ -1,0 +1,269 @@
+{
+  "card_count": 83,
+  "declared_era": "Emperor",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-cc1863d409740ef0b251",
+      "line_number": 3,
+      "quantity": 1,
+      "raw_line": "Yasuki Palaces - exp "
+    },
+    {
+      "card_reference_id": "card-ref-19d638066b6faa57b9ca",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Border Keep "
+    },
+    {
+      "card_reference_id": "card-ref-43e075daf5fc0970ab89",
+      "line_number": 5,
+      "quantity": 1,
+      "raw_line": "Bamboo Harvesters "
+    },
+    {
+      "card_reference_id": "card-ref-e16f37442a0f429d05a9",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "Suspicions "
+    },
+    {
+      "card_reference_id": "card-ref-5bc679f12a4635fa2f84",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "Stolen Merchandise "
+    },
+    {
+      "card_reference_id": "card-ref-b619bb28c4fefa209301",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "The Yasuki Peddler "
+    },
+    {
+      "card_reference_id": "card-ref-15839199740b17f90efc",
+      "line_number": 9,
+      "quantity": 1,
+      "raw_line": "Traveling Peddler "
+    },
+    {
+      "card_reference_id": "card-ref-6e58eb19d93d62dd819e",
+      "line_number": 10,
+      "quantity": 1,
+      "raw_line": "Hachi's Revenge "
+    },
+    {
+      "card_reference_id": "card-ref-5b8126ba3aae8606c44b",
+      "line_number": 11,
+      "quantity": 1,
+      "raw_line": "Hida's Guidance - exp "
+    },
+    {
+      "card_reference_id": "card-ref-fdfb0f98918341f4ea69",
+      "line_number": 12,
+      "quantity": 3,
+      "raw_line": "3 Iron Mine"
+    },
+    {
+      "card_reference_id": "card-ref-1966405e1645b4a7eecd",
+      "line_number": 13,
+      "quantity": 3,
+      "raw_line": "3 Small Farm"
+    },
+    {
+      "card_reference_id": "card-ref-a6a26084aeeee2894b0b",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3 Slanderer"
+    },
+    {
+      "card_reference_id": "card-ref-2bf7d65fe7afcd6c0b19",
+      "line_number": 15,
+      "quantity": 3,
+      "raw_line": "3 Prosperous Village"
+    },
+    {
+      "card_reference_id": "card-ref-3e27d7183409eb3ba465",
+      "line_number": 16,
+      "quantity": 2,
+      "raw_line": "2 Governor's Court"
+    },
+    {
+      "card_reference_id": "card-ref-d8fb81624fde07a022ec",
+      "line_number": 17,
+      "quantity": 2,
+      "raw_line": "2 Large Farm"
+    },
+    {
+      "card_reference_id": "card-ref-faa14f43e38894bda504",
+      "line_number": 18,
+      "quantity": 1,
+      "raw_line": "Yoritomo Sachina - exp "
+    },
+    {
+      "card_reference_id": "card-ref-ffa8152bcd9e0b8e4a85",
+      "line_number": 19,
+      "quantity": 1,
+      "raw_line": "Soshi Yoshihara - exp "
+    },
+    {
+      "card_reference_id": "card-ref-03a15f4a4c0d31625315",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "Shosuro Rin "
+    },
+    {
+      "card_reference_id": "card-ref-b1fb7c3e860da6b48dd3",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3 Bayushi Nomen - exp2"
+    },
+    {
+      "card_reference_id": "card-ref-857af75ce2e51c99b401",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3 Yasuki Baiko"
+    },
+    {
+      "card_reference_id": "card-ref-51c23e0b0747c556f226",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "Yasuki Makoto "
+    },
+    {
+      "card_reference_id": "card-ref-e639cccf2399be877f9d",
+      "line_number": 24,
+      "quantity": 1,
+      "raw_line": "Yasuki Jinn-Kuen - exp2 "
+    },
+    {
+      "card_reference_id": "card-ref-9a0c8b6704cdafa4bdd1",
+      "line_number": 25,
+      "quantity": 1,
+      "raw_line": "Yasuki Tsujiken - exp "
+    },
+    {
+      "card_reference_id": "card-ref-a8db02b3bf8f96c72f00",
+      "line_number": 26,
+      "quantity": 3,
+      "raw_line": "3 Yasuki Jekku"
+    },
+    {
+      "card_reference_id": "card-ref-bd26055d8ce410a6dd4e",
+      "line_number": 27,
+      "quantity": 3,
+      "raw_line": "3 Yasuki Tanimura"
+    },
+    {
+      "card_reference_id": "card-ref-35070b12dc3cc8f157d6",
+      "line_number": 28,
+      "quantity": 3,
+      "raw_line": "3 Scars of War"
+    },
+    {
+      "card_reference_id": "card-ref-f4607ae66cbdf8b4fbf2",
+      "line_number": 29,
+      "quantity": 3,
+      "raw_line": "3 Disgraceful Conduct"
+    },
+    {
+      "card_reference_id": "card-ref-7272db75dc4fa858267b",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3 Rocky Terrain"
+    },
+    {
+      "card_reference_id": "card-ref-231c5190d092a14b6b67",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3 Paid Off"
+    },
+    {
+      "card_reference_id": "card-ref-808338906a2bd2a21a40",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3 The Host's Advantage"
+    },
+    {
+      "card_reference_id": "card-ref-48bd0b6984211d8f422d",
+      "line_number": 33,
+      "quantity": 3,
+      "raw_line": "3 Sheathing the Sword"
+    },
+    {
+      "card_reference_id": "card-ref-b1efbd3d9b357733ff78",
+      "line_number": 34,
+      "quantity": 3,
+      "raw_line": "3 The Power of a Word"
+    },
+    {
+      "card_reference_id": "card-ref-869d05ec9008880bfbae",
+      "line_number": 35,
+      "quantity": 3,
+      "raw_line": "3 Dazzling Attire"
+    },
+    {
+      "card_reference_id": "card-ref-37ae0e3369b765529b64",
+      "line_number": 36,
+      "quantity": 3,
+      "raw_line": "3 Incriminating Testimony"
+    },
+    {
+      "card_reference_id": "card-ref-3b1e76f0f1ec75b3a9a2",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3 The Heir's Wrath"
+    },
+    {
+      "card_reference_id": "card-ref-c49d73db569e52dcb511",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3 Remember Your Ancestors"
+    },
+    {
+      "card_reference_id": "card-ref-5edbd0d27471775dd3dc",
+      "line_number": 39,
+      "quantity": 1,
+      "raw_line": "Black Marketeering "
+    },
+    {
+      "card_reference_id": "card-ref-507e1913f949adf616ec",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "Request Authorization "
+    },
+    {
+      "card_reference_id": "card-ref-2b387683a688ee3504d9",
+      "line_number": 41,
+      "quantity": 1,
+      "raw_line": "Dismissing the Cur "
+    },
+    {
+      "card_reference_id": "card-ref-96dd046bccc3c19af864",
+      "line_number": 42,
+      "quantity": 2,
+      "raw_line": "2 Inexplicable Challenge"
+    },
+    {
+      "card_reference_id": "card-ref-93d5acb105ac89edf21e",
+      "line_number": 43,
+      "quantity": 2,
+      "raw_line": "2 Relentless Conviction"
+    }
+  ],
+  "entry_count": 41,
+  "id": "deck-65d4e75607e4834a0afc",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Crab Control",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Emperor"
+  ],
+  "source_id": "source-31120901caab2c6ad34c"
+}

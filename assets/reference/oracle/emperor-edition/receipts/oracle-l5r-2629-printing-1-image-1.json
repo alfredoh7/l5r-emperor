@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1060930,
+  "card_id": "oracle-l5r-2629",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2629-printing-1-image-1",
+  "image_index": 1,
+  "name": "Footsteps of Madness",
+  "numbers": [
+    "300"
+  ],
+  "oracle_id": 2629,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2629-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:46.438178+00:00",
+  "sha256": "cc79243086d2a74ceb15c6d7eac0e6d92997e458bc12da7c23b1b7c69931af35",
+  "source_image_hash": "70/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/70/8c/printing_2629_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/70/8c/printing_2629_1_",
+  "width": 750
+}

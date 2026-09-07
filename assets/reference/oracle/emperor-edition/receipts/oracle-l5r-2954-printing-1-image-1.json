@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1095682,
+  "card_id": "oracle-l5r-2954",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2954-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hanabi",
+  "numbers": [
+    "252"
+  ],
+  "oracle_id": 2954,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2954-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:57.592390+00:00",
+  "sha256": "0d77a31cb3215f84ab189351919b1dbae4f8015966a5f850cb6e074e55464887",
+  "source_image_hash": "58/69",
+  "source_url": "https://images.oracleofthevoid.com/l5r/58/69/printing_2954_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/58/69/printing_2954_1_",
+  "width": 750
+}

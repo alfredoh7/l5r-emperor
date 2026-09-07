@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1100335,
+  "card_id": "oracle-l5r-3254",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3254-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hidden Defenses",
+  "numbers": [
+    "308"
+  ],
+  "oracle_id": 3254,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3254-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:05.685094+00:00",
+  "sha256": "fe3f479624d0ce495f6c5ec995f9c294ba5e34ea8011fdecae6317ee81d77dd7",
+  "source_image_hash": "7c/76",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7c/76/printing_3254_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7c/76/printing_3254_1_",
+  "width": 750
+}

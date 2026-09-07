@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1088979,
+  "card_id": "oracle-l5r-370",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-370-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ancestral Protection",
+  "numbers": [
+    "269"
+  ],
+  "oracle_id": 370,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-370-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:44.879239+00:00",
+  "sha256": "5f75da23aed1221f269b5ff258abdd325b74126c99e728e7006ac8c5aff5b9d6",
+  "source_image_hash": "c9/f9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/f9/printing_370_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/f9/printing_370_1_",
+  "width": 750
+}

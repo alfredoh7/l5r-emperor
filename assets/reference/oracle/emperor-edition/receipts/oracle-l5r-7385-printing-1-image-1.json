@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1026172,
+  "card_id": "oracle-l5r-7385",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7385-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soul's Sacrifice",
+  "numbers": [
+    "348"
+  ],
+  "oracle_id": 7385,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7385-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:37.547088+00:00",
+  "sha256": "c56287da3d0ccb1008c08838db4439fcaeda760852552b6acd73e91246f66a0a",
+  "source_image_hash": "cf/67",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/67/printing_7385_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/67/printing_7385_1_",
+  "width": 750
+}

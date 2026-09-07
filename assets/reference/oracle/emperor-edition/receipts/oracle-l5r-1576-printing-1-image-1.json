@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1172617,
+  "card_id": "oracle-l5r-1576",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1576-printing-1-image-1",
+  "image_index": 1,
+  "name": "Cross-Clan Wedding",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 1576,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1576-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:14.606781+00:00",
+  "sha256": "105db933d7b06f05aaf2f37855357cd60a098fc312918f87f9faff3c69819849",
+  "source_image_hash": "5e/ed",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5e/ed/printing_1576_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5e/ed/printing_1576_1_",
+  "width": 750
+}

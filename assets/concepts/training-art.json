@@ -1,0 +1,14 @@
+{
+  "tool": "Codex image generation",
+  "purpose": "Original illustration atlas for synthetic training cards; not published L5R card art",
+  "prompt": "Use case: illustration-story. Asset type: a single 2x2 illustration texture atlas for clearly labeled fictional training cards in a Japanese fantasy samurai card-game prototype. Square image 2048x2048, four equal full-bleed square illustrations arranged in an exact 2x2 grid, no borders, no gutters, no frames, no typography, no symbols or captions. Top left: a Crane-inspired samurai in pale blue and ivory robes with a sheathed sword, overlooking misty mountains, calm dignified pose. Top right: a Lion-inspired samurai in muted ochre lamellar armor holding a spear, grassy battlefield with distant banners, confident grounded pose. Bottom left: small rural Japanese village marketplace with timber roofs, green hills, farm fields and a few distant tiny shoppers. Bottom right: secluded Japanese castle on a rocky hill with green pine trees, morning mist and stone steps. Unified refined brush-painted style on warm washi paper, detailed enough for a premium fantasy card game, restrained ink contours, moss green, warm ivory, ochre, muted blue, soft natural light. This is original concept illustration, not a reproduction of existing cards. The four panels must meet precisely at x=50% and y=50% so each quadrant is independently usable as an engine atlas region.",
+  "output": "src/L5R.Client/Art/training-atlas.png",
+  "layout": [
+    "Crane-inspired samurai",
+    "Lion-inspired samurai",
+    "Village marketplace",
+    "Castle"
+  ],
+  "mapping": "Four equally sized quadrants. Reused by training card types.",
+  "approval": "Provisional concept direction A; final art approval pending"
+}

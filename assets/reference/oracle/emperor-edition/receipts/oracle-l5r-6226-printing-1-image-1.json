@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1220424,
+  "card_id": "oracle-l5r-6226",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6226-printing-1-image-1",
+  "image_index": 1,
+  "name": "Refuge of the Three Sisters",
+  "numbers": [
+    "205"
+  ],
+  "oracle_id": 6226,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6226-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:06.517690+00:00",
+  "sha256": "5cc8e76a91f0e58ef773c4d9d50a2cf470cce72ae38eaa462af50960449e8c21",
+  "source_image_hash": "25/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/25/4a/printing_6226_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/25/4a/printing_6226_1_",
+  "width": 750
+}

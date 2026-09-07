@@ -1,0 +1,5790 @@
+{
+  "resolutions": {
+    "card-ref-003cf9cc2717e18ef1ce": {
+      "candidate_card_ids": [
+        "oracle-l5r-10724"
+      ],
+      "card_id": "oracle-l5r-10724",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10724",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-00d070ca2789a1276a83": {
+      "candidate_card_ids": [
+        "oracle-l5r-1010"
+      ],
+      "card_id": "oracle-l5r-1010",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1010",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-00e6992c86a36ec18310": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-01099c6c768edae63953": {
+      "candidate_card_ids": [
+        "oracle-l5r-2619"
+      ],
+      "card_id": "oracle-l5r-2619",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2619",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-01219b3b0ab207eb1604": {
+      "candidate_card_ids": [
+        "oracle-l5r-10054"
+      ],
+      "card_id": "oracle-l5r-10054",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10054",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-01572c15df9876d463fb": {
+      "candidate_card_ids": [
+        "oracle-l5r-10925"
+      ],
+      "card_id": "oracle-l5r-10925",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10925",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-015767db28de189901e5": {
+      "candidate_card_ids": [
+        "oracle-l5r-10183"
+      ],
+      "card_id": "oracle-l5r-10183",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10183",
+      "status": "resolved",
+      "types": [
+        "Stronghold"
+      ]
+    },
+    "card-ref-0284dddc5bcdc2764ba2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-02963d5c9f3675fb07c0": {
+      "candidate_card_ids": [
+        "oracle-l5r-9921"
+      ],
+      "card_id": "oracle-l5r-9921",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9921",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-030efc0b93129dbdf265": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-03a15f4a4c0d31625315": {
+      "candidate_card_ids": [
+        "oracle-l5r-7151"
+      ],
+      "card_id": "oracle-l5r-7151",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7151",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-07871686a4c1c8cd5a22": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-087f81dec09ff451dab4": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0921b10f8cefea115f77": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0a15723d776578cea5ef": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0a27e145fc9ed0412085": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0ac37bdb472e98f53ba8": {
+      "candidate_card_ids": [
+        "oracle-l5r-10941"
+      ],
+      "card_id": "oracle-l5r-10941",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10941",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-0c5e923816235fca7712": {
+      "candidate_card_ids": [
+        "oracle-l5r-5148"
+      ],
+      "card_id": "oracle-l5r-5148",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5148",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-0ca340aec3ef0c5f8a5f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10575"
+      ],
+      "card_id": "oracle-l5r-10575",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10575",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-0cdccbab4cf62cef35e5": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0d3f59f149f70ee9b2b1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10938"
+      ],
+      "card_id": "oracle-l5r-10938",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10938",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-0db330cb03019b16d8a1": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0dd7a49d81f6ab03db3c": {
+      "candidate_card_ids": [
+        "oracle-l5r-4224"
+      ],
+      "card_id": "oracle-l5r-4224",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4224",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-0e455e81112498b3447a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10735"
+      ],
+      "card_id": "oracle-l5r-10735",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10735",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-0ea35b2095cdbb8aea87": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0eb68b1a450a76aa3e28": {
+      "candidate_card_ids": [
+        "oracle-l5r-10701"
+      ],
+      "card_id": "oracle-l5r-10701",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10701",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-0ed42678068640b8f39e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0f46312c1c63e5ad5577": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-0f610837342da3adac9c": {
+      "candidate_card_ids": [
+        "oracle-l5r-6338"
+      ],
+      "card_id": "oracle-l5r-6338",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6338",
+      "status": "resolved",
+      "types": [
+        "Ring"
+      ]
+    },
+    "card-ref-0f64365c9daa6dd95b37": {
+      "candidate_card_ids": [
+        "oracle-l5r-10825"
+      ],
+      "card_id": "oracle-l5r-10825",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10825",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-1050f9eae64b7415a529": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-10b89698fa871c066f2d": {
+      "candidate_card_ids": [
+        "oracle-l5r-6335"
+      ],
+      "card_id": "oracle-l5r-6335",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6335",
+      "status": "resolved",
+      "types": [
+        "Ring"
+      ]
+    },
+    "card-ref-10dab7060886fcf6160d": {
+      "candidate_card_ids": [
+        "oracle-l5r-6302"
+      ],
+      "card_id": "oracle-l5r-6302",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6302",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-10e657b7c01c4da81249": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-11509363c3a499dd640b": {
+      "candidate_card_ids": [
+        "oracle-l5r-7949"
+      ],
+      "card_id": "oracle-l5r-7949",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7949",
+      "status": "resolved",
+      "types": [
+        "Stronghold"
+      ]
+    },
+    "card-ref-115a7031bd4b38130d35": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-11b38df062791e1de573": {
+      "candidate_card_ids": [
+        "oracle-l5r-10932"
+      ],
+      "card_id": "oracle-l5r-10932",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10932",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-129966f3ed99476cd620": {
+      "candidate_card_ids": [
+        "oracle-l5r-10754"
+      ],
+      "card_id": "oracle-l5r-10754",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10754",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-136e84e9cc6a85c76088": {
+      "candidate_card_ids": [
+        "oracle-l5r-2342"
+      ],
+      "card_id": "oracle-l5r-2342",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2342",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-142e5f749ef6803e19e3": {
+      "candidate_card_ids": [
+        "oracle-l5r-10714"
+      ],
+      "card_id": "oracle-l5r-10714",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10714",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-152135818eadc14e8b6c": {
+      "candidate_card_ids": [
+        "oracle-l5r-7428"
+      ],
+      "card_id": "oracle-l5r-7428",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7428",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-157ff262ae3ef39aefcc": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-15839199740b17f90efc": {
+      "candidate_card_ids": [
+        "oracle-l5r-8729"
+      ],
+      "card_id": "oracle-l5r-8729",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8729",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-15fceae94899c9bbea61": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-16335a456b16155727a8": {
+      "candidate_card_ids": [
+        "oracle-l5r-5457"
+      ],
+      "card_id": "oracle-l5r-5457",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5457",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-168468dd5ba978989172": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-17125616d4750ef309e2": {
+      "candidate_card_ids": [
+        "oracle-l5r-10889"
+      ],
+      "card_id": "oracle-l5r-10889",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10889",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-17bec1756922aad1b11b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10434"
+      ],
+      "card_id": "oracle-l5r-10434",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10434",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-188c2a7f6170ec80c82d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-18fd0159a47e7ff4090a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10964"
+      ],
+      "card_id": "oracle-l5r-10964",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10964",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-1966405e1645b4a7eecd": {
+      "candidate_card_ids": [
+        "oracle-l5r-7303"
+      ],
+      "card_id": "oracle-l5r-7303",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7303",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-19d638066b6faa57b9ca": {
+      "candidate_card_ids": [
+        "oracle-l5r-1106"
+      ],
+      "card_id": "oracle-l5r-1106",
+      "clans": [],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1106",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-1a20ea62f7592dd732fe": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-1a50921b33468282c6c4": {
+      "candidate_card_ids": [
+        "oracle-l5r-10723"
+      ],
+      "card_id": "oracle-l5r-10723",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10723",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-1afe1c876a5c37e12f19": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-1bbde420033a303efd13": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-1be0a5a18a96c92af728": {
+      "candidate_card_ids": [
+        "oracle-l5r-10874"
+      ],
+      "card_id": "oracle-l5r-10874",
+      "clans": [
+        "Spider"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10874",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-1c46d0ae068c691e6fc3": {
+      "candidate_card_ids": [
+        "oracle-l5r-2445"
+      ],
+      "card_id": "oracle-l5r-2445",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2445",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-1c933e395ed6b83bac63": {
+      "candidate_card_ids": [
+        "oracle-l5r-7423"
+      ],
+      "card_id": "oracle-l5r-7423",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7423",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-1ceaa69ed11175b96ab1": {
+      "candidate_card_ids": [
+        "oracle-l5r-5423"
+      ],
+      "card_id": "oracle-l5r-5423",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5423",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-1cf531e9ed9cd89532b4": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-1d71b643370fcbe5ad3d": {
+      "candidate_card_ids": [
+        "oracle-l5r-4658"
+      ],
+      "card_id": "oracle-l5r-4658",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4658",
+      "status": "resolved",
+      "types": [
+        "Celestial"
+      ]
+    },
+    "card-ref-1ddd94abb7f1fb06230f": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-1e040057b5aa96b16a68": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-2021956bb62595eca517": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-20741d7553f205b0ca8b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10862"
+      ],
+      "card_id": "oracle-l5r-10862",
+      "clans": [
+        "Phoenix"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10862",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-211a7e4b6f4769a3ad77": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-21669d000e51282b0f74": {
+      "candidate_card_ids": [
+        "oracle-l5r-10861"
+      ],
+      "card_id": "oracle-l5r-10861",
+      "clans": [
+        "Phoenix"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10861",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-21ece919147f7e3338d8": {
+      "candidate_card_ids": [
+        "oracle-l5r-10756"
+      ],
+      "card_id": "oracle-l5r-10756",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10756",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-22340ad9292336f9d671": {
+      "candidate_card_ids": [
+        "oracle-l5r-6209"
+      ],
+      "card_id": "oracle-l5r-6209",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6209",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-2258ed43162aa027ed4b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10578"
+      ],
+      "card_id": "oracle-l5r-10578",
+      "clans": [
+        "Lion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10578",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-226c91df158684dbdc17": {
+      "candidate_card_ids": [
+        "oracle-l5r-10722"
+      ],
+      "card_id": "oracle-l5r-10722",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10722",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-22aa17d4427cceb27c7e": {
+      "candidate_card_ids": [
+        "oracle-l5r-6339"
+      ],
+      "card_id": "oracle-l5r-6339",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6339",
+      "status": "resolved",
+      "types": [
+        "Ring"
+      ]
+    },
+    "card-ref-231c5190d092a14b6b67": {
+      "candidate_card_ids": [
+        "oracle-l5r-5861"
+      ],
+      "card_id": "oracle-l5r-5861",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5861",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-23202eaa3bffb3e31275": {
+      "candidate_card_ids": [
+        "oracle-l5r-10645"
+      ],
+      "card_id": "oracle-l5r-10645",
+      "clans": [
+        "Mantis"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10645",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-254903fd3d47e1969f56": {
+      "candidate_card_ids": [
+        "oracle-l5r-10693"
+      ],
+      "card_id": "oracle-l5r-10693",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10693",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-25653dbe624162784df9": {
+      "candidate_card_ids": [
+        "oracle-l5r-5181"
+      ],
+      "card_id": "oracle-l5r-5181",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5181",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-2631ff2ba4254d5fe8d1": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-2668ae124a0a10e32d02": {
+      "candidate_card_ids": [
+        "oracle-l5r-61"
+      ],
+      "card_id": "oracle-l5r-61",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=61",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-27379be9c5a62a572729": {
+      "candidate_card_ids": [
+        "oracle-l5r-10719"
+      ],
+      "card_id": "oracle-l5r-10719",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10719",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-282dc0dc681e3d0510e2": {
+      "candidate_card_ids": [
+        "oracle-l5r-10910"
+      ],
+      "card_id": "oracle-l5r-10910",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10910",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-29280e5ec5864a8885c3": {
+      "candidate_card_ids": [
+        "oracle-l5r-3774"
+      ],
+      "card_id": "oracle-l5r-3774",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3774",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-29d8d925a4511cf5a0b9": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-2b387683a688ee3504d9": {
+      "candidate_card_ids": [
+        "oracle-l5r-2027"
+      ],
+      "card_id": "oracle-l5r-2027",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2027",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-2b6f946c637d579041f8": {
+      "candidate_card_ids": [
+        "oracle-l5r-9083"
+      ],
+      "card_id": "oracle-l5r-9083",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9083",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-2bbfb8befb0520df2b82": {
+      "candidate_card_ids": [
+        "oracle-l5r-10833"
+      ],
+      "card_id": "oracle-l5r-10833",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10833",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-2bf7d65fe7afcd6c0b19": {
+      "candidate_card_ids": [
+        "oracle-l5r-6086"
+      ],
+      "card_id": "oracle-l5r-6086",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6086",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-2c0b68cd01996b91c63d": {
+      "candidate_card_ids": [
+        "oracle-l5r-6290"
+      ],
+      "card_id": "oracle-l5r-6290",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6290",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-2c0fa824e8a91e58847d": {
+      "candidate_card_ids": [
+        "oracle-l5r-10891"
+      ],
+      "card_id": "oracle-l5r-10891",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10891",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-2cbf6362b7552f373d53": {
+      "candidate_card_ids": [
+        "oracle-l5r-8347"
+      ],
+      "card_id": "oracle-l5r-8347",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8347",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-2e3d8c307c55fbbea530": {
+      "candidate_card_ids": [
+        "oracle-l5r-4496"
+      ],
+      "card_id": "oracle-l5r-4496",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4496",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-2e90f1af589bde2c5e98": {
+      "candidate_card_ids": [
+        "oracle-l5r-10824"
+      ],
+      "card_id": "oracle-l5r-10824",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10824",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-2ea077994c95589ea4e3": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-2f59fda3a5c31b8a2fd2": {
+      "candidate_card_ids": [
+        "oracle-l5r-6333"
+      ],
+      "card_id": "oracle-l5r-6333",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6333",
+      "status": "resolved",
+      "types": [
+        "Ring"
+      ]
+    },
+    "card-ref-30d9524785a2d1ba5df1": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-31227bc793f59af52ec3": {
+      "candidate_card_ids": [
+        "oracle-l5r-9061"
+      ],
+      "card_id": "oracle-l5r-9061",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9061",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-326452c89c7f32a171ae": {
+      "candidate_card_ids": [
+        "oracle-l5r-10035"
+      ],
+      "card_id": "oracle-l5r-10035",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10035",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-3265d9694f44d98fa1d5": {
+      "candidate_card_ids": [
+        "oracle-l5r-10950"
+      ],
+      "card_id": "oracle-l5r-10950",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10950",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-32da2000ea6c10ded5b4": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3326214831a48f2f1988": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3398078a13d036b3d796": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-347edb3b750aedfa3414": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-35070b12dc3cc8f157d6": {
+      "candidate_card_ids": [
+        "oracle-l5r-6490"
+      ],
+      "card_id": "oracle-l5r-6490",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6490",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-35ee345b0f74a39e591a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10222"
+      ],
+      "card_id": "oracle-l5r-10222",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10222",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-3613f5296372f3116d63": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-368ae8da0dd914671cc3": {
+      "candidate_card_ids": [
+        "oracle-l5r-7483"
+      ],
+      "card_id": "oracle-l5r-7483",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7483",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-36a6603e817d4b724771": {
+      "candidate_card_ids": [
+        "oracle-l5r-2493"
+      ],
+      "card_id": "oracle-l5r-2493",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2493",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-36f4023c42b3c4034a28": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3751720c660e05f94b21": {
+      "candidate_card_ids": [
+        "oracle-l5r-5982"
+      ],
+      "card_id": "oracle-l5r-5982",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5982",
+      "status": "resolved",
+      "types": [
+        "Stronghold"
+      ]
+    },
+    "card-ref-37ae0e3369b765529b64": {
+      "candidate_card_ids": [
+        "oracle-l5r-10153"
+      ],
+      "card_id": "oracle-l5r-10153",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10153",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-384d6dcd2e650d072e93": {
+      "candidate_card_ids": [
+        "oracle-l5r-2070"
+      ],
+      "card_id": "oracle-l5r-2070",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2070",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-3a69a1943f4ab1870c62": {
+      "candidate_card_ids": [
+        "oracle-l5r-2179"
+      ],
+      "card_id": "oracle-l5r-2179",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2179",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-3b1e76f0f1ec75b3a9a2": {
+      "candidate_card_ids": [
+        "oracle-l5r-8127"
+      ],
+      "card_id": "oracle-l5r-8127",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8127",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-3b302d99f88fe33af19f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10951"
+      ],
+      "card_id": "oracle-l5r-10951",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10951",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-3bb516b11e5cab94f181": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3c3f5ed3432c1d2207fd": {
+      "candidate_card_ids": [
+        "oracle-l5r-10033"
+      ],
+      "card_id": "oracle-l5r-10033",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10033",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-3c9d9c81e954695cfc22": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3cc88a7d0f23c50d37cb": {
+      "candidate_card_ids": [
+        "oracle-l5r-2283"
+      ],
+      "card_id": "oracle-l5r-2283",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2283",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-3dccec812c090c917d33": {
+      "candidate_card_ids": [
+        "oracle-l5r-10711"
+      ],
+      "card_id": "oracle-l5r-10711",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10711",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-3e27d7183409eb3ba465": {
+      "candidate_card_ids": [
+        "oracle-l5r-2878"
+      ],
+      "card_id": "oracle-l5r-2878",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2878",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-3ea7484a315344cd8fd7": {
+      "candidate_card_ids": [
+        "oracle-l5r-8550"
+      ],
+      "card_id": "oracle-l5r-8550",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8550",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-3ed47b5d0549a18b4f57": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-3ee8fbdab0e0744631a7": {
+      "candidate_card_ids": [
+        "oracle-l5r-3413"
+      ],
+      "card_id": "oracle-l5r-3413",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3413",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-4055f3a34422d850063a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10747"
+      ],
+      "card_id": "oracle-l5r-10747",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10747",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-41019ee7240c1c0eead7": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-411f107e6bfbe0711029": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-414c286a5e97835c7270": {
+      "candidate_card_ids": [
+        "oracle-l5r-10537"
+      ],
+      "card_id": "oracle-l5r-10537",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10537",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-4157d4181316429c670e": {
+      "candidate_card_ids": [
+        "oracle-l5r-9020"
+      ],
+      "card_id": "oracle-l5r-9020",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9020",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-43267c63fd0ba597883c": {
+      "candidate_card_ids": [
+        "oracle-l5r-2784"
+      ],
+      "card_id": "oracle-l5r-2784",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2784",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-43ae99886a2a30b3eb30": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-43e075daf5fc0970ab89": {
+      "candidate_card_ids": [
+        "oracle-l5r-679"
+      ],
+      "card_id": "oracle-l5r-679",
+      "clans": [],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=679",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-44efc8ba0b2533152df0": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-4555d2301b09087e1384": {
+      "candidate_card_ids": [
+        "oracle-l5r-10630"
+      ],
+      "card_id": "oracle-l5r-10630",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10630",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-459cc07220d24923ca98": {
+      "candidate_card_ids": [
+        "oracle-l5r-10038"
+      ],
+      "card_id": "oracle-l5r-10038",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10038",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-45ba2cd47b3e884a4ab2": {
+      "candidate_card_ids": [
+        "oracle-l5r-10832"
+      ],
+      "card_id": "oracle-l5r-10832",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10832",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-45ee1b642b9db2470c1b": {
+      "candidate_card_ids": [
+        "oracle-l5r-5178"
+      ],
+      "card_id": "oracle-l5r-5178",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5178",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-46287e2b1405ec50cf3d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-470d2aec0c25f4f1fda8": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-4773dd6d59005a051cef": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-4778df410abdbfe4d652": {
+      "candidate_card_ids": [
+        "oracle-l5r-2276"
+      ],
+      "card_id": "oracle-l5r-2276",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2276",
+      "status": "resolved",
+      "types": [
+        "Celestial"
+      ]
+    },
+    "card-ref-47860d9fafcdd6e54053": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-48bd0b6984211d8f422d": {
+      "candidate_card_ids": [
+        "oracle-l5r-6727"
+      ],
+      "card_id": "oracle-l5r-6727",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6727",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-4b62d18dff9eef4144da": {
+      "candidate_card_ids": [
+        "oracle-l5r-10175"
+      ],
+      "card_id": "oracle-l5r-10175",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10175",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-4bfa49f26d9fd439dd3e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-4c9c3490c48df1b4ad77": {
+      "candidate_card_ids": [
+        "oracle-l5r-2332"
+      ],
+      "card_id": "oracle-l5r-2332",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2332",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-4cfea6df7b8928dd61ec": {
+      "candidate_card_ids": [
+        "oracle-l5r-1880"
+      ],
+      "card_id": "oracle-l5r-1880",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1880",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-507e1913f949adf616ec": {
+      "candidate_card_ids": [
+        "oracle-l5r-6265"
+      ],
+      "card_id": "oracle-l5r-6265",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6265",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-51c23e0b0747c556f226": {
+      "candidate_card_ids": [
+        "oracle-l5r-9449"
+      ],
+      "card_id": "oracle-l5r-9449",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9449",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-52304d8efc7d25b93ba8": {
+      "candidate_card_ids": [
+        "oracle-l5r-1135"
+      ],
+      "card_id": "oracle-l5r-1135",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1135",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-5350a239807b18c3b02e": {
+      "candidate_card_ids": [
+        "oracle-l5r-10760"
+      ],
+      "card_id": "oracle-l5r-10760",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10760",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-556b8e6b9c420b9ca742": {
+      "candidate_card_ids": [
+        "oracle-l5r-10830"
+      ],
+      "card_id": "oracle-l5r-10830",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10830",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-5658ca3ab20f048cba9b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10927"
+      ],
+      "card_id": "oracle-l5r-10927",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10927",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-585020f48117c63c6e58": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-592629ae562c5962c206": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-5b8126ba3aae8606c44b": {
+      "candidate_card_ids": [
+        "oracle-l5r-3250"
+      ],
+      "card_id": "oracle-l5r-3250",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3250",
+      "status": "resolved",
+      "types": [
+        "Celestial"
+      ]
+    },
+    "card-ref-5bc679f12a4635fa2f84": {
+      "candidate_card_ids": [
+        "oracle-l5r-7494"
+      ],
+      "card_id": "oracle-l5r-7494",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7494",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-5c4bdfe6898dd5349b86": {
+      "candidate_card_ids": [
+        "oracle-l5r-10743"
+      ],
+      "card_id": "oracle-l5r-10743",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10743",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-5d574b52f1dfe891ba47": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-5e2ced176e6f437db1b9": {
+      "candidate_card_ids": [
+        "oracle-l5r-9877"
+      ],
+      "card_id": "oracle-l5r-9877",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9877",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-5edbd0d27471775dd3dc": {
+      "candidate_card_ids": [
+        "oracle-l5r-10137"
+      ],
+      "card_id": "oracle-l5r-10137",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10137",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-609e1ba65507b7822b4b": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-61fcd1b3ee233547a529": {
+      "candidate_card_ids": [
+        "oracle-l5r-3307"
+      ],
+      "card_id": "oracle-l5r-3307",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3307",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-62c1c14325fbb571d759": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-6310992741f0fe671c0a": {
+      "candidate_card_ids": [
+        "oracle-l5r-7311"
+      ],
+      "card_id": "oracle-l5r-7311",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7311",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-652243c9adf82339bb44": {
+      "candidate_card_ids": [
+        "oracle-l5r-10746"
+      ],
+      "card_id": "oracle-l5r-10746",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10746",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-69ecc2eb0326fbffaddc": {
+      "candidate_card_ids": [
+        "oracle-l5r-2011"
+      ],
+      "card_id": "oracle-l5r-2011",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2011",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-6e58eb19d93d62dd819e": {
+      "candidate_card_ids": [
+        "oracle-l5r-10034"
+      ],
+      "card_id": "oracle-l5r-10034",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10034",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-6e6ffb7647e3b71b5988": {
+      "candidate_card_ids": [
+        "oracle-l5r-82"
+      ],
+      "card_id": "oracle-l5r-82",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=82",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-6e9c66e1baf69e8b34a9": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-6f2fbb3fac60ee5cc57c": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-6fc4727cea1c3907c92b": {
+      "candidate_card_ids": [
+        "oracle-l5r-9086"
+      ],
+      "card_id": "oracle-l5r-9086",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9086",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-701e7716252f8fae23f8": {
+      "candidate_card_ids": [
+        "oracle-l5r-10029"
+      ],
+      "card_id": "oracle-l5r-10029",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10029",
+      "status": "resolved",
+      "types": [
+        "Event"
+      ]
+    },
+    "card-ref-70990383ae4588a8cdf7": {
+      "candidate_card_ids": [
+        "oracle-l5r-10613"
+      ],
+      "card_id": "oracle-l5r-10613",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10613",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-71bf8be94a6594fbddc4": {
+      "candidate_card_ids": [
+        "oracle-l5r-916"
+      ],
+      "card_id": "oracle-l5r-916",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=916",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-7235c157b9bcb6984372": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7272db75dc4fa858267b": {
+      "candidate_card_ids": [
+        "oracle-l5r-6374"
+      ],
+      "card_id": "oracle-l5r-6374",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6374",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-7306c0d5a5ad8b477348": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-73be01b982eaafb4c017": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-73e7c2aae14d2a498256": {
+      "candidate_card_ids": [
+        "oracle-l5r-3044"
+      ],
+      "card_id": "oracle-l5r-3044",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3044",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-73f551984763a761fb4c": {
+      "candidate_card_ids": [
+        "oracle-l5r-10057"
+      ],
+      "card_id": "oracle-l5r-10057",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10057",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-74005014a98763ef756a": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7514f415aadb7c4b0e58": {
+      "candidate_card_ids": [
+        "oracle-l5r-9198"
+      ],
+      "card_id": "oracle-l5r-9198",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9198",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-758a413a7ff98020e849": {
+      "candidate_card_ids": [
+        "oracle-l5r-10963"
+      ],
+      "card_id": "oracle-l5r-10963",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10963",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-76669670fc885fcad877": {
+      "candidate_card_ids": [
+        "oracle-l5r-10580"
+      ],
+      "card_id": "oracle-l5r-10580",
+      "clans": [
+        "Phoenix"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10580",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-76a66d812d186657ee4c": {
+      "candidate_card_ids": [
+        "oracle-l5r-9378"
+      ],
+      "card_id": "oracle-l5r-9378",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9378",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-77164a5d03820201b56c": {
+      "candidate_card_ids": [
+        "oracle-l5r-10124"
+      ],
+      "card_id": "oracle-l5r-10124",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10124",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-7729d6c4fbe855bde3fd": {
+      "candidate_card_ids": [
+        "oracle-l5r-10887"
+      ],
+      "card_id": "oracle-l5r-10887",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10887",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-7753fc1e24438371171b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10905"
+      ],
+      "card_id": "oracle-l5r-10905",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10905",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-78197258747570aa1a56": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-792dd67b3e7b0f1fd70a": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7958682d0e330d934f9d": {
+      "candidate_card_ids": [
+        "oracle-l5r-7996"
+      ],
+      "card_id": "oracle-l5r-7996",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7996",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-79a2b0c25383582d9c13": {
+      "candidate_card_ids": [
+        "oracle-l5r-10102"
+      ],
+      "card_id": "oracle-l5r-10102",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10102",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-79e1a66eb28dad260f87": {
+      "candidate_card_ids": [
+        "oracle-l5r-10949"
+      ],
+      "card_id": "oracle-l5r-10949",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10949",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-79ebfb1af699d67e7115": {
+      "candidate_card_ids": [
+        "oracle-l5r-2867"
+      ],
+      "card_id": "oracle-l5r-2867",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2867",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-7a14bfcb78307aee9a18": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7add768b5fe31fc7b483": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7aea7f07b5dd3dc1fa1b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10658"
+      ],
+      "card_id": "oracle-l5r-10658",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10658",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-7b0ba9e4ec9745032812": {
+      "candidate_card_ids": [
+        "oracle-l5r-6567"
+      ],
+      "card_id": "oracle-l5r-6567",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6567",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-7db80ebe7ee9845dd2e0": {
+      "candidate_card_ids": [
+        "oracle-l5r-10840"
+      ],
+      "card_id": "oracle-l5r-10840",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10840",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-7dbf2c124c2a2b428475": {
+      "candidate_card_ids": [
+        "oracle-l5r-9939"
+      ],
+      "card_id": "oracle-l5r-9939",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9939",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-7e074c18bafe6e9033a4": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7e2397974e37f9cdce91": {
+      "candidate_card_ids": [
+        "oracle-l5r-6334"
+      ],
+      "card_id": "oracle-l5r-6334",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6334",
+      "status": "resolved",
+      "types": [
+        "Ring"
+      ]
+    },
+    "card-ref-7e27a8e0017e96b79c0f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10615"
+      ],
+      "card_id": "oracle-l5r-10615",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10615",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-7ed83df888d34079255f": {
+      "candidate_card_ids": [
+        "oracle-l5r-9085"
+      ],
+      "card_id": "oracle-l5r-9085",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Explicit spelling alias: Explicitly reviewed spelling difference: the supplied Unicorn Maidens list omits the hyphen in Liu-Xeung. Exact family, given-name parts and Experienced 1 agree. Original input remains unchanged.",
+      "source_url": "https://oracleofthevoid.com/#cardid=9085",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-7f37b12968137e1fc597": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-7fb7c6b8f07530501d2c": {
+      "candidate_card_ids": [
+        "oracle-l5r-9800"
+      ],
+      "card_id": "oracle-l5r-9800",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9800",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-7fc2cd571c9305222db3": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-808338906a2bd2a21a40": {
+      "candidate_card_ids": [
+        "oracle-l5r-8141"
+      ],
+      "card_id": "oracle-l5r-8141",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8141",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-8174f158c5a46e782ed1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10920"
+      ],
+      "card_id": "oracle-l5r-10920",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10920",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-820a655c58262d05ee38": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-824083247bb94e5fb445": {
+      "candidate_card_ids": [
+        "oracle-l5r-9922"
+      ],
+      "card_id": "oracle-l5r-9922",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9922",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-825b98fcbc09eecba260": {
+      "candidate_card_ids": [
+        "oracle-l5r-10838"
+      ],
+      "card_id": "oracle-l5r-10838",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10838",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-83d88075cfc1d8067e7c": {
+      "candidate_card_ids": [
+        "oracle-l5r-10842"
+      ],
+      "card_id": "oracle-l5r-10842",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10842",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-84343ab2054c54c81770": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-847b3f447c3f78e3c8a2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-84a773edc7683c2fb25d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-855b65df07519486c088": {
+      "candidate_card_ids": [
+        "oracle-l5r-446"
+      ],
+      "card_id": "oracle-l5r-446",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=446",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-857af75ce2e51c99b401": {
+      "candidate_card_ids": [
+        "oracle-l5r-10044"
+      ],
+      "card_id": "oracle-l5r-10044",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10044",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-85bb0744918d57a872db": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-85f2ae35e2d4c70a752f": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-869d05ec9008880bfbae": {
+      "candidate_card_ids": [
+        "oracle-l5r-1875"
+      ],
+      "card_id": "oracle-l5r-1875",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1875",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-86e9815650d2ca34190e": {
+      "candidate_card_ids": [
+        "oracle-l5r-3730"
+      ],
+      "card_id": "oracle-l5r-3730",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3730",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-86fd1095ef8817e28409": {
+      "candidate_card_ids": [
+        "oracle-l5r-10214"
+      ],
+      "card_id": "oracle-l5r-10214",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10214",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-87e3ad8e84a06c9db19c": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-89509910eba66a9218c3": {
+      "candidate_card_ids": [
+        "oracle-l5r-10826"
+      ],
+      "card_id": "oracle-l5r-10826",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10826",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-89ab752b01d7fea9e8c4": {
+      "candidate_card_ids": [
+        "oracle-l5r-10111"
+      ],
+      "card_id": "oracle-l5r-10111",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10111",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-8a24b00ad0e2921817d1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10548"
+      ],
+      "card_id": "oracle-l5r-10548",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10548",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-8b22dbe9b078e479fb37": {
+      "candidate_card_ids": [
+        "oracle-l5r-1914"
+      ],
+      "card_id": "oracle-l5r-1914",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1914",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-8b71d3d8957d1fd391a6": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-8e4694f9b3b1f3cde0ea": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-8e5a30616f312b679ae2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-8eb8b35f3e931d9e6b50": {
+      "candidate_card_ids": [
+        "oracle-l5r-9941"
+      ],
+      "card_id": "oracle-l5r-9941",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9941",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-8f841cd4121aad844540": {
+      "candidate_card_ids": [
+        "oracle-l5r-10213"
+      ],
+      "card_id": "oracle-l5r-10213",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10213",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-9190c301b60cdfe67f21": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-9201350771eb78b508f0": {
+      "candidate_card_ids": [
+        "oracle-l5r-10835"
+      ],
+      "card_id": "oracle-l5r-10835",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10835",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-92bed46655cf4544d749": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-93972adbd1c6ebe6ab86": {
+      "candidate_card_ids": [
+        "oracle-l5r-10894"
+      ],
+      "card_id": "oracle-l5r-10894",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10894",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-9398dbd1d755fabe4e80": {
+      "candidate_card_ids": [
+        "oracle-l5r-1497"
+      ],
+      "card_id": "oracle-l5r-1497",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1497",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-93d5acb105ac89edf21e": {
+      "candidate_card_ids": [
+        "oracle-l5r-6247"
+      ],
+      "card_id": "oracle-l5r-6247",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6247",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-940edd4afa4e32fe26ee": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-94393cb997c9341fd369": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-95a523b63ae84f95baf0": {
+      "candidate_card_ids": [
+        "oracle-l5r-6314"
+      ],
+      "card_id": "oracle-l5r-6314",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6314",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-96ae2428f31d502f2b85": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-96dd046bccc3c19af864": {
+      "candidate_card_ids": [
+        "oracle-l5r-3743"
+      ],
+      "card_id": "oracle-l5r-3743",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3743",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-98d13bab799c4dc60053": {
+      "candidate_card_ids": [
+        "oracle-l5r-10890"
+      ],
+      "card_id": "oracle-l5r-10890",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10890",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-99799ce015adc4b618a1": {
+      "candidate_card_ids": [
+        "oracle-l5r-4840"
+      ],
+      "card_id": "oracle-l5r-4840",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4840",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-99c1638930077fe26623": {
+      "candidate_card_ids": [
+        "oracle-l5r-7223"
+      ],
+      "card_id": "oracle-l5r-7223",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7223",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-99f6dedb8e23ae4d15b5": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-9a0c8b6704cdafa4bdd1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10045"
+      ],
+      "card_id": "oracle-l5r-10045",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10045",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-9bb97b8a477e371610a2": {
+      "candidate_card_ids": [
+        "oracle-l5r-10738"
+      ],
+      "card_id": "oracle-l5r-10738",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10738",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-9ca9d4c22653f81bc51e": {
+      "candidate_card_ids": [
+        "oracle-l5r-9866"
+      ],
+      "card_id": "oracle-l5r-9866",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9866",
+      "status": "resolved",
+      "types": [
+        "Region"
+      ]
+    },
+    "card-ref-9e484f3bf2f33fed56cc": {
+      "candidate_card_ids": [
+        "oracle-l5r-10189"
+      ],
+      "card_id": "oracle-l5r-10189",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10189",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-9f7652404ef70b0f24de": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-9fcf80719db8b3ab4ebb": {
+      "candidate_card_ids": [
+        "oracle-l5r-2181"
+      ],
+      "card_id": "oracle-l5r-2181",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2181",
+      "status": "resolved",
+      "types": [
+        "Celestial"
+      ]
+    },
+    "card-ref-a0436d0cd4070c74c91c": {
+      "candidate_card_ids": [
+        "oracle-l5r-4167"
+      ],
+      "card_id": "oracle-l5r-4167",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4167",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a0494d525141d19921a9": {
+      "candidate_card_ids": [
+        "oracle-l5r-10858"
+      ],
+      "card_id": "oracle-l5r-10858",
+      "clans": [
+        "Mantis"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10858",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a08a71ae1fb268688054": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-a09ecc4e4509a17b0b32": {
+      "candidate_card_ids": [
+        "oracle-l5r-10732"
+      ],
+      "card_id": "oracle-l5r-10732",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10732",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-a13ef9795ae6ade42373": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-a16bf815c385a307b3c3": {
+      "candidate_card_ids": [
+        "oracle-l5r-6258"
+      ],
+      "card_id": "oracle-l5r-6258",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6258",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-a214ea0936bdab0249eb": {
+      "candidate_card_ids": [
+        "oracle-l5r-2118"
+      ],
+      "card_id": "oracle-l5r-2118",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2118",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a2b9cb9abc8e985a18ef": {
+      "candidate_card_ids": [
+        "oracle-l5r-1273"
+      ],
+      "card_id": "oracle-l5r-1273",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1273",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-a3409e2420c0763711b5": {
+      "candidate_card_ids": [
+        "oracle-l5r-10576"
+      ],
+      "card_id": "oracle-l5r-10576",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10576",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a388f67735787a4d0f01": {
+      "candidate_card_ids": [
+        "oracle-l5r-10957"
+      ],
+      "card_id": "oracle-l5r-10957",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10957",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-a3912729292a8eef14fd": {
+      "candidate_card_ids": [
+        "oracle-l5r-10433"
+      ],
+      "card_id": "oracle-l5r-10433",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10433",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-a3ae78d4e7ae6ce4a7f4": {
+      "candidate_card_ids": [
+        "oracle-l5r-10586"
+      ],
+      "card_id": "oracle-l5r-10586",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10586",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a4a05173646e76f00d2d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-a6a26084aeeee2894b0b": {
+      "candidate_card_ids": [
+        "oracle-l5r-7291"
+      ],
+      "card_id": "oracle-l5r-7291",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7291",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-a7145e54ec724cf8bdc7": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-a8db02b3bf8f96c72f00": {
+      "candidate_card_ids": [
+        "oracle-l5r-9443"
+      ],
+      "card_id": "oracle-l5r-9443",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9443",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-a9042560839c83305848": {
+      "candidate_card_ids": [
+        "oracle-l5r-662"
+      ],
+      "card_id": "oracle-l5r-662",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=662",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-aa98498a8e8d8aca780d": {
+      "candidate_card_ids": [
+        "oracle-l5r-3694"
+      ],
+      "card_id": "oracle-l5r-3694",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3694",
+      "status": "resolved",
+      "types": [
+        "Event"
+      ]
+    },
+    "card-ref-aaa76bae09a24f1f2e65": {
+      "candidate_card_ids": [
+        "oracle-l5r-9107"
+      ],
+      "card_id": "oracle-l5r-9107",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9107",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-acb278a93731ff4e4e4e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-adf8fa69c8758eb7853a": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-ae43dc2b9220202a8ec3": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-ae74692a831579382569": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-afe417ada0eeca65530e": {
+      "candidate_card_ids": [
+        "oracle-l5r-10582"
+      ],
+      "card_id": "oracle-l5r-10582",
+      "clans": [
+        "Spider"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10582",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b05e971e973bb982ebed": {
+      "candidate_card_ids": [
+        "oracle-l5r-9933"
+      ],
+      "card_id": "oracle-l5r-9933",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9933",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-b0b0538ccb216ffb972f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10611"
+      ],
+      "card_id": "oracle-l5r-10611",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10611",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-b13c52bdf79b1efbdeb9": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b1df91f34c33ce38ec7d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b1efbd3d9b357733ff78": {
+      "candidate_card_ids": [
+        "oracle-l5r-8262"
+      ],
+      "card_id": "oracle-l5r-8262",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8262",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-b1fb7c3e860da6b48dd3": {
+      "candidate_card_ids": [
+        "oracle-l5r-853"
+      ],
+      "card_id": "oracle-l5r-853",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=853",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b2f9b23b054abd0a4ad1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10869"
+      ],
+      "card_id": "oracle-l5r-10869",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10869",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b36252f7648e9945747e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b39b2fb40bdc6923e317": {
+      "candidate_card_ids": [
+        "oracle-l5r-5087"
+      ],
+      "card_id": "oracle-l5r-5087",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5087",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b432de12782436eacf25": {
+      "candidate_card_ids": [
+        "oracle-l5r-5027"
+      ],
+      "card_id": "oracle-l5r-5027",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5027",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-b43b018039fb2d04d570": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b44acbde3e5add1184a6": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b53d646b2a0d35a1a13d": {
+      "candidate_card_ids": [
+        "oracle-l5r-1682"
+      ],
+      "card_id": "oracle-l5r-1682",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1682",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b592db42e86f652a043b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10828"
+      ],
+      "card_id": "oracle-l5r-10828",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10828",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-b619bb28c4fefa209301": {
+      "candidate_card_ids": [
+        "oracle-l5r-10219"
+      ],
+      "card_id": "oracle-l5r-10219",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10219",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-b6bb3f04ca40e333eb07": {
+      "candidate_card_ids": [
+        "oracle-l5r-1045"
+      ],
+      "card_id": "oracle-l5r-1045",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1045",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-b6e4e6084d3b176cd31e": {
+      "candidate_card_ids": [
+        "oracle-l5r-127"
+      ],
+      "card_id": "oracle-l5r-127",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=127",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-b735268e3c445f37380a": {
+      "candidate_card_ids": [
+        "oracle-l5r-5112"
+      ],
+      "card_id": "oracle-l5r-5112",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5112",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b7e1b8fa552e2770cfac": {
+      "candidate_card_ids": [
+        "oracle-l5r-9094"
+      ],
+      "card_id": "oracle-l5r-9094",
+      "clans": [
+        "Unicorn"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9094",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-b7e6d1e1cbf61c0c7545": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b84b536272b0de552d0d": {
+      "candidate_card_ids": [
+        "oracle-l5r-6984"
+      ],
+      "card_id": "oracle-l5r-6984",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6984",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-b8cc6720bd26e39548bd": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-b92e0c7267ae8e2246e1": {
+      "candidate_card_ids": [
+        "oracle-l5r-10896"
+      ],
+      "card_id": "oracle-l5r-10896",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10896",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-b986eae3a7c33534d6a7": {
+      "candidate_card_ids": [
+        "oracle-l5r-2492"
+      ],
+      "card_id": "oracle-l5r-2492",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2492",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-bb16f311ff37153c4ab2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-bb4d1a9d459cca7836f4": {
+      "candidate_card_ids": [
+        "oracle-l5r-2463"
+      ],
+      "card_id": "oracle-l5r-2463",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2463",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-bb95de4c106730c7fac0": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-bbc69d0200dbbd888430": {
+      "candidate_card_ids": [
+        "oracle-l5r-5668"
+      ],
+      "card_id": "oracle-l5r-5668",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5668",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-bc4d36873a6f2855087c": {
+      "candidate_card_ids": [
+        "oracle-l5r-7265"
+      ],
+      "card_id": "oracle-l5r-7265",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7265",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-bcdb82b7cf23d0974608": {
+      "candidate_card_ids": [
+        "oracle-l5r-10125"
+      ],
+      "card_id": "oracle-l5r-10125",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10125",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-bd26055d8ce410a6dd4e": {
+      "candidate_card_ids": [
+        "oracle-l5r-9464"
+      ],
+      "card_id": "oracle-l5r-9464",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9464",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-bde267cad7ed3c65632d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-be9758cf90a7d2addf0c": {
+      "candidate_card_ids": [
+        "oracle-l5r-10935"
+      ],
+      "card_id": "oracle-l5r-10935",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10935",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-bf84b19edd16ac6b4137": {
+      "candidate_card_ids": [
+        "oracle-l5r-10744"
+      ],
+      "card_id": "oracle-l5r-10744",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10744",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-bfbb2fe36f75c5781bb8": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c14fc4530fbec683ac0f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10660"
+      ],
+      "card_id": "oracle-l5r-10660",
+      "clans": [
+        "Spider"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10660",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-c16d34c1018c2e32991f": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c213f5cdf2382f540997": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c23317794733dd6c250a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10827"
+      ],
+      "card_id": "oracle-l5r-10827",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10827",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-c256edfa3c1b79e042e2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c3174a2d6575a3b81310": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c340fca19b4c82e429e1": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c49d73db569e52dcb511": {
+      "candidate_card_ids": [
+        "oracle-l5r-6253"
+      ],
+      "card_id": "oracle-l5r-6253",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6253",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-c58ac6104f0d8111282d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c5aed9a929426de1252a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10621"
+      ],
+      "card_id": "oracle-l5r-10621",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10621",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-c65dab622468fb0bffce": {
+      "candidate_card_ids": [
+        "oracle-l5r-10644"
+      ],
+      "card_id": "oracle-l5r-10644",
+      "clans": [
+        "Mantis"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10644",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-c68304d36b877e702d90": {
+      "candidate_card_ids": [
+        "oracle-l5r-10632"
+      ],
+      "card_id": "oracle-l5r-10632",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10632",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-c7281ba01a7a67973a41": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-c75eaf5c5b8f94402a95": {
+      "candidate_card_ids": [
+        "oracle-l5r-7411"
+      ],
+      "card_id": "oracle-l5r-7411",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7411",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-c7bf55f51ea74d520d0b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10573"
+      ],
+      "card_id": "oracle-l5r-10573",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10573",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-c94b96d30bb1cf98a093": {
+      "candidate_card_ids": [
+        "oracle-l5r-10617"
+      ],
+      "card_id": "oracle-l5r-10617",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10617",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-ca18bacb493b1c0aa563": {
+      "candidate_card_ids": [
+        "oracle-l5r-494"
+      ],
+      "card_id": "oracle-l5r-494",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=494",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-cb01d5170eb6897aadad": {
+      "candidate_card_ids": [
+        "oracle-l5r-10650"
+      ],
+      "card_id": "oracle-l5r-10650",
+      "clans": [
+        "Phoenix"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10650",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-cbd35183feb24acb04b8": {
+      "candidate_card_ids": [
+        "oracle-l5r-10931"
+      ],
+      "card_id": "oracle-l5r-10931",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10931",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-cc1863d409740ef0b251": {
+      "candidate_card_ids": [
+        "oracle-l5r-9459"
+      ],
+      "card_id": "oracle-l5r-9459",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Pre-Game"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9459",
+      "status": "resolved",
+      "types": [
+        "Stronghold"
+      ]
+    },
+    "card-ref-cd59923a08f7ac3cc0d0": {
+      "candidate_card_ids": [
+        "oracle-l5r-10914"
+      ],
+      "card_id": "oracle-l5r-10914",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10914",
+      "status": "resolved",
+      "types": [
+        "Spell"
+      ]
+    },
+    "card-ref-cda3d78fdbe8a4f828bf": {
+      "candidate_card_ids": [
+        "oracle-l5r-7869"
+      ],
+      "card_id": "oracle-l5r-7869",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7869",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-cf112191e826e671b1db": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-cf7d99745344d9f18544": {
+      "candidate_card_ids": [
+        "oracle-l5r-10607"
+      ],
+      "card_id": "oracle-l5r-10607",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10607",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-cfb4899dfb6f4080fb9c": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-d0c33cc9e5657c9b2a87": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-d186939a5f700417f651": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-d1acbcd6045b60db9a66": {
+      "candidate_card_ids": [
+        "oracle-l5r-5556"
+      ],
+      "card_id": "oracle-l5r-5556",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=5556",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-d30fb27dcd4f33a2deca": {
+      "candidate_card_ids": [
+        "oracle-l5r-8590"
+      ],
+      "card_id": "oracle-l5r-8590",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=8590",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-d349d6b26a29444da445": {
+      "candidate_card_ids": [
+        "oracle-l5r-10759"
+      ],
+      "card_id": "oracle-l5r-10759",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10759",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-d3fa5d046ce611f99a2e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-d55863d8ae6b4a5a20d3": {
+      "candidate_card_ids": [
+        "oracle-l5r-10049"
+      ],
+      "card_id": "oracle-l5r-10049",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10049",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-d68ff8aa4297ffc78578": {
+      "candidate_card_ids": [
+        "oracle-l5r-121"
+      ],
+      "card_id": "oracle-l5r-121",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=121",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-d6ce21a58ea925b2aee6": {
+      "candidate_card_ids": [
+        "oracle-l5r-10581"
+      ],
+      "card_id": "oracle-l5r-10581",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10581",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-d7d3b8b2c87da67eb5f6": {
+      "candidate_card_ids": [
+        "oracle-l5r-7443"
+      ],
+      "card_id": "oracle-l5r-7443",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7443",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-d8fb81624fde07a022ec": {
+      "candidate_card_ids": [
+        "oracle-l5r-4664"
+      ],
+      "card_id": "oracle-l5r-4664",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=4664",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-d970e4552c5352b471b5": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-d9cb15369ccb15079d14": {
+      "candidate_card_ids": [
+        "oracle-l5r-10657"
+      ],
+      "card_id": "oracle-l5r-10657",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10657",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-da0a57e159d87f8097ba": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-da4a1512f0d07d0513c6": {
+      "candidate_card_ids": [
+        "oracle-l5r-7266"
+      ],
+      "card_id": "oracle-l5r-7266",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7266",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-db753f7c9e334a04f1fc": {
+      "candidate_card_ids": [
+        "oracle-l5r-10753"
+      ],
+      "card_id": "oracle-l5r-10753",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10753",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-dc4ee18bee87f8bd4d10": {
+      "candidate_card_ids": [
+        "oracle-l5r-3513"
+      ],
+      "card_id": "oracle-l5r-3513",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3513",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-dcb1d46700f6bf330001": {
+      "candidate_card_ids": [
+        "oracle-l5r-10579"
+      ],
+      "card_id": "oracle-l5r-10579",
+      "clans": [
+        "Mantis"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10579",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-dd41ffdb21f3079cb240": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-dedf8c05714fc5d179a4": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-dfa504a33f9be1796a54": {
+      "candidate_card_ids": [
+        "oracle-l5r-10912"
+      ],
+      "card_id": "oracle-l5r-10912",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10912",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-e046b4bab1d58a42c05d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e148f39b5669a03bf421": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e14fed6709c2098a8403": {
+      "candidate_card_ids": [
+        "oracle-l5r-10956"
+      ],
+      "card_id": "oracle-l5r-10956",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10956",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e16f37442a0f429d05a9": {
+      "candidate_card_ids": [
+        "oracle-l5r-7675"
+      ],
+      "card_id": "oracle-l5r-7675",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7675",
+      "status": "resolved",
+      "types": [
+        "Event"
+      ]
+    },
+    "card-ref-e1dd9ae4ecddc2abb06f": {
+      "candidate_card_ids": [
+        "oracle-l5r-10741"
+      ],
+      "card_id": "oracle-l5r-10741",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10741",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e1f2c635ea86b6814362": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e3e6c2e653cb5c816998": {
+      "candidate_card_ids": [
+        "oracle-l5r-10544"
+      ],
+      "card_id": "oracle-l5r-10544",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10544",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e4f43535ef3988981a86": {
+      "candidate_card_ids": [
+        "oracle-l5r-10962"
+      ],
+      "card_id": "oracle-l5r-10962",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10962",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e567312f8899026eb8d2": {
+      "candidate_card_ids": [
+        "oracle-l5r-10948"
+      ],
+      "card_id": "oracle-l5r-10948",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10948",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e567a6e9b48b6dde575b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10937"
+      ],
+      "card_id": "oracle-l5r-10937",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10937",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e5b251db1a780d2e1751": {
+      "candidate_card_ids": [
+        "oracle-l5r-6465"
+      ],
+      "card_id": "oracle-l5r-6465",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6465",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e639cccf2399be877f9d": {
+      "candidate_card_ids": [
+        "oracle-l5r-9445"
+      ],
+      "card_id": "oracle-l5r-9445",
+      "clans": [
+        "Crab"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9445",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-e66bea43b25f468e0c53": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e67573fbd955b3ff3f6e": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e6b092b17b347620a38a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10593"
+      ],
+      "card_id": "oracle-l5r-10593",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10593",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-e6fe85149b5a62cc78a2": {
+      "candidate_card_ids": [
+        "oracle-l5r-2152"
+      ],
+      "card_id": "oracle-l5r-2152",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2152",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-e735f7decabbef25c0d7": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e7b46b943a600c012c22": {
+      "candidate_card_ids": [
+        "oracle-l5r-10725"
+      ],
+      "card_id": "oracle-l5r-10725",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10725",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e7cf86bf75a6c2590521": {
+      "candidate_card_ids": [
+        "oracle-l5r-10572"
+      ],
+      "card_id": "oracle-l5r-10572",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10572",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-e81e09ae6c39edf141ef": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e847bf561ee65b9ff30d": {
+      "candidate_card_ids": [
+        "oracle-l5r-9902"
+      ],
+      "card_id": "oracle-l5r-9902",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9902",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-e8e3a1f16e8c83d65601": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-e9a108a4874e19878795": {
+      "candidate_card_ids": [
+        "oracle-l5r-10648"
+      ],
+      "card_id": "oracle-l5r-10648",
+      "clans": [
+        "Phoenix"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10648",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-eab08e982412e327aa61": {
+      "candidate_card_ids": [
+        "oracle-l5r-10513"
+      ],
+      "card_id": "oracle-l5r-10513",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10513",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-eb7796fb6f3af3639f5f": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-ed77cc0358a148aaf15a": {
+      "candidate_card_ids": [
+        "oracle-l5r-7656"
+      ],
+      "card_id": "oracle-l5r-7656",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7656",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-ef0784e62060cec5e957": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f0f6c957c3f074d66641": {
+      "candidate_card_ids": [
+        "oracle-l5r-7991"
+      ],
+      "card_id": "oracle-l5r-7991",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7991",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f10882eda9eaccf4ae6c": {
+      "candidate_card_ids": [
+        "oracle-l5r-1119"
+      ],
+      "card_id": "oracle-l5r-1119",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1119",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-f12cd3a46eabfcedca0b": {
+      "candidate_card_ids": [
+        "oracle-l5r-10577"
+      ],
+      "card_id": "oracle-l5r-10577",
+      "clans": [
+        "Dragon"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10577",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-f22aa9fd26c2f473931a": {
+      "candidate_card_ids": [
+        "oracle-l5r-10748"
+      ],
+      "card_id": "oracle-l5r-10748",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10748",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f26e8181ca7c140d27b5": {
+      "candidate_card_ids": [
+        "oracle-l5r-10893"
+      ],
+      "card_id": "oracle-l5r-10893",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10893",
+      "status": "resolved",
+      "types": [
+        "Follower"
+      ]
+    },
+    "card-ref-f2798be6235188976cc4": {
+      "candidate_card_ids": [
+        "oracle-l5r-9156"
+      ],
+      "card_id": "oracle-l5r-9156",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9156",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f39dcc3392f3868f973d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f3d28fc74a22c58e75e7": {
+      "candidate_card_ids": [
+        "oracle-l5r-10721"
+      ],
+      "card_id": "oracle-l5r-10721",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10721",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f406d02863b1b438f86a": {
+      "candidate_card_ids": [
+        "oracle-l5r-1004"
+      ],
+      "card_id": "oracle-l5r-1004",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1004",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-f4607ae66cbdf8b4fbf2": {
+      "candidate_card_ids": [
+        "oracle-l5r-2020"
+      ],
+      "card_id": "oracle-l5r-2020",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2020",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f4ba3f487ffa37818475": {
+      "candidate_card_ids": [
+        "oracle-l5r-1340"
+      ],
+      "card_id": "oracle-l5r-1340",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=1340",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-f4db88f026c85a8e9ae4": {
+      "candidate_card_ids": [
+        "oracle-l5r-10143"
+      ],
+      "card_id": "oracle-l5r-10143",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10143",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-f521aa5c9a4b6caa773d": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f583b368f51978717988": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f65f336e81a2b2b9d02c": {
+      "candidate_card_ids": [
+        "oracle-l5r-10112"
+      ],
+      "card_id": "oracle-l5r-10112",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10112",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-f68429db1d1ff4a67f20": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f6bbab95b8134e8eb5c0": {
+      "candidate_card_ids": [
+        "oracle-l5r-6481"
+      ],
+      "card_id": "oracle-l5r-6481",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=6481",
+      "status": "resolved",
+      "types": [
+        "Item"
+      ]
+    },
+    "card-ref-f88c1d21c209cbcf84a2": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-f9e5112e8f3835fbc1f7": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-fa2c56a7844944c79570": {
+      "candidate_card_ids": [],
+      "card_id": null,
+      "clans": [],
+      "deck_types": [],
+      "reason": "No exact title/version match in this Emperor-only snapshot",
+      "status": "unresolved",
+      "types": []
+    },
+    "card-ref-faa14f43e38894bda504": {
+      "candidate_card_ids": [
+        "oracle-l5r-9623"
+      ],
+      "card_id": "oracle-l5r-9623",
+      "clans": [
+        "Mantis"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=9623",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-faee7f6c59a3b331a315": {
+      "candidate_card_ids": [
+        "oracle-l5r-10755"
+      ],
+      "card_id": "oracle-l5r-10755",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=10755",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-fbf920829616b322eee0": {
+      "candidate_card_ids": [
+        "oracle-l5r-7664"
+      ],
+      "card_id": "oracle-l5r-7664",
+      "clans": [],
+      "deck_types": [
+        "Fate"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7664",
+      "status": "resolved",
+      "types": [
+        "Strategy"
+      ]
+    },
+    "card-ref-fdfb0f98918341f4ea69": {
+      "candidate_card_ids": [
+        "oracle-l5r-3808"
+      ],
+      "card_id": "oracle-l5r-3808",
+      "clans": [],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=3808",
+      "status": "resolved",
+      "types": [
+        "Holding"
+      ]
+    },
+    "card-ref-fe9bab28163913f27107": {
+      "candidate_card_ids": [
+        "oracle-l5r-2078"
+      ],
+      "card_id": "oracle-l5r-2078",
+      "clans": [
+        "Crane"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=2078",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    },
+    "card-ref-ffa8152bcd9e0b8e4a85": {
+      "candidate_card_ids": [
+        "oracle-l5r-7373"
+      ],
+      "card_id": "oracle-l5r-7373",
+      "clans": [
+        "Scorpion"
+      ],
+      "deck_types": [
+        "Dynasty"
+      ],
+      "reason": "Exact normalized title and experienced-version match",
+      "source_url": "https://oracleofthevoid.com/#cardid=7373",
+      "status": "resolved",
+      "types": [
+        "Personality"
+      ]
+    }
+  },
+  "schema_version": 1
+}

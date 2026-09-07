@@ -1,0 +1,227 @@
+{
+  "card_count": 84,
+  "declared_era": "Emperor",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-3751720c660e05f94b21",
+      "line_number": 3,
+      "quantity": 1,
+      "raw_line": "Plains of the Maiden "
+    },
+    {
+      "card_reference_id": "card-ref-43e075daf5fc0970ab89",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Bamboo Harvesters "
+    },
+    {
+      "card_reference_id": "card-ref-19d638066b6faa57b9ca",
+      "line_number": 5,
+      "quantity": 1,
+      "raw_line": "Border Keep "
+    },
+    {
+      "card_reference_id": "card-ref-cda3d78fdbe8a4f828bf",
+      "line_number": 6,
+      "quantity": 3,
+      "raw_line": "3 Temple Fortress"
+    },
+    {
+      "card_reference_id": "card-ref-d7d3b8b2c87da67eb5f6",
+      "line_number": 7,
+      "quantity": 3,
+      "raw_line": "3 Stables"
+    },
+    {
+      "card_reference_id": "card-ref-2bf7d65fe7afcd6c0b19",
+      "line_number": 8,
+      "quantity": 3,
+      "raw_line": "3 Prosperous Village"
+    },
+    {
+      "card_reference_id": "card-ref-bc4d36873a6f2855087c",
+      "line_number": 9,
+      "quantity": 3,
+      "raw_line": "3 Silk Works"
+    },
+    {
+      "card_reference_id": "card-ref-d8fb81624fde07a022ec",
+      "line_number": 10,
+      "quantity": 3,
+      "raw_line": "3 Large Farm"
+    },
+    {
+      "card_reference_id": "card-ref-1966405e1645b4a7eecd",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3 Small Farm"
+    },
+    {
+      "card_reference_id": "card-ref-9ca9d4c22653f81bc51e",
+      "line_number": 12,
+      "quantity": 1,
+      "raw_line": "Natural Aviary "
+    },
+    {
+      "card_reference_id": "card-ref-4778df410abdbfe4d652",
+      "line_number": 13,
+      "quantity": 1,
+      "raw_line": "Ebisu's Honesty "
+    },
+    {
+      "card_reference_id": "card-ref-701e7716252f8fae23f8",
+      "line_number": 14,
+      "quantity": 1,
+      "raw_line": "Dark Experiments "
+    },
+    {
+      "card_reference_id": "card-ref-aa98498a8e8d8aca780d",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "Imperial Gift "
+    },
+    {
+      "card_reference_id": "card-ref-2b6f946c637d579041f8",
+      "line_number": 16,
+      "quantity": 3,
+      "raw_line": "3 Utaku Lishan"
+    },
+    {
+      "card_reference_id": "card-ref-6fc4727cea1c3907c92b",
+      "line_number": 17,
+      "quantity": 3,
+      "raw_line": "3 Utaku Mai"
+    },
+    {
+      "card_reference_id": "card-ref-b7e1b8fa552e2770cfac",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3 Utaku Ryoko"
+    },
+    {
+      "card_reference_id": "card-ref-79a2b0c25383582d9c13",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3 Utaku Chikako"
+    },
+    {
+      "card_reference_id": "card-ref-31227bc793f59af52ec3",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3 Utaku Eun-ju"
+    },
+    {
+      "card_reference_id": "card-ref-aaa76bae09a24f1f2e65",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3 Utaku Tsukiko"
+    },
+    {
+      "card_reference_id": "card-ref-7ed83df888d34079255f",
+      "line_number": 22,
+      "quantity": 1,
+      "raw_line": "Utaku Liu Xeung - exp "
+    },
+    {
+      "card_reference_id": "card-ref-824083247bb94e5fb445",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3 Pure Intent"
+    },
+    {
+      "card_reference_id": "card-ref-fbf920829616b322eee0",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3 Surety of Purpose"
+    },
+    {
+      "card_reference_id": "card-ref-16335a456b16155727a8",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3 My Enemy's Mercy"
+    },
+    {
+      "card_reference_id": "card-ref-2cbf6362b7552f373d53",
+      "line_number": 26,
+      "quantity": 3,
+      "raw_line": "3 The Sound of Thunder"
+    },
+    {
+      "card_reference_id": "card-ref-7dbf2c124c2a2b428475",
+      "line_number": 27,
+      "quantity": 3,
+      "raw_line": "3 Two-Fold Virtue"
+    },
+    {
+      "card_reference_id": "card-ref-6310992741f0fe671c0a",
+      "line_number": 28,
+      "quantity": 3,
+      "raw_line": "3 Sneak Attack"
+    },
+    {
+      "card_reference_id": "card-ref-8eb8b35f3e931d9e6b50",
+      "line_number": 29,
+      "quantity": 3,
+      "raw_line": "3 Unfortunate Hesitation"
+    },
+    {
+      "card_reference_id": "card-ref-f4ba3f487ffa37818475",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3 Chrysanthemum Blossom"
+    },
+    {
+      "card_reference_id": "card-ref-855b65df07519486c088",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3 Armor of the Heavens"
+    },
+    {
+      "card_reference_id": "card-ref-2668ae124a0a10e32d02",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3 A Paragon's Strength"
+    },
+    {
+      "card_reference_id": "card-ref-7514f415aadb7c4b0e58",
+      "line_number": 33,
+      "quantity": 3,
+      "raw_line": "3 Wall of Honor"
+    },
+    {
+      "card_reference_id": "card-ref-02963d5c9f3675fb07c0",
+      "line_number": 34,
+      "quantity": 3,
+      "raw_line": "3 Preserving Beauty"
+    },
+    {
+      "card_reference_id": "card-ref-f0f6c957c3f074d66641",
+      "line_number": 35,
+      "quantity": 3,
+      "raw_line": "3 The Compassion of the Unicorn"
+    },
+    {
+      "card_reference_id": "card-ref-a2b9cb9abc8e985a18ef",
+      "line_number": 36,
+      "quantity": 1,
+      "raw_line": "Celestial Sword of the Unicorn - exp "
+    }
+  ],
+  "entry_count": 34,
+  "id": "deck-fab9611b6d0f8b7cc88e",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Unicorn Maidens",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Emperor"
+  ],
+  "source_id": "source-1f7eb95a6916cefb5211"
+}

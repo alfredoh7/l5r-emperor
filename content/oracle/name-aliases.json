@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "aliases": [
+    {
+      "source_name": "Utaku Liu Xeung",
+      "source_experience": 1,
+      "source_version_notation": "experienced",
+      "card_id": "oracle-l5r-9085",
+      "canonical_name": "Utaku Liu-Xeung - exp",
+      "source_url": "https://oracleofthevoid.com/#cardid=9085",
+      "reason": "Explicitly reviewed spelling difference: the supplied Unicorn Maidens list omits the hyphen in Liu-Xeung. Exact family, given-name parts and Experienced 1 agree. Original input remains unchanged.",
+      "reviewed_on": "2026-09-06"
+    }
+  ]
+}

@@ -1,0 +1,269 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-b8cc6720bd26e39548bd",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Golden Plains of the Unicorn"
+    },
+    {
+      "card_reference_id": "card-ref-30d9524785a2d1ba5df1",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Moto Naleesh, the Living Goddess"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-a3912729292a8eef14fd",
+      "line_number": 7,
+      "quantity": 3,
+      "raw_line": "3x Colonial Temple"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-c7bf55f51ea74d520d0b",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Family Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 11,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-0f64365c9daa6dd95b37",
+      "line_number": 12,
+      "quantity": 1,
+      "raw_line": "House of Prophecy"
+    },
+    {
+      "card_reference_id": "card-ref-e8e3a1f16e8c83d65601",
+      "line_number": 13,
+      "quantity": 2,
+      "raw_line": "2x Jade Works"
+    },
+    {
+      "card_reference_id": "card-ref-d7d3b8b2c87da67eb5f6",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3x Stables"
+    },
+    {
+      "card_reference_id": "card-ref-1a20ea62f7592dd732fe",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "1x Vengeful Populace"
+    },
+    {
+      "card_reference_id": "card-ref-7729d6c4fbe855bde3fd",
+      "line_number": 17,
+      "quantity": 3,
+      "raw_line": "3x Moto Paikao"
+    },
+    {
+      "card_reference_id": "card-ref-dedf8c05714fc5d179a4",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Shinjo Tobita"
+    },
+    {
+      "card_reference_id": "card-ref-e66bea43b25f468e0c53",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Moto Okano"
+    },
+    {
+      "card_reference_id": "card-ref-157ff262ae3ef39aefcc",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Utaku Hyo-Yeon"
+    },
+    {
+      "card_reference_id": "card-ref-17125616d4750ef309e2",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Shinjo Sujikaro"
+    },
+    {
+      "card_reference_id": "card-ref-211a7e4b6f4769a3ad77",
+      "line_number": 22,
+      "quantity": 1,
+      "raw_line": "1x Moto Ulagan"
+    },
+    {
+      "card_reference_id": "card-ref-d970e4552c5352b471b5",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "1x Utaku Izimi"
+    },
+    {
+      "card_reference_id": "card-ref-98d13bab799c4dc60053",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Utaku Sakiko"
+    },
+    {
+      "card_reference_id": "card-ref-a3ae78d4e7ae6ce4a7f4",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Utaku Sang-Ju"
+    },
+    {
+      "card_reference_id": "card-ref-d186939a5f700417f651",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Unicorn Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-85f2ae35e2d4c70a752f",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Chagatai's Legion"
+    },
+    {
+      "card_reference_id": "card-ref-f26e8181ca7c140d27b5",
+      "line_number": 29,
+      "quantity": 3,
+      "raw_line": "3x Commander's Steed"
+    },
+    {
+      "card_reference_id": "card-ref-3c9d9c81e954695cfc22",
+      "line_number": 30,
+      "quantity": 2,
+      "raw_line": "2x Heavy Cavalry"
+    },
+    {
+      "card_reference_id": "card-ref-0284dddc5bcdc2764ba2",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Wyrm Riders"
+    },
+    {
+      "card_reference_id": "card-ref-7f37b12968137e1fc597",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3x Light Cavalry"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 35,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-9bb97b8a477e371610a2",
+      "line_number": 36,
+      "quantity": 3,
+      "raw_line": "3x Allied Efforts"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-11b38df062791e1de573",
+      "line_number": 38,
+      "quantity": 1,
+      "raw_line": "1x Concealed Reserves"
+    },
+    {
+      "card_reference_id": "card-ref-e847bf561ee65b9ff30d",
+      "line_number": 39,
+      "quantity": 1,
+      "raw_line": "1x Defensive Grill"
+    },
+    {
+      "card_reference_id": "card-ref-0d3f59f149f70ee9b2b1",
+      "line_number": 40,
+      "quantity": 2,
+      "raw_line": "2x Expensive Achievement"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 42,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-fa2c56a7844944c79570",
+      "line_number": 43,
+      "quantity": 1,
+      "raw_line": "1x Journey's End"
+    },
+    {
+      "card_reference_id": "card-ref-0e455e81112498b3447a",
+      "line_number": 44,
+      "quantity": 3,
+      "raw_line": "3x Lakeside Retreat"
+    },
+    {
+      "card_reference_id": "card-ref-652243c9adf82339bb44",
+      "line_number": 45,
+      "quantity": 3,
+      "raw_line": "3x Outnumbered"
+    },
+    {
+      "card_reference_id": "card-ref-1cf531e9ed9cd89532b4",
+      "line_number": 46,
+      "quantity": 1,
+      "raw_line": "1x Versatile Army"
+    }
+  ],
+  "entry_count": 41,
+  "id": "deck-2fd922266525ac16d68a",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Unicorn",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-148d41c821100aadf966"
+}

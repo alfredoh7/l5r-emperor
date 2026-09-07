@@ -1,0 +1,251 @@
+{
+  "card_count": 85,
+  "declared_era": "Emperor",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-11509363c3a499dd640b",
+      "line_number": 3,
+      "quantity": 1,
+      "raw_line": "The Aerie "
+    },
+    {
+      "card_reference_id": "card-ref-43e075daf5fc0970ab89",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Bamboo Harvesters "
+    },
+    {
+      "card_reference_id": "card-ref-a0436d0cd4070c74c91c",
+      "line_number": 5,
+      "quantity": 3,
+      "raw_line": "3 Kakita Gonji"
+    },
+    {
+      "card_reference_id": "card-ref-0dd7a49d81f6ab03db3c",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "Kakita Tadanobu "
+    },
+    {
+      "card_reference_id": "card-ref-a214ea0936bdab0249eb",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1 Doji Makoto"
+    },
+    {
+      "card_reference_id": "card-ref-19d638066b6faa57b9ca",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "Border Keep "
+    },
+    {
+      "card_reference_id": "card-ref-22340ad9292336f9d671",
+      "line_number": 9,
+      "quantity": 3,
+      "raw_line": "3 Reckless Duel"
+    },
+    {
+      "card_reference_id": "card-ref-1c933e395ed6b83bac63",
+      "line_number": 10,
+      "quantity": 3,
+      "raw_line": "3 Spirit of the Duelist"
+    },
+    {
+      "card_reference_id": "card-ref-368ae8da0dd914671cc3",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3 Steel on Steel"
+    },
+    {
+      "card_reference_id": "card-ref-152135818eadc14e8b6c",
+      "line_number": 12,
+      "quantity": 3,
+      "raw_line": "3 Spirit of the Truth"
+    },
+    {
+      "card_reference_id": "card-ref-f6bbab95b8134e8eb5c0",
+      "line_number": 13,
+      "quantity": 3,
+      "raw_line": "3 Satoshi's Dual Warfans"
+    },
+    {
+      "card_reference_id": "card-ref-89ab752b01d7fea9e8c4",
+      "line_number": 14,
+      "quantity": 1,
+      "raw_line": "Blades of the Black Dragon "
+    },
+    {
+      "card_reference_id": "card-ref-f406d02863b1b438f86a",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "Blade of Champions "
+    },
+    {
+      "card_reference_id": "card-ref-5e2ced176e6f437db1b9",
+      "line_number": 16,
+      "quantity": 1,
+      "raw_line": "Celestial Sword of the Crane - exp "
+    },
+    {
+      "card_reference_id": "card-ref-7958682d0e330d934f9d",
+      "line_number": 17,
+      "quantity": 3,
+      "raw_line": "3 The Courtesy of the Crane"
+    },
+    {
+      "card_reference_id": "card-ref-ca18bacb493b1c0aa563",
+      "line_number": 18,
+      "quantity": 1,
+      "raw_line": "Asahina House Guard "
+    },
+    {
+      "card_reference_id": "card-ref-69ecc2eb0326fbffaddc",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3 Discovering a Conspiracy"
+    },
+    {
+      "card_reference_id": "card-ref-36a6603e817d4b724771",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3 Fear Me!"
+    },
+    {
+      "card_reference_id": "card-ref-2c0b68cd01996b91c63d",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3 Retribution"
+    },
+    {
+      "card_reference_id": "card-ref-bbc69d0200dbbd888430",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3 Of One Instant"
+    },
+    {
+      "card_reference_id": "card-ref-6e6ffb7647e3b71b5988",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3 A Stain Cleansed"
+    },
+    {
+      "card_reference_id": "card-ref-3ee8fbdab0e0744631a7",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3 Home Guard"
+    },
+    {
+      "card_reference_id": "card-ref-01099c6c768edae63953",
+      "line_number": 25,
+      "quantity": 2,
+      "raw_line": "2 Focus"
+    },
+    {
+      "card_reference_id": "card-ref-9fcf80719db8b3ab4ebb",
+      "line_number": 26,
+      "quantity": 1,
+      "raw_line": "Doji's Guidance - exp "
+    },
+    {
+      "card_reference_id": "card-ref-6e58eb19d93d62dd819e",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "Hachi's Revenge "
+    },
+    {
+      "card_reference_id": "card-ref-15839199740b17f90efc",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "Traveling Peddler "
+    },
+    {
+      "card_reference_id": "card-ref-86fd1095ef8817e28409",
+      "line_number": 29,
+      "quantity": 1,
+      "raw_line": "The Daidoji Marketplace "
+    },
+    {
+      "card_reference_id": "card-ref-99799ce015adc4b618a1",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3 Marketplace"
+    },
+    {
+      "card_reference_id": "card-ref-a16bf815c385a307b3c3",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3 Remote Village"
+    },
+    {
+      "card_reference_id": "card-ref-2bf7d65fe7afcd6c0b19",
+      "line_number": 32,
+      "quantity": 3,
+      "raw_line": "3 Prosperous Village"
+    },
+    {
+      "card_reference_id": "card-ref-459cc07220d24923ca98",
+      "line_number": 33,
+      "quantity": 3,
+      "raw_line": "3 Small Library"
+    },
+    {
+      "card_reference_id": "card-ref-d8fb81624fde07a022ec",
+      "line_number": 34,
+      "quantity": 3,
+      "raw_line": "3 Large Farm"
+    },
+    {
+      "card_reference_id": "card-ref-1966405e1645b4a7eecd",
+      "line_number": 35,
+      "quantity": 3,
+      "raw_line": "3 Small Farm"
+    },
+    {
+      "card_reference_id": "card-ref-d55863d8ae6b4a5a20d3",
+      "line_number": 36,
+      "quantity": 3,
+      "raw_line": "3 Doji Mitsuru"
+    },
+    {
+      "card_reference_id": "card-ref-fe9bab28163913f27107",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3 Doji Genshin"
+    },
+    {
+      "card_reference_id": "card-ref-3a69a1943f4ab1870c62",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3 Doji Yoshitada"
+    },
+    {
+      "card_reference_id": "card-ref-e6fe85149b5a62cc78a2",
+      "line_number": 39,
+      "quantity": 3,
+      "raw_line": "3 Doji Shigeyuki"
+    },
+    {
+      "card_reference_id": "card-ref-384d6dcd2e650d072e93",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "Doji Dainagon "
+    }
+  ],
+  "entry_count": 38,
+  "id": "deck-29b2cd7dba1314ea487e",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Crane Dominance",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Emperor"
+  ],
+  "source_id": "source-ec4d016bdea9aee10b89"
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1109571,
+  "card_id": "oracle-l5r-7665",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7665-printing-1-image-1",
+  "image_index": 1,
+  "name": "Surprise Attack",
+  "numbers": [
+    "357"
+  ],
+  "oracle_id": 7665,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7665-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:45.774717+00:00",
+  "sha256": "fc04b78fa5f2b7394c2206dbe200a6c697db01b3792a6064c9e5209193de2b65",
+  "source_image_hash": "07/29",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/29/printing_7665_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/29/printing_7665_1_",
+  "width": 750
+}

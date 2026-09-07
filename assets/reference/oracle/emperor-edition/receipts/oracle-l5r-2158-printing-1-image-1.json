@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1269263,
+  "card_id": "oracle-l5r-2158",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2158-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Shunya",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 2158,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2158-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:31.529680+00:00",
+  "sha256": "23e8bceb6d514b21115ba5a6e669fbf3793aed5e337ae7131e07d8cb02d31aec",
+  "source_image_hash": "91/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/91/c1/printing_2158_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/91/c1/printing_2158_1_",
+  "width": 750
+}

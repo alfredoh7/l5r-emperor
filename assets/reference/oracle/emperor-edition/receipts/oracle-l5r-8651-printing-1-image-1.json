@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1088587,
+  "card_id": "oracle-l5r-8651",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8651-printing-1-image-1",
+  "image_index": 1,
+  "name": "Toritaka Shishido",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 8651,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-8651-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:17.875255+00:00",
+  "sha256": "297226ca075b170369bd63aa16a93ed22dc20b818e73ee97530e0388438f2393",
+  "source_image_hash": "1f/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1f/6b/printing_8651_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1f/6b/printing_8651_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1169953,
+  "card_id": "oracle-l5r-1086",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1086-printing-1-image-1",
+  "image_index": 1,
+  "name": "Boastful Proclamation",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 1086,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1086-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:05.190969+00:00",
+  "sha256": "def7e385577e2ef90707bd277e4ba68aed66a132b96da3aff3e468af9e7104cc",
+  "source_image_hash": "fb/b8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fb/b8/printing_1086_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/b8/printing_1086_1_",
+  "width": 750
+}

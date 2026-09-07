@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1067011,
+  "card_id": "oracle-l5r-6051",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6051-printing-1-image-1",
+  "image_index": 1,
+  "name": "Prepared for Death",
+  "numbers": [
+    "331"
+  ],
+  "oracle_id": 6051,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6051-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:03.617572+00:00",
+  "sha256": "b78e27717d7de92b07a60374ca5d6f29f84233ae586950e1d069c8e30b625b52",
+  "source_image_hash": "0e/b8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/b8/printing_6051_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/b8/printing_6051_1_",
+  "width": 750
+}

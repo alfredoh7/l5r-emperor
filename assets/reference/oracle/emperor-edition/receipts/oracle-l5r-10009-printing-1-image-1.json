@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1007108,
+  "card_id": "oracle-l5r-10009",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10009-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kyuden Hida Scout",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10009,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10009-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:33.621932+00:00",
+  "sha256": "1d6b65ab6cc6953ede0283c3498f824b38d4c09521d2534794f67c702b6e1e61",
+  "source_image_hash": "63/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/01/printing_10009_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/01/printing_10009_1_",
+  "width": 750
+}

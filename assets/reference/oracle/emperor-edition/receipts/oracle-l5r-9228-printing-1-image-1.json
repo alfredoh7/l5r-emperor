@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1097021,
+  "card_id": "oracle-l5r-9228",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9228-printing-1-image-1",
+  "image_index": 1,
+  "name": "Warded Paths",
+  "numbers": [
+    "262"
+  ],
+  "oracle_id": 9228,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9228-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:32.860009+00:00",
+  "sha256": "98f559265b7fb066a49e1f2c937f5754d271b3f49a72038fc6e70ef71e065ddc",
+  "source_image_hash": "f6/38",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f6/38/printing_9228_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f6/38/printing_9228_1_",
+  "width": 750
+}

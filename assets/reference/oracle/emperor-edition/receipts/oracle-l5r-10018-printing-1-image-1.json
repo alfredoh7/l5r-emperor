@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1017248,
+  "card_id": "oracle-l5r-10018",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10018-printing-1-image-1",
+  "image_index": 1,
+  "name": "Witness",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 10018,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10018-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:36.316294+00:00",
+  "sha256": "ffa9645d08bdbbfcbf474ebc0328f12b84b0aa1ac6614b35aed473ced746d003",
+  "source_image_hash": "18/2a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/18/2a/printing_10018_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/18/2a/printing_10018_1_",
+  "width": 750
+}

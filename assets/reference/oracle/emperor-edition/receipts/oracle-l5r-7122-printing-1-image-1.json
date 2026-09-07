@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1029645,
+  "card_id": "oracle-l5r-7122",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7122-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Koshiba",
+  "numbers": [
+    "158"
+  ],
+  "oracle_id": 7122,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7122-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:31.301434+00:00",
+  "sha256": "0f1a5996edc03b552f2b8db914e65c5666736ebae504a41db5f3ae8eff00852e",
+  "source_image_hash": "83/d7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/83/d7/printing_7122_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/83/d7/printing_7122_1_",
+  "width": 750
+}

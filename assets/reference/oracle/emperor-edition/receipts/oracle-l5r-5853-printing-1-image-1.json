@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1059338,
+  "card_id": "oracle-l5r-5853",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5853-printing-1-image-1",
+  "image_index": 1,
+  "name": "Oyo's Second Lesson",
+  "numbers": [
+    "328"
+  ],
+  "oracle_id": 5853,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-5853-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:00.255846+00:00",
+  "sha256": "48224eb0ea7a38a41deb946a484caa6a8599eba14163ed6ad16c60948e471bdb",
+  "source_image_hash": "fd/e6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fd/e6/printing_5853_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/e6/printing_5853_1_",
+  "width": 750
+}

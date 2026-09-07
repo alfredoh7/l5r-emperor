@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1074096,
+  "card_id": "oracle-l5r-3127",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3127-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Kisada (Emperor)",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 3127,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3127-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:02.321915+00:00",
+  "sha256": "c463a343b12a03b3790aacf5a871336644ad41adee8c9915146b7d569a006665",
+  "source_image_hash": "0d/00",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0d/00/printing_3127_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0d/00/printing_3127_1_",
+  "width": 750
+}

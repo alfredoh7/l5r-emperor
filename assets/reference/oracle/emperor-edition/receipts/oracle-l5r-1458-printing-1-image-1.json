@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1144476,
+  "card_id": "oracle-l5r-1458",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1458-printing-1-image-1",
+  "image_index": 1,
+  "name": "Consecration",
+  "numbers": [
+    "250"
+  ],
+  "oracle_id": 1458,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1458-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:12.909916+00:00",
+  "sha256": "3b6b2414c2873e8e20469480d2f444fd21e02f803d623fe18778def40bdfb3b3",
+  "source_image_hash": "6a/65",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6a/65/printing_1458_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/65/printing_1458_1_",
+  "width": 750
+}

@@ -1,0 +1,1328 @@
+{
+  "global_conflicts": [
+    {
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AoD001",
+        "sun-moon-card-AoD111",
+        "sun-moon-card-CJ032",
+        "sun-moon-card-Celestial217",
+        "sun-moon-card-Diamond289",
+        "sun-moon-card-Diamond309",
+        "sun-moon-card-FK004",
+        "sun-moon-card-FK016",
+        "sun-moon-card-FK081",
+        "sun-moon-card-FK111",
+        "sun-moon-card-FK117",
+        "sun-moon-card-Gold059",
+        "sun-moon-card-Gold128",
+        "sun-moon-card-Gold408",
+        "sun-moon-card-Ivory206",
+        "sun-moon-card-Lotus178",
+        "sun-moon-card-Lotus400",
+        "sun-moon-card-Obsidian054",
+        "sun-moon-card-Obsidian065",
+        "sun-moon-card-SCC1014",
+        "sun-moon-card-SCC3023",
+        "sun-moon-card-SL040",
+        "sun-moon-card-Samurai188",
+        "sun-moon-card-Samurai255",
+        "sun-moon-card-Samurai293",
+        "sun-moon-card-TotV019",
+        "sun-moon-card-TotV120",
+        "sun-moon-card-TotV130",
+        "sun-moon-card-TotV141",
+        "sun-moon-card-TotV158",
+        "sun-moon-card-TwentyFestivals040"
+      ],
+      "source_image_path": "images/cards/AD/AD.jpg"
+    },
+    {
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Diamond238",
+        "sun-moon-card-Gold080"
+      ],
+      "source_image_path": "images/cards/AD/AD096.jpg"
+    },
+    {
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-CJ061",
+        "sun-moon-card-CJ083",
+        "sun-moon-card-CJ135",
+        "sun-moon-card-CJ152",
+        "sun-moon-card-Diamond219",
+        "sun-moon-card-Diamond255",
+        "sun-moon-card-Diamond378",
+        "sun-moon-card-Emperor276",
+        "sun-moon-card-FK046",
+        "sun-moon-card-FK060",
+        "sun-moon-card-FK086",
+        "sun-moon-card-FaS",
+        "sun-moon-card-Gold060",
+        "sun-moon-card-Gold263",
+        "sun-moon-card-Gold295",
+        "sun-moon-card-Gold438",
+        "sun-moon-card-Gold456",
+        "sun-moon-card-Gold476",
+        "sun-moon-card-Gold535",
+        "sun-moon-card-Obsidian108",
+        "sun-moon-card-Pearl300",
+        "sun-moon-card-Promo594",
+        "sun-moon-card-Promo611",
+        "sun-moon-card-SCC2023",
+        "sun-moon-card-SL047",
+        "sun-moon-card-SL123",
+        "sun-moon-card-TotV002",
+        "sun-moon-card-TotV127",
+        "sun-moon-card-TotV185",
+        "sun-moon-card-TotV187",
+        "sun-moon-card-TotV195"
+      ],
+      "source_image_path": "images/cards/FaS/FaS.jpg"
+    },
+    {
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AoD021",
+        "sun-moon-card-CJ042",
+        "sun-moon-card-Diamond047",
+        "sun-moon-card-Emperor274",
+        "sun-moon-card-Emperor330",
+        "sun-moon-card-FK034",
+        "sun-moon-card-FK075",
+        "sun-moon-card-Gold106",
+        "sun-moon-card-Gold122",
+        "sun-moon-card-Gold188",
+        "sun-moon-card-Gold368",
+        "sun-moon-card-Gold482",
+        "sun-moon-card-Gold497",
+        "sun-moon-card-Ivory283",
+        "sun-moon-card-Lotus239",
+        "sun-moon-card-Lotus240",
+        "sun-moon-card-Lotus310",
+        "sun-moon-card-Obsidian067",
+        "sun-moon-card-Obsidian073",
+        "sun-moon-card-Promo599",
+        "sun-moon-card-Promo604",
+        "sun-moon-card-SCC1003",
+        "sun-moon-card-SCC1009",
+        "sun-moon-card-SCC1015",
+        "sun-moon-card-SCC2003",
+        "sun-moon-card-SCC3019",
+        "sun-moon-card-SL086",
+        "sun-moon-card-SL126",
+        "sun-moon-card-Samurai237",
+        "sun-moon-card-TotV111",
+        "sun-moon-card-TotV148"
+      ],
+      "source_image_path": "images/cards/HB/HB.jpg"
+    }
+  ],
+  "mappings": [
+    {
+      "artwork_id": "art-41d2f8dc136aba885d76",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AM009"
+      ],
+      "canonical_card_id": "oracle-l5r-10824",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "AM",
+      "legacy_card_id": "sun-moon-card-AM009",
+      "name": "Exotic Market",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AM009",
+      "source_image_path": "images/cards/AM/AM009.jpg",
+      "status": "matched",
+      "text": "Market \n[BOW]: Produce 2 Gold. \n[BOW]: When paying for an Item, it enters play for 3 less Gold.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-05a3301eab0f804c5749",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AM018"
+      ],
+      "canonical_card_id": "oracle-l5r-10833",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "AM",
+      "legacy_card_id": "sun-moon-card-AM018",
+      "name": "Hiruma Koru",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AM018",
+      "source_image_path": "images/cards/AM/AM018.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Samurai • Scout \nInvest [PAY 1]: Create a 0F Follower and attach it to Koru. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-1cda9ea317f096280939",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AM090"
+      ],
+      "canonical_card_id": "oracle-l5r-10905",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "AM",
+      "legacy_card_id": "sun-moon-card-AM090",
+      "name": "Khalimpeh-jiak",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AM090",
+      "source_image_path": "images/cards/AM/AM090.jpg",
+      "status": "matched",
+      "text": "Weapon \nEngage, [BOW]: Give a target enemy Personality or Follower -2F.",
+      "type": "Item"
+    },
+    {
+      "artwork_id": "art-4bb83f201fd5685ad329",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AM110"
+      ],
+      "canonical_card_id": "oracle-l5r-10925",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "AM",
+      "legacy_card_id": "sun-moon-card-AM110",
+      "name": "A Moving Battle",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AM110",
+      "source_image_path": "images/cards/AM/AM110.jpg",
+      "status": "matched",
+      "text": "Terrain \nBefore this battle resolves, you may move one of your opposed attacking Personalities at this battlefield to an adjacent, unresolved battlefield. \nBattle: Destroy a target Terrain (if able). Put this Terrain into play.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-807e02aba7c7429bdc30",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AMoH042"
+      ],
+      "canonical_card_id": "oracle-l5r-10721",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "AMoH",
+      "legacy_card_id": "sun-moon-card-AMoH042",
+      "name": "Defensive Formation",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AMoH042",
+      "source_image_path": "images/cards/AMoH/AMoH042.jpg",
+      "status": "matched",
+      "text": "Battle: Give one to three of your target defending Personalities +2F (this turn).",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-6bf87a8387f32e6f26b3",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AMoH053"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory"
+      ],
+      "image_edition": "AMoH",
+      "legacy_card_id": "sun-moon-card-AMoH053",
+      "name": "The Impregnable Fortress of the Crab (1)",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AMoH053",
+      "source_image_path": "images/cards/AMoH/AMoH053.jpg",
+      "status": "matched",
+      "text": "Your Crab Clan Personalities have +1F while opposed.",
+      "type": "Stronghold"
+    },
+    {
+      "artwork_id": "art-d67e92aaf63be91541d5",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-AMoH053b"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory"
+      ],
+      "image_edition": "AMoH",
+      "legacy_card_id": "sun-moon-card-AMoH053b",
+      "name": "The Impregnable Fortress of the Crab (2)",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "AMoH053b",
+      "source_image_path": "images/cards/AMoH/AMoH053b.jpg",
+      "status": "matched",
+      "text": "Your Crab Clan Personalities have +1F while opposed.",
+      "type": "Stronghold"
+    },
+    {
+      "artwork_id": "art-60b2e41d935ddf2dfbbf",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-GoC016"
+      ],
+      "canonical_card_id": "oracle-l5r-10617",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "GoC",
+      "legacy_card_id": "sun-moon-card-GoC016",
+      "name": "Hida Gojiro",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "GoC016",
+      "source_image_path": "images/cards/GoC/GoC016.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Berserker • Fallen \nInvest [PAY 4]: Give Gojiro two +1F tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.) \nAfter Gojiro enters play, lose 1 Honor.",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-208f24462330c7254cbe",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-GoC140"
+      ],
+      "canonical_card_id": "oracle-l5r-10748",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "GoC",
+      "legacy_card_id": "sun-moon-card-GoC140",
+      "name": "Strength of the Bear",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "GoC140",
+      "source_image_path": "images/cards/GoC/GoC140.jpg",
+      "status": "matched",
+      "text": "Battle: Bow your target unbowed Personality. Bow a target enemy card with lower Force than his. If your Personality has 5 or more printed Force, straighten him.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-ed1f11b7a6af4ac6f5a9",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory009"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "gold",
+        "diamond",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory009",
+      "name": "Ashigaru Fort",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory009",
+      "source_image_path": "images/cards/Ivory/Ivory009.jpg",
+      "status": "matched",
+      "text": "Farm \n[BOW]: Produce 2 Gold. \nOpen: If it is not your turn, target a Personality. Straighten his unit. Destroy this Holding.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-5bd98e3e790f0493726c",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory021"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory021",
+      "name": "Frontline Encampment",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory021",
+      "source_image_path": "images/cards/Ivory/Ivory021.jpg",
+      "status": "matched",
+      "text": "[BOW]: Produce 2 Gold. \nLimited: Give your target Personality +2F. Destroy this Holding.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-310b1c0997d3373ecef8",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory025"
+      ],
+      "canonical_card_id": "oracle-l5r-3044",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory025",
+      "name": "Heavy Infantry Dojo",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory025",
+      "source_image_path": "images/cards/Ivory/Ivory025.jpg",
+      "status": "matched",
+      "text": "Dojo \n[BOW]: Produce 3 Gold. \nBattle, [BOW]: Give your target Personality +2F.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-8ab4d50b5692ec570b6e",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory029"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory029",
+      "name": "Humble House",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory029",
+      "source_image_path": "images/cards/Ivory/Ivory029.jpg",
+      "status": "matched",
+      "text": "Sake House \n[BOW]: Produce 2 Gold. \nLimited, [BOW]: Give a target Personality a +1F Sake token. Remove it after your next turn begins.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-ec89c9883073e49957a6",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory031"
+      ],
+      "canonical_card_id": "oracle-l5r-3808",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "jade",
+        "gold",
+        "diamond",
+        "lotus",
+        "samurai",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory031",
+      "name": "Iron Mine",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory031",
+      "source_image_path": "images/cards/Ivory/Ivory031.jpg",
+      "status": "matched",
+      "text": "Mine \n[BOW]: Produce 2 Gold, or 3 Gold if you are a Crab Clan player.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-0fd83cd6c0db1c3e7f5d",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory059"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory059",
+      "name": "Hida Kisada, the Little Bear",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory059",
+      "source_image_path": "images/cards/Ivory/Ivory059.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Clan Champion • Samurai • Siege • Experienced • Kensai • Loyal • Tactician • Unique \nYour Provinces have +1 strength. Fear effects, Melee Attacks, and Ranged Attacks targeting your Crab Clan Personalities in Kisada's army have -1 strength. \nTireless Battle/Open: Straighten your target Follower or Personality.",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-8906bb93753688dcf7c9",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory061"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory061",
+      "name": "Hida Saiyuki",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory061",
+      "source_image_path": "images/cards/Ivory/Ivory061.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Samurai • Soul of Kaiu Hisayuki \nIncrease by 1 all Force bonuses Saiyuki receives (for the duration of the Force bonus).",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-e2ecdd6cf6fbcfa1258c",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory062"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory062",
+      "name": "Hida Toranosuke",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory062",
+      "source_image_path": "images/cards/Ivory/Ivory062.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Samurai \nHome Battle: Target your Personality at any location. Switch his and Toranosuke's location. Straighten their units as they move.",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-e5c060b28974b51c4443",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory065"
+      ],
+      "canonical_card_id": "oracle-l5r-3307",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory065",
+      "name": "Hiruma Moritoki",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory065",
+      "source_image_path": "images/cards/Ivory/Ivory065.jpg",
+      "status": "matched",
+      "text": "Crab Clan • Samurai • Scholar • Scout",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-9518fcd5de987f3b926b",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory219"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory219",
+      "name": "Ancestral Armor of the Crab Clan - exp",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory219",
+      "source_image_path": "images/cards/Ivory/Ivory219.jpg",
+      "status": "matched",
+      "text": "Armor • Experienced • Unique \nCan only attach to a Crab Clan Personality. After you Equip this Item, gain 2 Honor. \nTireless Battle/Open: Straighten this Personality, and straighten his attachments if he is defending.",
+      "type": "Item"
+    },
+    {
+      "artwork_id": "art-a6e1c96135bce15d7010",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory235"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory235",
+      "name": "Heavy Yari",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory235",
+      "source_image_path": "images/cards/Ivory/Ivory235.jpg",
+      "status": "matched",
+      "text": "Spear • Two-Handed • Weapon \nBattle, [BOW]: Melee 2 Attack (Destroy a target enemy Follower, or Personality without Followers, with 2 or lower Force).",
+      "type": "Item"
+    },
+    {
+      "artwork_id": "art-7f07428a93d636ffbbd4",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory239"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory239",
+      "name": "Oriole Katana",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory239",
+      "source_image_path": "images/cards/Ivory/Ivory239.jpg",
+      "status": "matched",
+      "text": "One-Handed • Sword • Weapon \nThis Personality has Conqueror (A Conqueror's unit doesn't bow after battle).",
+      "type": "Item"
+    },
+    {
+      "artwork_id": "art-b88bf19a5bcc739c27d4",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory244"
+      ],
+      "canonical_card_id": "oracle-l5r-7411",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "lotus",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory244",
+      "name": "Spiked Tetsubo",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory244",
+      "source_image_path": "images/cards/Ivory/Ivory244.jpg",
+      "status": "matched",
+      "text": "Heavy Weapon • One-Handed • Weapon \nAfter this Personality enters a duel, the other Personality in the duel loses Duelist.",
+      "type": "Item"
+    },
+    {
+      "artwork_id": "art-a188e58851aec84989dd",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory288"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory288",
+      "name": "Army Like a Tide",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory288",
+      "source_image_path": "images/cards/Ivory/Ivory288.jpg",
+      "status": "matched",
+      "text": "Battle: Target your Personality, or one or two of your Personalities if you have fewer Provinces than any other player. Give them each +1F and Conqueror (A Conqueror's unit doesn't bow after battle).",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-5ee6843d0267952c50b9",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory297"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "jade",
+        "gold",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory297",
+      "name": "Contentious Terrain",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory297",
+      "source_image_path": "images/cards/Ivory/Ivory297.jpg",
+      "status": "matched",
+      "text": "Terrain \nYour Personalities at this battlefield have +1F. \nBattle: Destroy a Terrain (if able). Put this card into play.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-9f12e9e9dd1371d4423d",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory301"
+      ],
+      "canonical_card_id": "oracle-l5r-10143",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory301",
+      "name": "Determined Challenge",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory301",
+      "source_image_path": "images/cards/Ivory/Ivory301.jpg",
+      "status": "matched",
+      "text": "Battle: Target your unbowed attacking Personality. Move a target enemy Personality at any location to the current battlefield. Straighten him as he moves.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-88ad0083e82a9cf69e4f",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Ivory351"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "diamond",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "Ivory",
+      "legacy_card_id": "sun-moon-card-Ivory351",
+      "name": "Today We Die",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Ivory351",
+      "source_image_path": "images/cards/Ivory/Ivory351.jpg",
+      "status": "matched",
+      "text": "Limited: Target a Samurai Personality who has not been targeted by a Today We Die this game. Until the game ends, he cannot Lobby, after the end of each of his controller's Action Phases, if he can legally assign, his controller must declare an attack and assign him, and give him a +1F/+1C token after each battle resolution he is in.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-caa6fc4ef2d4c50738a2",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-Promo564"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "candidate",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory"
+      ],
+      "image_edition": "Promo",
+      "legacy_card_id": "sun-moon-card-Promo564",
+      "name": "The Topaz Dojo",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "Promo564",
+      "source_image_path": "images/cards/Promo/Promo564.jpg",
+      "status": "matched",
+      "text": "Dojo • Unique \n[BOW]: Produce 2 Gold. \nOpen, [BOW]: Give a +1F/+1C Training token to a target Personality with no printed abilities and no Training token.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-1b536bf5d7cd050d1416",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW002"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW002",
+      "name": "Counting House",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW002",
+      "source_image_path": "images/cards/TCW/TCW002.jpg",
+      "status": "matched",
+      "text": "You may only have one copy of Counting House in play. \n[BOW]: Produce 2 Gold. \nLimited, [BOW]: If you have fewer Provinces than each other player, draw a card.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-8ae8c48f643c85d6f060",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW003"
+      ],
+      "canonical_card_id": "oracle-l5r-2463",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "diamond",
+        "lotus",
+        "samurai",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW003",
+      "name": "Family Library",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW003",
+      "source_image_path": "images/cards/TCW/TCW003.jpg",
+      "status": "matched",
+      "text": "[BOW]: Produce 2 Gold. \nLimited: Discard a face-up card from one of your Provinces. Refill the Province with your target discarded (not dead) Personality. Destroy this Holding.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-b4344f3869fd2d1ea388",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW007"
+      ],
+      "canonical_card_id": null,
+      "canonical_match_status": "unmatched",
+      "declared_legalities": [
+        "open",
+        "samurai",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW007",
+      "name": "House of Exotic Goods",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW007",
+      "source_image_path": "images/cards/TCW/TCW007.jpg",
+      "status": "matched",
+      "text": "[BOW]: Produce 2 Gold. \nLimited: Put one or more face-up cards in your Provinces at the bottom of your deck (and refill the Provinces). Turn all cards in your Provinces face-up. Destroy this Holding.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-a81467f04b6c1fe24b6b",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW038"
+      ],
+      "canonical_card_id": "oracle-l5r-121",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW038",
+      "name": "Advance Warning",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW038",
+      "source_image_path": "images/cards/TCW/TCW038.jpg",
+      "status": "matched",
+      "text": "Battle: Move your target Personality home. If he is a Scout, straighten his unit. Raise or lower the current Province's strength by his Force (this turn).",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-ebdedad609185762e0ce",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW041"
+      ],
+      "canonical_card_id": "oracle-l5r-662",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW041",
+      "name": "Back to the Front",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW041",
+      "source_image_path": "images/cards/TCW/TCW041.jpg",
+      "status": "matched",
+      "text": "Absent Battle: Target your Personality at any location who assigned to this battlefield (this turn). Move him there and straighten his unit as he moves. (You may take Absent actions without presence.)",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-cd96eeff8aacd0d6e100",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW047"
+      ],
+      "canonical_card_id": "oracle-l5r-2445",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW047",
+      "name": "Fall Back!",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW047",
+      "source_image_path": "images/cards/TCW/TCW047.jpg",
+      "status": "matched",
+      "text": "Battle: Move home your target Personality. As he moves, straighten his unit and you may straighten one of your other units (at any location).",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-a9401df9c47516395e11",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW048"
+      ],
+      "canonical_card_id": "oracle-l5r-3730",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW048",
+      "name": "Incapacitated",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW048",
+      "source_image_path": "images/cards/TCW/TCW048.jpg",
+      "status": "matched",
+      "text": "Battle: Move home a target defending Personality.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-43b059484c58bb298f2d",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TCW050"
+      ],
+      "canonical_card_id": "oracle-l5r-10714",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F"
+      ],
+      "image_edition": "TCW",
+      "legacy_card_id": "sun-moon-card-TCW050",
+      "name": "Ritual Preparation",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TCW050",
+      "source_image_path": "images/cards/TCW/TCW050.jpg",
+      "status": "matched",
+      "text": "Battle: Straighten your target card in a unit.",
+      "type": "Strategy"
+    },
+    {
+      "artwork_id": "art-9bcd789053ea5228cd98",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals011"
+      ],
+      "canonical_card_id": "oracle-l5r-10615",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals011",
+      "name": "Coastal Pearl Bed",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals011",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals011.jpg",
+      "status": "matched",
+      "text": "Pearl • Pearl Bed \nOpen, [BOW]: A target Holding's abilities may not be used.",
+      "type": "Holding"
+    },
+    {
+      "artwork_id": "art-970037798c1a486a9777",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals043"
+      ],
+      "canonical_card_id": "oracle-l5r-10575",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals043",
+      "name": "Hida Iguchi",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals043",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals043.jpg",
+      "status": "matched",
+      "text": "Samurai • Cavalry \n(Once per turn, as an Absent Engage, move your unbowed Personality in a Cavalry unit to the battle.)",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-7954643deab4e29c364e",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals044"
+      ],
+      "canonical_card_id": "oracle-l5r-10832",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals044",
+      "name": "Hida Kurabi",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals044",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals044.jpg",
+      "status": "matched",
+      "text": "Berserker • Hero • Imperial • Destined • Reserve \n(Draw a card after you Recruit a Destined card. You may Recruit a Reserve Personality, if they would be opposed, as an Absent Battle action.)",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-5c9a937385bc95ec7bef",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals050"
+      ],
+      "canonical_card_id": "oracle-l5r-10835",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals050",
+      "name": "Kaiu Gorobei",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals050",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals050.jpg",
+      "status": "matched",
+      "text": "Samurai • Siege \nBattle: Discard a card to bow a target enemy card with Force equal to or lower than the discarded card's Focus Value.",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-5dfe8cc7b48bbdc201b7",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals056"
+      ],
+      "canonical_card_id": "oracle-l5r-10621",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals056",
+      "name": "Toritaka Iabuchi",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals056",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals056.jpg",
+      "status": "matched",
+      "text": "Samurai • Scout • Destined \n(Draw a card after you Recruit a Destined card.) \nBattle, [BOW]: Ranged 2 Attack (Destroy a target enemy Follower or Personality without Followers with 2 or lower Force).",
+      "type": "Personality"
+    },
+    {
+      "artwork_id": "art-cdf4477d42786516f5e4",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals235"
+      ],
+      "canonical_card_id": "oracle-l5r-6334",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "jade",
+        "gold",
+        "diamond",
+        "lotus",
+        "samurai",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals235",
+      "name": "Ring of Earth",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals235",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals235.jpg",
+      "status": "matched",
+      "text": "Earth • Unique \nPlay after a battle resolves at your Province, if it was not destroyed and any enemy units were ever at its battlefield. You may discard this Ring from your hand to use its ability without cost. \nEarth Repeatable Interrupt, [BOW]: The Battle action cannot move Personalities.",
+      "type": "Ring"
+    },
+    {
+      "artwork_id": "art-c2c4afe32169e99c2aba",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals237"
+      ],
+      "canonical_card_id": "oracle-l5r-6338",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "jade",
+        "gold",
+        "diamond",
+        "lotus",
+        "samurai",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals237",
+      "name": "Ring of the Void",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals237",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals237.jpg",
+      "status": "matched",
+      "text": "Void • Unique \nYou may discard this Ring from your hand to use its Void ability without cost. \nLimited: Play if you have two or fewer Rings in play. Discard your hand. \nVoid Limited, [BOW]: Draw a card. If you now have more cards in your hand than any other player, discard a card.",
+      "type": "Ring"
+    },
+    {
+      "artwork_id": "art-40ee77cf2250d7f66d9b",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals238"
+      ],
+      "canonical_card_id": "oracle-l5r-6339",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "jade",
+        "gold",
+        "diamond",
+        "lotus",
+        "samurai",
+        "celestial",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals238",
+      "name": "Ring of Water",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals238",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals238.jpg",
+      "status": "matched",
+      "text": "Water • Unique \nPlay after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or Provinces during resolution. You may discard this Ring from your hand to use its ability without cost. \nWater Absent Repeatable Battle, [BOW]: Move your target Personality home or, if he would be opposed, move your target Personality at any location to the current battlefield.",
+      "type": "Ring"
+    },
+    {
+      "artwork_id": "art-295febab0e22cfab651f",
+      "artwork_identity_status": "source_path_assertion",
+      "candidate_legacy_card_ids": [
+        "sun-moon-card-TwentyFestivals262"
+      ],
+      "canonical_card_id": "oracle-l5r-10927",
+      "canonical_match_status": "resolved",
+      "declared_legalities": [
+        "open",
+        "emperor",
+        "ivory",
+        "20F",
+        "onyx"
+      ],
+      "image_edition": "TwentyFestivals",
+      "legacy_card_id": "sun-moon-card-TwentyFestivals262",
+      "name": "A Warrior's Brutality",
+      "oracle_printing_id": null,
+      "printing_status": "unverified",
+      "reason": "Exactly one XML card/image entry names this preserved image path; printing legality is not inferred",
+      "source_card_id": "TwentyFestivals262",
+      "source_image_path": "images/cards/TwentyFestivals/TwentyFestivals262.jpg",
+      "status": "matched",
+      "text": "Battle: Give your target opposed Personality +3F.",
+      "type": "Strategy"
+    }
+  ],
+  "schema_version": 1,
+  "source": {
+    "archive_member": "StreamingAssets/Database/database.xml",
+    "archive_path": "/Users/alfredo/Downloads/Sun and Moon - Mac/Sun and Moon.app/Contents/Resources/Data/l5r codex attachment 3.zip",
+    "archive_sha256": "d60f1ad077b12dbc9add61e75fe30a489cc8f9b5ceadeb7e9573026ccb0836b4",
+    "bytes": 8548435,
+    "database_version": "Oct 4, 2015 Kamisasori no Kaisho (Complete), updated Nov 28, 2017 by Kempy 1.3.4",
+    "ignored_members": [
+      {
+        "bytes": 0,
+        "path": "Resources/",
+        "reason": "Directory"
+      },
+      {
+        "bytes": 163,
+        "path": "__MACOSX/._Resources",
+        "reason": "macOS metadata"
+      },
+      {
+        "bytes": 302272,
+        "path": "Resources/unity_builtin_extra",
+        "reason": "Not reference XML; Unity assets/code are not imported"
+      },
+      {
+        "bytes": 163,
+        "path": "__MACOSX/Resources/._unity_builtin_extra",
+        "reason": "macOS metadata"
+      },
+      {
+        "bytes": 319,
+        "path": "__MACOSX/StreamingAssets/Database/._database.xml",
+        "reason": "macOS metadata"
+      }
+    ],
+    "name": "User-supplied Sun and Moon database",
+    "raw_path": "assets/reference/sun-and-moon/database/database.xml",
+    "sha256": "a1e62c29b7e70196adac8049da73971f3130ebc3e147f4dcc5571036f3903591"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "tool": "Built-in image_gen",
+  "reference": "assets/table/phase-1/environment-v5-level.png",
+  "selected": "assets/table/phase-4/borderless-silk-v1.png",
+  "prompt": "Use case: style-transfer. Asset type: production game environment cloth texture, tileable square, highest available resolution. Reference image: approved dark olive silk tabletop from Legend of Five Rings. Create a perfectly top-down, flat, orthographic material swatch filling the ENTIRE image edge to edge with exactly the same luxurious aged olive-green silk brocade as the center of the reference. Preserve its restrained dark moss/olive palette, fine woven fibers, delicate Japanese floral damask and understated aged gold thread. Very subtle wear and organic variation. No perspective. No wooden frame, no trim, no props, no candle, no text, no cards, no UI, no central medallion. Pattern evenly distributed, low-contrast and fine enough to support readable cards over it. Seamless repeating material: opposite edges must join naturally. Flat even illumination; game shader adds live candlelight. Match the premium tactile painted/photoreal quality of the reference, not an abstract green noise texture. Square 2048x2048 or higher.",
+  "notes": "Generated at 1254×1254. Native shader mirrors alternate tiles and uses mipmaps; the source bitmap is unmodified. Blender MCP exports the orthographic material plane."
+}

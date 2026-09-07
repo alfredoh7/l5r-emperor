@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1138534,
+  "card_id": "oracle-l5r-1216",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1216-printing-1-image-1",
+  "image_index": 1,
+  "name": "Capturing the Soul",
+  "numbers": [
+    "246"
+  ],
+  "oracle_id": 1216,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1216-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:06.884969+00:00",
+  "sha256": "a037f8011c9f6b100a1fe212b6c9ca3befe0ed8c099809c61a0c85fb30969f58",
+  "source_image_hash": "14/91",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/91/printing_1216_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/91/printing_1216_1_",
+  "width": 750
+}

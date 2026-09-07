@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1083912,
+  "card_id": "oracle-l5r-336",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-336-printing-1-image-1",
+  "image_index": 1,
+  "name": "Alter History",
+  "numbers": [
+    "11"
+  ],
+  "oracle_id": 336,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-336-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:04:43.978544+00:00",
+  "sha256": "2a8fe0ea1ab765fd7b86a3e49b83b98f95757cddc866cb1f36e1da10643b4729",
+  "source_image_hash": "fe/e6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/e6/printing_336_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/e6/printing_336_1_",
+  "width": 750
+}

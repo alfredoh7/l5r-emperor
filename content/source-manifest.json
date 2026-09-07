@@ -1,0 +1,1190 @@
+{
+  "artwork": [
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-41d2f8dc136aba885d76",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AM/AM009.jpg",
+      "sha256": "41d2f8dc136aba885d76e1801ae8a8740fc0c252846a842673c415ef1f4991c7",
+      "source_id": "source-86254e9cbc7c748a26f9",
+      "source_set_folder": "AM",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-05a3301eab0f804c5749",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AM/AM018.jpg",
+      "sha256": "05a3301eab0f804c5749e4b064259cb937deba74049be8fac2d7cac7481e5e0d",
+      "source_id": "source-583e2b4365a6dcc25e56",
+      "source_set_folder": "AM",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-1cda9ea317f096280939",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AM/AM090.jpg",
+      "sha256": "1cda9ea317f0962809396e7ac900ea6c7c7e1a768106a0766e279f9872c19dd5",
+      "source_id": "source-a282de787817d33fdccf",
+      "source_set_folder": "AM",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-4bb83f201fd5685ad329",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AM/AM110.jpg",
+      "sha256": "4bb83f201fd5685ad3292967a696039fb47765e7d955eed61072a38681178ff2",
+      "source_id": "source-3f59828f89cbd18e7ef5",
+      "source_set_folder": "AM",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-807e02aba7c7429bdc30",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH042.jpg",
+      "sha256": "807e02aba7c7429bdc30998d66547b53a2ea4987303cbdcf5aa9713558b0cc41",
+      "source_id": "source-6577c1bf45d902f26b1e",
+      "source_set_folder": "AMoH",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-6bf87a8387f32e6f26b3",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH053.jpg",
+      "sha256": "6bf87a8387f32e6f26b366508fe40849eff1de8dc557de6d68ce00313b0e5481",
+      "source_id": "source-1c9b00f27ff01976cc08",
+      "source_set_folder": "AMoH",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-d67e92aaf63be91541d5",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH053b.jpg",
+      "sha256": "d67e92aaf63be91541d55992057faf1714ddb0b5dc2bf8712ba3422b2e9fc01f",
+      "source_id": "source-678056343bcd913c77b5",
+      "source_set_folder": "AMoH",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-60b2e41d935ddf2dfbbf",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/GoC/GoC016.jpg",
+      "sha256": "60b2e41d935ddf2dfbbff93f696414216cdeb9a510987a9ce6e44f0968296e76",
+      "source_id": "source-8265107eccce43cc02fd",
+      "source_set_folder": "GoC",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-208f24462330c7254cbe",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/GoC/GoC140.jpg",
+      "sha256": "208f24462330c7254cbeba22dade4d4b6dee1fc684433954b96dd9b523cfdbf9",
+      "source_id": "source-ca1031b067d6c8dd9c08",
+      "source_set_folder": "GoC",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-ed1f11b7a6af4ac6f5a9",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory009.jpg",
+      "sha256": "ed1f11b7a6af4ac6f5a9b51c82eea3a830d700ee0c7323f6b274310da993df3c",
+      "source_id": "source-496ebc67c19d36488cc3",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-5bd98e3e790f0493726c",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory021.jpg",
+      "sha256": "5bd98e3e790f0493726ca4b7c99bce4f13da119aa4590a61d77769b00691db2b",
+      "source_id": "source-9be2e89f484de35378d7",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-310b1c0997d3373ecef8",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory025.jpg",
+      "sha256": "310b1c0997d3373ecef8f2e3e37dec4018266e25959c9ed72711d05e7ea96506",
+      "source_id": "source-ce8f07643d60a3b90f33",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-8ab4d50b5692ec570b6e",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory029.jpg",
+      "sha256": "8ab4d50b5692ec570b6ebf14650616705949976008824df4fe1203881706b03f",
+      "source_id": "source-a82c4e2050c480646f56",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-ec89c9883073e49957a6",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory031.jpg",
+      "sha256": "ec89c9883073e49957a6ffae1716895ce8df419949e27e735e9cb34ca25f6a5a",
+      "source_id": "source-a5bb7624e89cc84f4725",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-0fd83cd6c0db1c3e7f5d",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory059.jpg",
+      "sha256": "0fd83cd6c0db1c3e7f5d11eb3c513baa64eee2dc781e12ebb17a0c1c0836549f",
+      "source_id": "source-6099edeadea4a0760664",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-8906bb93753688dcf7c9",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory061.jpg",
+      "sha256": "8906bb93753688dcf7c9f22ca61876b8b45e365caf3e1c8d37857d483ab2cbd3",
+      "source_id": "source-073c6d80c391e0a854a2",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-e2ecdd6cf6fbcfa1258c",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory062.jpg",
+      "sha256": "e2ecdd6cf6fbcfa1258c40eae503dfe77f8a304e6b69f22f6b95be8d7efa61d0",
+      "source_id": "source-5938f1b74a2936a92963",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-e5c060b28974b51c4443",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory065.jpg",
+      "sha256": "e5c060b28974b51c4443e5ac45924c47598bf29bcd7ae01675ed74bf4d41ec69",
+      "source_id": "source-c718698a1be0b6c02c50",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-9518fcd5de987f3b926b",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory219.jpg",
+      "sha256": "9518fcd5de987f3b926b4f4797de77df38e0774d62f640f4444be969fbc834d5",
+      "source_id": "source-3a1834c70f1f050bccca",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-a6e1c96135bce15d7010",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory235.jpg",
+      "sha256": "a6e1c96135bce15d7010523ccbf387631d5ebc56df898dee95a5d6055b7839fa",
+      "source_id": "source-e019e41ba60fc77be7e6",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-7f07428a93d636ffbbd4",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory239.jpg",
+      "sha256": "7f07428a93d636ffbbd485ec564533908b729d24578297b706ebc1481aa9cb62",
+      "source_id": "source-93b33b393e90556d4a98",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-b88bf19a5bcc739c27d4",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory244.jpg",
+      "sha256": "b88bf19a5bcc739c27d4d401c20d71f91678899e79842caeb7dcab20a5f53cf3",
+      "source_id": "source-2058886a3e64a0f57e94",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-a188e58851aec84989dd",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory288.jpg",
+      "sha256": "a188e58851aec84989dd995846b1dc9b4357f2b7379227614e65f2324ec9df59",
+      "source_id": "source-c9fd50ca82a2eba7e6e0",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-5ee6843d0267952c50b9",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory297.jpg",
+      "sha256": "5ee6843d0267952c50b929e93db6614bc9d02f77187ae614def1b5306753decf",
+      "source_id": "source-6abf0b57422e640b5795",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-9f12e9e9dd1371d4423d",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory301.jpg",
+      "sha256": "9f12e9e9dd1371d4423dc1b1c4ed4e25534b93c93ecae11b37f7c739e86e70c9",
+      "source_id": "source-8f610c43369ad497a94f",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-88ad0083e82a9cf69e4f",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory351.jpg",
+      "sha256": "88ad0083e82a9cf69e4f30f15704fca76d69a4b3177cb40b162438a9b46f977a",
+      "source_id": "source-0a66115ccb2f3511125f",
+      "source_set_folder": "Ivory",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-caa6fc4ef2d4c50738a2",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/Promo/Promo564.jpg",
+      "sha256": "caa6fc4ef2d4c50738a2cd36bc4120b99fcca3e018df3b2a4c7dc6207051f259",
+      "source_id": "source-f7d682979677e3b7a48e",
+      "source_set_folder": "Promo",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-1b536bf5d7cd050d1416",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW002.jpg",
+      "sha256": "1b536bf5d7cd050d1416cdd244e17e243096ed20056aa6866c0398a37b5df502",
+      "source_id": "source-abddff1249eb89e8a850",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-8ae8c48f643c85d6f060",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW003.jpg",
+      "sha256": "8ae8c48f643c85d6f060dfcd1fe1a313ec988c5509da021ecdd2e65d1514f1e5",
+      "source_id": "source-a5b9eb2f3efdc510cbcf",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-b4344f3869fd2d1ea388",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW007.jpg",
+      "sha256": "b4344f3869fd2d1ea388f662e73f738ec445c5edbdb3e9b314943c12d6c9c125",
+      "source_id": "source-a44c69ddfda5d4912d59",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-a81467f04b6c1fe24b6b",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW038.jpg",
+      "sha256": "a81467f04b6c1fe24b6b1a76ecacd534bc3132ba523e3f50e359da75e50ff3da",
+      "source_id": "source-9742cccb6497c7bc4dd0",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-ebdedad609185762e0ce",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW041.jpg",
+      "sha256": "ebdedad609185762e0ce5428033aade6cf6994f22a0daf17fb4d6aa490f679ba",
+      "source_id": "source-e09c2eab3a41468faf26",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-cd96eeff8aacd0d6e100",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW047.jpg",
+      "sha256": "cd96eeff8aacd0d6e100ebd42c33fe802e688fc52cc3fef88e96d06e52cd4b6e",
+      "source_id": "source-b7ae53ba4108fea3ddfb",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-a9401df9c47516395e11",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW048.jpg",
+      "sha256": "a9401df9c47516395e119c746b0f45b055651cbf79d32dfb6d65098ecd0442de",
+      "source_id": "source-4be35c5d19d33a297384",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-43b059484c58bb298f2d",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TCW/TCW050.jpg",
+      "sha256": "43b059484c58bb298f2db08329207a52db0af48de93713ff3ed4260d263c4d0f",
+      "source_id": "source-2d9e5001da5e19af7caa",
+      "source_set_folder": "TCW",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-9bcd789053ea5228cd98",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals011.jpg",
+      "sha256": "9bcd789053ea5228cd98474bba97675f759f9d6f61b62eee2a9cc7e3c71b8946",
+      "source_id": "source-fb9223e5e261bcbc8dcd",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-970037798c1a486a9777",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals043.jpg",
+      "sha256": "970037798c1a486a97778efa3a4f300ad5f19a0fc4b264e16151707a92e1148d",
+      "source_id": "source-64292319fd1cbf635a23",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-7954643deab4e29c364e",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals044.jpg",
+      "sha256": "7954643deab4e29c364e5786d61181fbcfc9c9bdc731b6294282f9d5d4e02915",
+      "source_id": "source-24db02a5fb65808906b5",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-5c9a937385bc95ec7bef",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals050.jpg",
+      "sha256": "5c9a937385bc95ec7befc60ff04d8514210a28ef971c31426c52c92f77c2e7be",
+      "source_id": "source-3d7eb03f4aa5082742a4",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-5dfe8cc7b48bbdc201b7",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals056.jpg",
+      "sha256": "5dfe8cc7b48bbdc201b78396d34b01b12dfbe6251d3f923f95a02f28cf6d4341",
+      "source_id": "source-7d37adb931699d6272f2",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-cdf4477d42786516f5e4",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals235.jpg",
+      "sha256": "cdf4477d42786516f5e4f5c3fdd81a4d618fd3575fd82089576d87d737b7ace0",
+      "source_id": "source-7900b9b97aaeed69da34",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-c2c4afe32169e99c2aba",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals237.jpg",
+      "sha256": "c2c4afe32169e99c2aba9c55b0983e9ddb0d7fcc2b6740d24ab8d84c6a35a66a",
+      "source_id": "source-b102d25619302a0bd972",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-40ee77cf2250d7f66d9b",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals238.jpg",
+      "sha256": "40ee77cf2250d7f66d9b9b025597a36c61c0231cebfbc1b8449e28b89af8030d",
+      "source_id": "source-afb6148ffc1e28c8a9a2",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    },
+    {
+      "card_reference_id": null,
+      "height": 600,
+      "id": "art-295febab0e22cfab651f",
+      "legality_status": "unverified",
+      "mapping_status": "unmapped",
+      "path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals262.jpg",
+      "sha256": "295febab0e22cfab651f1d9eb7d58ef4f1809d1eed4f26e00ba469f8975d3814",
+      "source_id": "source-f207fd389032e03616fd",
+      "source_set_folder": "TwentyFestivals",
+      "width": 428
+    }
+  ],
+  "artwork_by_source_folder": {
+    "AM": 4,
+    "AMoH": 3,
+    "GoC": 2,
+    "Ivory": 17,
+    "Promo": 1,
+    "TCW": 8,
+    "TwentyFestivals": 9
+  },
+  "counts": {
+    "artwork_files": 44,
+    "card_references": 412,
+    "decks": 13,
+    "unique_artwork_hashes": 44
+  },
+  "decks": [
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 43,
+      "id": "deck-b67883c541dc735d0144",
+      "legality_status": "unverified",
+      "name": "Crab",
+      "playable": false
+    },
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 43,
+      "id": "deck-3a414eb1ed5a5e9d52bf",
+      "legality_status": "unverified",
+      "name": "Crane",
+      "playable": false
+    },
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 44,
+      "id": "deck-ca4006c16924f58c69f8",
+      "legality_status": "unverified",
+      "name": "Dragon",
+      "playable": false
+    },
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 42,
+      "id": "deck-ff761bc0c4df1f31108f",
+      "legality_status": "unverified",
+      "name": "Lion",
+      "playable": false
+    },
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 42,
+      "id": "deck-9ca2b288be8bc5ba1cdf",
+      "legality_status": "unverified",
+      "name": "Mantis",
+      "playable": false
+    },
+    {
+      "card_count": 83,
+      "declared_era": "Ivory",
+      "entry_count": 43,
+      "id": "deck-4fb0b5c940ee6c36e573",
+      "legality_status": "unverified",
+      "name": "Phoenix",
+      "playable": false
+    },
+    {
+      "card_count": 83,
+      "declared_era": "Ivory",
+      "entry_count": 44,
+      "id": "deck-45c89aaa451ab9b9421e",
+      "legality_status": "unverified",
+      "name": "Scorpion",
+      "playable": false
+    },
+    {
+      "card_count": 79,
+      "declared_era": "Ivory",
+      "entry_count": 43,
+      "id": "deck-ec0149c477be012a4aec",
+      "legality_status": "unverified",
+      "name": "Spider",
+      "playable": false
+    },
+    {
+      "card_count": 81,
+      "declared_era": "Ivory",
+      "entry_count": 41,
+      "id": "deck-2fd922266525ac16d68a",
+      "legality_status": "unverified",
+      "name": "Unicorn",
+      "playable": false
+    },
+    {
+      "card_count": 83,
+      "declared_era": "Emperor",
+      "entry_count": 41,
+      "id": "deck-65d4e75607e4834a0afc",
+      "legality_status": "unverified",
+      "name": "Crab Control",
+      "playable": false
+    },
+    {
+      "card_count": 85,
+      "declared_era": "Emperor",
+      "entry_count": 38,
+      "id": "deck-29b2cd7dba1314ea487e",
+      "legality_status": "unverified",
+      "name": "Crane Dominance",
+      "playable": false
+    },
+    {
+      "card_count": 88,
+      "declared_era": "Emperor",
+      "entry_count": 41,
+      "id": "deck-0b1fbca7b3696ed66909",
+      "legality_status": "unverified",
+      "name": "Dragon Destruction",
+      "playable": false
+    },
+    {
+      "card_count": 84,
+      "declared_era": "Emperor",
+      "entry_count": 34,
+      "id": "deck-fab9611b6d0f8b7cc88e",
+      "legality_status": "unverified",
+      "name": "Unicorn Maidens",
+      "playable": false
+    }
+  ],
+  "schema_version": 1,
+  "sources": [
+    {
+      "byte_count": 3137983,
+      "id": "archive-6df1459a2e3efb26ae4a",
+      "kind": "user_archive",
+      "sha256": "6df1459a2e3efb26ae4a14fb04da0861eeba8b0e06b584fd33b8adfe885924a4",
+      "source_name": "Archive.zip",
+      "source_path": "/Users/alfredo/Downloads/Sun and Moon - Mac/Archive.zip"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Crab.txt",
+      "byte_count": 877,
+      "id": "source-9a1a72d61ecd9e132080",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Crab.txt",
+      "sha256": "01441afe5dffaa7cc7153cd77f5e0a4524486a687ba0a373133ddd53595a7de7"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Crane.txt",
+      "byte_count": 893,
+      "id": "source-a8b0e014154844f6b46d",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Crane.txt",
+      "sha256": "0da5db5d3daca58ff1d63327da86d6ae753e01de9591edeafcdc5a734fb58afb"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Dragon.txt",
+      "byte_count": 929,
+      "id": "source-a2de7e5adc42a275623c",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Dragon.txt",
+      "sha256": "bb461a0a55708c6afa87227ae5bea514fd8de7662529f6c9c66674df92fc309e"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Lion.txt",
+      "byte_count": 868,
+      "id": "source-22e2d6f2121e4ac00e7a",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Lion.txt",
+      "sha256": "35b8ca96fc170d56017028d687f89679aaa7b7d2652071124de69a74243ba98b"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Mantis.txt",
+      "byte_count": 863,
+      "id": "source-4352c775db6a9a613a1c",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Mantis.txt",
+      "sha256": "658153b7fc7e07aa2570e32220805044fa8a572f55836434c4095bf25bfe83a2"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Phoenix.txt",
+      "byte_count": 933,
+      "id": "source-fe23de5a58993ea23ecb",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Phoenix.txt",
+      "sha256": "e6e7a7d30e3d58127d4fe618c2b51fe41821f5214250c794d2bf318caae55684"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Scorpion.txt",
+      "byte_count": 903,
+      "id": "source-9c24dde7512f0ca698a2",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Scorpion.txt",
+      "sha256": "d33fc3134fa83e5da20a0022720e2c799bba718e6314981787ebf9da006fbdb6"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Spider.txt",
+      "byte_count": 963,
+      "id": "source-0ef4cd53441616689960",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Spider.txt",
+      "sha256": "da1fa852e41d67ce63214d485f05dc4fe77a7eeebd7ce9bc8ca2c7202225039d"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "Decks/Unicorn.txt",
+      "byte_count": 850,
+      "id": "source-148d41c821100aadf966",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/Decks/Unicorn.txt",
+      "sha256": "fb01d87633e5d6c208faac5750306703ccaf4f24615d32b6509ce033ef40d979"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AM/AM009.jpg",
+      "byte_count": 74345,
+      "id": "source-86254e9cbc7c748a26f9",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AM/AM009.jpg",
+      "sha256": "41d2f8dc136aba885d76e1801ae8a8740fc0c252846a842673c415ef1f4991c7"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AM/AM018.jpg",
+      "byte_count": 60158,
+      "id": "source-583e2b4365a6dcc25e56",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AM/AM018.jpg",
+      "sha256": "05a3301eab0f804c5749e4b064259cb937deba74049be8fac2d7cac7481e5e0d"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AM/AM090.jpg",
+      "byte_count": 67134,
+      "id": "source-a282de787817d33fdccf",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AM/AM090.jpg",
+      "sha256": "1cda9ea317f0962809396e7ac900ea6c7c7e1a768106a0766e279f9872c19dd5"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AM/AM110.jpg",
+      "byte_count": 78425,
+      "id": "source-3f59828f89cbd18e7ef5",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AM/AM110.jpg",
+      "sha256": "4bb83f201fd5685ad3292967a696039fb47765e7d955eed61072a38681178ff2"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AMoH/AMoH042.jpg",
+      "byte_count": 66743,
+      "id": "source-6577c1bf45d902f26b1e",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH042.jpg",
+      "sha256": "807e02aba7c7429bdc30998d66547b53a2ea4987303cbdcf5aa9713558b0cc41"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AMoH/AMoH053.jpg",
+      "byte_count": 69720,
+      "id": "source-1c9b00f27ff01976cc08",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH053.jpg",
+      "sha256": "6bf87a8387f32e6f26b366508fe40849eff1de8dc557de6d68ce00313b0e5481"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/AMoH/AMoH053b.jpg",
+      "byte_count": 66882,
+      "id": "source-678056343bcd913c77b5",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/AMoH/AMoH053b.jpg",
+      "sha256": "d67e92aaf63be91541d55992057faf1714ddb0b5dc2bf8712ba3422b2e9fc01f"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/GoC/GoC016.jpg",
+      "byte_count": 64464,
+      "id": "source-8265107eccce43cc02fd",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/GoC/GoC016.jpg",
+      "sha256": "60b2e41d935ddf2dfbbff93f696414216cdeb9a510987a9ce6e44f0968296e76"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/GoC/GoC140.jpg",
+      "byte_count": 61435,
+      "id": "source-ca1031b067d6c8dd9c08",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/GoC/GoC140.jpg",
+      "sha256": "208f24462330c7254cbeba22dade4d4b6dee1fc684433954b96dd9b523cfdbf9"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory009.jpg",
+      "byte_count": 92933,
+      "id": "source-496ebc67c19d36488cc3",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory009.jpg",
+      "sha256": "ed1f11b7a6af4ac6f5a9b51c82eea3a830d700ee0c7323f6b274310da993df3c"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory021.jpg",
+      "byte_count": 165452,
+      "id": "source-9be2e89f484de35378d7",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory021.jpg",
+      "sha256": "5bd98e3e790f0493726ca4b7c99bce4f13da119aa4590a61d77769b00691db2b"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory025.jpg",
+      "byte_count": 51492,
+      "id": "source-ce8f07643d60a3b90f33",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory025.jpg",
+      "sha256": "310b1c0997d3373ecef8f2e3e37dec4018266e25959c9ed72711d05e7ea96506"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory029.jpg",
+      "byte_count": 46744,
+      "id": "source-a82c4e2050c480646f56",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory029.jpg",
+      "sha256": "8ab4d50b5692ec570b6ebf14650616705949976008824df4fe1203881706b03f"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory031.jpg",
+      "byte_count": 58825,
+      "id": "source-a5bb7624e89cc84f4725",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory031.jpg",
+      "sha256": "ec89c9883073e49957a6ffae1716895ce8df419949e27e735e9cb34ca25f6a5a"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory059.jpg",
+      "byte_count": 70542,
+      "id": "source-6099edeadea4a0760664",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory059.jpg",
+      "sha256": "0fd83cd6c0db1c3e7f5d11eb3c513baa64eee2dc781e12ebb17a0c1c0836549f"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory061.jpg",
+      "byte_count": 58904,
+      "id": "source-073c6d80c391e0a854a2",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory061.jpg",
+      "sha256": "8906bb93753688dcf7c9f22ca61876b8b45e365caf3e1c8d37857d483ab2cbd3"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory062.jpg",
+      "byte_count": 46744,
+      "id": "source-5938f1b74a2936a92963",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory062.jpg",
+      "sha256": "e2ecdd6cf6fbcfa1258c40eae503dfe77f8a304e6b69f22f6b95be8d7efa61d0"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory065.jpg",
+      "byte_count": 58275,
+      "id": "source-c718698a1be0b6c02c50",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory065.jpg",
+      "sha256": "e5c060b28974b51c4443e5ac45924c47598bf29bcd7ae01675ed74bf4d41ec69"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory219.jpg",
+      "byte_count": 54505,
+      "id": "source-3a1834c70f1f050bccca",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory219.jpg",
+      "sha256": "9518fcd5de987f3b926b4f4797de77df38e0774d62f640f4444be969fbc834d5"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory235.jpg",
+      "byte_count": 61705,
+      "id": "source-e019e41ba60fc77be7e6",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory235.jpg",
+      "sha256": "a6e1c96135bce15d7010523ccbf387631d5ebc56df898dee95a5d6055b7839fa"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory239.jpg",
+      "byte_count": 58575,
+      "id": "source-93b33b393e90556d4a98",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory239.jpg",
+      "sha256": "7f07428a93d636ffbbd485ec564533908b729d24578297b706ebc1481aa9cb62"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory244.jpg",
+      "byte_count": 53098,
+      "id": "source-2058886a3e64a0f57e94",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory244.jpg",
+      "sha256": "b88bf19a5bcc739c27d4d401c20d71f91678899e79842caeb7dcab20a5f53cf3"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory288.jpg",
+      "byte_count": 60932,
+      "id": "source-c9fd50ca82a2eba7e6e0",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory288.jpg",
+      "sha256": "a188e58851aec84989dd995846b1dc9b4357f2b7379227614e65f2324ec9df59"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory297.jpg",
+      "byte_count": 198630,
+      "id": "source-6abf0b57422e640b5795",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory297.jpg",
+      "sha256": "5ee6843d0267952c50b929e93db6614bc9d02f77187ae614def1b5306753decf"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory301.jpg",
+      "byte_count": 72411,
+      "id": "source-8f610c43369ad497a94f",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory301.jpg",
+      "sha256": "9f12e9e9dd1371d4423dc1b1c4ed4e25534b93c93ecae11b37f7c739e86e70c9"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Ivory/Ivory351.jpg",
+      "byte_count": 69099,
+      "id": "source-0a66115ccb2f3511125f",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Ivory/Ivory351.jpg",
+      "sha256": "88ad0083e82a9cf69e4f30f15704fca76d69a4b3177cb40b162438a9b46f977a"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/Promo/Promo564.jpg",
+      "byte_count": 71833,
+      "id": "source-f7d682979677e3b7a48e",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/Promo/Promo564.jpg",
+      "sha256": "caa6fc4ef2d4c50738a2cd36bc4120b99fcca3e018df3b2a4c7dc6207051f259"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW002.jpg",
+      "byte_count": 75982,
+      "id": "source-abddff1249eb89e8a850",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW002.jpg",
+      "sha256": "1b536bf5d7cd050d1416cdd244e17e243096ed20056aa6866c0398a37b5df502"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW003.jpg",
+      "byte_count": 78693,
+      "id": "source-a5b9eb2f3efdc510cbcf",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW003.jpg",
+      "sha256": "8ae8c48f643c85d6f060dfcd1fe1a313ec988c5509da021ecdd2e65d1514f1e5"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW007.jpg",
+      "byte_count": 68761,
+      "id": "source-a44c69ddfda5d4912d59",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW007.jpg",
+      "sha256": "b4344f3869fd2d1ea388f662e73f738ec445c5edbdb3e9b314943c12d6c9c125"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW038.jpg",
+      "byte_count": 68815,
+      "id": "source-9742cccb6497c7bc4dd0",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW038.jpg",
+      "sha256": "a81467f04b6c1fe24b6b1a76ecacd534bc3132ba523e3f50e359da75e50ff3da"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW041.jpg",
+      "byte_count": 64007,
+      "id": "source-e09c2eab3a41468faf26",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW041.jpg",
+      "sha256": "ebdedad609185762e0ce5428033aade6cf6994f22a0daf17fb4d6aa490f679ba"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW047.jpg",
+      "byte_count": 67205,
+      "id": "source-b7ae53ba4108fea3ddfb",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW047.jpg",
+      "sha256": "cd96eeff8aacd0d6e100ebd42c33fe802e688fc52cc3fef88e96d06e52cd4b6e"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW048.jpg",
+      "byte_count": 60766,
+      "id": "source-4be35c5d19d33a297384",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW048.jpg",
+      "sha256": "a9401df9c47516395e119c746b0f45b055651cbf79d32dfb6d65098ecd0442de"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TCW/TCW050.jpg",
+      "byte_count": 59037,
+      "id": "source-2d9e5001da5e19af7caa",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TCW/TCW050.jpg",
+      "sha256": "43b059484c58bb298f2db08329207a52db0af48de93713ff3ed4260d263c4d0f"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals011.jpg",
+      "byte_count": 69862,
+      "id": "source-fb9223e5e261bcbc8dcd",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals011.jpg",
+      "sha256": "9bcd789053ea5228cd98474bba97675f759f9d6f61b62eee2a9cc7e3c71b8946"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals043.jpg",
+      "byte_count": 69367,
+      "id": "source-64292319fd1cbf635a23",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals043.jpg",
+      "sha256": "970037798c1a486a97778efa3a4f300ad5f19a0fc4b264e16151707a92e1148d"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals044.jpg",
+      "byte_count": 67645,
+      "id": "source-24db02a5fb65808906b5",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals044.jpg",
+      "sha256": "7954643deab4e29c364e5786d61181fbcfc9c9bdc731b6294282f9d5d4e02915"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals050.jpg",
+      "byte_count": 70697,
+      "id": "source-3d7eb03f4aa5082742a4",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals050.jpg",
+      "sha256": "5c9a937385bc95ec7befc60ff04d8514210a28ef971c31426c52c92f77c2e7be"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals056.jpg",
+      "byte_count": 68414,
+      "id": "source-7d37adb931699d6272f2",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals056.jpg",
+      "sha256": "5dfe8cc7b48bbdc201b78396d34b01b12dfbe6251d3f923f95a02f28cf6d4341"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals235.jpg",
+      "byte_count": 71849,
+      "id": "source-7900b9b97aaeed69da34",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals235.jpg",
+      "sha256": "cdf4477d42786516f5e4f5c3fdd81a4d618fd3575fd82089576d87d737b7ace0"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals237.jpg",
+      "byte_count": 59207,
+      "id": "source-b102d25619302a0bd972",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals237.jpg",
+      "sha256": "c2c4afe32169e99c2aba9c55b0983e9ddb0d7fcc2b6740d24ab8d84c6a35a66a"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals238.jpg",
+      "byte_count": 82725,
+      "id": "source-afb6148ffc1e28c8a9a2",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals238.jpg",
+      "sha256": "40ee77cf2250d7f66d9b9b025597a36c61c0231cebfbc1b8449e28b89af8030d"
+    },
+    {
+      "archive_id": "archive-6df1459a2e3efb26ae4a",
+      "archive_member": "images/cards/TwentyFestivals/TwentyFestivals262.jpg",
+      "byte_count": 70701,
+      "id": "source-f207fd389032e03616fd",
+      "kind": "archive_member",
+      "local_path": "assets/reference/sun-and-moon/images/cards/TwentyFestivals/TwentyFestivals262.jpg",
+      "sha256": "295febab0e22cfab651f1d9eb7d58ef4f1809d1eed4f26e00ba469f8975d3814"
+    },
+    {
+      "byte_count": 841,
+      "id": "source-31120901caab2c6ad34c",
+      "kind": "user_deck",
+      "local_path": "assets/reference/decks/Crab Control.txt",
+      "sha256": "e95b24eb475f1963b1a79167a1a5c5dddf07db58fbe5667fce4408019f1676cc",
+      "source_name": "Crab Control.txt",
+      "source_path": "/Users/alfredo/Downloads/Crab Control.txt"
+    },
+    {
+      "byte_count": 749,
+      "id": "source-ec4d016bdea9aee10b89",
+      "kind": "user_deck",
+      "local_path": "assets/reference/decks/Crane Dominance.txt",
+      "sha256": "fd7df77410c315ed5b3fc0f38124b0c30c5448bb0b98d41be3a4efa8d55e5509",
+      "source_name": "Crane Dominance.txt",
+      "source_path": "/Users/alfredo/Downloads/Crane Dominance.txt"
+    },
+    {
+      "byte_count": 833,
+      "id": "source-71eb51db3de499dddb94",
+      "kind": "user_deck",
+      "local_path": "assets/reference/decks/Dragon Destruction.txt",
+      "sha256": "28ff8e061123212dd93df49dff25ff658b1cc57ffa39cf883619a6b2ce4260f2",
+      "source_name": "Dragon Destruction.txt",
+      "source_path": "/Users/alfredo/Downloads/Dragon Destruction.txt"
+    },
+    {
+      "byte_count": 682,
+      "id": "source-1f7eb95a6916cefb5211",
+      "kind": "user_deck",
+      "local_path": "assets/reference/decks/Unicorn Maidens.txt",
+      "sha256": "2d815ab835707e08b5f0f4bf7356b61b019a3ac4a1ecf060ee8e0b988f349e6b",
+      "source_name": "Unicorn Maidens.txt",
+      "source_path": "/Users/alfredo/Downloads/Unicorn Maidens.txt"
+    }
+  ]
+}

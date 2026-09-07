@@ -1,0 +1,23 @@
+{
+  "tool": "Built-in Imagegen (image_gen.imagegen)",
+  "date": "2026-09-06",
+  "workflow": "Generate a playable target, inspect native Godot captures, generate matching material textures, map them onto the dedicated scene through Blender MCP, export GLB, iterate native lighting and controls.",
+  "outputs": [
+    {
+      "file": "assets/concepts/D-playable-lacquer.png",
+      "references": ["assets/concepts/A-lacquer-ink.png", "docs/screenshots/gameplay-assignment.png (pre-polish)", "src/L5R.Client/Content/Published/oracle-l5r-3636.jpg"],
+      "prompt": "Create one refined production UI target concept for a playable native Legend of Five Rings Emperor Edition card game, landscape 16:10. Reference 1 establishes warm black walnut lacquer, antique brass hairlines, olive silk tabletop and subtle five-ring ink inlay; reference 2 supplies the REAL functional board topology and controls that must stay; reference 3 is an actual printed card face, preserve its COMPLETE portrait card proportions and all printed borders and rules text in representative card slots. No cropped illustration-only cards. A practical achievable game screenshot, not cinematic art. Top compact lacquer header: Emperor title, turn, phase breadcrumb, small menu. Main play area left 77%, right 23% dark translucent lacquer inspector containing one large COMPLETE portrait card, short rules help and bottom Confirm/Cancel controls. Main area: opponent home units top, opponent four provinces, central four battle lanes with warm brass line separators and units aligned to their target province, own four provinces, own home, centered hand at bottom. Full portrait printed cards resting on cloth with soft shadows, some physically rotated sideways when bowed, attachments peeking from beneath personalities. Fine blue dashed attack intent arrow. Very restrained labels, avoid boxes within boxes; leave green cloth visible. Warm edge candles and beveled wood surround, elegant readable cream serif heading and clean sans UI text. Bottom-left concise contextual 'Your next move' guidance. Convey a premium tactile tabletop, humane readable hierarchy and physical card ownership. Keep the functional zones and portrait full scans unmistakable. No landscape province illustrations, no illegible giant decorative text, no web dashboard, no extra cinematic camera tilt. This is a target to implement in Godot with genuine Blender tabletop geometry and native controls."
+    },
+    {
+      "file": "assets/table/olive-silk-generated.png",
+      "references": ["assets/concepts/D-playable-lacquer.png"],
+      "prompt": "Create a production texture asset extracted in design spirit from the olive silk playing surface in this concept. ONLY a flat orthographic rectangular 3:2 cloth albedo texture, filling every pixel, no table frame, no cards, no text, no UI, no props, no border, no fake perspective, no lighting gradients or shadows, no rings (rings will be actual geometry). Muted warm olive green / aged moss silk, subtle rich fine woven linen fibers and mottled patina throughout, quiet subtly brighter clear center. Delicate faded charcoal-olive Japanese ink bamboo leaves and wispy ink pine branches restricted to the outermost 7% edges and corners, sparse not busy. Center 86% clean cloth, suitable for actual card gameplay on top. Premium tactile aged silk, visually matching the provided game concept tabletop in palette and texture scale. The texture will be mapped onto a Blender mesh, so no modeled objects or baked specular lights. Output the texture itself without labels or framing."
+    },
+    {
+      "file": "assets/table/walnut-lacquer-generated.png",
+      "runtimeCopy": "src/L5R.Client/Art/lacquer-ui.png",
+      "references": ["assets/concepts/D-playable-lacquer.png"],
+      "prompt": "Generate ONLY a flat rectangular 3:2 albedo texture of the beautiful almost-black walnut lacquer in this reference game's frame. Dark smoked Japanese walnut, elegant subtle long flowing organic wood grain, soft brown-black variation, tactile lightly aged polished lacquer, tiny natural hairline wear. Deep dark color around charcoal brown #231c14; keep grain low contrast and premium, not striped or repetitive. Cover every pixel with this material. No border, frame, corners, brass, text, objects, cards, UI, highlights or directional baked lighting. It will be used as a physically shaded Blender material and native UI panel background. Orthographic material texture, no perspective."
+    }
+  ]
+}

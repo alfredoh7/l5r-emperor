@@ -1,0 +1,281 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-168468dd5ba978989172",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "The Exquisite Palace of the Crane"
+    },
+    {
+      "card_reference_id": "card-ref-41019ee7240c1c0eead7",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Doji Makoto, the Smiling Blade"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 7,
+      "quantity": 2,
+      "raw_line": "2x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 8,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-1bbde420033a303efd13",
+      "line_number": 9,
+      "quantity": 1,
+      "raw_line": "1x Famous Bazaar"
+    },
+    {
+      "card_reference_id": "card-ref-3c3f5ed3432c1d2207fd",
+      "line_number": 10,
+      "quantity": 2,
+      "raw_line": "2x Farmer's Market"
+    },
+    {
+      "card_reference_id": "card-ref-6e9c66e1baf69e8b34a9",
+      "line_number": 11,
+      "quantity": 2,
+      "raw_line": "2x Kabuki Theater Troupe"
+    },
+    {
+      "card_reference_id": "card-ref-c340fca19b4c82e429e1",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x Poorly Placed Garden"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 13,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-99799ce015adc4b618a1",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3x Marketplace"
+    },
+    {
+      "card_reference_id": "card-ref-5350a239807b18c3b02e",
+      "line_number": 15,
+      "quantity": 1,
+      "raw_line": "1x The Turquoise Court"
+    },
+    {
+      "card_reference_id": "card-ref-825b98fcbc09eecba260",
+      "line_number": 17,
+      "quantity": 1,
+      "raw_line": "1x Daidoji Gensai"
+    },
+    {
+      "card_reference_id": "card-ref-b53d646b2a0d35a1a13d",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Daidoji Tametaka"
+    },
+    {
+      "card_reference_id": "card-ref-47860d9fafcdd6e54053",
+      "line_number": 19,
+      "quantity": 1,
+      "raw_line": "1x Doji Katata"
+    },
+    {
+      "card_reference_id": "card-ref-8e5a30616f312b679ae2",
+      "line_number": 20,
+      "quantity": 1,
+      "raw_line": "1x Doji Soeka"
+    },
+    {
+      "card_reference_id": "card-ref-384d6dcd2e650d072e93",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Doji Dainagon"
+    },
+    {
+      "card_reference_id": "card-ref-7db80ebe7ee9845dd2e0",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Doji Kurohime"
+    },
+    {
+      "card_reference_id": "card-ref-46287e2b1405ec50cf3d",
+      "line_number": 23,
+      "quantity": 3,
+      "raw_line": "3x Kakita Amiki"
+    },
+    {
+      "card_reference_id": "card-ref-a3409e2420c0763711b5",
+      "line_number": 24,
+      "quantity": 3,
+      "raw_line": "3x Kakita Izumiko"
+    },
+    {
+      "card_reference_id": "card-ref-83d88075cfc1d8067e7c",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Kakita Ujirou"
+    },
+    {
+      "card_reference_id": "card-ref-609e1ba65507b7822b4b",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Crane Clan - exp"
+    },
+    {
+      "card_reference_id": "card-ref-32da2000ea6c10ded5b4",
+      "line_number": 28,
+      "quantity": 1,
+      "raw_line": "1x Regal Furisode"
+    },
+    {
+      "card_reference_id": "card-ref-dd41ffdb21f3079cb240",
+      "line_number": 29,
+      "quantity": 1,
+      "raw_line": "1x Utaku's Destiny"
+    },
+    {
+      "card_reference_id": "card-ref-93972adbd1c6ebe6ab86",
+      "line_number": 30,
+      "quantity": 1,
+      "raw_line": "1x Court Scribe"
+    },
+    {
+      "card_reference_id": "card-ref-c256edfa3c1b79e042e2",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Sparrow Clan Aide"
+    },
+    {
+      "card_reference_id": "card-ref-7e2397974e37f9cdce91",
+      "line_number": 32,
+      "quantity": 1,
+      "raw_line": "1x Ring of Earth"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-10b89698fa871c066f2d",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of Fire"
+    },
+    {
+      "card_reference_id": "card-ref-b6bb3f04ca40e333eb07",
+      "line_number": 36,
+      "quantity": 3,
+      "raw_line": "3x Block Supply Lines"
+    },
+    {
+      "card_reference_id": "card-ref-cbd35183feb24acb04b8",
+      "line_number": 37,
+      "quantity": 3,
+      "raw_line": "3x Breaking the Rhythm"
+    },
+    {
+      "card_reference_id": "card-ref-92bed46655cf4544d749",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3x Discretionary Valor"
+    },
+    {
+      "card_reference_id": "card-ref-7a14bfcb78307aee9a18",
+      "line_number": 39,
+      "quantity": 2,
+      "raw_line": "2x Do Not Delay!"
+    },
+    {
+      "card_reference_id": "card-ref-b986eae3a7c33534d6a7",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "1x Favors"
+    },
+    {
+      "card_reference_id": "card-ref-acb278a93731ff4e4e4e",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Flashy Technique"
+    },
+    {
+      "card_reference_id": "card-ref-73be01b982eaafb4c017",
+      "line_number": 42,
+      "quantity": 1,
+      "raw_line": "1x Come One at a Time"
+    },
+    {
+      "card_reference_id": "card-ref-0ac37bdb472e98f53ba8",
+      "line_number": 43,
+      "quantity": 2,
+      "raw_line": "2x Hold the Walls"
+    },
+    {
+      "card_reference_id": "card-ref-e7b46b943a600c012c22",
+      "line_number": 44,
+      "quantity": 3,
+      "raw_line": "3x Honor Replaces Rage"
+    },
+    {
+      "card_reference_id": "card-ref-226c91df158684dbdc17",
+      "line_number": 45,
+      "quantity": 2,
+      "raw_line": "2x Iaijutsu Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-96dd046bccc3c19af864",
+      "line_number": 46,
+      "quantity": 1,
+      "raw_line": "1x Inexplicable Challenge"
+    },
+    {
+      "card_reference_id": "card-ref-e5b251db1a780d2e1751",
+      "line_number": 47,
+      "quantity": 1,
+      "raw_line": "1x Sanctioned Duel"
+    },
+    {
+      "card_reference_id": "card-ref-5d574b52f1dfe891ba47",
+      "line_number": 48,
+      "quantity": 2,
+      "raw_line": "2x Stand or Run"
+    },
+    {
+      "card_reference_id": "card-ref-e14fed6709c2098a8403",
+      "line_number": 49,
+      "quantity": 3,
+      "raw_line": "3x Strategic Withdrawal"
+    }
+  ],
+  "entry_count": 43,
+  "id": "deck-3a414eb1ed5a5e9d52bf",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Crane",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-a8b0e014154844f6b46d"
+}

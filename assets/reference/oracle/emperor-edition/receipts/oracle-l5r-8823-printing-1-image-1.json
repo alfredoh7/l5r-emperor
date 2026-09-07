@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1044292,
+  "card_id": "oracle-l5r-8823",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8823-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Daikyu",
+  "numbers": [
+    "240"
+  ],
+  "oracle_id": 8823,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-8823-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:08:20.185901+00:00",
+  "sha256": "55b1bde571ae8051563dfda702960f738ab8163a3ee76b62e285a9059564f672",
+  "source_image_hash": "9a/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9a/cc/printing_8823_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9a/cc/printing_8823_1_",
+  "width": 750
+}

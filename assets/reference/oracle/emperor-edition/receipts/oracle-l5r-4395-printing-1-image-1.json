@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1056407,
+  "card_id": "oracle-l5r-4395",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4395-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsu Sorano",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 4395,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4395-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:26.837726+00:00",
+  "sha256": "34ae17f51167746483bd1a1c204541aebceb7db5032266b059a6f11116d20685",
+  "source_image_hash": "6b/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6b/3f/printing_4395_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6b/3f/printing_4395_1_",
+  "width": 750
+}

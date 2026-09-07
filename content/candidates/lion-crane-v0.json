@@ -1,0 +1,540 @@
+{
+  "schema_version": 1,
+  "notice": "Production deck proposals for implementation planning only. These decks must not be presented as playable; no balance or final legality claim is made.",
+  "decks": [
+    {
+      "id": "candidate-crane-v0",
+      "name": "Crane foundation candidate",
+      "clan": "Crane",
+      "playable": false,
+      "legality_status": "unverified",
+      "status": "implementation_backlog_proposal",
+      "pregame": [
+        {
+          "card_id": "oracle-l5r-6855",
+          "name": "Shinden Asahina",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=6855",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1106",
+          "name": "Border Keep",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=1106",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-679",
+          "name": "Bamboo Harvesters",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=679",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "dynasty": [
+        {
+          "card_id": "oracle-l5r-7303",
+          "name": "Small Farm",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=7303",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4664",
+          "name": "Large Farm",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4664",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6258",
+          "name": "Remote Village",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=6258",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4840",
+          "name": "Marketplace",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4840",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2867",
+          "name": "Gold Mine",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=2867",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6086",
+          "name": "Prosperous Village",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=6086",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-502",
+          "name": "Asahina Konomi",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=502",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-521",
+          "name": "Asahina Yasutora",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=521",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1645",
+          "name": "Daidoji Kenshi",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1645",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9812",
+          "name": "Daidoji Tsunehiko",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9812",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2166",
+          "name": "Doji Tatsuki",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=2166",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-507",
+          "name": "Asahina Nanae",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=507",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10625",
+          "name": "Daidoji Soken",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10625",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2158",
+          "name": "Doji Shunya",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=2158",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "fate": [
+        {
+          "card_id": "oracle-l5r-10118",
+          "name": "Light Armor",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10118",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9879",
+          "name": "Pure Strike Blade",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9879",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9871",
+          "name": "Native Guide",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9871",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10253",
+          "name": "Rank & File",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10253",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9147",
+          "name": "Veteran Skirmishers",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9147",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6051",
+          "name": "Prepared for Death",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=6051",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-5861",
+          "name": "Paid Off",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=5861",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1521",
+          "name": "Costly Feud",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1521",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-3730",
+          "name": "Incapacitated",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=3730",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1045",
+          "name": "Block Supply Lines",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1045",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10368",
+          "name": "Defensive Stance",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10368",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1589",
+          "name": "Crushing Strength",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1589",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9916",
+          "name": "Never Afraid",
+          "quantity": 2,
+          "source_url": "https://oracleofthevoid.com/#cardid=9916",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2619",
+          "name": "Focus",
+          "quantity": 2,
+          "source_url": "https://oracleofthevoid.com/#cardid=2619",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "counts": {
+        "dynasty": 40,
+        "fate": 40
+      },
+      "selection_notes": "A proposed smaller mechanics surface for future implementation, not a supported or balanced deck. All printed traits, abilities, rulebook actions and keywords still require period verification and engine coverage."
+    },
+    {
+      "id": "candidate-lion-v0",
+      "name": "Lion foundation candidate",
+      "clan": "Lion",
+      "playable": false,
+      "legality_status": "unverified",
+      "status": "implementation_backlog_proposal",
+      "pregame": [
+        {
+          "card_id": "oracle-l5r-2949",
+          "name": "Halls of Memory",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=2949",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1106",
+          "name": "Border Keep",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=1106",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-679",
+          "name": "Bamboo Harvesters",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=679",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "dynasty": [
+        {
+          "card_id": "oracle-l5r-7303",
+          "name": "Small Farm",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=7303",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4664",
+          "name": "Large Farm",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4664",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6258",
+          "name": "Remote Village",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=6258",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4840",
+          "name": "Marketplace",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4840",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2867",
+          "name": "Gold Mine",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=2867",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6086",
+          "name": "Prosperous Village",
+          "quantity": 1,
+          "source_url": "https://oracleofthevoid.com/#cardid=6086",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-229",
+          "name": "Akodo Kisho",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=229",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-3636",
+          "name": "Ikoma Shika",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=3636",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-3640",
+          "name": "Ikoma Sido",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=3640",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10851",
+          "name": "Ikoma Takakura",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10851",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4395",
+          "name": "Kitsu Sorano",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4395",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-4915",
+          "name": "Matsu Hachiro",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=4915",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-3641",
+          "name": "Ikoma Sugo",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=3641",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10063",
+          "name": "Kitsu Kouki",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10063",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "fate": [
+        {
+          "card_id": "oracle-l5r-10118",
+          "name": "Light Armor",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10118",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9879",
+          "name": "Pure Strike Blade",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9879",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9871",
+          "name": "Native Guide",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9871",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10253",
+          "name": "Rank & File",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10253",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9147",
+          "name": "Veteran Skirmishers",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=9147",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-6051",
+          "name": "Prepared for Death",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=6051",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-5861",
+          "name": "Paid Off",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=5861",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1521",
+          "name": "Costly Feud",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1521",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-3730",
+          "name": "Incapacitated",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=3730",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1045",
+          "name": "Block Supply Lines",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1045",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-10368",
+          "name": "Defensive Stance",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=10368",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-1589",
+          "name": "Crushing Strength",
+          "quantity": 3,
+          "source_url": "https://oracleofthevoid.com/#cardid=1589",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-9916",
+          "name": "Never Afraid",
+          "quantity": 2,
+          "source_url": "https://oracleofthevoid.com/#cardid=9916",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        },
+        {
+          "card_id": "oracle-l5r-2619",
+          "name": "Focus",
+          "quantity": 2,
+          "source_url": "https://oracleofthevoid.com/#cardid=2619",
+          "automation_status": "unsupported",
+          "historical_text_status": "needs_era_review"
+        }
+      ],
+      "counts": {
+        "dynasty": 40,
+        "fate": 40
+      },
+      "selection_notes": "A proposed smaller mechanics surface for future implementation, not a supported or balanced deck. All printed traits, abilities, rulebook actions and keywords still require period verification and engine coverage."
+    }
+  ]
+}

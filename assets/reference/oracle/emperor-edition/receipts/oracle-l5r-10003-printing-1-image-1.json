@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1055762,
+  "card_id": "oracle-l5r-10003",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10003-printing-1-image-1",
+  "image_index": 1,
+  "name": "Dutiful Cavalry",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10003,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10003-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:34.552919+00:00",
+  "sha256": "c91ea956b804200867dc5dee683f4c1e5b18978a16002c63a6dcd6cc5c4ea116",
+  "source_image_hash": "66/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/66/4d/printing_10003_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/66/4d/printing_10003_1_",
+  "width": 750
+}

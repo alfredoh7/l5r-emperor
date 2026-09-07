@@ -1,0 +1,275 @@
+{
+  "card_count": 81,
+  "declared_era": "Ivory",
+  "entries": [
+    {
+      "card_reference_id": "card-ref-a7145e54ec724cf8bdc7",
+      "line_number": 2,
+      "quantity": 1,
+      "raw_line": "1 The Fruitful Port of the Mantis"
+    },
+    {
+      "card_reference_id": "card-ref-8e4694f9b3b1f3cde0ea",
+      "line_number": 4,
+      "quantity": 1,
+      "raw_line": "Yoritomo Hiromi, the Growing Storm"
+    },
+    {
+      "card_reference_id": "card-ref-7e27a8e0017e96b79c0f",
+      "line_number": 6,
+      "quantity": 1,
+      "raw_line": "1x Coastal Pearl Bed"
+    },
+    {
+      "card_reference_id": "card-ref-8b71d3d8957d1fd391a6",
+      "line_number": 7,
+      "quantity": 1,
+      "raw_line": "1x Counting House"
+    },
+    {
+      "card_reference_id": "card-ref-db753f7c9e334a04f1fc",
+      "line_number": 8,
+      "quantity": 1,
+      "raw_line": "1x The Emerald Dojo"
+    },
+    {
+      "card_reference_id": "card-ref-bb4d1a9d459cca7836f4",
+      "line_number": 9,
+      "quantity": 2,
+      "raw_line": "2x Family Library"
+    },
+    {
+      "card_reference_id": "card-ref-89509910eba66a9218c3",
+      "line_number": 10,
+      "quantity": 1,
+      "raw_line": "1x Jade Pearl Inn"
+    },
+    {
+      "card_reference_id": "card-ref-e8e3a1f16e8c83d65601",
+      "line_number": 11,
+      "quantity": 3,
+      "raw_line": "3x Jade Works"
+    },
+    {
+      "card_reference_id": "card-ref-e1f2c635ea86b6814362",
+      "line_number": 12,
+      "quantity": 2,
+      "raw_line": "2x House of Exotic Goods"
+    },
+    {
+      "card_reference_id": "card-ref-b432de12782436eacf25",
+      "line_number": 13,
+      "quantity": 1,
+      "raw_line": "1x Merchant Atoll"
+    },
+    {
+      "card_reference_id": "card-ref-2e3d8c307c55fbbea530",
+      "line_number": 14,
+      "quantity": 3,
+      "raw_line": "3x Kobune Port"
+    },
+    {
+      "card_reference_id": "card-ref-b44acbde3e5add1184a6",
+      "line_number": 15,
+      "quantity": 3,
+      "raw_line": "3x Deep Harbor"
+    },
+    {
+      "card_reference_id": "card-ref-b7e6d1e1cbf61c0c7545",
+      "line_number": 17,
+      "quantity": 1,
+      "raw_line": "1x Yoritomo Ichido"
+    },
+    {
+      "card_reference_id": "card-ref-3ed47b5d0549a18b4f57",
+      "line_number": 18,
+      "quantity": 3,
+      "raw_line": "3x Tsuruchi Rin"
+    },
+    {
+      "card_reference_id": "card-ref-c65dab622468fb0bffce",
+      "line_number": 19,
+      "quantity": 3,
+      "raw_line": "3x Tsuruchi Gombei"
+    },
+    {
+      "card_reference_id": "card-ref-b13c52bdf79b1efbdeb9",
+      "line_number": 20,
+      "quantity": 3,
+      "raw_line": "3x Tsuruchi Gosho"
+    },
+    {
+      "card_reference_id": "card-ref-dcb1d46700f6bf330001",
+      "line_number": 21,
+      "quantity": 3,
+      "raw_line": "3x Tsuruchi Nishima"
+    },
+    {
+      "card_reference_id": "card-ref-a0494d525141d19921a9",
+      "line_number": 22,
+      "quantity": 3,
+      "raw_line": "3x Tsuruchi Shusaku"
+    },
+    {
+      "card_reference_id": "card-ref-b36252f7648e9945747e",
+      "line_number": 23,
+      "quantity": 1,
+      "raw_line": "1x Tsuruchi Kaito"
+    },
+    {
+      "card_reference_id": "card-ref-23202eaa3bffb3e31275",
+      "line_number": 24,
+      "quantity": 1,
+      "raw_line": "1x Yoritomo Mikaru"
+    },
+    {
+      "card_reference_id": "card-ref-a08a71ae1fb268688054",
+      "line_number": 25,
+      "quantity": 3,
+      "raw_line": "3x Yoritomo Teihiko"
+    },
+    {
+      "card_reference_id": "card-ref-a13ef9795ae6ade42373",
+      "line_number": 27,
+      "quantity": 1,
+      "raw_line": "1x Ancestral Armor of the Mantis Clan"
+    },
+    {
+      "card_reference_id": "card-ref-da0a57e159d87f8097ba",
+      "line_number": 28,
+      "quantity": 2,
+      "raw_line": "2x Exquisite Nagamaki of the Fox Clan"
+    },
+    {
+      "card_reference_id": "card-ref-0a27e145fc9ed0412085",
+      "line_number": 29,
+      "quantity": 1,
+      "raw_line": "1x Tsuruchi Longbow"
+    },
+    {
+      "card_reference_id": "card-ref-347edb3b750aedfa3414",
+      "line_number": 30,
+      "quantity": 3,
+      "raw_line": "3x Expert Archers"
+    },
+    {
+      "card_reference_id": "card-ref-e81e09ae6c39edf141ef",
+      "line_number": 31,
+      "quantity": 3,
+      "raw_line": "3x Spearmen"
+    },
+    {
+      "card_reference_id": "card-ref-2f59fda3a5c31b8a2fd2",
+      "line_number": 32,
+      "quantity": 1,
+      "raw_line": "1x Ring of Air"
+    },
+    {
+      "card_reference_id": "card-ref-0f610837342da3adac9c",
+      "line_number": 33,
+      "quantity": 1,
+      "raw_line": "1x Ring of the Void"
+    },
+    {
+      "card_reference_id": "card-ref-22aa17d4427cceb27c7e",
+      "line_number": 34,
+      "quantity": 1,
+      "raw_line": "1x Ring of Water"
+    },
+    {
+      "card_reference_id": "card-ref-d68ff8aa4297ffc78578",
+      "line_number": 36,
+      "quantity": 2,
+      "raw_line": "2x Advance Warning"
+    },
+    {
+      "card_reference_id": "card-ref-9bb97b8a477e371610a2",
+      "line_number": 37,
+      "quantity": 2,
+      "raw_line": "2x Allied Efforts"
+    },
+    {
+      "card_reference_id": "card-ref-a9042560839c83305848",
+      "line_number": 38,
+      "quantity": 3,
+      "raw_line": "3x Back to the Front"
+    },
+    {
+      "card_reference_id": "card-ref-8a24b00ad0e2921817d1",
+      "line_number": 39,
+      "quantity": 2,
+      "raw_line": "2x Deliberations"
+    },
+    {
+      "card_reference_id": "card-ref-e567a6e9b48b6dde575b",
+      "line_number": 40,
+      "quantity": 1,
+      "raw_line": "1x Expanding the Gardens"
+    },
+    {
+      "card_reference_id": "card-ref-1c46d0ae068c691e6fc3",
+      "line_number": 41,
+      "quantity": 3,
+      "raw_line": "3x Fall Back!"
+    },
+    {
+      "card_reference_id": "card-ref-29d8d925a4511cf5a0b9",
+      "line_number": 42,
+      "quantity": 3,
+      "raw_line": "3x Higher Ground"
+    },
+    {
+      "card_reference_id": "card-ref-86e9815650d2ca34190e",
+      "line_number": 43,
+      "quantity": 3,
+      "raw_line": "3x Incapacitated"
+    },
+    {
+      "card_reference_id": "card-ref-bfbb2fe36f75c5781bb8",
+      "line_number": 44,
+      "quantity": 3,
+      "raw_line": "3x Fearful Volley"
+    },
+    {
+      "card_reference_id": "card-ref-bf84b19edd16ac6b4137",
+      "line_number": 45,
+      "quantity": 1,
+      "raw_line": "1x The False Route"
+    },
+    {
+      "card_reference_id": "card-ref-1a50921b33468282c6c4",
+      "line_number": 46,
+      "quantity": 1,
+      "raw_line": "1x Trade Embargo"
+    },
+    {
+      "card_reference_id": "card-ref-758a413a7ff98020e849",
+      "line_number": 47,
+      "quantity": 2,
+      "raw_line": "2x Unholy Strike"
+    },
+    {
+      "card_reference_id": "card-ref-3dccec812c090c917d33",
+      "line_number": 48,
+      "quantity": 1,
+      "raw_line": "1x Unsettling Gathering"
+    }
+  ],
+  "entry_count": 42,
+  "id": "deck-9ca2b288be8bc5ba1cdf",
+  "issues": [
+    {
+      "code": "legality_unverified",
+      "line_number": null,
+      "message": "Era labels are source claims; card legality, deck partitions and abilities need catalogue/rules verification."
+    }
+  ],
+  "legality_status": "unverified",
+  "name": "Mantis",
+  "playable": false,
+  "schema_version": 1,
+  "source_era_labels": [
+    "Ivory"
+  ],
+  "source_id": "source-4352c775db6a9a613a1c"
+}

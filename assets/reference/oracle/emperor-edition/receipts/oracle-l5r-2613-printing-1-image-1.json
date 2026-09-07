@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1168148,
+  "card_id": "oracle-l5r-2613",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2613-printing-1-image-1",
+  "image_index": 1,
+  "name": "Flooded Pass",
+  "numbers": [
+    "298"
+  ],
+  "oracle_id": 2613,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2613-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:45.188221+00:00",
+  "sha256": "99eeb8ea31d481db0ff43000f484016a0ad139b101ec8332b3d47458359dfb50",
+  "source_image_hash": "91/6a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/91/6a/printing_2613_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/91/6a/printing_2613_1_",
+  "width": 750
+}

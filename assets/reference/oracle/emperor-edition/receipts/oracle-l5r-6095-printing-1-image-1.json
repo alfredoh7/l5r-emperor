@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1142703,
+  "card_id": "oracle-l5r-6095",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6095-printing-1-image-1",
+  "image_index": 1,
+  "name": "Public Records",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 6095,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6095-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:05.331881+00:00",
+  "sha256": "8e08dc096fe07152071cc8cf715597888845df81021ac71f57a5d442a9e7c96a",
+  "source_image_hash": "9b/a0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/a0/printing_6095_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/a0/printing_6095_1_",
+  "width": 750
+}

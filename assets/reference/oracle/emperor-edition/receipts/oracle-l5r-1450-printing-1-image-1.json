@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1179561,
+  "card_id": "oracle-l5r-1450",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1450-printing-1-image-1",
+  "image_index": 1,
+  "name": "Confusion at Court",
+  "numbers": [
+    "284"
+  ],
+  "oracle_id": 1450,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1450-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:05:12.494540+00:00",
+  "sha256": "f12447543ec04bead18054121af2e4ea114e1abbbf413a40fcf08b0b046e5fd0",
+  "source_image_hash": "1c/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1c/42/printing_1450_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1c/42/printing_1450_1_",
+  "width": 750
+}

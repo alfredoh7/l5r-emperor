@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1235636,
+  "card_id": "oracle-l5r-7265",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7265-printing-1-image-1",
+  "image_index": 1,
+  "name": "Silk Works",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 7265,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7265-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:33.832890+00:00",
+  "sha256": "c58352c40f3312bc7800bb7364283ceddf4f2d3109689b70672ff7b40d8683b6",
+  "source_image_hash": "26/91",
+  "source_url": "https://images.oracleofthevoid.com/l5r/26/91/printing_7265_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/26/91/printing_7265_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1050325,
+  "card_id": "oracle-l5r-4642",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4642-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kyuden Kitsune",
+  "numbers": [
+    "410"
+  ],
+  "oracle_id": 4642,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4642-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:06:34.060151+00:00",
+  "sha256": "d5824ce25008529d17e9a894c5c76cb050c84dc34e5c967034db7d4e90de372c",
+  "source_image_hash": "d7/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/80/printing_4642_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/80/printing_4642_1_",
+  "width": 750
+}

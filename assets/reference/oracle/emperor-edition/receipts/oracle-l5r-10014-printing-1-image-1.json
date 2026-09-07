@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1049303,
+  "card_id": "oracle-l5r-10014",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10014-printing-1-image-1",
+  "image_index": 1,
+  "name": "Swamp Spirit",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 10014,
+  "path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10014-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition",
+  "quality": "master",
+  "retrieved_at": "2026-09-06T16:07:46.612640+00:00",
+  "sha256": "cd77ea74d6e047ef0fafbb2d2a5cc8aa6d340d66b4795b7add39f0b174b17346",
+  "source_image_hash": "07/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/23/printing_10014_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/23/printing_10014_1_",
+  "width": 750
+}

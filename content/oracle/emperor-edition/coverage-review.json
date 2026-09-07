@@ -1,0 +1,159 @@
+{
+  "collection_roles": {
+    "numbered_core": 428,
+    "proxy": 21,
+    "supplemental": 122,
+    "unnumbered_game_type": 3
+  },
+  "download_counts": {
+    "card_records": 574,
+    "cards_with_images": 574,
+    "dimensions": {
+      "750x1050": 590
+    },
+    "downloaded_bytes": 638679076,
+    "downloaded_images": 590,
+    "expected_images": 590,
+    "failed_images": 0,
+    "printing_records": 574,
+    "qualities": {
+      "master": 590
+    },
+    "record_types": {
+      "Celestial": 9,
+      "Event": 16,
+      "Follower": 22,
+      "Holding": 31,
+      "Item": 12,
+      "Other": 122,
+      "Personality": 145,
+      "Proxy": 21,
+      "Region": 5,
+      "Ring": 5,
+      "Spell": 17,
+      "Strategy": 131,
+      "Stronghold": 38
+    },
+    "unique_image_hashes": 590
+  },
+  "existing_era_catalogue_path": "content/oracle/emperor-catalogue.json",
+  "existing_era_catalogue_sha256": "b95664a8b01b159f3c25eb6482b1279b5a25e5e6b94149179a0370f15cc929da",
+  "metadata_review": [
+    {
+      "card_id": "oracle-l5r-1239",
+      "name": "Caught Unawares",
+      "printing_number": [
+        "283"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Destroyer War (Celestial)",
+        "Legacy",
+        "Modern"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-1576",
+      "name": "Cross-Clan Wedding",
+      "printing_number": [
+        "15"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Hidden Emperor (Jade)",
+        "Legacy",
+        "Modern"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-4252",
+      "name": "Kalani's Landing",
+      "printing_number": [
+        "408"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Legacy",
+        "Modern"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-5709",
+      "name": "One Koku",
+      "printing_number": [
+        "326"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Clan Wars (Imperial)",
+        "Legacy",
+        "Modern"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-8036",
+      "name": "The Duty of the Crab",
+      "printing_number": [
+        "362"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Legacy",
+        "Modern"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-8106",
+      "name": "The Governor's Estate",
+      "printing_number": [],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "unnumbered_game_type",
+      "source_legality_labels": [
+        "Legacy"
+      ]
+    },
+    {
+      "card_id": "oracle-l5r-9292",
+      "name": "Well-Tended Farm",
+      "printing_number": [
+        "56"
+      ],
+      "review_reason": "Explicit Emperor Edition printing exists, but this identity is absent from the saved Age of Conquest (Emperor) query. Retained for review; no automatic historical legality inference.",
+      "role": "numbered_core",
+      "source_legality_labels": [
+        "Legacy",
+        "Modern",
+        "Rain of Blood (Diamond)"
+      ]
+    }
+  ],
+  "numbered_core_complete": true,
+  "numbered_core_missing_images": [],
+  "numbered_core_missing_numbers": [],
+  "records_also_in_era_query": 424,
+  "source": {
+    "api_url": "https://api.oracleofthevoid.com/search",
+    "complete_search": true,
+    "method": "POST",
+    "name": "Oracle of the Void",
+    "printing_set": "Emperor Edition",
+    "query": {
+      "field_printing_set": "Emperor Edition",
+      "from": 0,
+      "size": 1000,
+      "sort": "[{\"title.keyword\":{\"order\":\"asc\"}}]",
+      "table": "l5r",
+      "type_printing_set": "select"
+    },
+    "reported_total": 574,
+    "response_path": "assets/reference/oracle/emperor-edition/search-response.json",
+    "response_sha256": "7ca72221132cec24e6bc576f31034f2a89af3173106f5f156404f2d91321aaa5",
+    "retrieved_on": "2026-09-06",
+    "user_search_url": "https://oracleofthevoid.com/#search=type_printing_set%3Dselect%26field_printing_set%3DEmperor%2520Edition%26table%3Dl5r%26sort%3D%255B%257B%2522title.keyword%2522%253A%257B%2522order%2522%253A%2522asc%2522%257D%257D%255D"
+  }
+}
