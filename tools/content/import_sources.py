@@ -158,9 +158,12 @@ def safe_members(archive: zipfile.ZipFile) -> list[zipfile.ZipInfo]:
     members = []
     destinations: set[str] = set()
     for info in infos:
-        path = PurePosixPath(info.filename)
-        if path.is_absolute() or ".." in path.parts or "\\" in info.filename or "\x00" in info.filename or re.match(r"^[a-zA-Z]:", info.filename):
-            raise ValueError(f"Unsafe archive path: {info.filename!r}")
+        # ZipInfo normalizes backslashes on Windows and truncates NULs. Validate
+        # the original archive name before trusting that normalized destination.
+        original_name = info.orig_filename
+        path = PurePosixPath(original_name)
+        if path.is_absolute() or ".." in path.parts or "\\" in original_name or "\x00" in original_name or re.match(r"^[a-zA-Z]:", original_name):
+            raise ValueError(f"Unsafe archive path: {original_name!r}")
         if stat.S_ISLNK(info.external_attr >> 16):
             raise ValueError(f"Archive symlinks are not supported: {info.filename!r}")
         if info.file_size > MAX_ENTRY_BYTES or info.flag_bits & 1:
