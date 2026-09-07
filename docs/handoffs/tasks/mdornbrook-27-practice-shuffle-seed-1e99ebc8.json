@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fixed MatchSession.StartPractice (shared file) hardcoding seed 20260906 on every Practice match, making every game deal an identical order despite the shuffle algorithm itself being correct. Now generates a fresh random seed per call via RandomNumberGenerator, matching RoomManager.cs's existing per-room randomness.",
+  "validation": "bash tools/check.sh: all suites pass cleanly on first run (Core 39/39, Published 32/32, AI 13/13, client build/import/smoke clean, no flakiness this time).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/27",
+  "branch": "mdornbrook/27-practice-shuffle-seed",
+  "updated": "2026-09-07T18:18:58.040867+00:00"
+}
