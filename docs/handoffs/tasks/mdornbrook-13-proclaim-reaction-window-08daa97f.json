@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Fixed the Proclaim reaction window bouncing priority for a meaningless second Pass click when no player has a legal reaction; added HasLegalReaction extension point for future reaction cards.",
+  "validation": "bash tools/check.sh --skip-client: all suites pass (Core 36/36, Published 31/31, AI 13/13, client transport 4/4).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/13",
+  "branch": "mdornbrook/13-proclaim-reaction-window",
+  "updated": "2026-09-07T16:13:10.241008+00:00"
+}
