@@ -51,6 +51,12 @@ class ArchiveTests(unittest.TestCase):
         stream = io.BytesIO()
         with zipfile.ZipFile(stream, "w") as target:
             for name, value in entries:
+                if isinstance(name, str):
+                    # Preserve deliberately malformed raw entry names on every
+                    # host; ZipInfo's constructor otherwise sanitizes the fixture.
+                    info = zipfile.ZipInfo(name)
+                    info.filename = name
+                    name = info
                 target.writestr(name, value)
         stream.seek(0)
         return zipfile.ZipFile(stream)
@@ -60,7 +66,7 @@ class ArchiveTests(unittest.TestCase):
             self.assertEqual([member.filename for member in safe_members(archive)], ["Decks/Crane.txt"])
 
     def test_rejects_traversal_absolute_windows_and_case_collision(self):
-        for path in ("../escape.txt", "/escape.txt", "dir/../../escape.txt", "C:/escape.txt", "dir\\escape.txt"):
+        for path in ("../escape.txt", "/escape.txt", "dir/../../escape.txt", "C:/escape.txt", "dir\\escape.txt", "safe.txt\x00hidden.txt"):
             with self.subTest(path=path), self.archive([(path, b"x")]) as archive:
                 with self.assertRaises(ValueError):
                     safe_members(archive)
