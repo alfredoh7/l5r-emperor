@@ -1,5 +1,6 @@
 using System.Net.Http.Json;
 using System.Net.WebSockets;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using L5R.Core;
@@ -31,7 +32,10 @@ public sealed class MatchSession : IDisposable
     public void StartPractice(bool economy, bool published = false, int seat = 0)
     {
         Disconnect();
-        _engine = published ? MatchEngine.CreatePublishedMatch(20260906) : economy ? MatchEngine.CreateEconomyScenario(20260906) : MatchEngine.CreateStarterMatch(20260906);
+        // A fixed seed shuffled every deck identically, game after game — Practice looked unshuffled
+        // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
+        var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
         _localSeat = published ? seat : _engine.State.ActivePlayerId;
         RefreshLocal();
     }
