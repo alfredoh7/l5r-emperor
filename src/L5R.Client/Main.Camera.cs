@@ -157,6 +157,11 @@ public partial class Main
     {
         if (_tableSurface is null) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
+        // The token buttons live above the projected viewport; let native GUI input
+        // reach them instead of forwarding their clicks into the underlying table.
+        if (!_cameraDragging && @event is InputEventMouse tokenMouse && OverStatToken(tokenMouse.Position)
+            && (@event is InputEventMouseMotion || @event is InputEventMouseButton { ButtonIndex: MouseButton.Left }))
+        { _tableSurface.ExitMouse(); HideTableTooltip(); return; }
         if (@event is InputEventKey { Pressed: false } released && released.Keycode is Key.Enter or Key.KpEnter or Key.Tab && !CameraBlocked && GetViewport().GuiGetFocusOwner() is null && TableFocus is not null)
             _tableSurface.Canvas.PushInput(released, true);
         if (@event is InputEventMouseButton mouse)
