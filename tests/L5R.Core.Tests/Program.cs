@@ -67,7 +67,8 @@ var tests = new (string Name, Action Run)[]
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
-    ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack)
+    ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
+    ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack)
 };
 var failed=0;
 foreach(var test in tests)
@@ -748,6 +749,56 @@ static void MonasteryFireTokenAndAttack()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"monastery-fire-attack"));
         Equal(e.State.Cards[performer.Id].Tokens.Count,0);
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    }
+}
+static void TorazuFireTokensAndAttack()
+{
+    var torazuId=PublishedContent.PersonalityWave2.Cards.Single(c=>c.Name=="Togashi Torazu").Id;
+    {
+        // Reaction: entering play grants three +1F Fire tokens, same mechanism as Meiyu's. The
+        // buying Crane player is off-clan, so only Torazu's own reaction is offered, not Proclaim.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-marketplace",0,Zone.Home); Add(s,"training-marketplace",0,Zone.Home); // enough Gold for cost 6
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=torazuId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,6).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"torazu-fire-tokens"));
+        Equal(e.State.Cards[cardId].Tokens.Count,3);
+        Check(e.State.Cards[cardId].Tokens.All(t=>t.Type=="Fire" && t.Stat=="Force" && t.Amount==1));
+    }
+    {
+        // Battle: no separate Performer -- the shared "source Personality must be at this
+        // battlefield" check already stands in for presence/location. No Fire token, no legal action.
+        var s=StrongholdBattle("oracle-l5r-4059");
+        var torazu=Add(s,torazuId,0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:torazu.Id,AbilityId:"torazu-fire-attack"));
+    }
+    {
+        // Deferred targeting: legal with no target in sight, but the Fire token is destroyed as a
+        // cost regardless of whether the Attack hits.
+        var s=StrongholdBattle("oracle-l5r-4059");
+        var torazu=Add(s,torazuId,0,Zone.Battlefield,province:0);
+        torazu.Tokens.Add(new("fixture-token","Fire","test-fixture","Force",1));
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above Ranged 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:torazu.Id,AbilityId:"torazu-fire-attack"));
+        Equal(e.State.Cards[torazu.Id].Tokens.Count,0,"The Fire token is destroyed as a cost regardless of whether the Attack hits");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
+    }
+    {
+        // A legal target (Force <= 3, no Followers) is destroyed.
+        var s=StrongholdBattle("oracle-l5r-4059");
+        var torazu=Add(s,torazuId,0,Zone.Battlefield,province:0);
+        torazu.Tokens.Add(new("fixture-token","Fire","test-fixture","Force",1));
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, no Followers
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:torazu.Id,TargetId:enemy.Id,AbilityId:"torazu-fire-attack"));
+        Equal(e.State.Cards[torazu.Id].Tokens.Count,0);
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
     }
 }

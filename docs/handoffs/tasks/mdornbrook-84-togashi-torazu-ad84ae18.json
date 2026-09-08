@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import Togashi Torazu, reusing the Fire-token/entering-play-Reaction/Ranged-Attack primitives already built for Meiyu and Monastery of New Thought. Small generalization: her Battle ability is self-performed (no separate Performer), handled via a small ad hoc per-ability Require alongside the existing shared Battle-presence check. Shared because one card scan copies into src/L5R.Client/Content/Published/ (ui-lane path) via the same content pipeline as every prior wave; CardAbilities.cs/CardCatalog.cs/PublishedContent.cs/csproj changes are additive rules-lane work.",
+  "validation": "bash tools/check.sh: full suite passed (retried once after the known transient Godot import flake). python3 -m unittest discover -s tools/content: 107/107 passed, including 4 new for the packaging script.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/84",
+  "branch": "mdornbrook/84-togashi-torazu",
+  "updated": "2026-09-08T23:10:34.179718+00:00"
+}

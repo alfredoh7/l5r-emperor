@@ -41,6 +41,6 @@ public static class CardCatalog
             new("training-token-master", "Training token master", CardType.Personality, "Phoenix", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-create-token","training-move-token","training-destroy-token"], Text:"Synthetic token-primitive fixture: creates, moves and destroys tokens. Never included in a playable deck."),
             new("training-tattooed", "Training tattooed personality", CardType.Personality, "Dragon", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Tattooed"], Text:"Synthetic Monastery of New Thought fixture: carries the Tattooed keyword. Never included in a playable deck.")
         ];
-        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).Concat(PublishedContent.StrongholdWave3.Cards).Concat(PublishedContent.PersonalityWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
+        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).Concat(PublishedContent.StrongholdWave3.Cards).Concat(PublishedContent.PersonalityWave1.Cards).Concat(PublishedContent.PersonalityWave2.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
