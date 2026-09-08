@@ -107,6 +107,22 @@ public partial class Main
             GD.Print("UI_SMOKE_PASS: stack toggle spreads attachments; an individual attachment opens in the inspector with its parent preserved.");
         }
         RenderBoard(); ResetTableCamera();
+        if (_captureMode.Contains("standards", StringComparison.Ordinal))
+        {
+            if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusBattle();
+            if (_captureMode.Contains("resolution", StringComparison.Ordinal))
+            {
+                _session.FollowPracticePriority(); Render();
+                for (var i = 0; i < 2; i++)
+                {
+                    _session.Submit(new GameCommand("pass", View.PriorityPlayerId, View.Version)).GetAwaiter().GetResult();
+                    _session.FollowPracticePriority();
+                }
+                _uiQueue.Clear(); Render();
+                if (_resolutionMessage is null) throw new Exception("Native battle result was not presented");
+            }
+            ProbeUnitStandardInput();
+        }
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
         if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
         if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) ProbeHudIcons();
@@ -147,6 +163,7 @@ public partial class Main
         GD.Print($"RENDER_METRICS: fps={Performance.GetMonitor(Performance.Monitor.TimeFps)}, table_texture={_tableSurface.Canvas.Size}, density={_tableSurface.RenderScale}");
         ValidateTurnAndClarity();
         ValidateStatTokens();
+        ValidateUnitStandards();
         ValidateQuietHud();
         ValidatePhysicalLayout();
         if (_captureMode.EndsWith("piletip", StringComparison.Ordinal))

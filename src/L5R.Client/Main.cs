@@ -81,6 +81,8 @@ public partial class Main : Node
     {
         while (_uiQueue.TryDequeue(out var update)) update();
         ProcessTableCamera(delta);
+        ExpireBattleResolution();
+        foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
         if (_autoOpponent && !_session.Online && _capturePath is null)
@@ -200,7 +202,7 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -330,6 +332,7 @@ public partial class Main : Node
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
+        ObserveBattleResolution();
         if (_displayedVersion != View.Version)
         {
             _displayedVersion = View.Version;

@@ -18,6 +18,8 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped(View.VictoryReason ?? "Victory"));
             _inspector.AddChild(Palette.Button("Start another practice", ShowPractice, true)); return;
         }
+        if (BattleTracker.InBattle(View.Phase) || _resolutionMessage is not null)
+            _inspector.AddChild(new BattleTracker { Snapshot = View, Compact = _selected is not null || _chosen is not null || View.PendingChoice is not null, ReducedMotion = _reducedMotion, ResolutionMessage = _resolutionMessage });
         if (View.PendingChoice is { } pending)
         {
             _inspector.AddChild(Palette.Text(pending.Type == "discardHand" ? "HAND LIMIT" : pending.Type == "shinden" ? "YOUR CHOICE" : "REACTION WINDOW", 12, Palette.Gold));
@@ -46,7 +48,7 @@ public partial class Main
         }
         else if (View.PendingChoice is null)
         {
-            _inspector.AddChild(Palette.Text(HumanPhase(View.Phase), 26, title: true));
+            if (!BattleTracker.InBattle(View.Phase)) _inspector.AddChild(Palette.Text(HumanPhase(View.Phase), 26, title: true));
             var help = Palette.Wrapped("Select a card to inspect it.", 16, Palette.PaperDim);
             help.MouseFilter = Control.MouseFilterEnum.Stop; help.TooltipText = RulesHelp.PhaseGuide(View.Phase);
             _inspector.AddChild(help);

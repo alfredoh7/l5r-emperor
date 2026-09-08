@@ -5,7 +5,7 @@ namespace L5R.Client;
 public partial class Main
 {
     private static IEnumerable<StatTokens> DescendantTokens(Node node) => node.GetChildren()
-        .SelectMany(child => child is StatTokens token ? new[] { token } : DescendantTokens(child));
+        .SelectMany(child => child is StatTokens token && token is not UnitStandard ? new[] { token } : DescendantTokens(child));
     private IEnumerable<StatTokens> InspectableTokens => TokenPairs.Concat(DescendantTokens(_unitDetail));
     private static Rect2 TokenVisualRect(StatTokens token) => new(token.GlobalPosition,
         token.GetGlobalTransform().Scale * new Vector2(token.Diameter * 2.12f, token.Diameter + 4));

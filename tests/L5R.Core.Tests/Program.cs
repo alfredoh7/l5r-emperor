@@ -3,6 +3,10 @@ using L5R.Core;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
+    ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
+    ("Unit view counts Items once and matches battle resolution", UnitViewResolution),
+    ("Unit view is absent outside visible in-play Personalities and old payloads", UnitViewPrivacy),
     ("Starter setup uses four provinces, six-card hands and second-player bowed holding", Setup),
     ("Player snapshots hide enemy hand, all deck order and face-down own provinces", Privacy),
     ("Invalid, duplicate, stale and wrong-priority commands are atomic", AtomicReject),
@@ -457,4 +461,52 @@ static void CompleteMatch()
     }
     Check(e.State.WinnerId is not null,$"Match did not finish in {count} commands.");
     Equal(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));
+}
+
+// Presentation consumes the same authoritative contribution used by ResolveBattle.
+static (MatchState State, CardInstance Parent, CardInstance Follower) UnitViewFixture()
+{
+    var s=Battle(2,0,20).State;
+    var p=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var f=Add(s,"training-follower",0,Zone.Attached,attachedTo:p.Id,province:0);
+    f.Modifiers=[new("fixture","fixture","Force",5-CardCatalog.Get(f.DefinitionId).Force)];
+    return(s,p,f);
+}
+static CardView UnitView(MatchState s,string id) => MatchEngine.FromTestState(s).GetView(0).Players[0].Army.Single(c=>c.Id==id);
+static void UnitViewClamp()
+{
+    var(s,p,f)=UnitViewFixture(); Equal(UnitView(s,p.Id).UnitForce,7);
+    p.Modifiers.Add(new("fixture","force-reduction","Force",-3));
+    Equal(UnitView(s,p.Id).Force,0); Equal(UnitView(s,p.Id).UnitForce,5);
+    Equal(UnitView(s,f.Id).Force,5); Equal(UnitView(s,f.Id).UnitForce,null);
+}
+static void UnitViewBows()
+{
+    var(s,p,f)=UnitViewFixture(); p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,5);
+    f.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
+    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,5);
+    p.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,7);
+    f.Zone=Zone.FateDiscard; f.AttachedTo=null; Equal(UnitView(s,p.Id).UnitForce,2);
+    p.Zone=Zone.Home; p.ProvinceIndex=null;
+    Equal(MatchEngine.FromTestState(s).GetView(0).Players[0].Home.Single(c=>c.Id==p.Id).UnitForce,2);
+}
+static void UnitViewResolution()
+{
+    var(s,p,f)=UnitViewFixture(); var item=Add(s,"training-item",0,Zone.Attached,bowed:true,attachedTo:p.Id,province:0);
+    var bonus=CardCatalog.Get(item.DefinitionId).Force;
+    Equal(UnitView(s,p.Id).Force,2+bonus); Equal(UnitView(s,p.Id).UnitForce,7+bonus);
+    var e=MatchEngine.FromTestState(s); var total=UnitView(s,p.Id).UnitForce;
+    Resolve(e); Check(e.GetView(0).Events.Single(ev=>ev.Type=="battleResolved").Message.Contains($"attacking Force {total},"));
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==p.Id).UnitForce,0,"Returning bowed units must refresh the projection");
+}
+static void UnitViewPrivacy()
+{
+    var e=MatchEngine.CreateStarterMatch(); var v=e.GetView(1);
+    Check(v.Players.SelectMany(p=>p.Provinces).All(p=>p.Card?.UnitForce is null));
+    Check(v.Players.SelectMany(p=>p.Hand).All(c=>c.UnitForce is null));
+    Equal(v.Players[0].Hand.Length,0); Equal(v.Players[0].Stronghold.UnitForce,null);
+    var(s,p,f)=UnitViewFixture(); p.Zone=Zone.Dead; f.Zone=Zone.FateDiscard; f.AttachedTo=null;
+    Check(MatchEngine.FromTestState(s).GetView(0).Players[0].Discard.All(c=>c.UnitForce is null));
+    var payload=System.Text.Json.Nodes.JsonNode.Parse(Json(UnitView(UnitViewFixture().State,UnitViewFixture().Parent.Id)))!.AsObject();
+    payload.Remove("UnitForce"); Equal(JsonSerializer.Deserialize<CardView>(payload.ToJsonString())!.UnitForce,null);
 }

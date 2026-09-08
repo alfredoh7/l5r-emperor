@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved Unit Standard banner and battle tracker, stacked on PR35.",
-  "validation": "Context refreshed; existing authoritative BattleForce identified; production artwork generated. Implementation and tests pending.",
-  "remaining": "Project unit Force, integrate banner/tracker, native layout/input and regression checks, request rules review.",
+  "summary": "Approved Unit Standard: server-projected effective unit Force on navy spear banners, textured priority-aware battle tracker, compact inspection rail and transient resolution acknowledgement.",
+  "validation": "Core/server/transport and Python checks: 192 passed. Client compiles with 0 warnings/errors. Native Mac: five upright/bowed/0/1/3/6 attachment fixtures, seven real-board scenarios across 1280/1672/1920/2560 widths, extra native banner tooltip and revised compact tracker checks passed. Reviewed native captures against approved concept.",
+  "remaining": "Final compact atlas crop smoke, combined menu launcher verification and CI; mdornbrook shared review required before merge. Full maneuver/Engage sequencing remains #20/#15. Windows graphical playtesting not performed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/18",
   "branch": "codex/18-unit-standard",
-  "updated": "2026-09-08T08:07:35.455380+00:00"
+  "updated": "2026-09-08T08:21:18.904890+00:00"
 }
