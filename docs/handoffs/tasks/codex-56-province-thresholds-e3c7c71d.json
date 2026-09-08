@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implementing approved C fortress provinces and A border-mounted icons from the concept artwork.",
+  "validation": "Starting from current origin/main; approved references preserved; no implementation validation yet.",
+  "remaining": "Production texture integration, header removal, province rendering, visual and native input validation.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/56",
+  "branch": "codex/56-province-thresholds",
+  "updated": "2026-09-08T20:48:03.902235+00:00"
+}
