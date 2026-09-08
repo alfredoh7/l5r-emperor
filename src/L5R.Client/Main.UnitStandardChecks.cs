@@ -60,14 +60,20 @@ public partial class Main
             if(b.Card.UnitForce!=b.CardAnchor.Card.UnitForce) throw new Exception("Banner value differs from projected view");
             var rect=b.BodyRectOnViewport();
             if(!b.Inline && _cameraFitted && !_tableViewport.GetGlobalRect().Grow(2).Encloses(rect)) throw new Exception("Banner clipped in fitted view");
-            var polygon=b.BodyCornersOnViewport();
+            var polygons=b.ArtworkPolygonsOnViewport().ToArray();
             var face=b.CardAnchor.FaceCornersOnViewport();
             var mountDistance=Enumerable.Range(0,4).Min(i=>Geometry2D.GetClosestPointToSegment(b.MountOnViewport,face[i],face[(i+1)%4]).DistanceTo(b.MountOnViewport));
             if(mountDistance>.8f) throw new Exception("Standard brass mount detached from Personality rim");
             foreach(var c in _tiles.Where(c=>b.Inline ? _unitDetail.IsAncestorOf(c) : _world.IsAncestorOf(c)))
-                if(Geometry2D.IntersectPolygons(polygon,c.FaceCornersOnViewport()).Count>0) throw new Exception($"Banner {b.Card.Id} overlaps {c.Card.Id}");
-            foreach(var other in standards.Where(o=>o!=b)) if(rect.Intersects(other.BodyRectOnViewport())) throw new Exception("Banners collide");
-            foreach(var t in InspectableTokens.Where(t=>t.IsVisibleInTree())) if(rect.Intersects(TokenVisualRect(t))) throw new Exception("Banner covers Force/Chi token");
+                if(polygons.Any(p=>Geometry2D.IntersectPolygons(p,c.FaceCornersOnViewport()).Count>0)) throw new Exception($"Banner {b.Card.Id} overlaps {c.Card.Id}");
+            foreach(var other in standards.Where(o=>o!=b)) if(polygons.Any(p=>other.ArtworkPolygonsOnViewport().Any(q=>Geometry2D.IntersectPolygons(p,q).Count>0))) throw new Exception("Banners collide");
+            foreach(var t in InspectableTokens.Where(t=>t.IsVisibleInTree()))
+                for(var i=0;i<2;i++)
+                {
+                    var center=new Vector2(t.Diameter*(.5f+i*1.12f),t.Diameter/2);
+                    var disc=Enumerable.Range(0,48).Select(j=>t.GetGlobalTransform()*(center+Vector2.FromAngle(j*Mathf.Tau/48)*t.Diameter/2)).ToArray();
+                    if(polygons.Any(p=>Geometry2D.IntersectPolygons(p,disc).Count>0)) throw new Exception("Banner covers Force/Chi token");
+                }
         }
         if(_captureMode.Contains("standards") && (!_standardProbeDone || _standardProbeError is not null)) throw new Exception(_standardProbeError ?? "Native banner input incomplete");
         GD.Print($"UNIT_STANDARD_PASS: {standards.Length} server-bound banners; no card/token occlusion, clipping or collisions; nativeClick={_standardProbeDone}.");

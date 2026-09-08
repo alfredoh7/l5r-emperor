@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Unit Standard correction: integrated generated brass mount at the Personality rim; cloth and numerals render in the card/table plane. Mixed bowed stacks align their right edges; expanded inspection reserves space beside the Personality.",
-  "validation": "216 automated regression checks passed. Client compiled without warnings/errors; five native fixture configurations and eight real-board captures passed, including 0/1/3/6 attachments, upright/bowed, expanded, fit/focus, tooltip/click and reduced motion. Screenshots reviewed. Final strengthened inter-banner collision assertion and combined launcher verification in progress.",
-  "remaining": "Final native collision rerun and combined menu preview verification; then publish correction to PR36. Rules projection remains unchanged from existing PR36 and awaits mdornbrook review. GitHub review inbox report is local artifacts/reviews/2026-09-08-mendon-review-inbox.md.",
+  "summary": "Approved Unit Standard plus follow-up: integrated generated brass mount touches the Personality rim; cloth and numerals share the table/card perspective. Mixed bowed stacks align their right edges; expanded inspection places the flag beside its Personality.",
+  "validation": "216 automated checks passed (29 collaboration,75 content,50 core,32 published,8 deck-format,13 AI,5 server,4 transport). Client build 0 warnings/errors. Final complete native suite passed: five fixture configurations and eight real-board scenarios, 0/1/3/6 attachments, upright/bowed, expanded, fit/focus, tooltip/click, reduced motion and 1280/1672/1920/2560 widths. True silhouette/circle collision checks and card-rim mounting assertions pass. Native screenshots reviewed.",
+  "remaining": "Combined menu launcher verification is in progress. PR36 remains unmerged and needs mdornbrook shared review. No Windows graphical playtest. Earlier Unit Standard launcher preserved; new isolated Mounted Standards preview is being prepared. GitHub feedback report is local artifacts/reviews/2026-09-08-mendon-review-inbox.md.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/18",
   "branch": "codex/18-unit-standard",
-  "updated": "2026-09-08T13:44:56.107279+00:00"
+  "updated": "2026-09-08T13:49:20.804849+00:00"
 }
