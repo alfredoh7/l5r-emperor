@@ -27,6 +27,8 @@ var tests = new (string Name, Action Run)[]
     ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
     ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
     ("A Personality with the enters-dishonored effect enters play Dishonorable", EntersPlayDishonored),
+    ("A Personality without an enters-bowed effect always enters play straightened", EntersPlayStraightenedByDefault),
+    ("A Personality with the enters-bowed effect enters play bowed directly, not straightened then bowed", EntersPlayBowed),
     ("Seppuku requires Samurai, Courtier, or Shugenja", OrderSeppukuRequiresKeyword),
     ("Seppuku requires a Dishonorable Personality", OrderSeppukuRequiresDishonorable),
     ("Seppuku destroys honorably with no Honor change", OrderSeppukuHonorableDeath),
@@ -358,6 +360,26 @@ static void EntersPlayDishonored()
     e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
     Accept(e,Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
     Check(e.State.Cards[cardId].Dishonorable,"A Personality with Effect 'enters-dishonored' should enter play Dishonorable");
+}
+static void EntersPlayStraightenedByDefault()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-crane-samurai";
+    e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
+    Accept(e,Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
+    Check(!e.State.Cards[cardId].Bowed,"A Personality without an enters-bowed effect should enter play straightened");
+}
+static void EntersPlayBowed()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-enters-bowed-samurai";
+    e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
+    var result=e.Execute(Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
+    Check(result.Accepted,result.Error??"Rejected");
+    Check(e.State.Cards[cardId].Bowed,"A Personality with Effect 'enters-bowed' should enter play bowed");
+    var entered=result.Events.Single(ev=>ev.Type=="cardEnteredPlay" && ev.CardId==cardId);
+    Check(entered.Message.Contains("bowed"),"Entry should report bowed as part of the same transition");
+    Check(!result.Events.Any(ev=>ev.CardId==cardId && ev.Type is "straightened" or "unbowed"),"No separate straighten-then-bow event should exist for this card");
 }
 static void OrderSeppukuRequiresKeyword()
 {
