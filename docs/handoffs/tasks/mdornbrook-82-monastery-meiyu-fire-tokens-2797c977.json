@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire up Monastery of New Thought and Togashi Meiyu, plus a new engine capability: a card's own entering-play Reaction (composes with Proclaim in the same window, each usable once). Shared because Models.cs/MatchQueries.cs (explicitly shared client-facing contract) and two card scans copying into src/L5R.Client/Content/Published/ (ui-lane path) are touched via the same content pipeline as every prior wave; CardAbilities.cs/CardCatalog.cs/MatchEngine.cs/PublishedContent.cs/csproj changes are additive rules-lane work.",
+  "validation": "bash tools/check.sh: full suite passed, no import flake this run. python3 -m unittest discover -s tools/content: 103/103 passed, including 8 new for the two packaging scripts.",
+  "remaining": "None; ready for review. The visual token-art scenario (per the user's own framing) is intentionally deferred until issue #81 (token art/placement) lands.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/82",
+  "branch": "mdornbrook/82-monastery-meiyu-fire-tokens",
+  "updated": "2026-09-08T22:54:30.274176+00:00"
+}

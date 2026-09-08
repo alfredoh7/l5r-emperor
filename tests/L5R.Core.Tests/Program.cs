@@ -65,7 +65,9 @@ var tests = new (string Name, Action Run)[]
     ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
     ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
-    ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives)
+    ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
+    ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
+    ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack)
 };
 var failed=0;
 foreach(var test in tests)
@@ -671,6 +673,82 @@ static void TokenPrimitives()
         Equal(e.State.Cards[defender.Id].Tokens.Count,0,"A destroyed unit's tokens are removed from the game");
         Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard);
         Equal(e.State.Cards[follower.Id].Tokens.Count,0,"A destroyed attachment's tokens are removed from the game too");
+    }
+}
+static void MeiyuEntersPlayReaction()
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Players[0].Clan="Dragon"; // in-clan with Meiyu, so Proclaim is also eligible this entry
+    Add(s,"training-marketplace",0,Zone.Home); Add(s,"training-marketplace",0,Zone.Home); // enough Gold for her 5 cost
+    var meiyuId=PublishedContent.PersonalityWave1.Cards.Single(c=>c.Name=="Togashi Meiyu").Id;
+    var cardId=s.Players[0].Provinces[0].CardId!;
+    s.Cards[cardId].DefinitionId=meiyuId; s.Cards[cardId].FaceUp=true;
+    var e=MatchEngine.FromTestState(s);
+    var honorBefore=e.State.Players[0].Honor;
+    var payment=e.PaymentOptions(0,5).First();
+    Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+    Equal(e.State.PendingChoice?.Type,"proclaim","Both Proclaim and Meiyu's own reaction are eligible on this entry");
+    // Meiyu's own reaction first; the window stays open afterward for Proclaim.
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"meiyu-fire-tokens"));
+    Equal(e.State.Cards[cardId].Tokens.Count,3);
+    Check(e.State.Cards[cardId].Tokens.All(t=>t.Type=="Fire" && t.Stat=="Force" && t.Amount==1));
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==cardId).Force,3,"Base Force 0 plus three +1F Fire tokens");
+    Check(e.State.PendingChoice is not null,"The window stays open for Proclaim afterward");
+    // Using the reaction passed priority to the opponent, same as Proclaim's own alternation; they
+    // have nothing to do here but decline, handing priority back for Proclaim.
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"meiyu-fire-tokens")); // once only
+    // Proclaim still works afterward, in either order.
+    Accept(e,new GameCommand("proclaim",0,e.Version));
+    Equal(e.State.Players[0].Honor,honorBefore+2,"Meiyu's printed Personal Honor is 2");
+    Check(e.State.PendingChoice is not null,"Window still open until both players pass");
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    Accept(e,new GameCommand("declineReaction",0,e.Version));
+    Check(e.State.PendingChoice is null,"Window closes once both players pass consecutively");
+}
+static void MonasteryFireTokenAndAttack()
+{
+    {
+        // Limited: only a Tattooed Personality is a legal target.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        s.Cards[s.Players[0].StrongholdId].DefinitionId="oracle-l5r-10183";
+        var tattooed=Add(s,"training-tattooed",0,Zone.Home);
+        var notTattooed=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:notTattooed.Id,AbilityId:"monastery-fire-token"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:tattooed.Id,AbilityId:"monastery-fire-token"));
+        Equal(e.State.Cards[tattooed.Id].Tokens.Count,1); Equal(e.State.Cards[tattooed.Id].Tokens[0].Type,"Fire");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==tattooed.Id).Force,3,"Base Force 2 plus the token's +1F");
+    }
+    {
+        // Battle: destroying a Fire token on the performer is a required cost -- no Fire token, no legal action.
+        var s=StrongholdBattle("oracle-l5r-10183");
+        var performer=Add(s,"training-tattooed",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,AbilityId:"monastery-fire-attack"));
+    }
+    {
+        // The performer may be bowed -- no "unbowed" qualifier is printed. Deferred targeting: legal
+        // with no target in sight, but the Fire token is destroyed as a cost regardless.
+        var s=StrongholdBattle("oracle-l5r-10183");
+        var performer=Add(s,"training-tattooed",0,Zone.Battlefield,province:0,bowed:true);
+        performer.Tokens.Add(new("fixture-token","Fire","test-fixture","Force",1));
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above Ranged 5
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,AbilityId:"monastery-fire-attack"));
+        Equal(e.State.Cards[performer.Id].Tokens.Count,0,"The Fire token is destroyed as a cost regardless of whether the Attack hits");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
+    }
+    {
+        // A legal target (Force <= 5, no Followers) is destroyed.
+        var s=StrongholdBattle("oracle-l5r-10183");
+        var performer=Add(s,"training-tattooed",0,Zone.Battlefield,province:0);
+        performer.Tokens.Add(new("fixture-token","Fire","test-fixture","Force",1));
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, no Followers
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"monastery-fire-attack"));
+        Equal(e.State.Cards[performer.Id].Tokens.Count,0);
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
     }
 }
 static void CarpenterCastleAttack()

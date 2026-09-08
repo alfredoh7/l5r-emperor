@@ -65,6 +65,42 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 3 of the Stronghold rollout: Monastery of New Thought, the first card using
+    /// the Token primitive's Fire type end-to-end (grant, then destroy for a Ranged Attack cost).</summary>
+    public static PublishedSnapshot StrongholdWave3 { get; } = LoadStrongholdWave3();
+
+    private static PublishedSnapshot LoadStrongholdWave3()
+    {
+        var snapshot = Load("L5R.Published.StrongholdWave3.json", "stronghold-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected stronghold-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+                throw new InvalidOperationException($"stronghold-wave-3 card is not a textful Stronghold: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("stronghold-wave-3 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 1 of ability-bearing Personalities beyond the pinned Lion/Crane pool: Togashi
+    /// Meiyu, the first card exercising a Reaction-timing, entering-play-triggered ability.</summary>
+    public static PublishedSnapshot PersonalityWave1 { get; } = LoadPersonalityWave1();
+
+    private static PublishedSnapshot LoadPersonalityWave1()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave1.json", "personality-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-1 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

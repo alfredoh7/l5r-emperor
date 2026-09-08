@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 380749,
+  "card_id": "oracle-l5r-8550",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8550-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Meiyu",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 8550,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8550-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T22:42:03.216120+00:00",
+  "sha256": "3f20d006ca99a78855be75eb03fb1b5da17031b46d0059154c79fd755029c681",
+  "source_image_hash": "99/21",
+  "source_url": "https://images.oracleofthevoid.com/l5r/99/21/printing_8550_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/99/21/printing_8550_1_",
+  "width": 750
+}

@@ -1,0 +1,31 @@
+{
+  "Profile": "stronghold-wave-3",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10183",
+      "Name": "Monastery of New Thought",
+      "Type": "Stronghold",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "Limited: Target your Tattooed Personality: Give him a +1F Fire token.\nBattle: Destroy a Fire token on your performing Personality: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10183.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "monastery-fire-token",
+        "monastery-fire-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
