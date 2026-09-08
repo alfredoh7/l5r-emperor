@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Clarify turn owner and action priority; enlarge hand faces 19.3%; add distinct gold hover and pale blue persistent selection with projected card growth and stable hand-edge input.",
-  "validation": "Standard check.sh passed: 188 automated checks plus client build, import and smoke. check-card-clarity.sh passed 11 native scenarios including both seats, off-turn responses, bowed cards, expanded attachments, hand-edge hover, multiple aspect ratios and reduced motion. Inspected native screenshots.",
-  "remaining": "Camera regression and combined menu/stat-token launcher integration in progress. PR 33 awaits CI, Alfredo visual acceptance and shared-lane review. Issue 11 sidebar/province-numbering proposals remain separate.",
+  "summary": "Explicit turn owner/action priority cue and lit acting-player plaque; resting hand faces 19.3% larger; gold hover with board/hand growth; stronger pale blue persistent selection; stable hand-edge input and reduced motion. Isolated combined launcher preserves menu PR9, tokens PR32 and current main.",
+  "validation": "check.sh: 188 automated checks plus client build/import/smoke passed. 11 branch-native cases and all 13 combined-build cases passed, including bowed cards, expanded attachments and their parent, both seats and off-turn response, first/last/edge hand input, 720p/16:10/ultrawide, reduced motion and token overlap checks. All eight camera cases passed with documented fixture/focus reruns. Launcher entry point passed menu/match/pause/resume/options persistence. Native screenshots inspected. Final CI pending push; prior runtime CI passed Mac and Windows.",
+  "remaining": "No implementation work remains. Await Alfredo visual acceptance, final CI and shared-lane review from mdornbrook before merging PR33. Windows graphical playtesting remains separate. Issue11 sidebar/province-numbering requests remain separate.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/11",
   "branch": "codex/11-turn-card-clarity",
-  "updated": "2026-09-08T00:42:05.586943+00:00"
+  "updated": "2026-09-08T00:54:54.384450+00:00"
 }

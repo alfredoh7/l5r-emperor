@@ -22,3 +22,13 @@ Also run the standard deterministic suite and relevant table-camera/stack checks
 This addresses the active/priority portion of #11. The province-numbering and battle-step sidebar proposals in its comments remain separate work. No authoritative rules, card data, protocol or automated opponent choices change.
 
 Alfredo's local combined launcher includes the unmerged menu (#9) and stat-token (#32) work for continuity. This PR is based on main and does not merge those other PRs implicitly.
+
+## Recorded acceptance (2026-09-08)
+
+- Standard suite: 188 automated checks; client compilation/import/smoke passed.
+- Eleven native cases on the main-based branch, followed by all thirteen cases on the combined menu/token build, including expanded-parent hover/selection. Token validation found no card occlusion or token collisions.
+- All eight table-camera cases passed; an OS-focus interruption and a generated game ending before the fixture required reruns. The new clarity fixture search now handles unsuitable generated matches explicitly, without retrying UI assertions.
+- The launcher entry point passed the menu → Clan choice → real match → paused menu → resume flow and Options persistence.
+- [Combined playable preview](screenshots/card-clarity/combined-preview.png) includes PRs #9 and #32 for continuity. The other screenshots depict this PR on main.
+
+The native menu input probe should allow macOS Spaces transitions to finish between fullscreen toggles; `--time-scale 0.25` gives the existing timed probe sufficient wall time. This changes only the verification run, not normal gameplay speed.
