@@ -448,8 +448,8 @@ public sealed partial class MatchEngine
         var count=0;
         foreach(var card in cards)
         {
-            foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; count++; }
-            card.Zone=Zone.Dead; card.ProvinceIndex=null; card.FaceUp=true; count++;
+            foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++; }
+            card.Zone=Zone.Dead; card.ProvinceIndex=null; card.FaceUp=true; card.Tokens.Clear(); count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
             // Seppuku clears Dishonorable before calling DestroyUnits, so it never pays this.
             if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");

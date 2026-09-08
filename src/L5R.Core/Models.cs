@@ -24,6 +24,13 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
 public sealed record GrantedKeyword(string Keyword, string Source, string Duration);
 
+/// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
+/// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
+/// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
+/// by this specific token -- unlike a Modifier, it is not cleared at turn end, only when the token
+/// itself is destroyed or its host card leaves play.</summary>
+public sealed record CardToken(string Id, string Type, string Source, string? Stat = null, int Amount = 0);
+
 public sealed class CardInstance
 {
     public string Id { get; set; } = "";
@@ -36,6 +43,7 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
@@ -72,6 +80,7 @@ public sealed record GameEvent(long Sequence, string Type, string Message, int? 
 public sealed class MatchState
 {
     public long Version { get; set; }
+    public int TokenSequence { get; set; }
     public int? FavorPlayerId { get; set; }
     public int TurnNumber { get; set; } = 1;
     public int ActivePlayerId { get; set; }
@@ -102,7 +111,8 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
-    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null);
+    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
+    CardToken[]? Tokens = null);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,

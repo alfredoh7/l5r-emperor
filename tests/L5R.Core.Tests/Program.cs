@@ -64,7 +64,8 @@ var tests = new (string Name, Action Run)[]
     ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
     ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
     ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
-    ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack)
+    ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
+    ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives)
 };
 var failed=0;
 foreach(var test in tests)
@@ -612,6 +613,64 @@ static void LawOfDarknessDojo()
         var before=e.State.Players[1].Honor;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:samurai.Id,TargetId:enemy.Id,AbilityId:"training-honor-strike"));
         Equal(e.State.Players[1].Honor,before-3,"2 Honor from the training ability plus 1 more from Law of Darkness Dojo's passive");
+    }
+}
+static void TokenPrimitives()
+{
+    {
+        // Create: a token's stat bonus applies immediately and, unlike a Modifier, survives FinishTurn.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:master.Id,AbilityId:"training-create-token"));
+        Equal(e.State.Cards[master.Id].Tokens.Count,1); Equal(e.State.Cards[master.Id].Tokens[0].Type,"Training");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==master.Id).Force,3,"Base Force 2 plus the token's +1F");
+        Accept(e,Cmd(e,"pass")); SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Cards[master.Id].Tokens.Count,1,"Tokens are not cleared at turn end, unlike Modifiers");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==master.Id).Force,3);
+    }
+    {
+        // Move: the token's stat bonus transfers with it, off the source and onto the destination.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var other=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:master.Id,AbilityId:"training-create-token"));
+        var tokenId=e.State.Cards[master.Id].Tokens[0].Id;
+        Accept(e,Cmd(e,"pass"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:master.Id,PerformerId:other.Id,AbilityId:"training-move-token"));
+        Equal(e.State.Cards[master.Id].Tokens.Count,0);
+        Equal(e.State.Cards[other.Id].Tokens.Count,1); Equal(e.State.Cards[other.Id].Tokens[0].Id,tokenId);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==master.Id).Force,2,"Force returns to base once its token moves away");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==other.Id).Force,4,"Base Force 3 plus the moved token's +1F");
+    }
+    {
+        // Destroy: the token and its stat bonus are gone.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:master.Id,AbilityId:"training-create-token"));
+        Accept(e,Cmd(e,"pass"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:master.Id,AbilityId:"training-destroy-token"));
+        Equal(e.State.Cards[master.Id].Tokens.Count,0);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==master.Id).Force,2);
+    }
+    {
+        // Leaves play: a destroyed unit's own tokens, and its destroyed attachment's tokens, are
+        // removed from the game entirely (core rules Glossary — Token).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        var attacker=Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); attacker.Modifiers=[new("fixture","fixture","Force",5)]; // Force 10
+        var defender=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        defender.Tokens=[new("test-token","Training","test-fixture","Force",1)];
+        var follower=Add(s,"training-follower",1,Zone.Attached,attachedTo:defender.Id,province:0); // +2F unbowed; total defense 8 < attack 10
+        follower.Tokens=[new("test-token-2","Training","test-fixture","Force",1)];
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[defender.Id].Zone,Zone.Dead);
+        Equal(e.State.Cards[defender.Id].Tokens.Count,0,"A destroyed unit's tokens are removed from the game");
+        Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard);
+        Equal(e.State.Cards[follower.Id].Tokens.Count,0,"A destroyed attachment's tokens are removed from the game too");
     }
 }
 static void CarpenterCastleAttack()
