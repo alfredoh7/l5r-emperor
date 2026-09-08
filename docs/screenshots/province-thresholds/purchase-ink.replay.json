@@ -1,0 +1,162 @@
+{
+  "contentVersion": "emperor-lion-crane-0.2.0",
+  "scenario": "lion-crane-v1",
+  "seed": 8324978401849747961,
+  "commands": [
+    {
+      "type": "useAbility",
+      "playerId": 1,
+      "expectedVersion": 0,
+      "cardId": "card-0084",
+      "sourceIds": [],
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": [
+        "card-0107",
+        "card-0119",
+        "card-0120",
+        "card-0116"
+      ],
+      "targetId": null,
+      "abilityId": "border-first",
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "pass",
+      "playerId": 0,
+      "expectedVersion": 1,
+      "cardId": null,
+      "sourceIds": null,
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "useAbility",
+      "playerId": 1,
+      "expectedVersion": 2,
+      "cardId": "card-0084",
+      "sourceIds": [],
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": [
+        "card-0108"
+      ],
+      "targetId": null,
+      "abilityId": "border-game",
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "pass",
+      "playerId": 0,
+      "expectedVersion": 3,
+      "cardId": null,
+      "sourceIds": null,
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "pass",
+      "playerId": 1,
+      "expectedVersion": 4,
+      "cardId": null,
+      "sourceIds": null,
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "pass",
+      "playerId": 1,
+      "expectedVersion": 5,
+      "cardId": null,
+      "sourceIds": null,
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "purchase",
+      "playerId": 1,
+      "expectedVersion": 6,
+      "cardId": "card-0085",
+      "sourceIds": [],
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "purchase",
+      "playerId": 1,
+      "expectedVersion": 7,
+      "cardId": "card-0092",
+      "sourceIds": [
+        "card-0083"
+      ],
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    },
+    {
+      "type": "purchase",
+      "playerId": 1,
+      "expectedVersion": 8,
+      "cardId": "card-0099",
+      "sourceIds": [
+        "card-0084"
+      ],
+      "province": null,
+      "clanDiscount": false,
+      "clanAllegiance": false,
+      "assignments": null,
+      "cardIds": null,
+      "targetId": null,
+      "abilityId": null,
+      "performerId": null,
+      "choice": null
+    }
+  ]
+}

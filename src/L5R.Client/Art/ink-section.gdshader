@@ -54,8 +54,8 @@ void fragment() {
     // Champagne pigment inherits the original raster's grain and highlights,
     // while retaining enough saturation to read in the lantern-lit navy cloth.
     float luminance = dot(paint.rgb, vec3(.2126, .7152, .0722));
-    vec3 pigment = mix(paint.rgb, vec3(luminance), .35);
+    vec3 pigment = paint.rgb;
     pigment = mix(pigment, vec3(.94, .85, .66), wet * .14);
     COLOR = vec4(pigment * stroke_color.rgb,
-        paint.a * stroke_color.a * opacity * appearing * evaporation * (.9 + grain * .1 + wet * .13));
+        paint.a * stroke_color.a * opacity * appearing * evaporation * (1.0 + wet * .13));
 }

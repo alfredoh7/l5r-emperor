@@ -25,6 +25,7 @@ public partial class Main
         Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
+        _matSections.Emphasize(null, hover:true);
         MeasureTableLayout();
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
@@ -201,9 +202,12 @@ public partial class Main
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
             Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
-            if (province.Card is { } card) Place(area, Tile(card, true, CardHeight, CardHeight), 0, 0, CardHeight, PlaneHeight(CardHeight));
-            _statTokenLayer!.AddChild(new ProvinceMarker { ProvinceAnchor=area,Projection=_tableSurface.ProjectCanvas,ProvinceIndex=province.Index,
-                Allowed=()=>_expandedUnits.Count==0 });
+            if (province.Card is { } card)
+            {
+                var tile = Tile(card, true, CardHeight, CardHeight);
+                Place(area, tile, 0, 0, CardHeight, PlaneHeight(CardHeight));
+            }
+
         }
     }
 

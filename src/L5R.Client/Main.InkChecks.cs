@@ -53,13 +53,23 @@ public partial class Main
             ReleaseTableFocus(); HideTableTooltip();
             ValidateInkBoardTopology();
             ValidateInkAttachmentTrays(targets, resting, version);
-            ValidateEmptyProvinceMarker();
+            ValidateEmptyProvinceThreshold();
             await ValidateMatEmblems();
             ValidateInkTransitions();
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree().CreateTimer(.8), SceneTreeTimer.SignalName.Timeout);
             ValidateInkCardClearance();
+            if (_captureMode.EndsWith("provinces", StringComparison.Ordinal))
+            {
+                // Honest close inspection through the ordinary camera transform;
+                // the captured match, cards and attachment membership stay intact.
+                var bays = _matTargets.Where(s => s.Id.StartsWith($"province:{Self.Id}:", StringComparison.Ordinal)).OrderBy(s => s.Bounds.Position.X).Take(2).ToArray();
+                var region = bays.Select(s => s.Bounds).Aggregate((a,b) => a.Merge(b)).Grow(32);
+                _cameraCenter = region.GetCenter(); _cameraZoom = FitRegion(region); _cameraFitted = false; ApplyTableCamera();
+                _matSections.Emphasize(bays[0].Id);
+                await ToSignal(GetTree().CreateTimer(.45), SceneTreeTimer.SignalName.Timeout);
+            }
             GD.Print($"INK_MAT_PASS: {_matTargets.Count} icon-marked, disjoint sections; in-play Holdings left for both seats; exact visible-card membership; real scene hover/selection/deselection, attachment tray expansion/folding and same-state rebuild preserve settled borders and match version.");
             GD.Print("INK_MOTION_PASS: isolated native renderer verifies card-settlement gating, expansion/contraction apparition, rapid retarget, unchanged-sync reveal progress, delayed removal, immediate reduced motion and new-match identity reset. Representative geometry only; no invented game events.");
         }
@@ -87,7 +97,7 @@ public partial class Main
         {
             var holdings = _holdingBounds[player.Id];
             var home = _homeBounds[player.Id];
-            var provinces = _matTargets.Single(s => s.Id == $"provinces:{player.Id}").Bounds;
+            var provinces = _matTargets.Where(s => s.Id.StartsWith($"province:{player.Id}:", StringComparison.Ordinal)).Select(s => s.Bounds).FirstOrDefault(new Rect2(_playLeft, 0, 1, 1));
             InkRequire(holdings.End.X + 1 <= Math.Min(home.Position.X, provinces.Position.X),
                 $"Seat {player.Id}'s Holdings are not separate on the left of its home/provinces.");
             foreach (var card in player.Home.Where(c => c.AttachedTo is null))
@@ -139,7 +149,7 @@ public partial class Main
             var root = card.AttachedTo is { } parentId ? FindCard(parentId) ?? throw new InvalidOperationException("Attachment has no visible parent.") : card;
             var id = root.Zone switch
             {
-                Zone.Province => $"provinces:{root.OwnerId}",
+                Zone.Province => $"province:{root.OwnerId}:{View.Players.Single(p => p.Id == root.OwnerId).Provinces.Single(p => p.Card?.Id == root.Id).Index}",
                 Zone.Battlefield => $"battle:{1 - View.ActivePlayerId}:{root.ProvinceIndex}",
                 _ => $"{(root.Definition?.Type is CardType.Holding or CardType.Stronghold ? "holdings" : "home")}:{root.OwnerId}"
             };
@@ -239,6 +249,17 @@ public partial class Main
                 InkRequire(Geometry2D.IntersectPolygons(tile.FaceCornersOnViewport(), new Vector2[] { bounds.Position, new(bounds.End.X, bounds.Position.Y), bounds.End, new(bounds.Position.X, bounds.End.Y) }).Count == 0,
                     "A mat emblem covers a resting card.");
         }
+        GetWindow().GrabFocus();
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        var savedCenter = _cameraCenter; var savedZoom = _cameraZoom; var savedFit = _cameraFitted;
+        if (!icons.Any(c => c.Visible && PointerOnTable(c.GetGlobalRect().GetCenter())))
+        {
+            // A close camera can legitimately put all border-mounted icons offscreen.
+            ResetTableCamera();
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        }
         var visible = icons.FirstOrDefault(c => c.Visible && PointerOnTable(c.GetGlobalRect().GetCenter()));
         InkRequire(visible is not null, "The icon fixture has no visible hotspot to test.");
         HideTableTooltip(); ReadingTooltip.LastText = null;
@@ -250,63 +271,57 @@ public partial class Main
             "Native pointer hover did not route the icon's accessible name through the reading tooltip.");
         HideTableTooltip();
         Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(8, 140) });
-        foreach (var marker in _statTokenLayer!.GetChildren().OfType<ProvinceMarker>())
+        _cameraCenter = savedCenter; _cameraZoom = savedZoom; _cameraFitted = savedFit; ApplyTableCamera();
+        foreach (var player in View.Players)
+        foreach (var province in player.Provinces.Where(p => !p.Destroyed))
         {
-            marker._Process(0);
-            if (!marker.Visible) continue;
-            var anchor = marker.ProvinceAnchor;
-            var bottom = _tableSurface.ProjectCanvas(anchor.GetGlobalTransform() * new Vector2(anchor.Size.X / 2, anchor.Size.Y));
-            InkRequire(marker.GetGlobalRect().Position.Y > bottom.Y, "A ceremonial province seal is not below its card slot.");
-            if (anchor.GetChildren().OfType<CardTile>().FirstOrDefault() is not { } card) continue;
-            var before = marker.GetGlobalRect();
-            card.EmitSignal(Control.SignalName.MouseEntered); card._Process(.2); marker._Process(0);
-            InkRequire(InkSame(before, marker.GetGlobalRect()), "Hovering a province moved its identity seal.");
+            var id = $"province:{player.Id}:{province.Index}";
+            var descriptor = _matTargets.Single(s => s.Id == id);
+            var threshold = ProvinceThresholdArt.ThresholdBounds(descriptor.Bounds);
+            InkRequire(threshold.Position.Y > ProvinceRowY(player) + PlaneHeight(CardHeight),
+                "A fortress threshold overlaps its province card slot.");
+            InkRequire(descriptor.ProvinceNumber == province.Index + 1, "A province threshold lost its authoritative public identity.");
+            if (province.Card is null) continue;
+            var card = _tiles.Single(t => t.Card.Id == province.Card.Id);
+            var before = _matSections.CurrentBounds(id);
+            card.EmitSignal(Control.SignalName.MouseEntered); card._Process(.2);
+            InkRequire(before == _matSections.CurrentBounds(id), "Hovering a province moved its threshold.");
             card.EmitSignal(Control.SignalName.MouseExited); card._Process(.2);
         }
+        var first = _matTargets.First(s => s.ProvinceNumber is not null);
+        var reveal = _matSections.RevealProgress(first.Id);
+        var geometry = _matSections.CurrentBounds(first.Id);
+        _matSections.Emphasize(first.Id);
+        AdvanceInk(_matSections, .45f);
+        InkRequire(_matSections.EmphasisProgress(first.Id) == 1 && _matSections.RevealProgress(first.Id) == reveal && _matSections.CurrentBounds(first.Id) == geometry,
+            "Province selection restarted ink or moved its threshold.");
+        _matSections.Emphasize(null); AdvanceInk(_matSections, .45f);
+        InkRequire(_matSections.EmphasisProgress(first.Id) == 0, "Deselecting a province left its glow active.");
         InkRequire(View.Version == version, "Hovering a mat icon or province seal changed gameplay state.");
         GD.Print("INK_EMBLEM_PASS: native pointer routes icon hover names; icon hit regions pass through input; province seals sit below resting slots and stay fixed during card hover.");
     }
 
-    private void ValidateEmptyProvinceMarker()
+    private void ValidateEmptyProvinceThreshold()
     {
-        // An isolated live Control tests the marker's no-CardTile fallback.
-        // It represents an empty surviving slot without altering a MatchView,
-        // discarding a card, or claiming a province destruction happened.
-        var anchor = new Control
-        {
-            Position = new Vector2(_playLeft + 30, _selfProvinceY),
-            Size = new Vector2(CardHeight, PlaneHeight(CardHeight)), MouseFilter = Control.MouseFilterEnum.Ignore
-        };
-        var marker = new ProvinceMarker { ProvinceAnchor = anchor, Projection = _tableSurface.ProjectCanvas, ProvinceIndex = 2 };
-        _world.AddChild(anchor); _statTokenLayer!.AddChild(marker);
-        marker.SetProcess(false);
+        // Native presentation lifecycle with no fabricated game snapshot: an empty
+        // surviving Province 3 retains its frame; removing Province 1 never moves it.
+        var renderer = new InkMatSections(); _world.AddChild(renderer);
         try
         {
-            InkRequire(!marker.Visible, "A newly created province marker flashed at the default origin before placement.");
-            InkRequire(!anchor.GetChildren().OfType<CardTile>().Any(), "Empty marker fixture unexpectedly contains a card.");
-            marker._Process(0);
-            InkRequire(marker.IsVisibleInTree() && marker.Text == "3" && float.IsFinite(marker.Position.X) && float.IsFinite(marker.Position.Y) &&
-                marker.Scale.X > 0 && marker.Scale.Y > 0,
-                "A surviving empty province lost its visible, finite, stable number.");
-            var beforeMove = marker.GetGlobalRect();
-            anchor.Position += new Vector2(32, 16); marker._Process(0);
-            InkRequire(!InkSame(beforeMove, marker.GetGlobalRect()) && marker.Text == "3", "Moving the province slot lost or detached its number.");
-            anchor.Hide(); marker._Process(0);
-            InkRequire(!marker.Visible, "Province marker remained visible after its anchor was hidden.");
-            anchor.Show(); marker.Allowed = () => false; marker._Process(0);
-            InkRequire(!marker.Visible, "Province marker ignored its existing Allowed predicate.");
-            marker.Allowed = () => true; marker._Process(0);
-            InkRequire(marker.Visible && marker.Text == "3", "Empty province number did not recover after the anchor was allowed again.");
-            _world.RemoveChild(anchor); marker._Process(0);
-            InkRequire(!marker.Visible, "Detached province anchor left an orphan number.");
-            GD.Print("INK_PROVINCE_PASS: isolated native marker retains Province 3 without a card; hidden, forbidden and detached anchors hide it. No rules snapshot changed; no destruction event simulated.");
+            InkMatSection[] slots = [new("one", "Province 1", new Rect2(0,0,210,330), ProvinceNumber:1),
+                new("three", "Province 3", new Rect2(460,0,210,330), ProvinceNumber:3)];
+            renderer.Sync(slots, true, "isolated-empty");
+            InkRequire(renderer.Targets.Single(s => s.Id == "three").ProvinceNumber == 3 && renderer.RevealProgress("three") == 1,
+                "An empty province did not retain its visible identity.");
+            var before = renderer.CurrentBounds("three");
+            renderer.Sync([slots[1]], true, "isolated-empty");
+            InkRequire(renderer.SectionCount == 1 && renderer.CurrentBounds("three") == before && renderer.Targets[0].ProvinceNumber == 3,
+                "Removing another province moved or renumbered the empty survivor.");
+            renderer.Sync([], true, "isolated-empty");
+            InkRequire(renderer.SectionCount == 0, "Removing a province left an orphan frame or number.");
+            GD.Print("INK_PROVINCE_PASS: native empty Province 3 retains identity; removing another slot does not renumber or move it; removal leaves no orphan art. Presentation-only fixture.");
         }
-        finally
-        {
-            if (anchor.GetParent() is { } parent) parent.RemoveChild(anchor);
-            anchor.QueueFree();
-            _statTokenLayer!.RemoveChild(marker); marker.QueueFree();
-        }
+        finally { _world.RemoveChild(renderer); renderer.QueueFree(); }
     }
 
     private void AssertInkLayoutUnchanged(Dictionary<string, InkMatSection> targets,
