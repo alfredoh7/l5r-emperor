@@ -123,11 +123,21 @@ public partial class Main
             else
             {
                 // The menu branch hosts Options in its own canvas rather than a dialog.
-                GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
-                GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
-                if (!_root.Visible) throw new InvalidOperationException("Options did not return to the existing table.");
+                ResumeCapturedOptions();
             }
         }
+    }
+
+    private async void ResumeCapturedOptions()
+    {
+        // Let each menu page finish its deferred focus operation before leaving it.
+        for (var page = 0; page < 2; page++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
+        }
+        if (!_root.Visible) { GD.PushError("Options did not return to the existing table."); GetTree().Quit(1); }
     }
 
     private void ValidateBoardCapture()
