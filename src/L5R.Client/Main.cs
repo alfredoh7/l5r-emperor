@@ -49,6 +49,9 @@ public partial class Main : Node
     private string _savedServer = "http://localhost:5210";
     private string _profile = "default";
     private string SeatPath => ProjectSettings.GlobalizePath($"user://private-seat-{_profile}.json");
+    /// <summary>Where saved decks live -- plain files in DeckFormat.cs's text format (see #24),
+    /// so they can be hand-edited or dropped into another player's local install.</summary>
+    private string DecksDirectory => ProjectSettings.GlobalizePath("user://Decks");
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
     private MatchView View => _session.Snapshot!.View;
     private ActionOption[] Actions => _session.Snapshot!.Actions;

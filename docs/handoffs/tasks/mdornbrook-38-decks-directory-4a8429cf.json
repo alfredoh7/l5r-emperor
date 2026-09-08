@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Added a user://Decks directory (Main.cs, matching the existing SeatPath convention) and an 'Open Decks location' button in Settings (Main.Dialogs.cs) that creates the directory on demand and opens it via OS.ShellOpen, reusing the same pattern as the existing 'Export practice replay' button. Resolves the deck-storage-location open question from #24.",
+  "validation": "bash tools/check.sh: all suites pass, clean on first run (Core 46/46, Published 32/32, deck format 8/8, AI 13/13, client build/import/smoke clean).",
+  "remaining": "None; ready for review. Save/load plumbing for actual deck files is out of scope here -- belongs to #25/#29.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/38",
+  "branch": "mdornbrook/38-decks-directory",
+  "updated": "2026-09-08T09:04:32.887867+00:00"
+}
