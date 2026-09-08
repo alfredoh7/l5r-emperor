@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Implementing approved C dynamic ink borders, internal labels and left-side in-play holdings; studying reference motion and native layout.",
+  "validation": "Planning stage; existing game and approved concept inspected. Implementation checks pending.",
+  "remaining": "Renderer, layout integration, native animation/input review and CI.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/52",
+  "branch": "codex/52-ink-mat",
+  "updated": "2026-09-08T18:15:03.302432+00:00"
+}
