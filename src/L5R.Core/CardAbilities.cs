@@ -33,6 +33,11 @@ public static class AbilityCatalog
         ["journeys-end-move"] = new("Battle", "Move home a Personality with no more Followers than the performer", "fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle"),
         ["shamate-move"] = new("Battle", "Move home a Personality with equal or lower Personal Honor", "lower-or-equal-honor-than-performer", Performer: "own-unbowed-personality-at-battle"),
         ["law-of-darkness-weaken"] = new("Battle", "Enemy Personality −4 Force · bow if dishonorable", "enemy-personality"),
+        // Ranged/Melee Attack (core rules Glossary): targeting a Follower or a Personality without
+        // Followers, Force <= strength, is resolved at the moment the effect happens rather than
+        // required up front -- the action stays legal to take with no eligible target in sight.
+        ["carpenter-castle-siege"] = new("Battle", "Bow a Castle/Siege card · Ranged 5 Attack", "attack", Performer: "own-castle-or-siege"),
+        ["shiro-shiba-melee"] = new("Battle", "Perform · Melee 4 Attack (+2 if you control a Shugenja)", "attack", Performer: "own-unbowed-samurai-at-battle"),
         // Training-only: no published card yet reduces an opponent's Honor via a Battle action, so this
         // exercises Law of Darkness Dojo's "he loses 1 Honor" passive, which otherwise has no live trigger.
         ["training-honor-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor", "enemy-personality"),
@@ -55,6 +60,14 @@ public sealed partial class MatchEngine
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
+    private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
+    // Ranged/Melee Attack strength; conditional bonuses (e.g. Shiro Shiba's Shugenja check) live here.
+    private int AttackStrength(string abilityId, PlayerState player) => abilityId switch
+    {
+        "carpenter-castle-siege" => 5,
+        "shiro-shiba-melee" => 4 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
+        _ => 0
+    };
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
@@ -115,11 +128,15 @@ public sealed partial class MatchEngine
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
-            Require(performer.OwnerId == player.Id && InPlay(performer) && Definition(performer).Type == CardType.Personality, "Choose your own Personality to perform.");
+            Require(performer.OwnerId == player.Id && InPlay(performer), "Choose your own card to perform.");
             Require(ability.Performer switch {
-                "shugenja" => Keyword(performer, "Shugenja") && !performer.Bowed,
-                "own-unbowed-personality-at-battle" => !performer.Bowed && AtBattle(performer),
-                "own-personality" => true,
+                "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
+                "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
+                "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
+                // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
+                // reused for the same "select one more card, separately from the effect's target" shape.
+                "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
+                "own-personality" => Definition(performer).Type == CardType.Personality,
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -137,6 +154,22 @@ public sealed partial class MatchEngine
         {
             Require(command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             if (ability.Target == "none") Require(command.TargetId is null, "This action has no target.");
+            // Ranged/Melee Attack: unlike every other ability target, this one is not required to
+            // exist for the action to be legal -- a null TargetId always validates. When a TargetId
+            // is supplied, it must be a Follower or a Personality without Followers in the current
+            // enemy army with Force at or below the attack's (possibly conditional) strength.
+            else if (ability.Target == "attack")
+            {
+                if (command.TargetId is not null)
+                {
+                    var target = Card(command.TargetId);
+                    Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
+                    var type = Definition(target).Type;
+                    Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
+                        "Attack a Follower or a Personality without Followers.");
+                    Require(CardForce(target) <= AttackStrength(id, player), "That card's Force is above the Attack's strength.");
+                }
+            }
             else
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
@@ -221,6 +254,11 @@ public sealed partial class MatchEngine
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
+            case "carpenter-castle-siege":
+                Card(command.PerformerId).Bowed = true;
+                if (target is not null) { DestroyAttackTarget(target); GainHonor(player.Id, 2, "Carpenter Castle"); }
+                break;
+            case "shiro-shiba-melee": if (target is not null) DestroyAttackTarget(target); break;
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
             case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
             case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
@@ -280,6 +318,13 @@ public sealed partial class MatchEngine
         player.Hand.Remove(card.Id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("fateDiscarded", $"{player.Name} discarded {Definition(card).Name}.", player.Id, card.Id);
     }
+    // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
+    // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.
+    private void DestroyAttackTarget(CardInstance target)
+    {
+        if (Definition(target).Type == CardType.Follower) DestroyAttachment(target);
+        else DestroyUnits([target], true);
+    }
     private void DestroyAttachment(CardInstance card)
     {
         var parent = Card(card.AttachedTo);
@@ -331,6 +376,8 @@ public sealed partial class MatchEngine
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
+                "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
@@ -342,7 +389,7 @@ public sealed partial class MatchEngine
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), _ => inPlay };
+                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(), _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {

@@ -47,6 +47,24 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 2 of the Stronghold rollout: the first two Strongholds using the Ranged/Melee
+    /// Attack primitive (deferred, not-required-up-front targeting -- core rules Glossary).</summary>
+    public static PublishedSnapshot StrongholdWave2 { get; } = LoadStrongholdWave2();
+
+    private static PublishedSnapshot LoadStrongholdWave2()
+    {
+        var snapshot = Load("L5R.Published.StrongholdWave2.json", "stronghold-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected stronghold-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+                throw new InvalidOperationException($"stronghold-wave-2 card is not a textful Stronghold: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("stronghold-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
