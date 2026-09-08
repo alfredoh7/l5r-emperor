@@ -43,3 +43,7 @@ The current GitHub account returned HTTP 403 for private repository rulesets and
 The review router runs for PRs targeting `main` on `pull_request_target` using **only the trusted base commit**, with no PR-head checkout or execution. PR titles, branch names and descriptions are not interpolated into shell commands. It reads filenames and GitHub author metadata, applies labels and requests reviewers according to the trusted base policy. The PR CI uses a read-only token and executes the ordinary candidate tests. New/untracked/deleted/renamed files are included in local auditing; renamed paths retain their old lane for review routing. No background process watches your computers.
 
 Official behavior references: [Codex project instructions](https://learn.chatgpt.com/docs/agent-configuration/agents-md), [Claude project memory and AGENTS import](https://code.claude.com/docs/en/memory). See `docs/COLLABORATION_VALIDATION.md` for the actual tested scenarios and remaining limits.
+
+## Optional authenticated board integration
+
+See [PROJECT_BOARD.md](PROJECT_BOARD.md) for the separate Netlify application and `tools/board.py`. The helper reads live board context when configured, without changing the local-only behavior of `collab.py handoff`. Explicit board claim and handoff commands coordinate executor ownership. Preserve existing GitHub coordination when the service is unavailable. No autonomous developer permission is removed.

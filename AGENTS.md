@@ -9,6 +9,10 @@ The latest user request takes precedence. These instructions apply to every impl
 3. Check open PRs and assigned issues for overlapping files/tasks. Reuse the matching issue; create one for a new implementation task and record who is taking it. A draft PR on the task branch makes ownership visible early. Assign only yourself unless the user requests another assignee. Coordination records are not locks; check again before editing a shared file.
 4. Start from current `origin/main` on a short task branch (`codex/<issue>-<topic>` or `claude/<issue>-<topic>`). Resume an existing branch only when it belongs to this task. Separate simultaneous sessions into separate clones/worktrees. Never switch/reset/stash someone else's dirty work automatically; use a separate worktree for unrelated work. For a dirty task-owned branch, preserve and continue it.
 
+## Project board coordination
+
+Read `docs/PROJECT_BOARD.md` for the private board and agent client. When `L5R_BOARD_TOKEN` is configured, context includes live board state. Claim Ready work with `tools/board.py` before editing; use the exact executor/branch to resume, record scope revisions instead of silently expanding the task, and explicitly hand off after publishing the existing repository handoff. Do not claim success on authentication/network failure. Preserve current work and use explicit GitHub coordination for new work during an outage. Human acceptance is distinct from merge permission and cannot be provided by an agent token.
+
 ## Standing development authority
 
 - **Mendon (`mdornbrook`) and agents working on his tasks may change any part of the game without Alfredo’s approval**, including UI, menus, shared functions, custom-deck loaders, practice/sandbox modes, rules, card data and server code. This is explicit owner authorization, recorded in `.github/collaboration.json` under `autonomous_developers`; do not ask again because a file falls in Alfredo's usual lane.
