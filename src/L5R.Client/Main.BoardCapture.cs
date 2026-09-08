@@ -21,7 +21,9 @@ public partial class Main
             _session.FollowPracticePriority();
             var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
-            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady()) break;
+            var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
+                View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
+            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
@@ -123,6 +125,7 @@ public partial class Main
             }
             ProbeUnitStandardInput();
         }
+        if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeInkMat(); }
         if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
         if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
@@ -166,6 +169,7 @@ public partial class Main
         ValidateStatTokens();
         ValidateUnitStandards();
         if (_captureMode.Contains("deselect", StringComparison.Ordinal) && _deselectProbeError is not null) throw new Exception(_deselectProbeError);
+        if (_captureMode.Contains("ink", StringComparison.Ordinal) && _inkProbeError is not null) throw new Exception(_inkProbeError);
         ValidateQuietHud();
         ValidatePhysicalLayout();
         if (_captureMode.EndsWith("piletip", StringComparison.Ordinal))

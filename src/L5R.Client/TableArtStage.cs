@@ -105,7 +105,11 @@ public partial class TableArtStage : Node3D
                     """ };
                 var material = new ShaderMaterial { Shader = ReviewMode ? shader : GD.Load<Shader>("res://Art/navy-table.gdshader") };
                 if (!ReviewMode) material.SetShaderParameter("plate_texture", GD.Load<Texture2D>("res://Art/navy-mat-v4.png"));
-                if (!ReviewMode) material.SetShaderParameter("lantern_texture", GD.Load<Texture2D>("res://Art/tavern-lantern.png"));
+                if (!ReviewMode)
+                {
+                    material.SetShaderParameter("lantern_texture", GD.Load<Texture2D>("res://Art/tavern-lantern.png"));
+                    material.SetShaderParameter("weathered_texture", GD.Load<Texture2D>("res://Art/tavern-lantern-weathered.png"));
+                }
                 if (ReviewMode) material.SetShaderParameter("plate_texture", texture);
                 mesh.SetSurfaceOverrideMaterial(i, material);
                 _paintedMaterials.Add(material);
@@ -126,6 +130,7 @@ public partial class TableArtStage : Node3D
 
     // The new plate has uninterrupted fabric inside this conservative UV inset.
     // Keep a real margin around the board as its home/army rows expand.
+    private static readonly Vector2 RightLamp = new(.91f, .16f);
     private const float FabricInset = .04f;
     public const float FabricPadding = 90;
     private static Vector2 EnvironmentExtent(Vector2 boardSize)
@@ -143,12 +148,24 @@ public partial class TableArtStage : Node3D
         return new Rect2(boardSize / 2 - extent / 2 + extent * FabricInset, extent * (1 - 2 * FabricInset));
     }
 
-    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize)
+    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom)
     {
         // Expand the environment around the playable area, keeping its native
         // aspect instead of stretching edge pixels into an infinite surface.
         var extent = EnvironmentExtent(boardSize);
         var origin = boardSize / 2 - extent / 2;
+        // Reserve an actual gutter outside the card plane, rather than a fixed
+        // fraction that can put the lamp inside Holdings on compact tables.
+        var leftWorld = new Vector2(Math.Min(-160, origin.X + extent.X * .08f), origin.Y + extent.Y * .88f);
+        // At the fitted view, keep the whole sprite away from the window edge.
+        // Derive this from the fit camera, not the live camera: manual pan/zoom
+        // must never make a lamp chase the screen edge or detach from its light.
+        var fitPerspective = 1 / (1 - TableSurface.Depth * (leftWorld.Y - boardSize.Y / 2) * fitZoom);
+        var fitPixelsPerWorld = fitZoom * fitPerspective * density;
+        var minimumBase = 32 * density + 108 * fitPixelsPerWorld;
+        var fittedX = screenCenter.X + (leftWorld.X - boardSize.X / 2) * fitPixelsPerWorld;
+        if (fittedX < minimumBase) leftWorld.X += (minimumBase - fittedX) / fitPixelsPerWorld;
+        var leftLamp = (leftWorld - origin) / extent;
         foreach (var material in _paintedMaterials)
         {
             material.SetShaderParameter("screen_size", GetViewport().GetVisibleRect().Size);
@@ -160,10 +177,12 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("plane_depth", TableSurface.Depth);
             material.SetShaderParameter("environment_origin", origin);
             material.SetShaderParameter("environment_size", extent);
+            material.SetShaderParameter("left_lamp", leftLamp);
+            material.SetShaderParameter("right_lamp", RightLamp);
         }
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
-        CardPaper.Table.SetShaderParameter("light_origin", origin + extent * new Vector2(.094f, .68f));
-        CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * new Vector2(.895f, .39f));
+        CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
+        CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);
     }
 
     public override void _Process(double delta)

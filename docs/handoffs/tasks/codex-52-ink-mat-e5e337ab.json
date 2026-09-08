@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Replaced mat headings with aged gold icons and hover help, and moved stable province numbers into ceremonial seals below cards; retained card-first ink apparition and weathered corner candlelight.",
+  "validation": "Zero-warning client build/import; three native ink views with pointer tooltip routing, polygon clearance, hover-invariant seals and empty-slot identity checks; 120-frame real Remote Village purchase film; all eight native camera/input cases including reduced-motion image identity; refreshed launcher smoke passed. Native captures visually reviewed. See docs/INK_MAT_VALIDATION.md.",
+  "remaining": "Alfredo visual/play acceptance and Mendon shared-client/battlefield review; hosted CI pending this final push. Native Windows graphical playtesting and later assignment/resolution presentation remain open.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/52",
+  "branch": "codex/52-ink-mat",
+  "updated": "2026-09-08T20:00:09.127118+00:00"
+}

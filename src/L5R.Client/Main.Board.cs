@@ -26,8 +26,9 @@ public partial class Main
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         MeasureTableLayout();
+        SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
-        AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self);
+        AddHoldings(enemy); AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self); AddHoldings(Self);
         // A shallow physical fan, with complete scans and space for a modest hover lift.
         var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
         var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
@@ -70,62 +71,18 @@ public partial class Main
     private readonly Dictionary<int, float> _armyHeights = [];
     private readonly Dictionary<int, CardView[][]> _homeRows = [];
     private float PlaneHeight(float side) => side - 4;
-    private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : 12;
+    private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : MatPadding + MatHeader;
     private float SlotX(PlayerView player, int slot) =>
-        (player.Id == View.ViewerId ? _slotCenters[slot] : WorldWidth - _slotCenters[slot]) - CardHeight / 2;
-    private CardView[] HomeCards(PlayerView player) => new[] { player.Stronghold }
-        .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Personality))
-        .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Personality)).ToArray();
+        _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
+    private CardView[] HomeCards(PlayerView player) => player.Home
+        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding).ToArray();
+    private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
+        .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
         .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0);
     private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
     private int ArmyColumns(int province) => View.Players.Max(p => p.Army.Count(c => c.AttachedTo is null && c.ProvinceIndex == province)) > 2 ? 2 : 1;
-    private void MeasureTableLayout()
-    {
-        for (var i = 0; i < 4; i++)
-        {
-            var width = View.Players.SelectMany(p => p.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == i).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-            _laneWidths[i] = Math.Max(170, ArmyColumns(i) * (width + CardGap));
-        }
-        var x = 20f;
-        _slotCenters[0] = x + 75; x += 160;
-        _slotCenters[1] = x + 75; x += 160;
-        for (var i = 0; i < 4; i++) { _slotCenters[2 + i] = x + _laneWidths[i] / 2; x += _laneWidths[i]; }
-        _slotCenters[6] = x + 85; x += 160;
-        _slotCenters[7] = x + 85; x += 160;
-        // A developed economy expands sideways before it needs another row.
-        var homeWidth = View.Players.Max(p => HomeCards(p).Take(12).Sum(c => UnitWidth(c, p) + CardGap)) + 40;
-        WorldWidth = Math.Max(x + 20, homeWidth);
-        for (var i = 0; i < _slotCenters.Length; i++) _slotCenters[i] += (WorldWidth - x - 20) / 2;
-        foreach (var player in View.Players)
-        {
-            var rows = new List<CardView[]>(); var row = new List<CardView>(); var used = 0f;
-            foreach (var card in HomeCards(player))
-            {
-                var width = UnitWidth(card, player);
-                if (row.Count > 0 && used + width > WorldWidth - 40) { rows.Add(row.ToArray()); row.Clear(); used = 0; }
-                row.Add(card); used += width + CardGap;
-            }
-            if (row.Count > 0) rows.Add(row.ToArray());
-            _homeRows[player.Id] = rows.ToArray();
-            _homeHeights[player.Id] = rows.Sum(r => r.Max(c => StackHeight(c, player)) + RowGap);
-            _armyHeights[player.Id] = Math.Max(0, player.Army.Where(c => c.AttachedTo is null).GroupBy(c => c.ProvinceIndex)
-                .Select(lane => lane.Chunk(ArmyColumns(lane.Key ?? 0)).Sum(r => r.Max(c => StackHeight(c, player)) + RowGap)).DefaultIfEmpty(0).Max());
-        }
-        var enemy = View.Players.Single(p => p.Id != View.ViewerId);
-        _enemyHomeY = 12 + PlaneHeight(CardHeight) + RowGap;
-        _battleY = _enemyHomeY + _homeHeights[enemy.Id] + 8;
-        _battleHeight = BattleActive && View.Players.Any(p => p.Army.Length > 0) ? _armyHeights.Values.Sum() + 32 : 24;
-        _selfHomeY = _battleY + _battleHeight + 8;
-        _selfProvinceY = _selfHomeY + _homeHeights[Self.Id];
-        var previousHeight = _worldHeight;
-        _worldHeight = _selfProvinceY + PlaneHeight(CardHeight) + 12;
-        if (_tableLayoutSeen && _cameraFitted && _worldHeight > previousHeight + 1) _cameraFitted = false;
-        _tableLayoutSeen = true;
-        _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size;
-    }
-
     private static float CardFootprint(CardView card, float height)
     {
         if (card.Bowed) return height;
@@ -134,22 +91,25 @@ public partial class Main
         return (height - 12) * ratio + 16;
     }
 
-    private void AddHome(PlayerView player)
+    private void AddHome(PlayerView player) => AddMatCards(player, _homeRows[player.Id], _homeBounds[player.Id], false);
+    private void AddHoldings(PlayerView player) => AddMatCards(player, _holdingRows[player.Id], _holdingBounds[player.Id], true);
+    private void AddMatCards(PlayerView player, CardView[][] rows, Rect2 bounds, bool holdings)
     {
-        var group = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0,
-            player.Id == View.ViewerId ? _selfHomeY : _enemyHomeY, WorldWidth, _homeHeights[player.Id]);
+        var group = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore },
+            bounds.Position.X, bounds.Position.Y, bounds.Size.X, bounds.Size.Y);
         group.SetMeta("home_owner", player.Id);
-        var y = 0f;
-        foreach (var row in _homeRows[player.Id])
+        group.SetMeta("mat_section", $"{(holdings ? "holdings" : "home")}:{player.Id}");
+        var y = MatHeader;
+        foreach (var row in rows)
         {
             var rowHeight = row.Max(c => StackHeight(c, player));
-            var x = 20f;
+            var x = MatPadding;
             foreach (var card in row)
             {
                 var width = UnitWidth(card, player);
                 var control = card.Definition?.Type == CardType.Personality ? UnitStack(card, player, CardHeight)
                     : Tile(card, true, width, CardHeight);
-                Place(group, control, player.Id == Self.Id ? x : WorldWidth - x - width, y, width, control is CardTile ? PlaneHeight(CardHeight) : StackHeight(card, player));
+                Place(group, control, x, y, width, control is CardTile ? PlaneHeight(CardHeight) : StackHeight(card, player));
                 x += width + CardGap;
             }
             y += rowHeight + RowGap;
@@ -258,18 +218,17 @@ public partial class Main
             var laneWidth = _laneWidths[province.Index];
             var lane = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(defender, 2 + province.Index) - (laneWidth - CardHeight) / 2, _battleY, laneWidth, _battleHeight);
             lane.SetMeta("battle_province", province.Index);
-            if (View.CurrentBattleProvince == province.Index)
-                Place(lane, new ColorRect { Color = new Color(.7f, .53f, .24f, .055f), MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, laneWidth - 8, _battleHeight);
-            var target = new Button { Text = $"Province {province.Index + 1}", Flat = true, TooltipText = $"Province {province.Index + 1} battlefield" };
+
+            var target = new Button { Text = "", Flat = true, TooltipText = $"Province {province.Index + 1} battlefield" };
             CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, province.Index);
-            Place(lane, target, 0, 0, laneWidth - 8, 24); _laneSummaries[province.Index] = target;
+            Place(lane, target, 0, 0, laneWidth - 8, MatHeader); _laneSummaries[province.Index] = target;
             foreach (var player in new[] { enemy, Self })
             {
-                var y = player.Id == enemy.Id ? 12 : 12 + _armyHeights[enemy.Id] + 8;
+                var y = MatHeader + (player.Id == enemy.Id ? 0 : _armyHeights[enemy.Id] + RowGap);
                 foreach (var row in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == province.Index).Chunk(ArmyColumns(province.Index)))
                 {
                     var rowHeight = row.Max(c => StackHeight(c, player));
-                    var x = 5f;
+                    var x = MatPadding;
                     foreach (var unit in row)
                     {
                         var width = UnitWidth(unit, player);

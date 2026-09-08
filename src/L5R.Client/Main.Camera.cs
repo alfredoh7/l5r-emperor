@@ -58,7 +58,10 @@ public partial class Main
     private void FitTableViewport()
     {
         _tableViewport.Position = new Vector2(144, 148);
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188, 666);
+        // Leave the fitted mat clear of the resting hand, including the small
+        // upward reach of its fan. Hover can still deliberately lift a hand card.
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188,
+            Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
     }
@@ -109,7 +112,7 @@ public partial class Main
         }
         _world.Scale = Vector2.One * _cameraZoom;
         _world.Position = _tableSurface.CanvasSize / 2 - _cameraCenter * _cameraZoom;
-        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight));
+        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight), FitZoom);
         CardPaper.SetTableTransform(_world.Position * _tableSurface.RenderScale, _cameraZoom * _tableSurface.RenderScale, _tableSurface.Canvas.Size);
         HideTableTooltip(); _syncTablePointer = true;
         _intentOverlay?.QueueRedraw();
@@ -140,6 +143,10 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
+        // A recorded demonstration consumes live input so a wheel/key/click
+        // cannot alter the evidence mid-take. Normal play and input probes do not.
+        if (_capturePath is not null && _captureMode == "published-ink-film")
+        { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
@@ -217,6 +224,7 @@ public partial class Main
 
     private void ProcessTableCamera(double delta)
     {
+        if (_capturePath is not null && _captureMode == "published-ink-film") return;
         ProcessTableTooltip(delta);
         if (_world is null || CameraBlocked)
         {
@@ -259,7 +267,7 @@ public partial class Main
         }
         if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
         { HideTableTooltip(); return; }
-        Control? hovered = token ?? TableHovered;
+        Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
         if (token is null)
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
