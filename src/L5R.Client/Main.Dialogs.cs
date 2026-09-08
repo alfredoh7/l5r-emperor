@@ -64,6 +64,7 @@ public partial class Main
         body.AddChild(Palette.Button(IsFullscreen ? "Use a window" : "Enter fullscreen", () => { dialog.QueueFree(); GetWindow().Mode = IsFullscreen ? Window.ModeEnum.Windowed : Window.ModeEnum.Fullscreen; }));
         body.AddChild(Palette.Button("Quit game", () => GetTree().Quit()));
         body.AddChild(Palette.Button("Export practice replay", ExportReplay));
+        body.AddChild(Palette.Button("Open Decks location", OpenDecksLocation));
         body.AddChild(Palette.Button("Rules coverage & limitations", ShowCoverage));
         var concede = Palette.Button("Concede this match…", () => Confirm("Concede this match?", "The other player will win the current match.", () => Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version))));
         concede.Disabled = _session.Snapshot is null || View.WinnerId is not null; body.AddChild(concede);
@@ -150,6 +151,12 @@ public partial class Main
         };
         body.AddChild(Palette.Wrapped("Hand the device to the other player before revealing their private hand.", 21));
         body.AddChild(Palette.Button("I'm ready · reveal my hand", () => { _selected = null; _chosen = null; switched = true; _session.SwitchPracticeSeat(); dialog.QueueFree(); }, true));
+    }
+
+    private void OpenDecksLocation()
+    {
+        Directory.CreateDirectory(DecksDirectory);
+        OS.ShellOpen(DecksDirectory);
     }
 
     private void ExportReplay()
