@@ -77,7 +77,7 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,105);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,107);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
@@ -88,6 +88,9 @@ internal static class PublishedTests
         Check(!vanilla.Select(c=>c.Id).Intersect(PublishedContent.Snapshot.Cards.Select(c=>c.Id)).Any());
         var strongholds=PublishedContent.StrongholdWave1.Cards;Eq(strongholds.Length,4);
         foreach(var c in strongholds){Eq(c.Type,CardType.Stronghold);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        var strongholds2=PublishedContent.StrongholdWave2.Cards;Eq(strongholds2.Length,2);
+        foreach(var c in strongholds2){Eq(c.Type,CardType.Stronghold);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        Check(!strongholds2.Select(c=>c.Id).Intersect(strongholds.Select(c=>c.Id)).Any());
     }
     private static void Setup()
     {
