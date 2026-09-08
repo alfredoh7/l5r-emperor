@@ -119,7 +119,9 @@ public partial class Main
                     RequireCamera(_selected?.Id == _probeTile!.Card.Id, "ordinary card click was swallowed by navigation");
                     RequireCamera(View.Version == _probeVersion, "card inspection changed match state");
                     ValidatePerspectiveClicks();
-                    ShowSettings(); _probeZoom = _cameraZoom; break;
+                    // Options now replaces the table with the main-menu page.
+                    // Use the real Rules dialog to exercise modal camera blocking.
+                    ShowRules(); _probeZoom = _cameraZoom; break;
                 case 19:
                     RequireCamera(CameraBlocked, "modal did not block camera");
                     CameraKey(Key.Right, true); break;
@@ -162,6 +164,7 @@ public partial class Main
                 var midpoint = (corners[edge] + corners[(edge + 1) % 4]) / 2;
                 var point = midpoint + (center - midpoint).Normalized() * 6;
                 RequireCamera(_tableSurface.ProjectCanvas(_tableSurface.ScreenToCanvas(point)).DistanceTo(point) < .1f, "perspective round trip drifted");
+                if (_selected?.Id == tile.Card.Id) DeselectCard();
                 MoveProbeMouse(point); CameraMouse(MouseButton.Left, true, point); CameraMouse(MouseButton.Left, false, point);
                 RequireCamera(_selected?.Id == tile.Card.Id, "projected edge click selected the wrong card");
             }

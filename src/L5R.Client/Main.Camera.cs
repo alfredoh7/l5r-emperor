@@ -58,7 +58,10 @@ public partial class Main
     private void FitTableViewport()
     {
         _tableViewport.Position = new Vector2(144, 148);
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188, 666);
+        // Leave the fitted mat clear of the resting hand, including the small
+        // upward reach of its fan. Hover can still deliberately lift a hand card.
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188,
+            Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
     }

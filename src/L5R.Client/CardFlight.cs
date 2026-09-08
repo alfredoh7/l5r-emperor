@@ -18,6 +18,7 @@ public partial class CardFlight : Control
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Ignore; ZIndex = 40; Material = CardPaper.FixedTable;
+        TextureFilter = TextureFilterEnum.LinearWithMipmaps;
     }
     public override void _Process(double delta)
     {

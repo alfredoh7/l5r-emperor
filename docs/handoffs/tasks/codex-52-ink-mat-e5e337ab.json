@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Implementing approved C dynamic ink borders, internal labels and left-side in-play holdings; studying reference motion and native layout.",
-  "validation": "Planning stage; existing game and approved concept inspected. Implementation checks pending.",
-  "remaining": "Renderer, layout integration, native animation/input review and CI.",
+  "lane": "shared",
+  "summary": "Implemented approved C textured ink mat regions, internal labels, separate left-side holdings, smooth live card/pile reflow and stable province identifiers.",
+  "validation": "Zero-warning client build and Godot import; 234 deterministic checks; three native ink fixtures plus 72-frame real purchase film; 17 board cases, eight camera cases and four deselection/target cases passed. Adversarial source/visual review addressed all concrete findings. Launcher command smoke passed. See docs/INK_MAT_VALIDATION.md.",
+  "remaining": "Mendon shared-client/battlefield review and Alfredo visual/play acceptance; hosted CI pending publication. No native Windows playtest. Assignment previews and cinematic resolution remain later passes.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/52",
   "branch": "codex/52-ink-mat",
-  "updated": "2026-09-08T18:15:03.302432+00:00"
+  "updated": "2026-09-08T18:55:18.800361+00:00"
 }

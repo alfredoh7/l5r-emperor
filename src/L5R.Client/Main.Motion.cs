@@ -8,7 +8,8 @@ public partial class Main
     private MatchView? _motionView;
     private readonly List<CardFlight> _flights = [];
     private record MotionFrame(MatchView View, Dictionary<string,Vector2[]> Cards,
-        Dictionary<(int,Zone),(Vector2[] Corners,float Count)> Piles);
+        Dictionary<string,Vector2> TableOrigins,
+        Dictionary<(int,Zone),(Vector2[] Corners,float Count,Vector2 Origin)> Piles);
     private IEnumerable<TablePile> TablePiles => _pileHud.GetChildren().OfType<TablePile>();
     private Vector2[] PileCorners(TablePile pile)
     {
@@ -24,7 +25,10 @@ public partial class Main
            View.Version <= _motionView.Version || _reducedMotion) return null;
         return new(_motionView, _tiles.Where(IsInstanceValid).GroupBy(t=>t.Card.Id)
             .ToDictionary(g=>g.Key,g=>g.First().FaceCornersOnViewport().Select(p=>p/_root.Scale.X).ToArray()),
-            TablePiles.ToDictionary(p=>(p.OwnerId,p.PileZone),p=>(PileCorners(p),p.ShownCount)));
+            _tiles.Where(t => IsInstanceValid(t) && _world.IsAncestorOf(t)).ToDictionary(t => t.Card.Id,
+                t => _world.GetGlobalTransform().AffineInverse() * t.GlobalPosition),
+            TablePiles.ToDictionary(p=>(p.OwnerId,p.PileZone),p=>(PileCorners(p),p.ShownCount,
+                _world.GetGlobalTransform().AffineInverse() * p.GlobalPosition)));
     }
     private static IEnumerable<CardView> VisibleCards(MatchView view) => view.Players.SelectMany(p => p.Home.Concat(p.Army)
         .Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(v=>v.Card is not null).Select(v=>v.Card!)).Append(p.Stronghold));
@@ -35,7 +39,13 @@ public partial class Main
         var old = VisibleCards(before.View).GroupBy(c=>c.Id).ToDictionary(g=>g.Key,g=>g.First());
         var next = VisibleCards(View).GroupBy(c=>c.Id).ToDictionary(g=>g.Key,g=>g.First());
         foreach(var pile in TablePiles)
-            if(before.Piles.TryGetValue((pile.OwnerId,pile.PileZone),out var prior)) pile.SettleFrom(prior.Count,_reducedMotion);
+            if(before.Piles.TryGetValue((pile.OwnerId,pile.PileZone),out var prior))
+            {
+                pile.SettleFrom(prior.Count,_reducedMotion);
+                var start = pile.GetParent<Control>().GetGlobalTransform().AffineInverse() * (_world.GetGlobalTransform() * prior.Origin);
+                if (start.DistanceTo(pile.Position) > .5f)
+                    pile.AddChild(new TableCardReflow { Card = pile, From = start, To = pile.Position, ReducedMotion = () => _reducedMotion });
+            }
         foreach(var tile in _tiles.Where(t=>t.Card.Zone==Zone.Hand))
         {
             if(!before.Cards.TryGetValue(tile.Card.Id,out var corners) || old.GetValueOrDefault(tile.Card.Id)?.Zone!=Zone.Hand) continue;
@@ -63,6 +73,17 @@ public partial class Main
             var moved = previous is not null && (previous.Zone != card.Zone || previous.ProvinceIndex != card.ProvinceIndex || previous.AttachedTo != card.AttachedTo);
             var draw = previous is null && card.Zone is Zone.Hand or Zone.Province;
             var publicDiscard = previous is null && card.Zone==Zone.FateDiscard && card.OwnerId!=View.ViewerId;
+            var restingTile = _tiles.FirstOrDefault(t => t.Card.Id == card.Id && _world.IsAncestorOf(t));
+            if (!moved && !draw && previous is not null && restingTile is not null &&
+                before.TableOrigins.TryGetValue(card.Id, out var oldOrigin))
+            {
+                // Resting control origins exclude hover growth and bow geometry.
+                // A tray card has no TableOrigins entry, so folding cannot fly it onto the mat.
+                var start = restingTile.GetParent<Control>().GetGlobalTransform().AffineInverse() *
+                    (_world.GetGlobalTransform() * oldOrigin);
+                if (start.DistanceTo(restingTile.Position) > .5f)
+                    restingTile.AddChild(new TableCardReflow { Card = restingTile, From = start, To = restingTile.Position, ReducedMotion = () => _reducedMotion });
+            }
             if(!moved && !draw && !publicDiscard) continue;
             Vector2[]? from = before.Cards.GetValueOrDefault(card.Id);
             if(draw && card.Zone==Zone.Province)
