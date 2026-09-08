@@ -4,7 +4,7 @@ Explain the problem and resulting behavior. Link the issue and `docs/handoffs/ta
 
 ## Lane and coordination
 
-UI / rules / shared. Explain any semantic effect on the other lane, even if the changed paths look isolated. Shared interfaces and cross-lane work need the other lead's review. GitHub applies path-based lane labels automatically.
+UI / rules / shared. Explain any semantic effect on the other lane, even if the changed paths look isolated. Follow the review policy in AGENTS.md and .github/collaboration.json: Mendon has standing authority across all game areas and may merge his PR after relevant tests/CI without Alfredo approval; other authors request the other lead for shared changes. GitHub applies path-based lane labels automatically.
 
 ## Validation
 
