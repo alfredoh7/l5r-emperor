@@ -6,8 +6,10 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private int _boardFixtureAttempts;
     private void PrepareBoardCapture()
     {
+        _boardFixtureAttempts++;
         var defenseMode = _captureMode.Contains("defense", StringComparison.Ordinal);
         var assignmentMode = defenseMode || _captureMode.Contains("assignment", StringComparison.Ordinal);
         var assignmentType = defenseMode ? "assignDefense" : "attack";
@@ -19,13 +21,23 @@ public partial class Main
             _session.FollowPracticePriority();
             var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
-            if (assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) break;
+            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady()) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
             if (version == View.Version) throw new InvalidOperationException("Board capture action rejected.");
         }
-        if (View.WinnerId is not null || steps >= 1200) throw new InvalidOperationException("Did not reach the required board capture state.");
+        if (View.WinnerId is not null || steps >= 1200)
+        {
+            // Fresh practice seeds can win before a suitable battle occurs. Search
+            // another real match only during fixture setup; never retry a UI assertion.
+            if (_captureMode.Contains("clarity", StringComparison.Ordinal) && _boardFixtureAttempts < 4)
+            {
+                GD.Print("CLARITY_SETUP: practice ended before the required fixture; trying a fresh match.");
+                _session.StartPractice(false, true, 1); PrepareBoardCapture(); return;
+            }
+            throw new InvalidOperationException("Did not reach the required board capture state.");
+        }
         _uiQueue.Clear(); _selected = null; _chosen = null; Render();
         if (assignmentMode)
         {

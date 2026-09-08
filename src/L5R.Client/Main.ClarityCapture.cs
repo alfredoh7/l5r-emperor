@@ -5,6 +5,15 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private bool ClarityFixtureReady()
+    {
+        if (!_captureMode.Contains("clarity", StringComparison.Ordinal)) return true;
+        var seat = _captureMode.Contains("other", StringComparison.Ordinal) ? 1 - View.ViewerId : View.ViewerId;
+        var player = View.Players.Single(p => p.Id == seat);
+        if (_captureMode.Contains("hand", StringComparison.Ordinal)) return player.HandCount > 0;
+        if (_captureMode.Contains("expanded", StringComparison.Ordinal)) return View.Players.Any(p => p.Army.Any(c => c.AttachedTo is not null));
+        return player.Home.Any(c => c.Definition?.Type == CardType.Personality && (!_captureMode.Contains("bowed", StringComparison.Ordinal) || c.Bowed));
+    }
     private CardTile? _clarityCard;
     private long _clarityVersion;
     private string? _clarityError;
