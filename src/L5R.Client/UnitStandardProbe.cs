@@ -1,5 +1,6 @@
 using Godot;
 using L5R.Core;
+using System.Text.Json;
 
 namespace L5R.Client;
 
@@ -9,6 +10,7 @@ public partial class UnitStandardProbe : Control
     private readonly List<UnitStandard> _standards = [];
     private readonly List<CardTile> _faces = [];
     private string _output = "";
+    private CardView[][]? _engineViews;
     private bool _comparison, _small, _bowed, _motion;
     private int _step, _clicks;
     private double _clock;
@@ -18,6 +20,7 @@ public partial class UnitStandardProbe : Control
         foreach (var arg in OS.GetCmdlineUserArgs())
         {
             if (arg.StartsWith("--output=")) _output = arg[9..];
+            if(arg.StartsWith("--engine-views=")) { _engineViews=JsonSerializer.Deserialize<CardView[][]>(System.IO.File.ReadAllText(arg[15..])); _comparison=true; }
             _comparison |= arg == "--comparison"; _small |= arg == "--small";
             _bowed |= arg == "--bowed"; _motion |= arg == "--motion";
         }
@@ -25,7 +28,7 @@ public partial class UnitStandardProbe : Control
         var screen = GetViewportRect().Size;
         AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/navy-mat-v4.png"), Size = screen, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore });
         var title = Palette.Text("Unit Standard", 40, Palette.Gold, true); title.Position = new Vector2(48, 25); AddChild(title);
-        var caption = Palette.Text(_comparison ? "Illustrative values · Personality 2 → 0 · Follower 5 · Unit 7 → 5" : "Native layout cases · 0 / 1 / 3 / 6 attachments · upright and bowed", 22); caption.Position = new Vector2(48, 82); AddChild(caption);
+        var caption = Palette.Text(_engineViews is not null ? "Engine views · Bowed: 0 battle Force · Unbowed: 13 · Personality coins stay 3 / 3" : _comparison ? "Illustrative values · Personality 2 → 0 · Follower 5 · Unit 7 → 5" : "Native layout cases · 0 / 1 / 3 / 6 attachments · upright and bowed", 22); caption.Position = new Vector2(48, 82); AddChild(caption);
         var def = PublishedContent.Snapshot.Cards.First(d => d.Type == CardType.Personality && d.Clan == "Crane");
         var count = _comparison ? 2 : 8;
         var columns = _comparison ? 2 : 4;
@@ -33,19 +36,22 @@ public partial class UnitStandardProbe : Control
         var cell = usable / columns;
         for (var n = 0; n < count; n++)
         {
-            var attachments = _comparison ? 1 : new[] { 0, 1, 3, 6 }[n % 4];
+            var attachments = _engineViews is not null ? _engineViews[n].Length-1 : _comparison ? 1 : new[] { 0, 1, 3, 6 }[n % 4];
             var side = _comparison ? Math.Min(465, screen.Y - 310) : _small ? 94 : Math.Min(196, (screen.Y - 190) / 2 - 100);
             var x = cell * (n % columns) + cell / 2 - side / 2 - 16;
             var y = 155 + n / columns * (screen.Y - 170) / 2;
             var p = new CardView("fixture-" + n, def, n % 2, Zone.Home, true, _bowed || n >= 4, null, null, _comparison ? n == 0 ? 2 : 0 : n, 3, UnitForce: _comparison ? n == 0 ? 7 : 5 : new[] { 0, 7, 12, 100 }[n % 4]);
+            if (_engineViews is not null) p=_engineViews[n][0];
+            else if (p.Bowed) p=p with { UnitForce=0 };
             var companions = new List<CardTile>();
             for (var a = attachments - 1; a >= 0; a--)
             {
                 var f = p with { Id = $"a-{n}-{a}", AttachedTo = p.Id, Zone = Zone.Attached, UnitForce = null, Force = 5,
                     Definition = PublishedContent.Snapshot.Cards.First(d => d.Type == (_comparison || a % 2 == 1 ? CardType.Follower : CardType.Item)), Bowed = !_comparison && a % 2 == 0 };
-                var tile = Face(f, x, y + a * 12, side); companions.Add(tile);
+                if (_engineViews is not null) f=_engineViews[n][a+1];
+                var tile = Face(f, x, y + (attachments - 1 - a) * (_engineViews is not null ? 55 : 12), side); companions.Add(tile);
             }
-            var front = Face(p, x, y + attachments * (_comparison ? 65 : 12), side);
+            var front = Face(p, x, y + attachments * (_engineViews is not null ? 55 : _comparison ? 45 : 12), side);
             var tokens = new StatTokens { CardAnchor = front, Companions = companions.ToArray(), Card = p, Projection = p => p };
             AddChild(tokens);
             var standard = new UnitStandard { CardAnchor = front, Companions = companions.ToArray(), Card = p, Projection = p => p, Explanation = UnitStandard.ExplainUnit(p) };

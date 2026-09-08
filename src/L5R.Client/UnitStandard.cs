@@ -76,5 +76,5 @@ public partial class UnitStandard : StatTokens
         if (IsHovered() || HasFocus()) DrawLine(_body.Position + _body.Size * new Vector2(.27f,.77f), _body.Position + _body.Size * new Vector2(.73f,.77f), Palette.Gold, 1, true);
     }
 
-    public static string ExplainUnit(CardView card) => $"{card.Definition?.Name}\nUnit Force {card.UnitForce}\n\nThe rules engine's current Force contribution for this entire unit.\nIncludes the Personality and qualifying Followers. Items are already included in Personality Force.\nBowed cards normally contribute no Force; Elite is accounted for by the engine.\n\nOrange: Personality Force {card.Force}\nGray: Chi {card.Chi}\nSpears: Unit Force {card.UnitForce}\n\nClick the standard to select this Personality.";
+    public static string ExplainUnit(CardView card) => $"{card.Definition?.Name}\nUnit Force {card.UnitForce}\n\nCurrent battle contribution for this entire unit.\nIncludes the Personality and qualifying Followers. Items are already included in Personality Force.\nA bowed Personality normally makes the entire unit contribute 0, including its Followers.\nPrinted exceptions such as Elite are accounted for.\n\nOrange: Personality Force {card.Force}\nGray: Chi {card.Chi}\nSpears: Unit Force {card.UnitForce}\n\nClick the standard to select this Personality.";
 }

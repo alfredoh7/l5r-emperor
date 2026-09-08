@@ -3,6 +3,7 @@ using L5R.Core;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Bowed Takakura suppresses two Native Guides in the view and actual resolution", BowedTakakuraResolution),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
     ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
     ("Unit view counts Items once and matches battle resolution", UnitViewResolution),
@@ -23,7 +24,7 @@ var tests = new (string Name, Action Run)[]
     ("Bamboo fixture waits until owner's second turn to straighten", Bamboo),
     ("Battle destroys province only on strictly greater margin", ProvinceThreshold),
     ("Tied armies destroy each other and gain one Honor per opposing card", BattleTie),
-    ("Bowed Personality's unbowed Followers still count in army Force", FollowerForce),
+    ("Bowed Personality suppresses its unbowed Followers at resolution", FollowerForce),
     ("Bowed Elite Followers still count in unit Force; plain bowed Followers do not", EliteFollowerForce),
     ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
     ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
@@ -224,13 +225,12 @@ static void FollowerForce()
 {
     var s=Battle(5,1,6,true).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
     Add(s,"training-follower",0,Zone.Attached,attachedTo:personality.Id,province:0);
-    var e=MatchEngine.FromTestState(s); Resolve(e); Check(e.State.Cards[personality.Id].Zone!=Zone.Dead);
+    var e=MatchEngine.FromTestState(s); Resolve(e); Equal(e.State.Cards[personality.Id].Zone,Zone.Dead);
 }
 static void EliteFollowerForce()
 {
-    // Bowed personality contributes nothing; a plain bowed Follower drops out too, but a bowed
-    // Elite Follower's printed Force still counts toward its unit.
-    var s=Battle(5,0,1,true).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    // With an unbowed zero-Force Personality, only the bowed Elite Follower counts.
+    var s=Battle(0,0,1,false).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
     Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
     var elite=Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
     elite.GrantedKeywords=[new("Elite","test-fixture","Permanent")];
@@ -483,9 +483,9 @@ static void UnitViewClamp()
 }
 static void UnitViewBows()
 {
-    var(s,p,f)=UnitViewFixture(); p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,5);
+    var(s,p,f)=UnitViewFixture(); p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
     f.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
-    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,5);
+    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,0);
     p.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,7);
     f.Zone=Zone.FateDiscard; f.AttachedTo=null; Equal(UnitView(s,p.Id).UnitForce,2);
     p.Zone=Zone.Home; p.ProvinceIndex=null;
@@ -510,4 +510,32 @@ static void UnitViewPrivacy()
     Check(MatchEngine.FromTestState(s).GetView(0).Players[0].Discard.All(c=>c.UnitForce is null));
     var payload=System.Text.Json.Nodes.JsonNode.Parse(Json(UnitView(UnitViewFixture().State,UnitViewFixture().Parent.Id)))!.AsObject();
     payload.Remove("UnitForce"); Equal(JsonSerializer.Deserialize<CardView>(payload.ToJsonString())!.UnitForce,null);
+}
+
+static void BowedTakakuraResolution()
+{
+    foreach(var owner in new[]{0,1})
+    {
+        var s=Battle(1,1,6).State;
+        var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
+        p.DefinitionId=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Ikoma Takakura").Id;
+        p.Modifiers.Clear(); p.Bowed=true;
+        var guide=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
+        Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
+        Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var bowedCards=e.GetView(owner).Players[owner].Army;
+        var card=bowedCards.Single(c=>c.Id==p.Id);
+        Equal(card.Force,3); Equal(card.Chi,3); Equal(card.UnitForce,0);
+        Resolve(e);
+        Equal(e.State.Cards[p.Id].Zone,Zone.Dead,"Bowed Personality and its Followers must lose to the opposing 1F unit");
+        Check(!e.State.Players[1].Provinces[0].Destroyed);
+        var result=e.GetView(owner).Events.Single(ev=>ev.Type=="battleResolved").Message;
+        Check(result.Contains(owner==0?"attacking Force 0, defending Force 1":"attacking Force 1, defending Force 0"),result);
+        p.Bowed=false;
+        var ready=MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army.Single(c=>c.Id==p.Id);
+        Equal(ready.Force,3); Equal(ready.Chi,3); Equal(ready.UnitForce,13);
+        if(owner==0 && Environment.GetEnvironmentVariable("L5R_UNIT_VIEW_FIXTURE") is { Length: >0 } output)
+            File.WriteAllText(output,Json(new[]{bowedCards,MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army}));
+    }
 }
