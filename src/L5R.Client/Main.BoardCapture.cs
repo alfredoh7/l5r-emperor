@@ -108,6 +108,7 @@ public partial class Main
         }
         RenderBoard(); ResetTableCamera();
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
+        if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
         if (_captureMode.Contains("piles", StringComparison.Ordinal)) ValidatePileControls();
         if (_captureMode.EndsWith("settings", StringComparison.Ordinal)) ShowSettings();
         if (_captureMode.Contains("gate", StringComparison.Ordinal))
@@ -144,6 +145,7 @@ public partial class Main
     {
         GD.Print($"RENDER_METRICS: fps={Performance.GetMonitor(Performance.Monitor.TimeFps)}, table_texture={_tableSurface.Canvas.Size}, density={_tableSurface.RenderScale}");
         ValidateTurnAndClarity();
+        ValidateStatTokens();
         ValidateQuietHud();
         ValidatePhysicalLayout();
         if (_captureMode.EndsWith("piletip", StringComparison.Ordinal))

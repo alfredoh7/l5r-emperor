@@ -157,6 +157,11 @@ public partial class Main
     {
         if (_tableSurface is null) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
+        // The token buttons live above the projected viewport; let native GUI input
+        // reach them instead of forwarding their clicks into the underlying table.
+        if (!_cameraDragging && @event is InputEventMouse tokenMouse && OverStatToken(tokenMouse.Position)
+            && (@event is InputEventMouseMotion || @event is InputEventMouseButton { ButtonIndex: MouseButton.Left }))
+        { _tableSurface.ExitMouse(); HideTableTooltip(); return; }
         if (@event is InputEventKey { Pressed: false } released && released.Keycode is Key.Enter or Key.KpEnter or Key.Tab && !CameraBlocked && GetViewport().GuiGetFocusOwner() is null && TableFocus is not null)
             _tableSurface.Canvas.PushInput(released, true);
         if (@event is InputEventMouseButton mouse)
@@ -256,18 +261,26 @@ public partial class Main
     private void ProcessTableTooltip(double delta)
     {
         if (_tableSurface is null) return;
+        var token = GetViewport().GuiGetHoveredControl() as StatTokens;
+        if (token is not null && !token.IsVisibleInTree()) token = null;
+        // Token explanations use the same bounded overlay as card previews, so
+        // native tooltips and the projected viewport cannot compete for the hover.
+        if (token is not null) { _syncTablePointer = false; _tableSurface.ExitMouse(); }
         PrepareTableTooltips(_world);
-        if (_syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
+        if (token is null && _syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
         {
             _syncTablePointer = false;
             _tableSurface.ForwardMouse(new InputEventMouseMotion { Position = _lastTableMouse });
         }
-        if (CameraBlocked || _cameraDragging || !PointerOnTable(_lastTableMouse)) { HideTableTooltip(); return; }
-        var hovered = TableHovered;
-        while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
+        if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
+        { HideTableTooltip(); return; }
+        Control? hovered = token ?? TableHovered;
+        if (token is null)
+            while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
-        _tableTooltip = hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
+        _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :
+            hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
         _root.AddChild(_tableTooltip);
         _tableTooltip.Scale = Vector2.One / _root.Scale.X;
         _tableTooltip.Size = _tableTooltip.CustomMinimumSize;
