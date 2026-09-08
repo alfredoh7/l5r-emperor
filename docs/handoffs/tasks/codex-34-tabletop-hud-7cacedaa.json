@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Starting tabletop HUD refinement after user feedback, including pending token and clarity dependencies.",
-  "validation": "Context and overlap reviewed; implementation and native checks in progress.",
-  "remaining": "Implement, inspect native captures, run input checks and publish review evidence.",
+  "summary": "Refined tabletop HUD: numeral-only Musashi stat tokens, engraved toolbar icons, consolidated turn/priority plaques, supplied aged Clan and koku art, honor fan, and individual pile edges with raised-face input.",
+  "validation": "188 automated checks and client import/smoke passed; final runtime compiles with zero warnings/errors. Native pile boundaries, 4 token fixtures, responsive icon clicks and real draw/discard motion passed. Ultrawide pile clearance failure fixed and rerun passed; 720p raised-edge click and arrow-pan-after-fit passed. Remaining camera and hand scenarios are running.",
+  "remaining": "Finish remaining native checks, verify combined menu launcher, attach screenshots and wait for CI/shared review before merge. PR is stacked on PR33 and also includes pending PR32.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/34",
   "branch": "codex/34-tabletop-hud",
-  "updated": "2026-09-08T07:09:58.526513+00:00"
+  "updated": "2026-09-08T07:21:51.970898+00:00"
 }
