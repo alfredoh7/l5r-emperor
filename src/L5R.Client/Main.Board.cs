@@ -27,15 +27,15 @@ public partial class Main
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self);
         // A shallow physical fan, with complete scans and space for a modest hover lift.
-        var step = Math.Min(174, (BoardWidth - 100) / Math.Max(1, Self.Hand.Length));
-        var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + 240)) / 2;
+        var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
+        var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
         for (var i = 0; i < Self.Hand.Length; i++)
         {
             var offset = i - (Self.Hand.Length - 1) / 2f;
-            var tile = Tile(Self.Hand[i], true, 240, 240);
+            var tile = Tile(Self.Hand[i], true, HandCardSide, HandCardSide);
             tile.Material = CardPaper.FixedTable;
             tile.RestAngle = Math.Clamp(offset * .028f, -.13f, .13f);
-            Place(_hand, tile, start + i * step, Math.Abs(offset) * 1.4f - 1, 240, 240);
+            Place(_hand, tile, start + i * step, Math.Abs(offset) * 1.4f - 1, HandCardSide, HandCardSide);
         }
         foreach (var tile in _tiles) _currentBows[tile.Card.Id] = tile.Card.Bowed;
         RenderClanHud(); RenderPiles(); ApplyTableCamera();

@@ -6,8 +6,10 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private int _boardFixtureAttempts;
     private void PrepareBoardCapture()
     {
+        _boardFixtureAttempts++;
         var defenseMode = _captureMode.Contains("defense", StringComparison.Ordinal);
         var assignmentMode = defenseMode || _captureMode.Contains("assignment", StringComparison.Ordinal);
         var assignmentType = defenseMode ? "assignDefense" : "attack";
@@ -19,13 +21,23 @@ public partial class Main
             _session.FollowPracticePriority();
             var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
-            if (assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) break;
+            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady()) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
             if (version == View.Version) throw new InvalidOperationException("Board capture action rejected.");
         }
-        if (View.WinnerId is not null || steps >= 1200) throw new InvalidOperationException("Did not reach the required board capture state.");
+        if (View.WinnerId is not null || steps >= 1200)
+        {
+            // Fresh practice seeds can win before a suitable battle occurs. Search
+            // another real match only during fixture setup; never retry a UI assertion.
+            if (_captureMode.Contains("clarity", StringComparison.Ordinal) && _boardFixtureAttempts < 4)
+            {
+                GD.Print("CLARITY_SETUP: practice ended before the required fixture; trying a fresh match.");
+                _session.StartPractice(false, true, 1); PrepareBoardCapture(); return;
+            }
+            throw new InvalidOperationException("Did not reach the required board capture state.");
+        }
         _uiQueue.Clear(); _selected = null; _chosen = null; Render();
         if (assignmentMode)
         {
@@ -95,7 +107,9 @@ public partial class Main
             GD.Print("UI_SMOKE_PASS: stack toggle spreads attachments; an individual attachment opens in the inspector with its parent preserved.");
         }
         RenderBoard(); ResetTableCamera();
+        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
         if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
+        if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) ProbeHudIcons();
         if (_captureMode.Contains("piles", StringComparison.Ordinal)) ValidatePileControls();
         if (_captureMode.EndsWith("settings", StringComparison.Ordinal)) ShowSettings();
         if (_captureMode.Contains("gate", StringComparison.Ordinal))
@@ -103,17 +117,35 @@ public partial class Main
         if (_captureMode.Contains("motionoff", StringComparison.Ordinal))
         {
             ShowSettings();
-            var dialog = GetChildren().OfType<AcceptDialog>().Last();
-            var motion = dialog.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(b => b.Text.StartsWith("Reduced motion", StringComparison.Ordinal));
+            var dialog = GetChildren().OfType<AcceptDialog>().LastOrDefault();
+            var motion = (dialog as Node ?? GetTree().Root).FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(b => b.Text.StartsWith("Reduced motion", StringComparison.Ordinal));
             motion.ButtonPressed = true;
             if (!_reducedMotion || !_table.ReducedMotion) throw new InvalidOperationException("Reduced motion did not stop environmental animation.");
-            dialog.QueueFree();
+            if (dialog is not null) dialog.QueueFree();
+            else
+            {
+                // The menu branch hosts Options in its own canvas rather than a dialog.
+                ResumeCapturedOptions();
+            }
         }
+    }
+
+    private async void ResumeCapturedOptions()
+    {
+        // Let each menu page finish its deferred focus operation before leaving it.
+        for (var page = 0; page < 2; page++)
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
+        }
+        if (!_root.Visible) { GD.PushError("Options did not return to the existing table."); GetTree().Quit(1); }
     }
 
     private void ValidateBoardCapture()
     {
         GD.Print($"RENDER_METRICS: fps={Performance.GetMonitor(Performance.Monitor.TimeFps)}, table_texture={_tableSurface.Canvas.Size}, density={_tableSurface.RenderScale}");
+        ValidateTurnAndClarity();
         ValidateStatTokens();
         ValidateQuietHud();
         ValidatePhysicalLayout();
@@ -158,7 +190,10 @@ public partial class Main
                 {
                     var midpoint = (local[edge] + local[(edge + 1) % 4]) / 2;
                     var outward = (midpoint - center).Normalized();
-                    if (!tile._HasPoint(midpoint - outward * 4) || tile._HasPoint(midpoint + outward * 8))
+                    var outside = midpoint + outward * 8;
+                    // A lifted hand intentionally retains its resting pick area to avoid edge-hover oscillation.
+                    var retainedHandArea = tile.Card.Zone == Zone.Hand && tile.IsInspectionHover && tile.ContainsRestingFace(outside);
+                    if (!tile._HasPoint(midpoint - outward * 4) || tile._HasPoint(outside) && !retainedHandArea)
                         throw new InvalidOperationException("Projected card edge does not match its input polygon.");
                 }
             }

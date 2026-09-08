@@ -11,7 +11,15 @@ public partial class Main
         foreach(var player in View.Players)
         {
             var production=player.Home.Concat(player.Army).Append(player.Stronghold).Where(c=>!c.Bowed).Sum(c=>Production(c,player));
-            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead)),16,player.Id==View.ViewerId?938:14,270,120);
+            var own = player.Id == View.ViewerId;
+            var turn = View.WinnerId is int winner ? (winner == player.Id ? "VICTORY" : "MATCH ENDED") :
+                View.ActivePlayerId == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
+            var action = View.WinnerId is not null ? "" : View.PriorityPlayerId == player.Id ?
+                (View.ActivePlayerId == player.Id ? (own ? "Your action" : "Choosing action") : (own ? "Your response" : "Choosing response")) :
+                View.ActivePlayerId == player.Id ? "Awaiting response" : "";
+            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead),
+                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id)
+                { ReducedMotion = _reducedMotion },16,own?938:14,270,120);
         }
     }
     private readonly Dictionary<(int,Zone), CardView> _discardPreview = [];

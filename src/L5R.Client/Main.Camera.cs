@@ -16,7 +16,6 @@ public partial class Main
     private Vector2 ScreenCenter(Control c) => _world.IsAncestorOf(c) ? _tableSurface.ProjectCanvas(c.GetGlobalRect().GetCenter()) : c.GetGlobalRect().GetCenter();
     private Vector2 ScreenToWorld(Vector2 p) => _world.GetGlobalTransform().AffineInverse() * _tableSurface.ScreenToCanvas(p);
     private Vector2 WorldToScreen(Vector2 p) => _tableSurface.ProjectCanvas(_world.GetGlobalTransform() * p);
-    private HBoxContainer _cameraControls = null!;
     private Button _fitTableButton = null!, _battleCameraButton = null!;
     private bool _tableLayoutSeen;
     private Vector2 _cameraCenter = new(680, 410);
@@ -49,25 +48,11 @@ public partial class Main
 
     private void BuildCameraControls()
     {
-        _cameraControls = Place(_root, new HBoxContainer(), 300, 108, 290, 32);
-        _cameraControls.AddThemeConstantOverride("separation", 6);
-        _fitTableButton = CameraButton("Fit table", ResetTableCamera,
-            "Home: fit the whole table. Arrow keys or drag empty cloth to pan. Middle-drag or Space + drag also pans. Mouse wheel over the table zooms toward the pointer.");
-        _cameraControls.AddChild(_fitTableButton);
-        _cameraControls.AddChild(CameraButton("−", () => ZoomTable(.85f, _tableViewport.Size / 2), "Zoom out"));
-        _cameraControls.AddChild(CameraButton("+", () => ZoomTable(1 / .85f, _tableViewport.Size / 2), "Zoom in"));
-        _cameraControls.AddChild(CameraButton("My side", FocusMySide, "Frame your cards in play and province row. Your hand stays fixed below."));
-        _battleCameraButton = CameraButton("Battle", FocusBattle, "Frame the current battlefields. This only moves your camera.");
-        _cameraControls.AddChild(_battleCameraButton);
-    }
-
-    private static Button CameraButton(string text, Action pressed, string tooltip)
-    {
-        var button = Palette.Button(text, pressed);
-        button.TooltipText = tooltip; button.FocusMode = Control.FocusModeEnum.None;
-        button.AddThemeFontSizeOverride("font_size", 14);
-        button.AddThemeStyleboxOverride("normal", Palette.Box(new Color(.035f, .032f, .027f, .8f), new Color("75603e"), 6));
-        return button;
+        _fitTableButton = new TableIconButton(TableGlyph.Fit, () => { ReleaseTableFocus(); ResetTableCamera(); },
+            "Fit table · Home\nArrow keys or drag empty cloth to pan. Middle-drag or Space + drag also pans. Mouse wheel zooms toward the pointer.");
+        _menu.AddChild(_fitTableButton); _menu.MoveChild(_fitTableButton, 0);
+        _battleCameraButton = new TableIconButton(TableGlyph.Battle, () => { ReleaseTableFocus(); FocusBattle(); }, "Frame current battlefields");
+        _menu.AddChild(_battleCameraButton); _menu.MoveChild(_battleCameraButton, 1);
     }
 
     private void FitTableViewport()

@@ -11,6 +11,7 @@ public partial class PhaseTrack : Control
     private int _active = -1;
     private float _time;
     private TextureRect _plate = null!;
+    public TurnIndicator TurnCue { get; } = new();
     private ShaderMaterial _art = null!;
     private readonly List<TooltipRegion> _areas = [];
     // Actual medallion positions in the selected bitmap; labels/tooltips follow the artwork.
@@ -33,6 +34,7 @@ public partial class PhaseTrack : Control
             MouseFilter = MouseFilterEnum.Ignore, ShowBehindParent = true
         };
         AddChild(_plate);
+        AddChild(TurnCue); TurnCue.Hide(); // Turn information is presented in the player plaques.
         Resized += FitArtwork;
         FitArtwork();
     }
@@ -49,10 +51,14 @@ public partial class PhaseTrack : Control
             _areas[i].Position = _plate.Position+new Vector2(left*width,0);
             _areas[i].Size = new Vector2((right-left)*width,Math.Min(_plate.Size.Y,94));
         }
+        TurnCue.Position = new Vector2(320, 94);
+        TurnCue.Size = new Vector2(Math.Max(360, Size.X - 320), 40);
         QueueRedraw();
     }
     public void Present(MatchView view)
     {
+        TurnCue.Present(view);
+        TurnCue.ReducedMotion = ReducedMotion;
         var next = SegmentFor(view.Phase);
         if (_active < 0) _weights[next] = 1;
         _active = next;
@@ -73,6 +79,7 @@ public partial class PhaseTrack : Control
     }
     public override void _Process(double delta)
     {
+        TurnCue.ReducedMotion = ReducedMotion;
         if (ReducedMotion && _weights.Select((weight, i) => weight == (i == _active ? 1 : 0)).All(settled => settled)) return;
         _time += (float)delta;
         for (var i = 0; i < 4; i++)
@@ -83,6 +90,7 @@ public partial class PhaseTrack : Control
     {
         _time = time;
         ReducedMotion = !animate;
+        TurnCue.ReducedMotion = ReducedMotion;
         if (ReducedMotion) for (var i = 0; i < 4; i++) _weights[i] = i == _active ? 1 : 0;
         UpdateArt();
     }

@@ -108,21 +108,13 @@ public partial class StatTokens : Button
             }
             DrawColoredPolygon(vertices, Colors.White, uv, _sheet);
             if (IsHovered() || HasFocus()) DrawArc(center, _diameter * .48f, 0, Mathf.Tau, 80, Numeral with { A = .45f }, 1, true);
-            var label = _diameter >= 34 ? (i == 0 ? "FORCE" : "CHI") : (i == 0 ? "F" : "C");
-            var labelSize = Math.Max(6, (int)(_diameter * .16f));
             var value = (i == 0 ? Card.Force : Card.Chi).ToString(System.Globalization.CultureInfo.InvariantCulture);
-            var fontSize = (int)(_diameter * .56f);
-            while (fontSize > 2 && Palette.Body.GetStringSize(value, fontSize: fontSize).X > _diameter * .7f) fontSize--;
+            var fontSize = (int)(_diameter * .68f);
+            while (fontSize > 2 && Palette.Title.GetStringSize(value, fontSize: fontSize).X > _diameter * .72f) fontSize--;
             var left = center.X - _diameter / 2;
-            var baseline = center.Y + _diameter * .30f;
-            DrawStringOutline(Palette.Body, new Vector2(left, baseline), value, HorizontalAlignment.Center, _diameter, fontSize, Math.Max(2, (int)(_diameter * .035f)), new Color("24201c"));
-            DrawStringOutline(Palette.Body, new Vector2(left, baseline), value, HorizontalAlignment.Center, _diameter, fontSize, 1, Numeral);
-            DrawString(Palette.Body, new Vector2(left, baseline), value, HorizontalAlignment.Center, _diameter, fontSize, Numeral);
-            if (_diameter >= 18)
-            {
-                DrawStringOutline(Palette.Body, new Vector2(left, center.Y - _diameter * .20f), label, HorizontalAlignment.Center, _diameter, labelSize, 2, new Color("24201c"));
-                DrawString(Palette.Body, new Vector2(left, center.Y - _diameter * .20f), label, HorizontalAlignment.Center, _diameter, labelSize, Numeral);
-            }
+            var baseline = center.Y + (Palette.Title.GetAscent(fontSize) - Palette.Title.GetDescent(fontSize)) / 2;
+            DrawStringOutline(Palette.Title, new Vector2(left, baseline), value, HorizontalAlignment.Center, _diameter, fontSize, Math.Max(2, (int)(_diameter * .04f)), new Color("24201c"));
+            DrawString(Palette.Title, new Vector2(left, baseline), value, HorizontalAlignment.Center, _diameter, fontSize, Numeral);
         }
     }
 
