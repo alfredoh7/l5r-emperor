@@ -1,5 +1,9 @@
 shader_type spatial;
 render_mode unshaded, cull_disabled, fog_disabled;
+#include "res://Art/candlelight.gdshaderinc"
+uniform sampler2D weathered_texture : filter_linear_mipmap, repeat_disable;
+uniform vec2 left_lamp = vec2(.14,.88);
+uniform vec2 right_lamp = vec2(.91,.16);
 uniform sampler2D lantern_texture : filter_linear_mipmap, repeat_disable;
 uniform sampler2D plate_texture : filter_linear_mipmap, repeat_disable;
 uniform vec2 environment_origin = vec2(0.0);
@@ -26,14 +30,14 @@ vec3 preserve_painted_color(vec3 c) {
 }
 
 float flame_energy(float phase) {
-    return mix(1.0, 1.0+.045*sin(phase*1.7)+.018*sin(phase*4.1+1.3),candle_motion);
+    return candle_energy(phase,candle_motion);
 }
 vec3 floor_light(vec2 uv, vec2 source, float phase) {
     vec2 d = (uv-source)/vec2(.24,.31);
     vec2 near_d = (uv-source)/vec2(.066,.105);
     float pool = exp(-dot(d,d)*1.5);
     float near_pool = exp(-dot(near_d,near_d)*1.7);
-    return (vec3(.15,.075,.022)*pool + vec3(.13,.062,.015)*near_pool)*flame_energy(phase);
+    return (vec3(.19,.089,.026)*pool + vec3(.17,.079,.020)*near_pool)*flame_energy(phase);
 }
 vec3 upright_lantern(vec3 background, vec2 source, vec2 pixel, float phase) {
     vec2 base_world = environment_origin+environment_size*source;
@@ -44,16 +48,28 @@ vec3 upright_lantern(vec3 background, vec2 source, vec2 pixel, float phase) {
     vec2 size = vec2(216.0,300.0)*camera_zoom*perspective*display_density;
     vec2 uv = (pixel-base)/size+vec2(.5,.94);
     vec2 haze = (uv-vec2(.5,.60))/vec2(.45,.35);
-    background += vec3(.085,.039,.009)*exp(-dot(haze,haze)*2.0)*flame_energy(phase);
-    if (uv.x >= 0.0 && uv.x <= 1.0 && uv.y >= 0.0 && uv.y <= 1.0) {
-        vec4 prop = texture(lantern_texture,uv);
-        float emissive = smoothstep(.38,.85,prop.r)*smoothstep(.0,.2,prop.r-prop.b);
-        prop.rgb += vec3(.14,.080,.020)*emissive*(flame_energy(phase)-.7);
-        background = mix(background,prop.rgb,prop.a);
-        // A little optical bloom escapes the bright paper, without blurring the metal silhouette.
-        vec2 core = (uv-vec2(.5,.63))/vec2(.16,.18);
-        background += vec3(.027,.016,.005)*exp(-dot(core,core)*2.0)*flame_energy(phase);
-    }
+    background += vec3(.14,.065,.018)*exp(-dot(haze,haze)*2.0)*flame_energy(phase);
+    // Sample continuously: implicit mip derivatives inside a UV branch can
+    // leave a rectangular seam. Alpha handles the cutout; bloom has no hard crop.
+    // Preserve the existing accurate alpha silhouette. The generated patina
+    // plate contains a neutral checker background, so neutral samples retain
+    // the original material; no checker pixels enter the rendered cutout.
+    vec2 sample_uv = uv;
+    float flame = exp(-dot((uv-vec2(.5,.598))/vec2(.035,.065),(uv-vec2(.5,.598))/vec2(.035,.065))*2.0);
+    sample_uv.x += sin(phase*3.2)*.0035*flame*candle_motion;
+    sample_uv.y += sin(phase*2.7+.8)*.0025*flame*candle_motion;
+    vec4 prop = texture(lantern_texture,sample_uv);
+    vec3 worn = texture(weathered_texture,sample_uv).rgb;
+    float chroma = max(worn.r,max(worn.g,worn.b))-min(worn.r,min(worn.g,worn.b));
+    prop.rgb = mix(prop.rgb,worn,smoothstep(.06,.19,chroma)*.92);
+    float emissive = smoothstep(.38,.85,prop.r)*smoothstep(.0,.2,prop.r-prop.b);
+    prop.rgb *= 1.0 + emissive*(flame_energy(phase)-1.0)*.72;
+    prop.rgb += vec3(.080,.042,.010)*emissive;
+    float sprite_coverage = smoothstep(0.0,.006,min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y)));
+    background = mix(background,prop.rgb,smoothstep(.018,.98,prop.a)*sprite_coverage);
+    // A little optical bloom escapes the bright paper, without blurring the metal silhouette.
+    vec2 core = (uv-vec2(.5,.63))/vec2(.16,.18);
+    background += vec3(.043,.025,.008)*exp(-dot(core,core)*2.0)*flame_energy(phase);
     return background;
 }
 void fragment() {
@@ -65,8 +81,8 @@ void fragment() {
     float edge = min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));
     float coverage = smoothstep(0.0,.022,edge);
     vec3 painted = mix(vec3(.012,.013,.015),texture(plate_texture,clamp(uv,vec2(0.0),vec2(1.0))).rgb,coverage);
-    vec2 left_base = vec2(.094,.68);
-    vec2 right_base = vec2(.895,.39);
+    vec2 left_base = left_lamp;
+    vec2 right_base = right_lamp;
     vec2 left_shadow = (world-(environment_origin+environment_size*left_base))/vec2(83.0,45.0);
     vec2 right_shadow = (world-(environment_origin+environment_size*right_base))/vec2(83.0,45.0);
     float shadow = max(exp(-dot(left_shadow,left_shadow)*1.9),exp(-dot(right_shadow,right_shadow)*1.9));

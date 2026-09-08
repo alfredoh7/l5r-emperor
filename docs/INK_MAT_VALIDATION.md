@@ -16,7 +16,24 @@ These are unaltered game captures from real practice states, not generated game 
 
 The focused view intentionally crops the opponent's side; Fit Table returns to the complete layout. The material follows C's worn ink and cloud motifs, with a brighter pigment and inset ornaments adapted to gameplay. It is not a literal pixel copy of the concept sheet.
 
-## Validation
+## Follow-up: settle first, then ink; weathered corner lamps
+
+Alfredo accepted the settled frame but corrected the motion: the border should appear after cards move. The new renderer holds its incoming pigment at zero until actual card flights, table reflow, bowing and pile settling finish. Following a brief quiet pause, ink seeps outward from opposing corners with uneven local absorption, then stops. Outgoing ink and labels dissolve in place instead of stretching.
+
+Labels now use restrained Alegreya serif at 14 screen pixels (12 minimum); the corner motifs are half the previous width. Lamps move toward the lower-left and upper-right corners, with a larger lower-left inset after the small-window check. A generated weathering plate uses the original cutout silhouette. Mipmaps remove sparkling detail at small sizes, and continuous sampling with soft coverage removes rectangular glow seams and prevents the texture from extending beyond its silhouette. One shared candle-energy function synchronizes each lamp's softly moving flame, emitted glow, mat spill and nearby card lighting. The hand and reading popovers stay evenly lit.
+
+Follow-up validation:
+
+- Client build: zero warnings/errors; Godot import successful.
+- Native ink suite: three actual board fixtures (1920×1080 overview/focus and 1280×800), attachment expand/inspect/fold, card/mat clearance, selection invariance and province identifiers passed.
+- Isolated renderer regressions: deliberately hold the motion gate closed for two seconds; assert no incoming ink. Verify the post-settle pause and intermediate reveal, repeat Sync during waiting/reveal, retarget during spreading, dissolve removal, immediate reduced motion while waiting, and fresh-match reset.
+- Real purchase film: 120 authored-time frames at 24 fps. The engine accepts one offered Holding purchase and the group grows from four to five including the Stronghold. Every recorded moving-card frame has zero incoming pigment; intermediate pigment appears only after movement settles. The camera remains fixed and the final card membership, opacity and pile counts are correct. Replay and frame telemetry accompany the movie. One later recording aborted on a camera change at frame 75, after the move/reveal had settled. The demonstration now consumes live wheel/key/click input while retaining the automatic-camera assertion; normal play and camera-input tests are unchanged.
+- Eight native camera/input cases passed, including bowed edge hits, assignment, attachment expansion, pile tooltip, 16:10, ultrawide and reduced motion. The reduced-motion check renders at two independent light phases and requires byte-identical frames.
+- Inspected before/during/after captures. Corrected texture undersampling, a too-small left lamp margin at 1280×800, and faint alpha fringe artifacts. Numerically compared settled film frames: nearby cards and fabric change with the candle; the hand remains pixel-identical. This is native renderer evidence, not a real-time performance benchmark.
+
+The initial rules/network suite below is historical evidence for this PR's original implementation. The follow-up changes presentation only and does not claim a fresh expert rules acceptance or native Windows playtest.
+
+## Initial implementation validation (b3db820)
 
 - `bash tools/check.sh --skip-client`: passed. 31 collaboration, 85 content, 56 foundation, 32 published, 8 deck-format, 13 AI, 5 server and 4 client-transport checks.
 - Client compilation: zero warnings/errors. Native Godot import passed.

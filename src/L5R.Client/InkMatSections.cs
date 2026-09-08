@@ -11,20 +11,23 @@ public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool A
 /// </summary>
 public partial class InkMatSections : Control
 {
-    private const float ResizeSeconds = .76f, RevealSeconds = .84f, RemoveSeconds = .56f;
+    private const float SettlePause = .16f, RevealSeconds = 1.35f, RemoveSeconds = .48f;
+    public Func<bool> MotionSettled { get; set; } = () => true;
     private readonly Dictionary<string, Section> _sections = new(StringComparer.Ordinal);
     private string? _matchKey;
     private bool _reducedMotion;
     private Texture2D? _edge, _cloud;
     private Shader? _shader;
     private InkLabelOverlay? _labelOverlay;
-    private readonly Color _letter = new("e8d3a8");
+    private readonly Color _letter = new("c6bda7");
 
     /// <summary>Includes a removed section only while its old ink is dissolving.</summary>
     public int SectionCount => _sections.Count;
     public bool ReducedMotion => _reducedMotion;
-    public bool IsAnimating => _sections.Values.Any(s => s.Removing || s.Progress < 1 || s.Reveal < 1 || s.GhostProgress < 1 || Math.Abs(s.Active - (s.Target.Active ? 1 : 0)) > .001f);
+    public bool IsAnimating => _sections.Values.Any(s => s.Removing || s.Waiting || s.Reveal < 1 || s.GhostProgress < 1 || Math.Abs(s.Active - (s.Target.Active ? 1 : 0)) > .001f);
     public IReadOnlyList<InkMatSection> Targets => _sections.Values.Where(s => !s.Removing).Select(s => s.Target).ToArray();
+    public float RevealProgress(string id) => _sections.TryGetValue(id, out var s) ? s.Reveal : 0;
+    public bool WaitingForCards(string id) => _sections.TryGetValue(id, out var s) && s.Waiting;
     public Rect2? CurrentBounds(string id) => _sections.TryGetValue(id, out var section) ? section.Current : null;
 
     /// <summary>
@@ -44,9 +47,10 @@ public partial class InkMatSections : Control
     private sealed class Section(InkMatSection target, InkStroke stroke, InkStroke ghost)
     {
         public InkMatSection Target = target;
-        public Rect2 From = target.Bounds, Current = target.Bounds, GhostBounds = target.Bounds;
-        public float Progress = 1, Reveal = 1, GhostProgress = 1, RemoveProgress, Active = target.Active ? 1 : 0;
-        public bool Removing;
+        public Rect2 Current = target.Bounds, GhostBounds = target.Bounds;
+        public float Reveal = 1, GhostReveal = 1, GhostProgress = 1, RemoveProgress, QuietTime, Active = target.Active ? 1 : 0;
+        public bool Removing, Waiting;
+        public string GhostLabel = target.Label;
         public InkStroke Stroke = stroke, Ghost = ghost;
     }
 
@@ -80,34 +84,36 @@ public partial class InkMatSections : Control
             if (!_sections.TryGetValue(descriptor.Id, out var state))
             {
                 var ghost = NewStroke(); var stroke = NewStroke();
-                state = new Section(descriptor, stroke, ghost) { Reveal = initial || reducedMotion ? 1 : 0 };
+                state = new Section(descriptor, stroke, ghost) { Reveal = initial || reducedMotion ? 1 : 0, Waiting = !initial && !reducedMotion };
                 _sections.Add(descriptor.Id, state);
             }
             else
             {
                 var changed = !SameRect(state.Target.Bounds, rect);
-                // Reappearing during dissolution resumes from the currently visible
-                // contour; unrelated sections never have their progress reset.
-                if (state.Removing)
+                if (changed || state.Removing)
                 {
-                    state.Reveal = reducedMotion ? 1 : Math.Clamp(1 - state.RemoveProgress, 0, 1);
+                    // Preserve the old contour at its settled location while it
+                    // evaporates. New ink has no moving/interpolated rectangle.
+                    if (state.Reveal > .001f)
+                    {
+                        state.GhostBounds = state.Current;
+                        state.GhostLabel = state.Target.Label;
+                        state.GhostReveal = state.Reveal;
+                        state.GhostProgress = reducedMotion ? 1 : 0;
+                    }
+                    state.Current = rect;
+                    state.Reveal = reducedMotion ? 1 : 0;
+                    state.Waiting = !reducedMotion;
+                    state.QuietTime = 0;
                     state.Removing = false; state.RemoveProgress = 0;
                 }
-                if (changed)
-                {
-                    state.GhostBounds = state.Current;
-                    state.GhostProgress = reducedMotion ? 1 : 0;
-                    state.From = state.Current;
-                    state.Progress = reducedMotion ? 1 : 0;
-                    if (reducedMotion) state.Current = rect;
-                }
-                else if (state.Progress >= 1) state.Current = rect;
                 state.Target = descriptor;
             }
             if (reducedMotion)
             {
-                state.Current = state.From = descriptor.Bounds;
-                state.Progress = state.Reveal = state.GhostProgress = 1;
+                state.Current = descriptor.Bounds;
+                state.Reveal = state.GhostProgress = 1;
+                state.Waiting = false;
                 state.Active = descriptor.Active ? 1 : 0;
             }
             Present(state);
@@ -116,7 +122,7 @@ public partial class InkMatSections : Control
         {
             if (present.Contains(id)) continue;
             if (reducedMotion) { RemoveSection(id, state); continue; }
-            if (!state.Removing) { state.Removing = true; state.RemoveProgress = 0; }
+            if (!state.Removing) { state.Removing = true; state.Waiting = false; state.RemoveProgress = 0; }
             Present(state);
         }
         QueueRedraw();
@@ -166,14 +172,17 @@ public partial class InkMatSections : Control
     public override void _Process(double delta)
     {
         var elapsed = (float)Math.Min(delta, .1);
+        var cardsSettled = !_sections.Values.Any(s => s.Waiting) || MotionSettled();
         foreach (var (id, state) in _sections.ToArray())
         {
-            state.Progress = Math.Min(1, state.Progress + elapsed / ResizeSeconds);
-            state.Reveal = Math.Min(1, state.Reveal + elapsed / RevealSeconds);
-            state.GhostProgress = Math.Min(1, state.GhostProgress + elapsed / ResizeSeconds);
+            state.GhostProgress = Math.Min(1, state.GhostProgress + elapsed / RemoveSeconds);
             state.Active = Mathf.MoveToward(state.Active, state.Target.Active ? 1 : 0, elapsed / .35f);
-            var weight = Ease(state.Progress);
-            state.Current = new Rect2(state.From.Position.Lerp(state.Target.Bounds.Position, weight), state.From.Size.Lerp(state.Target.Bounds.Size, weight));
+            if (state.Waiting)
+            {
+                state.QuietTime = cardsSettled ? state.QuietTime + elapsed : 0;
+                if (state.QuietTime >= SettlePause && state.GhostProgress >= 1) state.Waiting = false;
+            }
+            else if (!state.Removing) state.Reveal = Math.Min(1, state.Reveal + elapsed / RevealSeconds);
             if (state.Removing)
             {
                 state.RemoveProgress = Math.Min(1, state.RemoveProgress + elapsed / RemoveSeconds);
@@ -189,15 +198,15 @@ public partial class InkMatSections : Control
     {
         state.Stroke.Position = state.Current.Position;
         state.Stroke.Size = state.Current.Size;
-        state.Stroke.Present(state.Current.Size, state.Active, state.Reveal, state.Progress,
+        state.Stroke.Present(state.Current.Size, state.Active, state.Reveal,
             state.Removing ? state.RemoveProgress : 0, 1);
         state.Ghost.Visible = state.GhostProgress < 1 && !_reducedMotion;
         if (state.Ghost.Visible)
         {
             state.Ghost.Position = state.GhostBounds.Position;
             state.Ghost.Size = state.GhostBounds.Size;
-            state.Ghost.Present(state.GhostBounds.Size, state.Active, 1, 1, state.GhostProgress,
-                .24f * (1 - Ease(state.GhostProgress)) * (state.Removing ? 1 - state.RemoveProgress : 1));
+            state.Ghost.Present(state.GhostBounds.Size, state.Active, state.GhostReveal, state.GhostProgress,
+                1 - Ease(state.GhostProgress));
         }
     }
 
@@ -218,23 +227,36 @@ public partial class InkMatSections : Control
     private static bool SameRect(Rect2 a, Rect2 b) => a.Position.DistanceSquaredTo(b.Position) < .01f && a.Size.DistanceSquaredTo(b.Size) < .01f;
     private static float Ease(float value) => value * value * value * (value * (value * 6 - 15) + 10);
 
+    private IEnumerable<(Rect2 Bounds, string Label, float Opacity, float Active)> Labels()
+    {
+        foreach (var state in _sections.Values)
+        {
+            var fade = state.Removing ? 1 - Ease(state.RemoveProgress) : 1;
+            if (state.GhostProgress < 1)
+                yield return (state.GhostBounds, state.GhostLabel,
+                    Ease(Math.Clamp((state.GhostReveal-.2f)/.65f,0,1)) * (1-Ease(state.GhostProgress)) * fade, state.Active);
+            yield return (state.Current, state.Target.Label,
+                Ease(Math.Clamp((state.Reveal-.2f)/.65f,0,1)) * fade, state.Active);
+        }
+    }
+
     public override void _Draw()
     {
         if (_labelOverlay is not null && IsInstanceValid(_labelOverlay) && _labelOverlay.IsInsideTree()) return;
-        foreach (var state in _sections.Values)
+        foreach (var state in Labels())
         {
-            var bounds = state.Current;
-            var opacity = Ease(Math.Clamp(state.Reveal * 2, 0, 1)) * (state.Removing ? 1 - Ease(state.RemoveProgress) : 1);
-            if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Target.Label)) continue;
+            var bounds = state.Bounds;
+            var opacity = state.Opacity;
+            if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Label)) continue;
             // Center the real heading within the first 64 logical units. This is
             // reserved by layout, so neither a title nor its motif touches a card.
             var width = Math.Max(1, bounds.Size.X - 42);
-            var fontSize = 36;
-            while (fontSize > 20 && Palette.Title.GetStringSize(state.Target.Label, fontSize: fontSize).X > width) fontSize--;
-            var baseline = bounds.Position + new Vector2(21, 32 + (Palette.Title.GetAscent(fontSize) - Palette.Title.GetDescent(fontSize)) / 2);
+            var fontSize = 27;
+            while (fontSize > 18 && Palette.Body.GetStringSize(state.Label, fontSize: fontSize).X > width) fontSize--;
+            var baseline = bounds.Position + new Vector2(21, 32 + (Palette.Body.GetAscent(fontSize) - Palette.Body.GetDescent(fontSize)) / 2);
             var tint = _letter.Lerp(new Color("f6dfaf"), state.Active);
-            DrawStringOutline(Palette.Title, baseline, state.Target.Label, HorizontalAlignment.Center, width, fontSize, 3, new Color(.035f, .05f, .065f, .85f * opacity));
-            DrawString(Palette.Title, baseline, state.Target.Label, HorizontalAlignment.Center, width, fontSize, tint with { A = opacity * .94f });
+            DrawStringOutline(Palette.Body, baseline, state.Label, HorizontalAlignment.Center, width, fontSize, 3, new Color(.035f, .05f, .065f, .85f * opacity));
+            DrawString(Palette.Body, baseline, state.Label, HorizontalAlignment.Center, width, fontSize, tint with { A = opacity * .94f });
         }
     }
 
@@ -256,30 +278,30 @@ public partial class InkMatSections : Control
             var transform = GetGlobalTransform();
             var inverse = transform.AffineInverse();
             var screenScale = Math.Max(.1f, transform.X.Length());
-            foreach (var state in owner._sections.Values)
+            foreach (var state in owner.Labels())
             {
-                var bounds = state.Current;
-                var opacity = Ease(Math.Clamp(state.Reveal * 2, 0, 1)) * (state.Removing ? 1 - Ease(state.RemoveProgress) : 1);
-                if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Target.Label)) continue;
+                var bounds = state.Bounds;
+                var opacity = state.Opacity;
+                if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Label)) continue;
                 var centerWorld = bounds.Position + new Vector2(bounds.Size.X / 2, 32);
                 var center = inverse * project(centerWorld);
                 var left = inverse * project(new Vector2(bounds.Position.X + 12, centerWorld.Y));
                 var right = inverse * project(new Vector2(bounds.End.X - 12, centerWorld.Y));
                 var width = Math.Max(1, left.DistanceTo(right));
-                var localSize = Math.Max(1, (int)Math.Round(18 / screenScale));
-                var minimumSize = Math.Max(1, (int)Math.Round(16 / screenScale));
-                var label = state.Target.Label;
-                while (localSize > minimumSize && Palette.Title.GetStringSize(label, fontSize: localSize).X > width) localSize--;
-                if (Palette.Title.GetStringSize(label, fontSize: localSize).X > width && label.StartsWith("Province ", StringComparison.Ordinal))
+                var localSize = Math.Max(1, (int)Math.Round(14 / screenScale));
+                var minimumSize = Math.Max(1, (int)Math.Round(12 / screenScale));
+                var label = state.Label;
+                while (localSize > minimumSize && Palette.Body.GetStringSize(label, fontSize: localSize).X > width) localSize--;
+                if (Palette.Body.GetStringSize(label, fontSize: localSize).X > width && label.StartsWith("Province ", StringComparison.Ordinal))
                     label = "P. " + label[9..];
-                var labelWidth = Math.Min(width, Palette.Title.GetStringSize(label, fontSize: localSize).X);
+                var labelWidth = Math.Min(width, Palette.Body.GetStringSize(label, fontSize: localSize).X);
                 // The baseline is centered on the same world-space top gutter as
                 // the ink. Camera changes only its anchor, never its readability.
-                var baseline = center + new Vector2(-labelWidth / 2, (Palette.Title.GetAscent(localSize) - Palette.Title.GetDescent(localSize)) / 2);
-                var color = owner._letter.Lerp(new Color("f6dfaf"), state.Active) with { A = opacity * .97f };
-                DrawStringOutline(Palette.Title, baseline, label, HorizontalAlignment.Center, labelWidth, localSize,
-                    Math.Max(1, (int)Math.Round(2 / screenScale)), new Color(.035f, .05f, .065f, opacity * .88f));
-                DrawString(Palette.Title, baseline, label, HorizontalAlignment.Center, labelWidth, localSize, color);
+                var baseline = center + new Vector2(-labelWidth / 2, (Palette.Body.GetAscent(localSize) - Palette.Body.GetDescent(localSize)) / 2);
+                var color = owner._letter.Lerp(new Color("f6dfaf"), state.Active) with { A = opacity * .88f };
+                DrawStringOutline(Palette.Body, baseline, label, HorizontalAlignment.Center, labelWidth, localSize,
+                    Math.Max(1, (int)Math.Round(1 / screenScale)), new Color(.035f, .05f, .065f, opacity * .88f));
+                DrawString(Palette.Body, baseline, label, HorizontalAlignment.Center, labelWidth, localSize, color);
             }
         }
     }
@@ -295,13 +317,12 @@ public partial class InkMatSections : Control
             TextureFilter = TextureFilterEnum.LinearWithMipmaps;
         }
 
-        public void Present(Vector2 size, float active, float reveal, float reform, float dissolve, float opacity)
+        public void Present(Vector2 size, float active, float reveal, float dissolve, float opacity)
         {
             _active = active;
             var material = (ShaderMaterial)Material;
             material.SetShaderParameter("section_size", size);
             material.SetShaderParameter("reveal", reveal);
-            material.SetShaderParameter("reform", reform);
             material.SetShaderParameter("dissolve", dissolve);
             material.SetShaderParameter("opacity", opacity);
             QueueRedraw();
@@ -315,15 +336,15 @@ public partial class InkMatSections : Control
             var strength = .72f + _active * .14f;
             DrawBorder(22, color with { A = .13f + _active * .05f });
             DrawBorder(9, color with { A = strength });
-            var motifWidth = Math.Min(108, Size.X * .21f);
+            var motifWidth = Math.Min(54, Size.X * .12f);
             var motifHeight = motifWidth * Cloud.GetHeight() / Math.Max(1, Cloud.GetWidth());
-            var height = Math.Min(32, motifHeight);
+            var height = Math.Min(16, motifHeight);
             // Opposite corner curls echo the approved painted motif, with clear
             // central header space and a fixed scale as the frame grows.
             if (Size.X >= 350 && Size.Y >= 100)
             {
-                DrawTextureRect(Cloud, new Rect2(7, 5, motifWidth, height), false, color with { A = .68f + _active * .10f });
-                DrawTextureRect(Cloud, new Rect2(Size.X - 7 - motifWidth, Size.Y - 5 - height, -motifWidth, -height), false, color with { A = .68f + _active * .10f });
+                DrawTextureRect(Cloud, new Rect2(7, 5, motifWidth, height), false, color with { A = .55f + _active * .10f });
+                DrawTextureRect(Cloud, new Rect2(Size.X - 7 - motifWidth, Size.Y - 5 - height, -motifWidth, -height), false, color with { A = .55f + _active * .10f });
             }
         }
 

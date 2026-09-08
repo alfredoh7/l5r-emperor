@@ -16,7 +16,7 @@ public partial class Main
     private Rect2 _inkFilmBefore, _inkFilmAfter;
     private Vector2 _inkFilmCameraCenter;
     private float _inkFilmCameraZoom;
-    private bool _inkFilmSawMidpoint;
+    private bool _inkFilmSawMidpoint, _inkFilmSawWaiting;
     private readonly List<object> _inkFilmFrames = [];
 
     private async void ProcessInkFilm()
@@ -53,21 +53,28 @@ public partial class Main
                 _inkFilmAfter = _holdingBounds[_inkFilmOwner];
                 if (InkSame(_inkFilmBefore, _inkFilmAfter))
                     throw new InvalidOperationException("This purchase did not change the actual Holdings section bounds.");
-                if (!_matSections.IsAnimating || !InkSame(_inkFilmBefore, InkBounds(_matSections, $"holdings:{_inkFilmOwner}")))
-                    throw new InvalidOperationException("The purchase's ink border snapped instead of starting from its visible prior bounds.");
+                if (!_matSections.IsAnimating || _matSections.RevealProgress($"holdings:{_inkFilmOwner}") != 0)
+                    throw new InvalidOperationException("The purchase's new border appeared before the card movement.");
                 if (!_flights.Any(IsInstanceValid)) throw new InvalidOperationException("The purchased card has no native transfer animation.");
                 GD.Print($"INK_FILM_PURCHASE: {_inkFilmCardName}; version {_inkFilmVersion}->{View.Version}; in-play group 4->5 including Stronghold; {_inkFilmBefore}->{_inkFilmAfter}; payment uses offered source ids.");
             }
             AdvanceInkFilmVisuals();
             if (_cameraCenter.DistanceTo(_inkFilmCameraCenter) > .01f || Math.Abs(_cameraZoom - _inkFilmCameraZoom) > .001f)
-                throw new InvalidOperationException("Film camera changed during the purchase transition.");
+                throw new InvalidOperationException($"Film camera changed at frame {_inkFilmFrame}: center {_inkFilmCameraCenter}->{_cameraCenter}; zoom {_inkFilmCameraZoom}->{_cameraZoom}; window {GetViewport().GetVisibleRect().Size}.");
             var current = InkBounds(_matSections, $"holdings:{_inkFilmOwner}");
-            if (_inkFilmFrame >= 12 && InkBetween(current, _inkFilmBefore, _inkFilmAfter)) _inkFilmSawMidpoint = true;
+            var reveal = _matSections.RevealProgress($"holdings:{_inkFilmOwner}");
+            var moving = !TableMotionsSettled();
+            if (_inkFilmFrame >= 12)
+            {
+                if (moving && reveal > 0) throw new InvalidOperationException("Ink appeared before actual card/pile movement settled.");
+                if (moving && reveal == 0) _inkFilmSawWaiting = true;
+                if (!moving && reveal > 0 && reveal < 1) _inkFilmSawMidpoint = true;
+            }
             _inkFilmFrames.Add(new
             {
                 frame = _inkFilmFrame, seconds = _inkFilmFrame / 24.0, version = View.Version,
                 holdingsBounds = new { x = current.Position.X, y = current.Position.Y, width = current.Size.X, height = current.Size.Y },
-                animating = _matSections.IsAnimating
+                animating = _matSections.IsAnimating, reveal, cardsMoving = moving
             });
             // Capture after Godot has laid out and painted newly rebuilt native
             // controls. Forcing a draw inside Main._Process can save a blank
@@ -78,10 +85,10 @@ public partial class Main
             using var frame = GetViewport().GetTexture().GetImage();
             if (frame.SavePng(System.IO.Path.Combine(folder, $"frame-{_inkFilmFrame:000}.png")) != Error.Ok)
                 throw new InvalidOperationException("Native ink purchase frame could not be saved.");
-            if (++_inkFilmFrame < 72) return;
+            if (++_inkFilmFrame < 120) return;
 
-            if (!_inkFilmSawMidpoint || _matSections.IsAnimating || !InkSame(current, _inkFilmAfter))
-                throw new InvalidOperationException("Real purchase did not show intermediate bounds and settle at its target.");
+            if (!_inkFilmSawWaiting || !_inkFilmSawMidpoint || _matSections.IsAnimating || !InkSame(current, _inkFilmAfter))
+                throw new InvalidOperationException("Real purchase did not wait for cards, spread ink gradually, and settle at its target.");
             if (_tiles.Any(t => t.SelfModulate.A != 1) || TablePiles.Any(p => Math.Abs(p.ShownCount - p.Count) > .01f))
                 throw new InvalidOperationException("Purchase film ended with invisible cards or unsettled pile counts.");
             ValidateInkBoardTopology();
@@ -93,11 +100,11 @@ public partial class Main
                     description = "Native game capture of one real, engine-accepted Holding purchase; the in-play Holdings group changes from four to five cards including its Stronghold. No fabricated gameplay state.",
                     card = _inkFilmCardName, purchase = _inkFilmPurchase, beforeVersion = _inkFilmVersion,
                     afterVersion = View.Version, framesPerSecond = 24, frames = _inkFilmFrames,
-                    checks = new[] { "Engine accepted purchase", "Holding entered its actual Home zone", "Actual layout bounds changed", "Camera stayed fixed", "Intermediate ink bounds observed", "Borders, card opacity and pile counts settled", "Complete real card membership retained" }
+                    checks = new[] { "Engine accepted purchase", "Holding entered its actual Home zone", "Actual layout bounds changed", "Camera stayed fixed", "Ink absent throughout actual card movement", "Gradual reveal after card settlement", "Borders, card opacity and pile counts settled", "Complete real card membership retained" }
                 }, Json));
             var replay = _session.ExportPracticeReplay();
             if (replay is not null) System.IO.File.WriteAllText(System.IO.Path.ChangeExtension(_capturePath!, "replay.json"), replay);
-            GD.Print("INK_FILM_PASS: 72 native frames at 24 fps; real offered purchase at frame 12; four-to-five in-play group including Stronghold; continuous border growth/repacking, stable camera, full card transfer and exact settled state. Contraction is tested separately with renderer geometry.");
+            GD.Print("INK_FILM_PASS: 120 native frames at 24 fps; real offered purchase at frame 12; four-to-five in-play group including Stronghold; card-first movement followed by organic ink apparition, stable camera, full card transfer and exact settled state. Contraction is tested separately with renderer geometry.");
             GetTree().Quit(); _capturePath = null;
         }
         catch (Exception error) { GD.PushError(error.ToString()); GetTree().Quit(1); _capturePath = null; }
@@ -148,8 +155,12 @@ public partial class Main
         _cameraZoom *= .8f; _cameraFitted = false; ApplyTableCamera();
         _inkFilmCameraCenter = _cameraCenter; _inkFilmCameraZoom = _cameraZoom;
         _inkFilmBefore = _holdingBounds[_inkFilmOwner];
-        AdvanceInk(_matSections, 1.2);
+        foreach (var control in _tiles.Cast<Control>().Concat(TablePiles))
+            foreach (var reflow in control.GetChildren().OfType<TableCardReflow>())
+                for (var i = 0; i < 9; i++) reflow._Process(.1);
         foreach (var pile in TablePiles) { pile.SetProcess(false); pile.SettleFrom(pile.Count, true); }
+        foreach (var tile in _tiles) tile._Process(.2);
+        AdvanceInk(_matSections, 2);
         ReleaseTableFocus(); HideTableTooltip();
         GD.Print($"INK_FILM_SETUP: reached a real affordable {_inkFilmCardName} purchase after {setupCommands} permitted training commands; current version {View.Version}; seat {_inkFilmOwner}. No frames of setup were included.");
     }

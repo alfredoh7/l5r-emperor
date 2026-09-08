@@ -19,7 +19,7 @@ public partial class Main
         {
             // Let deferred container layout, camera and the preceding fixture's
             // legitimate ink transition finish before recording resting bounds.
-            await ToSignal(GetTree().CreateTimer(1.2), SceneTreeTimer.SignalName.Timeout);
+            await ToSignal(GetTree().CreateTimer(3.8), SceneTreeTimer.SignalName.Timeout);
             if (_matSections.IsAnimating) throw new InvalidOperationException("Real mat did not settle after fixture setup.");
             ValidateInkBoardTopology();
             ValidateInkCardClearance();
@@ -60,7 +60,7 @@ public partial class Main
             await ToSignal(GetTree().CreateTimer(.8), SceneTreeTimer.SignalName.Timeout);
             ValidateInkCardClearance();
             GD.Print($"INK_MAT_PASS: {_matTargets.Count} labeled, disjoint sections; in-play Holdings left for both seats; exact visible-card membership; real scene hover/selection/deselection, attachment tray expansion/folding and same-state rebuild preserve settled borders and match version.");
-            GD.Print("INK_MOTION_PASS: isolated native renderer verifies expansion, contraction, midpoint bounds, midflight retarget continuity, unchanged-sync progress, delayed removal, immediate reduced motion and new-match identity reset. Representative geometry only; no invented game events.");
+            GD.Print("INK_MOTION_PASS: isolated native renderer verifies card-settlement gating, expansion/contraction apparition, rapid retarget, unchanged-sync reveal progress, delayed removal, immediate reduced motion and new-match identity reset. Representative geometry only; no invented game events.");
         }
         catch (Exception error) { _inkProbeError = error.ToString(); }
         finally { _inkProbeDone = true; }
@@ -285,24 +285,33 @@ public partial class Main
             var stable = new InkMatSection("stable", "Home", new Rect2(780, 80, 320, 220));
             SyncInk(probe, [compact, stable]); SyncInk(uninterrupted, [compact, stable]);
             InkRequire(!probe.IsAnimating && probe.SectionCount == 2, "Initial mat did not establish stable identities.");
+            var cardsSettled = false;
+            probe.MotionSettled = uninterrupted.MotionSettled = () => cardsSettled;
             SyncInk(probe, [expanded, stable]); SyncInk(uninterrupted, [expanded, stable]);
-            InkRequire(probe.IsAnimating && InkSame(InkBounds(probe, compact.Id), compact.Bounds), "Expanding section snapped immediately.");
-            AdvanceInk(probe, .2); AdvanceInk(uninterrupted, .2);
-            InkRequire(InkBetween(InkBounds(probe, compact.Id), compact.Bounds, expanded.Bounds), "Expansion has no intermediate geometry.");
+            InkRequire(probe.IsAnimating && probe.RevealProgress(compact.Id) == 0, "New border became visible before card movement.");
+            AdvanceInk(probe, 2); AdvanceInk(uninterrupted, 2);
+            InkRequire(probe.WaitingForCards(compact.Id) && probe.RevealProgress(compact.Id) == 0,
+                "Ink revealed on a timer while cards were still moving.");
             InkRequire(InkSame(InkBounds(probe, stable.Id), stable.Bounds), "An unrelated section moved during expansion.");
-
-            // Compare with a renderer whose identical transition receives no
-            // repeated Sync, so a progress-reset bug cannot pass by merely moving.
+            SyncInk(probe, [expanded, stable]);
+            cardsSettled = true;
+            AdvanceInk(probe, .1); AdvanceInk(uninterrupted, .1);
+            InkRequire(probe.RevealProgress(compact.Id) == 0, "Ink omitted the quiet pause after cards settled.");
+            AdvanceInk(probe, .4); AdvanceInk(uninterrupted, .4);
+            InkRequire(probe.RevealProgress(compact.Id) > 0 && probe.RevealProgress(compact.Id) < 1,
+                "Post-settlement ink did not have a gradual reveal.");
             SyncInk(probe, [expanded, stable]);
             AdvanceInk(probe, .1); AdvanceInk(uninterrupted, .1);
-            InkRequire(InkSame(InkBounds(probe, compact.Id), InkBounds(uninterrupted, compact.Id)), "Unchanged Sync restarted an active ink transition.");
+            InkRequire(Math.Abs(probe.RevealProgress(compact.Id)-uninterrupted.RevealProgress(compact.Id)) < .001f,
+                "Unchanged Sync restarted the ink reveal.");
 
-            var moving = InkBounds(probe, compact.Id);
-            SyncInk(probe, [contracted, stable]);
-            InkRequire(InkSame(InkBounds(probe, compact.Id), moving), "Midflight retarget jumped away from the currently visible edge.");
-            AdvanceInk(probe, .2);
-            InkRequire(InkBetween(InkBounds(probe, compact.Id), moving, contracted.Bounds), "Contraction has no intermediate geometry.");
-            AdvanceInk(probe, 1);
+            // A second movement while ink is spreading cancels the obsolete
+            // target, dissolves its partial pigment, and waits for actual rest.
+            cardsSettled = false;
+            SyncInk(probe, [contracted, stable]); AdvanceInk(probe, 1);
+            InkRequire(probe.WaitingForCards(compact.Id) && probe.RevealProgress(compact.Id) == 0,
+                "Rapid retarget painted a contracted box before movement ended.");
+            cardsSettled = true; AdvanceInk(probe, 1.8);
             InkRequire(!probe.IsAnimating && InkSame(InkBounds(probe, compact.Id), contracted.Bounds), "Contraction did not settle at its new bounds.");
 
             SyncInk(probe, [stable]);
@@ -316,13 +325,20 @@ public partial class Main
 
             SyncInk(probe, [compact, stable]);
             InkRequire(probe.IsAnimating && probe.SectionCount == 2, "A new section did not enter through a reveal.");
-            AdvanceInk(probe, 1);
+            AdvanceInk(probe, 1.8);
             SyncInk(probe, [expanded with { Active = true }, stable]); AdvanceInk(probe, .1);
             SyncInk(probe, [expanded with { Active = true }, stable], reducedMotion: true);
             InkRequire(probe.ReducedMotion && !probe.IsAnimating && InkSame(InkBounds(probe, compact.Id), expanded.Bounds),
                 "Enabling reduced motion did not immediately finish geometry, reveal and active feedback.");
             SyncInk(probe, [stable], reducedMotion: true);
             InkRequire(probe.SectionCount == 1 && !probe.IsAnimating, "Reduced motion still animates a removed section.");
+
+            SyncInk(probe, [compact, stable]);
+            cardsSettled = false;
+            SyncInk(probe, [expanded, stable]); AdvanceInk(probe, .1);
+            SyncInk(probe, [expanded, stable], reducedMotion: true);
+            InkRequire(!probe.IsAnimating && probe.RevealProgress(compact.Id) == 1,
+                "Reduced motion remained blocked on card animation.");
 
             var fresh = new InkMatSection("fresh-match", "Provinces", new Rect2(160, 160, 800, 240));
             SyncInk(probe, [fresh], matchKey: "different-match");
@@ -358,14 +374,6 @@ public partial class Main
     private static Rect2 InkBounds(InkMatSections renderer, string id) => renderer.CurrentBounds(id)
         ?? throw new InvalidOperationException($"Missing ink section {id}.");
     private static bool InkSame(Rect2 a, Rect2 b) => a.Position.DistanceTo(b.Position) < .02f && a.Size.DistanceTo(b.Size) < .02f;
-    private static bool InkBetween(Rect2 current, Rect2 start, Rect2 end)
-    {
-        float[] actual = [current.Position.X, current.Position.Y, current.Size.X, current.Size.Y];
-        float[] from = [start.Position.X, start.Position.Y, start.Size.X, start.Size.Y];
-        float[] to = [end.Position.X, end.Position.Y, end.Size.X, end.Size.Y];
-        return !InkSame(current, start) && !InkSame(current, end) && Enumerable.Range(0, 4)
-            .All(i => actual[i] >= Math.Min(from[i], to[i]) - .02f && actual[i] <= Math.Max(from[i], to[i]) + .02f);
-    }
     private static IEnumerable<Node> InkDescendants(Node parent) => parent.GetChildren()
         .SelectMany(child => new[] { child }.Concat(InkDescendants(child)));
     private static void InkRequire(bool condition, string message)

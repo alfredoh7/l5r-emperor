@@ -3,7 +3,6 @@ render_mode unshaded;
 
 uniform vec2 section_size = vec2(500.0, 250.0);
 uniform float reveal : hint_range(0.0, 1.0) = 1.0;
-uniform float reform : hint_range(0.0, 1.0) = 1.0;
 uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
 uniform float opacity : hint_range(0.0, 1.0) = 1.0;
 varying vec2 local_point;
@@ -39,13 +38,16 @@ void fragment() {
     float travel = path / (2.0 * (dimensions.x + dimensions.y));
     float grain = noise(local_point * .29) * .58 + noise(local_point * .83 + vec2(6.0)) * .42;
 
-    // A frayed front travels once around the contour when a new section appears.
-    // Geometry reformation leaves settled ink visible while a quieter wet front
-    // passes across it. No TIME input: settled borders never shimmer or wobble.
-    float front = mix(-.075, 1.075, reveal);
-    float appearing = 1.0 - smoothstep(front - .045, front + .025, travel + (grain - .5) * .055);
-    float reform_front = mix(-.08, 1.08, reform);
-    float wet = (1.0 - smoothstep(.0, .105, abs(travel + (grain - .5) * .035 - reform_front))) * (1.0 - step(.999, reform));
+    // Pigment seeps from opposite corners in several uneven fronts. Each
+    // local fiber darkens gradually; there is no hard wipe or marching rectangle.
+    // Explicit reveal time stops completely once the pigment has settled.
+    float corner_distance = min(min(travel, 1.0-travel), abs(travel-.5));
+    float broad = noise(local_point * .024 + vec2(7.0, 13.0));
+    float arrival = corner_distance * 2.65 + broad * .22 + grain * .065;
+    float front = mix(-.2, 1.28, reveal);
+    float soak = front - arrival;
+    float appearing = smoothstep(-.11, .19, soak);
+    float wet = (1.0-smoothstep(.04,.30,abs(soak))) * (1.0-step(.999,reveal));
     float evaporation = 1.0 - smoothstep(grain - .2, grain + .23, dissolve * 1.5 - .25);
     if (dissolve < .001) evaporation = 1.0;
 

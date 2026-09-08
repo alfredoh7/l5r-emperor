@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implemented approved C textured ink mat regions, internal labels, separate left-side holdings, smooth live card/pile reflow and stable province identifiers.",
-  "validation": "Zero-warning client build and Godot import; 234 deterministic checks; three native ink fixtures plus 72-frame real purchase film; 17 board cases, eight camera cases and four deselection/target cases passed. Adversarial source/visual review addressed all concrete findings. Launcher command smoke passed. See docs/INK_MAT_VALIDATION.md.",
-  "remaining": "Mendon shared-client/battlefield review and Alfredo visual/play acceptance; hosted CI pending publication. No native Windows playtest. Assignment previews and cinematic resolution remain later passes.",
+  "summary": "Refined ink sections to dissolve in place and appear organically only after actual card movement settles; smaller serif labels and half-size ornaments; weathered corner lanterns with coordinated candlelight on cloth/cards.",
+  "validation": "Zero-warning client build/import; three native ink fixtures and lifecycle regressions; 120-frame real Marketplace purchase verifies card-first reveal and fixed camera. Eight native camera/input cases passed, including reduced-motion frame identity. Final scene captures visually reviewed; texture aliasing, glow seams and small-window margins corrected. Current-checkout launcher smoke passed. See docs/INK_MAT_VALIDATION.md.",
+  "remaining": "Alfredo visual/play acceptance and Mendon shared-client/battlefield review; hosted CI pending this follow-up push. Native Windows graphical playtesting and later assignment/resolution presentation remain open.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/52",
   "branch": "codex/52-ink-mat",
-  "updated": "2026-09-08T18:55:18.800361+00:00"
+  "updated": "2026-09-08T19:41:03.213458+00:00"
 }

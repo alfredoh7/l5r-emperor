@@ -296,7 +296,7 @@ public partial class Main : Node
         _menu.AddThemeConstantOverride("separation", 7);
         _menu.AddChild(new TableIconButton(TableGlyph.Menu, ShowTableMenu, "Menu"));
         _menu.AddChild(new TableIconButton(TableGlyph.Rules, ShowRules, "Rules and reference"));
-        _matSections = new InkMatSections(); _world.AddChild(_matSections);
+        _matSections = new InkMatSections { MotionSettled = TableMotionsSettled }; _world.AddChild(_matSections);
         _tableViewport.AddChild(_matSections.CreateLabelOverlay(WorldToScreen));
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);

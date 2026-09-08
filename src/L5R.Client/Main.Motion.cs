@@ -17,6 +17,13 @@ public partial class Main
         return new[] { r.Position, new Vector2(r.End.X,r.Position.Y),r.End,new Vector2(r.Position.X,r.End.Y) }
             .Select(p => _tableSurface.ProjectCanvas(pile.GetGlobalTransform()*p) / _root.Scale.X).ToArray();
     }
+    private bool TableMotionsSettled() =>
+        _flights.All(f => !IsInstanceValid(f) || f.IsQueuedForDeletion()) &&
+        _tiles.Where(IsInstanceValid).All(t => Mathf.IsEqualApprox(t.VisualBowAngle, t.Card.Bowed ? Mathf.Pi / 2 : 0)) &&
+        TablePiles.All(p => Math.Abs(p.ShownCount - p.Count) < .01f) &&
+        _tiles.Where(IsInstanceValid).Cast<Control>().Concat(TablePiles)
+            .All(c => c.GetChildren().OfType<TableCardReflow>().All(r => r.IsQueuedForDeletion()));
+
     private MotionFrame? BeginTableMotion()
     {
         foreach(var flight in _flights) if(IsInstanceValid(flight)) flight.Finish();
