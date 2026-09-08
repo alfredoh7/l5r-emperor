@@ -21,9 +21,16 @@ public partial class Main
             _session.FollowPracticePriority();
             var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
+            // Fixture selection uses public engine-provided unit force only. The
+            // eventual assertion checks actual resolution events, not this estimate.
+            var fallReady = !_captureMode.Contains("fall", StringComparison.Ordinal) ||
+                View.CurrentBattleProvince is int active && View.Players.Single(p => p.Id == View.ActivePlayerId).Army
+                    .Where(c => c.AttachedTo is null && c.ProvinceIndex == active).Sum(c => c.UnitForce ?? 0) >
+                View.Players.Single(p => p.Id != View.ActivePlayerId).Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == active).Sum(c => c.UnitForce ?? 0)
+                    + View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Single(p => p.Index == active).Strength;
             var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
                 View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
-            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady) break;
+            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
@@ -125,6 +132,7 @@ public partial class Main
             }
             ProbeUnitStandardInput();
         }
+        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { FocusBattle(); ProbeBattleCourts(); }
         if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeInkMat(); }
         if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
@@ -168,6 +176,7 @@ public partial class Main
         ValidateTurnAndClarity();
         ValidateStatTokens();
         ValidateUnitStandards();
+        if (_captureMode.Contains("courts", StringComparison.Ordinal) && _battleProbeError is not null) throw new Exception(_battleProbeError);
         if (_captureMode.Contains("deselect", StringComparison.Ordinal) && _deselectProbeError is not null) throw new Exception(_deselectProbeError);
         if (_captureMode.Contains("ink", StringComparison.Ordinal) && _inkProbeError is not null) throw new Exception(_inkProbeError);
         ValidateQuietHud();

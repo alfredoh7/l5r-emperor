@@ -9,6 +9,13 @@ public partial class Main
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
+    private float _enemyProvinceY, _reservedBattleHeight, _reservedEnemyBand, _reservedHoldingWidth;
+    private readonly float[] _reservedLaneWidths = new float[4];
+    private readonly Dictionary<int, Rect2> _battleCourts = [];
+    private readonly Dictionary<string, Vector2> _battlePlacements = [];
+    private IEnumerable<CardView> CourtUnits(PlayerView player, int province) => player.Army
+        .Where(c => c.AttachedTo is null && c.ProvinceIndex == province)
+        .Concat(player.Home.Where(c => c.AttachedTo is null && _assignments.GetValueOrDefault(c.Id, -1) == province));
     private readonly Dictionary<int, CardView[][]> _holdingRows = [];
     private readonly Dictionary<int, Rect2> _holdingBounds = [], _homeBounds = [];
     private readonly List<InkMatSection> _matTargets = [];
@@ -35,13 +42,18 @@ public partial class Main
     private void MeasureTableLayout()
     {
         var oldSize = new Vector2(WorldWidth, _worldHeight);
-        if (!_tableLayoutSeen) _matMatchEpoch++;
-        _matTargets.Clear();
+        if (!_tableLayoutSeen)
+        {
+            _matMatchEpoch++; _reservedBattleHeight = 0; _reservedEnemyBand = 0; _reservedHoldingWidth = 0; Array.Clear(_reservedLaneWidths);
+            _fallTimes.Clear(); _framedBattle = null;
+        }
+        _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();
         for (var i = 0; i < 4; i++)
         {
-            var unitWidth = View.Players.SelectMany(p => p.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == i)
+            var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
-            _laneWidths[i] = Math.Max(210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10);
+            _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
+                Math.Max(BattleActive ? 440 : 210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -60,20 +72,28 @@ public partial class Main
             holdingWidth = Math.Max(holdingWidth, MatRowsWidth(_holdingRows[player.Id], player) + 2 * MatPadding);
             _homeRows[player.Id] = PackMatRows(HomeCards(player), player, _playWidth - 2 * MatPadding);
             _homeHeights[player.Id] = Math.Max(118, MatRowsHeight(_homeRows[player.Id], player));
-            _armyHeights[player.Id] = Math.Max(0, player.Army.Where(c => c.AttachedTo is null).GroupBy(c => c.ProvinceIndex)
-                .Select(lane => lane.Chunk(ArmyColumns(lane.Key ?? 0)).Sum(r => r.Max(c => StackHeight(c, player)) + RowGap)).DefaultIfEmpty(0).Max());
+            _armyHeights[player.Id] = Math.Max(0, Enumerable.Range(0, 4).Select(province => CourtUnits(player, province).Chunk(ArmyColumns(province)).Sum(r => r.Max(c => StackHeight(c, player)) + RowGap)).DefaultIfEmpty(0).Max());
         }
+        holdingWidth = _reservedHoldingWidth = Math.Max(holdingWidth, _reservedHoldingWidth);
         _playLeft = MatPadding + holdingWidth + MatGap;
         WorldWidth = _playLeft + _playWidth + MatPadding;
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         var provinceHeight = MatHeader + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding;
-        _enemyHomeY = MatPadding + provinceHeight + MatGap;
-        var enemyBandBottom = Math.Max(_enemyHomeY + _homeHeights[enemy.Id], MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy));
-        _battleY = enemyBandBottom + MatGap;
-        _battleHeight = BattleActive ? Math.Max(92, _armyHeights.Values.Sum() + MatHeader + MatPadding + RowGap + InkMatSections.BattleFooter) : 0;
-        _selfHomeY = _battleY + _battleHeight + (BattleActive ? MatGap : 0);
-        _selfProvinceY = _selfHomeY + _homeHeights[Self.Id] + MatGap + MatHeader;
-        _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding,
+        // Home remains behind the province row: the court-to-province neck
+        // never crosses resting cards, Holdings or another player's home.
+        _enemyHomeY = MatPadding;
+        var returning = enemy.Home.Concat(enemy.Army).Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding)
+            .Select(c => c with { Bowed = true }).ToArray();
+        var returnRows = PackMatRows(returning, enemy, _playWidth - 2 * MatPadding);
+        _reservedEnemyBand = Math.Max(_reservedEnemyBand, Math.Max(_homeHeights[enemy.Id], MatRowsHeight(returnRows, enemy)));
+        _enemyProvinceY = _enemyHomeY + _reservedEnemyBand + MatGap + MatHeader;
+        var enemyBandBottom = Math.Max(_enemyProvinceY - MatHeader + provinceHeight,
+            MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy));
+        _battleY = enemyBandBottom + 44;
+        _battleHeight = _reservedBattleHeight = Math.Max(_reservedBattleHeight, BattleActive ? Math.Max(340, _armyHeights.Values.Sum() + MatHeader + MatPadding + 38) : 0);
+        _selfProvinceY = _battleY + _battleHeight + (_battleHeight > 0 ? 44 : 0) + MatHeader;
+        _selfHomeY = _selfProvinceY + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding + MatGap;
+        _worldHeight = Math.Max(_selfHomeY + _homeHeights[Self.Id],
             _selfHomeY + MatRowsHeight(_holdingRows[Self.Id], Self)) + MatPadding;
 
         foreach (var player in View.Players)
@@ -101,12 +121,35 @@ public partial class Main
             var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
             foreach (var province in defender.Provinces.Where(p => !p.Destroyed))
             {
-                var width = _laneWidths[province.Index];
-                _matTargets.Add(new($"battle:{defender.Id}:{province.Index}", $"Province {province.Index + 1}",
-                    new Rect2(SlotX(defender, 2 + province.Index) - (width - CardHeight) / 2, _battleY, width - 10, _battleHeight),
-                    View.CurrentBattleProvince == province.Index));
+                var index = province.Index;
+                if (!View.Players.Any(p => CourtUnits(p, index).Any()) && View.CurrentBattleProvince != index) continue;
+                var widest = View.Players.SelectMany(p => CourtUnits(p, index).Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
+                var width = Math.Max(440, ArmyColumns(index) * (widest + CardGap) + MatPadding * 2 + 10) - 16;
+                var occupiedHeight = View.Players.Sum(p => CourtUnits(p, index).Chunk(ArmyColumns(index))
+                    .Sum(r => r.Max(c => StackHeight(c, p)) + RowGap));
+                var courtHeight = Math.Max(340, occupiedHeight + MatHeader + MatPadding + 38);
+                var yCourt = defender.Id == Self.Id ? _battleY + _battleHeight - courtHeight : _battleY;
+                var bounds = new Rect2(SlotX(defender, 2 + index) + CardHeight / 2 - width / 2, yCourt, width, courtHeight);
+                _battleCourts[index] = bounds;
+                _matTargets.Add(new($"battle:{defender.Id}:{index}", $"Province {index + 1}", bounds, View.CurrentBattleProvince == index));
+                // Top army belongs to the top seat, so the defending seat is
+                // always closest to its own province, from either player's view.
+                foreach (var player in new[] { enemy, Self })
+                {
+                    var rows = CourtUnits(player, index).Chunk(ArmyColumns(index)).ToArray();
+                    var height = rows.Sum(r => r.Max(c => StackHeight(c, player)) + RowGap);
+                    var y = player.Id == enemy.Id ? bounds.Position.Y + MatHeader : bounds.End.Y - MatPadding - height;
+                    foreach (var row in rows)
+                    {
+                        var rowWidth = row.Sum(c => UnitWidth(c, player)) + (row.Length - 1) * CardGap;
+                        var cx = bounds.GetCenter().X - rowWidth / 2;
+                        foreach (var card in row) { _battlePlacements[card.Id] = new Vector2(cx, y); cx += UnitWidth(card, player) + CardGap; }
+                        y += row.Max(c => StackHeight(c, player)) + RowGap;
+                    }
+                }
             }
         }
+
         // Keep a player's camera steady while ink and cards change positions.
         // Fit/Home remains explicit and always frames the complete new layout.
         if (_tableLayoutSeen && _cameraFitted && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
@@ -114,6 +157,9 @@ public partial class Main
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size;
     }
 
-    private void SyncMatSections() => _matSections.Sync(_matTargets, _reducedMotion,
-        $"{_matMatchEpoch}:{View.Scenario}:{View.ViewerId}:{_session.Snapshot?.RoomCode}");
+    private void SyncMatSections()
+    {
+        _matSections.Sync(_matTargets, _reducedMotion, $"{_matMatchEpoch}:{View.Scenario}:{View.ViewerId}:{_session.Snapshot?.RoomCode}");
+        _battleDecor?.QueueRedraw();
+    }
 }

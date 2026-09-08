@@ -4,6 +4,7 @@ render_mode unshaded;
 uniform vec2 section_size = vec2(500.0, 250.0);
 uniform float reveal : hint_range(0.0, 1.0) = 1.0;
 uniform float dissolve : hint_range(0.0, 1.0) = 0.0;
+uniform float battle_emphasis = 0.0;
 uniform float opacity : hint_range(0.0, 1.0) = 1.0;
 varying vec2 local_point;
 varying vec4 stroke_color;
@@ -55,6 +56,7 @@ void fragment() {
     // while retaining enough saturation to read in the lantern-lit navy cloth.
     float luminance = dot(paint.rgb, vec3(.2126, .7152, .0722));
     vec3 pigment = paint.rgb;
+    pigment = mix(pigment, vec3(.52, .87, 1.0) * (luminance + .25), battle_emphasis * .58);
     pigment = mix(pigment, vec3(.94, .85, .66), wet * .14);
     COLOR = vec4(pigment * stroke_color.rgb,
         paint.a * stroke_color.a * opacity * appearing * evaporation * (1.0 + wet * .13));

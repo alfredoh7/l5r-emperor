@@ -295,6 +295,7 @@ public partial class InkMatSections : Control
         {
             _active = active;
             var material = (ShaderMaterial)Material;
+            material.SetShaderParameter("battle_emphasis", ProvinceNumber is null && Label.StartsWith("Province ", StringComparison.Ordinal) ? active : 0);
             material.SetShaderParameter("section_size", size);
             material.SetShaderParameter("reveal", reveal);
             material.SetShaderParameter("dissolve", dissolve);

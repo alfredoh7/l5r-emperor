@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved battle courts B, ink stepping-stone previews B and fractured/extinguished province falls in three reviewed passes.",
-  "validation": "Inspected current main, concurrent PR64 and province-art dependency PR57; no engine changes planned.",
-  "remaining": "Implement all three passes, native visual/input regressions, deterministic checks and CI; shared review before merge.",
+  "summary": "Approved B/B/A+B battle presentation implemented; native battle regression passes, broader native review and final integration underway.",
+  "validation": "Five native battle fixtures pass; 37 collaboration, 91 content, 60 core, 32 published, 8 deck-format, 13 AI, 5 server and 4 transport checks pass. Ink and camera suites in progress.",
+  "remaining": "Final visual film review, integrate newly merged rules PR64, final CI and Mendon shared review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/75",
   "branch": "codex/75-battle-presentation",
-  "updated": "2026-09-08T21:53:02.131484+00:00"
+  "updated": "2026-09-08T22:16:14.465874+00:00"
 }

@@ -51,6 +51,7 @@ public static class ProvinceThresholdArt
     public static Rect2 IconBounds(Rect2 bounds, string label)
     {
         // A's icons interrupt the top stroke, near its left corner. No header row.
+        if (label.StartsWith("Province ", StringComparison.Ordinal)) return new Rect2(bounds.GetCenter().X - 24, bounds.Position.Y - 24, 48, 48);
         var local = label == "Holdings" ? new Rect2(77 * .55f, 0, 56 * .55f, 75 * .55f)
             : new Rect2(71 * .55f, 0, 121 * .55f, 69 * .55f);
         return new Rect2(bounds.Position + local.Position, local.Size);
@@ -60,6 +61,8 @@ public static class ProvinceThresholdArt
 
     public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0)
     {
+        if (province is null && label.StartsWith("Province ", StringComparison.Ordinal))
+        { BattleInkArt.Court(canvas, size, active); return; }
         var art = Plate(label, province);
         var source = art.GetSize();
         var isProvince = province is not null;
@@ -93,15 +96,6 @@ public static class ProvinceThresholdArt
                     new Rect2(destX[x], destY[y], destX[x + 1] - destX[x], destY[y + 1] - destY[y]),
                     new Rect2(sourceX[x], sourceY[y], sourceX[x + 1] - sourceX[x], sourceY[y + 1] - sourceY[y]), tint);
             }
-        }
-        if (!isProvince && label.StartsWith("Province ", StringComparison.Ordinal))
-        {
-            var symbol = MatEmblemArt.Symbol(label);
-            var icon = IconBounds(new Rect2(Vector2.Zero, size), label);
-            var iconSize = new Vector2(36 * symbol.GetWidth() / (float)symbol.GetHeight(), 36);
-            canvas.DrawTextureRect(symbol, new Rect2(icon.GetCenter() - iconSize / 2, iconSize), false);
-            var sealSize = new Vector2(88, 38);
-            MatEmblemArt.DrawSeal(canvas, new Rect2(new Vector2(size.X / 2, size.Y - InkMatSections.BattleFooter / 2) - sealSize / 2, sealSize), label[9..]);
         }
     }
 }

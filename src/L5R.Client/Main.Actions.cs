@@ -148,10 +148,10 @@ public partial class Main
             var picker = new OptionButton(); picker.AddItem("Stay at home");
             foreach (var province in provinces) picker.AddItem($"Province {province + 1}");
             picker.Selected = _assignments.TryGetValue(id, out var assigned) ? Array.IndexOf(provinces, assigned) + 1 : 0;
-            picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderInspector(); Highlight(); };
+            picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderBoard(); RenderInspector(); Highlight(); };
             _inspector.AddChild(picker);
         }
-        _decisionActions.AddChild(Palette.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderInspector(); Highlight(); }));
+        _decisionActions.AddChild(Palette.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderBoard(); RenderInspector(); Highlight(); }));
         _decisionActions.AddChild(Palette.Button("Confirm assignments", () => Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
         _decisionActions.AddChild(Palette.Button("Cancel assignment", CancelChoice));
     }
@@ -236,7 +236,7 @@ public partial class Main
         _decisionActions.AddChild(Palette.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
@@ -264,6 +264,7 @@ public partial class Main
     }
     private void RenderPhaseActions()
     {
+        if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(Palette.Button("View battle details", ShowHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
