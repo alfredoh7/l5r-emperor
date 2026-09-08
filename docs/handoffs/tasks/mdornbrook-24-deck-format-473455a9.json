@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Revised DeckFormat (from the earlier commit on this branch) to match the real legacy deck-list convention the user provided (5 sample files: Crane Dominance, Crab Control, Dragon Destruction, Unicorn Maidens, Spider's Web) -- already parsed by tools/content/import_sources.py. Deck is now just a Legality label plus a flat, ordered DeckEntry[]; dropped the invented Name/Clan/Stronghold/Bamboo Harvesters/Border Keep header fields, since the real format has none -- that structure is resolved by callers with pool access (content/deck-pool.json from #23), not by this type.",
+  "validation": "bash tools/check.sh: all suites pass, clean on this run (Core 46/46, Published 32/32, deck format 8/8, AI 13/13, client build/import/smoke clean).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/24",
+  "branch": "mdornbrook/24-deck-format",
+  "updated": "2026-09-07T19:01:21.626903+00:00"
+}
