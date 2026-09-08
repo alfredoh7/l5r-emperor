@@ -131,8 +131,22 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
-                Require(command.Type is "proclaim" or "declineReaction" or "pass","Resolve the Proclaim reaction window first.");
-                if (command.Type=="proclaim") Proclaim(command); else PassReaction();
+                // "useAbility" here resolves the entering card's own entering-play Reaction (if it
+                // has one) -- ValidateAbility's "Reaction" case gates it to this exact window/card.
+                // The window stays open afterward (UseAbility's own NextAction flips priority without
+                // clearing PendingChoice), so Proclaim can still follow, in either order, until passed.
+                Require(command.Type is "proclaim" or "useAbility" or "declineReaction" or "pass","Resolve the Proclaim reaction window first.");
+                if (command.Type=="proclaim") Proclaim(command);
+                else if (command.Type=="useAbility") UseAbility(command);
+                else PassReaction();
+                return;
+            }
+            if (_state.PendingChoice.Type=="entryReaction")
+            {
+                // Same window as "proclaim" above, but for a card that has its own entering-play
+                // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the entry reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
@@ -171,11 +185,18 @@ public sealed partial class MatchEngine
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
+        var hasEntryReaction=(Definition(card).Abilities??[]).Any(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play");
         if (quote.ProclaimEligible)
         {
-            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor, or pass. Proclaim may be used once per turn.");
+            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(hasEntryReaction?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
+        }
+        else if (hasEntryReaction)
+        {
+            _state.PendingChoice=new("entryReaction",command.PlayerId,card.Id,"After entry: use this card's own reaction, or pass.");
+            _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Entry reaction window opened.",command.PlayerId,card.Id);
         }
     }
 

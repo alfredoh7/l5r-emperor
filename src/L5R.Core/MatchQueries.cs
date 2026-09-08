@@ -57,12 +57,24 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player=Player(playerId);
-        if(_state.PendingChoice is { Type:"proclaim" } pending)
+        if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
         {
             if(pending.PlayerId==playerId)
             {
-                var honor=Definition(Card(pending.CardId)).PersonalHonor;
-                Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),player.ProclaimUsedTurn==_state.TurnNumber?"Already used Proclaim this turn.":null,pending.CardId);
+                if(pending.Type=="proclaim")
+                {
+                    var honor=Definition(Card(pending.CardId)).PersonalHonor;
+                    Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),player.ProclaimUsedTurn==_state.TurnNumber?"Already used Proclaim this turn.":null,pending.CardId);
+                }
+                var enteringCard=Card(pending.CardId);
+                var reactionId=(Definition(enteringCard).Abilities??[]).FirstOrDefault(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play");
+                if(reactionId is not null)
+                {
+                    var used=enteringCard.AbilityUses.ContainsKey(reactionId);
+                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                        new("useAbility",playerId,_state.Version,CardId:enteringCard.Id,AbilityId:reactionId),
+                        used?"This reaction has already been used.":null,enteringCard.Id);
+                }
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
