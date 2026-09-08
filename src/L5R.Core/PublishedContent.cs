@@ -101,6 +101,24 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 2 of ability-bearing Personalities: Togashi Torazu, reusing the Fire-token
+    /// primitives with a self-performed (Performer-less) Battle ability.</summary>
+    public static PublishedSnapshot PersonalityWave2 { get; } = LoadPersonalityWave2();
+
+    private static PublishedSnapshot LoadPersonalityWave2()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave2.json", "personality-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-2 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
