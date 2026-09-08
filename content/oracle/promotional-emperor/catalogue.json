@@ -1,744 +1,350 @@
 {
   "cards": [
     {
-      "current_oracle_text": "",
+      "current_oracle_text": "Siege Battle: Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor.",
       "deck_types": [
-        "Dynasty"
+        "Pre-Game"
       ],
       "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-10578",
+      "id": "oracle-l5r-1218",
       "image_ids": [
-        "oracle-l5r-10578-printing-1-image-1"
+        "oracle-l5r-1218-printing-2-image-1"
       ],
-      "name": "Akodo Daiken",
-      "oracle_id": 10578,
+      "name": "Carpenter Castle",
+      "oracle_id": 1218,
       "playable": false,
       "selected_printings": [
         {
           "artist": [
-            "Mateusz Ozminski"
+            "Noah Bradley"
           ],
           "artnumber": [
-            "10130151"
+            "10040402"
           ],
-          "designer": [
-            "Bryan"
+          "clan": [
+            "Crab"
           ],
-          "designernotes": [
-            "This is one of the Lions fighting P'an Ku and/or Fudo cultists"
+          "cost": [
+            "4"
           ],
-          "flavor": [
-            "<i>\"You notice the sword, but honor is my blade. It is stronger than any steel could ever be.\"</i>"
+          "force": [
+            "9"
+          ],
+          "keywords": [
+            "Castle"
+          ],
+          "personalhonor": [
+            "4"
           ],
           "printimagehash": [
-            "1d/4a"
+            "70/31"
           ],
-          "printingid": "1",
+          "printingid": "2",
           "rarity": [
             "Promo"
           ],
           "set": [
             "Promotional&ndash;Emperor"
           ],
-          "use": [
-            "[Summer Con Dynasty 8]"
+          "text": [
+            "Siege Battle: Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor."
+          ],
+          "title": [
+            "Carpenter Castle"
+          ],
+          "type": [
+            "Stronghold"
           ]
         }
       ],
       "source_legality_labels": [
-        "A Brother's Destiny (Ivory Edition)",
         "Age of Conquest (Emperor)",
         "Legacy",
         "Modern"
       ],
       "source_record": {
         "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:35:34.608335",
-        "cardid": 10578,
-        "chi": [
-          "3"
-        ],
+        "@timestamp": "2026-06-06T14:34:26.046711",
+        "cardid": 1218,
         "clan": [
-          "Lion"
-        ],
-        "cost": [
-          "6"
+          "Crab"
         ],
         "deck": [
-          "Dynasty"
+          "Pre-Game"
         ],
-        "force": [
-          "4"
-        ],
-        "formattedtitle": "Akodo Daiken",
-        "honor": [
-          "4"
-        ],
-        "imagehash": "1d/4a",
+        "formattedtitle": "Carpenter Castle",
+        "imagehash": "c7/4f",
         "keywords": [
-          "<b>Conqueror</b>",
-          "Lion Clan",
-          "Samurai"
+          "Castle"
         ],
         "legality": [
-          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
           "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
           "Legacy",
           "Modern"
         ],
-        "notes": [
-          "Legal December 1st, 2013",
-          "Released in the 2013 Summer Con pack"
-        ],
-        "ph": [
-          "3"
-        ],
         "printing": [
           {
             "artist": [
-              "Mateusz Ozminski"
+              "Noah Bradley"
             ],
             "artnumber": [
-              "10130151"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "This is one of the Lions fighting P'an Ku and/or Fudo cultists"
+              "10040402"
             ],
             "flavor": [
-              "<i>\"You notice the sword, but honor is my blade. It is stronger than any steel could ever be.\"</i>"
+              "<i>\"If war were a thing you could touch and feel, this is where it would be made.\" - Kaiu Iemasa</i>"
+            ],
+            "number": [
+              "392"
             ],
             "printimagehash": [
-              "1d/4a"
+              "c7/4f"
             ],
             "printingid": "1",
             "rarity": [
-              "Promo"
+              "Fixed"
             ],
             "set": [
-              "Promotional&ndash;Emperor"
-            ],
-            "use": [
-              "[Summer Con Dynasty 8]"
+              "Emperor Edition"
             ]
           },
           {
             "artist": [
-              "Mateusz Ozminski"
+              "Noah Bradley"
             ],
             "artnumber": [
-              "10130151"
-            ],
-            "chi": [
-              "3"
+              "10040402"
             ],
             "clan": [
-              "Lion"
+              "Crab"
             ],
             "cost": [
-              "6"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "This is one of the Lions fighting P'an Ku and/or Fudo cultists"
-            ],
-            "flavor": [
-              "The Lion charged with a roar of fury and the passion of men who have trained for war but never tasted it. The Crab resigned themselves to receive the charge with the resilience of men who have tasted it far too often."
+              "4"
             ],
             "force": [
-              "4"
-            ],
-            "honor": [
-              "4"
+              "9"
             ],
             "keywords": [
-              "Conqueror",
-              "Lion Clan",
-              "Samurai"
-            ],
-            "number": [
-              "20"
+              "Castle"
             ],
             "personalhonor": [
-              "3"
+              "4"
             ],
             "printimagehash": [
-              "1a/cc",
-              "29/3b",
-              "8f/b8"
+              "70/31"
             ],
             "printingid": "2",
-            "rarity": [
-              "Fixed"
-            ],
-            "set": [
-              "A Matter of Honor"
-            ],
-            "title": [
-              "Akodo Daiken"
-            ],
-            "type": [
-              "Personality"
-            ],
-            "use": [
-              "[Summer Con Dynasty 8]"
-            ]
-          }
-        ],
-        "printingprimary": "1",
-        "title": [
-          "Akodo Daiken"
-        ],
-        "type": [
-          "Personality"
-        ],
-        "updatelog": [
-          {
-            "newdata": {
-              "legality": [
-                "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
-                "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-                "Modern"
-              ]
-            },
-            "olddata": {
-              "legality": [
-                "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
-                "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-                "Modern",
-                "Modern"
-              ]
-            },
-            "op": "update",
-            "timestamp": 1634264856728,
-            "uid": 21069,
-            "uname": "Don Eisele"
-          }
-        ]
-      },
-      "source_url": "https://oracleofthevoid.com/#cardid=10578",
-      "types": [
-        "Personality"
-      ]
-    },
-    {
-      "current_oracle_text": "",
-      "deck_types": [
-        "Dynasty"
-      ],
-      "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-10577",
-      "image_ids": [
-        "oracle-l5r-10577-printing-1-image-1"
-      ],
-      "name": "Mirumoto Tsuda",
-      "oracle_id": 10577,
-      "playable": false,
-      "selected_printings": [
-        {
-          "artist": [
-            "Zhi Kang Lim"
-          ],
-          "artnumber": [
-            "10130150"
-          ],
-          "designer": [
-            "Bryan"
-          ],
-          "designernotes": [
-            "This is one of the Dragons fighting P'an Ku and/or Fudo cultists"
-          ],
-          "flavor": [
-            "<i>\"Forgive me, my friend. I understand all too well seeking your own path, but you have followed yours to dishonor and heresy, and I will not stand for it.\"</i>"
-          ],
-          "printimagehash": [
-            "54/c7"
-          ],
-          "printingid": "1",
-          "rarity": [
-            "Promo"
-          ],
-          "set": [
-            "Promotional&ndash;Emperor"
-          ],
-          "use": [
-            "[Summer Con Dynasty 7]"
-          ]
-        }
-      ],
-      "source_legality_labels": [
-        "A Brother's Destiny (Ivory Edition)",
-        "Age of Conquest (Emperor)",
-        "Legacy",
-        "Modern"
-      ],
-      "source_record": {
-        "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:33:14.225341",
-        "cardid": 10577,
-        "chi": [
-          "3"
-        ],
-        "clan": [
-          "Dragon"
-        ],
-        "cost": [
-          "5"
-        ],
-        "deck": [
-          "Dynasty"
-        ],
-        "force": [
-          "3"
-        ],
-        "formattedtitle": "Mirumoto Tsuda",
-        "honor": [
-          "3"
-        ],
-        "imagehash": "54/c7",
-        "keywords": [
-          "<b>Cavalry</b>",
-          "<b>Duelist</b>",
-          "Dragon Clan",
-          "Samurai"
-        ],
-        "legality": [
-          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
-          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-          "Legacy",
-          "Modern"
-        ],
-        "notes": [
-          "Legal December 1st, 2013",
-          "Released in the 2013 Summer Con pack"
-        ],
-        "ph": [
-          "2"
-        ],
-        "printing": [
-          {
-            "artist": [
-              "Zhi Kang Lim"
-            ],
-            "artnumber": [
-              "10130150"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "This is one of the Dragons fighting P'an Ku and/or Fudo cultists"
-            ],
-            "flavor": [
-              "<i>\"Forgive me, my friend. I understand all too well seeking your own path, but you have followed yours to dishonor and heresy, and I will not stand for it.\"</i>"
-            ],
-            "printimagehash": [
-              "54/c7"
-            ],
-            "printingid": "1",
             "rarity": [
               "Promo"
             ],
             "set": [
               "Promotional&ndash;Emperor"
-            ],
-            "use": [
-              "[Summer Con Dynasty 7]"
-            ]
-          }
-        ],
-        "printingprimary": "1",
-        "title": [
-          "Mirumoto Tsuda"
-        ],
-        "type": [
-          "Personality"
-        ]
-      },
-      "source_url": "https://oracleofthevoid.com/#cardid=10577",
-      "types": [
-        "Personality"
-      ]
-    },
-    {
-      "current_oracle_text": "",
-      "deck_types": [
-        "Dynasty"
-      ],
-      "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-10571",
-      "image_ids": [
-        "oracle-l5r-10571-printing-1-image-1"
-      ],
-      "name": "Traveling Market",
-      "oracle_id": 10571,
-      "playable": false,
-      "selected_printings": [
-        {
-          "artist": [
-            "Brent Chumley"
-          ],
-          "artnumber": [
-            "10130172"
-          ],
-          "designer": [
-            "Bryan"
-          ],
-          "designernotes": [
-            "A market in the colonies selling exotic wares (tied to card 10130173)"
-          ],
-          "flavor": [
-            "<i>\"They come, set up a temporary post, and then move on in search of better goods and customers. An interesting and wholly innocent pattern.\" - Yasuki Makoto</i>"
-          ],
-          "number": [
-            "159"
-          ],
-          "printimagehash": [
-            "14/90"
-          ],
-          "printingid": "1",
-          "rarity": [
-            "Promo"
-          ],
-          "set": [
-            "Promotional&ndash;Emperor"
-          ],
-          "use": [
-            "[September Herald Card 1]"
-          ]
-        }
-      ],
-      "source_legality_labels": [
-        "A Brother's Destiny (Ivory Edition)",
-        "A Brother's Destiny (Twenty Festivals)",
-        "Age of Conquest (Emperor)",
-        "Legacy",
-        "Modern",
-        "War of the Seals (Onyx Edition)"
-      ],
-      "source_record": {
-        "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:36:12.526057",
-        "cardid": 10571,
-        "cost": [
-          "3"
-        ],
-        "deck": [
-          "Dynasty"
-        ],
-        "formattedtitle": "Traveling Market",
-        "imagehash": "23/53",
-        "keywords": [
-          "<b>Kharmic</b>",
-          "Market"
-        ],
-        "legality": [
-          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
-          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Twenty&nbsp;Festivals)",
-          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-          "Legacy",
-          "Modern",
-          "War&nbsp;of&nbsp;the&nbsp;Seals&nbsp;(Onyx&nbsp;Edition)"
-        ],
-        "notes": [
-          "Legal December 1st, 2013"
-        ],
-        "playtestname": [
-          "Traveling Market"
-        ],
-        "printing": [
-          {
-            "artist": [
-              "Brent Chumley"
-            ],
-            "artnumber": [
-              "10130172"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "A market in the colonies selling exotic wares (tied to card 10130173)"
-            ],
-            "flavor": [
-              "<i>\"They come, set up a temporary post, and then move on in search of better goods and customers. An interesting and wholly innocent pattern.\" - Yasuki Makoto</i>"
-            ],
-            "number": [
-              "159"
-            ],
-            "printimagehash": [
-              "14/90"
-            ],
-            "printingid": "1",
-            "rarity": [
-              "Promo"
-            ],
-            "set": [
-              "Promotional&ndash;Emperor"
-            ],
-            "use": [
-              "[September Herald Card 1]"
-            ]
-          },
-          {
-            "artist": [
-              "Brent Chumley"
-            ],
-            "artnumber": [
-              "10130172"
-            ],
-            "cost": [
-              "3"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "A market in the colonies selling exotic wares (tied to card 10130173)"
-            ],
-            "flavor": [
-              "\"If the Lion are to prosper, we cannot wait for patrons. We must seek them out.\" - Akodo Kenaro"
-            ],
-            "keywords": [
-              "Kharmic",
-              "Market"
-            ],
-            "number": [
-              "13"
-            ],
-            "printimagehash": [
-              "55/e1",
-              "d1/1e",
-              "d7/d8"
-            ],
-            "printingid": "2",
-            "rarity": [
-              "Fixed"
-            ],
-            "set": [
-              "A Matter of Honor"
             ],
             "text": [
-              "(Limited, pay 2 Gold: Discard a Kharmic card from your Province and refill it face-up.)<br>:bow:: Produce 3 Gold."
+              "Siege Battle: Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor."
             ],
             "title": [
-              "Traveling Market"
+              "Carpenter Castle"
             ],
             "type": [
-              "Holding"
-            ],
-            "use": [
-              "[September Herald Card 1]"
-            ]
-          },
-          {
-            "artist": [
-              "Brent Chumley"
-            ],
-            "artnumber": [
-              "17400049"
-            ],
-            "cost": [
-              "3"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "A market in the colonies selling exotic wares (tied to card 10130173)"
-            ],
-            "flavor": [
-              "Many merchants believe that their customers will come to them. Others are not so patient, and are willing to go to the customer if the promise of coin is sufficient."
-            ],
-            "keywords": [
-              "Kharmic",
-              "Market"
-            ],
-            "number": [
-              "41"
-            ],
-            "printimagehash": [
-              "58/18"
-            ],
-            "printingid": "3",
-            "rarity": [
-              "Uncommon"
-            ],
-            "set": [
-              "Twenty Festivals"
-            ],
-            "title": [
-              "Traveling Market"
-            ],
-            "type": [
-              "Holding"
-            ],
-            "use": [
-              "Designer's Choice"
+              "Stronghold"
             ]
           }
         ],
-        "printingprimary": "3",
+        "printingprimary": "1",
+        "production": [
+          "4"
+        ],
+        "startinghonor": [
+          "4"
+        ],
+        "strength": [
+          "9"
+        ],
+        "text": [
+          "<b>Siege Battle:</b> Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor."
+        ],
         "title": [
-          "Traveling Market"
+          "Carpenter Castle"
         ],
         "type": [
-          "Holding"
+          "Stronghold"
         ]
       },
-      "source_url": "https://oracleofthevoid.com/#cardid=10571",
+      "source_url": "https://oracleofthevoid.com/#cardid=1218",
       "types": [
-        "Holding"
+        "Stronghold"
       ]
     },
     {
-      "current_oracle_text": "",
+      "current_oracle_text": "Battle: Choose your performing unbowed Samurai: Melee 4 Attack, with +2 strength if you control a Shugenja.",
       "deck_types": [
-        "Dynasty"
+        "Pre-Game"
       ],
       "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-10586",
+      "id": "oracle-l5r-7017",
       "image_ids": [
-        "oracle-l5r-10586-printing-1-image-1"
+        "oracle-l5r-7017-printing-2-image-1"
       ],
-      "name": "Utaku Sang-Ju",
-      "oracle_id": 10586,
+      "name": "Shiro Shiba",
+      "oracle_id": 7017,
       "playable": false,
       "selected_printings": [
         {
           "artist": [
-            "Storn A. Cook"
+            "Noah Bradley"
           ],
           "artnumber": [
-            "10130156"
+            "10040421"
           ],
-          "designer": [
-            "Bryan"
+          "clan": [
+            "Phoenix"
           ],
-          "designernotes": [
-            "This is one of the Unicorns fighting P'an Ku and/or Fudo cultists"
+          "cost": [
+            "4"
           ],
-          "flavor": [
-            "<i>\"I trust my spear, my horse, and my clan,\" Sang-Ju said, \"not necessarily in that order.\"</i>"
+          "force": [
+            "7"
+          ],
+          "personalhonor": [
+            "6"
           ],
           "printimagehash": [
-            "7c/ec"
+            "90/5e"
           ],
-          "printingid": "1",
+          "printingid": "2",
           "rarity": [
             "Promo"
           ],
           "set": [
             "Promotional&ndash;Emperor"
           ],
-          "use": [
-            "[Summer Con Fate 2]"
+          "text": [
+            "Battle: Choose your performing unbowed Samurai: Melee 4 Attack, with +2 strength if you control a Shugenja."
+          ],
+          "title": [
+            "Shiro Shiba"
+          ],
+          "type": [
+            "Stronghold"
           ]
         }
       ],
       "source_legality_labels": [
-        "A Brother's Destiny (Ivory Edition)",
         "Age of Conquest (Emperor)",
         "Legacy",
         "Modern"
       ],
       "source_record": {
         "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:35:40.687369",
-        "cardid": 10586,
-        "chi": [
-          "3"
-        ],
+        "@timestamp": "2026-06-06T14:34:15.905408",
+        "cardid": 7017,
         "clan": [
-          "Unicorn"
-        ],
-        "cost": [
-          "5"
+          "Phoenix"
         ],
         "deck": [
-          "Dynasty"
+          "Pre-Game"
         ],
-        "force": [
-          "3"
-        ],
-        "formattedtitle": "Utaku Sang-Ju",
-        "honor": [
-          "4"
-        ],
-        "imagehash": "7c/ec",
-        "keywords": [
-          "<b>Cavalry</b>",
-          "Battle Maiden",
-          "Paragon",
-          "Samurai",
-          "Unicorn Clan"
-        ],
+        "formattedtitle": "Shiro Shiba",
+        "imagehash": "df/4d",
         "legality": [
-          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
           "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
           "Legacy",
           "Modern"
         ],
-        "notes": [
-          "Legal December 1st, 2013",
-          "Released in the 2013 Summer Con pack"
-        ],
-        "ph": [
-          "3"
-        ],
         "printing": [
           {
             "artist": [
-              "Storn A. Cook"
+              "Noah Bradley"
             ],
             "artnumber": [
-              "10130156"
-            ],
-            "designer": [
-              "Bryan"
-            ],
-            "designernotes": [
-              "This is one of the Unicorns fighting P'an Ku and/or Fudo cultists"
+              "10040421"
             ],
             "flavor": [
-              "<i>\"I trust my spear, my horse, and my clan,\" Sang-Ju said, \"not necessarily in that order.\"</i>"
+              "<i>\"An unassuming home for an unassuming people. They are what all warriors should strive to become.\" - Isawa Tamaki</i>"
+            ],
+            "number": [
+              "413"
             ],
             "printimagehash": [
-              "7c/ec"
+              "df/4d"
             ],
             "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition"
+            ]
+          },
+          {
+            "artist": [
+              "Noah Bradley"
+            ],
+            "artnumber": [
+              "10040421"
+            ],
+            "clan": [
+              "Phoenix"
+            ],
+            "cost": [
+              "4"
+            ],
+            "force": [
+              "7"
+            ],
+            "personalhonor": [
+              "6"
+            ],
+            "printimagehash": [
+              "90/5e"
+            ],
+            "printingid": "2",
             "rarity": [
               "Promo"
             ],
             "set": [
               "Promotional&ndash;Emperor"
             ],
-            "use": [
-              "[Summer Con Fate 2]"
+            "text": [
+              "Battle: Choose your performing unbowed Samurai: Melee 4 Attack, with +2 strength if you control a Shugenja."
+            ],
+            "title": [
+              "Shiro Shiba"
+            ],
+            "type": [
+              "Stronghold"
             ]
           }
         ],
         "printingprimary": "1",
+        "production": [
+          "4"
+        ],
+        "startinghonor": [
+          "6"
+        ],
+        "strength": [
+          "7"
+        ],
+        "text": [
+          "<b>Battle:</b> Choose your performing unbowed Samurai: Melee 4 Attack, with +2 strength if you control a Shugenja."
+        ],
         "title": [
-          "Utaku Sang-Ju"
+          "Shiro Shiba"
         ],
         "type": [
-          "Personality"
+          "Stronghold"
         ]
       },
-      "source_url": "https://oracleofthevoid.com/#cardid=10586",
+      "source_url": "https://oracleofthevoid.com/#cardid=7017",
       "types": [
-        "Personality"
+        "Stronghold"
       ]
     }
   ],
   "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
   "printing_set": "Promotional&ndash;Emperor",
-  "response_sha256": "65b9f5955afe8cfed30caa31efffcc68a96bf134545079991012605690b11ed3",
+  "response_sha256": "7538362618e52a60548deba171f5f46c6cfd7767aa4826d21965a897e32ed172",
   "schema_version": 1,
   "scope": "needed_cards_only"
 }

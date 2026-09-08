@@ -62,7 +62,9 @@ var tests = new (string Name, Action Run)[]
     ("Journey's End Keep moves home a Personality with no more Followers than the performer, not one with more", JourneysEndMove),
     ("Shamate Keep moves home a Personality with equal or lower Personal Honor; gains Honor only if uncontrolled", ShamateMove),
     ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
-    ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo)
+    ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
+    ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
+    ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack)
 };
 var failed=0;
 foreach(var test in tests)
@@ -610,6 +612,96 @@ static void LawOfDarknessDojo()
         var before=e.State.Players[1].Honor;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:samurai.Id,TargetId:enemy.Id,AbilityId:"training-honor-strike"));
         Equal(e.State.Players[1].Honor,before-3,"2 Honor from the training ability plus 1 more from Law of Darkness Dojo's passive");
+    }
+}
+static void CarpenterCastleAttack()
+{
+    {
+        // Ranged/Melee Attack targeting is deferred, not required up front: the action is legal even
+        // though the only enemy in play is too strong to be a legal target.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above Ranged 5
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,AbilityId:"carpenter-castle-siege"));
+        Check(e.State.Cards[castle.Id].Bowed,"Bowing the Castle/Siege card is a cost paid regardless of whether the Attack hits");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
+        Equal(e.State.Players[0].Honor,before,"No Honor gain without a hit");
+    }
+    {
+        // A Personality with a Follower attached is not itself targetable; the Follower is.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, would be in range alone
+        var follower=Add(s,"training-follower",1,Zone.Attached,attachedTo:enemy.Id,province:0); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        var before=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:follower.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard,"The targeted Follower is destroyed as an attachment, not marked Dead");
+        Equal(e.State.Players[0].Honor,before+2,"Gains 2 Honor because the Attack targeted a card");
+    }
+    {
+        // A Personality with no Followers, at or under strength, is destroyed as a full unit (Dead).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, no Followers
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+        Equal(e.State.Players[0].Honor,before+2);
+    }
+    {
+        // The Castle/Siege card must be unbowed and carry the matching keyword.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var bowedCastle=Add(s,"training-castle",0,Zone.Home,bowed:true);
+        var notCastle=Add(s,"training-border-keep",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:bowedCastle.Id,AbilityId:"carpenter-castle-siege"));
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:notCastle.Id,AbilityId:"carpenter-castle-siege"));
+    }
+}
+static void ShiroShibaAttack()
+{
+    {
+        // Base Melee 4 Attack: a Force-4 enemy without Followers is legal, a Force-5 one is not.
+        var s=StrongholdBattle("oracle-l5r-7017");
+        var performer=Add(s,"training-samurai",0,Zone.Battlefield,province:0);
+        var tooStrong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:tooStrong.Id,AbilityId:"shiro-shiba-melee"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,AbilityId:"shiro-shiba-melee"));
+        Check(e.State.Cards[tooStrong.Id].Zone==Zone.Battlefield,"Above-strength enemy is untouched; performer does not bow as a cost");
+        Check(!e.State.Cards[performer.Id].Bowed,"The performing Samurai is not itself bowed by this ability");
+    }
+    {
+        // Controlling a Shugenja (anywhere in play, not just at this battlefield) raises strength to 6.
+        var s=StrongholdBattle("oracle-l5r-7017");
+        var performer=Add(s,"training-samurai",0,Zone.Battlefield,province:0);
+        var shugenja=Add(s,"training-shugenja",0,Zone.Home);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var stillTooStrong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        Add(s,"training-item",1,Zone.Attached,attachedTo:stillTooStrong.Id,province:0); // +2 Force = 8, above even the boosted strength of 6
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:stillTooStrong.Id,AbilityId:"shiro-shiba-melee"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"shiro-shiba-melee"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead);
+        Check(shugenja.Zone==Zone.Home,"The Shugenja need not be at this battlefield to grant the bonus");
+    }
+    {
+        // The performer must be an unbowed Samurai at this battlefield.
+        var s=StrongholdBattle("oracle-l5r-7017");
+        var bowed=Add(s,"training-samurai",0,Zone.Battlefield,province:0,bowed:true);
+        var notSamurai=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:bowed.Id,AbilityId:"shiro-shiba-melee"));
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:notSamurai.Id,AbilityId:"shiro-shiba-melee"));
     }
 }
 // Presentation consumes the same authoritative contribution used by ResolveBattle.
