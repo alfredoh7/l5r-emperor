@@ -11,7 +11,7 @@ for spec in '1920x1080 normal' '1280x720 small' '1672x941 motion' '2560x1080 too
   rg -q 'STAT_TOKEN_PASS' "artifacts/checks/token-$mode.log"
   if rg -q 'ERROR:|SCRIPT ERROR:' "artifacts/checks/token-$mode.log"; then cat "artifacts/checks/token-$mode.log"; exit 1; fi
 done
-for spec in '1920x1080 battle-tokens' '1280x720 assignment' '1672x941 battle-expanded-tokens' '2560x1080 battle-tokens-focus'; do
+for spec in '1920x1080 battle-tokens' '1280x720 assignment' '1672x941 battle-expanded-tokens' '2560x1080 battle-tokens-focus' '1920x1080 battle-tokens-tokenhover'; do
   read -r resolution mode <<< "$spec"
   "$GODOT" --path "$L5R_PROJECT_ROOT/src/L5R.Client" --resolution "$resolution" -- --capture="$L5R_PROJECT_ROOT/artifacts/screenshots/token-board-$mode.png" --capture-mode="published-board-$mode" > "artifacts/checks/token-board-$mode.log" 2>&1
   rg -q 'STAT_TOKEN_PASS' "artifacts/checks/token-board-$mode.log"

@@ -27,6 +27,12 @@ public partial class Main
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             if (_selected?.Id != pair.Card.Id || View.Version != version) throw new InvalidOperationException("Token click failed to inspect its Personality without changing the match.");
             _tokenClickChecked = true;
+            if (_captureMode.Contains("tokenhover", StringComparison.Ordinal))
+            {
+                GetWindow().GrabFocus();
+                GetViewport().WarpMouse(point + Vector2.One);
+                Input.ParseInputEvent(new InputEventMouseMotion { Position = point + Vector2.One, GlobalPosition = point + Vector2.One, Relative = Vector2.One });
+            }
         }
         catch (Exception e) { _tokenProbeError = e.Message; }
     }
@@ -68,6 +74,9 @@ public partial class Main
                 if (rect.Intersects(TokenVisualRect(pairs[j]))) throw new InvalidOperationException("Token pairs collide.");
         }
         if (_captureMode.Contains("tokens", StringComparison.Ordinal) && (!_tokenClickChecked || _tokenProbeError is not null)) throw new InvalidOperationException(_tokenProbeError ?? "Native token input probe incomplete");
+        if (_captureMode.Contains("tokenhover", StringComparison.Ordinal) &&
+            ReadingTooltip.LastText?.Contains("Click either token to select this Personality.", StringComparison.Ordinal) != true)
+            throw new InvalidOperationException("Native token hover did not open its explanation.");
         GD.Print($"STAT_TOKEN_PASS: {pairs.Length} engine-bound pairs; no card occlusion, clipping or token collisions; nativeClick={_tokenClickChecked}.");
     }
 }
