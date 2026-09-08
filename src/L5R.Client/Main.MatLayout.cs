@@ -5,7 +5,7 @@ namespace L5R.Client;
 
 public partial class Main
 {
-    private const float MatPadding = 22, MatHeader = 64, MatGap = 24;
+    private const float MatPadding = 22, MatHeader = InkMatSections.Header, MatGap = 24;
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
@@ -66,14 +66,14 @@ public partial class Main
         _playLeft = MatPadding + holdingWidth + MatGap;
         WorldWidth = _playLeft + _playWidth + MatPadding;
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
-        var provinceHeight = MatHeader + PlaneHeight(CardHeight) + MatPadding;
+        var provinceHeight = MatHeader + PlaneHeight(CardHeight) + ProvinceMarker.Footer + MatPadding;
         _enemyHomeY = MatPadding + provinceHeight + MatGap;
         var enemyBandBottom = Math.Max(_enemyHomeY + _homeHeights[enemy.Id], MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy));
         _battleY = enemyBandBottom + MatGap;
-        _battleHeight = BattleActive ? Math.Max(92, _armyHeights.Values.Sum() + MatHeader + MatPadding + RowGap) : 0;
+        _battleHeight = BattleActive ? Math.Max(92, _armyHeights.Values.Sum() + MatHeader + MatPadding + RowGap + InkMatSections.BattleFooter) : 0;
         _selfHomeY = _battleY + _battleHeight + (BattleActive ? MatGap : 0);
         _selfProvinceY = _selfHomeY + _homeHeights[Self.Id] + MatGap + MatHeader;
-        _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + MatPadding,
+        _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + ProvinceMarker.Footer + MatPadding,
             _selfHomeY + MatRowsHeight(_holdingRows[Self.Id], Self)) + MatPadding;
 
         foreach (var player in View.Players)

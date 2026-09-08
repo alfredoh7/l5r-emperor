@@ -9,7 +9,7 @@ Approved direction: C from the border-only concepts, selected by Alfredo on 2026
 - `src/L5R.Client/Art/mat-ink-cloud.png`: original generated cloud bitmap (alpha retained).
 - Marco Polo title reference: https://www.youtube.com/watch?v=6onwcVx8BDg . Muted browser playback sampled the opening through 0:50 of 1:37. Observed directional uneven ink fronts, dense cores/transparent fringes, substrate grain, movement that settles. This implementation takes those motion properties as inspiration; it does not reproduce the title artwork.
 
-The renderer crops transparent padding non-destructively through AtlasTexture regions using a small alpha threshold, since generated files contain stray almost-transparent pixels. Decorative motifs retain fixed size; edge grain repeats rather than stretching the ornament. Labels use small, restrained Alegreya serif text, as requested in the follow-up; Musashi remains the game heading font elsewhere. Corner ornaments are capped at 54 world units (half the initial implementation size). The reference sheet is not a production atlas.
+The renderer crops transparent padding non-destructively through AtlasTexture regions using a small alpha threshold, since generated files contain stray almost-transparent pixels. Decorative motifs retain fixed size; edge grain repeats rather than stretching the ornament. The latest follow-up replaces permanent box labels with generated gold emblems and hover names; ceremonial live province numbers sit beneath their cards. See [EMBLEMS.md](EMBLEMS.md) for the exact production prompts and rendering details. Corner ornaments are capped at 54 world units (half the initial implementation size). The reference sheet is not a production atlas.
 
 ## Exact generation prompts
 

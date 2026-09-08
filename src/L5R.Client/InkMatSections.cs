@@ -2,7 +2,7 @@ using Godot;
 
 namespace L5R.Client;
 
-/// <summary>Public layout facts only. Bounds and lettering are in the unprojected table plane.</summary>
+/// <summary>Public layout facts only. Bounds and icon identities are in the unprojected table plane.</summary>
 public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool Active = false);
 
 /// <summary>
@@ -18,8 +18,8 @@ public partial class InkMatSections : Control
     private bool _reducedMotion;
     private Texture2D? _edge, _cloud;
     private Shader? _shader;
-    private InkLabelOverlay? _labelOverlay;
-    private readonly Color _letter = new("c6bda7");
+    private InkIconOverlay? _iconOverlay;
+    public const float Header = 96, BattleFooter = 84;
 
     /// <summary>Includes a removed section only while its old ink is dissolving.</summary>
     public int SectionCount => _sections.Count;
@@ -31,17 +31,17 @@ public partial class InkMatSections : Control
     public Rect2? CurrentBounds(string id) => _sections.TryGetValue(id, out var section) ? section.Current : null;
 
     /// <summary>
-    /// Optional crisp type above the projected canvas. Project receives unprojected
+    /// Optional crisp emblems above the projected canvas. Project receives unprojected
     /// world points and returns viewport-global points; the returned input-transparent
     /// control should be parented inside the clipped table viewport.
     /// </summary>
-    public Control CreateLabelOverlay(Func<Vector2, Vector2> projectToGlobal)
+    public Control CreateIconOverlay(Func<Vector2, Vector2> projectToGlobal)
     {
-        if (_labelOverlay is not null && IsInstanceValid(_labelOverlay))
-            throw new InvalidOperationException("The mat already has a label overlay.");
-        _labelOverlay = new InkLabelOverlay(this, projectToGlobal);
+        if (_iconOverlay is not null && IsInstanceValid(_iconOverlay))
+            throw new InvalidOperationException("The mat already has an icon overlay.");
+        _iconOverlay = new InkIconOverlay(this, projectToGlobal);
         QueueRedraw();
-        return _labelOverlay;
+        return _iconOverlay;
     }
 
     private sealed class Section(InkMatSection target, InkStroke stroke, InkStroke ghost)
@@ -227,7 +227,7 @@ public partial class InkMatSections : Control
     private static bool SameRect(Rect2 a, Rect2 b) => a.Position.DistanceSquaredTo(b.Position) < .01f && a.Size.DistanceSquaredTo(b.Size) < .01f;
     private static float Ease(float value) => value * value * value * (value * (value * 6 - 15) + 10);
 
-    private IEnumerable<(Rect2 Bounds, string Label, float Opacity, float Active)> Labels()
+    private IEnumerable<(Rect2 Bounds, string Label, float Opacity, float Active)> Emblems()
     {
         foreach (var state in _sections.Values)
         {
@@ -240,73 +240,104 @@ public partial class InkMatSections : Control
         }
     }
 
+    public Control? IconAt(Vector2 globalPosition) => _iconOverlay?.Hit(globalPosition);
+    public IReadOnlyList<Control> IconHotspots => _iconOverlay?.Hotspots ?? [];
+
     public override void _Draw()
     {
-        if (_labelOverlay is not null && IsInstanceValid(_labelOverlay) && _labelOverlay.IsInsideTree()) return;
-        foreach (var state in Labels())
+        if (_iconOverlay is not null && IsInstanceValid(_iconOverlay) && _iconOverlay.IsInsideTree()) return;
+        foreach (var state in Emblems())
         {
-            var bounds = state.Bounds;
-            var opacity = state.Opacity;
-            if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Label)) continue;
-            // Center the real heading within the first 64 logical units. This is
-            // reserved by layout, so neither a title nor its motif touches a card.
-            var width = Math.Max(1, bounds.Size.X - 42);
-            var fontSize = 27;
-            while (fontSize > 18 && Palette.Body.GetStringSize(state.Label, fontSize: fontSize).X > width) fontSize--;
-            var baseline = bounds.Position + new Vector2(21, 32 + (Palette.Body.GetAscent(fontSize) - Palette.Body.GetDescent(fontSize)) / 2);
-            var tint = _letter.Lerp(new Color("f6dfaf"), state.Active);
-            DrawStringOutline(Palette.Body, baseline, state.Label, HorizontalAlignment.Center, width, fontSize, 3, new Color(.035f, .05f, .065f, .85f * opacity));
-            DrawString(Palette.Body, baseline, state.Label, HorizontalAlignment.Center, width, fontSize, tint with { A = opacity * .94f });
+            if (state.Opacity <= .001f) continue;
+            var texture = MatEmblemArt.Symbol(state.Label);
+            var height = 64f;
+            var size = new Vector2(height * texture.GetWidth() / texture.GetHeight(), height);
+            DrawTextureRect(texture, new Rect2(state.Bounds.Position + new Vector2(state.Bounds.Size.X / 2, Header / 2) - size / 2, size), false,
+                new Color(1, 1, 1, state.Opacity * .9f));
         }
     }
 
-    private partial class InkLabelOverlay(InkMatSections owner, Func<Vector2, Vector2> project) : Control
+    private partial class InkIconOverlay(InkMatSections owner, Func<Vector2, Vector2> project) : Control
     {
+        private readonly Dictionary<string, Control> _hotspots = new(StringComparer.Ordinal);
+        public IReadOnlyList<Control> Hotspots => _hotspots.Values.ToArray();
+        public Control? Hit(Vector2 global) => IsVisibleInTree()
+            ? _hotspots.Values.FirstOrDefault(c => c.Visible && c.GetGlobalRect().HasPoint(global)) : null;
         public override void _Ready()
         {
             MouseFilter = MouseFilterEnum.Ignore;
             FocusMode = FocusModeEnum.None;
             ClipContents = false;
+            TextureFilter = TextureFilterEnum.LinearWithMipmaps;
             owner.QueueRedraw();
         }
-
-        public override void _Process(double delta) => QueueRedraw();
-
+        private Rect2 IconRect(Rect2 bounds, string label)
+        {
+            var inverse = GetGlobalTransform().AffineInverse();
+            var centerWorld = bounds.Position + new Vector2(bounds.Size.X / 2, Header / 2);
+            var center = inverse * project(centerWorld);
+            var availableHeight = (inverse * project(centerWorld + new Vector2(0, Header / 2 - 6)))
+                .DistanceTo(inverse * project(centerWorld - new Vector2(0, Header / 2 - 6)));
+            var screenScale = Math.Max(.1f, GetGlobalTransform().X.Length());
+            var height = Math.Min(30 / screenScale, availableHeight * .84f);
+            var texture = MatEmblemArt.Symbol(label);
+            var size = new Vector2(height * texture.GetWidth() / texture.GetHeight(), height);
+            return new Rect2(center - size / 2, size);
+        }
+        public override void _Process(double delta)
+        {
+            if (!IsInstanceValid(owner) || !owner.IsInsideTree()) return;
+            foreach (var target in owner.Targets)
+            {
+                if (!_hotspots.TryGetValue(target.Id, out var hit))
+                {
+                    hit = new Control { MouseFilter = MouseFilterEnum.Ignore, FocusMode = FocusModeEnum.None };
+                    hit.SetMeta("mat_icon", target.Id);
+                    _hotspots.Add(target.Id, hit); AddChild(hit);
+                }
+                // Explicit hit testing gives the projected mat readable tooltips
+                // without any overlay intercepting a card, click or camera drag.
+                hit.SetMeta("flat_tooltip", target.Label switch
+                {
+                    "Holdings" => "Holdings · Stronghold and in-play Holdings",
+                    "Home" => "Home · Cards at home and their attachments",
+                    "Provinces" => "Provinces · The seals below the cards identify each province",
+                    _ => target.Label + " battlefield"
+                });
+                var rect = IconRect(target.Bounds, target.Label);
+                hit.Position = rect.Position; hit.Size = rect.Size;
+                hit.Visible = owner.IsVisibleInTree() && owner.RevealProgress(target.Id) > .85f;
+            }
+            var existing = owner.Targets.Select(s => s.Id).ToHashSet(StringComparer.Ordinal);
+            foreach (var key in _hotspots.Keys.Where(key => !existing.Contains(key)).ToArray())
+            { var old = _hotspots[key]; RemoveChild(old); old.QueueFree(); _hotspots.Remove(key); }
+            QueueRedraw();
+        }
         public override void _Draw()
         {
             if (!IsInstanceValid(owner) || !owner.IsInsideTree() || !owner.IsVisibleInTree()) return;
-            var transform = GetGlobalTransform();
-            var inverse = transform.AffineInverse();
-            var screenScale = Math.Max(.1f, transform.X.Length());
-            foreach (var state in owner.Labels())
+            var inverse = GetGlobalTransform().AffineInverse();
+            var screenScale = Math.Max(.1f, GetGlobalTransform().X.Length());
+            foreach (var state in owner.Emblems())
             {
-                var bounds = state.Bounds;
-                var opacity = state.Opacity;
-                if (opacity <= .001f || string.IsNullOrWhiteSpace(state.Label)) continue;
-                var centerWorld = bounds.Position + new Vector2(bounds.Size.X / 2, 32);
+                if (state.Opacity <= .001f) continue;
+                var tint = new Color(1, 1, 1, state.Opacity * (.88f + .12f * state.Active));
+                DrawTextureRect(MatEmblemArt.Symbol(state.Label), IconRect(state.Bounds, state.Label), false, tint);
+                if (!state.Label.StartsWith("Province ", StringComparison.Ordinal)) continue;
+                // The battlefield keeps its destination identity, also beneath
+                // its units. No permanently visible words are needed on the mat.
+                var centerWorld = state.Bounds.Position + new Vector2(state.Bounds.Size.X / 2, state.Bounds.Size.Y - BattleFooter / 2);
                 var center = inverse * project(centerWorld);
-                var left = inverse * project(new Vector2(bounds.Position.X + 12, centerWorld.Y));
-                var right = inverse * project(new Vector2(bounds.End.X - 12, centerWorld.Y));
-                var width = Math.Max(1, left.DistanceTo(right));
-                var localSize = Math.Max(1, (int)Math.Round(14 / screenScale));
-                var minimumSize = Math.Max(1, (int)Math.Round(12 / screenScale));
-                var label = state.Label;
-                while (localSize > minimumSize && Palette.Body.GetStringSize(label, fontSize: localSize).X > width) localSize--;
-                if (Palette.Body.GetStringSize(label, fontSize: localSize).X > width && label.StartsWith("Province ", StringComparison.Ordinal))
-                    label = "P. " + label[9..];
-                var labelWidth = Math.Min(width, Palette.Body.GetStringSize(label, fontSize: localSize).X);
-                // The baseline is centered on the same world-space top gutter as
-                // the ink. Camera changes only its anchor, never its readability.
-                var baseline = center + new Vector2(-labelWidth / 2, (Palette.Body.GetAscent(localSize) - Palette.Body.GetDescent(localSize)) / 2);
-                var color = owner._letter.Lerp(new Color("f6dfaf"), state.Active) with { A = opacity * .88f };
-                DrawStringOutline(Palette.Body, baseline, label, HorizontalAlignment.Center, labelWidth, localSize,
-                    Math.Max(1, (int)Math.Round(1 / screenScale)), new Color(.035f, .05f, .065f, opacity * .88f));
-                DrawString(Palette.Body, baseline, label, HorizontalAlignment.Center, labelWidth, localSize, color);
+                var available = (inverse * project(centerWorld + new Vector2(0, BattleFooter / 2 - 4)))
+                    .DistanceTo(inverse * project(centerWorld - new Vector2(0, BattleFooter / 2 - 4)));
+                var height = Math.Min(30 / screenScale, available * .86f);
+                var size = new Vector2(height * MatEmblemArt.Seal.GetWidth() / MatEmblemArt.Seal.GetHeight(), height);
+                MatEmblemArt.DrawSeal(this, new Rect2(center - size / 2, size), state.Label[9..], state.Opacity);
             }
         }
     }
 
-    /// <summary>Only painted strokes use the grain shader; lettering remains crisp.</summary>
+    /// <summary>Only painted strokes use the grain shader; emblems remain crisp.</summary>
     private partial class InkStroke : Control
     {
         public Texture2D Edge = null!, Cloud = null!;

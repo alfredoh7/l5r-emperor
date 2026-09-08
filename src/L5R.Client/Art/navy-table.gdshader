@@ -2,7 +2,7 @@ shader_type spatial;
 render_mode unshaded, cull_disabled, fog_disabled;
 #include "res://Art/candlelight.gdshaderinc"
 uniform sampler2D weathered_texture : filter_linear_mipmap, repeat_disable;
-uniform vec2 left_lamp = vec2(.14,.88);
+uniform vec2 left_lamp = vec2(.08,.88);
 uniform vec2 right_lamp = vec2(.91,.16);
 uniform sampler2D lantern_texture : filter_linear_mipmap, repeat_disable;
 uniform sampler2D plate_texture : filter_linear_mipmap, repeat_disable;

@@ -112,7 +112,7 @@ public partial class Main
         }
         _world.Scale = Vector2.One * _cameraZoom;
         _world.Position = _tableSurface.CanvasSize / 2 - _cameraCenter * _cameraZoom;
-        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight));
+        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight), FitZoom);
         CardPaper.SetTableTransform(_world.Position * _tableSurface.RenderScale, _cameraZoom * _tableSurface.RenderScale, _tableSurface.Canvas.Size);
         HideTableTooltip(); _syncTablePointer = true;
         _intentOverlay?.QueueRedraw();
@@ -267,7 +267,7 @@ public partial class Main
         }
         if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
         { HideTableTooltip(); return; }
-        Control? hovered = token ?? TableHovered;
+        Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
         if (token is null)
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }

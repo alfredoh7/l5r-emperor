@@ -4,6 +4,21 @@ Issue #52 / PR #53 — 2026-09-08 — native macOS Godot 4.7.2 .NET.
 
 The approved C direction is implemented as textured, animated mat sections. Holdings are grouped on screen-left, other Home cards remain separate, and actual battles use province-specific fields. Existing full card scans, stat inlays, unit standards, rules authority and manual camera controls remain in use.
 
+## Latest icon and province-seal pass
+
+Alfredo replaced permanent box wording with intuitive emblems. Generated gold-pigment sprites now mark Holdings (rice sheaf), Home (residence), Provinces (fortified gate), and battlefields (crossed swords). The existing delayed reading tooltip provides each name without capturing input. Province numbers use a separate aged ceremonial surround under each resting slot; battlefields repeat their destination seal below the units. Header/footer space is reserved for this artwork. Numbers remain attached to an empty surviving slot, and card hover does not move them.
+
+Final local validation after this change:
+
+- C# compilation and Godot import: passed, zero warnings/errors.
+- `bash tools/check-ink-mat.sh`: all three native views passed, including original layout/card/attachment checks, plus native icon hover routing, polygon clearance against actual card faces, stable below-card province seals, and the empty/hidden/detached-slot checks. The isolated ink lifecycle checks also passed.
+- The real Remote Village purchase film passed: 120 frames, 24 fps, version 18 to 19, in-play group four to five including Stronghold. Reviewed moving, settled and revealing frames. [Native recording](screenshots/ink-mat/ink-apparition.mp4) is a five-second authored-time capture, not a performance benchmark.
+- `bash tools/check-table-camera.sh`: all eight native cases passed again, covering pan/zoom, bowed card input, assignment, attachment inspection, pile tooltip, 16:10, ultrawide and reduced motion. Reduced-motion frames at different light phases were identical.
+- Refreshed Mac launcher; its current-checkout entry passed `bash 'Play Latest.command' --headless --quit-after 2`.
+- Visual review covered the small window, crowded board and closer player-side framing. Seals have reserved space beneath cards; hover targets remain pointer-transparent. The corner lamp position now uses a fitted-camera gutter, avoiding Holdings on compact boards without following manual camera movement.
+
+Exact built-in ImageGen prompts and runtime asset paths are in [EMBLEMS.md](../assets/ui/ink-mat/EMBLEMS.md). Expert rules acceptance and native Windows graphical playtesting are not claimed.
+
 ## Reviewed native views
 
 These are unaltered game captures from real practice states, not generated game screenshots. Practice shuffles vary, so the three pictures are different positions in different matches.
@@ -20,7 +35,7 @@ The focused view intentionally crops the opponent's side; Fit Table returns to t
 
 Alfredo accepted the settled frame but corrected the motion: the border should appear after cards move. The new renderer holds its incoming pigment at zero until actual card flights, table reflow, bowing and pile settling finish. Following a brief quiet pause, ink seeps outward from opposing corners with uneven local absorption, then stops. Outgoing ink and labels dissolve in place instead of stretching.
 
-Labels now use restrained Alegreya serif at 14 screen pixels (12 minimum); the corner motifs are half the previous width. Lamps move toward the lower-left and upper-right corners, with a larger lower-left inset after the small-window check. A generated weathering plate uses the original cutout silhouette. Mipmaps remove sparkling detail at small sizes, and continuous sampling with soft coverage removes rectangular glow seams and prevents the texture from extending beyond its silhouette. One shared candle-energy function synchronizes each lamp's softly moving flame, emitted glow, mat spill and nearby card lighting. The hand and reading popovers stay evenly lit.
+Labels now use restrained Alegreya serif at 14 screen pixels (12 minimum); the corner motifs are half the previous width. Lamps move toward the lower-left and upper-right corners, with card-plane clearance and a fitted-view margin after checking compact tables and small windows. The placement derives from the fit camera so manual panning never pins a lamp to the screen edge. A generated weathering plate uses the original cutout silhouette. Mipmaps remove sparkling detail at small sizes, and continuous sampling with soft coverage removes rectangular glow seams and prevents the texture from extending beyond its silhouette. One shared candle-energy function synchronizes each lamp's softly moving flame, emitted glow, mat spill and nearby card lighting. The hand and reading popovers stay evenly lit.
 
 Follow-up validation:
 

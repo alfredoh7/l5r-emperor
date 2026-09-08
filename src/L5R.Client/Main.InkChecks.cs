@@ -54,12 +54,13 @@ public partial class Main
             ValidateInkBoardTopology();
             ValidateInkAttachmentTrays(targets, resting, version);
             ValidateEmptyProvinceMarker();
+            await ValidateMatEmblems();
             ValidateInkTransitions();
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree().CreateTimer(.8), SceneTreeTimer.SignalName.Timeout);
             ValidateInkCardClearance();
-            GD.Print($"INK_MAT_PASS: {_matTargets.Count} labeled, disjoint sections; in-play Holdings left for both seats; exact visible-card membership; real scene hover/selection/deselection, attachment tray expansion/folding and same-state rebuild preserve settled borders and match version.");
+            GD.Print($"INK_MAT_PASS: {_matTargets.Count} icon-marked, disjoint sections; in-play Holdings left for both seats; exact visible-card membership; real scene hover/selection/deselection, attachment tray expansion/folding and same-state rebuild preserve settled borders and match version.");
             GD.Print("INK_MOTION_PASS: isolated native renderer verifies card-settlement gating, expansion/contraction apparition, rapid retarget, unchanged-sync reveal progress, delayed removal, immediate reduced motion and new-match identity reset. Representative geometry only; no invented game events.");
         }
         catch (Exception error) { _inkProbeError = error.ToString(); }
@@ -70,7 +71,7 @@ public partial class Main
     {
         InkRequire(_matTargets.Count > 0 && _matTargets.Select(s => s.Id).Distinct().Count() == _matTargets.Count,
             "Mat sections are missing or repeat an identity.");
-        InkRequire(_matTargets.All(s => !string.IsNullOrWhiteSpace(s.Label)), "A mat section has no visible name.");
+        InkRequire(_matTargets.All(s => !string.IsNullOrWhiteSpace(s.Label)), "A mat section has no accessible name.");
         InkRequire(_matSections.MouseFilter == Control.MouseFilterEnum.Ignore &&
             InkDescendants(_matSections).OfType<Control>().All(c => c.MouseFilter == Control.MouseFilterEnum.Ignore),
             "An ink border could intercept card or camera input.");
@@ -220,6 +221,52 @@ public partial class Main
             .EmitSignal(Button.SignalName.Pressed);
     }
 
+    private async Task ValidateMatEmblems()
+    {
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        var version = View.Version;
+        var icons = _matSections.IconHotspots;
+        InkRequire(icons.Count == _matTargets.Count && icons.All(c => c.MouseFilter == Control.MouseFilterEnum.Ignore),
+            "Mat icon identities are missing or their hit regions capture input.");
+        foreach (var icon in icons.Where(c => c.Visible))
+        {
+            var point = icon.GetGlobalRect().GetCenter();
+            InkRequire(_matSections.IconAt(point) == icon && icon.HasMeta("flat_tooltip"), "An icon has no discoverable hover name.");
+            // Compare in the same screen coordinate space; no icon should cover a
+            // resting card, even at a dense overview with many attachments.
+            var bounds = icon.GetGlobalRect();
+            foreach (var tile in _tiles.Where(t => _world.IsAncestorOf(t)))
+                InkRequire(Geometry2D.IntersectPolygons(tile.FaceCornersOnViewport(), new Vector2[] { bounds.Position, new(bounds.End.X, bounds.Position.Y), bounds.End, new(bounds.Position.X, bounds.End.Y) }).Count == 0,
+                    "A mat emblem covers a resting card.");
+        }
+        var visible = icons.FirstOrDefault(c => c.Visible && PointerOnTable(c.GetGlobalRect().GetCenter()));
+        InkRequire(visible is not null, "The icon fixture has no visible hotspot to test.");
+        HideTableTooltip(); ReadingTooltip.LastText = null;
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = visible!.GetGlobalRect().GetCenter() });
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        ProcessTableTooltip(.6);
+        InkRequire(ReadingTooltip.LastText == visible.GetMeta("flat_tooltip").AsString(),
+            "Native pointer hover did not route the icon's accessible name through the reading tooltip.");
+        HideTableTooltip();
+        Input.ParseInputEvent(new InputEventMouseMotion { Position = new Vector2(8, 140) });
+        foreach (var marker in _statTokenLayer!.GetChildren().OfType<ProvinceMarker>())
+        {
+            marker._Process(0);
+            if (!marker.Visible) continue;
+            var anchor = marker.ProvinceAnchor;
+            var bottom = _tableSurface.ProjectCanvas(anchor.GetGlobalTransform() * new Vector2(anchor.Size.X / 2, anchor.Size.Y));
+            InkRequire(marker.GetGlobalRect().Position.Y > bottom.Y, "A ceremonial province seal is not below its card slot.");
+            if (anchor.GetChildren().OfType<CardTile>().FirstOrDefault() is not { } card) continue;
+            var before = marker.GetGlobalRect();
+            card.EmitSignal(Control.SignalName.MouseEntered); card._Process(.2); marker._Process(0);
+            InkRequire(InkSame(before, marker.GetGlobalRect()), "Hovering a province moved its identity seal.");
+            card.EmitSignal(Control.SignalName.MouseExited); card._Process(.2);
+        }
+        InkRequire(View.Version == version, "Hovering a mat icon or province seal changed gameplay state.");
+        GD.Print("INK_EMBLEM_PASS: native pointer routes icon hover names; icon hit regions pass through input; province seals sit below resting slots and stay fixed during card hover.");
+    }
+
     private void ValidateEmptyProvinceMarker()
     {
         // An isolated live Control tests the marker's no-CardTile fallback.
@@ -241,6 +288,9 @@ public partial class Main
             InkRequire(marker.IsVisibleInTree() && marker.Text == "3" && float.IsFinite(marker.Position.X) && float.IsFinite(marker.Position.Y) &&
                 marker.Scale.X > 0 && marker.Scale.Y > 0,
                 "A surviving empty province lost its visible, finite, stable number.");
+            var beforeMove = marker.GetGlobalRect();
+            anchor.Position += new Vector2(32, 16); marker._Process(0);
+            InkRequire(!InkSame(beforeMove, marker.GetGlobalRect()) && marker.Text == "3", "Moving the province slot lost or detached its number.");
             anchor.Hide(); marker._Process(0);
             InkRequire(!marker.Visible, "Province marker remained visible after its anchor was hidden.");
             anchor.Show(); marker.Allowed = () => false; marker._Process(0);
