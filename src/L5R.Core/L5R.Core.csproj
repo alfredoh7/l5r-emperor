@@ -6,5 +6,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup><InternalsVisibleTo Include="L5R.Core.Tests" /></ItemGroup>
-  <ItemGroup><EmbeddedResource Include="../../content/published/lion-crane-v1.json" LogicalName="L5R.Published.json" /></ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="../../content/published/lion-crane-v1.json" LogicalName="L5R.Published.json" />
+    <EmbeddedResource Include="../../content/published/vanilla-wave-1.json" LogicalName="L5R.Published.VanillaWave1.json" />
+  </ItemGroup>
 </Project>

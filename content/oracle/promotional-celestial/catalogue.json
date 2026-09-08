@@ -1,0 +1,137 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-7725",
+      "image_ids": [
+        "oracle-l5r-7725-printing-1-image-1"
+      ],
+      "name": "Tadatsugu",
+      "oracle_id": 7725,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Jason Engle"
+          ],
+          "artnumber": [
+            "9028"
+          ],
+          "flavor": [
+            "<i>He thought that the ways of the empire meant nothing to him, but now war will not let him be.</i>"
+          ],
+          "printimagehash": [
+            "6a/50"
+          ],
+          "printingid": "1",
+          "promoquantity": [
+            "122"
+          ],
+          "rarity": [
+            "Promo"
+          ],
+          "set": [
+            "Promotional&ndash;Celestial"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Destroyer War (Celestial)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:35.427627",
+        "cardid": 7725,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "5"
+        ],
+        "formattedtitle": "Tadatsugu",
+        "honor": [
+          "0"
+        ],
+        "imagehash": "6a/50",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "<b>Kensai</b>",
+          "Paragon",
+          "Ronin",
+          "Samurai"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Destroyer&nbsp;War&nbsp;(Celestial)",
+          "Legacy",
+          "Modern"
+        ],
+        "notes": [
+          "Legal August 1st, 2011",
+          "Released in the 2011 Kotei pack"
+        ],
+        "ph": [
+          "3"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Jason Engle"
+            ],
+            "artnumber": [
+              "9028"
+            ],
+            "flavor": [
+              "<i>He thought that the ways of the empire meant nothing to him, but now war will not let him be.</i>"
+            ],
+            "printimagehash": [
+              "6a/50"
+            ],
+            "printingid": "1",
+            "promoquantity": [
+              "122"
+            ],
+            "rarity": [
+              "Promo"
+            ],
+            "set": [
+              "Promotional&ndash;Celestial"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Tadatsugu"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=7725",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Promotional&ndash;Celestial",
+  "response_sha256": "617d90ac1e319deee213d941cdf42b7402ac784d529133ea5631fcdee6950273",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

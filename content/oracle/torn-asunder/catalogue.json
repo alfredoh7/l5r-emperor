@@ -1,0 +1,579 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10314",
+      "image_ids": [
+        "oracle-l5r-10314-printing-1-image-1"
+      ],
+      "name": "Daigotsu Arare",
+      "oracle_id": 10314,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Sam Flegal"
+          ],
+          "artnumber": [
+            "10110061"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Note: Generic Spider Samurai, just a cheap, warm body.]"
+          ],
+          "flavor": [
+            "<i>\"The Crab cast aside their duties in order to attack us, and without provocation. So be it then! I am ready for them!\"</i>"
+          ],
+          "number": [
+            "58"
+          ],
+          "printimagehash": [
+            "61/6e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Torn Asunder"
+          ],
+          "use": [
+            "Spider Designer's Choice (should be generic and useful)"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:21.385826",
+        "cardid": 10314,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Spider"
+        ],
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Daigotsu Arare",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "61/6e",
+        "keywords": [
+          "Samurai",
+          "Shadowlands",
+          "Spider Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "playtestname": [
+          "Daitogsu Generic"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Sam Flegal"
+            ],
+            "artnumber": [
+              "10110061"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: Generic Spider Samurai, just a cheap, warm body.]"
+            ],
+            "flavor": [
+              "<i>\"The Crab cast aside their duties in order to attack us, and without provocation. So be it then! I am ready for them!\"</i>"
+            ],
+            "number": [
+              "58"
+            ],
+            "printimagehash": [
+              "61/6e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Torn Asunder"
+            ],
+            "use": [
+              "Spider Designer's Choice (should be generic and useful)"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Daigotsu Arare"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10314",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10272",
+      "image_ids": [
+        "oracle-l5r-10272-printing-1-image-1"
+      ],
+      "name": "Hida Chiyurei",
+      "oracle_id": 10272,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Paul (Prof.) Herbert"
+          ],
+          "artnumber": [
+            "10110016"
+          ],
+          "designer": [
+            "Loki"
+          ],
+          "designernotes": [
+            "A Crab Berserker with a better grasp of tactics than your average Hida."
+          ],
+          "flavor": [
+            "<i>\"There's a time for attack and a time for planning. Lucky for me, most of my plans tend to involve attacking.\"</i>"
+          ],
+          "number": [
+            "16"
+          ],
+          "printimagehash": [
+            "6e/75"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Torn Asunder"
+          ],
+          "use": [
+            "Non-unique Crab Berserker"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:28.267823",
+        "cardid": 10272,
+        "chi": [
+          "1"
+        ],
+        "clan": [
+          "Crab"
+        ],
+        "cost": [
+          "5"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Hida Chiyurei",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "6e/75",
+        "keywords": [
+          "<b>Tactician</b>",
+          "Berserker",
+          "Crab Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "playtestname": [
+          "Hida Chiyurei"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Paul (Prof.) Herbert"
+            ],
+            "artnumber": [
+              "10110016"
+            ],
+            "designer": [
+              "Loki"
+            ],
+            "designernotes": [
+              "A Crab Berserker with a better grasp of tactics than your average Hida."
+            ],
+            "flavor": [
+              "<i>\"There's a time for attack and a time for planning. Lucky for me, most of my plans tend to involve attacking.\"</i>"
+            ],
+            "number": [
+              "16"
+            ],
+            "printimagehash": [
+              "6e/75"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Torn Asunder"
+            ],
+            "use": [
+              "Non-unique Crab Berserker"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "story": [
+          "2011 Name a Personality - Daniel Sales"
+        ],
+        "title": [
+          "Hida Chiyurei"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10272",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10306",
+      "image_ids": [
+        "oracle-l5r-10306-printing-1-image-1"
+      ],
+      "name": "Isawa Mizuhama",
+      "oracle_id": 10306,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "artnumber": [
+            "10110053"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Note: Generic Water Shugenja]"
+          ],
+          "flavor": [
+            "<i>\"Even in this foreign land, the water kami still answer in the ways of their element&#8230; gentle as a spring rain, or ferocious as a tidal wave.\"</i>"
+          ],
+          "number": [
+            "50"
+          ],
+          "printimagehash": [
+            "9a/83"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Torn Asunder"
+          ],
+          "use": [
+            "Non-unique Phoenix Fire or Water Shugenja for Spell Military, one of the Phoenix, doesn't have to be this guy, finds the WMD testing sites"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:24.907454",
+        "cardid": 10306,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Phoenix"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Isawa Mizuhama",
+        "honor": [
+          "6"
+        ],
+        "imagehash": "9a/83",
+        "keywords": [
+          "Phoenix Clan",
+          "Shugenja",
+          "Water"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "playtestname": [
+          "Water Shugenja"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "artnumber": [
+              "10110053"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: Generic Water Shugenja]"
+            ],
+            "flavor": [
+              "<i>\"Even in this foreign land, the water kami still answer in the ways of their element&#8230; gentle as a spring rain, or ferocious as a tidal wave.\"</i>"
+            ],
+            "number": [
+              "50"
+            ],
+            "printimagehash": [
+              "9a/83"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Torn Asunder"
+            ],
+            "use": [
+              "Non-unique Phoenix Fire or Water Shugenja for Spell Military, one of the Phoenix, doesn't have to be this guy, finds the WMD testing sites"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Isawa Mizuhama"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10306",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10299",
+      "image_ids": [
+        "oracle-l5r-10299-printing-1-image-1"
+      ],
+      "name": "Yoritomo Hofu",
+      "oracle_id": 10299,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Aurelien Hubert"
+          ],
+          "artnumber": [
+            "10110045"
+          ],
+          "designer": [
+            "Thomas"
+          ],
+          "designernotes": [
+            "A Mantis Magistrate on one of the giant Fourth Storm boats. At war with the Crane"
+          ],
+          "flavor": [
+            "<i>\"We have faced the unnatural terrors of these waters for twenty years and survived. Do the Crane really think they can trouble us where the Great Death has failed?\"</i>"
+          ],
+          "number": [
+            "43"
+          ],
+          "printimagehash": [
+            "ff/ab"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Torn Asunder"
+          ],
+          "use": [
+            "Non-unique Mantis Magistrate, anti-Crane, captain or crew member of the Fourth Storm"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:43.166060",
+        "cardid": 10299,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Mantis"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Yoritomo Hofu",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "ff/ab",
+        "keywords": [
+          "<b>Conqueror</b>",
+          "<b>Naval</b>",
+          "Captain of <i>The Fourth Storm</i>",
+          "Magistrate",
+          "Mantis Clan",
+          "Samurai"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "playtestname": [
+          "Yoritomo McDuck"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Aurelien Hubert"
+            ],
+            "artnumber": [
+              "10110045"
+            ],
+            "designer": [
+              "Thomas"
+            ],
+            "designernotes": [
+              "A Mantis Magistrate on one of the giant Fourth Storm boats. At war with the Crane"
+            ],
+            "flavor": [
+              "<i>\"We have faced the unnatural terrors of these waters for twenty years and survived. Do the Crane really think they can trouble us where the Great Death has failed?\"</i>"
+            ],
+            "number": [
+              "43"
+            ],
+            "printimagehash": [
+              "ff/ab"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Torn Asunder"
+            ],
+            "use": [
+              "Non-unique Mantis Magistrate, anti-Crane, captain or crew member of the Fourth Storm"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Yoritomo Hofu"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10299",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Torn Asunder",
+  "response_sha256": "55513eb90365680caa28d55f32d2c5ea14e785b09bb1e9d148b49333be630b32",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

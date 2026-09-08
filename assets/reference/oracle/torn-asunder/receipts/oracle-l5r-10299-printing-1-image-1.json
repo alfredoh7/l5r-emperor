@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 721607,
+  "card_id": "oracle-l5r-10299",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10299-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Hofu",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 10299,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10299-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:48.845836+00:00",
+  "sha256": "6b5c296278d56d034070eed1a27035fe03eeefb4d1fee528edad49bea409c5b8",
+  "source_image_hash": "ff/ab",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ff/ab/printing_10299_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ff/ab/printing_10299_1_",
+  "width": 750
+}

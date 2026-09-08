@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire up vanilla wave 1: 61 ability-free cards beyond the pinned Lion/Crane pool, sourced and SHA256-verified from images.oracleofthevoid.com the same way as the existing 40",
+  "validation": "bash tools/check.sh: full suite passed (Core 50/50 incl. new vanilla-wave catalogue check, Published 32/32, DeckFormat 8/8, AI, Server, Transport, client build/import/smoke); python3 -m unittest discover -s tools/content: 85/85 passed incl. 10 new tests for the two new download/package scripts",
+  "remaining": "None; ready for review. Wave 2 (the 2,066 text-bearing cards) is future work, not started.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/41",
+  "branch": "mdornbrook/41-vanilla-wave-1",
+  "updated": "2026-09-08T11:52:11.432294+00:00"
+}

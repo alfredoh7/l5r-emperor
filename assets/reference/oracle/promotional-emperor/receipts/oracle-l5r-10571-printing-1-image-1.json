@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1023538,
+  "card_id": "oracle-l5r-10571",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10571-printing-1-image-1",
+  "image_index": 1,
+  "name": "Traveling Market",
+  "numbers": [
+    "159"
+  ],
+  "oracle_id": 10571,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10571-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:35:07.471558+00:00",
+  "sha256": "9b7fe699b46e01e5d5befafe1cea419714fdfc964656f51da3a41e6b70f6f1dd",
+  "source_image_hash": "14/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/90/printing_10571_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/90/printing_10571_1_",
+  "width": 750
+}

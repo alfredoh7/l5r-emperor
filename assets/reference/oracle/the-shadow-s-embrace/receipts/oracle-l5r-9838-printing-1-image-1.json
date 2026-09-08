@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 795827,
+  "card_id": "oracle-l5r-9838",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9838-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Hinata",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 9838,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9838-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:27.555469+00:00",
+  "sha256": "f5b3fbd4270ed1241778ebe5d7b0f470124b304bfee97160cff78b4af87351db",
+  "source_image_hash": "b2/9d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/9d/printing_9838_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/9d/printing_9838_1_",
+  "width": 750
+}

@@ -17,21 +17,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE = ROOT / "content/oracle/emperor-catalogue.json"
 PUBLISHED = ROOT / "content/published/lion-crane-v1.json"
+PUBLISHED_WAVES = (ROOT / "content/published/vanilla-wave-1.json",)
 OUTPUT = ROOT / "content/deck-pool.json"
 ARC = "Age of Conquest (Emperor)"
 EXCLUDED_TYPES = {"Proxy"}
 
 
-def playable_ids(published_path: Path = PUBLISHED) -> set[str]:
-    if not published_path.exists():
-        return set()
-    data = json.loads(published_path.read_text(encoding="utf-8"))
-    return {card["Id"] for card in data.get("Cards", [])}
+def playable_ids(*published_paths: Path) -> set[str]:
+    ids: set[str] = set()
+    for path in published_paths:
+        if not path.exists():
+            continue
+        data = json.loads(path.read_text(encoding="utf-8"))
+        ids |= {card["Id"] for card in data.get("Cards", [])}
+    return ids
 
 
-def build(source: Path = SOURCE, published_path: Path = PUBLISHED) -> dict:
+def build(source: Path = SOURCE, published_path: Path = PUBLISHED, extra_published_paths: tuple[Path, ...] = PUBLISHED_WAVES) -> dict:
     data = json.loads(source.read_text(encoding="utf-8"))
-    playable = playable_ids(published_path)
+    playable = playable_ids(published_path, *extra_published_paths)
     entries = []
     for card in data["cards"]:
         if card.get("source_membership") != ARC:

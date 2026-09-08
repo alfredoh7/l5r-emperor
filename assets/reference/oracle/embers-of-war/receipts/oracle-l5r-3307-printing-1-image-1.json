@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 720221,
+  "card_id": "oracle-l5r-3307",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3307-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Moritoki",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 3307,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3307-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:32.649567+00:00",
+  "sha256": "de66ebd9bc9b7e2557a66497c87169a2aed0e5a48d89c38662ecc5010044ab03",
+  "source_image_hash": "b3/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/c2/printing_3307_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/c2/printing_3307_1_",
+  "width": 750
+}
