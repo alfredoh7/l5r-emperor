@@ -20,6 +20,7 @@ for spec in \
   '1280x720 assignment-clarity-hand-picked' \
   '2560x1080 assignment-clarity-other-hand-last-lift' \
   '1920x1080 battle-clarity-hand-edge-lift' \
+  '1920x1080 battle-clarity-hand-neighbor-lift' \
   '1920x1080 battle-clarity-hand-motionoff'; do
   read -r resolution mode <<< "$spec"
   log="artifacts/card-clarity/$mode.log"

@@ -10,11 +10,11 @@ public partial class Main
         if (!_captureMode.Contains("clarity", StringComparison.Ordinal)) return true;
         var seat = _captureMode.Contains("other", StringComparison.Ordinal) ? 1 - View.ViewerId : View.ViewerId;
         var player = View.Players.Single(p => p.Id == seat);
-        if (_captureMode.Contains("hand", StringComparison.Ordinal)) return player.HandCount > 0;
+        if (_captureMode.Contains("hand", StringComparison.Ordinal)) return player.HandCount >= (_captureMode.Contains("neighbor", StringComparison.Ordinal) ? 2 : 1);
         if (_captureMode.Contains("expanded", StringComparison.Ordinal)) return View.Players.Any(p => p.Army.Any(c => c.AttachedTo is not null));
         return player.Home.Any(c => c.Definition?.Type == CardType.Personality && (!_captureMode.Contains("bowed", StringComparison.Ordinal) || c.Bowed));
     }
-    private CardTile? _clarityCard;
+    private CardTile? _clarityCard, _clarityNeighbor;
     private long _clarityVersion;
     private string? _clarityError;
     private bool _clarityInputDone;
@@ -44,6 +44,14 @@ public partial class Main
             GetWindow().GrabFocus();
             for (var attempt = 0; !GetWindow().HasFocus() && attempt < 100; attempt++)
                 await ToSignal(GetTree().CreateTimer(.2), SceneTreeTimer.SignalName.Timeout);
+            if (_captureMode.Contains("neighbor", StringComparison.Ordinal))
+            {
+                _clarityNeighbor = _tiles.Where(t => t.Card.Zone == Zone.Hand).Skip(1).First();
+                var neighbor = ScreenCenter(_clarityNeighbor);
+                GetViewport().PushInput(new InputEventMouseMotion { Position = neighbor, GlobalPosition = neighbor }, true);
+                GetViewport().PushInput(new InputEventMouseButton { Position = neighbor, GlobalPosition = neighbor, ButtonIndex = MouseButton.Left, Pressed = true }, true);
+                GetViewport().PushInput(new InputEventMouseButton { Position = neighbor, GlobalPosition = neighbor, ButtonIndex = MouseButton.Left, Pressed = false }, true);
+            }
             var point = ScreenCenter(_clarityCard);
             if (_captureMode.Contains("edge", StringComparison.Ordinal))
             {
@@ -86,6 +94,8 @@ public partial class Main
             if (!GetViewport().GetVisibleRect().Grow(1).Encloses(bounds) || bounds.Intersects(_inspectorPanel.GetGlobalRect()))
                 throw new InvalidOperationException("Enlarged hand face clips the window or inspector.");
         }
+        if (_clarityNeighbor is not null && (!_clarityNeighbor.IsSelected || _clarityCard.ZIndex <= _clarityNeighbor.ZIndex))
+            throw new InvalidOperationException("Hovered hand card must rise above its selected/focused neighbor without losing selection.");
         if (View.Version != _clarityVersion) throw new InvalidOperationException("Inspection or selection submitted a game command.");
         if (_captureMode.Contains("picked", StringComparison.Ordinal))
         {
