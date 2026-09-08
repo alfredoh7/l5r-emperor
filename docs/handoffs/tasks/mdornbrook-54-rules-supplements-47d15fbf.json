@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Add Torn Asunder, Coils of Madness, Gates of Chaos, and Aftermath rules supplements to the compiled Emperor Edition core rules doc",
+  "validation": "Documentation only; no code touched, no check.sh run",
+  "remaining": "None; ready for review. Stacked on open PR #48 (mdornbrook/47-core-rules-doc).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/54",
+  "branch": "mdornbrook/54-rules-supplements",
+  "updated": "2026-09-08T20:21:28.938472+00:00"
+}

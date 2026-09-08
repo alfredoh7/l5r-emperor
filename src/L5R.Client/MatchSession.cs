@@ -27,7 +27,10 @@ public sealed class MatchSession : IDisposable
     private CancellationTokenSource? _connection;
     private readonly SemaphoreSlim _sendLock = new(1, 1);
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
-    private int _localSeat;
+    private int _localSeat, _practiceNameSeat;
+    public string LocalDisplayName { get; set; } = "";
+    private MatchView NamedView(MatchView view) => string.IsNullOrWhiteSpace(LocalDisplayName) ? view : view with
+    { Players = view.Players.Select(p => p.Id == (Online ? view.ViewerId : _practiceNameSeat) ? p with { Name = LocalDisplayName } : p).ToArray() };
 
     public void StartPractice(bool economy, bool published = false, int seat = 0)
     {
@@ -37,6 +40,7 @@ public sealed class MatchSession : IDisposable
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
         _localSeat = published ? seat : _engine.State.ActivePlayerId;
+        _practiceNameSeat = _localSeat;
         RefreshLocal();
     }
 
@@ -57,7 +61,7 @@ public sealed class MatchSession : IDisposable
     private void RefreshLocal()
     {
         if (_engine is null) return;
-        Snapshot = new(_engine.GetView(_localSeat), _engine.QueryActions(_localSeat), "Practice");
+        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), "Practice");
         Changed?.Invoke();
     }
 
@@ -230,7 +234,7 @@ public sealed class MatchSession : IDisposable
                         actions = actions.Select(a => a with { Command = a.Command is null ? null : a.Command with { PlayerId = view.ViewerId, ExpectedVersion = view.Version } }).ToArray();
                         var playersConnected = body.TryGetProperty("playersConnected", out var presence)
                             ? presence.Deserialize<bool[]>(Json) : null;
-                        Snapshot = new(view, actions, "Private room", body.GetProperty("roomCode").GetString(), playersConnected);
+                        Snapshot = new(NamedView(view), actions, "Private room", body.GetProperty("roomCode").GetString(), playersConnected);
                         Busy = false;
                         Changed?.Invoke();
                         break;

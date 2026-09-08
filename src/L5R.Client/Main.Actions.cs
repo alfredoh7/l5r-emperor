@@ -18,6 +18,8 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped(View.VictoryReason ?? "Victory"));
             _inspector.AddChild(Palette.Button("Start another practice", ShowPractice, true)); return;
         }
+        if (BattleTracker.InBattle(View.Phase) || _resolutionMessage is not null)
+            _inspector.AddChild(new BattleTracker { Snapshot = View, Compact = _selected is not null || _chosen is not null || View.PendingChoice is not null, ReducedMotion = _reducedMotion, ResolutionMessage = _resolutionMessage });
         if (View.PendingChoice is { } pending)
         {
             _inspector.AddChild(Palette.Text(pending.Type == "discardHand" ? "HAND LIMIT" : pending.Type == "shinden" ? "YOUR CHOICE" : "REACTION WINDOW", 12, Palette.Gold));
@@ -26,14 +28,17 @@ public partial class Main
         }
         if (_selected?.Definition is { } def)
         {
-            _inspector.AddChild(Palette.Text(def.Type.ToString().ToUpperInvariant() + "  ·  " + def.Clan.ToUpperInvariant(), 11, Palette.Gold));
+            AddInspectionCaption(def.Type.ToString().ToUpperInvariant() + " · " + def.Clan.ToUpperInvariant());
             _inspector.AddChild(Palette.Wrapped(def.Name, 24));
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
-                var preview = new TextureRect { Material = CardPaper.Reading, TextureFilter = CanvasItem.TextureFilterEnum.LinearWithMipmaps, Texture = def.ScenarioOnly ? new AtlasTexture { Atlas = artwork, Region = CardTile.ArtRegion(def, artwork) } : artwork, CustomMinimumSize = new Vector2(0, def.ScenarioOnly ? 190 : 340), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered };
+                var preview = CardPreview.Face(_selected, def.ScenarioOnly ? 190 : 340);
                 _inspector.AddChild(preview);
             }
+            if (_selected.Dishonorable) _inspector.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
+            foreach (var grant in _selected.GrantedKeywords ?? [])
+                _inspector.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
             if (_selected.StraightenBlocked) _inspector.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) _inspector.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) _inspector.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
@@ -41,12 +46,12 @@ public partial class Main
         }
         else if (_selected is not null)
         {
-            _inspector.AddChild(Palette.Text("FACE-DOWN DYNASTY", 20, title: true));
+            AddInspectionCaption("FACE-DOWN DYNASTY");
             _inspector.AddChild(Palette.Wrapped("This card's identity remains hidden until the rules reveal it.", 15, Palette.PaperDim));
         }
         else if (View.PendingChoice is null)
         {
-            _inspector.AddChild(Palette.Text(HumanPhase(View.Phase), 26, title: true));
+            if (!BattleTracker.InBattle(View.Phase)) _inspector.AddChild(Palette.Text(HumanPhase(View.Phase), 26, title: true));
             var help = Palette.Wrapped("Select a card to inspect it.", 16, Palette.PaperDim);
             help.MouseFilter = Control.MouseFilterEnum.Stop; help.TooltipText = RulesHelp.PhaseGuide(View.Phase);
             _inspector.AddChild(help);
@@ -231,7 +236,7 @@ public partial class Main
         _decisionActions.AddChild(Palette.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
@@ -248,6 +253,15 @@ public partial class Main
         button.ClipText = true; container.AddChild(button);
     }
 
+    private void PassOpportunity()
+    {
+        if (_session.Snapshot is null || _session.Busy || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId) return;
+        if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) return;
+        var pass = Actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
+        if (pass?.Command is not { } command) return;
+        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        Submit(command);
+    }
     private void RenderPhaseActions()
     {
         Palette.Clear(_phaseActions);

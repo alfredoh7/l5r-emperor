@@ -128,6 +128,7 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is not null)
         {
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
+            if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 Require(command.Type is "proclaim" or "declineReaction" or "pass","Resolve the Proclaim reaction window first.");
@@ -164,7 +165,9 @@ public sealed partial class MatchEngine
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
-        card.Bowed=Definition(card).Type==CardType.Holding;
+        // A Personality is straightened by default; entering bowed is only ever a direct
+        // consequence of a printed effect, never a separate straighten-then-bow step.
+        card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
@@ -430,9 +433,16 @@ public sealed partial class MatchEngine
     private bool AttachmentAllowed(CardInstance attachment,CardInstance target) => new[] {"Armor","Weapon"}.All(keyword=>!Keyword(attachment,keyword) || !Attachments(target.Id).Any(c=>Keyword(c,keyword)));
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
     private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force));
-    // A bowed Personality or Follower normally drops out of its unit's Force; Elite is the printed
-    // (or granted) exception that keeps it in, whichever card carries the keyword.
-    private int BattleForce(CardInstance card) => ((card.Bowed && !Keyword(card,"Elite"))?0:PersonalityForce(card))+Attachments(card.Id).Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower).Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
+    // A bowed ordinary Personality suppresses its entire unit at resolution.
+    // Preserve the explicit Elite-Personality exception accepted in #19/#17.
+    // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
+    private int BattleForce(CardInstance card)
+    {
+        if(card.Bowed && !Keyword(card,"Elite")) return 0;
+        return PersonalityForce(card)+Attachments(card.Id)
+            .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
+            .Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
+    }
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
     {
         var count=0;
@@ -490,9 +500,47 @@ public sealed partial class MatchEngine
         _state.PriorityPlayerId=player.Id;
         if(player.Honor>=40) { Win(player.Id,"Honor victory at the start of the turn"); return; }
         player.TurnsTaken++;
+        StraightenPhase(player);
+    }
+    private void StraightenPhase(PlayerState player)
+    {
+        SetPhase(Phase.Straighten,player.Id);
+        // A card with the choose-straighten effect lets its controller decide, per turn, whether to
+        // straighten it instead of that being automatic or a fixed forced-skip condition.
+        if(EligibleForOptionalStraighten(player.Id).Length>0)
+        {
+            _state.PendingChoice=new("declineStraighten",player.Id,null,"Choose which cards to leave bowed instead of straightening.");
+            return;
+        }
+        FinishStraightening(player,[]);
+    }
+    private string[] EligibleForOptionalStraighten(int playerId)=>_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached
+        && Definition(c).Effect=="choose-straighten" && c.StraightenBlockedTurn!=_state.TurnNumber).Select(c=>c.Id).ToArray();
+    private void ResolveDeclineStraighten(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="declineStraighten" && command.PlayerId==pending.PlayerId,"Choose which cards to leave bowed instead of straightening.");
+        var eligible=EligibleForOptionalStraighten(pending.PlayerId).ToHashSet(StringComparer.Ordinal);
+        var declined=(command.CardIds??[]).Distinct(StringComparer.Ordinal).ToArray();
+        Require(declined.All(eligible.Contains),"Only cards with the choose-straighten ability can be left bowed here.");
+        _state.PendingChoice=null;
+        FinishStraightening(Player(pending.PlayerId),declined);
+    }
+    private void FinishStraightening(PlayerState player,string[] declinedIds)
+    {
         foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone is Zone.Home or Zone.Stronghold or Zone.Attached))
-            Straighten(card);
+        {
+            if(declinedIds.Contains(card.Id)) Emit("straightenDeclined",$"{Definition(card).Name} was left bowed by choice.",card.OwnerId,card.Id);
+            else Straighten(card);
+        }
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
+        EventsPhase(player);
+    }
+    private void EventsPhase(PlayerState player)
+    {
+        SetPhase(Phase.Events,player.Id);
+        // No card in the current published pool triggers an Events-phase decision; the phase still
+        // exists in turn order and the log for future Event/Celestial/Region cards to hook into.
         foreach(var province in player.Provinces.Where(p=>!p.Destroyed && p.CardId is not null))
         {
             var card=Card(province.CardId);

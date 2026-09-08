@@ -15,8 +15,8 @@ public partial class Main
             if(_tactileFrame==0)
             {
                 if(IsFullscreen || _fullscreenGate.Visible) throw new InvalidOperationException("Windowed play is gated.");
-                if(_tiles.Where(t=>t.Card.Zone==Zone.Hand).Any(t=>Math.Abs(t.FaceHeight-228)>.01)) throw new InvalidOperationException("Hand faces are not 20% larger.");
-                _tactileChecks.Add("Windowed play; full original card backs; hand scan height 190 → 228.");
+                if(_tiles.Where(t=>t.Card.Zone==Zone.Hand).Any(t=>Math.Abs(t.FaceHeight-(HandCardSide-12))>.01)) throw new InvalidOperationException("Hand faces are not 20% larger.");
+                _tactileChecks.Add("Windowed play; full original card backs; enlarged hand faces.");
             }
             if(_tactileFrame==12)
             {

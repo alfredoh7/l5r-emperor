@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implemented animated moonlit menu; added a clickable Mac launcher for the current checkout and permanent instruction to include launcher links with playable updates.",
+  "validation": "Menu implementation evidence is in docs/MAIN_MENU.md. Launcher shell syntax and Info.plist passed. Initial direct app launch hit macOS Documents access restrictions; corrected app opens Play Latest.command through Terminal. Actual click-equivalent app launch built successfully with zero warnings/errors and started native Godot; verified artifacts/checks/latest-launch.log.",
+  "remaining": "PR #9 awaits shared review. Earlier downloaded release is unchanged. New launcher opens Terminal and builds/runs this checkout without fetching or switching branches.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/8",
+  "branch": "codex/8-main-menu",
+  "updated": "2026-09-07T14:40:12.968630+00:00"
+}

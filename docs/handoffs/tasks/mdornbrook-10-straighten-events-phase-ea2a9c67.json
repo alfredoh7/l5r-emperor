@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add Straighten and Events phases to turn order, preceding Action; add an optional choose-straighten decline mechanic for a future passive ability",
+  "validation": "bash tools/check.sh --skip-client: all Core/Published/DeckFormat/AI/Server/Transport checks passed (49/49 Core incl. 3 new Straighten/Events regressions)",
+  "remaining": "UI-lane phase-bar segment count grows from 5 to 6 (Straighten added); PhaseTrack.SegmentFor and RulesHelp.PhaseGuide fall back safely today but should get real Straighten/Events handling before any choose-straighten card is published. Flagged on issue #10 for alfredoh7.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/10",
+  "branch": "mdornbrook/10-straighten-events-phase",
+  "updated": "2026-09-08T10:37:08.895512+00:00"
+}

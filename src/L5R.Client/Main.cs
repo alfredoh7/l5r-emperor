@@ -74,6 +74,8 @@ public partial class Main : Node
         LoadSeat();
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
+        InitializeFrontend();
+        if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
         _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
         Render();
@@ -83,7 +85,13 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
+        if (MenuVisible) return;
         ProcessTableCamera(delta);
+        if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
+        ExpireBattleResolution();
+        foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
+        foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
         if (_autoOpponent && !_session.Online && _capturePath is null)
         {
@@ -97,6 +105,7 @@ public partial class Main : Node
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
             _session.StepPracticeReaction();
         }
+        if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode == "published-tactile") { ProcessTactileCapture(); return; }
         if (_capturePath is not null)
         {
@@ -107,14 +116,22 @@ public partial class Main : Node
                 _captureClock = 0;
                 if (_captureMode is "published-choice" or "published-choice-confirm")
                 {
-                    var steps = 0;
-                    while (View.PendingChoice?.Type != "shinden" && View.WinnerId is null && steps++ < 800)
+                    for (var fixtureAttempt = 0; fixtureAttempt < 6 && View.PendingChoice?.Type != "shinden"; fixtureAttempt++)
                     {
-                        _session.FollowPracticePriority();
-                        var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Capture opponent had no action.");
-                        var version = View.Version;
-                        _session.Submit(command).GetAwaiter().GetResult();
-                        if (View.Version == version) throw new InvalidOperationException("Capture action was rejected.");
+                        if (fixtureAttempt > 0)
+                        {
+                            GD.Print("CHOICE_SETUP: practice ended without a Shinden decision; searching another real match before testing the UI.");
+                            _session.StartPractice(false, true, 1);
+                        }
+                        var steps = 0;
+                        while (View.PendingChoice?.Type != "shinden" && View.WinnerId is null && steps++ < 800)
+                        {
+                            _session.FollowPracticePriority();
+                            var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Capture opponent had no action.");
+                            var version = View.Version;
+                            _session.Submit(command).GetAwaiter().GetResult();
+                            if (View.Version == version) throw new InvalidOperationException("Capture action was rejected.");
+                        }
                     }
                     _session.FollowPracticePriority(); _uiQueue.Clear(); _selected = null; _chosen = null; Render();
                     if (View.PendingChoice?.Type != "shinden") throw new InvalidOperationException("Capture did not reach a Shinden decision.");
@@ -163,6 +180,7 @@ public partial class Main : Node
                 }
             }
             if (_capturePrepared) _captureFrames++;
+            if (_captureMode.Contains("clarity", StringComparison.Ordinal)) MaintainClarityPointer();
             if (_capturePrepared && _captureMode.Contains("camera", StringComparison.Ordinal)) ProcessCameraCapture();
             if (_capturePath is null) return;
             if (_capturePrepared && _captureMode.EndsWith("piletip", StringComparison.Ordinal) && _captureClock > .4 && !_pileHoverSent)
@@ -201,7 +219,7 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -224,6 +242,7 @@ public partial class Main : Node
     private float _layoutWidth = 1920;
     private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
     private const float SidebarWidth = 300;
+    private const float HandCardSide = 284;
     private HBoxContainer _menu = null!;
     private Control _inspectorPanel = null!, _fullscreenGate = null!;
     private bool IsFullscreen => GetWindow().Mode is Window.ModeEnum.Fullscreen or Window.ModeEnum.ExclusiveFullscreen;
@@ -242,7 +261,7 @@ public partial class Main : Node
         _root.Position = Vector2.Zero;
         if (_board is null) return;
         FitTableViewport();
-        _hand.Position = new Vector2(250, 820); _hand.Size = new Vector2(BoardWidth - 12, 240);
+        _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         _status.Visible = false;
@@ -275,15 +294,13 @@ public partial class Main : Node
         _timeline = Place(_root, new PhaseTrack(), 300, 12, 1000, 100);
         _menu = Place(_root, new HBoxContainer { Alignment = BoxContainer.AlignmentMode.End }, 1345, 27, 549, 35);
         _menu.AddThemeConstantOverride("separation", 7);
-        foreach (var entry in new (string Text, Action Click)[] { ("Menu", ShowTableMenu), ("? Rules", ShowRules) })
-        {
-            var button = Palette.Button(entry.Text, entry.Click); button.AddThemeFontSizeOverride("font_size", 14);
-            button.AddThemeStyleboxOverride("normal", Palette.Box(new Color(.035f, .032f, .027f, .65f), new Color("75603e"), 9));
-            _menu.AddChild(button);
-        }
+        _menu.AddChild(new TableIconButton(TableGlyph.Menu, ShowTableMenu, "Menu"));
+        _menu.AddChild(new TableIconButton(TableGlyph.Rules, ShowRules, "Rules and reference"));
+        _matSections = new InkMatSections { MotionSettled = TableMotionsSettled }; _world.AddChild(_matSections);
+        _tableViewport.AddChild(_matSections.CreateIconOverlay(WorldToScreen));
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
-        _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 820, BoardWidth - 12, 240);
+        _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
         var inspectorPanel = Place(_root, new LacquerPanel(), 1488, 94, SidebarWidth, 960);
         _inspectorPanel = inspectorPanel;
         inspectorPanel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.045f, .043f, .033f, .96f), new Color("766341"), 18));
@@ -317,23 +334,32 @@ public partial class Main : Node
         if (key.Keycode == Key.F11)
         {
             GetWindow().Mode = IsFullscreen ? Window.ModeEnum.Windowed : Window.ModeEnum.Fullscreen;
+            _preferences.Fullscreen = IsFullscreen;
+            if (_capturePath is null) _preferences.Save();
+            if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
+        else if (MenuVisible) return;
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
         }
+        else if (key.Keycode == Key.Escape) { ShowMainMenu(); GetViewport().SetInputAsHandled(); }
     }
 
     private void Render()
     {
         Interlocked.Exchange(ref _renderQueued, 0);
+        if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
+        if (MenuVisible) return;
         if (_session.Snapshot is null)
         {
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
+            _matSections.Sync([], true, "disconnected");
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
+        ObserveBattleResolution();
         if (_displayedVersion != View.Version)
         {
             _displayedVersion = View.Version;
@@ -352,6 +378,8 @@ public partial class Main : Node
     private void RenderTimeline()
     {
         _timeline.Present(View);
+        _timeline.PassRequested = PassOpportunity;
+        _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
     }
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
@@ -364,6 +392,7 @@ public partial class Main : Node
             tile.ContextHelp = $"{owner.Clan} · Province {province + 1} · {owner.Provinces.Single(p => p.Index == province).Strength} province strength";
         }
         if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
+        BindStatTransition(tile);
         _tiles.Add(tile); return tile;
     }
 
@@ -388,6 +417,7 @@ public partial class Main : Node
         }
         // A misclick during a reviewed action must not silently discard its target or payment.
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
+        if (_selected?.Id == card.Id) { DeselectCard(); return; }
         _selected = card; _sources.Clear();
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
@@ -446,6 +476,6 @@ public partial class Main : Node
     private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
     private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
-    private void SetNotice(string message) { _notice.Text = message; _notice.TooltipText = message; }
+    private void SetNotice(string message) { _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();
 }

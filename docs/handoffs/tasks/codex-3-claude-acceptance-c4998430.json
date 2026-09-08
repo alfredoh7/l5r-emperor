@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Recorded successful live Claude instruction-loading acceptance for both roles; finalized remote rehearsal evidence.",
+  "validation": "Claude Code 2.1.98 returned is_error=false after login refresh; inspected all four read-only scenarios and automatic CLAUDE.md/AGENTS.md discovery. No tools or development actions used by Claude. Previous 29 workflow and 148 game checks remain the unchanged baseline; docs-only update requires handoff audit and CI.",
+  "remaining": "None for live instruction-loading acceptance. Human rules and native Windows playtesting remain separate product gates.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/3",
+  "branch": "codex/3-claude-acceptance",
+  "updated": "2026-09-07T13:26:14.151057+00:00"
+}

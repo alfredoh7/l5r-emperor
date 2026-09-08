@@ -1,0 +1,10 @@
+[
+  [
+    "force-inlay",
+    "Use case: precise-object-edit. Production raster game texture. Attached card is MATERIAL REFERENCE. Generate a seamless-in-place replacement for ONLY the central number-bearing surface of the card's small top stat strip, without surrounding vertical clan-color posts. A single flat slightly portrait rectangular material swatch filling the ENTIRE image, no transparency, no margins. Extremely shallow antique inlay that looks printed naturally as part of the original card, fine HORIZONTAL woven/woodgrain striations, soft edge shadows only within the rectangle, subdued weathering. NO numbers, NO letters, NO icons, NO frame, NO thick bevel, NO perspective, NO object silhouette. This is a texture to stretch into a tiny 74x94px panel on original750x1050 card, must blend naturally with originalstrip. FORCE panel: warm muted yellow ochre/gold with brown recesses, closely match upper LEFT number-bearing golden surface on reference. Avoid bright orange metal or shiny newgold. Entire texture is that gold surface."
+  ],
+  [
+    "chi-inlay",
+    "Use case: precise-object-edit. Production raster game texture. Attached card is MATERIAL REFERENCE. Generate a seamless-in-place replacement for ONLY the central number-bearing surface of the card's small top stat strip, without surrounding vertical clan-color posts. A single flat slightly portrait rectangular material swatch filling the ENTIRE image, no transparency, no margins. Extremely shallow antique inlay that looks printed naturally as part of the original card, fine HORIZONTAL woven/woodgrain striations, soft edge shadows only within the rectangle, subdued weathering. NO numbers, NO letters, NO icons, NO frame, NO thick bevel, NO perspective, NO object silhouette. This is a texture to stretch into a tiny 74x94px panel on original750x1050 card, must blend naturally with originalstrip. CHI panel: slate charcoal GRAY with fine silvery-gray horizontal lines, closely match upper RIGHT gray number-bearing surface on reference. No gold. Entire texture is that gray surface."
+  ]
+]

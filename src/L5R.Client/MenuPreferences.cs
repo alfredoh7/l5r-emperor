@@ -1,0 +1,40 @@
+using Godot;
+namespace L5R.Client;
+
+/// <summary>Presentation-only preferences. No match state or player credentials.</summary>
+public sealed class MenuPreferences
+{
+    public bool Fullscreen, ReducedMotion;
+    public bool VSync = true;
+    public float Atmosphere = .65f;
+    public string DisplayName = "";
+    public static string CleanName(string value)
+    {
+        var clean = string.Concat(value.Where(c => !char.IsControl(c) && char.GetUnicodeCategory(c) != System.Globalization.UnicodeCategory.Format)).Trim();
+        var elements = System.Globalization.StringInfo.ParseCombiningCharacters(clean);
+        return elements.Length > 24 ? clean[..elements[24]] : clean;
+    }
+    public string Path { get; }
+    public MenuPreferences(string profile) => Path = $"user://presentation-{profile}.cfg";
+    public void Load()
+    {
+        var config = new ConfigFile();
+        if (config.Load(Path) != Error.Ok) return;
+        DisplayName = CleanName(config.GetValue("local", "display_name", "").AsString());
+        Fullscreen = config.GetValue("display", "fullscreen", false).AsBool();
+        ReducedMotion = config.GetValue("display", "reduced_motion", false).AsBool();
+        VSync = config.GetValue("display", "vsync", true).AsBool();
+        Atmosphere = Mathf.Clamp((float)config.GetValue("display", "atmosphere", .65f).AsDouble(), 0, 1);
+        if (!float.IsFinite(Atmosphere)) Atmosphere = .65f;
+    }
+    public Error Save()
+    {
+        var config = new ConfigFile();
+        config.SetValue("local", "display_name", CleanName(DisplayName));
+        config.SetValue("display", "fullscreen", Fullscreen);
+        config.SetValue("display", "reduced_motion", ReducedMotion);
+        config.SetValue("display", "vsync", VSync);
+        config.SetValue("display", "atmosphere", Atmosphere);
+        return config.Save(Path);
+    }
+}

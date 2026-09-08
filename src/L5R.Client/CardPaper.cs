@@ -7,6 +7,7 @@ public static class CardPaper
 {
     private static readonly Shader PaperShader = new() { Code = """
         shader_type canvas_item;
+        #include "res://Art/candlelight.gdshaderinc"
         uniform float patina = 1.0;
         uniform float candle_phase = 0.0;
         uniform float candle_motion = 1.0;
@@ -29,13 +30,12 @@ public static class CardPaper
             warm_paper *= 1.0 - edge * 0.22;
             warm_paper += vec3(fiber * paper);
             vec3 result = mix(ink.rgb, warm_paper, patina);
-            float flicker = 0.50 * sin(candle_phase * 2.1) + 0.29 * sin(candle_phase * 3.7 + 1.2) + 0.21 * sin(candle_phase * 7.6 + 0.5);
             vec2 world = (SCREEN_UV*screen_size-table_origin)/table_scale;
             vec2 distance = (world - light_origin) / light_radius;
-            float light = exp(-dot(distance, distance) * 1.5);
+            float light = exp(-dot(distance, distance) * 1.5) * candle_energy(candle_phase,candle_motion);
             vec2 right = (world-light_origin_right)/light_radius;
-            light += exp(-dot(right,right)*1.5);
-            result += vec3(0.064, 0.030, 0.007) * light * (1.0 + flicker * .06 * candle_motion);
+            light += exp(-dot(right,right)*1.5) * candle_energy(candle_phase+1.8,candle_motion);
+            result += vec3(0.090, 0.044, 0.013) * light;
             COLOR = vec4(clamp(result, vec3(0.0), vec3(1.0)), ink.a);
         }
         """ };

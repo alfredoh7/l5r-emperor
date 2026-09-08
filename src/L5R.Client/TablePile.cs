@@ -17,7 +17,15 @@ public partial class TablePile : TooltipButton
     private float _startCount;
     private double _settle = 1;
     public float ShownCount => _shownCount;
-    public Rect2 TopFace => new((Size.X-(Size.Y-18)*.7142857f)/2 - _shownCount * .055f, 26 - _shownCount * .65f, (Size.Y-18)*.7142857f, Size.Y-18);
+    private const float CardThickness = 1.35f;
+    private const float CardLean = .10f;
+    public Rect2 TopFace => LayerFace(Math.Max(0, _shownCount));
+    private Rect2 LayerFace(float level)
+    {
+        var height = Size.Y - 18; var width = height * .7142857f;
+        return new Rect2((Size.X-width)/2-level*CardLean,26-level*CardThickness,width,height);
+    }
+    public override bool _HasPoint(Vector2 point) => TopFace.Merge(LayerFace(0)).HasPoint(point);
     public void SettleFrom(float count, bool reducedMotion)
     {
         _startCount = Math.Clamp(count, 0, 200); _shownCount = reducedMotion ? Count : _startCount;
@@ -73,17 +81,30 @@ public partial class TablePile : TooltipButton
         else
         {
             DrawStyleBox(Palette.Box(new Color(0,0,0,.5f),null,0,4),new Rect2((Size.X-w)/2+2,29,w+3,h+3));
-            // One exposed paper edge per physical card: no five-layer cap.
+            // Each card has a dark core and a separate worn paper lip. Alternating
+            // fibers and tiny deterministic offsets prevent a solid extruded-block look.
+            // Fractional top thickness follows the existing draw/discard interpolation.
             for(var i=0;i<Math.Ceiling(_shownCount);i++)
-                PileFrame(new Rect2((Size.X-w)/2-i*.055f,26-i*.65f,w,h),new Color("302a21"),new Color(.39f,.34f,.26f,.85f));
+            {
+                var level=Math.Min(i+1,_shownCount);
+                var layer=LayerFace(level);
+                var jitter=(float)Math.Sin(i*2.399)*.38f;
+                layer.Position+=new Vector2(jitter,0);
+                PileFrame(layer,new Color("141816"),new Color("292b22"));
+                var edge = (i%3) switch { 0 => new Color("b1a58a"), 1 => new Color("867e69"), _ => new Color("9d9278") };
+                // Near and right edges catch the lantern. The gap between adjacent
+                // lips stays almost black, just like separate sleeved paper cards.
+                DrawLine(layer.Position+new Vector2(.6f,layer.Size.Y),layer.End+new Vector2(-.6f,0),edge,.63f,true);
+                DrawLine(layer.Position+new Vector2(layer.Size.X,1),layer.End,edge.Darkened(.25f),.52f,true);
+                for(var fiber=0;fiber<4;fiber++)
+                {
+                    var x=layer.Position.X+8+(i*17+fiber*37)%(int)Math.Max(1,layer.Size.X-22);
+                    DrawLine(new Vector2(x,layer.End.Y),new Vector2(x+3,layer.End.Y),edge.Lightened(.12f),.48f,true);
+                }
+            }
             var texture = _face ?? (_fate ? FateBack : DynastyBack);
             PileFace(texture,frame.Grow(-1),Colors.White);
         }
-        // Small inlaid symbols distinguish the four piles without permanent counts.
-        DrawCircle(new Vector2(Size.X/2,Size.Y-7),10,new Color("181711"));
-        DrawArc(new Vector2(Size.X/2,Size.Y-7),9,0,Mathf.Tau,40,new Color("967648"),1,true);
-        DrawString(Palette.Body,new Vector2(Size.X/2-8,Size.Y-2),_fate?"F":"D",HorizontalAlignment.Center,16,13,Palette.Gold);
-        if(_discard) DrawLine(new Vector2(Size.X/2-6,Size.Y-1),new Vector2(Size.X/2+6,Size.Y-1),Palette.Gold,1,true);
         if(IsHovered()) DrawRect(frame.Grow(2),Palette.Gold,false,1,true);
     }
 }

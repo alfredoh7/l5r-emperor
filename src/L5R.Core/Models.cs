@@ -5,7 +5,7 @@ namespace L5R.Core;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item, Spell, Event, Celestial, Region, Ring }
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Phase { Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
+public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached }
 
@@ -98,9 +98,11 @@ public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, b
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null);
+/// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
+/// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
-    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false);
+    AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,

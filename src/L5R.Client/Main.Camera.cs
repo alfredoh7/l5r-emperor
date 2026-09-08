@@ -16,7 +16,6 @@ public partial class Main
     private Vector2 ScreenCenter(Control c) => _world.IsAncestorOf(c) ? _tableSurface.ProjectCanvas(c.GetGlobalRect().GetCenter()) : c.GetGlobalRect().GetCenter();
     private Vector2 ScreenToWorld(Vector2 p) => _world.GetGlobalTransform().AffineInverse() * _tableSurface.ScreenToCanvas(p);
     private Vector2 WorldToScreen(Vector2 p) => _tableSurface.ProjectCanvas(_world.GetGlobalTransform() * p);
-    private HBoxContainer _cameraControls = null!;
     private Button _fitTableButton = null!, _battleCameraButton = null!;
     private bool _tableLayoutSeen;
     private Vector2 _cameraCenter = new(680, 410);
@@ -49,31 +48,20 @@ public partial class Main
 
     private void BuildCameraControls()
     {
-        _cameraControls = Place(_root, new HBoxContainer(), 300, 108, 290, 32);
-        _cameraControls.AddThemeConstantOverride("separation", 6);
-        _fitTableButton = CameraButton("Fit table", ResetTableCamera,
-            "Home: fit the whole table. Arrow keys or drag empty cloth to pan. Middle-drag or Space + drag also pans. Mouse wheel over the table zooms toward the pointer.");
-        _cameraControls.AddChild(_fitTableButton);
-        _cameraControls.AddChild(CameraButton("−", () => ZoomTable(.85f, _tableViewport.Size / 2), "Zoom out"));
-        _cameraControls.AddChild(CameraButton("+", () => ZoomTable(1 / .85f, _tableViewport.Size / 2), "Zoom in"));
-        _cameraControls.AddChild(CameraButton("My side", FocusMySide, "Frame your cards in play and province row. Your hand stays fixed below."));
-        _battleCameraButton = CameraButton("Battle", FocusBattle, "Frame the current battlefields. This only moves your camera.");
-        _cameraControls.AddChild(_battleCameraButton);
-    }
-
-    private static Button CameraButton(string text, Action pressed, string tooltip)
-    {
-        var button = Palette.Button(text, pressed);
-        button.TooltipText = tooltip; button.FocusMode = Control.FocusModeEnum.None;
-        button.AddThemeFontSizeOverride("font_size", 14);
-        button.AddThemeStyleboxOverride("normal", Palette.Box(new Color(.035f, .032f, .027f, .8f), new Color("75603e"), 6));
-        return button;
+        _fitTableButton = new TableIconButton(TableGlyph.Fit, () => { ReleaseTableFocus(); ResetTableCamera(); },
+            "Fit table · Home\nArrow keys or drag empty cloth to pan. Middle-drag or Space + drag also pans. Mouse wheel zooms toward the pointer.");
+        _menu.AddChild(_fitTableButton); _menu.MoveChild(_fitTableButton, 0);
+        _battleCameraButton = new TableIconButton(TableGlyph.Battle, () => { ReleaseTableFocus(); FocusBattle(); }, "Frame current battlefields");
+        _menu.AddChild(_battleCameraButton); _menu.MoveChild(_battleCameraButton, 1);
     }
 
     private void FitTableViewport()
     {
         _tableViewport.Position = new Vector2(144, 148);
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188, 666);
+        // Leave the fitted mat clear of the resting hand, including the small
+        // upward reach of its fan. Hover can still deliberately lift a hand card.
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188,
+            Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
     }
@@ -124,7 +112,7 @@ public partial class Main
         }
         _world.Scale = Vector2.One * _cameraZoom;
         _world.Position = _tableSurface.CanvasSize / 2 - _cameraCenter * _cameraZoom;
-        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight));
+        _table.SetPlaneCamera(_tableViewport.GetGlobalRect().GetCenter(), _root.Scale.X, _cameraCenter, _cameraZoom, new Vector2(WorldWidth, _worldHeight), FitZoom);
         CardPaper.SetTableTransform(_world.Position * _tableSurface.RenderScale, _cameraZoom * _tableSurface.RenderScale, _tableSurface.Canvas.Size);
         HideTableTooltip(); _syncTablePointer = true;
         _intentOverlay?.QueueRedraw();
@@ -155,8 +143,17 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
-        if (_tableSurface is null) return;
+        // A recorded demonstration consumes live input so a wheel/key/click
+        // cannot alter the evidence mid-take. Normal play and input probes do not.
+        if (_capturePath is not null && _captureMode == "published-ink-film")
+        { GetViewport().SetInputAsHandled(); return; }
+        if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
+        // The token buttons live above the projected viewport; let native GUI input
+        // reach them instead of forwarding their clicks into the underlying table.
+        if (!_cameraDragging && @event is InputEventMouse tokenMouse && OverStatToken(tokenMouse.Position)
+            && (@event is InputEventMouseMotion || @event is InputEventMouseButton { ButtonIndex: MouseButton.Left }))
+        { _tableSurface.ExitMouse(); HideTableTooltip(); return; }
         if (@event is InputEventKey { Pressed: false } released && released.Keycode is Key.Enter or Key.KpEnter or Key.Tab && !CameraBlocked && GetViewport().GuiGetFocusOwner() is null && TableFocus is not null)
             _tableSurface.Canvas.PushInput(released, true);
         if (@event is InputEventMouseButton mouse)
@@ -227,6 +224,7 @@ public partial class Main
 
     private void ProcessTableCamera(double delta)
     {
+        if (_capturePath is not null && _captureMode == "published-ink-film") return;
         ProcessTableTooltip(delta);
         if (_world is null || CameraBlocked)
         {
@@ -256,18 +254,26 @@ public partial class Main
     private void ProcessTableTooltip(double delta)
     {
         if (_tableSurface is null) return;
+        var token = GetViewport().GuiGetHoveredControl() as StatTokens;
+        if (token is not null && !token.IsVisibleInTree()) token = null;
+        // Token explanations use the same bounded overlay as card previews, so
+        // native tooltips and the projected viewport cannot compete for the hover.
+        if (token is not null) { _syncTablePointer = false; _tableSurface.ExitMouse(); }
         PrepareTableTooltips(_world);
-        if (_syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
+        if (token is null && _syncTablePointer && !_cameraDragging && PointerOnTable(_lastTableMouse))
         {
             _syncTablePointer = false;
             _tableSurface.ForwardMouse(new InputEventMouseMotion { Position = _lastTableMouse });
         }
-        if (CameraBlocked || _cameraDragging || !PointerOnTable(_lastTableMouse)) { HideTableTooltip(); return; }
-        var hovered = TableHovered;
-        while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
+        if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
+        { HideTableTooltip(); return; }
+        Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
+        if (token is null)
+            while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
-        _tableTooltip = hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
+        _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :
+            hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
         _root.AddChild(_tableTooltip);
         _tableTooltip.Scale = Vector2.One / _root.Scale.X;
         _tableTooltip.Size = _tableTooltip.CustomMinimumSize;
