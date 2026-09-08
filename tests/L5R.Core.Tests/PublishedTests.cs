@@ -27,6 +27,7 @@ internal static class PublishedTests
             ("Crushing Strength requires opposition and offers two exclusive abilities", Crushing),
             ("Never Afraid may destroy either player's attachment", Never),
             ("Destroying an attachment clears the Attachment-duration keyword it granted", AttachmentGrantedKeywordClears),
+            ("Destroying an attachment removes its tokens from the game", AttachmentTokenClears),
             ("Items add Force and Chi even bowed; Armor and Weapon limits enforced", Attachments),
             ("Followers meet Personal Honor requirement and stay separate from Personality Force", Followers),
             ("Lion attack traits turn on and off as units move", AttackTraits),
@@ -214,6 +215,14 @@ internal static class PublishedTests
         parent.GrantedKeywords=[new("Elite",item.Id,"Attachment")];
         var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",item.Id));
         Eq(Card(e,parent.Id).GrantedKeywords.Count,0);
+    }
+    private static void AttachmentTokenClears()
+    {
+        // Core rules Glossary — Token: "removed from the game if their card leaves play."
+        var s=State(true);var never=Add(s,9916,zone:Zone.Hand);var parent=Unit(s,0);var item=Add(s,10118,0,Zone.Attached,province:0,parent:parent.Id);
+        item.Tokens=[new("test-token","Training","test-fixture","Force",1)];
+        var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",item.Id));
+        Eq(Card(e,item.Id).Zone,Zone.FateDiscard);Eq(Card(e,item.Id).Tokens.Count,0);
     }
     private static void Attachments()
     {

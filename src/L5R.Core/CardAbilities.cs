@@ -36,6 +36,11 @@ public static class AbilityCatalog
         // Training-only: no published card yet reduces an opponent's Honor via a Battle action, so this
         // exercises Law of Darkness Dojo's "he loses 1 Honor" passive, which otherwise has no live trigger.
         ["training-honor-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor", "enemy-personality"),
+        // Training-only: exercises the token primitives (create/move/destroy) ahead of any published
+        // card needing them -- several already-triaged Strongholds will, in a later wave.
+        ["training-create-token"] = new("Open", "Training: give target Personality a +1F Training token", "own-personality"),
+        ["training-move-token"] = new("Open", "Training: move a token from target to performer", "own-personality-with-token", Performer: "own-personality"),
+        ["training-destroy-token"] = new("Open", "Training: destroy a token on target", "own-personality-with-token"),
     });
 }
 
@@ -53,7 +58,9 @@ public sealed partial class MatchEngine
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
-    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount);
+    // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
+    // persists until the token itself is destroyed or its host leaves play (core rules Glossary — Token).
+    private static int StatModifier(CardInstance card, string stat) => card.Modifiers.Where(m => m.Stat == stat).Sum(m => m.Amount) + card.Tokens.Where(t => t.Stat == stat).Sum(t => t.Amount);
     // A Personality reduced to 0 Chi is destroyed immediately, by any means — centralized here so
     // every current and future Chi-reducing effect enforces it without needing its own check.
     private void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount)
@@ -112,6 +119,7 @@ public sealed partial class MatchEngine
             Require(ability.Performer switch {
                 "shugenja" => Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => !performer.Bowed && AtBattle(performer),
+                "own-personality" => true,
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -157,6 +165,7 @@ public sealed partial class MatchEngine
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
+                        "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -212,6 +221,9 @@ public sealed partial class MatchEngine
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
+            case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
+            case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
+            case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -273,9 +285,34 @@ public sealed partial class MatchEngine
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
         parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        card.Tokens.Clear();
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }
+
+    // Tokens (core rules Glossary — Token): create/move/destroy are the only ways a token's placement
+    // changes. IDs are a persistent sequence on MatchState, not a fresh Guid, so replay stays deterministic.
+    private CardToken CreateToken(CardInstance card, string type, string source, string? stat = null, int amount = 0)
+    {
+        var token = new CardToken($"token-{++_state.TokenSequence:D4}", type, source, stat, amount);
+        card.Tokens.Add(token);
+        if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
+        Emit("tokenCreated", $"{Definition(card).Name} gained a {type} token.", card.OwnerId, card.Id);
+        return token;
+    }
+    private void MoveToken(CardInstance from, CardToken token, CardInstance to)
+    {
+        from.Tokens.Remove(token);
+        to.Tokens.Add(token);
+        Emit("tokenMoved", $"A {token.Type} token moved to {Definition(to).Name}.", to.OwnerId, to.Id);
+    }
+    private void DestroyToken(CardInstance card, CardToken token)
+    {
+        card.Tokens.Remove(token);
+        Emit("tokenDestroyed", $"{Definition(card).Name}'s {token.Type} token was destroyed.", card.OwnerId, card.Id);
+    }
+    private static int TokenCount(CardInstance card, string type) => card.Tokens.Count(t => t.Type == type);
+    private static bool HasToken(CardInstance card, string type) => card.Tokens.Any(t => t.Type == type);
 
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {
@@ -294,6 +331,7 @@ public sealed partial class MatchEngine
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             if (performers.Length == 0) performers = [null];
