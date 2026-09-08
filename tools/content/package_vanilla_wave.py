@@ -6,6 +6,10 @@ not merely assumed from deck-pool.json), so none needs a curated Effect/Ability
 like the Lion/Crane pool's textful cards -- only stats, keywords and a verified
 scan. Inputs are pinned source receipts from download_oracle_printings.py and
 download_expansion_printings.py; this never invents or infers card behavior.
+
+build_definition_fields is shared with package_stronghold_wave.py (and future
+ability-bearing waves), which pass allow_text=True and supply their own curated
+Effect/Abilities on top of the same verified stats/scan pipeline.
 """
 from __future__ import annotations
 
@@ -27,12 +31,25 @@ def plain(value: str) -> str:
 
 
 def find_source(root: Path, card_id: str) -> tuple[dict, str]:
-    """Return (catalogue card record, slug) for card_id, searching every fetched set."""
+    """Return (catalogue card record, slug) for card_id, searching every fetched set.
+
+    A card can appear in several sets' full-search catalogues even though only one set's
+    image was actually fetched for it (each wave only downloads the cards it needs from a
+    given set search); skip a match whose receipt was never downloaded rather than fail
+    later on a missing file.
+    """
+    candidates = []
     for catalogue_path in sorted((root / CONTENT_DIR).glob("*/catalogue.json")):
         data = json.loads(catalogue_path.read_text(encoding="utf-8"))
         for card in data["cards"]:
             if card["id"] == card_id:
-                return card, catalogue_path.parent.name
+                candidates.append((card, catalogue_path.parent.name))
+    for card, slug in candidates:
+        image_id = card["image_ids"][0]
+        if (root / "assets/reference/oracle" / slug / "receipts" / f"{image_id}.json").exists():
+            return card, slug
+    if candidates:
+        raise ValueError(f"{card_id} was searched in {[slug for _, slug in candidates]} but no receipt was downloaded")
     raise ValueError(f"No fetched catalogue entry for {card_id}")
 
 
@@ -41,7 +58,15 @@ def find_receipt(root: Path, slug: str, image_id: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def build_definition(root: Path, card_id: str) -> dict:
+def build_definition_fields(root: Path, card_id: str, allow_text: bool = False) -> tuple[dict, dict]:
+    """Verify and copy a card's scan, returning (CardDefinition fields minus Effect/Abilities,
+    source receipt for a *-sources.json manifest). Fields include "_oracle_id" (int) so a curated
+    wave can key its Effect/Ability overrides on it; callers must pop it before serializing.
+
+    allow_text=False (vanilla waves) fails closed if the card actually has printed rules text;
+    allow_text=True (ability waves) fails closed if it does NOT -- each wave only ever emits the
+    kind of card it was built to review.
+    """
     record, slug = find_source(root, card_id)
     c = record["source_record"]
     printing = record["selected_printings"][0]
@@ -52,8 +77,10 @@ def build_definition(root: Path, card_id: str) -> dict:
         return int(value) if value not in ("-", "") else default
 
     text = plain("\n".join(c.get("text", []) + printing.get("text", [])))
-    if text:
+    if text and not allow_text:
         raise ValueError(f"{card_id} has rules text and is not vanilla: {text!r}")
+    if not text and allow_text:
+        raise ValueError(f"{card_id} has no rules text; package it with package_vanilla_wave.py instead")
 
     image_id = record["image_ids"][0]
     receipt = find_receipt(root, slug, image_id)
@@ -67,16 +94,31 @@ def build_definition(root: Path, card_id: str) -> dict:
     shutil.copyfile(source_image, destination)
 
     honor = c.get("honor", [])
-    return dict(
+    fields = dict(
         Id=card_id, Name=plain(c["title"][0]), Type=c["type"][0], Clan=c.get("clan", ["Unaligned"])[0],
         GoldCost=num("cost"), GoldProduction=num("production"), Force=num("force"), Chi=num("chi"),
         PersonalHonor=num("ph"), HonorRequirement=(num("honor") if honor and honor[0] not in ("-", "") else None),
-        ProvinceStrength=num("strength"), StartingHonor=num("startinghonor"), Effect="none", Text="",
+        ProvinceStrength=num("strength"), StartingHonor=num("startinghonor"), Text=text,
         ScenarioOnly=False, ArtworkKey=f"res://Content/Published/{card_id}.jpg",
-        Keywords=[plain(k) for k in c.get("keywords", [])], Abilities=[], Focus=num("focus"),
-        _slug=slug, _source_url=record["source_url"], _image_sha256=receipt["sha256"],
-        _image_path=receipt["path"], _printing_set=record["selected_printings"][0]["set"],
+        Keywords=[plain(k) for k in c.get("keywords", [])], Focus=num("focus"),
+        _oracle_id=int(card_id.removeprefix("oracle-l5r-")),
     )
+    source = {"card_id": card_id, "printing_set": printing["set"], "source_url": record["source_url"],
+              "image_path": receipt["path"], "image_sha256": receipt["sha256"]}
+    return fields, source
+
+
+def build_definition(root: Path, card_id: str) -> dict:
+    fields, source = build_definition_fields(root, card_id, allow_text=False)
+    del fields["_oracle_id"]
+    fields["Effect"] = "none"
+    fields["Abilities"] = []
+    fields["_slug"] = None
+    fields["_source_url"] = source["source_url"]
+    fields["_image_sha256"] = source["image_sha256"]
+    fields["_image_path"] = source["image_path"]
+    fields["_printing_set"] = source["printing_set"]
+    return fields
 
 
 def package(card_ids: list[str], root: Path = ROOT) -> dict:

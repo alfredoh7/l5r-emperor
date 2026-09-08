@@ -28,6 +28,25 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Strongholds beyond the pinned Lion/Crane pool, each with a curated, hand-verified
+    /// Effect/Ability mapping (never inferred from prose) -- unlike VanillaWave1, these carry real
+    /// rules text and printed abilities.</summary>
+    public static PublishedSnapshot StrongholdWave1 { get; } = LoadStrongholdWave();
+
+    private static PublishedSnapshot LoadStrongholdWave()
+    {
+        var snapshot = Load("L5R.Published.StrongholdWave1.json", "stronghold-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected stronghold-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+                throw new InvalidOperationException($"stronghold-wave-1 card is not a textful Stronghold: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("stronghold-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

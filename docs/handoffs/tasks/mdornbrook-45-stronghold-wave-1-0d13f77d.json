@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire up Stronghold wave 1: Journey's End Keep, Plains of the Maiden, Law of Darkness Dojo, Shamate Keep, plus a generalized performer/target ability mechanism reused across future Stronghold waves",
+  "validation": "bash tools/check.sh: full suite passed (retried once past the known transient Godot import flake); python3 -m unittest discover -s tools/content: 91/91 passed incl. 6 new",
+  "remaining": "Keep of the Dead deferred (needs mid-battle unit movement, overlaps #20). 45 Strongholds remain; next slice needs the generic Attack primitive most of them share.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/45",
+  "branch": "mdornbrook/45-stronghold-wave-1",
+  "updated": "2026-09-08T12:44:27.962648+00:00"
+}

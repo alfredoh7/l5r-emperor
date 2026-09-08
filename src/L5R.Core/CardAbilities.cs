@@ -2,7 +2,10 @@ using System.Collections.ObjectModel;
 
 namespace L5R.Core;
 
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false);
+// Performer is set only when the ability separately selects a performing card before its target
+// (e.g. "Choose your performing unbowed Personality and target..."); most abilities leave it null
+// and use only their source card and Target.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null);
 
 public static class AbilityCatalog
 {
@@ -10,7 +13,7 @@ public static class AbilityCatalog
     {
         ["border-first"] = new("Limited", "First-turn province refresh", "provinces"),
         ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces"),
-        ["shinden-choice"] = new("Open", "Offer bowing or 1 Honor", "shinden"),
+        ["shinden-choice"] = new("Open", "Offer bowing or 1 Honor", "shinden", Performer: "shugenja"),
         ["air-straighten"] = new("Open", "Straighten an Air Personality", "air"),
         ["shunya-honor"] = new("Limited", "Discard Favor · gain 2 Honor", "none"),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality"),
@@ -27,6 +30,12 @@ public static class AbilityCatalog
         ["lobby"] = new("Limited", "Lobby · bow a Personality to take Favor", "lobby", true),
         ["favor-cycle"] = new("Limited", "Discard Favor and a card · draw a card", "hand", true),
         ["favor-battle"] = new("Battle", "Discard Favor · move an enemy attacker home", "enemy-attacking", true),
+        ["journeys-end-move"] = new("Battle", "Move home a Personality with no more Followers than the performer", "fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle"),
+        ["shamate-move"] = new("Battle", "Move home a Personality with equal or lower Personal Honor", "lower-or-equal-honor-than-performer", Performer: "own-unbowed-personality-at-battle"),
+        ["law-of-darkness-weaken"] = new("Battle", "Enemy Personality −4 Force · bow if dishonorable", "enemy-personality"),
+        // Training-only: no published card yet reduces an opponent's Honor via a Battle action, so this
+        // exercises Law of Darkness Dojo's "he loses 1 Honor" passive, which otherwise has no live trigger.
+        ["training-honor-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor", "enemy-personality"),
     });
 }
 
@@ -96,11 +105,15 @@ public sealed partial class MatchEngine
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
-        if (id == "shinden-choice")
+        if (ability.Performer is not null)
         {
-            var performer = Card(command.PerformerId);
-            Require(performer.OwnerId == player.Id && InPlay(performer) && Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
-                "Choose your unbowed Shugenja to perform and bow.");
+            var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
+            Require(performer.OwnerId == player.Id && InPlay(performer) && Definition(performer).Type == CardType.Personality, "Choose your own Personality to perform.");
+            Require(ability.Performer switch {
+                "shugenja" => Keyword(performer, "Shugenja") && !performer.Bowed,
+                "own-unbowed-personality-at-battle" => !performer.Bowed && AtBattle(performer),
+                _ => false
+            }, "That card does not meet this ability's performer requirement.");
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
         Require(command.Choice is null, "Choices are resolved by a separate decision command.");
@@ -141,6 +154,9 @@ public sealed partial class MatchEngine
                         "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item,
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item,
                         "lobby" => personality && own && !target.Bowed && Definition(target).PersonalHonor >= 1,
+                        "fewer-or-equal-followers-than-performer" => personality &&
+                            Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
+                        "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -167,6 +183,9 @@ public sealed partial class MatchEngine
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label}.", player.Id, source?.Id);
+        // Snapshot before the effect resolves so any Battle-action Honor loss it inflicts on an
+        // opponent can be detected generically afterward (Law of Darkness Dojo's passive).
+        var opponentHonorBeforeBattleAction = ability.Timing == "Battle" && target is not null && target.OwnerId != player.Id ? Player(target.OwnerId).Honor : (int?)null;
         switch (id)
         {
             case "border-first": case "border-game": CycleProvinces(player, command.CardIds!); break;
@@ -189,8 +208,14 @@ public sealed partial class MatchEngine
             case "block-supply": MoveHome(target!, true); break;
             case "lobby": target!.Bowed = true; _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "favor-cycle": DiscardFate(player, target!); Draw(player); break;
+            case "journeys-end-move": MoveHome(target!, false); break;
+            case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
+            case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
+            case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+        if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
+            GainHonor(target.OwnerId, -1, "Law of Darkness Dojo");
         if (source is not null && Definition(source).Type == CardType.Strategy) DiscardFate(player, source);
         NextAction(player.Id);
     }
@@ -265,7 +290,12 @@ public sealed partial class MatchEngine
             var ability = AbilityCatalog.All[id];
             if (ability.Timing == "Battle" ? _state.Phase != Phase.Battle : _state.Phase != Phase.Action) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
-            string?[] performers = id == "shinden-choice" ? _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray() : [null];
+            string?[] performers = ability.Performer switch
+            {
+                "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                _ => [null]
+            };
             if (performers.Length == 0) performers = [null];
             foreach (var performer in performers)
             {

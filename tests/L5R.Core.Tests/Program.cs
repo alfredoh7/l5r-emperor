@@ -48,7 +48,11 @@ var tests = new (string Name, Action Run)[]
     ("Invalid later assignment rolls back earlier valid assignment", AssignmentRollback),
     ("Zero-Force battle with an empty side has no outcome", EmptyBattle),
     ("Proclaim use becomes available on a subsequent turn", ProclaimReset),
-    ("Scripted training match completes with replay and invariant checks", CompleteMatch)
+    ("Scripted training match completes with replay and invariant checks", CompleteMatch),
+    ("Journey's End Keep moves home a Personality with no more Followers than the performer, not one with more", JourneysEndMove),
+    ("Shamate Keep moves home a Personality with equal or lower Personal Honor; gains Honor only if uncontrolled", ShamateMove),
+    ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
+    ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo)
 };
 var failed=0;
 foreach(var test in tests)
@@ -458,4 +462,92 @@ static void CompleteMatch()
     }
     Check(e.State.WinnerId is not null,$"Match did not finish in {count} commands.");
     Equal(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));
+}
+
+static MatchState StrongholdBattle(string strongholdDefinitionId)
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Cards[s.Players[0].StrongholdId].DefinitionId=strongholdDefinitionId;
+    s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0;
+    return s;
+}
+static void JourneysEndMove()
+{
+    var s=StrongholdBattle("oracle-l5r-4059");
+    var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+    var heavy=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+    Add(s,"training-follower",1,Zone.Attached,attachedTo:heavy.Id,province:0);
+    var light=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var ability=new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:heavy.Id,AbilityId:"journeys-end-move",PerformerId:performer.Id);
+    Reject(e,ability); // heavy has 1 Follower attached; the performer has 0 -- too many
+    Accept(e,ability with {TargetId=light.Id});
+    Equal(e.State.Cards[light.Id].Zone,Zone.Home,"A target with no more Followers than the performer should move home");
+}
+static void ShamateMove()
+{
+    {
+        var s=StrongholdBattle("oracle-l5r-6691");
+        var performer=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // Personal Honor 3
+        var proud=Add(s,"training-lion-dignitary",1,Zone.Battlefield,province:0); // Personal Honor 4
+        var honorable=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Personal Honor 3
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
+        var ability=new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:proud.Id,AbilityId:"shamate-move",PerformerId:performer.Id);
+        Reject(e,ability); // proud has higher Personal Honor than the performer
+        Accept(e,ability with {TargetId=honorable.Id});
+        Equal(e.State.Cards[honorable.Id].Zone,Zone.Home);
+        Equal(e.State.Players[0].Honor,before+2,"Should gain 2 Honor for moving home a Personality this player does not control");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-6691");
+        var performer=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // Personal Honor 3
+        var own=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Personal Honor 2, same side
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:own.Id,AbilityId:"shamate-move",PerformerId:performer.Id));
+        Equal(e.State.Cards[own.Id].Zone,Zone.Home);
+        Equal(e.State.Players[0].Honor,before,"No Honor gain when the performer's controller already controls the target");
+    }
+}
+static void PlainsOfMaiden()
+{
+    var s=StrongholdBattle("oracle-l5r-5982");
+    s.PriorityPlayerId=1; s.Players[1].Provinces[0].Strength=1;
+    Add(s,"training-battle-maiden",0,Zone.Battlefield,province:0);
+    Add(s,"training-battle-maiden",0,Zone.Battlefield,province:0);
+    Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var before=e.State.Players[0].Honor;
+    Resolve(e);
+    Equal(e.State.Players[0].Honor,before+4,"2 Honor for the destroyed defender plus 2 for two surviving Battle Maidens");
+}
+static void LawOfDarknessDojo()
+{
+    {
+        var s=StrongholdBattle("oracle-l5r-4676");
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var honorable=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:honorable.Id,AbilityId:"law-of-darkness-weaken"));
+        Check(e.State.Cards[honorable.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-4),"Should apply -4 Force");
+        Check(!e.State.Cards[honorable.Id].Bowed,"An honorable target should not be bowed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-4676");
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var dishonorable=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,TargetId:dishonorable.Id,AbilityId:"law-of-darkness-weaken"));
+        Check(e.State.Cards[dishonorable.Id].Bowed,"A dishonorable target should be bowed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-4676");
+        var samurai=Add(s,"training-honor-strike-samurai",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var before=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:samurai.Id,TargetId:enemy.Id,AbilityId:"training-honor-strike"));
+        Equal(e.State.Players[1].Honor,before-3,"2 Honor from the training ability plus 1 more from Law of Darkness Dojo's passive");
+    }
 }

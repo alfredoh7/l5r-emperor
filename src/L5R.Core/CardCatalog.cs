@@ -30,8 +30,10 @@ public static class CardCatalog
             new("training-follower", "Training ashigaru", CardType.Follower, GoldCost:2, Force:2, HonorRequirement:1, Text:"Training fixture. Requires a Personality with at least 1 Personal Honor. Adds 2 unit Force when unbowed."),
             new("training-item", "Training battle standard", CardType.Item, GoldCost:2, Force:2, Text:"Training fixture. Adds 2 Force directly to its Personality."),
             new("training-rally", "Training rally", CardType.Strategy, Effect:"force-three", Text:"Training fixture. Battle: Target your Personality at the current battlefield: Give it +3 Force until the turn ends."),
-            new("training-pressure", "Training pressure", CardType.Strategy, Effect:"bow-small", Text:"Training fixture. Battle: Target an enemy Personality with 3 or less Force at the current battlefield: Bow it.")
+            new("training-pressure", "Training pressure", CardType.Strategy, Effect:"bow-small", Text:"Training fixture. Battle: Target an enemy Personality with 3 or less Force at the current battlefield: Bow it."),
+            new("training-battle-maiden", "Training Battle Maiden", CardType.Personality, "Unicorn", GoldCost:4, Force:2, Chi:2, PersonalHonor:1, Keywords:["Battle Maiden"], Text:"Synthetic Plains of the Maiden fixture. Never included in a playable deck."),
+            new("training-honor-strike-samurai", "Training honor-strike samurai", CardType.Personality, "Scorpion", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Samurai"], Abilities:["training-honor-strike"], Text:"Synthetic Law of Darkness Dojo fixture: grants a Battle ability that reduces an enemy Personality's controller's Honor. Never included in a playable deck.")
         ];
-        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
+        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

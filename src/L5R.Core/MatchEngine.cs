@@ -358,15 +358,19 @@ public sealed partial class MatchEngine
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
         if(af>df)
         {
-            GainHonor(attacker,DestroyUnits(d)*2,"Battle victory");
+            var destroyedDefenders=DestroyUnits(d);
+            GainHonor(attacker,destroyedDefenders*2,"Battle victory");
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
-            if(af>df+province.Strength) DestroyProvince(defender,province);
+            var destroyedProvince=af>df+province.Strength;
+            if(destroyedProvince) DestroyProvince(defender,province);
+            if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
         }
         else if(df>af) GainHonor(defender,DestroyUnits(a)*2,"Battle victory");
         else if(a.Length>0 && d.Length>0)
         {
             var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
             GainHonor(attacker,destroyedD,"Tied battle"); GainHonor(defender,destroyedA,"Tied battle");
+            if(destroyedD>0) AttackerDestructionBonus(attacker,a);
         }
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield)) ReturnHome(card,true);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
@@ -377,6 +381,16 @@ public sealed partial class MatchEngine
             SetPhase(Phase.Dynasty,attacker);
         }
         else SetPhase(Phase.BattleSelection,attacker);
+    }
+    // Plains of the Maiden: after the Attacker destroys a province or army in resolution, gain Honor
+    // equal to their surviving Battle Maidens at this battlefield. Checked against units still in the
+    // battlefield zone after destruction, so a Battle Maiden destroyed in the same (tied) resolution
+    // does not count toward her own bonus.
+    private void AttackerDestructionBonus(int attacker,CardInstance[] attackingArmy)
+    {
+        if(Definition(Card(Player(attacker).StrongholdId)).Effect!="plains-honor") return;
+        var maidens=attackingArmy.Count(c=>c.Zone==Zone.Battlefield && Keyword(c,"Battle Maiden"));
+        if(maidens>0) GainHonor(attacker,maidens,"Plains of the Maiden");
     }
 
     private void Equip(GameCommand command)

@@ -7,7 +7,7 @@ import unittest
 from PIL import Image
 from io import BytesIO
 
-from package_vanilla_wave import build_definition, package, plain
+from package_vanilla_wave import build_definition, find_source, package, plain
 
 
 class PackageVanillaWaveTests(unittest.TestCase):
@@ -69,6 +69,32 @@ class PackageVanillaWaveTests(unittest.TestCase):
             (root / image_relative).write_bytes(b"tampered")
             with self.assertRaises((ValueError, OSError)):
                 build_definition(root, "oracle-l5r-3")
+
+    def test_find_source_skips_a_catalogue_match_with_no_downloaded_receipt(self):
+        # A card can be listed in several sets' full-search catalogues even though only one
+        # set's image was actually fetched for it (each wave only downloads what it needs).
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root, "oracle-l5r-5")  # writes to slug "test-set" with a real receipt
+            # "aaa-earlier-set" sorts before "test-set" and lists the same card, but has no receipt.
+            other_dir = root / "content/oracle/aaa-earlier-set"
+            other_dir.mkdir(parents=True)
+            card = {"id": "oracle-l5r-5", "image_ids": ["oracle-l5r-5-printing-9-image-1"],
+                    "selected_printings": [{"printingid": "9", "set": ["Earlier Set"], "printimagehash": ["ff/ee"], "text": []}],
+                    "source_url": "https://oracleofthevoid.com/#cardid=5", "source_record": {}}
+            (other_dir / "catalogue.json").write_text(json.dumps({"cards": [card]}), encoding="utf-8")
+            record, slug = find_source(root, "oracle-l5r-5")
+            self.assertEqual(slug, "test-set")
+
+    def test_find_source_reports_every_searched_set_when_no_receipt_exists_anywhere(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            catalogue_dir = root / "content/oracle/some-set"
+            catalogue_dir.mkdir(parents=True)
+            card = {"id": "oracle-l5r-6", "image_ids": ["oracle-l5r-6-printing-1-image-1"]}
+            (catalogue_dir / "catalogue.json").write_text(json.dumps({"cards": [card]}), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                find_source(root, "oracle-l5r-6")
 
     def test_package_writes_disjoint_definitions_and_sources(self):
         with tempfile.TemporaryDirectory() as tmp:

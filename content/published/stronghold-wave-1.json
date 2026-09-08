@@ -1,0 +1,99 @@
+{
+  "Profile": "stronghold-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4059",
+      "Name": "Journey's End Keep",
+      "Type": "Stronghold",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 4,
+      "Text": "Battle: Target your performing unbowed Personality to move home a target Personality with as many or fewer Followers attached; this will not be negated or delayed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4059.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "journeys-end-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5982",
+      "Name": "Plains of the Maiden",
+      "Type": "Stronghold",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "After you destroy a province or army in battle resolution as the Attacker: Gain Honor equal to the number of your Battle Maidens at the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5982.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "plains-honor"
+    },
+    {
+      "Id": "oracle-l5r-4676",
+      "Name": "Law of Darkness Dojo",
+      "Type": "Stronghold",
+      "Clan": "Scorpion",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 1,
+      "Text": "After another player loses Honor from your Battle action: He loses 1 Honor.\nBattle: Even if this card is bowed, target an enemy Personality: Give him -4F. Bow him if he is dishonorable.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4676.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "law-of-darkness-weaken"
+      ],
+      "Effect": "law-of-darkness-punish"
+    },
+    {
+      "Id": "oracle-l5r-6691",
+      "Name": "Shamate Keep",
+      "Type": "Stronghold",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 7,
+      "Text": "Your dishonorable Paragons do not have a maximum Personal Honor of 0 from the rulebook.\nBattle: Choose your performing unbowed Personality and move home a target Personality with equal or lower Personal Honor. Gain 2 Honor if you do not control him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6691.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "shamate-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -9,5 +9,6 @@
   <ItemGroup>
     <EmbeddedResource Include="../../content/published/lion-crane-v1.json" LogicalName="L5R.Published.json" />
     <EmbeddedResource Include="../../content/published/vanilla-wave-1.json" LogicalName="L5R.Published.VanillaWave1.json" />
+    <EmbeddedResource Include="../../content/published/stronghold-wave-1.json" LogicalName="L5R.Published.StrongholdWave1.json" />
   </ItemGroup>
 </Project>
