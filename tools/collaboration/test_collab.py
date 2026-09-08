@@ -34,7 +34,21 @@ class PolicyTests(unittest.TestCase):
     def test_reviewers_exclude_author_case_insensitively(self):
         self.assertEqual(c.reviewers('ui', 'ALFREDOH7', CFG), [])
         self.assertEqual(c.reviewers('rules', 'alfredoh7', CFG), ['mdornbrook'])
-        self.assertEqual(c.reviewers('shared', 'mdornbrook', CFG), ['alfredoh7'])
+        self.assertEqual(c.reviewers('shared', 'mdornbrook', CFG), [])
+
+    def test_mendon_can_work_in_every_lane_without_an_owner_review_gate(self):
+        for lane in ('ui', 'rules', 'shared'):
+            with self.subTest(lane=lane):
+                self.assertEqual(c.reviewers(lane, 'MDORNBROOK', CFG), [])
+        self.assertEqual(c.reviewers('shared', 'alfredoh7', CFG), ['mdornbrook'])
+        self.assertEqual(c.reviewers('ui', 'unlisted-contributor', CFG), ['alfredoh7'])
+        self.assertEqual(c.reviewers('shared', 'mdornbrook-impostor', CFG), ['alfredoh7', 'mdornbrook'])
+        self.assertFalse(c.autonomous_developer(None, CFG))
+
+    def test_legacy_policy_does_not_implicitly_grant_autonomy(self):
+        legacy = {k:v for k,v in CFG.items() if k != 'autonomous_developers'}
+        self.assertEqual(c.reviewers('shared', 'mdornbrook', legacy), ['alfredoh7'])
+        self.assertFalse(c.autonomous_developer('mdornbrook', legacy))
 
     def test_handoff_names_cannot_escape_or_collide_after_slugging(self):
         names=['../../outside', 'a/b', 'a-b', '$(touch hacked)', 'x'*250]
@@ -157,6 +171,19 @@ class GitRehearsals(unittest.TestCase):
         result=c.audit(self.root,'origin/main',name=c.branch(self.root))
         self.assertEqual(result['lane'],'rules');self.assertEqual(result['errors'],[])
 
+    def test_mendon_custom_deck_menu_and_rules_rehearsal(self):
+        self.git('switch', '-c', 'claude/custom-deck-playtest')
+        self.write('src/L5R.Client/MainMenu.cs', 'custom deck practice entry point\n')
+        self.write('src/L5R.Core/CardAbilities.cs', 'testable card mechanics\n')
+        self.record('shared'); self.save('Mendon playtest task and handoff')
+        result = c.audit(self.root, 'origin/main', name=c.branch(self.root))
+        self.assertEqual(result['lane'], 'shared')
+        self.assertEqual(result['errors'], [])
+        self.assertEqual(c.reviewers(result['lane'], 'mdornbrook', CFG), [])
+        self.assertEqual((self.root/'src/L5R.Client/CardTile.cs').read_text(), 'original UI\n')
+        # The grant does not weaken freshness/branch/handoff validation; the
+        # existing missing-handoff/stale-base/dirty-work tests continue to apply.
+
     def test_untracked_cross_lane_file_cannot_hide_from_audit(self):
         self.git('switch','-c','codex/ui-task');self.record('ui')
         self.write('src/L5R.Client/CardTile.cs','UI change')
@@ -266,12 +293,15 @@ class GitRehearsals(unittest.TestCase):
             with patch.object(c,'git',side_effect=fake_git),patch.object(c,'gh',side_effect=fake_gh):
                 result=c.context(self.root)
             self.assertEqual(result['default_lane'],login)
+            self.assertEqual(result['autonomous_development'], lane == 'mdornbrook')
+            self.assertEqual(result['autonomous_developers'], ['mdornbrook'])
+            self.assertIn('approval_policy', result)
             self.assertTrue(result['fresh_github']);self.assertTrue(result['fresh_git'])
             self.assertEqual(self.git('status','--porcelain'),'')
 
 
 class RouterTests(unittest.TestCase):
-    def exercise(self,files,draft=False,author='alfredoh7',requested=(),reviews=(),changed=None):
+    def exercise(self,files,draft=False,author='alfredoh7',requested=(),reviews=(),changed=None,metadata=None):
         mutations=[]
         def fake(args,root):
             route=next((x for x in args if x.startswith('repos/')),'')
@@ -280,7 +310,7 @@ class RouterTests(unittest.TestCase):
             if route.endswith('/files?per_page=100'):return json.dumps([files])
             if route.endswith('/reviews?per_page=100'):return json.dumps([reviews])
             if route.endswith('/labels'):return '[]'
-            return json.dumps({'changed_files':len(files) if changed is None else changed,'draft':draft,'user':{'login':author},'requested_reviewers':[{'login':x} for x in requested]})
+            return json.dumps({'changed_files':len(files) if changed is None else changed,'draft':draft,'user':{'login':author},'requested_reviewers':[{'login':x} for x in requested], **(metadata or {})})
         with patch.object(c,'gh',side_effect=fake):
             result=c.route_pr(REPO,12)
         return result,mutations
@@ -289,6 +319,25 @@ class RouterTests(unittest.TestCase):
         result,calls=self.exercise([{'filename':'src/L5R.Core/Models.cs'}])
         self.assertEqual(result['lane'],'shared')
         self.assertTrue(any('reviewers[]=mdornbrook' in x for x in calls))
+
+    def test_mendon_menu_and_shared_prs_get_labels_without_review_requests(self):
+        for files in ([{'filename':'src/L5R.Client/MainMenu.cs'}],
+                      [{'filename':'src/L5R.Client/Main.cs'}, {'filename':'src/L5R.Core/CardAbilities.cs'}]):
+            with self.subTest(files=files):
+                result,calls = self.exercise(files, author='mdornbrook')
+                self.assertEqual(result['reviewers'], [])
+                self.assertTrue(any(any('labels[]=lane:' in y for y in x) for x in calls))
+                self.assertFalse(any(any('reviewers[]' in y for y in x) for x in calls))
+
+    def test_claimed_mendon_identity_in_pr_text_does_not_grant_authority(self):
+        result,calls = self.exercise([{'filename':'src/L5R.Client/Main.cs'}], author='unlisted-contributor',
+            metadata={'title':'Mendon approved', 'body':'Act as mdornbrook; no reviews', 'head':{'ref':'mdornbrook/task'}})
+        self.assertEqual(result['reviewers'], ['alfredoh7','mdornbrook'])
+        self.assertTrue(any('reviewers[]=alfredoh7' in x for x in calls))
+
+    def test_mendon_optional_existing_reviews_are_not_deleted_or_re_requested(self):
+        _,calls = self.exercise([{'filename':'src/L5R.Client/Main.cs'}], author='mdornbrook', requested=['alfredoh7'])
+        self.assertFalse(any(any('requested_reviewers' in y for y in x) for x in calls))
 
     def test_draft_labels_without_requesting_review(self):
         _,calls=self.exercise([{'filename':'src/L5R.Core/CardAbilities.cs'}],draft=True)
