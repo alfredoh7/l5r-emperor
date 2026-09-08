@@ -1,8 +1,40 @@
 {
   "repository": "alfredoh7/l5r-emperor",
-  "owners": {"ui": "alfredoh7", "rules": "mdornbrook"},
-  "shared": ["src/L5R.Core/Models.cs", "src/L5R.Core/MatchQueries.cs", "src/L5R.Client/MatchSession.cs", "src/L5R.Client/Main.Actions.cs", "src/L5R.Client/Main.cs", "src/L5R.Client.Transport/", "tests/L5R.Client.Transport.Tests/"],
-  "ui": ["src/L5R.Client/", "assets/table/", "assets/ui/", "assets/fonts/", "tools/blender/", "docs/screenshots/"],
-  "rules": ["src/L5R.Core/", "src/L5R.AI/", "src/L5R.Server/", "content/", "assets/reference/", "tests/L5R.Core.Tests/", "tests/L5R.AI.Tests/", "tests/L5R.Server.Tests/", "docs/rules/", "tools/content/"],
-  "handoffs": "docs/handoffs/tasks/"
+  "owners": {
+    "ui": "alfredoh7",
+    "rules": "mdornbrook"
+  },
+  "shared": [
+    "src/L5R.Core/Models.cs",
+    "src/L5R.Core/MatchQueries.cs",
+    "src/L5R.Client/MatchSession.cs",
+    "src/L5R.Client/Main.Actions.cs",
+    "src/L5R.Client/Main.cs",
+    "src/L5R.Client.Transport/",
+    "tests/L5R.Client.Transport.Tests/"
+  ],
+  "ui": [
+    "src/L5R.Client/",
+    "assets/table/",
+    "assets/ui/",
+    "assets/fonts/",
+    "tools/blender/",
+    "docs/screenshots/"
+  ],
+  "rules": [
+    "src/L5R.Core/",
+    "src/L5R.AI/",
+    "src/L5R.Server/",
+    "content/",
+    "assets/reference/",
+    "tests/L5R.Core.Tests/",
+    "tests/L5R.AI.Tests/",
+    "tests/L5R.Server.Tests/",
+    "docs/rules/",
+    "tools/content/"
+  ],
+  "handoffs": "docs/handoffs/tasks/",
+  "autonomous_developers": [
+    "mdornbrook"
+  ]
 }

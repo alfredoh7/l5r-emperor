@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Configure Mendon to develop across all game areas without an Alfredo approval gate, per explicit owner request.",
-  "validation": "Verified mdornbrook already has GitHub write permission; inspected policy, reviewer routing and existing adversarial tests.",
-  "remaining": "Implement canonical authority policy and docs, test routing/rehearsals, pass CI, merge this explicitly authorized configuration.",
+  "summary": "Grant Mendon standing authority across all game areas, including menus and shared functions, with no Alfredo approval gate; preserve task branches, checks and conflict coordination.",
+  "validation": "37 collaboration tests passed on macOS, including both identities, custom-deck menu/rules Git rehearsal, trusted-author routing and impersonation checks; git diff --check passed. GitHub API confirms existing mdornbrook write access.",
+  "remaining": "Wait for current PR CI, then merge this explicitly owner-authorized workflow configuration. No game behavior changed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/60",
   "branch": "codex/60-mendon-autonomy",
-  "updated": "2026-09-08T21:12:09.513174+00:00"
+  "updated": "2026-09-08T21:16:01.746744+00:00"
 }

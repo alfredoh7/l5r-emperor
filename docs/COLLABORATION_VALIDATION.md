@@ -23,3 +23,12 @@ The live `context` command identified alfredoh7, chose the UI default, fetched c
 ## Evidence location and scope
 
 Local detailed logs are under ignored `artifacts/collaboration/`; PRs and GitHub Actions preserve remote validation. The project status and game-version baseline remain separate from workflow testing. The initial setup commit passed collaboration CI and full Mac/Windows CI. The live shared setup PR received lane:shared and a review request for mdornbrook. After activation on main, disposable UI/rules PRs [#5](https://github.com/alfredoh7/l5r-emperor/pull/5) and [#6](https://github.com/alfredoh7/l5r-emperor/pull/6) received the correct lane labels, suppressed draft review requests, and passed collaboration and Mac/Windows CI. Making the rules PR ready automatically requested mdornbrook. Both rehearsals were closed without merging and their disposable branches/worktrees removed. Human rules acceptance and native Windows graphical playtesting remain open product gates.
+
+
+## 2026-09-08: Mendon development authority
+
+The updated suite passes **37 tests** on local macOS: `python3 -m unittest discover -s tools/collaboration -p 'test_*.py' -v`. `git diff --check` also passes. GitHub reports `mdornbrook` has repository `write` access.
+
+New regressions exercise every lane for Mendon, a temporary Git task that changes both the practice menu and rules, and the actual reviewer router with simulated GitHub metadata. His UI/shared PRs retain scope labels without an owner review request; Alfredo's shared PRs still request Mendon. The context exposes the correct policy for each authenticated identity. Missing legacy configuration never grants authority implicitly; names in PR titles, descriptions or branch names cannot impersonate an authorized author. Existing optional review requests are preserved.
+
+Existing tests continue to verify stale bases, missing handoffs, dirty-work preservation, cross-lane paths, incomplete GitHub responses and trusted-base routing without executing PR-head code. These are workflow rehearsals, not a new custom-deck implementation or an interactive test on Mendon's computer. CI outcomes and the merge are recorded on PR #61; this local record does not pre-claim them.
