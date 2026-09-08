@@ -38,7 +38,7 @@ public partial class Main
             _clarityVersion = View.Version;
             var hand = _captureMode.Contains("hand", StringComparison.Ordinal);
             _clarityCard = hand ? (_captureMode.Contains("last", StringComparison.Ordinal) ? _tiles.Last(t => t.Card.Zone == Zone.Hand) : _tiles.First(t => t.Card.Zone == Zone.Hand)) :
-                _captureMode.Contains("expanded", StringComparison.Ordinal) ? _tiles.First(t => _unitDetail.IsAncestorOf(t) && t.Card.AttachedTo is not null) :
+                _captureMode.Contains("expanded", StringComparison.Ordinal) ? _tiles.First(t => _unitDetail.IsAncestorOf(t) && (_captureMode.Contains("parent", StringComparison.Ordinal) ? t.Card.AttachedTo is null : t.Card.AttachedTo is not null)) :
                 _tiles.First(t => t.Card.OwnerId == Self.Id && t.Card.Zone == Zone.Home && t.Card.Definition?.Type == CardType.Personality && (!_captureMode.Contains("bowed", StringComparison.Ordinal) || t.Card.Bowed));
             GetWindow().Title = "L5R UI clarity check";
             GetWindow().GrabFocus();

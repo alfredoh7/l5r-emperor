@@ -115,11 +115,18 @@ public partial class Main
         if (_captureMode.Contains("motionoff", StringComparison.Ordinal))
         {
             ShowSettings();
-            var dialog = GetChildren().OfType<AcceptDialog>().Last();
-            var motion = dialog.FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(b => b.Text.StartsWith("Reduced motion", StringComparison.Ordinal));
+            var dialog = GetChildren().OfType<AcceptDialog>().LastOrDefault();
+            var motion = (dialog as Node ?? GetTree().Root).FindChildren("*", "CheckBox", true, false).OfType<CheckBox>().Single(b => b.Text.StartsWith("Reduced motion", StringComparison.Ordinal));
             motion.ButtonPressed = true;
             if (!_reducedMotion || !_table.ReducedMotion) throw new InvalidOperationException("Reduced motion did not stop environmental animation.");
-            dialog.QueueFree();
+            if (dialog is not null) dialog.QueueFree();
+            else
+            {
+                // The menu branch hosts Options in its own canvas rather than a dialog.
+                GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
+                GetViewport().PushInput(new InputEventKey { Keycode = Key.Escape, Pressed = true }, true);
+                if (!_root.Visible) throw new InvalidOperationException("Options did not return to the existing table.");
+            }
         }
     }
 

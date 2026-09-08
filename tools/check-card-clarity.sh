@@ -15,6 +15,8 @@ for spec in \
   '1440x900 battle-clarity-other-hand-last-lift' \
   '1920x1080 battle-clarity-bowed-board-picked' \
   '1920x1080 battle-expanded-clarity-attachment-lift' \
+  '1920x1080 battle-expanded-clarity-parent-lift' \
+  '1920x1080 battle-expanded-clarity-parent-picked' \
   '1280x720 assignment-clarity-hand-picked' \
   '2560x1080 assignment-clarity-other-hand-last-lift' \
   '1920x1080 battle-clarity-hand-edge-lift' \
