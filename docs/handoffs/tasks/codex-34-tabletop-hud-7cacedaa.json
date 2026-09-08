@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Starting tabletop HUD refinement after user feedback, including pending token and clarity dependencies.",
+  "validation": "Context and overlap reviewed; implementation and native checks in progress.",
+  "remaining": "Implement, inspect native captures, run input checks and publish review evidence.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/34",
+  "branch": "codex/34-tabletop-hud",
+  "updated": "2026-09-08T07:09:58.526513+00:00"
+}
