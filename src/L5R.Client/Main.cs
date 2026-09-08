@@ -71,6 +71,8 @@ public partial class Main : Node
         }
         GetWindow().Mode = _captureMode.Contains("fullscreen", StringComparison.Ordinal) ? Window.ModeEnum.Fullscreen : Window.ModeEnum.Windowed;
         if (_capturePath is not null) GetWindow().GrabFocus();
+        if (_captureMode == "threshold-reference" && _capturePath is not null)
+        { SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); AddChild(new ThresholdArtReview(_capturePath)); SetProcess(false); return; }
         LoadSeat();
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
@@ -427,6 +429,9 @@ public partial class Main : Node
 
     private void Highlight()
     {
+        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == _selected?.Id && _selected is not null)
+            .Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault();
+        _matSections.Emphasize(selectedProvince);
         foreach (var tile in _tiles)
         {
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id);

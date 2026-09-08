@@ -66,14 +66,14 @@ public partial class Main
         _playLeft = MatPadding + holdingWidth + MatGap;
         WorldWidth = _playLeft + _playWidth + MatPadding;
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
-        var provinceHeight = MatHeader + PlaneHeight(CardHeight) + ProvinceMarker.Footer + MatPadding;
+        var provinceHeight = MatHeader + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding;
         _enemyHomeY = MatPadding + provinceHeight + MatGap;
         var enemyBandBottom = Math.Max(_enemyHomeY + _homeHeights[enemy.Id], MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy));
         _battleY = enemyBandBottom + MatGap;
         _battleHeight = BattleActive ? Math.Max(92, _armyHeights.Values.Sum() + MatHeader + MatPadding + RowGap + InkMatSections.BattleFooter) : 0;
         _selfHomeY = _battleY + _battleHeight + (BattleActive ? MatGap : 0);
         _selfProvinceY = _selfHomeY + _homeHeights[Self.Id] + MatGap + MatHeader;
-        _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + ProvinceMarker.Footer + MatPadding,
+        _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding,
             _selfHomeY + MatRowsHeight(_holdingRows[Self.Id], Self)) + MatPadding;
 
         foreach (var player in View.Players)
@@ -85,12 +85,16 @@ public partial class Main
                 holdingWidth, MatRowsHeight(_holdingRows[player.Id], player));
             _matTargets.Add(new($"holdings:{player.Id}", "Holdings", _holdingBounds[player.Id]));
             _matTargets.Add(new($"home:{player.Id}", "Home", _homeBounds[player.Id]));
-            // Fixed four-province footprint includes empty/destroyed locations;
-            // absence never renumbers surviving provinces or squeezes their row.
-            var provinceLeft = Enumerable.Range(0, 4).Min(i => SlotX(player, i + 2));
-            var provinceRight = Enumerable.Range(0, 4).Max(i => SlotX(player, i + 2) + CardHeight);
-            _matTargets.Add(new($"provinces:{player.Id}", "Provinces",
-                new Rect2(provinceLeft - 8, ProvinceRowY(player) - MatHeader, provinceRight - provinceLeft + 16, provinceHeight)));
+            // Each surviving province has its own fixed identity and C threshold.
+            // Destroying one never shifts or renumbers its surviving neighbours.
+            foreach (var province in player.Provinces.Where(p => !p.Destroyed))
+            {
+                var bayWidth = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
+                    new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
+                        ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
+                    ProvinceNumber: province.Index + 1));
+            }
         }
         if (BattleActive)
         {
