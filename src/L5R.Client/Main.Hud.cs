@@ -14,9 +14,7 @@ public partial class Main
             var own = player.Id == View.ViewerId;
             var turn = View.WinnerId is int winner ? (winner == player.Id ? "VICTORY" : "MATCH ENDED") :
                 View.ActivePlayerId == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
-            var action = View.WinnerId is not null ? "" : View.PriorityPlayerId == player.Id ?
-                (View.ActivePlayerId == player.Id ? (own ? "Your action" : "Choosing action") : (own ? "Your response" : "Choosing response")) :
-                View.ActivePlayerId == player.Id ? "Awaiting response" : "";
+            var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
             Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead),
                 action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id)
                 { ReducedMotion = _reducedMotion },16,own?938:14,270,120);
@@ -49,10 +47,10 @@ public partial class Main
     }
     private void ShowTableMenu()
     {
-        var (dialog,body)=Dialog("The table",430,560);
+        var (dialog,body)=Dialog("The table",500,780);
         body.AddChild(Palette.Text("Emperor",32,Palette.Gold,true));
         body.AddChild(Palette.Wrapped(_status.Text,16,Palette.PaperDim));
-        foreach(var (text,action) in new (string,Action)[]{("Practice",ShowPractice),("Private match",ShowOnline),("Card library",()=>LibraryDialog.Show(this)),("Match history",ShowHistory),("Settings",ShowSettings)})
+        foreach(var (text,action) in new (string,Action)[]{("Practice",ShowPractice),("Private match",ShowOnline),("Card library",()=>LibraryDialog.Show(this)),("Match history",ShowHistory),("Settings",ShowSettings),("Main menu",ShowMainMenu),("Export practice replay",ExportReplay),("Rules coverage",ShowCoverage),("Concede…",ShowConcede)})
             body.AddChild(Palette.Button(text,()=>{dialog.QueueFree(); action();}));
         body.AddChild(Palette.Button("Return to game",dialog.QueueFree));
     }

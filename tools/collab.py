@@ -141,15 +141,24 @@ def audit(root, base, head='HEAD', name=None, working=False):
     records = [p for p in paths if p.startswith(cfg['handoffs']) and p.endswith('.json')]
     if not records:
         errors.append('Missing changed task handoff; run the handoff command before the final commit.')
+    current_record = False
     for path in records:
         try:
             if working:
                 record = json.loads((root / path).read_text(encoding='utf-8'))
             else:
                 record = json.loads(git(root, 'show', commit(root, head) + ':' + path))
-            errors.extend(validate_record(record, lane, name))
+            if name and isinstance(record, dict) and record.get('branch') != name:
+                # Stacked PRs carry their dependencies' handoffs. Preserve and
+                # validate that history, but never let it replace this task's record.
+                errors.extend(validate_record(record, record.get('lane'), None))
+            else:
+                current_record = True
+                errors.extend(validate_record(record, lane, name))
         except (OSError, ValueError, RuntimeError):
             errors.append('Unreadable handoff: ' + path)
+    if name and records and not current_record:
+        errors.append('Handoff belongs to another branch; add this task’s handoff.')
     return {'lane': lane, 'changed_files': paths, 'errors': errors}
 
 

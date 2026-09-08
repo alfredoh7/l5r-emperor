@@ -34,7 +34,7 @@ public partial class StatTokens : Button
 
     public override void _Process(double delta) => PositionAtCard();
 
-    public void PositionAtCard()
+    public virtual void PositionAtCard()
     {
         if (!IsInstanceValid(CardAnchor) || !CardAnchor.IsInsideTree()) { Hide(); return; }
         Visible = CardAnchor.IsVisibleInTree() && (Allowed?.Invoke() ?? true);
@@ -73,6 +73,9 @@ public partial class StatTokens : Button
     public override bool _HasPoint(Vector2 point) => Enumerable.Range(0, 2).Any(i => point.DistanceTo(new Vector2(_diameter * (.5f + i * 1.12f), _diameter / 2)) <= _diameter / 2);
     public override Control _MakeCustomTooltip(string forText)
     {
+        // The projected-table overlay owns this tooltip. Godot may separately
+        // ask for an empty native tooltip; never create a second blank popup.
+        if (string.IsNullOrWhiteSpace(forText)) return null!;
         var shell = ReadingTooltip.Create(this, forText);
         var panel = shell.GetChild<Control>(0);
         // Long effect lists must reserve the label's real line height, so the

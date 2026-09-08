@@ -26,7 +26,7 @@ public partial class TurnIndicator : Control
         var actor = view.Players.Single(p => p.Id == view.PriorityPlayerId);
         var name = view.Players.Select(p => p.Clan).Distinct().Count() == 1 ? actor.Name : actor.Clan;
         TurnText = yourTurn ? "YOUR TURN" : "OPPONENT'S TURN";
-        ActionText = YourAction ? (yourTurn ? "Your action" : "Your response") :
+        ActionText = YourAction ? "Your decision" :
             (yourTurn ? $"Waiting for {name}'s response" : $"{name} is deciding");
         _accent = actor.Clan == "Lion" ? new Color("f1c976") : new Color("9bd4e4");
         QueueRedraw();

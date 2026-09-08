@@ -140,7 +140,7 @@ public partial class Main
 
     public override void _Input(InputEvent @event)
     {
-        if (_tableSurface is null) return;
+        if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.

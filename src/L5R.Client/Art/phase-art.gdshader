@@ -4,6 +4,7 @@ uniform sampler2D lit_reference : filter_linear_mipmap, repeat_disable;
 uniform vec2 plate_size = vec2(1260.0,101.24);
 uniform vec4 phase_weights = vec4(1.0,0.0,0.0,0.0);
 uniform float glow_energy = 1.0;
+uniform vec4 priority_tint : source_color = vec4(.61,.92,.98,1.0);
 void fragment() {
     // Direct bitmap presentation: no procedural outlines, rails or medallions.
     vec2 plate_uv = (vec2(0.0,260.0)+UV*vec2(2066.0,166.0))/vec2(2066.0,761.0);
@@ -22,6 +23,8 @@ void fragment() {
             float medallion = 1.0-smoothstep(16.0,24.0,length(delta));
             float feather = max(rail,medallion);
             vec3 lit = texture(lit_reference,(vec2(274.0,59.0)+local)/vec2(1042.0,122.0)).rgb;
+            float luminance = dot(lit,vec3(.299,.587,.114));
+            lit = mix(lit,priority_tint.rgb*luminance*1.32,.76);
             base.rgb = mix(base.rgb,lit*glow_energy,feather*phase_weights[i]);
         }
     }

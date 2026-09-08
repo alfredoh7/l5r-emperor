@@ -419,9 +419,16 @@ public sealed partial class MatchEngine
     private bool AttachmentAllowed(CardInstance attachment,CardInstance target) => new[] {"Armor","Weapon"}.All(keyword=>!Keyword(attachment,keyword) || !Attachments(target.Id).Any(c=>Keyword(c,keyword)));
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
     private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force));
-    // A bowed Personality or Follower normally drops out of its unit's Force; Elite is the printed
-    // (or granted) exception that keeps it in, whichever card carries the keyword.
-    private int BattleForce(CardInstance card) => ((card.Bowed && !Keyword(card,"Elite"))?0:PersonalityForce(card))+Attachments(card.Id).Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower).Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
+    // A bowed ordinary Personality suppresses its entire unit at resolution.
+    // Preserve the explicit Elite-Personality exception accepted in #19/#17.
+    // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
+    private int BattleForce(CardInstance card)
+    {
+        if(card.Bowed && !Keyword(card,"Elite")) return 0;
+        return PersonalityForce(card)+Attachments(card.Id)
+            .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
+            .Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
+    }
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
     {
         var count=0;

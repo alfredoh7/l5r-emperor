@@ -81,7 +81,7 @@ public partial class Main
         {
             if (_timeline.TurnCue.YourAction != (View.PriorityPlayerId == View.ViewerId)) throw new InvalidOperationException("Action cue disagrees with engine priority.");
             if (_timeline.TurnCue.TurnText != (View.ActivePlayerId == View.ViewerId ? "YOUR TURN" : "OPPONENT'S TURN")) throw new InvalidOperationException("Turn cue confuses priority with turn owner.");
-            if (_clanHud.GetChildren().OfType<ClanPlaque>().Count(p => p.Acting) != 1) throw new InvalidOperationException("Exactly one priority plaque must glow.");
+            if (_clanHud.GetChildren().OfType<ClanPlaque>().Count(p => p.TurnOwner) != 1) throw new InvalidOperationException("Exactly one turn-owner plaque must glow.");
         }
         if (_timeline.TurnCue.Visible) throw new InvalidOperationException("Standalone turn banner must be hidden.");
         if (View.WinnerId is null && _clanHud.GetChildren().OfType<ClanPlaque>().Count(p => p.TurnOwner) != 1)

@@ -1,0 +1,6 @@
+{
+  "mode": "built-in image_gen",
+  "reference": "A-inlaid-strips.png",
+  "output": "src/L5R.Client/Art/stat-inlays-v2.png",
+  "prompt": "Use case: stylized-concept. Production sprite atlas for an existing game. Reference image is the approved concept A; precisely recreate its two small square recessed stat panels from the upright card's top corners, WITHOUT any numbers. Output one 2:1 image containing exactly TWO square panels, edge to edge: left half warm amber/ochre antique gold Force panel, right half dark graphite silver/gray Chi panel. Each panel fills its half entirely, no gaps or margin. Straight-on orthographic, square symmetrical bevel frames, shallow inset quiet dark center, warm softly lit upper and left bevel and thin lower bevel shadow. Match reference miniature frames and restrained worn finish. Center must be smooth low-contrast dark amber left and charcoal right, so light gray numbers added by game remain perfectly readable. Fine soft patina only; NO busy grain, cracks, engravings, symbols, letters, digits or decorative filigree. No background table/cards, no perspective skew, no floating object shadows. Frames at 8 percent of each panel width. Asset will render at 35-60 pixels so favor broad readable material values. All pixels opaque, image fills complete canvas. Reference only for exact material and rim design."
+}

@@ -11,12 +11,10 @@ public partial class ClanPlaque : Control
     public string TurnText { get; }
     public string ActionText { get; }
     private float _time;
-    private readonly Color _accent;
     public ClanPlaque(string clan, int honor, int gold, bool favor, Action inspect, string action = "", string turn = "", bool acting = false, bool turnOwner = false)
     {
         MouseFilter = MouseFilterEnum.Ignore;
         Acting = acting; TurnOwner = turnOwner; TurnText=turn; ActionText=action;
-        _accent = clan == "Lion" ? new Color("f1c976") : new Color("9bd4e4");
         var frame=new LacquerPanel { MouseFilter=MouseFilterEnum.Ignore };
         AddChild(frame); frame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var emblemRegion = clan switch {
@@ -25,11 +23,12 @@ public partial class ClanPlaque : Control
             "Crab" => new Rect2(465,0,218,222), "Unicorn" => new Rect2(689,0,220,222),
             "Dragon" => new Rect2(340,220,224,223), _ => new Rect2(114,225,224,218)
         };
-        var icon=Decal("clan-reference.png",emblemRegion,new Vector2(8,11),new Vector2(94,94),false);
+        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-"+clan.ToLowerInvariant()+".png") : null;
+        var icon=Decal(extra is null ? "clan-reference.png" : "clan-"+clan.ToLowerInvariant()+".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero,extra.GetSize()),new Vector2(8,11),new Vector2(94,94),false);
         AddChild(icon);
         var title=Palette.Text(clan.ToUpperInvariant(),23,Palette.Paper,true); title.Position=new Vector2(111,7); AddChild(title);
-        var turnLabel=Palette.Text(turn,15,_accent,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
-        var cue=Palette.Text(action,14,acting?Palette.Paper:Palette.PaperDim); cue.Position=new Vector2(111,57); AddChild(cue);
+        var turnLabel=Palette.Text(turn,15,Palette.Gold,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
+        var cue=Palette.Text(action,14,Palette.PaperDim); cue.Position=new Vector2(111,57); cue.Size=new Vector2(148,23); cue.TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis; cue.TooltipText=action; cue.MouseFilter=MouseFilterEnum.Stop; AddChild(cue);
         var fan=new HonorFan { Position=new Vector2(110,86),Size=new Vector2(26,26),MouseFilter=MouseFilterEnum.Stop,TooltipText="Family Honor" }; AddChild(fan);
         var honorLabel=Palette.Text(honor.ToString(),23,Palette.Paper); honorLabel.Position=new Vector2(141,83); honorLabel.MouseFilter=MouseFilterEnum.Stop; honorLabel.TooltipText="Family Honor"; AddChild(honorLabel);
         var coin=Decal("koku-reference.png",new Rect2(5,10,548,560),new Vector2(191,86),new Vector2(27,27),true);
@@ -53,7 +52,7 @@ public partial class ClanPlaque : Control
     }
     public override void _Process(double delta)
     {
-        if (!Acting || ReducedMotion) return;
+        if (!TurnOwner || ReducedMotion) return;
         _time+=(float)delta; GetChildren().OfType<PlaqueGlow>().Single().QueueRedraw();
     }
     private partial class HonorFan : Control
@@ -62,18 +61,18 @@ public partial class ClanPlaque : Control
     {
         public override void _Draw()
         {
-            if (!plaque.Acting && !plaque.TurnOwner) return;
-            var pulse=plaque.ReducedMotion?1:1+.08f*Mathf.Sin(plaque._time*2);
-            var strength=plaque.Acting?1f:.44f;
+            if (!plaque.TurnOwner) return;
+            var pulse=1f; // Steady warm frame denotes turn ownership; phase light denotes action.
+            var strength=1f;
             var r=new Rect2(1,1,268,118);
             foreach(var (spread,alpha,width) in new[]{(9f,.10f,8f),(5f,.18f,5f),(2f,.42f,3f),(0f,.94f,2f)})
             {
-                var halo=Palette.Box(Colors.Transparent,plaque._accent with { A=alpha*strength*pulse },0,7+(int)spread);
+                var halo=Palette.Box(Colors.Transparent,Palette.Gold with { A=alpha*strength*pulse },0,7+(int)spread);
                 halo.BorderWidthLeft=halo.BorderWidthRight=halo.BorderWidthTop=halo.BorderWidthBottom=(int)width;
                 DrawStyleBox(halo,r.Grow(spread));
             }
-            DrawLine(new Vector2(110,77),new Vector2(256,77),plaque._accent with{ A=.2f*strength },5,true);
-            DrawLine(new Vector2(112,77),new Vector2(254,77),plaque._accent with{ A=.8f*strength },1,true);
+            DrawLine(new Vector2(110,77),new Vector2(256,77),Palette.Gold with{ A=.2f*strength },5,true);
+            DrawLine(new Vector2(112,77),new Vector2(254,77),Palette.Gold with{ A=.8f*strength },1,true);
         }
     }
 }

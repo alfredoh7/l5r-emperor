@@ -6,12 +6,14 @@ namespace L5R.Client;
 public partial class Main
 {
     private Control? _statTokenLayer;
-    private IEnumerable<StatTokens> TokenPairs => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
-    private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && TokenPairs.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
+    private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
+    private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
+    private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
     private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
+        ObserveStatChanges();
         var motion = BeginTableMotion();
         if (_statTokenLayer is null) { _statTokenLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore }; _tableViewport.AddChild(_statTokenLayer); }
         Palette.Clear(_statTokenLayer);
@@ -76,8 +78,8 @@ public partial class Main
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Personality)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
-        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max());
-    private float StackHeight(CardView card, PlayerView owner) => (card.Definition?.Type == CardType.Personality ? StatTokens.ReservedHeight : 0) + PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
+        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0);
+    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
     private int ArmyColumns(int province) => View.Players.Max(p => p.Army.Count(c => c.AttachedTo is null && c.ProvinceIndex == province)) > 2 ? 2 : 1;
     private void MeasureTableLayout()
     {
@@ -172,7 +174,7 @@ public partial class Main
             label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; heading.AddChild(label);
             var close = Palette.Button("Fold unit  ×", () => { _expandedUnits.Clear(); RenderBoard(); });
             close.AddThemeFontSizeOverride("font_size", 12); heading.AddChild(close);
-            var detailSide = Math.Min(210, (BoardWidth - 60) / (1 + attachments.Length * .8f));
+            var detailSide = Math.Min(210, (BoardWidth - 60) / (2.4f + Math.Max(0, attachments.Length - 1) * .8f));
             content.AddChild(UnitStack(personality, owner, detailSide, true));
             var location = personality.Zone == Zone.Battlefield ? $"{owner.Clan} · battlefield at Province {personality.ProvinceIndex + 1}" : $"{owner.Clan} · at home";
             content.AddChild(Palette.Text(location + "   ·   Hover any card to read it. Each card retains its own bow state.", 12, Palette.PaperDim));
@@ -184,7 +186,8 @@ public partial class Main
         // Expose a usable strip of each attachment. A spread opens the entire card.
         var step = expanded ? side * .80f : 24f;
         var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max());
-        var width = expanded ? faceWidth + attachments.Length * step : faceWidth;
+        var bannerWidth = personality.UnitForce.HasValue ? UnitStandard.ReservedWidth * side / CardHeight : 0;
+        var width = (expanded && attachments.Length > 0 ? faceWidth * 2 + Math.Max(0, attachments.Length - 1) * step : faceWidth) + bannerWidth;
         var tileHeight = detail ? side : PlaneHeight(side);
         var height = tileHeight + (expanded ? 0 : attachments.Length * step);
         var group = new VBoxContainer { CustomMinimumSize = new Vector2(width, 0) };
@@ -195,28 +198,25 @@ public partial class Main
         {
             var child = Tile(attachments[i], true, faceWidth, side);
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
-            Place(stack, child, expanded ? (i + 1) * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
+            Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }
         var front = Tile(personality, true, faceWidth, side);
         if (detail) { front.ProjectToScreen = null; front.CustomMinimumSize = new Vector2(faceWidth, side); }
         Place(stack, front, 0, expanded ? 0 : attachments.Length * step, faceWidth, tileHeight);
-        var tokenCards = View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Discard).Append(p.Stronghold)).Concat(Self.Hand).ToArray();
-        var tokens = new StatTokens
+        if (personality.UnitForce.HasValue)
         {
-            CardAnchor = front,
-            Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
-            Card = personality,
-            Projection = detail ? null : _tableSurface.ProjectCanvas,
-            Explanation = StatTokens.Explain(personality, tokenCards),
-            Allowed = () => detail || (_expandedUnits.Count == 0 &&
-                _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
-        };
-        tokens.Pressed += () => SelectCard(personality);
-        if (detail) { tokens.SetInlineSize(54); group.AddChild(tokens); }
-        else
-        {
-            group.AddChild(new Control { CustomMinimumSize = new Vector2(0, StatTokens.ReservedHeight), MouseFilter = Control.MouseFilterEnum.Ignore });
-            _statTokenLayer!.AddChild(tokens);
+            var standard = new UnitStandard
+            {
+                CardAnchor = front, Card = personality,
+                Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
+                Projection = detail ? null : _tableSurface.ProjectCanvas,
+                Inline = detail, Explanation = UnitStandard.ExplainUnit(personality),
+                Allowed = () => detail || (_expandedUnits.Count == 0 && _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
+            };
+            if (!detail) foreach (var tile in stack.GetChildren().OfType<CardTile>()) tile.AlignUnitRightEdge = true;
+            standard.Pressed += () => SelectCard(personality);
+            standard.SetMeta("flat_tooltip", standard.Explanation);
+            stack.AddChild(standard);
         }
         var footer = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; footer.AddThemeConstantOverride("separation", 4); group.AddChild(footer);
         if (attachments.Length > 0)
@@ -242,6 +242,8 @@ public partial class Main
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
             Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
             if (province.Card is { } card) Place(area, Tile(card, true, CardHeight, CardHeight), 0, 0, CardHeight, PlaneHeight(CardHeight));
+            _statTokenLayer!.AddChild(new ProvinceMarker { ProvinceAnchor=area,Projection=_tableSurface.ProjectCanvas,ProvinceIndex=province.Index,
+                Allowed=()=>_expandedUnits.Count==0 });
         }
     }
 
@@ -258,7 +260,7 @@ public partial class Main
             lane.SetMeta("battle_province", province.Index);
             if (View.CurrentBattleProvince == province.Index)
                 Place(lane, new ColorRect { Color = new Color(.7f, .53f, .24f, .055f), MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, laneWidth - 8, _battleHeight);
-            var target = new Button { Text = "", Flat = true, TooltipText = $"Province {province.Index + 1} battlefield" };
+            var target = new Button { Text = $"Province {province.Index + 1}", Flat = true, TooltipText = $"Province {province.Index + 1} battlefield" };
             CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, province.Index);
             Place(lane, target, 0, 0, laneWidth - 8, 24); _laneSummaries[province.Index] = target;
             foreach (var player in new[] { enemy, Self })

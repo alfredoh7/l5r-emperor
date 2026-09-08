@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add second-click deselection and a visible Close control for ordinary card inspection; cancel clears lingering inspection. Preserve target/payment/assignment clicks. Put battle priority wording in a dedicated footer below full and compact tracker art.",
+  "validation": "Reproduced pre-fix native second-click failure. bash tools/check-card-deselection.sh passed: build 0 warnings/errors; native hand/board toggles, switching cards and Close in battle/attack/defense, 1672x941 and 1280x800; full tracker visibility and unchanged game version; assignment preservation and targeted confirmation passed. Screenshots reviewed for compact/full footer spacing. No Core/server changes. Local Card Selection launcher built and opened this checkout.",
+  "remaining": "Review/CI and Mendon shared acceptance before merge; depends on pending PR49 and its PR9/36 dependencies. Windows native visual testing not performed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/50",
+  "branch": "codex/50-card-deselect",
+  "updated": "2026-09-08T17:08:41.118941+00:00"
+}

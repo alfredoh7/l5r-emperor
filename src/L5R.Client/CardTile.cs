@@ -67,6 +67,7 @@ public partial class CardTile : Button
 
     public override void _Process(double delta)
     {
+        AdvanceStatFeedback(delta);
         var inspecting = IsInspectionHover;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
@@ -88,10 +89,19 @@ public partial class CardTile : Button
 
     // The same projected quadrilateral drives drawing, hit testing and arrows.
     // Bow rotation takes place in the table plane before camera foreshortening.
+    public bool AlignUnitRightEdge { get; set; }
+
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
         var p = ((point - face / 2) * _hoverScale).Rotated(_bowAngle + RestAngle);
-        return Size / 2 + new Vector2(0, -_lift) + p;
+        var center = Size / 2;
+        if (AlignUnitRightEdge)
+        {
+            var angle = _bowAngle + RestAngle;
+            var extent = (Math.Abs(Mathf.Cos(angle)) * face.X + Math.Abs(Mathf.Sin(angle)) * face.Y) * _hoverScale / 2;
+            center.X = Size.X - 6 - extent;
+        }
+        return center + new Vector2(0, -_lift) + p;
     }
 
     private Vector2[] LocalFaceCorners(float grow = 0)
@@ -115,6 +125,8 @@ public partial class CardTile : Button
         var resting = (point - Size / 2).Rotated(-_bowAngle - RestAngle) + FaceSize() / 2;
         return new Rect2(Vector2.Zero, FaceSize()).Grow(2).HasPoint(resting);
     }
+
+    public Vector2[] FaceCornersInCanvas() => LocalFaceCorners().Select(p => GetGlobalTransform() * p).ToArray();
 
     public Vector2[] FaceCornersOnViewport() => LocalFaceCorners().Select(p => ProjectToScreen?.Invoke(GetGlobalTransform() * p) ?? GetGlobalTransform() * p).ToArray();
 
@@ -148,8 +160,36 @@ public partial class CardTile : Button
         DrawColoredPolygon(corners.Select(p => p + new Vector2(0, .7f)).ToArray(), new Color("a29174"));
         DrawColoredPolygon(corners, Colors.White, new Vector2[] { Vector2.Zero, Vector2.Right, Vector2.One, Vector2.Down }, texture);
         DrawInteractionEdge();
+        DrawStatInlays();
+        DrawPublicStatus();
     }
 
+    public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
+        (Card.Dishonorable ? new[]{ "Dishonorable" } : Array.Empty<string>())
+        .Concat((Card.GrantedKeywords ?? []).Select(k => "+ " + k.Keyword).Distinct()).ToArray();
+    private void DrawPublicStatus()
+    {
+        var labels = PublicStatusLabels;
+        if (labels.Length == 0) return;
+        var face=FaceSize();
+        var origin=ProjectFacePoint(Vector2.Zero,face);
+        var x=(ProjectFacePoint(Vector2.Right,face)-origin);
+        var y=(ProjectFacePoint(Vector2.Down,face)-origin);
+        DrawSetTransformMatrix(new Transform2D(x,y,origin));
+        // Two slim overlay bands across the lower artwork; never cover printed statistics/name/rules.
+        var shown = labels.Take(2).ToArray();
+        if(labels.Length>2) shown[1]+=$" · {labels.Length-2} more";
+        for(var i=0;i<shown.Length;i++)
+        {
+            var rect=new Rect2(face.X*.035f,face.Y*.395f+i*face.Y*.08f,face.X*.93f,face.Y*.074f);
+            var dishonorable=shown[i]=="Dishonorable";
+            DrawStyleBox(Palette.Box(dishonorable?new Color("492924"):new Color("202f33"),dishonorable?new Color("b37c67"):Palette.Gold,0,1),rect);
+            var size=Math.Max(11,(int)(face.Y*.06f));
+            while(size>8 && Palette.Title.GetStringSize(shown[i],fontSize:size).X>rect.Size.X-6) size--;
+            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),shown[i],HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
+        }
+        DrawSetTransformMatrix(Transform2D.Identity);
+    }
     public static Texture2D? Atlas
     {
         get
