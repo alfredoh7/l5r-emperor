@@ -123,6 +123,7 @@ public partial class Main
             }
             ProbeUnitStandardInput();
         }
+        if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
         if (_captureMode.Contains("tokens", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeStatTokenInput(); }
         if (_captureMode.Contains("hudicons", StringComparison.Ordinal)) ProbeHudIcons();
@@ -164,6 +165,7 @@ public partial class Main
         ValidateTurnAndClarity();
         ValidateStatTokens();
         ValidateUnitStandards();
+        if (_captureMode.Contains("deselect", StringComparison.Ordinal) && _deselectProbeError is not null) throw new Exception(_deselectProbeError);
         ValidateQuietHud();
         ValidatePhysicalLayout();
         if (_captureMode.EndsWith("piletip", StringComparison.Ordinal))

@@ -18,7 +18,7 @@ public partial class BattleTracker : Control
     {
         MouseFilter = MouseFilterEnum.Stop;
         TextureFilter = TextureFilterEnum.LinearWithMipmaps;
-        CustomMinimumSize = new Vector2(0, Compact ? 100 : 490);
+        CustomMinimumSize = new Vector2(0, (Compact ? 100 : 490) + 44);
         TooltipText = ResolutionMessage ?? (Snapshot.Phase == Phase.BattleSelection
             ? "The attacker chooses the next battlefield."
             : Snapshot.Phase == Phase.Battle ? "Battle actions alternate. Resolution follows two consecutive passes."
@@ -58,7 +58,7 @@ public partial class BattleTracker : Control
             }
             var label = Stage == 2 ? "Resolution" : Stage == 1 ? "Battle actions" : "Assignment";
             TextAt(label, new Rect2(x + 8, 52, w - 16, 22), 20, Highlight, true);
-            TextAt(Status, new Rect2(x + 8, 75, w - 16, 20), 17, Highlight, false);
+            TextAt(Status, new Rect2(x + 8, h + 8, w - 16, 28), 17, Highlight, false);
             return;
         }
         DrawTextureRectRegion(_plate, rect, source);
@@ -80,8 +80,11 @@ public partial class BattleTracker : Control
                 DrawArc(c, radius * .99f, 0, Mathf.Tau, 96, Highlight with { A = .75f }, 1.2f, true);
             }
             TextAt(names[i], new Rect2(x + 8, h * labels[i], w - 16, 25), 20, i == Stage ? Highlight : Palette.PaperDim, true);
-            if (i == Stage) TextAt(Status, new Rect2(x + 8, h * labels[i] + 23, w - 16, 20), 16, Highlight, false);
+
         }
+        // A dedicated footer below the plate keeps priority text clear of
+        // medallions, stage headings and the next inspector control.
+        TextAt(Status, new Rect2(x + 8, h + 8, w - 16, 28), 17, Highlight, false);
     }
     private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? $"Province {p + 1}" : ResolutionMessage is not null ? "Battle resolved" : "Battle";
     private void TextAt(string text, Rect2 box, int size, Color color, bool heading)

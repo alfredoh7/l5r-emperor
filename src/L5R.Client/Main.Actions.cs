@@ -28,7 +28,7 @@ public partial class Main
         }
         if (_selected?.Definition is { } def)
         {
-            _inspector.AddChild(Palette.Text(def.Type.ToString().ToUpperInvariant() + "  ·  " + def.Clan.ToUpperInvariant(), 11, Palette.Gold));
+            AddInspectionCaption(def.Type.ToString().ToUpperInvariant() + " · " + def.Clan.ToUpperInvariant());
             _inspector.AddChild(Palette.Wrapped(def.Name, 24));
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
@@ -46,7 +46,7 @@ public partial class Main
         }
         else if (_selected is not null)
         {
-            _inspector.AddChild(Palette.Text("FACE-DOWN DYNASTY", 20, title: true));
+            AddInspectionCaption("FACE-DOWN DYNASTY");
             _inspector.AddChild(Palette.Wrapped("This card's identity remains hidden until the rules reveal it.", 15, Palette.PaperDim));
         }
         else if (View.PendingChoice is null)
@@ -236,7 +236,7 @@ public partial class Main
         _decisionActions.AddChild(Palette.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {

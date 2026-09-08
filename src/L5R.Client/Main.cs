@@ -209,7 +209,7 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -404,6 +404,7 @@ public partial class Main : Node
         }
         // A misclick during a reviewed action must not silently discard its target or payment.
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
+        if (_selected?.Id == card.Id) { DeselectCard(); return; }
         _selected = card; _sources.Clear();
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
