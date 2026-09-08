@@ -6,7 +6,7 @@ Related: [issue #11](https://github.com/alfredoh7/l5r-emperor/issues/11), [PR #3
 
 - The phase artwork stays intact. A compact strip directly beneath it names **YOUR TURN** or **OPPONENT'S TURN** and separately identifies who must act or respond. It reads the existing `MatchView.ActivePlayerId` and `PriorityPlayerId`; it does not infer legality or advance the match.
 - The acting player's resource plaque has a softly lit rim and an explicit label. Text carries the meaning as well as color. Same-Clan matches use the acting player's name in waiting messages.
-- Hover uses warm gold light; persistent selection uses stronger pale blue light. Board cards grow 6%. Hand cards lift and grow a further 22% while hovered. Selection survives moving the pointer away and releasing keyboard focus.
+- Hover uses warm gold light; persistent selection uses stronger pale blue light. Board cards grow 6%. Hand cards lift and grow a further 22% while hovered. Selection survives moving the pointer away and releasing keyboard focus. The actual hovered card draws above its focused/selected neighbor.
 - Resting hand faces grow from 228 to 272 logical pixels, a 19.3% increase. The fan leaves extra room at either end. Original full card scans, bow rotation and attachment ownership are preserved.
 - A lifted hand keeps its resting pick area as well as its visible face, preventing flicker when the pointer rests on its bottom edge. Drawing and hit testing use the same enlarged/projected face everywhere else.
 - Reduced motion makes hover/bow transitions immediate and freezes the new ambient turn/plaque pulse; feedback remains visible.
@@ -26,7 +26,7 @@ Alfredo's local combined launcher includes the unmerged menu (#9) and stat-token
 ## Recorded acceptance (2026-09-08)
 
 - Standard suite: 188 automated checks; client compilation/import/smoke passed.
-- Eleven native cases on the main-based branch, followed by all thirteen cases on the combined menu/token build, including expanded-parent hover/selection. Token validation found no card occlusion or token collisions.
+- Eleven native cases on the main-based branch, followed by all fourteen cases on the combined menu/token build, including expanded-parent hover/selection and hovering beside an already selected hand card. Token validation found no card occlusion or token collisions.
 - All eight table-camera cases passed; an OS-focus interruption and a generated game ending before the fixture required reruns. The new clarity fixture search now handles unsuitable generated matches explicitly, without retrying UI assertions.
 - The launcher entry point passed the menu → Clan choice → real match → paused menu → resume flow and Options persistence.
 - [Combined playable preview](screenshots/card-clarity/combined-preview.png) includes PRs #9 and #32 for continuity. The other screenshots depict this PR on main.
