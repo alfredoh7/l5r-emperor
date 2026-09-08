@@ -403,6 +403,98 @@ A cross-reference index of every keyword that has an actual rules effect, each p
 
 ---
 
+## Rules Supplements
+
+Post-Emperor-Edition rulebook expansions each carried their own rules-relevant changes and card-specific rulings, layered on top of the core rules above rather than replacing them. Compiled here in release order, in the same reference style as the rest of this document — restated for lookup, not transcribed verbatim.
+
+### Torn Asunder Supplement
+
+**Stalwart** (new keyword). While a Personality has Stalwart, negate the first time each turn another player's card would bow him. If a Personality gains Stalwart after the turn has already started (i.e. he did not have it at the start of the turn), "first bowing" counts only from the point he gained the keyword onward — a bowing effect that already resolved against him earlier that turn is not retroactively negated.
+
+**Family names.** Rule of thumb for every Emperor-legal card: if the first word of a Personality's two-word title is not an ordinary English word (e.g. "the," "Master") and the Personality carries a Clan alignment or a keyword ending in "Clan," that first word is the Personality's family name.
+
+**Notes on specific cards:**
+- **Blood Wave, Spiritual Coalescence**: the destroyed Personality's Force is counted *after* he is destroyed, so it excludes any Force bonus from his (now also gone) Items.
+- **Earth's Protection**: the option to apply a bonus to your own province strength is not available while you are defending.
+- **In the Right**: "up to half your Courtier's Chi, rounded down" limits the *number of attacking cards you may target*, not any other value.
+- **Mirumoto Kojinrue**: his second trait does not override the general rule that abilities on bowed cards cannot be used.
+- **Path to Inner Peace**: this is a new, distinct card — not a most-recent-printing update of the old "The Path to Inner Peace" (Forbidden Knowledge). The Tao recognizes more than one path to enlightenment; both cards exist independently.
+- **Sycophants**: its second use is not granted to abilities that are already restricted to, e.g., once per phase, once per battle, or once per game — those caps still apply as printed.
+- **The Tachikaze**: by the rules, you may inspect your own face-down cards under this card at any time.
+- **Truce**: it can pay the cost for a Personality who holds your Clan alignment plus a second, different Clan alignment.
+
+### Coils of Madness Supplement
+
+Coils of Madness is the first set using Ivory Edition's "bugged" card format and terminology, previewing changes ahead of Ivory Edition itself. Unless noted, these rules apply only to cards from Coils of Madness and later sets — earlier cards keep working exactly as described in the core rules above.
+
+**Major changes:**
+
+1. Actions are now printed as `[Keywords] Designator, required costs: Effects block.` Both the action itself and its printed form are called "actions" — the term "ability" is no longer used on new cards, but existing rules-text that refers to "abilities" still applies to actions on cards printed under these rules.
+2. The `Reaction:` designator is replaced by two new designators, **Engage** and **Interrupt**.
+3. **Engage** plays exactly like a Reaction to the trigger "After engaging."
+4. **Interrupt** plays exactly like a Reaction to the trigger "Before an action's effects resolve." When an Interrupt's text refers to "an Action," it means only the specific action being interrupted — e.g. `Interrupt: Negate the destruction of cards in this unit from another player's action` only negates destruction caused by the action being interrupted, not destruction from any other source.
+5. Required costs are now shown graphically, and there are only two kinds: **bow this card** (a bowing-person icon) and **pay X Gold** (a coin icon with a number). The old Gold Cost icon on Strategies is superseded by this pay-Gold cost icon — a Strategy no longer needs its own separate Gold Cost stat once printed this way.
+6. Everything else in the effects block (other than targeting) is a plain effect: failing to happen does not stop the rest of the action from resolving. Exception: if an effect needed some piece of information to occur and that information isn't available (e.g. the Focus Value of the top card of an empty deck, or the Force of a target that couldn't be legally targeted), every later effect in that action that depends on that same information also fails.
+7. Required targeting has moved back into the effects block. Any target not marked "may" is still required, and — per Emperor Edition procedure — required targeting is still resolved during the targeting step, before costs are paid.
+8. Conditional phrasing (e.g. "He may bow one of his Rings to draw a card") means the stated action is optional, and if taken, the following effect happens. In this example the Ring-bowing is not a cost — but if it fails for some reason, the dependent effect ("draw a card") does not happen either.
+9. New keywords condense common modifier phrases, printed with reminder text in Coils of Madness:
+   - **Absent**: the action may be taken even without controlling any unit at the current battlefield (i.e. without Presence).
+   - **Home**: the action may be taken even while the card is at home rather than at the current battlefield.
+   - **Repeatable**: the action may be taken any number of times per turn.
+   - **Tireless**: the action may be taken even while the card is bowed.
+   - **Expendable**: after an Expendable card is destroyed, its controller draws a card.
+   - **Kharmic**: every player gains the universal ability `Repeatable Limited, 2 Gold: Discard a Kharmic card from your hand, or from your province if it's face-up. If you discarded a card from your hand, draw a card; otherwise, refill the province face-down.`
+10. An effect with a bow-cost icon but no designator (including payment-reduction effects) triggers optionally, at the moment you produce Gold.
+
+**Minor changes:**
+
+11. Starting with Coils of Madness, Followers are printed with no Honor Requirement stat; under Emperor Edition rules such Followers have an Honor Requirement of zero.
+12. "Equip," when it appears in an action's text (rather than as a Limited-Equip-referencing trait), means this sequence: target your Personality, target an attachment in your hand, and attach it to him, paying all costs. The Personality being equipped does not perform this action himself — but targeting him is still required and still resolved during the targeting step. Further action text can modify this base sequence (e.g. altering the cost).
+13. Example: **Recruitment Station**'s action `Battle/Open, * Gold, [bow]: Equip a Follower, paying 2 less Gold` means: target your performing Personality and a Follower in your hand, pay that Follower's cost minus 2 Gold, and attach it to the Personality.
+14. Triggered traits now end their trigger clause with a comma instead of a colon.
+15. As a preview of Ivory Edition, rules-relevant keywords are printed in **boldface** in a card's keyword line; keywords with no rules effect remain unbolded.
+16. "Base" (as a term) is replaced by "printed," with identical rules meaning.
+17. "Attack" and "defend," applied to a Personality or unit, mean to be assigned to, enter play at, or move to a battlefield on the attacking or defending side respectively (attacking side = the side of the player who declared the attack; defending side = the side controlling the provinces under attack).
+18. "Join" means to come under a player's control, whether by entering play or by a change of controller.
+19. Negation/prevention language is now general: "cannot," "may not," "will not," "negate," and "it has no effect" all mean the described effect simply cannot happen for its stated duration. Scope still depends on exact wording — e.g. "He will not straighten" blocks every effect that would straighten him, while "the action's effects will not straighten him" blocks only that one action's straightening effect.
+20. If an action "does not resolve," its effects never begin — they are not "prevented" or "negated," they simply never occur.
+21. "Duel of (stat)" means a duel where both Personalities use the named stat as their duel stat (instead of the default Chi).
+22. The Emperor Edition legality symbol moves from the lower-left to the lower-right of the card. Cosmetic only.
+
+### Gates of Chaos Supplement
+
+Under the coming Ivory Edition, Events will resolve differently than under Emperor Edition rules. As an interim rule, until the next base set becomes legal: every Event printed in Gates of Chaos, Coils of Madness, and (by extension) Aftermath resolves as though its text were a plain triggered trait with normal resolution effects — **ignore any printed `Limited:` designator on these Events.**
+
+Additionally, for the Event **A Fever in the Blood** to function correctly under Emperor Edition rules, its text is temporarily treated (as a technical Most Recent Printing) as: *"Put this Event into play. Discard it after your next turn begins. While it is in play, Personalities and Followers have −1F while attacking."* This reverts to its originally printed text once the next base set becomes legal.
+
+In the coming Ivory Edition, every card with a Gold Cost will enter play via an action, paying that cost through the action's own variable Gold-cost icon. Until then, for cards printed in Coils of Madness or later that bring a non-created card into play using the terms "equip" or "recruit," **ignore the variable Gold-cost icon** on that action (i.e. don't double-pay: pay the card's own Gold Cost as normal, not again via the icon).
+
+**Recruit**: introduced in Gates of Chaos on the card **Yoritomo Mikaru**, this term means "bring a Dynasty card into play" — tied to the Gold-cost-via-action transition described above.
+
+**New rules:**
+- **Destined**: after your Destined card enters play, draw a Fate card. This draw is mandatory, not optional.
+- **Fortification**: a Fortification Holding, when brought into play, attaches to the province it entered from — or, if it did not enter from a province, to any province you control. It still pays costs to enter play normally, but enters play **unbowed** (straightened), unlike other Holdings. It remains located in your home. If the province it's attached to is destroyed, the Fortification is discarded as part of that destruction, and this discard cannot be prevented.
+- **Invest (X Gold)**: a special trait containing a Gold icon. The icon and colon do not mean the trait itself has a cost — they describe an optional additional cost you may pay after the card enters play. This additional cost is paid separately from the card's own entering-play cost, and can only be paid once per time the card enters play; if paid, the Invest trait's stated effect applies. A card that produces Gold restricted to a specific purpose (e.g. "for a Follower") can also use that Gold toward a card's Invest cost, if the Invest cost matches that purpose. Cost reductions do not apply to an Invest cost unless they specifically say so (as, for example, Daigotsu Kikumura's first trait does).
+
+**Notes on specific cards:**
+- **The Lost Colossus**: players other than its controller may target it with Political actions.
+- **Ikoma Ayumu**: his trait reads, "the rulebook Tactical Advantage is an Open action for you if you choose Ayumu to perform it."
+
+### Aftermath Supplement
+
+**Reserve** (new keyword). Every player gains two universal abilities relevant to Reserve cards:
+- `Repeatable Absent Battle: If it would be opposed, bring a face-up Reserve Personality from your province into play in your army at the current battlefield, paying all costs.`
+- `Repeatable Battle: If it would be opposed, attach a Reserve attachment from your hand to your opposed target Personality at the current battlefield, paying all costs.`
+
+**Discipline** (new special trait on Strategies, printed with a Gold-cost icon). You may play a card with Discipline from your discard pile to use one of its actions, paying the icon's Gold cost as an additional cost of that action (or, if the action already has its own Gold cost, adding the Discipline cost to it). After the action ends, remove the card from the game. Reminder: abilities/actions can normally only be used once per turn, so a Discipline card generally cannot be played from the discard pile on the same turn it was played from hand.
+
+**Terminology**: "recruit" continues to mean "bring into play" (see Gates of Chaos, above). "FV" is shorthand for Focus Value, introduced in this set. On a Battle action, "this Province" means the current battlefield's province.
+
+**Notes on specific cards:**
+- **Ningen's "Treatise on the Nezumi"**: introduces the "multiplayer" keyword as a reminder that the ability is primarily useful in games with more than two players. The keyword itself has no rules effect.
+
+---
+
 ## Open items for future supplements
 
 Noted while compiling this document, for whoever adds the next supplement:
@@ -410,3 +502,4 @@ Noted while compiling this document, for whoever adds the next supplement:
 - This rulebook's own **Contents** page (p. 4–5) lists further Online Rules sub-sections beyond p. 131 (multiplayer "Ally," draft/sealed variants) that live past this document's page-131 cutoff and were not compiled here.
 - The rulebook frequently cross-references errata/FAQ content hosted at `rules.l5r.com`, which is not included in this compilation and would need its own source.
 - Several mechanics described here by name only (Terrain, Reconnaissance, Political/Tactical/Recon/Ninja/Iaijutsu/Kiho/Thunder/Dark Virtue action-type keywords, Clan Alignment as "Imperial," Madness tokens, Henshin) are defined at the *keyword* level in this rulebook but get their full behavioral texture from the specific cards that use them — a useful next supplement would be a per-mechanic deep-dive sourced from representative card text, similar to how `docs/rules/LION_CRANE_COVERAGE.md` already documents specific implemented cards.
+- The **Rules Supplements** section above (Torn Asunder, Coils of Madness, Gates of Chaos, Aftermath) was supplied directly by the rules-lane owner rather than sourced from this compilation's own rulebook PDF; later supplements (e.g. Ivory Edition itself, once the "coming edition" changes previewed above take final effect) are expected to land the same way.
