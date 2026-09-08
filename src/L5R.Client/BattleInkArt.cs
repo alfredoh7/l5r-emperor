@@ -21,14 +21,17 @@ public static class BattleInkArt
         image.GenerateMipmaps();
         return Cache[key] = ImageTexture.CreateFromImage(image);
     }
+    private static Texture2D? _verticalLink;
     public static void Stroke(Control canvas, Vector2 from, Vector2 to, Color tint)
     {
-        var delta = to - from;
-        if (delta.Length() < .1) return;
-        var art = ProvinceThresholdArt.Plate("Home", null);
-        canvas.DrawSetTransform(from, delta.Angle());
-        canvas.DrawTextureRectRegion(art, new Rect2(0, -4, delta.Length(), 8), new Rect2(240, 31, 500, 12), tint);
-        canvas.DrawSetTransform(Vector2.Zero);
+        if (_verticalLink is null)
+        {
+            using var source = ProvinceThresholdArt.Plate("Home", null).GetImage();
+            using var line = source.GetRegion(new Rect2I(240, 34, 500, 6));
+            line.ClearMipmaps(); line.Rotate90(ClockDirection.Clockwise); line.GenerateMipmaps();
+            _verticalLink = ImageTexture.CreateFromImage(line);
+        }
+        canvas.DrawTextureRect(_verticalLink, new Rect2(from.X - 4, Math.Min(from.Y, to.Y), 8, Math.Abs(from.Y - to.Y)), false, tint);
     }
     public static Texture2D Step => Extract("res://Art/battle-ink-reference.png", new Rect2I(375, 644, 32, 24));
     public static void Court(Control canvas, Vector2 size, float active)

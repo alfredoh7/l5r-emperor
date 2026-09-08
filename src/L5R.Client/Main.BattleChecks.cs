@@ -21,6 +21,9 @@ public partial class Main
         try
         {
             await ToSignal(GetTree().CreateTimer(3.5), SceneTreeTimer.SignalName.Timeout);
+            RenderingServer.ForceDraw(false); RenderingServer.ForceSync();
+            InkRequire(_battleDecor.Size.DistanceTo(_world.Size) < .01f && _battleDecor.DrawCalls > 0,
+                $"Battle decoration layer has no drawable bounds; decor={_battleDecor.Size}, world={_world.Size}, draws={_battleDecor.DrawCalls}.");
             ValidateInkBoardTopology();
             ValidateInkCardClearance();
             var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
@@ -82,6 +85,7 @@ public partial class Main
                 if (!_reducedMotion)
                 {
                     InkRequire(PresentationBusy && _battlePresentationStage == 1 && View.Version < actual.Version && Actions.Length == 0, "Outcome beat did not hold the permitted old view with actions unavailable.");
+                    InkRequire(_inspector.GetChildren().OfType<BattleTracker>().All(t => t.Stage == 2 && t.Status == "Resolving battle"), "Resolution still invites a battle action.");
                     await SaveBattleFrame("outcome");
                     await ToSignal(GetTree().CreateTimer(.72), SceneTreeTimer.SignalName.Timeout);
                     await SaveBattleFrame("transfers");

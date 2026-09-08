@@ -11,6 +11,13 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null ? "Review the highlighted target and any payment. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
+        if (PresentationBusy)
+        {
+            _guide.Visible = false;
+            _inspector.AddChild(new BattleTracker { Snapshot = View, ReducedMotion = _reducedMotion,
+                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true });
+            return;
+        }
         if (View.WinnerId is { } winner)
         {
             _inspector.AddChild(Palette.Text("MATCH COMPLETE", 12, Palette.Gold));

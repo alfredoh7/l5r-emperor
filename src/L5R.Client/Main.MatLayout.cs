@@ -154,7 +154,7 @@ public partial class Main
         // Fit/Home remains explicit and always frames the complete new layout.
         if (_tableLayoutSeen && _cameraFitted && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
-        _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size;
+        _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }
 
     private void SyncMatSections()

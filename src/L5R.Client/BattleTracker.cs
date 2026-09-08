@@ -9,6 +9,7 @@ public partial class BattleTracker : Control
     public MatchView Snapshot { get; set; } = null!;
     public bool Compact { get; set; }
     public bool ReducedMotion { get; set; }
+    public bool PresentationInProgress { get; set; }
     public string? ResolutionMessage { get; set; }
     private static Texture2D? _plate;
     private double _clock;
@@ -26,7 +27,7 @@ public partial class BattleTracker : Control
     }
     public override Control _MakeCustomTooltip(string text) => ReadingTooltip.Create(this, text);
     public override void _Process(double delta) { if (!ReducedMotion) { _clock += delta; QueueRedraw(); } }
-    public string Status => ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? (Snapshot.PendingChoice is null && Snapshot.Phase == Phase.Battle ? "You may act or pass" : "Your decision") : "Opponent may act";
+    public string Status => PresentationInProgress ? "Resolving battle" : ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? (Snapshot.PendingChoice is null && Snapshot.Phase == Phase.Battle ? "You may act or pass" : "Your decision") : "Opponent may act";
     private Color Highlight => ResolutionMessage is not null ? Palette.Gold : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? new Color("8bc9ee") : new Color("efb967");
     public override void _Draw()
     {

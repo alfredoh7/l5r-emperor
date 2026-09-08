@@ -58,7 +58,7 @@ public partial class Main
         if (_battlePresentationStage == 2 && _battlePresentationClock > .85 && TableMotionsSettled())
         {
             _battlePresentationStage = 3; _battlePresentationClock = 0;
-            foreach (var key in _fallTimes.Keys.ToArray()) if (_fallTimes[key] < 0) _fallTimes[key] = _battleVisualTime;
+            foreach (var key in _fallTimes.Keys.ToArray()) if (_fallTimes[key] == -1) _fallTimes[key] = _battleVisualTime;
         }
         if (_battlePresentationStage == 3 && _battlePresentationClock >= 1.25)
         { _battlePresentationStage = 0; RenderInspector(); RenderPhaseActions(); RenderTimeline(); FrameNewBattle(); }
@@ -80,7 +80,7 @@ public partial class Main
             var active = View.CurrentBattleProvince == index;
             var reveal = _matSections.RevealProgress($"battle:{defender.Id}:{index}");
             foreach (var dx in new[] { -19f, 19f })
-                BattleInkArt.Stroke(canvas, start + new Vector2(dx, 0), end + new Vector2(dx, 0), new Color(1, 1, 1, reveal * .85f));
+                BattleInkArt.Stroke(canvas, start + new Vector2(dx, 0), end + new Vector2(dx, 0), new Color(1.35f, 1.22f, 1, reveal));
 
         }
         foreach (var (id, province) in _assignments)
