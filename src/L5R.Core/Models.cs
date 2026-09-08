@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 namespace L5R.Core;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item }
+public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item, Spell, Event, Celestial, Region, Ring }
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Phase { Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
