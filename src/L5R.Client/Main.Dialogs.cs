@@ -40,7 +40,7 @@ public partial class Main
         body.AddChild(Palette.Wrapped("Play the published 40/40 Lion and Crane decks with every card ability automated, or use the training scenarios to learn the flow.", 16, Palette.PaperDim));
         void Start(bool economy, bool published = false, int seat = 0)
         {
-            void Begin() { _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
+            void Begin() { _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
             if (_session.Online || _session.Snapshot?.View.Version > 0) Confirm("Start a new practice?", "This leaves the current table. Export a practice replay first if you want to keep it.", Begin);
             else Begin();
         }
@@ -52,23 +52,7 @@ public partial class Main
         body.AddChild(Palette.Wrapped("The practice opponent uses the published abilities and sees only its own permitted information. Lion starts; Crane receives Bamboo Harvesters.", 13, Palette.Muted));
     }
 
-    private void ShowSettings()
-    {
-        var (dialog, body) = Dialog("Table settings", 600, 780);
-        body.AddChild(Palette.Text("Make the table yours", 28, title: true));
-        body.AddChild(Palette.Text("Borderless floral silk", 15, Palette.Gold));
-        var motion = new CheckBox { Text = "Reduced motion / faster practice turns", ButtonPressed = _reducedMotion };
-        motion.Toggled += enabled => { _reducedMotion = enabled; _table.ReducedMotion = enabled; _timeline.ReducedMotion = enabled; foreach (var t in _tiles) t.ReducedMotion = enabled; if (enabled) { foreach (var flight in _flights.Where(IsInstanceValid)) flight.Finish(); _flights.Clear(); foreach (var pile in TablePiles) pile.SettleFrom(pile.Count, true); } }; body.AddChild(motion);
-        body.AddChild(Palette.Wrapped("Reduced motion freezes candlelight and phase glow and makes card transfers instant. F11 toggles fullscreen; both window modes support the full game.", 14, Palette.PaperDim));
-        body.AddChild(Palette.Wrapped("Table camera: drag empty cloth, middle-drag, or Space + drag. Arrow keys pan; the mouse wheel zooms toward the pointer. Home fits the table. My side and Battle frame those areas without changing the match.", 14, Palette.PaperDim));
-        body.AddChild(Palette.Button(IsFullscreen ? "Use a window" : "Enter fullscreen", () => { dialog.QueueFree(); GetWindow().Mode = IsFullscreen ? Window.ModeEnum.Windowed : Window.ModeEnum.Fullscreen; }));
-        body.AddChild(Palette.Button("Quit game", () => GetTree().Quit()));
-        body.AddChild(Palette.Button("Export practice replay", ExportReplay));
-        body.AddChild(Palette.Button("Open Decks location", OpenDecksLocation));
-        body.AddChild(Palette.Button("Rules coverage & limitations", ShowCoverage));
-        var concede = Palette.Button("Concede this match…", () => Confirm("Concede this match?", "The other player will win the current match.", () => Submit(new L5R.Core.GameCommand("concede", View.ViewerId, View.Version))));
-        concede.Disabled = _session.Snapshot is null || View.WinnerId is not null; body.AddChild(concede);
-    }
+    private void ShowSettings() => ShowFrontendOptions();
 
     private void ShowOnline()
     {
