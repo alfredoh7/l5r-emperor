@@ -9,7 +9,7 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 - Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.
 - Game: Godot **4.7.2 .NET**, C#/.NET SDK **10.0.400**; tools are pinned by `tools/bootstrap.py` and `global.json`.
 - Platforms: Mac and Windows exports. Native Mac play/rendering has been checked; a Windows package is not evidence of a native Windows playtest.
-- Current ownership: alfredoh7 develops UI/QoL; mdornbrook validates and develops mechanics/rules. Preserve the approved aesthetic while both lanes progress. Read docs/COLLABORATION.md for automatic coordination.
+- Current focus: alfredoh7 develops UI/QoL; mdornbrook validates and develops mechanics/rules. Mendon has owner-authorized access to develop across all game areas, including UI/shared code, and merge his tested PRs after CI without Alfredo approval (see AGENTS.md and `.github/collaboration.json`). Preserve the approved aesthetic while both lanes progress. Read docs/COLLABORATION.md for automatic coordination.
 - Start with `docs/PROJECT_STATUS.md`, open GitHub issues and recent PRs after reading this file. They may supersede this checkpoint.
 
 ## Product decisions to preserve
@@ -104,7 +104,7 @@ All included effects are implemented under the pinned profile, but expert full-m
 4. Make the smallest coherent change. Include the issue number and evidence in the PR. For disputed mechanics, distinguish the reported interpretation, cited rule/printing, and verified conclusion.
 5. Run appropriate checks and list exact results and limitations. Attach a minimal replay/scenario and screenshots where useful. Do not attach seat tokens, private credentials or another player's hidden cards unnecessarily.
 6. Before yielding, update the issue/PR with completed work, remaining work, reproduction commands, and the branch/commit. Update `docs/PROJECT_STATUS.md` when the shared milestone changes. Use `docs/handoffs/TEMPLATE.md` for a longer handoff.
-7. Review PRs and merge through GitHub. Other sessions pull the merged changes before continuing. Do not force-push shared branches or silently rewrite the common rules profile.
+7. Merge through GitHub after relevant checks and the configured review policy. Mendon’s own PRs require no Alfredo approval; his agent can merge them after tests/CI pass. Other sessions pull the merged changes before continuing. Do not force-push shared branches or silently rewrite the common rules profile.
 
 Suggested prompt for the next AI:
 
