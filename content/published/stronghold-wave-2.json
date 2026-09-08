@@ -1,0 +1,55 @@
+{
+  "Profile": "stronghold-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1218",
+      "Name": "Carpenter Castle",
+      "Type": "Stronghold",
+      "Clan": "Crab",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 9,
+      "StartingHonor": 4,
+      "Text": "Siege Battle: Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1218.jpg",
+      "Keywords": [
+        "Castle"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "carpenter-castle-siege"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7017",
+      "Name": "Shiro Shiba",
+      "Type": "Stronghold",
+      "Clan": "Phoenix",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 6,
+      "Text": "Battle: Choose your performing unbowed Samurai: Melee 4 Attack, with +2 strength if you control a Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7017.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "shiro-shiba-melee"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

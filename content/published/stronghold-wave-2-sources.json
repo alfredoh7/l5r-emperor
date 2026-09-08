@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-1218",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1218",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1218-printing-1-image-1.jpg",
+    "image_sha256": "536120f08f9ad7aa105fa19068e1782cfe50ea3030bc8a2ed78758dfc9e622c3"
+  },
+  {
+    "card_id": "oracle-l5r-7017",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7017",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7017-printing-1-image-1.jpg",
+    "image_sha256": "05fccdeae5f1c056e2ed6d12b104862eb90a3ceba897f487627923dae85d92b5"
+  }
+]

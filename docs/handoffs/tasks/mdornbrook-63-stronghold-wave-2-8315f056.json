@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire up Stronghold wave 2: build the Ranged/Melee Attack primitive (deferred, not-required-up-front targeting) and ship Carpenter Castle + Shiro Shiba. Shared because two card scans copy into src/L5R.Client/Content/Published/ (ui-lane path) via the same content pipeline as every prior wave; rules-lane changes are additive (CardAbilities.cs, CardCatalog.cs, PublishedContent.cs, L5R.Core.csproj) and existing snapshots' invariants are re-verified.",
+  "validation": "bash tools/check.sh: full suite passed (retried once after the known transient Godot import flake). python3 -m unittest discover -s tools/content: 95/95 passed",
+  "remaining": "None; ready for review",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/63",
+  "branch": "mdornbrook/63-stronghold-wave-2",
+  "updated": "2026-09-08T21:29:06.973992+00:00"
+}

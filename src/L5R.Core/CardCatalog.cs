@@ -34,8 +34,11 @@ public static class CardCatalog
             new("training-rally", "Training rally", CardType.Strategy, Effect:"force-three", Text:"Training fixture. Battle: Target your Personality at the current battlefield: Give it +3 Force until the turn ends."),
             new("training-pressure", "Training pressure", CardType.Strategy, Effect:"bow-small", Text:"Training fixture. Battle: Target an enemy Personality with 3 or less Force at the current battlefield: Bow it."),
             new("training-battle-maiden", "Training Battle Maiden", CardType.Personality, "Unicorn", GoldCost:4, Force:2, Chi:2, PersonalHonor:1, Keywords:["Battle Maiden"], Text:"Synthetic Plains of the Maiden fixture. Never included in a playable deck."),
-            new("training-honor-strike-samurai", "Training honor-strike samurai", CardType.Personality, "Scorpion", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Samurai"], Abilities:["training-honor-strike"], Text:"Synthetic Law of Darkness Dojo fixture: grants a Battle ability that reduces an enemy Personality's controller's Honor. Never included in a playable deck.")
+            new("training-honor-strike-samurai", "Training honor-strike samurai", CardType.Personality, "Scorpion", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Samurai"], Abilities:["training-honor-strike"], Text:"Synthetic Law of Darkness Dojo fixture: grants a Battle ability that reduces an enemy Personality's controller's Honor. Never included in a playable deck."),
+            new("training-castle", "Training castle", CardType.Holding, GoldCost:2, Keywords:["Castle"], Text:"Synthetic Carpenter Castle fixture: carries the Castle keyword. Never included in a playable deck."),
+            new("training-samurai", "Training samurai performer", CardType.Personality, "Phoenix", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Samurai"], Text:"Synthetic Shiro Shiba fixture: a plain Samurai performer. Never included in a playable deck."),
+            new("training-shugenja", "Training shugenja", CardType.Personality, "Phoenix", GoldCost:3, Force:1, Chi:3, PersonalHonor:1, Keywords:["Shugenja"], Text:"Synthetic Shiro Shiba fixture: a controlled Shugenja, for its conditional +2 strength. Never included in a playable deck.")
         ];
-        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
+        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
