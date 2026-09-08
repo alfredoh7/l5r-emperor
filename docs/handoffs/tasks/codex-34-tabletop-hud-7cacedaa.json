@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Refined tabletop HUD: numeral-only Musashi stat tokens, engraved toolbar icons, consolidated turn/priority plaques, supplied aged Clan and koku art, honor fan, and individual pile edges with raised-face input.",
-  "validation": "188 automated checks and client import/smoke passed; final runtime compiles with zero warnings/errors. Native pile boundaries, 4 token fixtures, responsive icon clicks and real draw/discard motion passed. Ultrawide pile clearance failure fixed and rerun passed; 720p raised-edge click and arrow-pan-after-fit passed. Remaining camera and hand scenarios are running.",
-  "remaining": "Finish remaining native checks, verify combined menu launcher, attach screenshots and wait for CI/shared review before merge. PR is stacked on PR33 and also includes pending PR32.",
+  "summary": "Completed UI refinement: Musashi numeral-only tokens; icon toolbar; plaque turn and response cues with stronger glow; supplied aged Clan/koku art and honor fan; individual paper layers with correct raised-pile input and fabric padding. Combined preview retains menu PR9, tokens PR32 and clarity PR33.",
+  "validation": "188 automated checks plus Godot import/smoke; zero-warning final compile. 14 native clarity scenarios and all 8 camera cases passed cumulatively. Four token grids, responsive icon clicks, raised pile-top click, arrow pan after Fit, 0/1/8/20/40 pile boundaries, actual draw/discard animations and reduced motion passed. Combined launcher menu/match/pause/options and expanded-selection/motionoff probes passed. Screenshots inspected. Runtime Mac/Windows CI passed c805965; final docs CI pending.",
+  "remaining": "Await Alfredo visual acceptance and mdornbrook shared review before merging stacked PR35 after parents PR32/33. Native Windows graphical playtesting remains separate. Main and previous launchers unchanged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/34",
   "branch": "codex/34-tabletop-hud",
-  "updated": "2026-09-08T07:21:51.970898+00:00"
+  "updated": "2026-09-08T07:27:10.934780+00:00"
 }

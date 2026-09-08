@@ -28,3 +28,15 @@ Run `bash tools/check.sh`, then `bash tools/check-tabletop-hud.sh`, `bash tools/
 - The tactile capture submits actual Border Keep, discard and end-phase draw commands and checks movement/count settling.
 
 Final outcomes and screenshots are recorded in the task handoff and PR. Windows CI/export is not native Windows graphical testing.
+
+## Recorded outcome
+
+- `bash tools/check.sh`: 188 checks passed (29 collaboration, 59 content, 46 core, 32 published, 13 AI, 5 server, 4 transport), plus Godot import/headless smoke. Final runtime compilation: zero warnings/errors. Initial network-restricted package-audit warning was resolved by a successful online restore.
+- All 14 clarity scenarios passed cumulatively, including the corrected ultrawide case. All eight camera scenarios passed.
+- Four token fixtures passed; each checks 0/1/3/6 attachments, upright/bowed, 0/one/two/three-digit values and native input. Three responsive icon captures plus the final 720p pile-top-edge/arrow-pan check passed.
+- The real-command tactile sequence passed return/draw/discard/end-phase draw, exact final counts and reduced motion.
+- Combined menu preview passed launcher menu→match, pause/resume, cancel replacement, options persistence, native toolbar/pile-top input, expanded selected parent, reduced motion and final pile-count fixture.
+- Visual captures were inspected. The ultrawide test initially found reduced mat padding above raised piles; the fabric headroom was expanded and the failing case rerun successfully. Final code also includes a raised-pile hit area and prevents Fit from trapping arrow-key input.
+- Mac and Windows CI passed for runtime commit c805965. Final documentation-only CI is recorded on PR35. Native Windows graphical playtesting and human visual/rules acceptance remain separate.
+
+Screenshots: `docs/screenshots/tabletop-hud/after.png`, `expanded.png`, `numeral-tokens.png`, `pile-counts.png`. `before.png` is the prior combined preview. Before/after screenshots show different practice matches; compare the chrome/art, not the card state. The pile-count and token grids are explicitly illustrative native presentation fixtures.
