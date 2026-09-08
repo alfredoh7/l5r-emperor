@@ -61,7 +61,7 @@ public partial class UnitStandardProbe : Control
     }
     private CardTile Face(CardView c, float x, float y, float side)
     {
-        var tile = new CardTile(c, true, _ => {}, _ => {}) { Position = new Vector2(x,y), Size = Vector2.One * side, FaceHeight = side - 12, ReducedMotion = !_motion, PreviousBowed = _motion ? !c.Bowed : c.Bowed };
+        var tile = new CardTile(c, true, _ => {}, _ => {}) { Position = new Vector2(x,y), Size = Vector2.One * side, FaceHeight = side - 12, AlignUnitRightEdge = true, ReducedMotion = !_motion, PreviousBowed = _motion ? !c.Bowed : c.Bowed };
         AddChild(tile); _faces.Add(tile); return tile;
     }
     public override void _Process(double delta)
@@ -72,8 +72,8 @@ public partial class UnitStandardProbe : Control
             foreach (var b in _standards)
             {
                 b.PositionAtCard();
-                if (!GetViewportRect().Encloses(b.GetGlobalRect())) throw new Exception("Standard clipped");
-                var rect = b.GetGlobalRect();
+                if (!GetViewportRect().Encloses(b.BodyRectOnViewport())) throw new Exception("Standard clipped");
+                var rect = b.BodyRectOnViewport();
                 Vector2[] polygon = [rect.Position, new(rect.End.X,rect.Position.Y),rect.End,new(rect.Position.X,rect.End.Y)];
                 foreach (var card in _faces)
                     if (Geometry2D.IntersectPolygons(polygon,card.FaceCornersOnViewport()).Count > 0) throw new Exception("Standard overlaps a card face");
@@ -81,7 +81,7 @@ public partial class UnitStandardProbe : Control
             }
             if (_step++ == 0)
             {
-                var point = _standards[0].GetGlobalRect().GetCenter();
+                var point = _standards[0].BodyRectOnViewport().GetCenter();
                 Input.ParseInputEvent(new InputEventMouseMotion { Position=point });
                 Input.ParseInputEvent(new InputEventMouseButton { Position=point,ButtonIndex=MouseButton.Left,Pressed=true });
                 Input.ParseInputEvent(new InputEventMouseButton { Position=point,ButtonIndex=MouseButton.Left,Pressed=false });

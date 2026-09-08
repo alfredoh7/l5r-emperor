@@ -173,7 +173,7 @@ public partial class Main
             label.SizeFlagsHorizontal = Control.SizeFlags.ExpandFill; heading.AddChild(label);
             var close = Palette.Button("Fold unit  ×", () => { _expandedUnits.Clear(); RenderBoard(); });
             close.AddThemeFontSizeOverride("font_size", 12); heading.AddChild(close);
-            var detailSide = Math.Min(210, (BoardWidth - 60) / (1.36f + attachments.Length * .8f));
+            var detailSide = Math.Min(210, (BoardWidth - 60) / (2.4f + Math.Max(0, attachments.Length - 1) * .8f));
             content.AddChild(UnitStack(personality, owner, detailSide, true));
             var location = personality.Zone == Zone.Battlefield ? $"{owner.Clan} · battlefield at Province {personality.ProvinceIndex + 1}" : $"{owner.Clan} · at home";
             content.AddChild(Palette.Text(location + "   ·   Hover any card to read it. Each card retains its own bow state.", 12, Palette.PaperDim));
@@ -186,7 +186,7 @@ public partial class Main
         var step = expanded ? side * .80f : 24f;
         var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max());
         var bannerWidth = personality.UnitForce.HasValue ? UnitStandard.ReservedWidth * side / CardHeight : 0;
-        var width = (expanded ? faceWidth + attachments.Length * step : faceWidth) + bannerWidth;
+        var width = (expanded && attachments.Length > 0 ? faceWidth * 2 + Math.Max(0, attachments.Length - 1) * step : faceWidth) + bannerWidth;
         var tileHeight = detail ? side : PlaneHeight(side);
         var height = tileHeight + (expanded ? 0 : attachments.Length * step);
         var group = new VBoxContainer { CustomMinimumSize = new Vector2(width, 0) };
@@ -197,7 +197,7 @@ public partial class Main
         {
             var child = Tile(attachments[i], true, faceWidth, side);
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
-            Place(stack, child, expanded ? (i + 1) * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
+            Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }
         var front = Tile(personality, true, faceWidth, side);
         if (detail) { front.ProjectToScreen = null; front.CustomMinimumSize = new Vector2(faceWidth, side); }
@@ -225,13 +225,15 @@ public partial class Main
             var standard = new UnitStandard
             {
                 CardAnchor = front, Card = personality,
-                Companions = stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
+                Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
                 Projection = detail ? null : _tableSurface.ProjectCanvas,
                 Inline = detail, Explanation = UnitStandard.ExplainUnit(personality),
                 Allowed = () => detail || (_expandedUnits.Count == 0 && _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
             };
+            if (!detail) foreach (var tile in stack.GetChildren().OfType<CardTile>()) tile.AlignUnitRightEdge = true;
             standard.Pressed += () => SelectCard(personality);
-            if (detail) stack.AddChild(standard); else _statTokenLayer!.AddChild(standard);
+            standard.SetMeta("flat_tooltip", standard.Explanation);
+            stack.AddChild(standard);
         }
         var footer = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; footer.AddThemeConstantOverride("separation", 4); group.AddChild(footer);
         if (attachments.Length > 0)

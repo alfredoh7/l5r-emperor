@@ -31,9 +31,9 @@ public partial class Main
         {
             // Fresh practice seeds can win before a suitable battle occurs. Search
             // another real match only during fixture setup; never retry a UI assertion.
-            if (_captureMode.Contains("clarity", StringComparison.Ordinal) && _boardFixtureAttempts < 4)
+            if (_boardFixtureAttempts < 4)
             {
-                GD.Print("CLARITY_SETUP: practice ended before the required fixture; trying a fresh match.");
+                GD.Print("BOARD_SETUP: practice ended before the required fixture; trying a fresh match.");
                 _session.StartPractice(false, true, 1); PrepareBoardCapture(); return;
             }
             throw new InvalidOperationException("Did not reach the required board capture state.");

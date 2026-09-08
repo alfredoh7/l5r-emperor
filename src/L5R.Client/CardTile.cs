@@ -88,10 +88,19 @@ public partial class CardTile : Button
 
     // The same projected quadrilateral drives drawing, hit testing and arrows.
     // Bow rotation takes place in the table plane before camera foreshortening.
+    public bool AlignUnitRightEdge { get; set; }
+
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
         var p = ((point - face / 2) * _hoverScale).Rotated(_bowAngle + RestAngle);
-        return Size / 2 + new Vector2(0, -_lift) + p;
+        var center = Size / 2;
+        if (AlignUnitRightEdge)
+        {
+            var angle = _bowAngle + RestAngle;
+            var extent = (Math.Abs(Mathf.Cos(angle)) * face.X + Math.Abs(Mathf.Sin(angle)) * face.Y) * _hoverScale / 2;
+            center.X = Size.X - 6 - extent;
+        }
+        return center + new Vector2(0, -_lift) + p;
     }
 
     private Vector2[] LocalFaceCorners(float grow = 0)
@@ -115,6 +124,8 @@ public partial class CardTile : Button
         var resting = (point - Size / 2).Rotated(-_bowAngle - RestAngle) + FaceSize() / 2;
         return new Rect2(Vector2.Zero, FaceSize()).Grow(2).HasPoint(resting);
     }
+
+    public Vector2[] FaceCornersInCanvas() => LocalFaceCorners().Select(p => GetGlobalTransform() * p).ToArray();
 
     public Vector2[] FaceCornersOnViewport() => LocalFaceCorners().Select(p => ProjectToScreen?.Invoke(GetGlobalTransform() * p) ?? GetGlobalTransform() * p).ToArray();
 
