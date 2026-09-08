@@ -22,3 +22,11 @@ These are actual Godot captures, not generated concepts. Approval artwork and it
 Visual review found and corrected disappearing decoration caused by zero control bounds, shifting surviving provinces when units returned home, overly narrow crowded courts, and overlapping/wrong-state status text. Historical fallen markers stay extinguished when another province falls. No authoritative combat calculation was added to the UI.
 
 Native Windows play and expert rules acceptance are not claimed. PR #76 remains subject to shared review; these checks do not replace Mendon's judgment. Sound and named Personality cinematics remain future work.
+
+## Ink timing follow-up
+
+Alfredo requested 30–40% less delay before borders appear. The ink timing scale is now 0.65: the post-card pause is 0.104 s (was 0.160), reveal is 0.8775 s (was 1.350), and old-contour dissolve is 0.312 s (was 0.480). Card/pile movement still gates the start; movement durations and the organic shader are unchanged. Reduced motion remains immediate.
+
+The native lifecycle check now samples the shortened fade before and after completion. Its macOS focus wait and diagnostic were improved after a foreground-window failure. Validation is recorded in the current task handoff; the earlier screenshots/movie above document the original pass, before this timing adjustment.
+
+Follow-up checks passed: client compile/import, the native 1920×1080 ink/input fixture and a real 120-frame purchase film. `ink-faster-purchase.mp4` and its JSON contain the new timing evidence. The film kept ink absent while cards moved, then showed gradual appearance through completion.

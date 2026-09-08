@@ -11,7 +11,11 @@ public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool A
 /// </summary>
 public partial class InkMatSections : Control
 {
-    private const float SettlePause = .16f, RevealSeconds = 1.35f, RemoveSeconds = .48f;
+    // Keep the organic ink sequence, with 35% less waiting/spreading time.
+    // Actual card movement still finishes before a new contour starts.
+    private const float InkTimingScale = .65f;
+    private const float SettlePause = .16f * InkTimingScale,
+        RevealSeconds = 1.35f * InkTimingScale, RemoveSeconds = .48f * InkTimingScale;
     public Func<bool> MotionSettled { get; set; } = () => true;
     private readonly Dictionary<string, Section> _sections = new(StringComparer.Ordinal);
     private string? _matchKey, _hoverId, _selectedId;

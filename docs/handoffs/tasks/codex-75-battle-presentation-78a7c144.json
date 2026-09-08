@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved shared battle courts B, ink-step assignment previews B and fractured/extinguished province falls; integrate merged mechanics PR64.",
-  "validation": "256 deterministic checks pass after main integration; client build/import pass with local NU1900 feed warnings. Five native battle cases pass; eight camera cases, three ink cases and 120-frame purchase film pass. Complete-window 24fps province-fall movie and screenshots reviewed; launcher verified. See docs/screenshots/battle-presentation/README.md.",
-  "remaining": "GitHub CI and Mendon shared review before merge; native Windows and expert rules acceptance remain open.",
+  "summary": "Approved battle presentation plus follow-up: shorten all ink lifecycle timings by 35%, preserving card-first gating; integrate main through token primitives PR80.",
+  "validation": "Timing follow-up: client compilation/import passed; native 1920x1080 mat checks passed (actual hover, selection, tray, icon, expansion/contraction, retarget and reduced motion); real 120-frame purchase film passed and inspected. Prior battle-pass validation remains recorded in docs/screenshots/battle-presentation/README.md. Initial native attempts failed to acquire macOS focus; foregrounding the window fixed it. Existing fade test updated for the shorter duration.",
+  "remaining": "Updated GitHub CI and Mendon review before PR76 merges; no native Windows play or expert acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/75",
   "branch": "codex/75-battle-presentation",
-  "updated": "2026-09-08T22:29:10.298033+00:00"
+  "updated": "2026-09-08T22:42:09.171680+00:00"
 }

@@ -250,6 +250,12 @@ public partial class Main
                     "A mat emblem covers a resting card.");
         }
         GetWindow().GrabFocus();
+        // Native macOS focus changes can outlast two render frames.
+        for (var attempt = 0; !GetWindow().HasFocus() && attempt < 20; attempt++)
+        {
+            GetWindow().GrabFocus();
+            await ToSignal(GetTree().CreateTimer(.1), SceneTreeTimer.SignalName.Timeout);
+        }
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         var savedCenter = _cameraCenter; var savedZoom = _cameraZoom; var savedFit = _cameraFitted;
@@ -261,7 +267,7 @@ public partial class Main
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         }
         var visible = icons.FirstOrDefault(c => c.Visible && PointerOnTable(c.GetGlobalRect().GetCenter()));
-        InkRequire(visible is not null, "The icon fixture has no visible hotspot to test.");
+        InkRequire(visible is not null, $"The icon fixture has no visible hotspot to test (focus={GetWindow().HasFocus()}, blocked={CameraBlocked}, icons={icons.Count}, visible={icons.Count(c => c.Visible)}).");
         HideTableTooltip(); ReadingTooltip.LastText = null;
         Input.ParseInputEvent(new InputEventMouseMotion { Position = visible!.GetGlobalRect().GetCenter() });
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -382,7 +388,7 @@ public partial class Main
             SyncInk(probe, [stable]);
             InkRequire(probe.IsAnimating && probe.SectionCount == 2 && probe.Targets.Count == 1 && probe.CurrentBounds(compact.Id) is not null,
                 "A removed section vanished instead of retaining ink while it dissolves.");
-            AdvanceInk(probe, .2); SyncInk(probe, [stable]); AdvanceInk(probe, .2);
+            AdvanceInk(probe, .1); SyncInk(probe, [stable]); AdvanceInk(probe, .1);
             InkRequire(probe.CurrentBounds(compact.Id) is not null, "Removed ink disappeared before its fade could finish.");
             AdvanceInk(probe, .2);
             InkRequire(probe.SectionCount == 1 && probe.CurrentBounds(compact.Id) is null && !probe.IsAnimating,
