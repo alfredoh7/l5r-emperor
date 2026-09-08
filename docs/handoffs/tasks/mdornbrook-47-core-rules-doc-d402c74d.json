@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Compile docs/rules/EMPEROR_EDITION_CORE_RULES.md from the Emperor Edition rulebook (printed p. 20-131): Overview, Core Rules, Setup, full Turn Sequence, Winning the Game, Deck Construction, Rules Glossary, Online Rules appendix. Documentation only, no engine changes.",
+  "validation": "Documentation-only change; no code touched, no check.sh run. Content cross-checked page-by-page against the source PDF (text-extracted via pypdf since poppler/pdftoppm was unavailable) while compiling.",
+  "remaining": "User explicitly plans several more rules supplements to layer onto this document over time; noted open items (multiplayer variants, errata/FAQ sourcing, per-mechanic deep dives) at the end of the file.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/47",
+  "branch": "mdornbrook/47-core-rules-doc",
+  "updated": "2026-09-08T13:54:50.782233+00:00"
+}
