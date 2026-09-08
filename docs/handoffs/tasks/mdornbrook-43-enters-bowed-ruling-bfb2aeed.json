@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Personalities enter play bowed only via a printed enters-bowed effect (direct entry, never straighten-then-bow); default is always straightened, verified empirically against the current pool with no regression",
+  "validation": "bash tools/check.sh --skip-client: Core 51/51 (incl. 2 new tests), Published 32/32, DeckFormat 8/8, AI/Server/Transport all passed",
+  "remaining": "None for the self-effect mechanism. A second trigger shape (another card temporarily granting personalities-enter-bowed) deliberately deferred until a specific real printing is available to pin its exact scope.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/43",
+  "branch": "mdornbrook/43-enters-bowed-ruling",
+  "updated": "2026-09-08T12:12:02.267680+00:00"
+}

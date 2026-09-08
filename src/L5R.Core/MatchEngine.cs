@@ -164,7 +164,9 @@ public sealed partial class MatchEngine
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
-        card.Bowed=Definition(card).Type==CardType.Holding;
+        // A Personality is straightened by default; entering bowed is only ever a direct
+        // consequence of a printed effect, never a separate straighten-then-bow step.
+        card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
