@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Unit Standard follow-up: bowed ordinary Personality now suppresses all Followers in authoritative battle contribution. Exact Takakura + two Native Guides case reads 0 while coins remain 3/3; unbowed reads 13. Prior Elite-Personality exception preserved and flagged for rules-lead review.",
-  "validation": "Reproduced expected 0/got 10 before fix. 217 automated checks passed: 29 collaboration,75 content,51 core,32 published,8 deck-format,13 AI,5 server,4 transport. Regression tests actual attacker/defender resolution and unchanged Personality Force/Chi. Client build 0 warnings/errors. check-bowed-unit.sh passed; native engine-view capture shows both Native Guides, 0 bowed and 13 unbowed, coins3/3, click/layout checks; screenshot reviewed. Earlier mounted-standard geometry suite remains documented in prior handoff history.",
-  "remaining": "Combined menu launcher verification in progress, then publish to existing PR36; not merged. mdornbrook shared review required, especially preserved Elite-Personality exception. No Windows graphical playtest. New screenshot docs/screenshots/unit-standard/bowed-unit-correction.png.",
+  "summary": "Bowed-unit correction in PR36: an ordinary bowed Personality suppresses all its Followers in the authoritative battle contribution. Takakura + two Native Guides reads 0 while coins remain3/3; unbowed reads13. Earlier Elite-Personality exception preserved and called out for mdornbrook review.",
+  "validation": "Before fix, exact regression failed expected0/got10. After integrating current main9cf4c2a (#40/#42/#44), all232 automated checks passed:29collaboration,85content,56core,32published,8deck-format,13AI,5server,4transport. Exact regression tests both attacking/defending resolution and unchanged Force/Chi. Client build0warnings/errors. check-bowed-unit.sh and refreshed eight-case bowed native matrix pass; screenshots reviewed. Combined menu preview passes actual launcher menu-flow and table focus/tooltip/input checks. Bowed Unit Fix.app opened verified process path with clean startup.",
+  "remaining": "Ready for Alfredo playtest and mdornbrook shared rules review; not merged. Elite-Personality exception preserved from #19/#17; rules lead should confirm combined interaction. No Windows graphical playtest. Clickable Mac launcher: artifacts/L5R Emperor - Bowed Unit Fix.app; preview artifacts/playtest-bowed-unit-force includes current main and PR9. Older launchers preserved.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/18",
   "branch": "codex/18-unit-standard",
-  "updated": "2026-09-08T14:04:45.713112+00:00"
+  "updated": "2026-09-08T14:09:57.590492+00:00"
 }
