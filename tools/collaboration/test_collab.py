@@ -131,6 +131,25 @@ class GitRehearsals(unittest.TestCase):
         result=c.audit(self.root,'origin/main',name=c.branch(self.root))
         self.assertEqual(result['lane'],'ui');self.assertEqual(result['errors'],[])
 
+    def test_stacked_task_keeps_foreign_handoff_but_requires_own_shared_record(self):
+        self.git('switch', '-c', 'claude/dependency')
+        self.write('src/L5R.Core/CardAbilities.cs', 'dependency rules')
+        self.record('rules'); self.save('dependency handoff')
+        self.git('switch', '-c', 'codex/stacked-ui')
+        self.write('src/L5R.Client/CardTile.cs', 'UI using dependency')
+        report = c.audit(self.root, 'origin/main', name=c.branch(self.root), working=True)
+        self.assertTrue(any('another branch' in e for e in report['errors']))
+        self.record('ui')
+        self.assertTrue(c.audit(self.root, 'origin/main', name=c.branch(self.root), working=True)['errors'])
+        self.record('shared'); self.save('current shared handoff')
+        self.assertEqual(c.audit(self.root, 'origin/main', name=c.branch(self.root))['errors'], [])
+
+    def test_malformed_foreign_handoff_is_not_ignored(self):
+        self.git('switch', '-c', 'codex/stacked-ui')
+        self.record('ui')
+        self.write(c.handoff_path('other', CFG), json.dumps({'branch': 'other', 'lane': 'ui', 'summary': 'todo'}))
+        self.assertTrue(c.audit(self.root, 'origin/main', name=c.branch(self.root), working=True)['errors'])
+
     def test_rules_task_full_local_rehearsal(self):
         self.git('switch','-c','claude/11-ability-timing')
         self.write('src/L5R.Core/CardAbilities.cs','corrected ability timing\n')

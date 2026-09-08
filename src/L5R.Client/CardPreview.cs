@@ -6,6 +6,17 @@ namespace L5R.Client;
 /// <summary>Hover reads the projected CardView only; it cannot reveal hidden cards or change a draft.</summary>
 public static class CardPreview
 {
+    public static Control Face(CardView card, float height, float width = 0)
+    {
+        var face = new CardTile(card with { Bowed = false }, true, _ => { }, _ => { })
+        {
+            CustomMinimumSize = new Vector2(width, height), ReducedMotion = true,
+            Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
+            FocusMode = Control.FocusModeEnum.None
+        };
+        face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };
+        return face;
+    }
     public static Control Create(CardView card, string context, int? gold, float scale = 1)
     {
         // Fix the popup's measure independently of wrapped text. Godot measures a tooltip
@@ -26,13 +37,7 @@ public static class CardPreview
         }
         if (CardTile.Artwork(def) is { } art)
         {
-            row.AddChild(new TextureRect
-            {
-                Material = CardPaper.Reading, TextureFilter = CanvasItem.TextureFilterEnum.LinearWithMipmaps,
-                Texture = def.ScenarioOnly ? new AtlasTexture { Atlas = art, Region = CardTile.ArtRegion(def, art) } : art,
-                CustomMinimumSize = new Vector2(360, 510), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-                StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered, MouseFilter = Control.MouseFilterEnum.Ignore
-            });
+            row.AddChild(Face(card, 510, 360));
         }
         var body = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; row.AddChild(body);
         body.AddChild(Palette.Wrapped(def.Name, 22, Palette.Paper));
@@ -42,6 +47,14 @@ public static class CardPreview
         if (gold > 0) body.AddChild(Palette.Text($"{gold} Gold" + (card.Bowed ? " · bowed" : " · ready"), 14, Palette.Gold));
         var rules = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };
         var details = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; rules.AddChild(details);
+        if (def.Type == CardType.Personality)
+        {
+            details.AddChild(Palette.Wrapped($"Printed: {def.Force} Force · {def.Chi} Chi",16,Palette.PaperDim));
+            foreach(var modifier in card.Modifiers ?? []) details.AddChild(Palette.Wrapped($"{modifier.Amount:+0;-0;0} {modifier.Stat}",15,Palette.Gold));
+        }
+        if (card.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 20, new Color("efaa9a")));
+        foreach (var grant in card.GrantedKeywords ?? [])
+            details.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}", 16, Palette.Gold));
         details.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(def.Text) ? "No activated ability is printed on this card. Its statistics and traits can still be used by the game and other card effects." : def.Text, 16, Palette.PaperDim));
         details.AddChild(Palette.Wrapped(context, 15, Palette.Crane)); body.AddChild(rules);
         body.AddChild(Palette.Wrapped("Click to select. Read longer rules in the inspector.\n? Rules explains the table and turn sequence.", 12, Palette.Muted));

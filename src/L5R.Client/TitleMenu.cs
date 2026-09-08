@@ -84,11 +84,38 @@ public partial class TitleMenu : Control
     }
     private void Begin(int seat)
     {
-        if (!CanResume()) { StartMatch(seat); return; }
+        if (!CanResume()) { ShowName(seat); return; }
         Clear("replace");
         Entries.AddChild(Palette.Wrapped(IsOnline() ? "Leave your private table and start a new practice? This disconnects your seat; it does not concede." : "Replace the current practice? Unsaved progress will be lost.", 25));
-        Entry("Start new practice", () => StartMatch(seat), 39);
+        Entry("Start new practice", () => ShowName(seat), 39);
         Entry("Back", ShowPlay, 43); FocusFirst();
+    }
+    public void ShowName(int seat)
+    {
+        Clear("name");
+        Entries.AddChild(Palette.Text("Take your seat", 48, Palette.Gold, true));
+        Entries.AddChild(Palette.Wrapped(seat == 0 ? "Crane · Shinden Asahina" : "Lion · Halls of Memory", 25, Palette.PaperDim));
+        Entries.AddChild(Palette.Text("Your display name", 24));
+        var name = new LineEdit { Text = Preferences.DisplayName, PlaceholderText = "Enter your name", MaxLength = 24, CustomMinimumSize = new Vector2(0, 60), TooltipText = "Up to 24 characters. Remembered on this device; no account or login." };
+        name.AddThemeFontSizeOverride("font_size", 30);
+        name.AddThemeStyleboxOverride("normal", Palette.Box(new Color("10181d"),new Color("796442"),12,2));
+        name.AddThemeStyleboxOverride("focus", Palette.Box(Colors.Transparent,Palette.Gold,12,2));
+        Entries.AddChild(name);
+        Entries.AddChild(Palette.Wrapped("Remembered on this device. No account or login.", 21, Palette.PaperDim));
+        void Start()
+        {
+            var clean = MenuPreferences.CleanName(name.Text);
+            if (clean.Length == 0) { Notify("Enter a name to take your seat."); name.GrabFocus(); return; }
+            Preferences.DisplayName = clean;
+            if (Preferences.Save() != Error.Ok) { Notify("Your name could not be saved. Check local storage and try again."); return; }
+            PreferencesChanged(); StartMatch(seat);
+        }
+        var play = Entry("Begin match", Start, 48);
+        play.Disabled = MenuPreferences.CleanName(name.Text).Length == 0;
+        name.TextChanged += value => play.Disabled = MenuPreferences.CleanName(value).Length == 0;
+        name.TextSubmitted += _ => Start();
+        Entry("Back", ShowPlay, 40);
+        Callable.From(() => { if (IsInstanceValid(name) && name.IsInsideTree() && name.IsVisibleInTree()) name.GrabFocus(); }).CallDeferred();
     }
     public void ShowQuit()
     {

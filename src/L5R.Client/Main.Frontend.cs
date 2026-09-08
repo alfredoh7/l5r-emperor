@@ -35,6 +35,7 @@ public partial class Main
     }
     private void ApplyPreferences(bool window)
     {
+        _session.LocalDisplayName = _preferences.DisplayName;
         _reducedMotion = _preferences.ReducedMotion;
         _table.ReducedMotion = _reducedMotion; _timeline.ReducedMotion = _reducedMotion;
         foreach (var tile in _tiles) tile.ReducedMotion = _reducedMotion;
@@ -73,6 +74,7 @@ public partial class Main
     }
     private void StartFromMenu(int seat)
     {
+        ResetStatHistory();
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
         _selected = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
         _session.StartPractice(false, true, seat); EnterTable();

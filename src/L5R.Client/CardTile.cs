@@ -67,6 +67,7 @@ public partial class CardTile : Button
 
     public override void _Process(double delta)
     {
+        AdvanceStatFeedback(delta);
         var inspecting = IsInspectionHover;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
@@ -159,8 +160,36 @@ public partial class CardTile : Button
         DrawColoredPolygon(corners.Select(p => p + new Vector2(0, .7f)).ToArray(), new Color("a29174"));
         DrawColoredPolygon(corners, Colors.White, new Vector2[] { Vector2.Zero, Vector2.Right, Vector2.One, Vector2.Down }, texture);
         DrawInteractionEdge();
+        DrawStatInlays();
+        DrawPublicStatus();
     }
 
+    public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
+        (Card.Dishonorable ? new[]{ "Dishonorable" } : Array.Empty<string>())
+        .Concat((Card.GrantedKeywords ?? []).Select(k => "+ " + k.Keyword).Distinct()).ToArray();
+    private void DrawPublicStatus()
+    {
+        var labels = PublicStatusLabels;
+        if (labels.Length == 0) return;
+        var face=FaceSize();
+        var origin=ProjectFacePoint(Vector2.Zero,face);
+        var x=(ProjectFacePoint(Vector2.Right,face)-origin);
+        var y=(ProjectFacePoint(Vector2.Down,face)-origin);
+        DrawSetTransformMatrix(new Transform2D(x,y,origin));
+        // Two slim overlay bands across the lower artwork; never cover printed statistics/name/rules.
+        var shown = labels.Take(2).ToArray();
+        if(labels.Length>2) shown[1]+=$" · {labels.Length-2} more";
+        for(var i=0;i<shown.Length;i++)
+        {
+            var rect=new Rect2(face.X*.035f,face.Y*.395f+i*face.Y*.08f,face.X*.93f,face.Y*.074f);
+            var dishonorable=shown[i]=="Dishonorable";
+            DrawStyleBox(Palette.Box(dishonorable?new Color("492924"):new Color("202f33"),dishonorable?new Color("b37c67"):Palette.Gold,0,1),rect);
+            var size=Math.Max(11,(int)(face.Y*.06f));
+            while(size>8 && Palette.Title.GetStringSize(shown[i],fontSize:size).X>rect.Size.X-6) size--;
+            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),shown[i],HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
+        }
+        DrawSetTransformMatrix(Transform2D.Identity);
+    }
     public static Texture2D? Atlas
     {
         get

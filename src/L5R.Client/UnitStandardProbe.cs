@@ -28,7 +28,7 @@ public partial class UnitStandardProbe : Control
         var screen = GetViewportRect().Size;
         AddChild(new TextureRect { Texture = GD.Load<Texture2D>("res://Art/navy-mat-v4.png"), Size = screen, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCovered, MouseFilter = MouseFilterEnum.Ignore });
         var title = Palette.Text("Unit Standard", 40, Palette.Gold, true); title.Position = new Vector2(48, 25); AddChild(title);
-        var caption = Palette.Text(_engineViews is not null ? "Engine views · Bowed: 0 battle Force · Unbowed: 13 · Personality coins stay 3 / 3" : _comparison ? "Illustrative values · Personality 2 → 0 · Follower 5 · Unit 7 → 5" : "Native layout cases · 0 / 1 / 3 / 6 attachments · upright and bowed", 22); caption.Position = new Vector2(48, 82); AddChild(caption);
+        var caption = Palette.Text(_engineViews is not null ? "Engine views · Bowed: 0 battle Force · Unbowed: 13 · Personality inlays stay 3 / 3" : _comparison ? "Illustrative values · Personality 2 → 0 · Follower 5 · Unit 7 → 5" : "Native layout cases · 0 / 1 / 3 / 6 attachments · upright and bowed", 22); caption.Position = new Vector2(48, 82); AddChild(caption);
         var def = PublishedContent.Snapshot.Cards.First(d => d.Type == CardType.Personality && d.Clan == "Crane");
         var count = _comparison ? 2 : 8;
         var columns = _comparison ? 2 : 4;
@@ -52,8 +52,6 @@ public partial class UnitStandardProbe : Control
                 var tile = Face(f, x, y + (attachments - 1 - a) * (_engineViews is not null ? 55 : 12), side); companions.Add(tile);
             }
             var front = Face(p, x, y + attachments * (_engineViews is not null ? 55 : _comparison ? 45 : 12), side);
-            var tokens = new StatTokens { CardAnchor = front, Companions = companions.ToArray(), Card = p, Projection = p => p };
-            AddChild(tokens);
             var standard = new UnitStandard { CardAnchor = front, Companions = companions.ToArray(), Card = p, Projection = p => p, Explanation = UnitStandard.ExplainUnit(p) };
             standard.Pressed += () => _clicks++;
             AddChild(standard); _standards.Add(standard);
@@ -95,7 +93,7 @@ public partial class UnitStandardProbe : Control
                 {
                     var v=_tracker.Snapshot;
                     _tracker.Snapshot=v with { Phase=Phase.AttackDeclaration }; if(_tracker.Stage!=0) throw new Exception("Assignment phase mapping");
-                    _tracker.Snapshot=v with { PriorityPlayerId=1-v.ViewerId }; if(_tracker.Status!="Opponent’s response") throw new Exception("Opponent priority mapping");
+                    _tracker.Snapshot=v with { PriorityPlayerId=1-v.ViewerId }; if(_tracker.Status!="Opponent may act") throw new Exception("Opponent priority mapping");
                     _tracker.ResolutionMessage="Resolved fixture"; if(_tracker.Stage!=2 || _tracker.Status!="Resolved") throw new Exception("Resolution is not a player wait");
                     _tracker.ResolutionMessage=null; _tracker.Snapshot=v;
                 }

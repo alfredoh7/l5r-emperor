@@ -33,9 +33,12 @@ public partial class Main
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
-                var preview = new TextureRect { Material = CardPaper.Reading, TextureFilter = CanvasItem.TextureFilterEnum.LinearWithMipmaps, Texture = def.ScenarioOnly ? new AtlasTexture { Atlas = artwork, Region = CardTile.ArtRegion(def, artwork) } : artwork, CustomMinimumSize = new Vector2(0, def.ScenarioOnly ? 190 : 340), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered };
+                var preview = CardPreview.Face(_selected, def.ScenarioOnly ? 190 : 340);
                 _inspector.AddChild(preview);
             }
+            if (_selected.Dishonorable) _inspector.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
+            foreach (var grant in _selected.GrantedKeywords ?? [])
+                _inspector.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
             if (_selected.StraightenBlocked) _inspector.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) _inspector.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) _inspector.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
@@ -250,6 +253,15 @@ public partial class Main
         button.ClipText = true; container.AddChild(button);
     }
 
+    private void PassOpportunity()
+    {
+        if (_session.Snapshot is null || _session.Busy || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId) return;
+        if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) return;
+        var pass = Actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
+        if (pass?.Command is not { } command) return;
+        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
+        Submit(command);
+    }
     private void RenderPhaseActions()
     {
         Palette.Clear(_phaseActions);

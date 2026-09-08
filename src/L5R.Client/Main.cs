@@ -365,6 +365,8 @@ public partial class Main : Node
     private void RenderTimeline()
     {
         _timeline.Present(View);
+        _timeline.PassRequested = PassOpportunity;
+        _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
     }
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
@@ -377,6 +379,7 @@ public partial class Main : Node
             tile.ContextHelp = $"{owner.Clan} · Province {province + 1} · {owner.Provinces.Single(p => p.Index == province).Strength} province strength";
         }
         if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
+        BindStatTransition(tile);
         _tiles.Add(tile); return tile;
     }
 

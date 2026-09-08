@@ -18,6 +18,7 @@ public partial class Main
             MenuAssert(_session.Snapshot is null && MenuVisible, "startup has no match or hidden opponent turns");
             if (_captureMode == "menu-options") menu.ShowOptions();
             if (_captureMode == "menu-play") menu.ShowPlay();
+            if (_captureMode is "menu-name" or "menu-name-input") menu.ShowName(1);
             if (_captureMode == "menu-library") LibraryDialog.Show(this);
             if (_captureMode == "menu-private")
             {
@@ -55,12 +56,37 @@ public partial class Main
             if (_menuProbeStep == 8) { MenuAssert(menu.Page == "main", "Options returns to main menu"); KeyEvent(Key.Escape); _menuProbeStep++; _captureClock=0; return; }
             if (_menuProbeStep == 9) { MenuAssert(menu.Page == "quit", "quit requires confirmation"); DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path)); _menuProbeStep++; }
         }
+        if (_captureMode == "menu-name-input")
+        {
+            if (_menuProbeStep == 1)
+            {
+                var field=menu.Entries.GetChildren().OfType<LineEdit>().Single(); field.Text="Mendon"; field.GrabFocus();
+                GetViewport().PushInput(new InputEventKey { Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=true },true);
+                GetViewport().PushInput(new InputEventKey { Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=false },true);
+                _menuProbeStep++; _captureClock=0; return;
+            }
+            if (_menuProbeStep == 2)
+            {
+            MenuAssert(!MenuVisible && Self.Name=="Mendon", "native Enter submits the local name and enters the chosen deck");
+            ShowMainMenu(); menu.ShowName(1);
+            MenuAssert(menu.Entries.GetChildren().OfType<LineEdit>().Single().Text=="Mendon", "next name entry is prefilled");
+            DirAccess.RemoveAbsolute(ProjectSettings.GlobalizePath(_preferences.Path));
+            _menuProbeStep++;
+            }
+        }
         if (_captureMode == "menu-flow")
         {
             if (_menuProbeStep == 1)
             {
                 Click(menu.Entries.GetChild<Button>(0)); MenuAssert(menu.Page == "play", "Play opens clan selection");
-                Click(menu.Entries.GetChild<Button>(1)); MenuAssert(!MenuVisible && Self.Clan == "Lion", "Lion selection starts the real published match");
+                Click(menu.Entries.GetChild<Button>(1)); MenuAssert(menu.Page == "name" && _session.Snapshot is null, "deck selection opens name entry before creating a match");
+                var field = menu.Entries.GetChildren().OfType<LineEdit>().Single();
+                var begin = menu.Entries.GetChildren().OfType<Button>().First();
+                field.Text = "   "; MenuAssert(begin.Disabled, "blank name cannot start match");
+                field.Text = " Alfredo "; Click(begin);
+                MenuAssert(!MenuVisible && Self.Clan == "Lion" && Self.Name == "Alfredo", "name entry starts the selected published deck with trimmed local name");
+                var reloaded = new MenuPreferences(_preferencesProfile); reloaded.Load(); MenuAssert(reloaded.DisplayName == "Alfredo", "local name is remembered by a fresh preferences instance");
+                _session.SwitchPracticeSeat(); MenuAssert(View.Players.Single(p=>p.Clan=="Lion").Name=="Alfredo" && Self.Name!="Alfredo", "passing device does not move name to opponent"); _session.SwitchPracticeSeat();
                 _menuProbeVersion = View.Version; ShowMainMenu(); _captureClock = 0; _menuProbeStep++; return;
             }
             if (_menuProbeStep == 2)

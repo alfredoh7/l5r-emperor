@@ -26,8 +26,8 @@ public partial class BattleTracker : Control
     }
     public override Control _MakeCustomTooltip(string text) => ReadingTooltip.Create(this, text);
     public override void _Process(double delta) { if (!ReducedMotion) { _clock += delta; QueueRedraw(); } }
-    public string Status => ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? "Your response" : "Opponent’s response";
-    private Color Highlight => ResolutionMessage is not null ? Palette.Gold : Snapshot.Players[Snapshot.PriorityPlayerId].Clan == "Crane" ? new Color("8bc9ee") : new Color("efb967");
+    public string Status => ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? (Snapshot.PendingChoice is null && Snapshot.Phase == Phase.Battle ? "You may act or pass" : "Your decision") : "Opponent may act";
+    private Color Highlight => ResolutionMessage is not null ? Palette.Gold : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? new Color("8bc9ee") : new Color("efb967");
     public override void _Draw()
     {
         _plate ??= GD.Load<Texture2D>("res://Art/battle-tracker.png");
