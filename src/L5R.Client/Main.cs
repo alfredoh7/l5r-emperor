@@ -200,7 +200,7 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -275,12 +275,8 @@ public partial class Main : Node
         _timeline = Place(_root, new PhaseTrack(), 300, 12, 1000, 100);
         _menu = Place(_root, new HBoxContainer { Alignment = BoxContainer.AlignmentMode.End }, 1345, 27, 549, 35);
         _menu.AddThemeConstantOverride("separation", 7);
-        foreach (var entry in new (string Text, Action Click)[] { ("Menu", ShowTableMenu), ("? Rules", ShowRules) })
-        {
-            var button = Palette.Button(entry.Text, entry.Click); button.AddThemeFontSizeOverride("font_size", 14);
-            button.AddThemeStyleboxOverride("normal", Palette.Box(new Color(.035f, .032f, .027f, .65f), new Color("75603e"), 9));
-            _menu.AddChild(button);
-        }
+        _menu.AddChild(new TableIconButton(TableGlyph.Menu, ShowTableMenu, "Menu"));
+        _menu.AddChild(new TableIconButton(TableGlyph.Rules, ShowRules, "Rules and reference"));
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);

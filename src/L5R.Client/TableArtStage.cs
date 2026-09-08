@@ -132,8 +132,9 @@ public partial class TableArtStage : Node3D
     {
         const float aspect = 1672f / 941f;
         const float coverage = 1 - 2 * FabricInset;
+        const float pileHeadroom = 32; // Raised 40-card stacks extend above the far province row.
         var width = Math.Max(Math.Max(boardSize.X * 1.30f, boardSize.Y * 1.22f * aspect),
-            Math.Max((boardSize.X + 2 * FabricPadding) / coverage, (boardSize.Y + 2 * FabricPadding) / coverage * aspect));
+            Math.Max((boardSize.X + 2 * FabricPadding) / coverage, (boardSize.Y + 2 * (FabricPadding + pileHeadroom)) / coverage * aspect));
         return new Vector2(width, width / aspect);
     }
     public static Rect2 FabricBounds(Vector2 boardSize)

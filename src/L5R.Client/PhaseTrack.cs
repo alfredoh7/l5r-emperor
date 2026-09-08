@@ -34,7 +34,7 @@ public partial class PhaseTrack : Control
             MouseFilter = MouseFilterEnum.Ignore, ShowBehindParent = true
         };
         AddChild(_plate);
-        AddChild(TurnCue);
+        AddChild(TurnCue); TurnCue.Hide(); // Turn information is presented in the player plaques.
         Resized += FitArtwork;
         FitArtwork();
     }

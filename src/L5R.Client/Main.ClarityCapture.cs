@@ -83,7 +83,9 @@ public partial class Main
             if (_timeline.TurnCue.TurnText != (View.ActivePlayerId == View.ViewerId ? "YOUR TURN" : "OPPONENT'S TURN")) throw new InvalidOperationException("Turn cue confuses priority with turn owner.");
             if (_clanHud.GetChildren().OfType<ClanPlaque>().Count(p => p.Acting) != 1) throw new InvalidOperationException("Exactly one priority plaque must glow.");
         }
-        if (_timeline.TurnCue.GetGlobalRect().Intersects(_cameraControls.GetGlobalRect())) throw new InvalidOperationException("Turn indicator overlaps camera controls.");
+        if (_timeline.TurnCue.Visible) throw new InvalidOperationException("Standalone turn banner must be hidden.");
+        if (View.WinnerId is null && _clanHud.GetChildren().OfType<ClanPlaque>().Count(p => p.TurnOwner) != 1)
+            throw new InvalidOperationException("Exactly one plaque must identify the turn owner.");
         var hand = _tiles.Where(t => t.Card.Zone == Zone.Hand).ToArray();
         if (hand.Any(t => t.FaceHeight / 228f is < 1.15f or > 1.20f)) throw new InvalidOperationException("Hand enlargement is outside requested 15–20%.");
         if (!_captureMode.Contains("clarity", StringComparison.Ordinal)) return;
