@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Clarify turn owner and action priority; enlarge hand faces 19.3%; add distinct gold hover and pale blue persistent selection with projected card growth and stable hand-edge input.",
+  "validation": "Standard check.sh passed: 188 automated checks plus client build, import and smoke. check-card-clarity.sh passed 11 native scenarios including both seats, off-turn responses, bowed cards, expanded attachments, hand-edge hover, multiple aspect ratios and reduced motion. Inspected native screenshots.",
+  "remaining": "Camera regression and combined menu/stat-token launcher integration in progress. PR 33 awaits CI, Alfredo visual acceptance and shared-lane review. Issue 11 sidebar/province-numbering proposals remain separate.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/11",
+  "branch": "codex/11-turn-card-clarity",
+  "updated": "2026-09-08T00:42:05.586943+00:00"
+}

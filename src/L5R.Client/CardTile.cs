@@ -25,6 +25,12 @@ public partial class CardTile : Button
     private static Texture2D? _dynastyBack;
     private bool _hover;
     private float _lift;
+    private float _hoverScale = 1;
+    public float InteractionScale => _hoverScale;
+    public bool IsInspectionHover => _hover || HasFocus();
+    public bool IsSelected => Highlighted || SelectedSource || ChosenTarget;
+    public static readonly Color HoverColor = new("ffda89");
+    public static readonly Color SelectionColor = new("9ceafa");
     private static readonly Dictionary<string, Texture2D> PublishedArt = [];
     public static Texture2D? Artwork(CardDefinition definition)
     {
@@ -61,10 +67,15 @@ public partial class CardTile : Button
 
     public override void _Process(double delta)
     {
-        var targetLift = ReducedMotion || ProjectToScreen is not null ? 0f : _hover || HasFocus() ? 3f : 0f;
-        if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift)) return;
+        var inspecting = IsInspectionHover;
+        var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
+        var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
+        ZIndex = inspecting ? 20 : IsSelected ? 10 : 0;
+        if (Mathf.IsEqualApprox(_bowAngle, _bowDestination) && Mathf.IsEqualApprox(_lift, targetLift) && Mathf.IsEqualApprox(_hoverScale, targetScale)) return;
         _bowAngle = ReducedMotion ? _bowDestination : Mathf.MoveToward(_bowAngle, _bowDestination, (float)delta * Mathf.Pi * 3);
-        _lift = ReducedMotion ? 0 : Mathf.MoveToward(_lift, targetLift, (float)delta * 30);
+        // Reduced motion preserves visible feedback and makes its transition immediate.
+        _lift = ReducedMotion ? targetLift : Mathf.MoveToward(_lift, targetLift, (float)delta * 300);
+        _hoverScale = ReducedMotion ? targetScale : Mathf.MoveToward(_hoverScale, targetScale, (float)delta * 1.65f);
         QueueRedraw();
     }
 
@@ -79,7 +90,7 @@ public partial class CardTile : Button
     // Bow rotation takes place in the table plane before camera foreshortening.
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
-        var p = (point - face / 2).Rotated(_bowAngle + RestAngle);
+        var p = ((point - face / 2) * _hoverScale).Rotated(_bowAngle + RestAngle);
         return Size / 2 + new Vector2(0, -_lift) + p;
     }
 
@@ -90,26 +101,53 @@ public partial class CardTile : Button
             .Select(p => ProjectFacePoint(p, face)).ToArray();
     }
 
-    public override bool _HasPoint(Vector2 point) => Geometry2D.IsPointInPolygon(point, LocalFaceCorners(2));
+    public override bool _HasPoint(Vector2 point)
+    {
+        if (Geometry2D.IsPointInPolygon(point, LocalFaceCorners(2))) return true;
+        if (!_hover || Card.Zone != Zone.Hand) return false;
+        // Keep the original pick area while lifting. Otherwise a pointer on the
+        // bottom edge repeatedly enters/exits as the card moves away from it.
+        return ContainsRestingFace(point);
+    }
+
+    internal bool ContainsRestingFace(Vector2 point)
+    {
+        var resting = (point - Size / 2).Rotated(-_bowAngle - RestAngle) + FaceSize() / 2;
+        return new Rect2(Vector2.Zero, FaceSize()).Grow(2).HasPoint(resting);
+    }
 
     public Vector2[] FaceCornersOnViewport() => LocalFaceCorners().Select(p => ProjectToScreen?.Invoke(GetGlobalTransform() * p) ?? GetGlobalTransform() * p).ToArray();
+
+    private void DrawInteractionHalo()
+    {
+        if (!IsSelected && !IsInspectionHover && !LegalTarget) return;
+        var color = IsSelected ? SelectionColor : HoverColor;
+        var strength = IsSelected ? 1f : IsInspectionHover ? .82f : .28f;
+        var edge = LocalFaceCorners(2);
+        var closed = edge.Append(edge[0]).ToArray();
+        // Broad soft light with a bright core; no solid fill over the original scan.
+        var perspectiveWeight = ProjectToScreen is null ? 1f : 2.2f;
+        foreach (var (width, alpha) in new[] { (28f, .07f), (20f, .12f), (13f, .22f), (8f, .40f) })
+            DrawPolyline(closed, color with { A = alpha * strength }, width * perspectiveWeight, true);
+    }
+
+    private void DrawInteractionEdge()
+    {
+        var active = IsSelected || IsInspectionHover || LegalTarget;
+        var color = IsSelected ? SelectionColor : IsInspectionHover || LegalTarget ? HoverColor : new Color("8e866b");
+        var edge = LocalFaceCorners(active ? 1.6f : 1);
+        DrawPolyline(edge.Append(edge[0]).ToArray(), color with { A = active ? 1 : .58f }, active ? (IsSelected ? 3.2f : 2.3f) * (ProjectToScreen is null ? 1 : 2) : .9f, true);
+    }
 
     private void DrawPrintedFace(Texture2D texture)
     {
         var corners = LocalFaceCorners();
+        DrawInteractionHalo();
         for (var spread = 3; spread >= 1; spread--)
             DrawColoredPolygon(LocalFaceCorners(spread).Select(p => p + new Vector2(.6f, .8f + _lift * .5f)).ToArray(), new Color(.008f, .006f, .004f, .055f));
         DrawColoredPolygon(corners.Select(p => p + new Vector2(0, .7f)).ToArray(), new Color("a29174"));
         DrawColoredPolygon(corners, Colors.White, new Vector2[] { Vector2.Zero, Vector2.Right, Vector2.One, Vector2.Down }, texture);
-        var border = SelectedSource || ChosenTarget ? Palette.Crane : Highlighted || LegalTarget || _hover || HasFocus() ? Palette.Gold : new Color("8e866b");
-        var edge = LocalFaceCorners(1);
-        DrawPolyline(edge.Append(edge[0]).ToArray(), border with { A = .58f }, .9f, true);
-        if (Highlighted || LegalTarget || ChosenTarget || SelectedSource || _hover || HasFocus())
-        {
-            var glow = LocalFaceCorners(2);
-            DrawPolyline(glow.Append(glow[0]).ToArray(), border with { A = .18f }, 5, true);
-            DrawPolyline(glow.Append(glow[0]).ToArray(), border, 1.5f, true);
-        }
+        DrawInteractionEdge();
     }
 
     public static Texture2D? Atlas
@@ -155,7 +193,9 @@ public partial class CardTile : Button
         }
         var ratio = original is null ? .7142857f : original.GetWidth() / (float)original.GetHeight();
         var faceSize = new Vector2(height * ratio, height);
-        DrawSetTransformMatrix(new Transform2D(Vector2.Right, Vector2.Down, Size / 2 + new Vector2(0, -_lift)) * Transform2D.Identity.Rotated(_bowAngle + RestAngle).TranslatedLocal(-faceSize / 2));
+        DrawInteractionHalo();
+        DrawInteractionEdge();
+        DrawSetTransformMatrix(new Transform2D(Vector2.Right, Vector2.Down, Size / 2 + new Vector2(0, -_lift)) * Transform2D.Identity.Rotated(_bowAngle + RestAngle).ScaledLocal(Vector2.One * _hoverScale).TranslatedLocal(-faceSize / 2));
         var r = new Rect2(Vector2.Zero, faceSize);
         var border = SelectedSource || ChosenTarget ? Palette.Crane : Highlighted || LegalTarget || _hover || HasFocus() ? Palette.Gold : new Color("8e866b");
         // Broad penumbra, close contact shadow, and a thin paper edge. The original

@@ -95,6 +95,7 @@ public partial class Main
             GD.Print("UI_SMOKE_PASS: stack toggle spreads attachments; an individual attachment opens in the inspector with its parent preserved.");
         }
         RenderBoard(); ResetTableCamera();
+        if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
         if (_captureMode.Contains("piles", StringComparison.Ordinal)) ValidatePileControls();
         if (_captureMode.EndsWith("settings", StringComparison.Ordinal)) ShowSettings();
         if (_captureMode.Contains("gate", StringComparison.Ordinal))
@@ -113,6 +114,7 @@ public partial class Main
     private void ValidateBoardCapture()
     {
         GD.Print($"RENDER_METRICS: fps={Performance.GetMonitor(Performance.Monitor.TimeFps)}, table_texture={_tableSurface.Canvas.Size}, density={_tableSurface.RenderScale}");
+        ValidateTurnAndClarity();
         ValidateQuietHud();
         ValidatePhysicalLayout();
         if (_captureMode.EndsWith("piletip", StringComparison.Ordinal))
@@ -156,7 +158,10 @@ public partial class Main
                 {
                     var midpoint = (local[edge] + local[(edge + 1) % 4]) / 2;
                     var outward = (midpoint - center).Normalized();
-                    if (!tile._HasPoint(midpoint - outward * 4) || tile._HasPoint(midpoint + outward * 8))
+                    var outside = midpoint + outward * 8;
+                    // A lifted hand intentionally retains its resting pick area to avoid edge-hover oscillation.
+                    var retainedHandArea = tile.Card.Zone == Zone.Hand && tile.IsInspectionHover && tile.ContainsRestingFace(outside);
+                    if (!tile._HasPoint(midpoint - outward * 4) || tile._HasPoint(outside) && !retainedHandArea)
                         throw new InvalidOperationException("Projected card edge does not match its input polygon.");
                 }
             }

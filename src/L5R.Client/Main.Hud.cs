@@ -11,7 +11,8 @@ public partial class Main
         foreach(var player in View.Players)
         {
             var production=player.Home.Concat(player.Army).Append(player.Stronghold).Where(c=>!c.Bowed).Sum(c=>Production(c,player));
-            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead)),16,player.Id==View.ViewerId?938:14,270,120);
+            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead),
+                View.WinnerId is null && View.PriorityPlayerId == player.Id ? (player.Id == View.ViewerId ? "YOU ARE ACTING" : "OPPONENT ACTING") : "") { ReducedMotion = _reducedMotion },16,player.Id==View.ViewerId?938:14,270,120);
         }
     }
     private readonly Dictionary<(int,Zone), CardView> _discardPreview = [];

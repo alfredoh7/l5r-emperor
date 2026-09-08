@@ -6,9 +6,15 @@ namespace L5R.Client;
 public partial class ClanPlaque : Control
 {
     private Label _clan=null!, _honor=null!, _gold=null!;
-    public ClanPlaque(string clan, int honor, int gold, bool favor, Action inspect)
+    public bool Acting { get; set; }
+    public bool ReducedMotion { get; set; }
+    private float _time;
+    private Color _accent;
+    public ClanPlaque(string clan, int honor, int gold, bool favor, Action inspect, string action = "")
     {
         MouseFilter=MouseFilterEnum.Ignore;
+        Acting = action.Length > 0;
+        _accent = clan == "Lion" ? new Color("f1c976") : new Color("9bd4e4");
         var frame=new LacquerPanel { MouseFilter=MouseFilterEnum.Ignore };
         AddChild(frame); frame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var sheet=GD.Load<Texture2D>("res://Art/clan-medallions.png");
@@ -27,6 +33,24 @@ public partial class ClanPlaque : Control
         hit.AddThemeStyleboxOverride("pressed",Palette.Box(new Color(.8f,.62f,.3f,.14f),Palette.Gold,0,50));
         hit.AddThemeStyleboxOverride("focus",Palette.Box(Colors.Transparent,Palette.Gold,0,50));
         hit.Pressed+=inspect; AddChild(hit);
+        if (Acting)
+        {
+            var cue = Palette.Text(action, 13, _accent); cue.Position = new Vector2(115, 96);
+            cue.MouseFilter = MouseFilterEnum.Ignore; AddChild(cue);
+        }
         if(favor) { var mark=Palette.Text("◆",14,Palette.Gold); mark.Position=new Vector2(239,10); mark.MouseFilter=MouseFilterEnum.Stop; mark.TooltipText="Imperial Favor"; AddChild(mark); }
+    }
+
+    public override void _Process(double delta)
+    {
+        if (!Acting || ReducedMotion) return;
+        _time += (float)delta; QueueRedraw();
+    }
+    public override void _Draw()
+    {
+        if (!Acting) return;
+        var pulse = ReducedMotion ? 1 : 1 + .06f * Mathf.Sin(_time * 2);
+        foreach (var (spread, alpha) in new[] { (7f, .06f), (4f, .15f), (1f, .85f) })
+            DrawRect(new Rect2(Vector2.Zero, Size).Grow(spread), _accent with { A = alpha * pulse }, false, spread > 1 ? 3 : 2, true);
     }
 }
