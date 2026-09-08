@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Approved Unit Standard: server-projected effective unit Force on navy spear banners, textured priority-aware battle tracker, compact inspection rail and transient resolution acknowledgement.",
-  "validation": "Core/server/transport and Python checks: 192 passed. Client compiles with 0 warnings/errors. Native Mac: five upright/bowed/0/1/3/6 attachment fixtures, seven real-board scenarios across 1280/1672/1920/2560 widths, extra native banner tooltip and revised compact tracker checks passed. Reviewed native captures against approved concept.",
-  "remaining": "Final compact atlas crop smoke, combined menu launcher verification and CI; mdornbrook shared review required before merge. Full maneuver/Engage sequencing remains #20/#15. Windows graphical playtesting not performed.",
+  "summary": "Approved Unit Standard: authoritative effective unit Force on navy spear banners; textured priority-aware battle tracker, compact inspection rail and resolution acknowledgement. Blank native tooltip overlap corrected.",
+  "validation": "192 Python/Core/AI/server/transport checks passed. Client builds with 0 warnings/errors. Five native fixture configurations cover upright/bowed and 0/1/3/6 attachments; seven real-board scenarios cover assignment, expanded units, zoom, resolution and reduced motion at 1280/1672/1920/2560 widths. Extra banner click/tooltip and final compact atlas checks passed; native screenshots visually reviewed. Combined menu preview passes launcher menu-flow, battle and deferred Options/reduced-motion return after correcting the test probe timing.",
+  "remaining": "Ready for Alfredo playtest and mdornbrook shared review; CI monitored in PR36. Not merged. Future maneuver/Engage sequencing remains #20/#15; no Windows graphical playtest. Clickable Mac preview: artifacts/L5R Emperor - Unit Standard.app (launches artifacts/playtest-unit-standard including PR9 and the stacked UI changes).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/18",
   "branch": "codex/18-unit-standard",
-  "updated": "2026-09-08T08:21:18.904890+00:00"
+  "updated": "2026-09-08T08:27:36.856047+00:00"
 }
