@@ -14,6 +14,10 @@ public partial class Main
         {
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            // The main-menu branch closes Options through two deferred pages.
+            // Wait for the table to be interactable instead of racing that transition.
+            for (var frames = 0; frames < 120 && (!_root.IsVisibleInTree() || GetChildren().OfType<Window>().Any(w => w.Visible)); frames++)
+                await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             var b = Standards(_root).First(b => b.IsVisibleInTree() && _tableViewport.GetGlobalRect().Encloses(b.GetGlobalRect()));
             b.PositionAtCard(); var version = View.Version;
             var p = b.GetGlobalRect().GetCenter();
