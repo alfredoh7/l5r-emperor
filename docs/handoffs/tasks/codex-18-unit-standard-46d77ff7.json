@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved Unit Standard banner and battle tracker, stacked on PR35.",
+  "validation": "Context refreshed; existing authoritative BattleForce identified; production artwork generated. Implementation and tests pending.",
+  "remaining": "Project unit Force, integrate banner/tracker, native layout/input and regression checks, request rules review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/18",
+  "branch": "codex/18-unit-standard",
+  "updated": "2026-09-08T08:07:35.455380+00:00"
+}
