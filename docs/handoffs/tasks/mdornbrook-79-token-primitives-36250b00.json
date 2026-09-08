@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add token primitives (create/move/destroy) to L5R.Core. Shared because Models.cs (CardToken/CardInstance.Tokens/MatchState.TokenSequence) and MatchQueries.cs (CardView.Tokens) are explicitly shared client-facing contract files; every other changed file (CardAbilities.cs, CardCatalog.cs, MatchEngine.cs, tests) is plain rules-lane and additive. No UI/client code touched -- Tokens is exposed on CardView the same way Modifiers/GrantedKeywords already are, for a future client render pass.",
+  "validation": "bash tools/check.sh --skip-client: full suite passed. New regressions: TokenPrimitives (create/move/destroy + turn persistence + leaves-play cleanup) and AttachmentTokenClears",
+  "remaining": "None; ready for review. No published card wired up yet -- pure engine capability ahead of content (issue #79).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/79",
+  "branch": "mdornbrook/79-token-primitives",
+  "updated": "2026-09-08T22:17:51.468955+00:00"
+}
