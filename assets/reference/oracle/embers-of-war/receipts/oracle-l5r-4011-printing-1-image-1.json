@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 721928,
+  "card_id": "oracle-l5r-4011",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4011-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Yuri",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 4011,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4011-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:33.301832+00:00",
+  "sha256": "351acdae6105bee1a275e60be97050c77aaa16f756304caf0408a7cc7add7b18",
+  "source_image_hash": "db/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/db/4d/printing_4011_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/db/4d/printing_4011_1_",
+  "width": 750
+}

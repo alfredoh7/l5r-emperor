@@ -1,0 +1,144 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10099",
+      "image_ids": [
+        "oracle-l5r-10099-printing-1-image-1"
+      ],
+      "name": "Moto Miyu",
+      "oracle_id": 10099,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Aurelien Hubert"
+          ],
+          "artnumber": [
+            "10070072"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Art Note: Vanilla Unicorn Shugenja, though he is a Conqueror which is rare for Unicorn.]"
+          ],
+          "flavor": [
+            "<i>Words of death rose in the shugenja's mouth, and ranks upon ranks fell away before them.</i>"
+          ],
+          "number": [
+            "73"
+          ],
+          "printimagehash": [
+            "de/7d"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Seeds of Decay"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:14.225341",
+        "cardid": 10099,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Unicorn"
+        ],
+        "cost": [
+          "8"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Moto Miyu",
+        "honor": [
+          "0"
+        ],
+        "imagehash": "de/7d",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "<b>Conqueror</b>",
+          "Death Priest",
+          "Shugenja",
+          "Unicorn Clan",
+          "Water"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Aurelien Hubert"
+            ],
+            "artnumber": [
+              "10070072"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Art Note: Vanilla Unicorn Shugenja, though he is a Conqueror which is rare for Unicorn.]"
+            ],
+            "flavor": [
+              "<i>Words of death rose in the shugenja's mouth, and ranks upon ranks fell away before them.</i>"
+            ],
+            "number": [
+              "73"
+            ],
+            "printimagehash": [
+              "de/7d"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Seeds of Decay"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Moto Miyu"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10099",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Seeds of Decay",
+  "response_sha256": "049a30f92f1ced6e2a85efbd67d8f6acaca0ebf242fe28b426bf1b51714aae9e",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

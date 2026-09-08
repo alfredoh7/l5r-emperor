@@ -22,6 +22,9 @@ var tests = new (string Name, Action Run)[]
     ("Province discarding prevents returning to purchases", DynastyDiscard),
     ("Action phase needs consecutive passes and defender starts battle", Priority),
     ("Bamboo fixture waits until owner's second turn to straighten", Bamboo),
+    ("Turn start passes through Straighten then Events before Action", StraightenAndEventsPhaseOrder),
+    ("Choose-straighten fixture lets its controller leave it bowed", ChooseStraightenDecline),
+    ("Choose-straighten fixture straightens when not declined", ChooseStraightenDefault),
     ("Battle destroys province only on strictly greater margin", ProvinceThreshold),
     ("Tied armies destroy each other and gain one Honor per opposing card", BattleTie),
     ("Bowed Personality suppresses its unbowed Followers at resolution", FollowerForce),
@@ -29,6 +32,8 @@ var tests = new (string Name, Action Run)[]
     ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
     ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
     ("A Personality with the enters-dishonored effect enters play Dishonorable", EntersPlayDishonored),
+    ("A Personality without an enters-bowed effect always enters play straightened", EntersPlayStraightenedByDefault),
+    ("A Personality with the enters-bowed effect enters play bowed directly, not straightened then bowed", EntersPlayBowed),
     ("Seppuku requires Samurai, Courtier, or Shugenja", OrderSeppukuRequiresKeyword),
     ("Seppuku requires a Dishonorable Personality", OrderSeppukuRequiresDishonorable),
     ("Seppuku destroys honorably with no Honor change", OrderSeppukuHonorableDeath),
@@ -211,6 +216,38 @@ static void Bamboo()
     SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty")); SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
     Check(!e.State.Cards[id].Bowed); Equal(e.State.Players[1].TurnsTaken,2);
 }
+static void StraightenAndEventsPhaseOrder()
+{
+    var e=MatchEngine.CreateEconomyScenario();
+    SkipToDynasty(e);
+    var result=e.Execute(Cmd(e,"endDynasty"));
+    Check(result.Accepted,result.Error??"Rejected");
+    var order=result.Events.Where(ev=>ev.Type=="phaseChanged").Select(ev=>ev.Message).ToArray();
+    var straighten=Array.IndexOf(order,"Phase: Straighten.");
+    var events=Array.IndexOf(order,"Phase: Events.");
+    var action=Array.IndexOf(order,"Phase: Action.");
+    Check(straighten>=0 && events>straighten && action>events,"Straighten must precede Events, which must precede Action");
+    Equal(e.State.Phase,Phase.Action);
+}
+static void ChooseStraightenDecline()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var card=Add(s,"training-choose-straighten-samurai",1,Zone.Home,bowed:true);
+    var e2=MatchEngine.FromTestState(s);
+    SkipToDynasty(e2); Accept(e2,Cmd(e2,"endDynasty"));
+    Equal(e2.State.Phase,Phase.Straighten); Check(e2.State.PendingChoice?.Type=="declineStraighten");
+    Accept(e2,Cmd(e2,"declineStraighten",cards:[card.Id]));
+    Check(e2.State.Cards[card.Id].Bowed,"Declined card should stay bowed"); Equal(e2.State.Phase,Phase.Action);
+}
+static void ChooseStraightenDefault()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var card=Add(s,"training-choose-straighten-samurai",1,Zone.Home,bowed:true);
+    var e2=MatchEngine.FromTestState(s);
+    SkipToDynasty(e2); Accept(e2,Cmd(e2,"endDynasty"));
+    Accept(e2,Cmd(e2,"declineStraighten",cards:[]));
+    Check(!e2.State.Cards[card.Id].Bowed,"Choosing to straighten everything should include the optional card");
+}
 static void ProvinceThreshold()
 {
     var exact=Battle(8,2,6); Resolve(exact); Check(!exact.State.Players[1].Provinces[0].Destroyed);
@@ -327,6 +364,26 @@ static void EntersPlayDishonored()
     e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
     Accept(e,Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
     Check(e.State.Cards[cardId].Dishonorable,"A Personality with Effect 'enters-dishonored' should enter play Dishonorable");
+}
+static void EntersPlayStraightenedByDefault()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-crane-samurai";
+    e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
+    Accept(e,Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
+    Check(!e.State.Cards[cardId].Bowed,"A Personality without an enters-bowed effect should enter play straightened");
+}
+static void EntersPlayBowed()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-enters-bowed-samurai";
+    e=MatchEngine.FromTestState(s); var quote=e.QuotePurchase(0,cardId);
+    var result=e.Execute(Cmd(e,"purchase",id:cardId,sources:quote.Payments[0].SourceIds));
+    Check(result.Accepted,result.Error??"Rejected");
+    Check(e.State.Cards[cardId].Bowed,"A Personality with Effect 'enters-bowed' should enter play bowed");
+    var entered=result.Events.Single(ev=>ev.Type=="cardEnteredPlay" && ev.CardId==cardId);
+    Check(entered.Message.Contains("bowed"),"Entry should report bowed as part of the same transition");
+    Check(!result.Events.Any(ev=>ev.CardId==cardId && ev.Type is "straightened" or "unbowed"),"No separate straighten-then-bow event should exist for this card");
 }
 static void OrderSeppukuRequiresKeyword()
 {

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 820842,
+  "card_id": "oracle-l5r-10632",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10632-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Omero",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 10632,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10632-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:39.151241+00:00",
+  "sha256": "2d414460fc80bd8226f9e53494434e6adb069c6929b67fbabb3b7426ff68e056",
+  "source_image_hash": "87/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/2b/printing_10632_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/2b/printing_10632_1_",
+  "width": 750
+}

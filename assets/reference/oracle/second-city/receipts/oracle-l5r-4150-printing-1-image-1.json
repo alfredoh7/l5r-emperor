@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 376869,
+  "card_id": "oracle-l5r-4150",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4150-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Watsuki",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 4150,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4150-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:51.139229+00:00",
+  "sha256": "4a5e96c209e47636e27fa9849f5066917020f2208873227fa1624011d0b2cc3e",
+  "source_image_hash": "b5/c8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b5/c8/printing_4150_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b5/c8/printing_4150_1_",
+  "width": 750
+}

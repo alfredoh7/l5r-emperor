@@ -1,0 +1,844 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9838",
+      "image_ids": [
+        "oracle-l5r-9838-printing-1-image-1"
+      ],
+      "name": "Isawa Hinata",
+      "oracle_id": 9838,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Marc Scheff"
+          ],
+          "artnumber": [
+            "10060050"
+          ],
+          "designer": [
+            "Duncan"
+          ],
+          "designernotes": [
+            "Good spell platform that helps improve the efficiency of Phoenix spell-based ranged attacks"
+          ],
+          "flavor": [
+            "<i>\"The exploration continues, my lord,\" she reported. \"We have discovered amazing secrets, but the dangers are significant. We have lost a great many men and brilliant minds. We must have assistance, if we are to continue.\"</i>"
+          ],
+          "number": [
+            "50"
+          ],
+          "printimagehash": [
+            "b2/9d"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Non-unique Phoenix Fire or Water Shugenja for Spell Military - Anti-Nonhuman"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:14.465880",
+        "cardid": 9838,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Phoenix"
+        ],
+        "cost": [
+          "5"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Isawa Hinata",
+        "honor": [
+          "2"
+        ],
+        "imagehash": "b2/9d",
+        "keywords": [
+          "Fire",
+          "Phoenix Clan",
+          "Shugenja"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Marc Scheff"
+            ],
+            "artnumber": [
+              "10060050"
+            ],
+            "designer": [
+              "Duncan"
+            ],
+            "designernotes": [
+              "Good spell platform that helps improve the efficiency of Phoenix spell-based ranged attacks"
+            ],
+            "flavor": [
+              "<i>\"The exploration continues, my lord,\" she reported. \"We have discovered amazing secrets, but the dangers are significant. We have lost a great many men and brilliant minds. We must have assistance, if we are to continue.\"</i>"
+            ],
+            "number": [
+              "50"
+            ],
+            "printimagehash": [
+              "b2/9d"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Non-unique Phoenix Fire or Water Shugenja for Spell Military - Anti-Nonhuman"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Isawa Hinata"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9838",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9851",
+      "image_ids": [
+        "oracle-l5r-9851-printing-1-image-1"
+      ],
+      "name": "Kenta",
+      "oracle_id": 9851,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Storn A. Cook"
+          ],
+          "artnumber": [
+            "10060063"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Art Note: A generic Monk Kensai.]"
+          ],
+          "flavor": [
+            "<i>\"We do not care if the land we conquer is claimed by the Empress. We can take the land at will. If she claims it and we decide it should not belong to her any longer, then it will not.\"</i>"
+          ],
+          "number": [
+            "63"
+          ],
+          "printimagehash": [
+            "42/49"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Non-unique Spider Kensai Monk"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:26.285025",
+        "cardid": 9851,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Spider"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "5"
+        ],
+        "formattedtitle": "Kenta",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "42/49",
+        "keywords": [
+          "<b>Conqueror</b>",
+          "<b>Kensai</b>",
+          "Monk",
+          "Order of the Spider",
+          "Spider Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Storn A. Cook"
+            ],
+            "artnumber": [
+              "10060063"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Art Note: A generic Monk Kensai.]"
+            ],
+            "flavor": [
+              "<i>\"We do not care if the land we conquer is claimed by the Empress. We can take the land at will. If she claims it and we decide it should not belong to her any longer, then it will not.\"</i>"
+            ],
+            "number": [
+              "63"
+            ],
+            "printimagehash": [
+              "42/49"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Non-unique Spider Kensai Monk"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Kenta"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9851",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9825",
+      "image_ids": [
+        "oracle-l5r-9825-printing-1-image-1"
+      ],
+      "name": "Kitsu Kanae",
+      "oracle_id": 9825,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Alayna Lemmer"
+          ],
+          "artnumber": [
+            "10060038"
+          ],
+          "designer": [
+            "Thomas"
+          ],
+          "designernotes": [
+            "A Kitsu shugenja talking to a Unicorn courtier."
+          ],
+          "flavor": [
+            "<i>\"We speak not only with the spirits of the dead, but with the spirits of the living as well. Even this, however, is not quite as challenging as simply listening.\"</i>"
+          ],
+          "number": [
+            "37"
+          ],
+          "printimagehash": [
+            "f6/78"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Non-unique Lion Water Shugenja"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:57.266901",
+        "cardid": 9825,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Lion"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "1"
+        ],
+        "formattedtitle": "Kitsu Kanae",
+        "honor": [
+          "10"
+        ],
+        "imagehash": "f6/78",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Lion Clan",
+          "Shugenja",
+          "Water"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "4"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Alayna Lemmer"
+            ],
+            "artnumber": [
+              "10060038"
+            ],
+            "designer": [
+              "Thomas"
+            ],
+            "designernotes": [
+              "A Kitsu shugenja talking to a Unicorn courtier."
+            ],
+            "flavor": [
+              "<i>\"We speak not only with the spirits of the dead, but with the spirits of the living as well. Even this, however, is not quite as challenging as simply listening.\"</i>"
+            ],
+            "number": [
+              "37"
+            ],
+            "printimagehash": [
+              "f6/78"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Non-unique Lion Water Shugenja"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Kitsu Kanae"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9825",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9858",
+      "image_ids": [
+        "oracle-l5r-9858-printing-1-image-1"
+      ],
+      "name": "Sanzoko",
+      "oracle_id": 9858,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Ed Cox"
+          ],
+          "artnumber": [
+            "10060070"
+          ],
+          "designer": [
+            "Duncan"
+          ],
+          "designernotes": [
+            "A generic cheap, useful ronin.  (Named -ko because I thought it would be funny if little-Sanzo was bigger than Sanzo)."
+          ],
+          "flavor": [
+            "<i>\"I have been called thief. I have been called insolent. I have been called reckless and headstrong. Call me what you will, but I call myself a child of the sun.\"</i>"
+          ],
+          "number": [
+            "70"
+          ],
+          "printimagehash": [
+            "88/87"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Ronin Samurai"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:26.926777",
+        "cardid": 9858,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Unaligned"
+        ],
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Sanzoko",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "88/87",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Ronin",
+          "Samurai"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Ed Cox"
+            ],
+            "artnumber": [
+              "10060070"
+            ],
+            "designer": [
+              "Duncan"
+            ],
+            "designernotes": [
+              "A generic cheap, useful ronin.  (Named -ko because I thought it would be funny if little-Sanzo was bigger than Sanzo)."
+            ],
+            "flavor": [
+              "<i>\"I have been called thief. I have been called insolent. I have been called reckless and headstrong. Call me what you will, but I call myself a child of the sun.\"</i>"
+            ],
+            "number": [
+              "70"
+            ],
+            "printimagehash": [
+              "88/87"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Ronin Samurai"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Sanzoko"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9858",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9864",
+      "image_ids": [
+        "oracle-l5r-9864-printing-1-image-1"
+      ],
+      "name": "Utaku Sung-Ki",
+      "oracle_id": 9864,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Randy Elliott"
+          ],
+          "artnumber": [
+            "10060076"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Art Note: Standard Unicorn Battle Maiden.]"
+          ],
+          "flavor": [
+            "<i>\"My wonderful Usa has been my steed and companion ever since my gempukku. I do not know if I have the strength to face the perils of the battlefield without him.\"</i>"
+          ],
+          "number": [
+            "76"
+          ],
+          "printimagehash": [
+            "9a/c2"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Non-unique Unicorn Battlemaiden"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:34.608335",
+        "cardid": 9864,
+        "chi": [
+          "1"
+        ],
+        "clan": [
+          "Unicorn"
+        ],
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Utaku Sung-Ki",
+        "honor": [
+          "10"
+        ],
+        "imagehash": "9a/c2",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Battle Maiden",
+          "Paragon",
+          "Samurai",
+          "Unicorn Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "3"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Randy Elliott"
+            ],
+            "artnumber": [
+              "10060076"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Art Note: Standard Unicorn Battle Maiden.]"
+            ],
+            "flavor": [
+              "<i>\"My wonderful Usa has been my steed and companion ever since my gempukku. I do not know if I have the strength to face the perils of the battlefield without him.\"</i>"
+            ],
+            "number": [
+              "76"
+            ],
+            "printimagehash": [
+              "9a/c2"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Non-unique Unicorn Battlemaiden"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Utaku Sung-Ki"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9864",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-9834",
+      "image_ids": [
+        "oracle-l5r-9834-printing-1-image-1"
+      ],
+      "name": "Yoritomo Tsang",
+      "oracle_id": 9834,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Matthew S. Armstrong"
+          ],
+          "artnumber": [
+            "10060046"
+          ],
+          "designer": [
+            "Duncan"
+          ],
+          "designernotes": [
+            "Mantis Vanilla.  Kensai + Tactician makes a Force platform"
+          ],
+          "flavor": [
+            "<i>\"I think I have suffered enough of your honeyed garbage,\" the captain snarled. \"I demand satisfaction!\" <br>The Crane smiled. \"Do you have a champion?\" <br>Tsang stepped forward at once. \"I will stand against the Crane, captain.\"</i>"
+          ],
+          "number": [
+            "46"
+          ],
+          "printimagehash": [
+            "bd/df"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "The Shadow's Embrace"
+          ],
+          "use": [
+            "Mantis Designer's Choice (should be generic and useful)  -- vanilla"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:07.488359",
+        "cardid": 9834,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Mantis"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Yoritomo Tsang",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "bd/df",
+        "keywords": [
+          "<b>Kensai</b>",
+          "<b>Naval</b>",
+          "<b>Tactician</b>",
+          "Mantis Clan",
+          "Samurai"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Matthew S. Armstrong"
+            ],
+            "artnumber": [
+              "10060046"
+            ],
+            "designer": [
+              "Duncan"
+            ],
+            "designernotes": [
+              "Mantis Vanilla.  Kensai + Tactician makes a Force platform"
+            ],
+            "flavor": [
+              "<i>\"I think I have suffered enough of your honeyed garbage,\" the captain snarled. \"I demand satisfaction!\" <br>The Crane smiled. \"Do you have a champion?\" <br>Tsang stepped forward at once. \"I will stand against the Crane, captain.\"</i>"
+            ],
+            "number": [
+              "46"
+            ],
+            "printimagehash": [
+              "bd/df"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "The Shadow's Embrace"
+            ],
+            "use": [
+              "Mantis Designer's Choice (should be generic and useful)  -- vanilla"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Yoritomo Tsang"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=9834",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "The Shadow's Embrace",
+  "response_sha256": "d280e3fbe0ae4f2af9cd98ca7d9b8cb53028ea3e45dd87a3e3887c5e5edbf4e9",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

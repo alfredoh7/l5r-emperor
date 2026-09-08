@@ -1,0 +1,590 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10653",
+      "image_ids": [
+        "oracle-l5r-10653-printing-1-image-1"
+      ],
+      "name": "Bayushi Amorie",
+      "oracle_id": 10653,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Jason Behnke"
+          ],
+          "artnumber": [
+            "10140052"
+          ],
+          "designer": [
+            "Thomas"
+          ],
+          "designernotes": [
+            "A Scorpion Ninja searching for Fallen/Fudo people to gank."
+          ],
+          "flavor": [
+            "<i>The Scorpion Shinobi are trained to misdirect their opponents, obfuscate their attacks, conceal their objectives, and cling to the shadows. But some occasions require more overt methods.</i>"
+          ],
+          "number": [
+            "52"
+          ],
+          "printimagehash": [
+            "8d/b4"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Gates of Chaos"
+          ],
+          "use": [
+            "Non-unique no keywords"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:21.865734",
+        "cardid": 10653,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Ninja",
+          "Scorpion"
+        ],
+        "cost": [
+          "6"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Bayushi Amorie",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "8d/b4",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Ninja",
+          "Scorpion Clan"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "playtestname": [
+          "Bayushi Amorie"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Jason Behnke"
+            ],
+            "artnumber": [
+              "10140052"
+            ],
+            "designer": [
+              "Thomas"
+            ],
+            "designernotes": [
+              "A Scorpion Ninja searching for Fallen/Fudo people to gank."
+            ],
+            "flavor": [
+              "<i>The Scorpion Shinobi are trained to misdirect their opponents, obfuscate their attacks, conceal their objectives, and cling to the shadows. But some occasions require more overt methods.</i>"
+            ],
+            "number": [
+              "52"
+            ],
+            "printimagehash": [
+              "8d/b4"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Gates of Chaos"
+            ],
+            "use": [
+              "Non-unique no keywords"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "story": [
+          "2012 Name a Personality - Paul Adams"
+        ],
+        "title": [
+          "Bayushi Amorie"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10653",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10650",
+      "image_ids": [
+        "oracle-l5r-10650-printing-1-image-1"
+      ],
+      "name": "Isawa Koizumi",
+      "oracle_id": 10650,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "artnumber": [
+            "10140049"
+          ],
+          "designer": [
+            "Loki"
+          ],
+          "designernotes": [
+            "A Phoenix Air Shugenja honoring the kami."
+          ],
+          "flavor": [
+            "<i>\"These lands are not beyond redemption. We must find the peace within ourselves and make it manifest here. The Colonies can be tamed. This can become a land like unto the Empire, if we are but strong enough.\"</i>"
+          ],
+          "number": [
+            "49"
+          ],
+          "printimagehash": [
+            "1f/90"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Gates of Chaos"
+          ],
+          "use": [
+            "Non-unique no keywords"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:27.785120",
+        "cardid": 10650,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Phoenix"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "0"
+        ],
+        "formattedtitle": "Isawa Koizumi",
+        "honor": [
+          "0"
+        ],
+        "imagehash": "1f/90",
+        "keywords": [
+          "Air",
+          "Phoenix Clan",
+          "Shugenja"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "playtestname": [
+          "[Isawa Devout]"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "artnumber": [
+              "10140049"
+            ],
+            "designer": [
+              "Loki"
+            ],
+            "designernotes": [
+              "A Phoenix Air Shugenja honoring the kami."
+            ],
+            "flavor": [
+              "<i>\"These lands are not beyond redemption. We must find the peace within ourselves and make it manifest here. The Colonies can be tamed. This can become a land like unto the Empire, if we are but strong enough.\"</i>"
+            ],
+            "number": [
+              "49"
+            ],
+            "printimagehash": [
+              "1f/90"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Gates of Chaos"
+            ],
+            "use": [
+              "Non-unique no keywords"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Isawa Koizumi"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10650",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10619",
+      "image_ids": [
+        "oracle-l5r-10619-printing-1-image-1"
+      ],
+      "name": "Kaiu Sokakaze",
+      "oracle_id": 10619,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Manuel Calderon"
+          ],
+          "artnumber": [
+            "10140018"
+          ],
+          "designer": [
+            "Loki"
+          ],
+          "designernotes": [
+            "A Kaiu Tactician giving orders to a siege crew."
+          ],
+          "flavor": [
+            "<i>\"The Kaiu were not idle in the peace that followed the Destroyer War. When the Dark Naga came, they were ready.\" - Otomo Hiroshi, Chronicle of the Serpent War</i>"
+          ],
+          "number": [
+            "18"
+          ],
+          "printimagehash": [
+            "f9/4e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Gates of Chaos"
+          ],
+          "use": [
+            "Non-unique no keywords"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:20.807243",
+        "cardid": 10619,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Crab"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "0"
+        ],
+        "formattedtitle": "Kaiu Sokakaze",
+        "honor": [
+          "6"
+        ],
+        "imagehash": "f9/4e",
+        "keywords": [
+          "<b>Tactician</b>",
+          "Crab Clan",
+          "Samurai",
+          "Siege"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "3"
+        ],
+        "playtestname": [
+          "[Kaiu Uiak]"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Manuel Calderon"
+            ],
+            "artnumber": [
+              "10140018"
+            ],
+            "designer": [
+              "Loki"
+            ],
+            "designernotes": [
+              "A Kaiu Tactician giving orders to a siege crew."
+            ],
+            "flavor": [
+              "<i>\"The Kaiu were not idle in the peace that followed the Destroyer War. When the Dark Naga came, they were ready.\" - Otomo Hiroshi, Chronicle of the Serpent War</i>"
+            ],
+            "number": [
+              "18"
+            ],
+            "printimagehash": [
+              "f9/4e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Gates of Chaos"
+            ],
+            "use": [
+              "Non-unique no keywords"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Kaiu Sokakaze"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10619",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10632",
+      "image_ids": [
+        "oracle-l5r-10632-printing-1-image-1"
+      ],
+      "name": "Mirumoto Omero",
+      "oracle_id": 10632,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Jonathan Moore"
+          ],
+          "artnumber": [
+            "10140031"
+          ],
+          "designer": [
+            "Duncan"
+          ],
+          "designernotes": [
+            "A sitting Dragon Clan Samurai in a wide-brimmed hat, sharpening his sword."
+          ],
+          "flavor": [
+            "<i>\"Given a choice, I would not call the Spider allies. My lord wishes it, however, so I will slay any Crab or Scorpion who wishes them harm. That is the role of a samurai.\"</i>"
+          ],
+          "number": [
+            "31"
+          ],
+          "printimagehash": [
+            "87/2b"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Gates of Chaos"
+          ],
+          "use": [
+            "Non-unique Dragon Kensai &#149; Vanilla"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:10.965639",
+        "cardid": 10632,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Dragon"
+        ],
+        "cost": [
+          "5"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Mirumoto Omero",
+        "honor": [
+          "4"
+        ],
+        "imagehash": "87/2b",
+        "keywords": [
+          "<b>Conqueror</b>",
+          "<b>Kensai</b>",
+          "Dragon Clan",
+          "Samurai"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "playtestname": [
+          "[Mirumoto Omezo]"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Jonathan Moore"
+            ],
+            "artnumber": [
+              "10140031"
+            ],
+            "designer": [
+              "Duncan"
+            ],
+            "designernotes": [
+              "A sitting Dragon Clan Samurai in a wide-brimmed hat, sharpening his sword."
+            ],
+            "flavor": [
+              "<i>\"Given a choice, I would not call the Spider allies. My lord wishes it, however, so I will slay any Crab or Scorpion who wishes them harm. That is the role of a samurai.\"</i>"
+            ],
+            "number": [
+              "31"
+            ],
+            "printimagehash": [
+              "87/2b"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Gates of Chaos"
+            ],
+            "use": [
+              "Non-unique Dragon Kensai &#149; Vanilla"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "story": [
+          "2011 Amethyst  Champion Costume Contest - Guillermo Roji"
+        ],
+        "title": [
+          "Mirumoto Omero"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10632",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Gates of Chaos",
+  "response_sha256": "dd4b2981e8811e76d8d043e51b5ab10dfb8133c59332e9e3f30f1194ed28c7d3",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

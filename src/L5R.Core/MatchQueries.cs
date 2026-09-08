@@ -71,6 +71,13 @@ public sealed partial class MatchEngine
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
             Add("chooseShinden","Allow opponent to gain 1 Honor",Command("chooseShinden") with {Choice="honor"});
         }
+        else if(_state.PendingChoice is { Type:"declineStraighten" })
+        {
+            var optional=EligibleForOptionalStraighten(playerId);
+            Add("declineStraighten","Straighten all eligible cards",Command("declineStraighten",cardIds:[]),targets:optional);
+            foreach(var id in optional)
+                Add("declineStraighten",$"Leave {Definition(Card(id)).Name} bowed",Command("declineStraighten",cardIds:[id]),cardId:id);
+        }
         else if(_state.PendingChoice is { Type:"discardHand" })
         {
             var count=player.Hand.Count-8;

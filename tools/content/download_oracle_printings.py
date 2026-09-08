@@ -40,7 +40,7 @@ def sha(data: bytes) -> str:
 def save_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_suffix(path.suffix + ".tmp")
-    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
+    temporary.write_text(json.dumps(value, ensure_ascii=False, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     temporary.replace(path)
 
 
@@ -51,7 +51,7 @@ def numeric_id(value: object) -> str:
     return result
 
 
-def select_records(response: dict) -> tuple[list[dict], list[dict]]:
+def select_records(response: dict, printing_set: str = SET) -> tuple[list[dict], list[dict]]:
     hits = response.get("hits", {})
     total = hits.get("total")
     if isinstance(total, dict):
@@ -67,9 +67,9 @@ def select_records(response: dict) -> tuple[list[dict], list[dict]]:
         if card_id in seen_cards:
             raise ValueError(f"Duplicate card ID: {card_id}")
         seen_cards.add(card_id)
-        printings = [p for p in card.get("printing", []) if SET in values(p, "set")]
+        printings = [p for p in card.get("printing", []) if printing_set in values(p, "set")]
         if not printings:
-            raise ValueError(f"Search result {card_id} has no exact {SET} printing")
+            raise ValueError(f"Search result {card_id} has no exact {printing_set} printing")
         printing_ids, image_ids = set(), []
         for printing in printings:
             printing_id = numeric_id(printing["printingid"])
@@ -91,7 +91,7 @@ def select_records(response: dict) -> tuple[list[dict], list[dict]]:
                 jobs.append({"id": image_id, "card_id": f"oracle-l5r-{card_id}",
                              "oracle_id": int(card_id), "printing_id": printing_id,
                              "image_index": index, "source_image_hash": image_hash,
-                             "printing_set": SET, "name": " / ".join(values(card, "title")),
+                             "printing_set": printing_set, "name": " / ".join(values(card, "title")),
                              "numbers": values(printing, "number"),
                              "url_prefix": f"{IMAGE_HOST}{image_hash}/printing_{card_id}_{printing_id}_"})
         cards.append({"id": f"oracle-l5r-{card_id}", "oracle_id": int(card_id),

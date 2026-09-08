@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 359973,
+  "card_id": "oracle-l5r-566",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-566-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Moeru",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 566,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-566-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:50.627009+00:00",
+  "sha256": "a6d8ac96ab4f305d2e03fda093bdd8ac2d6b6dda58246e6b6ac9a60595f6d4e3",
+  "source_image_hash": "b8/5e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b8/5e/printing_566_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b8/5e/printing_566_1_",
+  "width": 750
+}

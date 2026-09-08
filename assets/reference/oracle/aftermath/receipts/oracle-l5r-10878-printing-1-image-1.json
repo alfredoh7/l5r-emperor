@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754904,
+  "card_id": "oracle-l5r-10878",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10878-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nonaka",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 10878,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10878-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:55.696409+00:00",
+  "sha256": "bb11a7a3f845ab484f82a7b4eb525b76bff5f08feb5cb9e7e8cfe214076495f8",
+  "source_image_hash": "d5/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d5/f6/printing_10878_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d5/f6/printing_10878_1_",
+  "width": 750
+}

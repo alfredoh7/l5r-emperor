@@ -1,0 +1,152 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10878",
+      "image_ids": [
+        "oracle-l5r-10878-printing-1-image-1"
+      ],
+      "name": "Nonaka",
+      "oracle_id": 10878,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Joshua Pinkas"
+          ],
+          "artnumber": [
+            "10150061"
+          ],
+          "designer": [
+            "Duncan"
+          ],
+          "designernotes": [
+            "Art: A Spider Clan Sohei cutting his enemy's sword arm.<br>Design: Spider's very own Mirumoto Tsubasa/Reiyu. Intentionally boxeable for EE. Has 1 less C than indicated by IE costing chart, since Spider Monks are low-C."
+          ],
+          "flavor": [
+            "<i>\"There will never be peace between us!\" the Crab shouted, and charged. \"I disagree,\" Nonaka whispered, and dug his blade into the Crab's belly.</i>"
+          ],
+          "number": [
+            "63"
+          ],
+          "printimagehash": [
+            "d5/f6"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Aftermath"
+          ],
+          "use": [
+            "Non-unique Spider Kensai Monk"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:56.786085",
+        "cardid": 10878,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Spider"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Nonaka",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "d5/f6",
+        "keywords": [
+          "<b>Kensai</b>",
+          "Monk",
+          "Spider Clan"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "playtestname": [
+          "Sohei"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Joshua Pinkas"
+            ],
+            "artnumber": [
+              "10150061"
+            ],
+            "designer": [
+              "Duncan"
+            ],
+            "designernotes": [
+              "Art: A Spider Clan Sohei cutting his enemy's sword arm.<br>Design: Spider's very own Mirumoto Tsubasa/Reiyu. Intentionally boxeable for EE. Has 1 less C than indicated by IE costing chart, since Spider Monks are low-C."
+            ],
+            "flavor": [
+              "<i>\"There will never be peace between us!\" the Crab shouted, and charged. \"I disagree,\" Nonaka whispered, and dug his blade into the Crab's belly.</i>"
+            ],
+            "number": [
+              "63"
+            ],
+            "printimagehash": [
+              "d5/f6"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Aftermath"
+            ],
+            "use": [
+              "Non-unique Spider Kensai Monk"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Nonaka"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10878",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Aftermath",
+  "response_sha256": "913e1d1ccde64d25c75f81bec8f6e55be56958fa56f8092efadad69d971c2c46",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

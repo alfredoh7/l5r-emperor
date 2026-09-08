@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 768261,
+  "card_id": "oracle-l5r-10272",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10272-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Chiyurei",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 10272,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10272-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:47.617187+00:00",
+  "sha256": "ede5da13cf6fc3f0b2815bbde56275db07d456ffb4cfdce4596fdc513c6f589a",
+  "source_image_hash": "6e/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/75/printing_10272_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/75/printing_10272_1_",
+  "width": 750
+}

@@ -1,0 +1,122 @@
+{
+  "complete": true,
+  "downloaded": [
+    {
+      "attempts": [],
+      "bytes": 754078,
+      "card_id": "oracle-l5r-10653",
+      "content_type": "image/jpeg",
+      "format": "JPEG",
+      "height": 1050,
+      "id": "oracle-l5r-10653-printing-1-image-1",
+      "image_index": 1,
+      "name": "Bayushi Amorie",
+      "numbers": [
+        "52"
+      ],
+      "oracle_id": 10653,
+      "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10653-printing-1-image-1.jpg",
+      "playable": false,
+      "printing_association": "explicit_oracle_printing_id_and_set",
+      "printing_id": "1",
+      "printing_set": "Gates of Chaos",
+      "quality": "master",
+      "retrieved_at": "2026-09-08T11:37:37.087102+00:00",
+      "sha256": "e34fffc95394031f40ec062999e5e0960c4c9bac22529a09ea8316104de29a65",
+      "source_image_hash": "8d/b4",
+      "source_url": "https://images.oracleofthevoid.com/l5r/8d/b4/printing_10653_1_master.jpg",
+      "url_prefix": "https://images.oracleofthevoid.com/l5r/8d/b4/printing_10653_1_",
+      "width": 750
+    },
+    {
+      "attempts": [],
+      "bytes": 785004,
+      "card_id": "oracle-l5r-10650",
+      "content_type": "image/jpeg",
+      "format": "JPEG",
+      "height": 1050,
+      "id": "oracle-l5r-10650-printing-1-image-1",
+      "image_index": 1,
+      "name": "Isawa Koizumi",
+      "numbers": [
+        "49"
+      ],
+      "oracle_id": 10650,
+      "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10650-printing-1-image-1.jpg",
+      "playable": false,
+      "printing_association": "explicit_oracle_printing_id_and_set",
+      "printing_id": "1",
+      "printing_set": "Gates of Chaos",
+      "quality": "master",
+      "retrieved_at": "2026-09-08T11:37:37.751201+00:00",
+      "sha256": "dc9ea4e87b606b184299f6702a6c5158f52dd6c3a49e42a83c17c3c3ce2ffb20",
+      "source_image_hash": "1f/90",
+      "source_url": "https://images.oracleofthevoid.com/l5r/1f/90/printing_10650_1_master.jpg",
+      "url_prefix": "https://images.oracleofthevoid.com/l5r/1f/90/printing_10650_1_",
+      "width": 750
+    },
+    {
+      "attempts": [],
+      "bytes": 849406,
+      "card_id": "oracle-l5r-10619",
+      "content_type": "image/jpeg",
+      "format": "JPEG",
+      "height": 1050,
+      "id": "oracle-l5r-10619-printing-1-image-1",
+      "image_index": 1,
+      "name": "Kaiu Sokakaze",
+      "numbers": [
+        "18"
+      ],
+      "oracle_id": 10619,
+      "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10619-printing-1-image-1.jpg",
+      "playable": false,
+      "printing_association": "explicit_oracle_printing_id_and_set",
+      "printing_id": "1",
+      "printing_set": "Gates of Chaos",
+      "quality": "master",
+      "retrieved_at": "2026-09-08T11:37:38.457459+00:00",
+      "sha256": "567a38f8eafec951ce508758d164b7a881cd56cc966563e95b677d4b917b725a",
+      "source_image_hash": "f9/4e",
+      "source_url": "https://images.oracleofthevoid.com/l5r/f9/4e/printing_10619_1_master.jpg",
+      "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/4e/printing_10619_1_",
+      "width": 750
+    },
+    {
+      "attempts": [],
+      "bytes": 820842,
+      "card_id": "oracle-l5r-10632",
+      "content_type": "image/jpeg",
+      "format": "JPEG",
+      "height": 1050,
+      "id": "oracle-l5r-10632-printing-1-image-1",
+      "image_index": 1,
+      "name": "Mirumoto Omero",
+      "numbers": [
+        "31"
+      ],
+      "oracle_id": 10632,
+      "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10632-printing-1-image-1.jpg",
+      "playable": false,
+      "printing_association": "explicit_oracle_printing_id_and_set",
+      "printing_id": "1",
+      "printing_set": "Gates of Chaos",
+      "quality": "master",
+      "retrieved_at": "2026-09-08T11:37:39.151241+00:00",
+      "sha256": "2d414460fc80bd8226f9e53494434e6adb069c6929b67fbabb3b7426ff68e056",
+      "source_image_hash": "87/2b",
+      "source_url": "https://images.oracleofthevoid.com/l5r/87/2b/printing_10632_1_master.jpg",
+      "url_prefix": "https://images.oracleofthevoid.com/l5r/87/2b/printing_10632_1_",
+      "width": 750
+    }
+  ],
+  "failures": [],
+  "missing_from_set": [],
+  "needed": [
+    "oracle-l5r-10619",
+    "oracle-l5r-10632",
+    "oracle-l5r-10650",
+    "oracle-l5r-10653"
+  ],
+  "printing_set": "Gates of Chaos"
+}

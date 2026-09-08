@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 810164,
+  "card_id": "oracle-l5r-10314",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10314-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Arare",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 10314,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10314-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:47.000037+00:00",
+  "sha256": "d2c8b6b5870c266c96a44f2c6ed28d3f891ebfa7fc3717978b2f48055602e1df",
+  "source_image_hash": "61/6e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/6e/printing_10314_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/6e/printing_10314_1_",
+  "width": 750
+}

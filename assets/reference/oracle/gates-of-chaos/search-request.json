@@ -1,0 +1,8 @@
+{
+  "field_printing_set": "Gates of Chaos",
+  "from": 0,
+  "size": 1000,
+  "sort": "[{\"title.keyword\":{\"order\":\"asc\"}}]",
+  "table": "l5r",
+  "type_printing_set": "select"
+}

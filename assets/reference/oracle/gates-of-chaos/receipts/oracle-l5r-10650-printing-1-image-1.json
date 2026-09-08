@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785004,
+  "card_id": "oracle-l5r-10650",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10650-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Koizumi",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 10650,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10650-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:37.751201+00:00",
+  "sha256": "dc9ea4e87b606b184299f6702a6c5158f52dd6c3a49e42a83c17c3c3ce2ffb20",
+  "source_image_hash": "1f/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1f/90/printing_10650_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1f/90/printing_10650_1_",
+  "width": 750
+}
