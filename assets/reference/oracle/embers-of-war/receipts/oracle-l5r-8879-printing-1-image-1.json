@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 726519,
+  "card_id": "oracle-l5r-8879",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8879-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Shigekazu",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 8879,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8879-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:35.141036+00:00",
+  "sha256": "0cdec767b416cb2ced2a61316f59249944c21723404a2c81c61ae7ca207bc645",
+  "source_image_hash": "11/c9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/c9/printing_8879_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/c9/printing_8879_1_",
+  "width": 750
+}

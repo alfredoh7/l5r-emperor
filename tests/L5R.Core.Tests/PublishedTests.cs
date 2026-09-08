@@ -6,7 +6,7 @@ internal static class PublishedTests
     public static int Run()
     {
         (string Name, Action Test)[] tests = [
-            ("Published pool pins all 40 cards and 40/40 decks", Catalogue),
+            ("Published pool pins the Lion/Crane 40/40 decks and the ability-free vanilla wave", Catalogue),
             ("Published setup gives Lion first turn and Crane delayed Bamboo", Setup),
             ("Border Keep first-turn and once-per-game refresh are independent", Border),
             ("Border Keep rejects bowed sources, foreign cards, duplicates and later first-turn use", BorderIllegal),
@@ -77,11 +77,15 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,40);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,101);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
+        Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
+        var vanilla=PublishedContent.VanillaWave1.Cards;Eq(vanilla.Length,61);
+        foreach(var c in vanilla){Eq(c.Effect,"none");Eq(c.Text,"");Eq(c.Abilities!.Length,0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        Check(!vanilla.Select(c=>c.Id).Intersect(PublishedContent.Snapshot.Cards.Select(c=>c.Id)).Any());
     }
     private static void Setup()
     {

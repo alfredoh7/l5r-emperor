@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 718775,
+  "card_id": "oracle-l5r-9851",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9851-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kenta",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 9851,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9851-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:28.179272+00:00",
+  "sha256": "c588e325dc3a6018e0ebaf4d0a8007b9e147b14cc5ef92e3f418e1abb20e6050",
+  "source_image_hash": "42/49",
+  "source_url": "https://images.oracleofthevoid.com/l5r/42/49/printing_9851_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/42/49/printing_9851_1_",
+  "width": 750
+}

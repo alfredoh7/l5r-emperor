@@ -1,0 +1,860 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-3307",
+      "image_ids": [
+        "oracle-l5r-3307-printing-1-image-1"
+      ],
+      "name": "Hiruma Moritoki",
+      "oracle_id": 3307,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Diego Gisbert Llorens"
+          ],
+          "artnumber": [
+            "10050013"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Note: A redshirt Crab Scout]"
+          ],
+          "flavor": [
+            "<i>\"Observing the enemy is only half the task of a well-trained scout. The other half is knowing him.\"</i>"
+          ],
+          "number": [
+            "15"
+          ],
+          "printimagehash": [
+            "b3/c2"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Embers of War"
+          ],
+          "use": [
+            "Non-unique Crab Scout"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "A Brother's Destiny (Ivory Edition)",
+        "A Brother's Destiny (Twenty Festivals)",
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:26.046711",
+        "cardid": 3307,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Crab"
+        ],
+        "cost": [
+          "6"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Hiruma Moritoki",
+        "honor": [
+          "0"
+        ],
+        "imagehash": "a8/b5",
+        "keywords": [
+          "Crab Clan",
+          "Samurai",
+          "Scholar",
+          "Scout"
+        ],
+        "legality": [
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+          "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Twenty&nbsp;Festivals)",
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "artnumber": [
+              "10050013"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: A redshirt Crab Scout]"
+            ],
+            "flavor": [
+              "<i>\"Observing the enemy is only half the task of a well-trained scout. The other half is knowing him.\"</i>"
+            ],
+            "number": [
+              "15"
+            ],
+            "printimagehash": [
+              "b3/c2"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Embers of War"
+            ],
+            "use": [
+              "Non-unique Crab Scout"
+            ]
+          },
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "artnumber": [
+              "17000077"
+            ],
+            "chi": [
+              "3"
+            ],
+            "clan": [
+              "Crab"
+            ],
+            "cost": [
+              "6"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: A redshirt Crab Scout]"
+            ],
+            "flavor": [
+              "\"Brawn will only get you so far. Wits will take you to the finish.\""
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "0"
+            ],
+            "keywords": [
+              "Crab Clan",
+              "Samurai",
+              "Scholar",
+              "Scout"
+            ],
+            "number": [
+              "65"
+            ],
+            "personalhonor": [
+              "2"
+            ],
+            "printimagehash": [
+              "b5/60"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Ivory Edition"
+            ],
+            "title": [
+              "Hiruma Moritoki"
+            ],
+            "type": [
+              "Personality"
+            ],
+            "use": [
+              "Non-unique Crab Scout"
+            ]
+          },
+          {
+            "artist": [
+              "Diego Gisbert Llorens"
+            ],
+            "artnumber": [
+              "17000077"
+            ],
+            "chi": [
+              "3"
+            ],
+            "clan": [
+              "Crab"
+            ],
+            "cost": [
+              "6"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: A redshirt Crab Scout]"
+            ],
+            "flavor": [
+              "The mighty Crab army advanced along the Plains of Thunder, and the Hiruma scouts paved the way. No danger was undiscovered, no peril unidentified."
+            ],
+            "force": [
+              "4"
+            ],
+            "honor": [
+              "0"
+            ],
+            "keywords": [
+              "Crab Clan",
+              "Samurai",
+              "Scholar",
+              "Scout"
+            ],
+            "number": [
+              "16"
+            ],
+            "personalhonor": [
+              "2"
+            ],
+            "printimagehash": [
+              "85/1c",
+              "be/1d",
+              "ec/e3"
+            ],
+            "printingid": "3",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "A Matter of Honor"
+            ],
+            "text": [
+              "(Gold Cost intentionally not reduced from EoW version.)"
+            ],
+            "title": [
+              "Hiruma Moritoki"
+            ],
+            "type": [
+              "Personality"
+            ],
+            "use": [
+              "Non-unique Crab Scout"
+            ]
+          }
+        ],
+        "printingprimary": "2",
+        "title": [
+          "Hiruma Moritoki"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=3307",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-4011",
+      "image_ids": [
+        "oracle-l5r-4011-printing-1-image-1"
+      ],
+      "name": "Iuchi Yuri",
+      "oracle_id": 4011,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "MuYoung Kim"
+          ],
+          "artnumber": [
+            "10050069"
+          ],
+          "designer": [
+            "Thomas"
+          ],
+          "designernotes": [
+            "A Unicorn Water Shugenja."
+          ],
+          "flavor": [
+            "<i>\"We control land access to the Colonies. What do the Mantis control? The seas are too vast for any to claim dominion.\"</i>"
+          ],
+          "number": [
+            "70"
+          ],
+          "printimagehash": [
+            "db/4d"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Embers of War"
+          ],
+          "use": [
+            "Non-unique Unicorn Water Shugenja"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:34.105598",
+        "cardid": 4011,
+        "chi": [
+          "5"
+        ],
+        "clan": [
+          "Unicorn"
+        ],
+        "cost": [
+          "10"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "6"
+        ],
+        "formattedtitle": "Iuchi Yuri",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "db/4d",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "Master of the Swift Waves",
+          "Shugenja",
+          "Unicorn Clan",
+          "Water"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "MuYoung Kim"
+            ],
+            "artnumber": [
+              "10050069"
+            ],
+            "designer": [
+              "Thomas"
+            ],
+            "designernotes": [
+              "A Unicorn Water Shugenja."
+            ],
+            "flavor": [
+              "<i>\"We control land access to the Colonies. What do the Mantis control? The seas are too vast for any to claim dominion.\"</i>"
+            ],
+            "number": [
+              "70"
+            ],
+            "printimagehash": [
+              "db/4d"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Embers of War"
+            ],
+            "use": [
+              "Non-unique Unicorn Water Shugenja"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Iuchi Yuri"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=4011",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-6814",
+      "image_ids": [
+        "oracle-l5r-6814-printing-1-image-1"
+      ],
+      "name": "Shiba Toshisugo",
+      "oracle_id": 6814,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Glen Osterberger"
+          ],
+          "artnumber": [
+            "10050049"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Note: A redshirt Shiba]"
+          ],
+          "flavor": [
+            "<i>\"Earth is strong in him and keeps his Fire steady,\" Sanetomo said. \"He will serve the clan well in our unfortunate disagreements with the Lion Clan.\"</i>"
+          ],
+          "number": [
+            "49"
+          ],
+          "printimagehash": [
+            "ed/b4"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Embers of War"
+          ],
+          "use": [
+            "Non-unique Phoenix Duelist Yojimbo"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:16.145930",
+        "cardid": 6814,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Phoenix"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "5"
+        ],
+        "formattedtitle": "Shiba Toshisugo",
+        "honor": [
+          "6"
+        ],
+        "imagehash": "ed/b4",
+        "keywords": [
+          "<b>Duelist</b>",
+          "Phoenix Clan",
+          "Samurai",
+          "Yojimbo"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Glen Osterberger"
+            ],
+            "artnumber": [
+              "10050049"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: A redshirt Shiba]"
+            ],
+            "flavor": [
+              "<i>\"Earth is strong in him and keeps his Fire steady,\" Sanetomo said. \"He will serve the clan well in our unfortunate disagreements with the Lion Clan.\"</i>"
+            ],
+            "number": [
+              "49"
+            ],
+            "printimagehash": [
+              "ed/b4"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Embers of War"
+            ],
+            "use": [
+              "Non-unique Phoenix Duelist Yojimbo"
+            ]
+          },
+          {
+            "artist": [
+              "Glen Osterberger"
+            ],
+            "flavor": [
+              "<i>\"Earth is strong in him and keeps his Fire steady,\" Sanetomo said. \"He will serve the clan well in our unfortunate disagreements with the Lion Clan.\"</i>"
+            ],
+            "legaldate": [
+              "Upon Release"
+            ],
+            "printimagehash": [
+              "7b/4f"
+            ],
+            "printingid": "2",
+            "rarity": [
+              "Promo"
+            ],
+            "set": [
+              "Promotional&ndash;Emperor"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Shiba Toshisugo"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=6814",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-7157",
+      "image_ids": [
+        "oracle-l5r-7157-printing-1-image-1"
+      ],
+      "name": "Shosuro Ryoichi",
+      "oracle_id": 7157,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Chris Pritchard"
+          ],
+          "artnumber": [
+            "10050052"
+          ],
+          "designer": [
+            "Bryan"
+          ],
+          "designernotes": [
+            "[Note: Art, and maybe flavor text, could show this guy dying, as he is only around to die.]"
+          ],
+          "flavor": [
+            "<i>\"With the wealth from the Colonies come those who wish to grow rich off of it. Which is fine, until one seeks to do it at the clan's expense. Then I must intervene and correct the wise or dispose of the foolish. Were you still alive, you could figure out which you were.\"</i>"
+          ],
+          "number": [
+            "53"
+          ],
+          "printimagehash": [
+            "d1/bb"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Embers of War"
+          ],
+          "use": [
+            "Non-unique Scorpion Paragon Yojimbo"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:48.307167",
+        "cardid": 7157,
+        "chi": [
+          "1"
+        ],
+        "clan": [
+          "Scorpion"
+        ],
+        "cost": [
+          "4"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Shosuro Ryoichi",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "d1/bb",
+        "keywords": [
+          "Magistrate",
+          "Samurai",
+          "Scorpion Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Chris Pritchard"
+            ],
+            "artnumber": [
+              "10050052"
+            ],
+            "designer": [
+              "Bryan"
+            ],
+            "designernotes": [
+              "[Note: Art, and maybe flavor text, could show this guy dying, as he is only around to die.]"
+            ],
+            "flavor": [
+              "<i>\"With the wealth from the Colonies come those who wish to grow rich off of it. Which is fine, until one seeks to do it at the clan's expense. Then I must intervene and correct the wise or dispose of the foolish. Were you still alive, you could figure out which you were.\"</i>"
+            ],
+            "number": [
+              "53"
+            ],
+            "printimagehash": [
+              "d1/bb"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Embers of War"
+            ],
+            "use": [
+              "Non-unique Scorpion Paragon Yojimbo"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Shosuro Ryoichi"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=7157",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-8879",
+      "image_ids": [
+        "oracle-l5r-8879-printing-1-image-1"
+      ],
+      "name": "Tsuruchi Shigekazu",
+      "oracle_id": 8879,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Albert Tavira"
+          ],
+          "artnumber": [
+            "10050042"
+          ],
+          "designer": [
+            "Loki"
+          ],
+          "designernotes": [
+            "A young and reckless Tsuruchi Scout."
+          ],
+          "flavor": [
+            "<i>\"The Spider were not welcomed openly, but at least they had a purpose. The other clans that are arriving, one by one, serve no purpose other than to take what belongs to us.\"</i>"
+          ],
+          "number": [
+            "41"
+          ],
+          "printimagehash": [
+            "11/c9"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Common"
+          ],
+          "set": [
+            "Embers of War"
+          ],
+          "use": [
+            "Non-unique Mantis Scout"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:46.385900",
+        "cardid": 8879,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Mantis"
+        ],
+        "cost": [
+          "8"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "6"
+        ],
+        "formattedtitle": "Tsuruchi Shigekazu",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "11/c9",
+        "keywords": [
+          "<b>Naval</b>",
+          "Mantis Clan",
+          "Samurai",
+          "Scout"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Albert Tavira"
+            ],
+            "artnumber": [
+              "10050042"
+            ],
+            "designer": [
+              "Loki"
+            ],
+            "designernotes": [
+              "A young and reckless Tsuruchi Scout."
+            ],
+            "flavor": [
+              "<i>\"The Spider were not welcomed openly, but at least they had a purpose. The other clans that are arriving, one by one, serve no purpose other than to take what belongs to us.\"</i>"
+            ],
+            "number": [
+              "41"
+            ],
+            "printimagehash": [
+              "11/c9"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Common"
+            ],
+            "set": [
+              "Embers of War"
+            ],
+            "use": [
+              "Non-unique Mantis Scout"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "title": [
+          "Tsuruchi Shigekazu"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=8879",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "printing_set": "Embers of War",
+  "response_sha256": "f1bc298fbf09ff838b88b58c5e5664bd9f4b70bbc1caf3a67ca3ab5e55945f5f",
+  "schema_version": 1,
+  "scope": "needed_cards_only"
+}

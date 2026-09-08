@@ -33,6 +33,6 @@ public static class CardCatalog
             new("training-rally", "Training rally", CardType.Strategy, Effect:"force-three", Text:"Training fixture. Battle: Target your Personality at the current battlefield: Give it +3 Force until the turn ends."),
             new("training-pressure", "Training pressure", CardType.Strategy, Effect:"bow-small", Text:"Training fixture. Battle: Target an enemy Personality with 3 or less Force at the current battlefield: Bow it.")
         ];
-        return cards.Concat(PublishedContent.Snapshot.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
+        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

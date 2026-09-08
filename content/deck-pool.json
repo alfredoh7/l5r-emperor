@@ -920,7 +920,7 @@
         "Samurai"
       ],
       "name": "Akodo Daiken",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -1402,7 +1402,7 @@
         "Soul of Akodo Shunori"
       ],
       "name": "Akodo Suoh",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -3220,7 +3220,7 @@
         "Void"
       ],
       "name": "Asako Moeru",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "4",
@@ -3248,7 +3248,7 @@
         "Void"
       ],
       "name": "Asako Niou",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "4",
@@ -3370,7 +3370,7 @@
         "Shugenja"
       ],
       "name": "Asako Rinshi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",
@@ -4211,7 +4211,7 @@
         "Scorpion Clan"
       ],
       "name": "Bayushi Amorie",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "6",
@@ -4674,7 +4674,7 @@
         "Yojimbo"
       ],
       "name": "Bayushi Manami",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -5354,7 +5354,7 @@
         "Soul of Bayushi Himaru"
       ],
       "name": "Bayushi Yasashiku",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "8",
@@ -8914,7 +8914,7 @@
         "Spider Clan"
       ],
       "name": "Daigotsu Arare",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "3",
@@ -11080,7 +11080,7 @@
         "Samurai"
       ],
       "name": "Doji Genshin",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "5",
         "cost": "7",
@@ -15682,7 +15682,7 @@
         "Crab Clan"
       ],
       "name": "Hida Bushotsu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "8",
@@ -15709,7 +15709,7 @@
         "Crab Clan"
       ],
       "name": "Hida Chiyurei",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "1",
         "cost": "5",
@@ -16587,7 +16587,7 @@
         "Scout"
       ],
       "name": "Hiruma Moritoki",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -18987,7 +18987,7 @@
         "Shugenja"
       ],
       "name": "Isawa Hinata",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -19131,7 +19131,7 @@
         "Shugenja"
       ],
       "name": "Isawa Koizumi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "4",
@@ -19245,7 +19245,7 @@
         "Water"
       ],
       "name": "Isawa Mizuhama",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "4",
@@ -19476,7 +19476,7 @@
         "Water"
       ],
       "name": "Isawa Shunsuko",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "6",
@@ -19566,7 +19566,7 @@
         "Void"
       ],
       "name": "Isawa Tomohiro",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "6",
@@ -19994,7 +19994,7 @@
         "Water"
       ],
       "name": "Iuchi Yuri",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "5",
         "cost": "10",
@@ -20635,7 +20635,7 @@
         "Siege"
       ],
       "name": "Kaiu Kawachi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "8",
@@ -20779,7 +20779,7 @@
         "Siege"
       ],
       "name": "Kaiu Sokakaze",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "4",
@@ -20852,7 +20852,7 @@
         "Siege"
       ],
       "name": "Kaiu Watsuki",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -21658,7 +21658,7 @@
         "Spider Clan"
       ],
       "name": "Kenta",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "7",
@@ -21930,7 +21930,7 @@
         "Water"
       ],
       "name": "Kitsu Kanae",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "4",
@@ -22407,7 +22407,7 @@
         "Soul of Kitsuki Nakai"
       ],
       "name": "Kitsuki Kinaro",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "6",
@@ -22831,7 +22831,7 @@
         "Spirit"
       ],
       "name": "Kitsune Kohaki",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "6",
@@ -25809,7 +25809,7 @@
         "Soul of Mirumoto Ino"
       ],
       "name": "Mirumoto Gobashi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -26296,7 +26296,7 @@
         "Samurai"
       ],
       "name": "Mirumoto Omero",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -26414,7 +26414,7 @@
         "Samurai"
       ],
       "name": "Mirumoto Tsuda",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -26832,7 +26832,7 @@
         "Thunder"
       ],
       "name": "Moshi Madoka",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "4",
@@ -27008,7 +27008,7 @@
         "Thunder"
       ],
       "name": "Moshi Tomeno",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "4",
@@ -27405,7 +27405,7 @@
         "Water"
       ],
       "name": "Moto Miyu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "8",
@@ -27551,7 +27551,7 @@
         "Water"
       ],
       "name": "Moto Rani",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -27668,7 +27668,7 @@
         "Unicorn Clan"
       ],
       "name": "Moto Taha",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -29017,7 +29017,7 @@
         "Spider Clan"
       ],
       "name": "Nonaka",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "4",
@@ -29230,7 +29230,7 @@
         "Spider Clan"
       ],
       "name": "Ohaba",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "8",
@@ -29684,7 +29684,7 @@
         "Cavalry"
       ],
       "name": "Outriders",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "0",
         "cost": "3",
@@ -32639,7 +32639,7 @@
         "Samurai"
       ],
       "name": "Sanzoko",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "3",
@@ -34222,7 +34222,7 @@
         "Yojimbo"
       ],
       "name": "Shiba Toshisugo",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",
@@ -34512,7 +34512,7 @@
         "Unicorn Clan"
       ],
       "name": "Shinjo Baeshuko",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -34540,7 +34540,7 @@
         "Unicorn Clan"
       ],
       "name": "Shinjo Byung",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "7",
@@ -35010,7 +35010,7 @@
         "Unicorn Clan"
       ],
       "name": "Shinjo Sanenari",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -35121,7 +35121,7 @@
         "Unicorn Clan"
       ],
       "name": "Shinjo Taeken",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "6",
@@ -35272,7 +35272,7 @@
         "Cavalry"
       ],
       "name": "Shinjo's Children",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "0",
         "cost": "5",
@@ -35758,7 +35758,7 @@
         "Scorpion Clan"
       ],
       "name": "Shosuro Koshiba",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -35984,7 +35984,7 @@
         "Scorpion Clan"
       ],
       "name": "Shosuro Ryoichi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "1",
         "cost": "4",
@@ -38876,7 +38876,7 @@
         "Samurai"
       ],
       "name": "Tadatsugu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",
@@ -38969,7 +38969,7 @@
         "Nonhuman"
       ],
       "name": "Takayuki",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "8",
@@ -39463,7 +39463,7 @@
         "Shugenja"
       ],
       "name": "Tamori Tomaru",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "4",
@@ -43983,7 +43983,7 @@
         "Void"
       ],
       "name": "Togashi Tsukagi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",
@@ -44376,7 +44376,7 @@
         "Market"
       ],
       "name": "Traveling Market",
-      "playable": false,
+      "playable": true,
       "stats": {
         "cost": "3"
       },
@@ -44516,7 +44516,7 @@
         "Ryu"
       ],
       "name": "Tsai-tsu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",
@@ -45061,7 +45061,7 @@
         "Scout"
       ],
       "name": "Tsuruchi Shigekazu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "8",
@@ -46385,7 +46385,7 @@
         "Unicorn Clan"
       ],
       "name": "Utaku Sang-Ju",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "5",
@@ -46443,7 +46443,7 @@
         "Unicorn Clan"
       ],
       "name": "Utaku Sung-Ki",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "1",
         "cost": "3",
@@ -46532,7 +46532,7 @@
         "Unicorn Clan"
       ],
       "name": "Utaku Tsukiko",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "7",
@@ -48140,7 +48140,7 @@
         "Merchant"
       ],
       "name": "Yasuki Tono",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "2",
@@ -48550,7 +48550,7 @@
         "Samurai"
       ],
       "name": "Yoritomo Doho",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -48791,7 +48791,7 @@
         "Samurai"
       ],
       "name": "Yoritomo Hofu",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "3",
         "cost": "7",
@@ -49029,7 +49029,7 @@
         "Soul of Yoritomo Saburo"
       ],
       "name": "Yoritomo Nakoshi",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "2",
         "cost": "5",
@@ -49325,7 +49325,7 @@
         "Samurai"
       ],
       "name": "Yoritomo Tsang",
-      "playable": false,
+      "playable": true,
       "stats": {
         "chi": "4",
         "cost": "7",

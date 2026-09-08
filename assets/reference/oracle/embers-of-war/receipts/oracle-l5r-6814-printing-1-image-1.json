@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 703945,
+  "card_id": "oracle-l5r-6814",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6814-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Toshisugo",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 6814,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6814-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:33.907556+00:00",
+  "sha256": "878c0f79a200a1c82ec00e3d064e1905f4f4b13822bd6114fd69b714ba5dcd90",
+  "source_image_hash": "ed/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ed/b4/printing_6814_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ed/b4/printing_6814_1_",
+  "width": 750
+}

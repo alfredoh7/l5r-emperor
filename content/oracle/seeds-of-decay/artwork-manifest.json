@@ -1,0 +1,38 @@
+{
+  "complete": true,
+  "downloaded": [
+    {
+      "attempts": [],
+      "bytes": 654243,
+      "card_id": "oracle-l5r-10099",
+      "content_type": "image/jpeg",
+      "format": "JPEG",
+      "height": 1050,
+      "id": "oracle-l5r-10099-printing-1-image-1",
+      "image_index": 1,
+      "name": "Moto Miyu",
+      "numbers": [
+        "73"
+      ],
+      "oracle_id": 10099,
+      "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10099-printing-1-image-1.jpg",
+      "playable": false,
+      "printing_association": "explicit_oracle_printing_id_and_set",
+      "printing_id": "1",
+      "printing_set": "Seeds of Decay",
+      "quality": "master",
+      "retrieved_at": "2026-09-08T11:37:54.019465+00:00",
+      "sha256": "e35be3aa592a837a4bd1d12a3a945a98f4ffad7597501d0ec1f6c33711568ded",
+      "source_image_hash": "de/7d",
+      "source_url": "https://images.oracleofthevoid.com/l5r/de/7d/printing_10099_1_master.jpg",
+      "url_prefix": "https://images.oracleofthevoid.com/l5r/de/7d/printing_10099_1_",
+      "width": 750
+    }
+  ],
+  "failures": [],
+  "missing_from_set": [],
+  "needed": [
+    "oracle-l5r-10099"
+  ],
+  "printing_set": "Seeds of Decay"
+}

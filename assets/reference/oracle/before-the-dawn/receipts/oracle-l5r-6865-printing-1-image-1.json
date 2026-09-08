@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 400817,
+  "card_id": "oracle-l5r-6865",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6865-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Byung",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 6865,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6865-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:34:14.641292+00:00",
+  "sha256": "bc65269ac64309818eb26cf33651fb32dac11df1b233a1ace7f1e4374c048e22",
+  "source_image_hash": "1b/8b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1b/8b/printing_6865_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/8b/printing_6865_1_",
+  "width": 750
+}

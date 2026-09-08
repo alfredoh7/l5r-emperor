@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 784851,
+  "card_id": "oracle-l5r-9858",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9858-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sanzoko",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 9858,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9858-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-08T11:37:29.490320+00:00",
+  "sha256": "8633ebab309f1a253c0c0d63b75d1d40d4fb1ab3629500df16c84a4ce8a109a7",
+  "source_image_hash": "88/87",
+  "source_url": "https://images.oracleofthevoid.com/l5r/88/87/printing_9858_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/88/87/printing_9858_1_",
+  "width": 750
+}
