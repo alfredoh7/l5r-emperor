@@ -15,6 +15,8 @@ Task: [#34](https://github.com/alfredoh7/l5r-emperor/issues/34). Follow-up PR: [
 
 This branch starts from main and incorporates pending clarity PR33 and token PR32. Its review comparison is stacked on PR33. Merge/rebase in dependency order; do not merge this directly while bypassing required parent reviews. The separately assembled local playable preview additionally includes menu PR9. Main and earlier launchers remain unchanged.
 
+The inherited PR32 handoff is preserved verbatim under `docs/handoffs/dependencies/`, so the stacked PR audit reads this task’s handoff rather than treating the inherited task as a second current owner. Run the audit with the actual comparison base: `python3 tools/collab.py audit --base origin/codex/11-turn-card-clarity --working`. Restore/synchronize historical task records with current main when the dependencies merge.
+
 ## Verification
 
 Run `bash tools/check.sh`, then `bash tools/check-tabletop-hud.sh`, `bash tools/check-card-clarity.sh`, and `bash tools/check-table-camera.sh` on a native desktop. The tests do not replace visual inspection or expert rules acceptance.
