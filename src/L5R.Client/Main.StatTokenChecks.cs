@@ -27,11 +27,13 @@ public partial class Main
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             if (_selected?.Id != pair.Card.Id || View.Version != version) throw new InvalidOperationException("Token click failed to inspect its Personality without changing the match.");
             _tokenClickChecked = true;
-            if (_captureMode.Contains("tokenhover", StringComparison.Ordinal))
+            if (_captureMode.Contains("tokentip", StringComparison.Ordinal))
             {
                 GetWindow().GrabFocus();
-                GetViewport().WarpMouse(point + Vector2.One);
-                Input.ParseInputEvent(new InputEventMouseMotion { Position = point + Vector2.One, GlobalPosition = point + Vector2.One, Relative = Vector2.One });
+                await ToSignal(GetTree().CreateTimer(1), SceneTreeTimer.SignalName.Timeout);
+                pair.PositionAtCard();
+                point = pair.GetGlobalTransform() * new Vector2(pair.Diameter / 2, pair.Diameter / 2);
+                GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point }, true);
             }
         }
         catch (Exception e) { _tokenProbeError = e.Message; }
@@ -74,9 +76,9 @@ public partial class Main
                 if (rect.Intersects(TokenVisualRect(pairs[j]))) throw new InvalidOperationException("Token pairs collide.");
         }
         if (_captureMode.Contains("tokens", StringComparison.Ordinal) && (!_tokenClickChecked || _tokenProbeError is not null)) throw new InvalidOperationException(_tokenProbeError ?? "Native token input probe incomplete");
-        if (_captureMode.Contains("tokenhover", StringComparison.Ordinal) &&
-            ReadingTooltip.LastText?.Contains("Click either token to select this Personality.", StringComparison.Ordinal) != true)
-            throw new InvalidOperationException("Native token hover did not open its explanation.");
+        if (_captureMode.Contains("tokentip", StringComparison.Ordinal) &&
+            (ReadingTooltip.LastText?.Contains("Click either token to select this Personality.", StringComparison.Ordinal) != true || _tableTooltip is null || _tableHover is not StatTokens))
+            throw new InvalidOperationException($"Native token hover failed: token={OverStatToken(_lastTableMouse)}, pointer={_lastTableMouse}, native={GetViewport().GuiGetHoveredControl()?.GetType().Name}, tableTip={_tableTooltip is not null}, text={ReadingTooltip.LastText}");
         GD.Print($"STAT_TOKEN_PASS: {pairs.Length} engine-bound pairs; no card occlusion, clipping or token collisions; nativeClick={_tokenClickChecked}.");
     }
 }

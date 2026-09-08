@@ -11,6 +11,7 @@ public partial class StatTokens : Button
     public CardTile[] Companions { get; set; } = [];
     public CardView Card { get; set; } = null!;
     public bool Inline { get; set; }
+    public string Explanation { get; set; } = "";
     public Func<bool>? Allowed { get; set; }
     public Func<Vector2, Vector2>? Projection { get; set; }
     private static Texture2D? _sheet;

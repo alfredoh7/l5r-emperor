@@ -207,7 +207,7 @@ public partial class Main
             Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
             Card = personality,
             Projection = detail ? null : _tableSurface.ProjectCanvas,
-            TooltipText = StatTokens.Explain(personality, tokenCards),
+            Explanation = StatTokens.Explain(personality, tokenCards),
             Allowed = () => detail || (_expandedUnits.Count == 0 &&
                 _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
         };
