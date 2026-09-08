@@ -5,11 +5,16 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private Control? _statTokenLayer;
+    private IEnumerable<StatTokens> TokenPairs => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
+    private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && TokenPairs.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
     private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
         var motion = BeginTableMotion();
+        if (_statTokenLayer is null) { _statTokenLayer = new Control { MouseFilter = Control.MouseFilterEnum.Ignore }; _tableViewport.AddChild(_statTokenLayer); }
+        Palette.Clear(_statTokenLayer);
         if (_bowVersion != View.Version)
         {
             _previousBows.Clear(); foreach (var pair in _currentBows) _previousBows[pair.Key] = pair.Value;
@@ -72,7 +77,7 @@ public partial class Main
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
         .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max());
-    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
+    private float StackHeight(CardView card, PlayerView owner) => (card.Definition?.Type == CardType.Personality ? StatTokens.ReservedHeight : 0) + PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
     private int ArmyColumns(int province) => View.Players.Max(p => p.Army.Count(c => c.AttachedTo is null && c.ProvinceIndex == province)) > 2 ? 2 : 1;
     private void MeasureTableLayout()
     {
@@ -195,6 +200,24 @@ public partial class Main
         var front = Tile(personality, true, faceWidth, side);
         if (detail) { front.ProjectToScreen = null; front.CustomMinimumSize = new Vector2(faceWidth, side); }
         Place(stack, front, 0, expanded ? 0 : attachments.Length * step, faceWidth, tileHeight);
+        var tokenCards = View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Discard).Append(p.Stronghold)).Concat(Self.Hand).ToArray();
+        var tokens = new StatTokens
+        {
+            CardAnchor = front,
+            Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
+            Card = personality,
+            Projection = detail ? null : _tableSurface.ProjectCanvas,
+            Explanation = StatTokens.Explain(personality, tokenCards),
+            Allowed = () => detail || (_expandedUnits.Count == 0 &&
+                _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
+        };
+        tokens.Pressed += () => SelectCard(personality);
+        if (detail) { tokens.SetInlineSize(54); group.AddChild(tokens); }
+        else
+        {
+            group.AddChild(new Control { CustomMinimumSize = new Vector2(0, StatTokens.ReservedHeight), MouseFilter = Control.MouseFilterEnum.Ignore });
+            _statTokenLayer!.AddChild(tokens);
+        }
         var footer = new HBoxContainer { Alignment = BoxContainer.AlignmentMode.Center }; footer.AddThemeConstantOverride("separation", 4); group.AddChild(footer);
         if (attachments.Length > 0)
         {
