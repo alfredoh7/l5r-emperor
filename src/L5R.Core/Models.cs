@@ -5,7 +5,7 @@ namespace L5R.Core;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item, Spell, Event, Celestial, Region, Ring }
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Phase { Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
+public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached }
 

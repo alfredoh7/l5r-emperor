@@ -17,6 +17,9 @@ var tests = new (string Name, Action Run)[]
     ("Province discarding prevents returning to purchases", DynastyDiscard),
     ("Action phase needs consecutive passes and defender starts battle", Priority),
     ("Bamboo fixture waits until owner's second turn to straighten", Bamboo),
+    ("Turn start passes through Straighten then Events before Action", StraightenAndEventsPhaseOrder),
+    ("Choose-straighten fixture lets its controller leave it bowed", ChooseStraightenDecline),
+    ("Choose-straighten fixture straightens when not declined", ChooseStraightenDefault),
     ("Battle destroys province only on strictly greater margin", ProvinceThreshold),
     ("Tied armies destroy each other and gain one Honor per opposing card", BattleTie),
     ("Bowed Personality's unbowed Followers still count in army Force", FollowerForce),
@@ -205,6 +208,38 @@ static void Bamboo()
     Accept(e,Cmd(e,"endDynasty")); Check(e.State.Cards[id].Bowed);
     SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty")); SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
     Check(!e.State.Cards[id].Bowed); Equal(e.State.Players[1].TurnsTaken,2);
+}
+static void StraightenAndEventsPhaseOrder()
+{
+    var e=MatchEngine.CreateEconomyScenario();
+    SkipToDynasty(e);
+    var result=e.Execute(Cmd(e,"endDynasty"));
+    Check(result.Accepted,result.Error??"Rejected");
+    var order=result.Events.Where(ev=>ev.Type=="phaseChanged").Select(ev=>ev.Message).ToArray();
+    var straighten=Array.IndexOf(order,"Phase: Straighten.");
+    var events=Array.IndexOf(order,"Phase: Events.");
+    var action=Array.IndexOf(order,"Phase: Action.");
+    Check(straighten>=0 && events>straighten && action>events,"Straighten must precede Events, which must precede Action");
+    Equal(e.State.Phase,Phase.Action);
+}
+static void ChooseStraightenDecline()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var card=Add(s,"training-choose-straighten-samurai",1,Zone.Home,bowed:true);
+    var e2=MatchEngine.FromTestState(s);
+    SkipToDynasty(e2); Accept(e2,Cmd(e2,"endDynasty"));
+    Equal(e2.State.Phase,Phase.Straighten); Check(e2.State.PendingChoice?.Type=="declineStraighten");
+    Accept(e2,Cmd(e2,"declineStraighten",cards:[card.Id]));
+    Check(e2.State.Cards[card.Id].Bowed,"Declined card should stay bowed"); Equal(e2.State.Phase,Phase.Action);
+}
+static void ChooseStraightenDefault()
+{
+    var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+    var card=Add(s,"training-choose-straighten-samurai",1,Zone.Home,bowed:true);
+    var e2=MatchEngine.FromTestState(s);
+    SkipToDynasty(e2); Accept(e2,Cmd(e2,"endDynasty"));
+    Accept(e2,Cmd(e2,"declineStraighten",cards:[]));
+    Check(!e2.State.Cards[card.Id].Bowed,"Choosing to straighten everything should include the optional card");
 }
 static void ProvinceThreshold()
 {
