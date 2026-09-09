@@ -22,7 +22,9 @@ on the same PR/ref. Fork PRs do not execute the desktop workflow on this Mac.
 - While the service runs, `caffeinate -i` prevents idle system sleep but permits display sleep.
   No global power settings are changed. Stop the service to restore normal idle sleep.
 - The service uses reduced CPU scheduling priority (nice 10). This is not a CPU/RAM cap.
-- Python and tool caches reside under the runner directory. Each job installs/validates
+- macOS uses the installed Homebrew Python 3.14 (requires 3.12+) in a temporary job
+  virtual environment; Windows retains setup-python 3.12. Python packages and tool
+  caches reside under the runner directory. Each job installs/validates
   the pinned project tools and runs the same full check script as hosted macOS.
 - Runner updates remain automatic. Credentials and binaries are outside Git.
 
