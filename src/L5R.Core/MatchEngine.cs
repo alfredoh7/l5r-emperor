@@ -149,6 +149,15 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="attackReaction")
+            {
+                // Open to either side (unlike the entry-reaction windows above) -- the top-level
+                // priority check already enforces whose turn it is to act or pass.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending attack first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;
@@ -209,8 +218,8 @@ public sealed partial class MatchEngine
         Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
         Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
         // Honorable before destruction: this is what spares the controller the dishonorable-death
-        // Honor penalty applied generally in DestroyUnits.
-        card.Dishonorable=false;
+        // Honor penalty applied generally in MarkDead.
+        Rehonor(card);
         DestroyUnits([card]);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
     }
@@ -464,16 +473,36 @@ public sealed partial class MatchEngine
             .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
             .Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
     }
+    // "Dead / Destroy" (core rules Glossary): entering the Dead zone, distinct from merely being
+    // discarded. A Personality who is still Dishonorable at this moment costs its controller Honor
+    // equal to his base Personal Honor -- Seppuku (and any future rehonor-before-death effect) spares
+    // this by clearing Dishonorable first (see Rehonor). This is the one shared entry point every
+    // path to "becoming dead" -- combat destruction or otherwise -- must go through.
+    private void MarkDead(CardInstance card)
+    {
+        card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
+        if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
+    }
+    private void Rehonor(CardInstance card) => card.Dishonorable=false;
+    // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
+    // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
+    // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
+    private void MakeDead(CardInstance card, bool honorable)
+    {
+        if(honorable) Rehonor(card);
+        MarkDead(card);
+        Emit("becameDead",$"{Definition(card).Name} became {(honorable?"honorably ":"")}dead.",card.OwnerId,card.Id);
+    }
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
     {
         var count=0;
         foreach(var card in cards)
         {
             foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++; }
-            card.Zone=Zone.Dead; card.ProvinceIndex=null; card.FaceUp=true; card.Tokens.Clear(); count++;
+            card.ProvinceIndex=null;
+            MarkDead(card);
+            count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
-            // Seppuku clears Dishonorable before calling DestroyUnits, so it never pays this.
-            if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
         }
         return count;

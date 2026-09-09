@@ -66,9 +66,11 @@ var tests = new (string Name, Action Run)[]
     ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
+    ("A discarded dishonorable Personality can become honorably dead: rehonored, no Honor-loss penalty", MakeDeadFromDiscard),
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
-    ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack)
+    ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
+    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow)
 };
 var failed=0;
 foreach(var test in tests)
@@ -618,6 +620,28 @@ static void LawOfDarknessDojo()
         Equal(e.State.Players[1].Honor,before-3,"2 Honor from the training ability plus 1 more from Law of Darkness Dojo's passive");
     }
 }
+static void MakeDeadFromDiscard()
+{
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var discarded=Add(s,"training-dishonored-samurai",0,Zone.DynastyDiscard); discarded.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:discarded.Id,AbilityId:"training-make-dead"));
+        Equal(e.State.Cards[discarded.Id].Zone,Zone.Dead);
+        Check(!e.State.Cards[discarded.Id].Dishonorable,"Becomes honorably dead: rehonored first");
+        Equal(e.State.Players[0].Honor,honorBefore,"No Honor loss -- he was rehonored before becoming dead");
+    }
+    {
+        // A Personality still in play (not yet discarded) is not a legal target.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var inPlay=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:inPlay.Id,AbilityId:"training-make-dead"));
+    }
+}
 static void TokenPrimitives()
 {
     {
@@ -800,6 +824,49 @@ static void TorazuFireTokensAndAttack()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:torazu.Id,TargetId:enemy.Id,AbilityId:"torazu-fire-attack"));
         Equal(e.State.Cards[torazu.Id].Tokens.Count,0);
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    }
+}
+static void AttackReactionWindow()
+{
+    {
+        // A reaction is available (the fixture reactor, anywhere in play -- Reaction timing has no
+        // Battle-presence/location requirement of its own): the window opens instead of resolving
+        // immediately. Negating drives strength to 0; the cost already paid stays paid regardless.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var reactor=Add(s,"training-attack-reactor",1,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, legal target
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction","A reaction is available, so the window opens instead of resolving immediately");
+        Equal(e.State.PendingAttack?.Strength,5);
+        Check(e.State.Cards[castle.Id].Bowed,"The cost is paid immediately, before the window even opens");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+        Equal(e.State.PendingAttack?.Strength,0);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.PendingChoice is null && e.State.PendingAttack is null,"Window closed and the attack resolved");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"Negated: the target survives");
+    }
+    {
+        // Boosting raises strength; a target already legal at announce time is still destroyed, and
+        // the per-ability hit bonus (Carpenter Castle's +2 Honor) still fires on the deferred hit.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var reactor=Add(s,"training-attack-reactor",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Accept(e,new GameCommand("declineReaction",1,e.Version)); // the opponent has nothing to react with
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reactor.Id,AbilityId:"training-attack-boost"));
+        Equal(e.State.PendingAttack?.Strength,7,"5 base + 2 from the boost");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Carpenter Castle's hit bonus still applies to a deferred resolution");
     }
 }
 static void CarpenterCastleAttack()

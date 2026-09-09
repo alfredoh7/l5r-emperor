@@ -52,6 +52,13 @@ public static class AbilityCatalog
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
+        // Training-only: exercises the "a discarded Personality becomes (honorably) dead" primitive
+        // ahead of any published card needing it (e.g. a future Temple of Death-style effect).
+        ["training-make-dead"] = new("Open", "Training: a discarded Personality becomes honorably dead", "discarded-personality"),
+        // Training-only: exercises the Ranged/Melee Attack reaction window ahead of any published
+        // card needing it -- proves strength can be raised or negated by either side before resolution.
+        ["training-attack-boost"] = new("Reaction", "Training: +2 to a pending attack", "none", Trigger: "before-attack-resolves"),
+        ["training-attack-negate"] = new("Reaction", "Training: negate a pending attack", "none", Trigger: "before-attack-resolves"),
     });
 }
 
@@ -76,6 +83,59 @@ public sealed partial class MatchEngine
         "torazu-fire-attack" => 3,
         _ => 0
     };
+    // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
+    // share the same resolution pathway (core rules Glossary — Ranged Attack/Melee Attack).
+    private static string AttackKind(string abilityId) => abilityId switch
+    {
+        "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
+        "shiro-shiba-melee" => "Melee",
+        _ => ""
+    };
+    // Whether opening a reaction window before resolving an attack could possibly matter right now.
+    // No kind-restricted Reaction exists yet (see AttackKind); once one does, filter by attack.Kind here.
+    private bool AnyAttackReactionAvailable() => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
+        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-attack-resolves" &&
+            (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber)));
+    // Steps F-G of a Ranged/Melee Attack (core rules): compare strength to the target's *current*
+    // Force -- re-evaluated here, not at announce time, since a Reaction may have changed either --
+    // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
+    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength)
+    {
+        if (strength <= 0 || targetId is null) return;
+        var target = Card(targetId);
+        if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
+        {
+            DestroyAttackTarget(target);
+            if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+        }
+    }
+    // Steps A-E already happened (presence, announce, performer, required targeting, costs) by the
+    // time a card's own UseAbility case calls this. Returns true if a reaction window was opened --
+    // the caller must `return;` so the action stays pending; false if it resolved immediately inline
+    // (identical end state to before this primitive existed, when nothing can possibly react).
+    private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId)
+    {
+        var strength = AttackStrength(abilityId, attacker);
+        if (!AnyAttackReactionAvailable())
+        {
+            ResolveAttackNow(abilityId, attacker.Id, targetId, strength);
+            return false;
+        }
+        _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId) };
+        _state.PendingChoice = new("attackReaction", attacker.Id, null, "An attack is pending: react or pass.");
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = 1 - attacker.Id;
+        Emit("reactionWindow", "Attack reaction window opened.", attacker.Id);
+        return true;
+    }
+    // Called once both players pass consecutively in the attackReaction window (Apply()).
+    private void ResolveAttack()
+    {
+        var attack = _state.PendingAttack!;
+        _state.PendingAttack = null;
+        ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength);
+        NextAction(attack.PlayerId);
+    }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
@@ -102,9 +162,16 @@ public sealed partial class MatchEngine
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
             "Battle" => _state.Phase == Phase.Battle,
-            // Legal only inside the post-entry reaction window opened for this exact card (Purchase()).
-            "Reaction" => _state.PendingChoice is not null && _state.PendingChoice.Type is "proclaim" or "entryReaction"
-                && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+            // Legal only inside the matching reaction window: entering-play reactions are gated to
+            // the exact card and its own controller (only they may ever act there); an attack
+            // reaction is open to either side, already enforced by the top-level priority check.
+            "Reaction" => _state.PendingChoice is not null && ability.Trigger switch
+            {
+                "own-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                "before-attack-resolves" => _state.PendingChoice.Type == "attackReaction",
+                _ => false
+            },
             _ => false
         }, $"{ability.Timing} timing is unavailable now.");
         var player = Player(command.PlayerId);
@@ -185,6 +252,14 @@ public sealed partial class MatchEngine
                         "Attack a Follower or a Personality without Followers.");
                     Require(CardForce(target) <= AttackStrength(id, player), "That card's Force is above the Attack's strength.");
                 }
+            }
+            // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
+            // in play -- it sits in a discard pile without yet being marked dead.
+            else if (ability.Target == "discarded-personality")
+            {
+                var target = Card(command.TargetId);
+                Require(Definition(target).Type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.FateDiscard,
+                    "Target a discarded Personality.");
             }
             else
             {
@@ -273,9 +348,9 @@ public sealed partial class MatchEngine
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
-                if (target is not null) { DestroyAttackTarget(target); GainHonor(player.Id, 2, "Carpenter Castle"); }
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
-            case "shiro-shiba-melee": if (target is not null) DestroyAttackTarget(target); break;
+            case "shiro-shiba-melee": if (ResolveOrDeferAttack(id, player, target?.Id)) return; break;
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
             case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
             case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
@@ -284,7 +359,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 DestroyToken(performer, performer.Tokens.First(t => t.Type == "Fire"));
-                if (target is not null) DestroyAttackTarget(target);
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             }
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
@@ -294,8 +369,11 @@ public sealed partial class MatchEngine
                 break;
             case "torazu-fire-attack":
                 DestroyToken(source!, source!.Tokens.First(t => t.Type == "Fire"));
-                if (target is not null) DestroyAttackTarget(target);
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
+            case "training-make-dead": MakeDead(target!, true); break;
+            case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
+            case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -424,7 +502,9 @@ public sealed partial class MatchEngine
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(), _ => inPlay };
+                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
+                    "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {
