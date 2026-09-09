@@ -70,7 +70,9 @@ var tests = new (string Name, Action Run)[]
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
     ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
-    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow)
+    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow),
+    ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
+    ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome)
 };
 var failed=0;
 foreach(var test in tests)
@@ -868,6 +870,44 @@ static void AttackReactionWindow()
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
         Equal(e.State.Players[0].Honor,honorBefore+2,"Carpenter Castle's hit bonus still applies to a deferred resolution");
     }
+}
+static void UnconditionalAttackImportWave()
+{
+    // Shinjo Eun-Sahng (Ranged 4), Shosuro Konishi (Ranged 5), Tsuruchi Kosoko (Ranged 5) and Stalking
+    // Tiger (Melee 6): each card is its own performer with no cost and no condition -- proves the
+    // shared Attack primitive needs nothing beyond a catalog entry plus a UseAbility case per card.
+    foreach(var (cardId,abilityId,strength) in new[]
+    {
+        ("oracle-l5r-6872","shinjo-eun-sahng-attack",4),
+        ("oracle-l5r-7121","shosuro-konishi-attack",5),
+        ("oracle-l5r-8852","tsuruchi-kosoko-attack",5),
+        ("oracle-l5r-7450","stalking-tiger-attack",6),
+    })
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        // Stalking Tiger is a Follower: it needs a friendly Personality unit to attach to before it
+        // (or anything else) counts as "a unit at the current battlefield" (Army() is Personality-only).
+        var isFollower=CardCatalog.Get(cardId).Type==CardType.Follower;
+        var host=isFollower?Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0):null;
+        var performer=Add(s,cardId,0,isFollower?Zone.Attached:Zone.Battlefield,province:0,attachedTo:host?.Id);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        if(strength<5) Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:strength>=5?target.Id:null,AbilityId:abilityId));
+        Equal(e.State.Cards[target.Id].Zone,strength>=5?Zone.Dead:Zone.Battlefield,$"{cardId}: hit expectation at strength {strength} vs Force 5");
+    }
+}
+static void TsuruchiIsasAttackAndMoveHome()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var isas=Add(s,"oracle-l5r-8840",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:isas.Id,TargetId:target.Id,AbilityId:"tsuruchi-isas-attack"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Ranged 3 hits a Force-3 target");
+    Check(e.State.Cards[isas.Id].Bowed,"Bowing Isas is the cost, paid up front");
+    Equal(e.State.Cards[isas.Id].Zone,Zone.Home,"Isas moves home after the Attack resolves");
+    Equal(e.State.Cards[isas.Id].ProvinceIndex,null,"Home is not associated with a province");
 }
 static void CarpenterCastleAttack()
 {

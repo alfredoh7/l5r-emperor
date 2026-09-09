@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import wave 1: 5 published cards (Shinjo Eun-Sahng, Shosuro Konishi, Tsuruchi Kosoko, Tsuruchi Isas, Stalking Tiger) using the generalized Ranged/Melee Attack primitive; adds PendingAttack.SourceId so a card's own post-attack effect can find the exact performer after a deferred resolution. Shared-file change: touches src/L5R.Client/Content/Published only to add the cards' scanned artwork (asset copy from the content pipeline), no client code changed; CardAbilities.cs/CardCatalog.cs/PublishedContent.cs/Models.cs are rules-lane engine changes.",
+  "validation": "bash tools/check.sh --skip-client: 70/70 + 33/33 + 8/8 tests pass, new UnconditionalAttackImportWave and TsuruchiIsasAttackAndMoveHome tests added.",
+  "remaining": "9 further Tier-1-ready cards (Dark Naga Scouts, Horse Archers, Shikaro, Isawa Taiken, Murderous Thieves, Shinjo Sujikaro, Moto Ming-Gwok, Bayushi Higaonna, Cavalry Flankers) are blocked on missing reference scans -- live fetch from Oracle of the Void returned HTTP 502 in this environment.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/95",
+  "branch": "mdornbrook/95-attack-import-wave-1",
+  "updated": "2026-09-09T11:27:19.895152+00:00"
+}

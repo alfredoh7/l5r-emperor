@@ -42,6 +42,6 @@ public static class CardCatalog
             new("training-tattooed", "Training tattooed personality", CardType.Personality, "Dragon", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Tattooed"], Text:"Synthetic Monastery of New Thought fixture: carries the Tattooed keyword. Never included in a playable deck."),
             new("training-attack-reactor", "Training attack reactor", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-attack-boost","training-attack-negate"], Text:"Synthetic Ranged/Melee Attack reaction-window fixture. Never included in a playable deck.")
         ];
-        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).Concat(PublishedContent.StrongholdWave3.Cards).Concat(PublishedContent.PersonalityWave1.Cards).Concat(PublishedContent.PersonalityWave2.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
+        return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).Concat(PublishedContent.StrongholdWave3.Cards).Concat(PublishedContent.PersonalityWave1.Cards).Concat(PublishedContent.PersonalityWave2.Cards).Concat(PublishedContent.PersonalityWave3.Cards).Concat(PublishedContent.FollowerWave1.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }
