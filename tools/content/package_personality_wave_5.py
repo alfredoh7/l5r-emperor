@@ -2,6 +2,11 @@
 """Build Personality wave 5: cards carrying Cavalry, Conqueror, or Tactician found
 while triaging that keyword pool for import (issue #111).
 
+Ikoma Natsu (3623) and Doji Atsumichi (2060) shipped in this wave originally, but
+moved into the pinned lion-crane-v1 snapshot (issue #113, swapped in for Ikoma Shika
+and Doji Tatsuki respectively) -- see package_published.py's own ABILITIES map for
+Atsumichi's curated bow/straighten abilities now.
+
 Same discipline as package_personality_wave_2.py: curated Effect/Ability mapping,
 hand-verified against each card's own scanned image, never inferred from prose.
 """
@@ -19,11 +24,8 @@ PROFILE = "personality-wave-5"
 # entry is checked against the card's own scanned image before being added here.
 ABILITIES = {
     1736: [],  # Daigotsu Kendo: pure Conqueror reminder text, no functional ability of its own.
-    3623: [],  # Ikoma Natsu: "will not be controlled by a Unicorn Clan player" -- no control-transfer
-               # mechanism exists anywhere in the engine, so this restriction is currently inert.
     5138: ["reiyu-force-penalty"],
     6885: ["horibe-bow", "horibe-straighten"],
-    2060: ["atsumichi-bow", "atsumichi-straighten"],
     7943: ["tetsuo-destroy-attachment", "tetsuo-destroy-weaker-weaponed"],
     5371: ["shunsuke-make-dead"],
 }

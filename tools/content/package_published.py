@@ -13,8 +13,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ABILITIES = {507:['air-straighten'],1045:['block-supply'],1106:['border-first','border-game'],
- 1521:['costly-feud'],1589:['crushing-force','crushing-destroy'],2158:['shunya-honor'],
- 3730:['incapacitated'],5861:['paid-bow','paid-straighten'],6051:['prepared-death'],
+ 1521:['costly-feud'],1589:['crushing-force','crushing-destroy'],2060:['atsumichi-bow','atsumichi-straighten'],
+ 2158:['shunya-honor'],3730:['incapacitated'],5861:['paid-bow','paid-straighten'],6051:['prepared-death'],
  6855:['shinden-choice'],9916:['never-afraid'],10063:['kouki-force'],10368:['defensive-stance']}
 EFFECTS = {679:'skip-first-straighten',2867:'dragon-gold',2949:'halls-memory',3641:'attacking-four',
  4840:'crane-gold',4915:'attacking-two',6086:'prosperous-discount'}

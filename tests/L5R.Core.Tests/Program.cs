@@ -3,7 +3,7 @@ using L5R.Core;
 
 var tests = new (string Name, Action Run)[]
 {
-    ("Bowed Takakura suppresses two Native Guides in the view and actual resolution", BowedTakakuraResolution),
+    ("A bowed Personality suppresses two Native Guides in the view and actual resolution", BowedPersonalityResolution),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
     ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
     ("Unit view counts Items once and matches battle resolution", UnitViewResolution),
@@ -1417,13 +1417,13 @@ static void UnitViewPrivacy()
     payload.Remove("UnitForce"); Equal(JsonSerializer.Deserialize<CardView>(payload.ToJsonString())!.UnitForce,null);
 }
 
-static void BowedTakakuraResolution()
+static void BowedPersonalityResolution()
 {
     foreach(var owner in new[]{0,1})
     {
         var s=Battle(1,1,6).State;
         var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
-        p.DefinitionId=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Ikoma Takakura").Id;
+        p.DefinitionId=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
         p.Modifiers.Clear(); p.Bowed=true;
         var guide=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
         Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
