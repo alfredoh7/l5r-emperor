@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix Kensai: a Two-Handed Weapon overrides both the Kensai and Kama two-Weapon allowances entirely -- whenever one is involved (already attached, or being attached), at most one Weapon total is ever allowed. Found while triaging Sandayu (a Kensai card) for import; its reminder text restates this as the general rule, confirmed with the user. training-two-handed-weapon fixture + new test cover both directions. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 79/79 core tests (1 new: TwoHandedWeaponOverridesKensaiAndKama), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/109",
+  "branch": "mdornbrook/109-two-handed-weapons",
+  "updated": "2026-09-09T14:34:38.386679+00:00"
+}

@@ -525,8 +525,12 @@ public sealed partial class MatchEngine
         if(Keyword(attachment,"Armor")) return !Attachments(target.Id).Any(c=>Keyword(c,"Armor"));
         if(Keyword(attachment,"Weapon"))
         {
-            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || Attachments(target.Id).Any(c=>Keyword(c,"Kama")) ? 2 : 1;
-            return Attachments(target.Id).Count(c=>Keyword(c,"Weapon"))<weaponCap;
+            var existingWeapons=Attachments(target.Id).Where(c=>Keyword(c,"Weapon")).ToArray();
+            // Two-Handed overrides Kensai and Kama entirely: whenever a Two-Handed Weapon is involved
+            // (already attached, or the one being attached), at most one Weapon total is ever allowed.
+            if(Keyword(attachment,"Two-Handed") || existingWeapons.Any(c=>Keyword(c,"Two-Handed"))) return existingWeapons.Length==0;
+            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || existingWeapons.Any(c=>Keyword(c,"Kama")) ? 2 : 1;
+            return existingWeapons.Length<weaponCap;
         }
         return true;
     }
