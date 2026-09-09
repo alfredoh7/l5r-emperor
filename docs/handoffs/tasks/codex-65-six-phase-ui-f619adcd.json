@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved A six-phase rail with C hover/focus contextual help for issue65, following issue10 merged enum contract.",
+  "validation": "Read issue10 rules handoff and current phase mapping; implementation and native checks pending.",
+  "remaining": "Implement artwork, six-segment mapping, help and native regression checks.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/65",
+  "branch": "codex/65-six-phase-ui",
+  "updated": "2026-09-09T12:14:24.930575+00:00"
+}
