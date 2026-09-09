@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved C token rails and short unit tabs; refine tab cloth to deeper weathered navy with earlier woven canvas and mipmaps. Preserve curved divider/polished spears and live values. Capitalize battle announcement heading. Integrate latest main.",
+  "validation": "281 regression checks passed after main integration; client compilation/import and all five native token modes plus actual battle passed. Final combined preview with PR99 passed phase/menu/player/stat/token checks; source comparison and material/readability reviewed. Token branch NU1900 metadata warning only; combined build zero warnings/errors.",
+  "remaining": "CI/mdornbrook review pending; PR92 remains stacked on PR76. PR99 supplies uppercase Weathered Quill typography separately. No native Windows graphical playtest.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/81",
+  "branch": "codex/81-token-rails",
+  "updated": "2026-09-09T13:25:35.807632+00:00"
+}
