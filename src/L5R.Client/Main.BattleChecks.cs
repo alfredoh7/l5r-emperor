@@ -57,15 +57,21 @@ public partial class Main
                 GD.Print("COMPACT_BOARD_PASS: original 218-unit province pitch, no retained court band, Home on table-facing side from both seats.");
             }
             GD.Print($"BATTLE_COURT_PASS: {_battleCourts.Count} connected courts; both seats nearest their provinces; real stacks fit disjoint bounds.");
+            await ProbeBattleJournalInput();
             if (_assignments.Count > 0)
             {
                 var version = View.Version; var plans = new Dictionary<string, int>(_assignments);
+                var previousStarts=new Dictionary<int,double>(_bloodStarts);
+                if(Self.Id==View.ActivePlayerId) InkRequire(plans.Values.All(p=>!_bloodStarts.ContainsKey(p)),"Draft attack prematurely activated blood.");
                 InkRequire(plans.All(p => FindCard(p.Key)?.Zone == Zone.Home && _battlePlacements.ContainsKey(p.Key)), "Preview moved a real unit.");
                 InkRequire(IntentArrows().Count(a => a.Assignment) == plans.Count, "Missing proposed ink path.");
                 var sourceRegion = _homeBounds[Self.Id];
                 var region = _battleCourts.Values.Aggregate(sourceRegion, (a, b) => a.Merge(b)).Grow(24);
+                if(_captureMode.Contains("blood-film",StringComparison.Ordinal))
+                    region=_battleCourts.Values.Aggregate((a,b)=>a.Merge(b)).Grow(110);
                 _cameraCenter = region.GetCenter(); _cameraZoom = FitRegion(region); _cameraFitted = false; ApplyTableCamera();
                 await SaveBattleFrame("planned");
+                GD.Print($"BLOOD_MOVIE_START: frame {Engine.GetProcessFrames()}.");
                 _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text == "Confirm assignments").EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
                 InkRequire(View.Version == version + 1 && _assignments.Count == 0 && !IntentArrows().Any(a => a.Assignment), "Confirmation failed to replace previews.");
@@ -75,12 +81,23 @@ public partial class Main
                     InkRequire(root.Zone == Zone.Battlefield && root.ProvinceIndex == province, "Confirmed unit has wrong engine destination.");
                     InkRequire(Self.Army.Where(c => c.AttachedTo == id).All(c => c.ProvinceIndex == province), "Attachments left their unit.");
                 }
-                await ToSignal(GetTree().CreateTimer(3), SceneTreeTimer.SignalName.Timeout);
+                if(Self.Id==View.ActivePlayerId) InkRequire(plans.Values.All(_bloodStarts.ContainsKey),"Committed attack did not activate blood.");
+                else InkRequire(previousStarts.All(p=>_bloodStarts.GetValueOrDefault(p.Key)==p.Value),"Defender assignment restarted blood.");
+                await ToSignal(GetTree().CreateTimer(.25), SceneTreeTimer.SignalName.Timeout);
+                await SaveBattleFrame("blood-first");
+                await ToSignal(GetTree().CreateTimer(.55), SceneTreeTimer.SignalName.Timeout);
+                await SaveBattleFrame("blood-soaking");
+                var starts=new Dictionary<int,double>(_bloodStarts);
+                RenderBoard(); Highlight();
+                InkRequire(starts.All(p=>_bloodStarts.GetValueOrDefault(p.Key)==p.Value),"Rerender or highlight replayed blood.");
+                await ToSignal(GetTree().CreateTimer(2.2), SceneTreeTimer.SignalName.Timeout);
                 InkRequire(TableMotionsSettled() && !_matSections.IsAnimating, "Confirmation motion did not settle.");
                 FocusBattle();
+                GD.Print($"BLOOD_MOVIE_END: frame {Engine.GetProcessFrames()}.");
                 GD.Print("BATTLE_ASSIGNMENT_PASS: actual tile/province signals, cancel and confirmation; preview leaves authority unchanged; all attachments follow root; ink settles after cards.");
             }
-            if (_captureMode.Contains("fall", StringComparison.Ordinal))
+            if(_captureMode.Contains("casualty", StringComparison.Ordinal)) await ProbeActionCasualty();
+            if (_captureMode.Contains("fall", StringComparison.Ordinal) || _captureMode.Contains("deaths",StringComparison.Ordinal))
             {
                 FocusBattle();
                 var old = View;
@@ -95,19 +112,22 @@ public partial class Main
                     _uiQueue.Clear(); Render();
                 }
                 var actual = _session.Snapshot!.View;
-                InkRequire(actual.Events.Any(e => e.Sequence > (old.Events.LastOrDefault()?.Sequence ?? 0) && e.Type == "provinceDestroyed"), "Fixture did not produce a real province fall.");
+                var expected=_captureMode.Contains("deaths",StringComparison.Ordinal)?"unitDestroyed":"provinceDestroyed";
+                InkRequire(actual.Events.Any(e => e.Sequence > (old.Events.LastOrDefault()?.Sequence ?? 0) && e.Type == expected), "Fixture did not produce a real "+expected);
                 if (!_reducedMotion)
                 {
                     InkRequire(PresentationBusy && _battlePresentationStage == 1 && View.Version < actual.Version && Actions.Length == 0, "Outcome beat did not hold the permitted old view with actions unavailable.");
                     InkRequire(_inspector.GetChildren().OfType<BattleTracker>().All(t => t.Stage == 2 && t.Status == "Resolving battle"), "Resolution still invites a battle action.");
                     await SaveBattleFrame("outcome");
-                    await ToSignal(GetTree().CreateTimer(.72), SceneTreeTimer.SignalName.Timeout);
+                    await ToSignal(GetTree().CreateTimer(_outcomeHold+.08), SceneTreeTimer.SignalName.Timeout);
                     await SaveBattleFrame("transfers");
                     await ToSignal(GetTree().CreateTimer(.8), SceneTreeTimer.SignalName.Timeout);
                     await SaveBattleFrame("fracture");
                 }
                 await ToSignal(GetTree().CreateTimer(3.2), SceneTreeTimer.SignalName.Timeout);
                 InkRequire(!PresentationBusy && View.Version == actual.Version && TableMotionsSettled(), "Presentation did not return to authoritative state.");
+                InkRequire(_journal.Outcome.Length>0 && _journal.Exchanges.Any(e=>e.Events.Any(x=>x.Type==expected)),"Result missing from battle exchanges.");
+                if(expected=="unitDestroyed") InkRequire(_journal.Aftermath.Any(r=>r.Destination=="Dead"),"Named death has no destination in aftermath.");
                 foreach (var player in View.Players)
                 foreach (var province in player.Provinces)
                 {

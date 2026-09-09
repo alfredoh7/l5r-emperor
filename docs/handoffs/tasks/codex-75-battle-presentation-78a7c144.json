@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Restore compact province spacing and table-facing Home rows; preserve approved battle passes and faster ink; rebuild B court connector from source pixels and establish permanent approved-art workflow.",
-  "validation": "Client build passed; 273 deterministic tests passed after integrating main through PR85; six native battle/layout fixtures passed; native ink lifecycle, selection and attachment-tray checks passed; ultrawide camera/HUD input checks passed; final source comparison and court capture visually reviewed; git diff --check passed.",
-  "remaining": "GitHub CI and Mendon shared review before merge. No native Windows graphical playtesting or expert rules acceptance claimed.",
+  "summary": "Preserve compact province-connected battles; implement approved frayed fallen frames, Daisho, attack-gated blood absorption and pulse, broad assignment arrows, named destruction and public aftermath in a worn left-side battle journal. Emit actor-tagged accepted pass events without changing legality.",
+  "validation": "275 deterministic checks passed; final core/published/deck repeated after public-card thumbnail metadata; client build/import passed; eight native Mac battle scenarios passed with journal input isolation, draft/confirmed attack gating, defense, action deaths, battle deaths, province falls and reduced motion; native ultrawide camera/input passed through Play Latest.command; source comparison and gameplay captures reviewed; launcher plist/executable/target verified; git diff --check passed.",
+  "remaining": "GitHub CI and mdornbrook shared review before merge. No native Windows graphical playtest, expert rules acceptance or network burst/reconnect cinematic acceptance claimed. Audio remains a future pass.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/75",
   "branch": "codex/75-battle-presentation",
-  "updated": "2026-09-09T00:28:07.572416+00:00"
+  "updated": "2026-09-09T02:28:21.637535+00:00"
 }

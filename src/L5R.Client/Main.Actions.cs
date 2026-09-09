@@ -15,7 +15,7 @@ public partial class Main
         {
             _guide.Visible = false;
             _inspector.AddChild(new BattleTracker { Snapshot = View, ReducedMotion = _reducedMotion,
-                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true });
+                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true, ActionOutcome = _actionOutcome });
             return;
         }
         if (View.WinnerId is { } winner)

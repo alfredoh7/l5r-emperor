@@ -57,10 +57,11 @@ public partial class Main
 
     private void FitTableViewport()
     {
-        _tableViewport.Position = new Vector2(144, 148);
+        var left = JournalOpen ? 292 : 144;
+        _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188,
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
@@ -170,6 +171,11 @@ public partial class Main
         if (_capturePath is not null && _captureMode == "published-ink-film")
         { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible) return;
+        // Keep fixed journal gestures entirely outside the card subviewport.
+        if(!_cameraDragging && @event is InputEventMouse journalMouse &&
+            ((_journalToggle?.Visible ?? false) && _journalToggle.GetGlobalRect().HasPoint(journalMouse.Position) ||
+             (_journalPanel?.Visible ?? false) && _journalPanel.GetGlobalRect().HasPoint(journalMouse.Position)))
+        { _tableSurface.ExitMouse(); HideTableTooltip(); return; }
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.

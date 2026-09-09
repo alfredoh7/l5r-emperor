@@ -128,7 +128,7 @@ public partial class Main
                 : fallen ? () => { var center = new Vector2(150, card.OwnerId == View.ViewerId ? 997 : 73); return new[] { center + new Vector2(-22, -32), center + new Vector2(22, -32), center + new Vector2(22, 32), center + new Vector2(-22, 32) }; }
                 : ()=>PileCorners(pile!);
             var flight = new CardFlight { From=from, Destination=destination, Face=texture, Back=draw && card.Definition is not null ? back : null,
-                Delay=TransferDelay(card), FadeOnArrival=fallen, Landed=()=>{if(tile is not null && IsInstanceValid(tile)) tile.SelfModulate=Colors.White;} };
+                Delay=TransferDelay(card), Duration=fallen ? 1.05 : .65, FadeOnArrival=fallen, Landed=()=>{if(tile is not null && IsInstanceValid(tile)) tile.SelfModulate=Colors.White;} };
             _root.AddChild(flight); _flights.Add(flight);
         }
         // Opponent draws are represented using only public counts and the green back.

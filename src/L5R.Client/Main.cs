@@ -73,6 +73,8 @@ public partial class Main : Node
         if (_capturePath is not null) GetWindow().GrabFocus();
         if (_captureMode == "battle-reference" && _capturePath is not null)
         { SetProcessInput(false); AddChild(new BattleArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode == "battle-escalation-reference" && _capturePath is not null)
+        { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "threshold-reference" && _capturePath is not null)
         { SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); AddChild(new ThresholdArtReview(_capturePath)); SetProcess(false); return; }
         LoadSeat();
@@ -92,6 +94,7 @@ public partial class Main : Node
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MenuVisible) return;
         ProcessBattlePresentation(delta);
+        if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
@@ -324,6 +327,7 @@ public partial class Main : Node
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildCameraControls();
+        BuildBattleJournal();
         BuildFullscreenGate();
         GetViewport().SizeChanged += FitPresentation; FitPresentation();
     }
@@ -365,7 +369,10 @@ public partial class Main : Node
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
+        ObserveBattleJournal();
         PrepareBattlePresentation();
+        RenderBattleJournal();
+        FitTableViewport();
         ObserveBattleResolution();
         if (_displayedVersion != View.Version)
         {
@@ -380,6 +387,7 @@ public partial class Main : Node
         if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
+        RenderBattleJournal();
     }
 
     private void RenderTimeline()

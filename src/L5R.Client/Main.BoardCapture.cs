@@ -16,6 +16,7 @@ public partial class Main
         var assignmentType = defenseMode ? "assignDefense" : "attack";
         var minimumUnits = defenseMode ? 1 : 2;
         var targetMode = _captureMode.Contains("target", StringComparison.Ordinal);
+        var casualtyMode = _captureMode.Contains("casualty", StringComparison.Ordinal);
         var steps = 0;
         while (View.WinnerId is null && steps++ < 1200)
         {
@@ -31,8 +32,10 @@ public partial class Main
                     + View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Single(p => p.Index == active).Strength;
             var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
                 View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
+            var casualtyReady = !casualtyMode || View.Phase==Phase.Battle && BattleCasualtyAction() is not null;
+            var defeatReady = !_captureMode.Contains("deaths", StringComparison.Ordinal) || View.CurrentBattleProvince is int bp && View.Players.All(p=>p.Army.Any(c=>c.AttachedTo is null && c.ProvinceIndex==bp)) && View.Players.SelectMany(p=>p.Army.Where(c=>c.AttachedTo is null && c.ProvinceIndex==bp)).Sum(c=>c.UnitForce??0)>0;
             var compactReady = View.Phase == Phase.Dynasty && View.TurnNumber >= 3 && View.Players.All(p => p.Home.Any(c => c.Definition?.Type == CardType.Personality));
-            if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady)) break;
+            if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady && casualtyReady && defeatReady)) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();

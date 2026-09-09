@@ -75,8 +75,7 @@ public static class BattleInkArt
             Piece(new Rect2(edge, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
             Piece(new Rect2(size.X/2+37, size.Y-14, size.X/2-37-edge, 14), new Rect2(45, 223, 45, 14));
         }
-        var icon = Extract("res://Art/battle-court-reference.png", new Rect2I(1476, 238, 56, 57), medallion: true);
-        canvas.DrawTextureRect(icon, new Rect2(size.X/2-24, connectionAbove ? size.Y-24 : -30, 56, 57), false, tint);
+        canvas.DrawTextureRect(BattleEscalationArt.Daisho, new Rect2(size.X/2-27, connectionAbove ? size.Y-27 : -27, 54, 54), false, tint);
     }
     public static void Fallen(Control canvas, Rect2 rect, int number, float progress)
     {
