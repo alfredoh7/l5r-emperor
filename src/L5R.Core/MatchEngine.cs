@@ -389,6 +389,9 @@ public sealed partial class MatchEngine
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
         var af=a.Sum(BattleForce); var df=d.Sum(BattleForce);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
+        // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
+        // regardless of the outcome (DestroyProvince below also clears it, redundantly, if destroyed).
+        Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
         if(af>df)
         {
             var destroyedDefenders=DestroyUnits(d);

@@ -76,7 +76,7 @@ var tests = new (string Name, Action Run)[]
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
     ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
     ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
-    ("Reconnaissance is cleared when its province's card is replaced or the province is destroyed", ReconnaissanceClearsOnProvinceChange)
+    ("Reconnaissance is cleared when its province's card is replaced, when its battle resolves (destroyed or not), or the province is destroyed outright", ReconnaissanceClearsOnProvinceChange)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1001,12 +1001,19 @@ static void ReconnaissanceClearsOnProvinceChange()
     Accept(e,Cmd(e,"purchase",id:id,sources:e.QuotePurchase(0,id).Payments[0].SourceIds));
     Check(!e.State.Players[0].Provinces[2].Reconnaissance[1],"Cleared once the province refills with a new, unseen card");
 
-    // Destroying a province also clears it (same precedent values as ProvinceThreshold).
-    var e2=Battle(9,2,6);
+    // A tied battle resolves without destroying the province -- Reconnaissance still resets to No.
+    var e2=Battle(3,3);
     e2.State.Players[1].Provinces[0].Reconnaissance[0]=true;
     Resolve(e2);
-    Check(e2.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
-    Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province is destroyed");
+    Check(!e2.State.Players[1].Provinces[0].Destroyed,"Sanity: a tied battle does not destroy the province");
+    Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance resets to No once the battle resolves, whether or not the province survives");
+
+    // Destroying a province also clears it (same precedent values as ProvinceThreshold).
+    var e3=Battle(9,2,6);
+    e3.State.Players[1].Provinces[0].Reconnaissance[0]=true;
+    Resolve(e3);
+    Check(e3.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
+    Check(!e3.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province is destroyed");
 }
 static void CarpenterCastleAttack()
 {
