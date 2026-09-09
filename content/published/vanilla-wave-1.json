@@ -1597,6 +1597,57 @@
       ],
       "Abilities": [],
       "Focus": 0
+    },
+    {
+      "Id": "oracle-l5r-10851",
+      "Name": "Ikoma Takakura",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Effect": "none",
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10851.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Abilities": [],
+      "Focus": 0
+    },
+    {
+      "Id": "oracle-l5r-2166",
+      "Name": "Doji Tatsuki",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Effect": "none",
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2166.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crane Clan",
+        "Samurai",
+        "Soul of Doji Ayano"
+      ],
+      "Abilities": [],
+      "Focus": 0
     }
   ],
   "Decks": []

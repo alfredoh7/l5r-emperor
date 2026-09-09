@@ -54,7 +54,7 @@ internal static class PublishedTests
     private static void Eq<T>(T actual,T expected) => Check(EqualityComparer<T>.Default.Equals(actual,expected),$"Expected {expected}; got {actual}");
     private static MatchState State(bool battle=false, int priority=0)
     {
-        var s=MatchEngine.CreatePublishedMatch(11).State;
+        var s=MatchEngine.CreatePublishedTestMatch(11).State;
         foreach(var c in s.Cards.Values.Where(c=>c.Zone!=Zone.Stronghold).ToArray()) s.Cards.Remove(c.Id);
         foreach(var p in s.Players) { p.Hand.Clear();p.DynastyDeck.Clear();p.FateDeck.Clear();p.TurnsTaken=2;p.Honor=p.Id==0?10:7;foreach(var province in p.Provinces) province.CardId=null; }
         s.Events.Clear();s.ActivePlayerId=0;s.PriorityPlayerId=priority;s.Phase=battle?Phase.Battle:Phase.Action;
@@ -78,13 +78,17 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,122);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,124);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
+        // The frozen test scenario (issue #115) must be structurally sound too, even though its own
+        // Cards are never merged into CardCatalog -- every id it lists must already be defined there.
+        Eq(PublishedContent.TestSnapshot.Cards.Length,40);
+        foreach(var d in PublishedContent.TestSnapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
-        var vanilla=PublishedContent.VanillaWave1.Cards;Eq(vanilla.Length,61);
+        var vanilla=PublishedContent.VanillaWave1.Cards;Eq(vanilla.Length,63);
         foreach(var c in vanilla){Eq(c.Effect,"none");Eq(c.Text,"");Eq(c.Abilities!.Length,0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
         Check(!vanilla.Select(c=>c.Id).Intersect(PublishedContent.Snapshot.Cards.Select(c=>c.Id)).Any());
         var strongholds=PublishedContent.StrongholdWave1.Cards;Eq(strongholds.Length,4);
@@ -113,7 +117,7 @@ internal static class PublishedTests
     }
     private static void Setup()
     {
-        var e=MatchEngine.CreatePublishedMatch();var s=e.State;Eq(s.ActivePlayerId,1);Eq(s.PriorityPlayerId,1);Eq(s.Players[0].Honor,6);Eq(s.Players[1].Honor,7);
+        var e=MatchEngine.CreatePublishedTestMatch();var s=e.State;Eq(s.ActivePlayerId,1);Eq(s.PriorityPlayerId,1);Eq(s.Players[0].Honor,6);Eq(s.Players[1].Honor,7);
         Check(s.Players[0].Provinces.All(p=>p.Strength==6));Check(s.Players[1].Provinces.All(p=>p.Strength==7));
         var bamboo=s.Cards.Values.Single(c=>c.DefinitionId==Id(679));Eq(bamboo.OwnerId,0);Check(bamboo.Bowed);
         foreach(var p in s.Players){Eq(p.DynastyDeck.Count,36);Eq(p.FateDeck.Count,34);Eq(p.Hand.Count,6);}
@@ -292,9 +296,12 @@ internal static class PublishedTests
     }
     private static void Privacy()
     {
-        var e=MatchEngine.CreatePublishedMatch();var s=e.State;var view=e.GetView(1);Eq(view.Players[0].Hand.Length,0);Check(view.Players[0].Provinces.All(p=>p.Card!.Definition is null));var ability=view.Players[1].Home.Single().Definition!.Abilities!;ability[0]="bad";Eq(e.GetView(1).Players[1].Home.Single().Definition!.Abilities![0],"border-first");
+        var e=MatchEngine.CreatePublishedTestMatch();var s=e.State;var view=e.GetView(1);Eq(view.Players[0].Hand.Length,0);Check(view.Players[0].Provinces.All(p=>p.Card!.Definition is null));var ability=view.Players[1].Home.Single().Definition!.Abilities!;ability[0]="bad";Eq(e.GetView(1).Players[1].Home.Single().Definition!.Abilities![0],"border-first");
         foreach(var id in s.Players[0].Hand)Check(!Json(view).Contains('"'+id+'"'));
     }
+    // Deliberately exercises the live app deck (Snapshot), not the frozen test scenario: this is a
+    // smoke test of whatever is actually deployed, so a card newly swapped into the live deck (e.g. for
+    // playtesting) gets its abilities checked here too, not just at content-load time.
     private static void OfferedActions()
     {
         foreach(var battle in new[]{false,true}) foreach(var player in new[]{0,1})
@@ -312,6 +319,8 @@ internal static class PublishedTests
             }
         }
     }
+    // Deliberately exercises the live app deck too: a full scripted game is exactly the kind of check
+    // that should catch an unplayable state a newly swapped-in live-deck card might introduce.
     private static void Replay()
     {
         var e=MatchEngine.CreatePublishedMatch(801);var count=0;

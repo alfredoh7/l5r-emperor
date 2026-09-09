@@ -23,6 +23,10 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);
+    // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
+    // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
+    // never silently change what this exercises.
+    public static MatchEngine CreatePublishedTestMatch(ulong seed = 20260906) => Create(seed, PublishedContent.TestScenario);
     internal static MatchEngine FromTestState(MatchState state) => new(Copy(state), 1, "test-only");
 
     public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray());
@@ -40,7 +44,8 @@ public sealed partial class MatchEngine
 
     private static MatchEngine Create(ulong seed, string scenario)
     {
-        if (scenario == PublishedContent.Scenario) return CreatePublished(seed);
+        if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
+        if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
         if (scenario is not ("starter" or "economy")) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
