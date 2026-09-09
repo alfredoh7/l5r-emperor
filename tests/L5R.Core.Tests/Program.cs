@@ -76,7 +76,10 @@ var tests = new (string Name, Action Run)[]
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
     ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
     ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
-    ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution)
+    ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution),
+    ("Tactical Advantage requires a performing Tactician, is usable any number of times per turn, and gives Force equal to the discarded card's Focus Value", TacticalAdvantage),
+    ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
+    ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1016,6 +1019,103 @@ static void ReconnaissanceOnlyClearsOnBattleResolution()
     Resolve(e3);
     Check(e3.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
     Check(!e3.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province's battle resolves, including when destroyed");
+}
+static void TacticalAdvantage()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var tactician=Add(s,"training-tactician",0,Zone.Battlefield,province:0);
+    var notTactician=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+    var focus1=Add(s,"training-focus-strategy",0,Zone.Hand);
+    var focus2=Add(s,"training-focus-strategy",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,PerformerId:notTactician.Id,TargetId:focus1.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,2,"Base Force 2, no bonus yet");
+    Accept(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus1.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,5,"Base 2 + discarded card's Focus Value 3");
+    Equal(e.State.Cards[focus1.Id].Zone,Zone.FateDiscard,"The discarded card moves to the Fate discard pile");
+    // Any number of times per turn: a second use in the same turn is not blocked by the normal
+    // once-per-turn dedupe -- only its own cost (discarding another card) limits it. Priority passed
+    // to the opponent after the first use (like any action), so they must act (or pass) before it
+    // returns to player 0 for the second use.
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Accept(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus2.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,8,"Two uses stack: base 2 + 3 + 3");
+}
+static void ConquerorStraightensAfterVictory()
+{
+    // A single eligible Conqueror resolves immediately: no choice to make.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var conqueror=Add(s,"training-conqueror",0,Zone.Battlefield,province:0); // Force 2
+    var other=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Force 4, no Conqueror
+    var weak=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, attacker wins 6-3
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e);
+    Check(e.State.PendingChoice is null,"No choice needed with only one Conqueror candidate");
+    Equal(e.State.Cards[conqueror.Id].Zone,Zone.Home); Check(!e.State.Cards[conqueror.Id].Bowed,"The sole Conqueror candidate returns home unbowed");
+    Equal(e.State.Cards[other.Id].Zone,Zone.Home); Check(e.State.Cards[other.Id].Bowed,"A non-Conqueror attacking unit still returns home bowed");
+
+    // Two eligible Conquerors: the attacker must choose which one straightens.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var c1=Add(s2,"training-conqueror",0,Zone.Battlefield,province:0);
+    var c2=Add(s2,"training-conqueror",0,Zone.Battlefield,province:0);
+    var weak2=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, attacker wins 4-3
+    var e2=MatchEngine.FromTestState(s2);
+    Resolve(e2);
+    Equal(e2.State.PendingChoice?.Type,"conqueror","Two eligible Conquerors: a real choice is required");
+    Check(e2.State.Cards[c1.Id].Zone==Zone.Battlefield && e2.State.Cards[c2.Id].Zone==Zone.Battlefield,"Resolution defers until the choice is made");
+    Reject(e2,new GameCommand("chooseConqueror",0,e2.Version,TargetId:weak2.Id)); // not an eligible candidate
+    Accept(e2,new GameCommand("chooseConqueror",0,e2.Version,TargetId:c1.Id));
+    Check(e2.State.PendingChoice is null && e2.State.Cards[c1.Id].Zone==Zone.Home && !e2.State.Cards[c1.Id].Bowed,"Chosen Conqueror returns home unbowed");
+    Check(e2.State.Cards[c2.Id].Zone==Zone.Home && e2.State.Cards[c2.Id].Bowed,"The other eligible Conqueror still returns home bowed");
+}
+static void KensaiAndKamaWeaponCap()
+{
+    // A Kensai may attach two Weapons but not a third.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var kensai=Add(s,"training-kensai",0,Zone.Home);
+    var w1=Add(s,"training-weapon",0,Zone.Hand);
+    var w2=Add(s,"training-weapon",0,Zone.Hand);
+    var w3=Add(s,"training-weapon",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    // Equip is a Limited action: it passes priority to the opponent (like any action), so they must
+    // act (or pass) before it returns to player 0 for a second equip.
+    Accept(e,Cmd(e,"equip",player:0,id:w1.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Accept(e,Cmd(e,"pass",player:1));
+    Accept(e,Cmd(e,"equip",player:0,id:w2.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Equal(e.State.Cards.Values.Count(c=>c.AttachedTo==kensai.Id),2,"Kensai carries two Weapons");
+    Accept(e,Cmd(e,"pass",player:1));
+    Reject(e,Cmd(e,"equip",player:0,id:w3.Id,target:kensai.Id));
+
+    // A non-Kensai personality with a Kama may attach a second Weapon, but still not a third.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var plain=Add(s2,"training-crane-samurai",0,Zone.Home);
+    var kama=Add(s2,"training-kama",0,Zone.Hand);
+    var pw1=Add(s2,"training-weapon",0,Zone.Hand);
+    var pw2=Add(s2,"training-weapon",0,Zone.Hand);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,Cmd(e2,"equip",player:0,id:pw1.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:plain.Id));
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Accept(e2,Cmd(e2,"equip",player:0,id:kama.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:plain.Id));
+    Equal(e2.State.Cards.Values.Count(c=>c.AttachedTo==plain.Id),2,"A plain Weapon plus a Kama: two Weapons total");
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Reject(e2,Cmd(e2,"equip",player:0,id:pw2.Id,target:plain.Id));
+
+    // A Kensai wielding a Kama is still capped at two Weapons -- the two allowances do not stack.
+    var s3=MatchEngine.CreateEconomyScenario().State;
+    s3.Phase=Phase.Action; s3.PriorityPlayerId=0; s3.ActivePlayerId=0;
+    var kensai2=Add(s3,"training-kensai",0,Zone.Home);
+    var kama2=Add(s3,"training-kama",0,Zone.Hand);
+    var kw1=Add(s3,"training-weapon",0,Zone.Hand);
+    var kw2=Add(s3,"training-weapon",0,Zone.Hand);
+    var e3=MatchEngine.FromTestState(s3);
+    Accept(e3,Cmd(e3,"equip",player:0,id:kama2.Id,sources:e3.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Accept(e3,Cmd(e3,"pass",player:1));
+    Accept(e3,Cmd(e3,"equip",player:0,id:kw1.Id,sources:e3.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Equal(e3.State.Cards.Values.Count(c=>c.AttachedTo==kensai2.Id),2,"Kensai + Kama: still two Weapons total");
+    Accept(e3,Cmd(e3,"pass",player:1));
+    Reject(e3,Cmd(e3,"equip",player:0,id:kw2.Id,target:kensai2.Id));
 }
 static void CarpenterCastleAttack()
 {

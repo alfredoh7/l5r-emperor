@@ -75,6 +75,12 @@ public static class AbilityCatalog
         // card needing it -- a per-player, per-province boolean that gates only part of an effect.
         ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
         ["training-reconnaissance-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor if you have Reconnaissance there", "enemy-personality"),
+        // Tactician (core rules Glossary): every player always has this ability, regardless of what
+        // they control -- "any number of times per turn" (see the ValidateAbility exemption below)
+        // is the point, so its own cost (discarding a card) is the only real limit on repeated use.
+        // Battle-timing by default; a card that grants an Action-segment variant would need its own
+        // catalog entry reusing the same UseAbility case, not a change to this one.
+        ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle"),
     });
 }
 
@@ -236,7 +242,9 @@ public sealed partial class MatchEngine
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        Require(!uses.TryGetValue(id, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        // "Any number of times per turn" (Tactical Advantage): exempt from the once-per-turn dedupe
+        // entirely -- its own cost (discarding a card) is the only real limit on repeated use.
+        Require(id == "tactical-advantage" || !uses.TryGetValue(id, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -260,6 +268,8 @@ public sealed partial class MatchEngine
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
+                // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
+                "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
@@ -437,6 +447,10 @@ public sealed partial class MatchEngine
             case "training-reconnaissance-strike":
                 if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike");
                 break;
+            case "tactical-advantage":
+                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
+                DiscardFate(player, target!);
+                break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
             case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
@@ -558,6 +572,7 @@ public sealed partial class MatchEngine
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
+                "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             if (performers.Length == 0) performers = [null];

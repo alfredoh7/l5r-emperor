@@ -97,6 +97,11 @@ public sealed partial class MatchEngine
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
             Add("chooseShinden","Allow opponent to gain 1 Honor",Command("chooseShinden") with {Choice="honor"});
         }
+        else if(_state.PendingChoice is { Type:"conqueror" })
+        {
+            foreach(var id in _state.PendingConqueror!.CandidateIds)
+                Add("chooseConqueror",$"Straighten {Definition(Card(id)).Name} instead of returning home bowed",Command("chooseConqueror",target:id),cardId:id);
+        }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {
             var optional=EligibleForOptionalStraighten(playerId);
