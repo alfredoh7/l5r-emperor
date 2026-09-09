@@ -1,9 +1,9 @@
 {
   "lane": "ui",
-  "summary": "Implement approved automatic YOUR TURN Ink Bloom with original artwork, uppercase Weathered Quill, pointer/keyboard pass-through and reduced motion.",
-  "validation": "Client compiles. Native material/lifecycle/input probe passes; real Main integration and source comparison in progress.",
-  "remaining": "Finish native integration, multiple viewport checks and combined playable preview; CI pending.",
+  "summary": "Approved Ink Bloom announces local turn ownership automatically using original imagegen artwork and uppercase Weathered Quill; no input gate, separate priority semantics, reduced motion and lifecycle cleanup.",
+  "validation": "Client build passed; native material/input checks at1280x720/1920x1080 and actual Main lifecycle checks at1280x800/1672x941/2560x1080 passed. Inspected source/native artwork and combined game screenshot. Combined preview client build0warnings;283 regressions passed. Earlier commit macOS/Windows CI passed; final evidence commit requires its own CI.",
+  "remaining": "PR105 ready for review; main unchanged. No native Windows graphical test or new live remote reconnect session. Reconnect dedup tested using public snapshots. Preview includes prior unmerged UI passes.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/11",
   "branch": "codex/11-turn-ink-bloom",
-  "updated": "2026-09-09T13:53:31.637819+00:00"
+  "updated": "2026-09-09T14:00:13.789932+00:00"
 }

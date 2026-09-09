@@ -9,7 +9,7 @@ public partial class TurnBloomIntegrationProbe : Node
     private TurnBloom _bloom=null!;
     private MatchSession _session=null!;
     private string _output="";
-    private int _step, _plays;
+    private int _step, _plays, _settleFrames;
     private double _clock;
     private long _version;
     private static readonly BindingFlags Private=BindingFlags.Instance|BindingFlags.NonPublic;
@@ -25,7 +25,7 @@ public partial class TurnBloomIntegrationProbe : Node
     }
     public override void _Process(double delta)
     {
-        _clock+=delta;if(_clock<.5)return;_clock=0;
+        _clock+=delta;if(++_settleFrames<4 || _clock<.5)return;_clock=0;_settleFrames=0;
         try
         {
             switch(_step)
@@ -40,6 +40,8 @@ public partial class TurnBloomIntegrationProbe : Node
                     _bloom.ManualTime=true;_bloom.SetTime(1.5f);_plays=_bloom.PlayCount;
                     break;
                 case 2:
+                    Require(_bloom.IsVisibleInTree() && _bloom.Playing,"Ink disappeared before readable hold");
+                    GD.Print($"TURN_BLOOM_FRAME: {_bloom.GetGlobalRect()} elapsed={_bloom.Elapsed} children={_bloom.GetChildCount()} reduced={_bloom.ReducedMotion}");
                     GetViewport().GetTexture().GetImage().SavePng(Path.Combine(_output,"board.png"));
                     _version=_session.Snapshot!.View.Version;
                     var pass=_session.Snapshot.Actions.First(a=>a.Enabled && a.Type=="pass");

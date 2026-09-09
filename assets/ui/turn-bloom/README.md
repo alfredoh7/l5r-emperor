@@ -7,3 +7,11 @@ The Godot canvas shader follows the approved preview: center-out textured absorp
 Announce once per local turn (`ActivePlayerId` and `TurnNumber`). Priority, phase, duplicate snapshots, same-turn reconnects and menu resumes do not retrigger. New practice games reset the local observation history. A different room has a separate identity. Changing a practice viewing seat is not a turn transition. Cancel for menu/disconnection, opponent turn and victory. No rules commands or timing are changed.
 
 Native visual and integration probes: `tools/check-turn-bloom.sh`. The probes are review fixtures, not playable card content.
+
+## Source-to-game review
+
+- `docs/screenshots/turn-bloom/approved-preview.png`: the selected animation at its readable hold.
+- `docs/screenshots/turn-bloom/native-artwork.png`: actual Godot render at the same dimensions/timing; bitmap bytes are unchanged, using mipmaps at table scale. Text baseline, uppercase face, compact spacing and material layering were inspected together.
+- `docs/screenshots/turn-bloom/combined-preview.png`: actual game screenshot including the earlier unmerged province, battle, token and six-phase UI passes. Those passes are not included by this main-based PR.
+
+Native probe checks passed at 1280×720 and 1920×1080; real Main/menu/action lifecycle checks passed at 1280×800, 1672×941 and 2560×1080. Reduced motion and pointer/keyboard pass-through passed. Reconnect deduplication is tested with repeated public snapshots, not a new end-to-end remote gameplay session. Windows native graphical acceptance remains open.

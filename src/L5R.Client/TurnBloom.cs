@@ -57,7 +57,7 @@ public partial class TurnBloom : Control
     public override void _Process(double delta)
     {
         Observe?.Invoke();
-        if (!ManualTime && Playing) SetTime(Elapsed + (float)delta);
+        if (!ManualTime && Playing) SetTime(Elapsed + Math.Min((float)delta,.1f));
     }
     private static float Ease(float a, float b, float t) { var x = Math.Clamp((t-a)/(b-a),0,1); return x*x*(3-2*x); }
     public override void _Draw()
