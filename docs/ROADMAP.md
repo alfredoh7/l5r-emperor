@@ -58,6 +58,7 @@ These exist as reusable engine shapes, not just one-off card hacks — but only 
 | Authoritative battle stage and next-player-action display | Not started | [#66](https://github.com/alfredoh7/l5r-emperor/issues/66) | |
 | Connected battle courts, ink assignments, province fall sequences | In progress | [#75](https://github.com/alfredoh7/l5r-emperor/issues/75), open PR [#76](https://github.com/alfredoh7/l5r-emperor/pull/76) | |
 | Private project board integration | In progress | [#62](https://github.com/alfredoh7/l5r-emperor/issues/62), open PR [#78](https://github.com/alfredoh7/l5r-emperor/pull/78) | |
+| Open Booster Packs minigame, launchable from the main menu | Not started | [#131](https://github.com/alfredoh7/l5r-emperor/issues/131) | Standalone collection-flavor minigame, not tied to deck construction or match rules. Scope (art, pack contents/odds, persistence, ties to the wider card catalogue) not yet defined. |
 
 ## Acceptance / process items (tracked here for completeness, owned by `docs/NEXT_PHASE.md`)
 
