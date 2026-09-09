@@ -155,6 +155,24 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 4 of ability-bearing Personalities: import wave 2 (issue #97) -- the first
+    /// target-dependent Attack strength conditional and an always-on passive Force bonus Effect.</summary>
+    public static PublishedSnapshot PersonalityWave4 { get; } = LoadPersonalityWave4();
+
+    private static PublishedSnapshot LoadPersonalityWave4()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave4.json", "personality-wave-4", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected personality-wave-4 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-4 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-4 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

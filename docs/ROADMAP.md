@@ -72,8 +72,29 @@ These exist as reusable engine shapes, not just one-off card hacks — but only 
 
 ## Content coverage
 
-Published (playable) card count as of 2026-09-09: **115** — pinned Lion/Crane 40, Vanilla Wave 1 (61 ability-free), Stronghold Waves 1–3 (7 total), Personality Waves 1–3 (6 total), Follower Wave 1 (1). The full Emperor-legal reference catalogue (`content/deck-pool.json`) has 2,143 cards; the wider catalogue is reference-only until a card is explicitly wired up (`docs/rules/LION_CRANE_COVERAGE.md`, `AGENTS.md` — never silently turn an unsupported effect into a blank playable card).
+Published (playable) card count as of 2026-09-09: **117** — pinned Lion/Crane 40, Vanilla Wave 1 (61 ability-free), Stronghold Waves 1–3 (7 total), Personality Waves 1–4 (8 total), Follower Wave 1 (1). The full Emperor-legal reference catalogue (`content/deck-pool.json`) has 2,143 cards; the wider catalogue is reference-only until a card is explicitly wired up (`docs/rules/LION_CRANE_COVERAGE.md`, `AGENTS.md` — never silently turn an unsupported effect into a blank playable card).
 
-Import wave 1 ([#95](https://github.com/alfredoh7/l5r-emperor/issues/95)) shipped 5 cards (Shinjo Eun-Sahng, Shosuro Konishi, Tsuruchi Kosoko, Tsuruchi Isas, Stalking Tiger) whose only blocker was the Ranged/Melee Attack primitive, plus a small additive `PendingAttack.SourceId` extension so a card's own post-attack effect (Isas' "move him home") can find the exact performing instance. Nine further candidates identified in the same triage are equally ready on the rules side but blocked on missing reference scans (`download_oracle_printings.py`/`download_expansion_printings.py` need a live call to the Oracle of the Void API, unavailable from this environment): Dark Naga Scouts, Horse Archers, Shikaro, Isawa Taiken, Murderous Thieves, Shinjo Sujikaro, Moto Ming-Gwok, Bayushi Higaonna, Cavalry Flankers.
+Import wave 1 ([#95](https://github.com/alfredoh7/l5r-emperor/issues/95)) shipped 5 cards (Shinjo Eun-Sahng, Shosuro Konishi, Tsuruchi Kosoko, Tsuruchi Isas, Stalking Tiger) whose only blocker was the Ranged/Melee Attack primitive, plus a small additive `PendingAttack.SourceId` extension so a card's own post-attack effect (Isas' "move him home") can find the exact performing instance.
+
+Import wave 2 ([#97](https://github.com/alfredoh7/l5r-emperor/issues/97)) shipped 2 cards (Bayushi Kahoku, Asako Ume) after widening `AttackStrength` to take the candidate target (unlocking target-dependent strength, e.g. Kahoku's "+2 if the target is dishonorable") and adding an always-on `PersonalityForce` Effect hook (`force-with-spell`, `force-if-enemy-dishonorable`) alongside the existing attacking-only Effects.
+
+Sixteen further Tier 2 candidates were triaged for import wave 2 and did not ship this round. Five need only the same target-dependent-strength/Force extensions wave 2 already built, but had no downloaded reference scan (same Oracle of the Void API blocker as wave 1's remaining nine): Akodo Kamina-exp, Horseback Warriors, Shiba Shirou, Cursed Relic, Isawa Kaname. Sankaku-Yari is the same shape as Horseback Warriors but also exposed a real gap: an Item's Battle ability has no check that its wielding Personality is actually at the current battlefield (only Personality-sourced abilities get that check today). The Vengeful is also scan-blocked. The rest need a mechanism beyond a strength/Force parameter, identified per card so a future wave can pick the highest-leverage one first:
+
+| Card | What's missing beyond the Attack primitive |
+|---|---|
+| Cursed Relic | "Any number of times per turn" exception list (precedented by `border-game`, not yet generalized) plus a "remove from the game" effect distinct from Destroy |
+| Isawa Kaname | Same "any number of times per turn" exception, plus a new Reaction trigger ("after a Ranged Attack is targeted") distinct from the existing `before-attack-resolves` |
+| The Vengeful | A "usable even while bowed" exception on a second ability, plus an unconditional straighten action |
+| Breath of the Heavens | Attack strength keyed off the *performer's* Fire token count (not source/target) with a Performer selection, plus a post-attack "give a token" effect requiring `PendingAttack` to track the performer separately from the source card |
+| Cleansing the Path, Thunder's Favor | Attack strength keyed off the *attached parent's* keyword (Spell "performing Shugenja" lookup), a new axis `AttackStrength` doesn't take yet |
+| Koan's Staff | Strength keyed off counting same-unit "Koan" cards — a new unit-composition counting helper |
+| The Arrow's Eye | Strength keyed off the *target's* Follower count — a unit-composition count, not a flag |
+| Genji's Students | Strength keyed off the performer's *own* unit Follower count, plus a separate Battle/Open province-strength-adjustment ability already on the same card |
+| Tamori Potion | Strength keyed off an Alchemist check plus counting distinct element keywords in a unit — compound counting logic |
+| The Lion's Charge | Strength keyed off a Paragon lookup on the performer or the performer's Personality (for a Follower performer), plus an Honor gain on use |
+| Togashi Sakata | A runtime choice between two token types on a Limited ability (existing token primitives only ever grant one fixed type) |
+| Moshi Tomiko | "Bow Tomiko or one of her Spells" is a cost choice between two different cards, not a plain self-bow |
+
+Nine further Tier 1 candidates from wave 1's triage remain blocked purely on scans, not mechanics: Dark Naga Scouts, Horse Archers, Shikaro, Isawa Taiken, Murderous Thieves, Shinjo Sujikaro, Moto Ming-Gwok, Bayushi Higaonna, Cavalry Flankers.
 
 Next content candidates should be chosen by which mechanic they'd exercise, per the "build the rules engine as we go" approach — e.g. the recurring "you do not lose Honor from [category] cards you own" pattern (6+ Strongholds) is the next highest-leverage primitive by card-count once picked up again.
