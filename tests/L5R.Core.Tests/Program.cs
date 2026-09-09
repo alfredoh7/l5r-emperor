@@ -1,8 +1,11 @@
 using System.Text.Json;
 using L5R.Core;
+using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
+    ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("A bowed Personality suppresses two Native Guides in the view and actual resolution", BowedPersonalityResolution),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
     ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
@@ -129,6 +132,28 @@ static MatchEngine Battle(int attackForce=5,int defenseForce=2,int provinceStren
     return MatchEngine.FromTestState(s);
 }
 static void Resolve(MatchEngine e) { Accept(e,Cmd(e,"pass")); Accept(e,Cmd(e,"pass")); }
+
+static void PublicPassEvents()
+{
+    var e=Battle();
+    var before=e.State.Events.Count;
+    Reject(e,new("pass",0,e.Version));
+    Equal(e.State.Events.Count,before);
+    Accept(e,Cmd(e,"pass"));
+    var first=e.GetView(0).Events.Last(); Equal(first.Type,"passed"); Equal(first.PlayerId,1);
+    Accept(e,Cmd(e,"pass"));
+    var events=e.GetView(1).Events.Skip(before).ToArray();
+    Equal(events.Count(x=>x.Type=="passed"),2);
+    Check(events.Single(x=>x.Type=="passed" && x.PlayerId==0).Sequence < events.Single(x=>x.Type=="battleResolved").Sequence);
+    var reaction=MatchEngine.CreateEconomyScenario();
+    var id=ProvinceCard(reaction); var quote=reaction.QuotePurchase(0,id);
+    Accept(reaction,Cmd(reaction,"purchase",id:id,sources:quote.Payments[0].SourceIds));
+    Check(reaction.State.PendingChoice is not null);
+    var actor=reaction.State.PriorityPlayerId;
+    Accept(reaction,Cmd(reaction,"declineReaction"));
+    var pass=reaction.GetView(1).Events.Last(x=>x.Type=="reactionPassed"); Equal(pass.PlayerId,actor);
+    Check(pass.CardId is null,"Passing must not reveal a hidden card.");
+}
 
 static void Setup()
 {
@@ -1452,4 +1477,28 @@ static void BowedPersonalityResolution()
         if(owner==0 && Environment.GetEnvironmentVariable("L5R_UNIT_VIEW_FIXTURE") is { Length: >0 } output)
             File.WriteAllText(output,Json(new[]{bowedCards,MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army}));
     }
+}
+
+static void BattleJournalProjection()
+{
+    var state=MatchEngine.CreateEconomyScenario().State;
+    state.Phase=Phase.Battle; state.CurrentBattleProvince=0; state.UnresolvedBattlefields=[0]; state.PriorityPlayerId=1;
+    state.Cards.Add("public-attacker",new CardInstance{Id="public-attacker",DefinitionId="training-crane-veteran",OwnerId=0,Zone=Zone.Battlefield,ProvinceIndex=0,FaceUp=true});
+    state.Cards.Add("public-defender",new CardInstance{Id="public-defender",DefinitionId="training-lion-veteran",OwnerId=1,Zone=Zone.Battlefield,ProvinceIndex=0,FaceUp=true,Modifiers=[new("fixture","fixture","Force",-5)]});
+    var engine=MatchEngine.FromTestState(state); var journal=new BattleJournal(); var before=engine.GetView(0);
+    journal.Observe(before,null); var revision=journal.Revision;
+    journal.Observe(before,before); Check(journal.Revision==revision,"Rerender reinserted events.");
+    Check(engine.Execute(new("pass",1,engine.Version)).Accepted,"First pass rejected.");
+    var intermediate=engine.GetView(0); journal.Observe(intermediate,before);
+    Check(engine.Execute(new("pass",0,engine.Version)).Accepted,"Second pass rejected.");
+    var after=engine.GetView(0); journal.Observe(after,intermediate);
+    Check(journal.Exchanges.Count(e=>e.Events[0].Type=="passed")==2,"Lost either player's pass.");
+    var resolution=journal.Exchanges.Single(e=>e.Events[0].Type=="battleResolved");
+    Check(resolution.Events.Any(e=>e.Type=="unitDestroyed"),"Destruction separated from its resolution cause.");
+    Check(journal.Aftermath.Any(r=>r.Destination=="Dead") && journal.Aftermath.Any(r=>r.Destination=="Home · bowed"),"Aftermath lost actual destinations.");
+    var count=journal.Exchanges.Count; journal.Observe(after,after); Check(count==journal.Exchanges.Count,"Duplicate outcome on rerender.");
+    var restored=new BattleJournal(); restored.Observe(after,null);
+    Check(restored.Aftermath.Count==0,"Reconnect invented historical movement destinations.");
+    Check(restored.Exchanges.SelectMany(x=>x.Events).All(e=>after.Events.Contains(e)),"Journal invented a public event.");
+    restored.Reset(); Check(restored.Exchanges.Count==0 && restored.LastSequence==-1,"New match retained previous history.");
 }

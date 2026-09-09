@@ -1,0 +1,1717 @@
+{
+  "description": "Native game capture of one real, engine-accepted Holding purchase; the in-play Holdings group changes from four to five cards including its Stronghold. No fabricated gameplay state.",
+  "card": "Gold Mine",
+  "purchase": {
+    "type": "purchase",
+    "playerId": 1,
+    "expectedVersion": 8,
+    "cardId": "card-0099",
+    "sourceIds": [
+      "card-0084"
+    ],
+    "province": null,
+    "clanDiscount": false,
+    "clanAllegiance": false,
+    "assignments": null,
+    "cardIds": null,
+    "targetId": null,
+    "abilityId": null,
+    "performerId": null,
+    "choice": null
+  },
+  "beforeVersion": 8,
+  "afterVersion": 9,
+  "framesPerSecond": 24,
+  "frames": [
+    {
+      "frame": 0,
+      "seconds": 0,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 1,
+      "seconds": 0.041666666666666664,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 2,
+      "seconds": 0.08333333333333333,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 3,
+      "seconds": 0.125,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 4,
+      "seconds": 0.16666666666666666,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 5,
+      "seconds": 0.20833333333333334,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 6,
+      "seconds": 0.25,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 7,
+      "seconds": 0.2916666666666667,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 8,
+      "seconds": 0.3333333333333333,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 9,
+      "seconds": 0.375,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 10,
+      "seconds": 0.4166666666666667,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 11,
+      "seconds": 0.4583333333333333,
+      "version": 8,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 474,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 12,
+      "seconds": 0.5,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 13,
+      "seconds": 0.5416666666666666,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 14,
+      "seconds": 0.5833333333333334,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 15,
+      "seconds": 0.625,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 16,
+      "seconds": 0.6666666666666666,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 17,
+      "seconds": 0.7083333333333334,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 18,
+      "seconds": 0.75,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 19,
+      "seconds": 0.7916666666666666,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 20,
+      "seconds": 0.8333333333333334,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 21,
+      "seconds": 0.875,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 22,
+      "seconds": 0.9166666666666666,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 23,
+      "seconds": 0.9583333333333334,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 24,
+      "seconds": 1,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 25,
+      "seconds": 1.0416666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 26,
+      "seconds": 1.0833333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 27,
+      "seconds": 1.125,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 28,
+      "seconds": 1.1666666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 29,
+      "seconds": 1.2083333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": true
+    },
+    {
+      "frame": 30,
+      "seconds": 1.25,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": false
+    },
+    {
+      "frame": 31,
+      "seconds": 1.2916666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": false
+    },
+    {
+      "frame": 32,
+      "seconds": 1.3333333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": false
+    },
+    {
+      "frame": 33,
+      "seconds": 1.375,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": false
+    },
+    {
+      "frame": 34,
+      "seconds": 1.4166666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0,
+      "cardsMoving": false
+    },
+    {
+      "frame": 35,
+      "seconds": 1.4583333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.030864198,
+      "cardsMoving": false
+    },
+    {
+      "frame": 36,
+      "seconds": 1.5,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.061728396,
+      "cardsMoving": false
+    },
+    {
+      "frame": 37,
+      "seconds": 1.5416666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.0925926,
+      "cardsMoving": false
+    },
+    {
+      "frame": 38,
+      "seconds": 1.5833333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.12345679,
+      "cardsMoving": false
+    },
+    {
+      "frame": 39,
+      "seconds": 1.625,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.15432099,
+      "cardsMoving": false
+    },
+    {
+      "frame": 40,
+      "seconds": 1.6666666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.18518518,
+      "cardsMoving": false
+    },
+    {
+      "frame": 41,
+      "seconds": 1.7083333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.21604937,
+      "cardsMoving": false
+    },
+    {
+      "frame": 42,
+      "seconds": 1.75,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.24691357,
+      "cardsMoving": false
+    },
+    {
+      "frame": 43,
+      "seconds": 1.7916666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.27777776,
+      "cardsMoving": false
+    },
+    {
+      "frame": 44,
+      "seconds": 1.8333333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.30864197,
+      "cardsMoving": false
+    },
+    {
+      "frame": 45,
+      "seconds": 1.875,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.33950618,
+      "cardsMoving": false
+    },
+    {
+      "frame": 46,
+      "seconds": 1.9166666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.3703704,
+      "cardsMoving": false
+    },
+    {
+      "frame": 47,
+      "seconds": 1.9583333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.4012346,
+      "cardsMoving": false
+    },
+    {
+      "frame": 48,
+      "seconds": 2,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.4320988,
+      "cardsMoving": false
+    },
+    {
+      "frame": 49,
+      "seconds": 2.0416666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.462963,
+      "cardsMoving": false
+    },
+    {
+      "frame": 50,
+      "seconds": 2.0833333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.49382722,
+      "cardsMoving": false
+    },
+    {
+      "frame": 51,
+      "seconds": 2.125,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.5246914,
+      "cardsMoving": false
+    },
+    {
+      "frame": 52,
+      "seconds": 2.1666666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.5555556,
+      "cardsMoving": false
+    },
+    {
+      "frame": 53,
+      "seconds": 2.2083333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.58641976,
+      "cardsMoving": false
+    },
+    {
+      "frame": 54,
+      "seconds": 2.25,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.61728394,
+      "cardsMoving": false
+    },
+    {
+      "frame": 55,
+      "seconds": 2.2916666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.6481481,
+      "cardsMoving": false
+    },
+    {
+      "frame": 56,
+      "seconds": 2.3333333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.6790123,
+      "cardsMoving": false
+    },
+    {
+      "frame": 57,
+      "seconds": 2.375,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.7098765,
+      "cardsMoving": false
+    },
+    {
+      "frame": 58,
+      "seconds": 2.4166666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.74074066,
+      "cardsMoving": false
+    },
+    {
+      "frame": 59,
+      "seconds": 2.4583333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.77160484,
+      "cardsMoving": false
+    },
+    {
+      "frame": 60,
+      "seconds": 2.5,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.802469,
+      "cardsMoving": false
+    },
+    {
+      "frame": 61,
+      "seconds": 2.5416666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.8333332,
+      "cardsMoving": false
+    },
+    {
+      "frame": 62,
+      "seconds": 2.5833333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.8641974,
+      "cardsMoving": false
+    },
+    {
+      "frame": 63,
+      "seconds": 2.625,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.89506155,
+      "cardsMoving": false
+    },
+    {
+      "frame": 64,
+      "seconds": 2.6666666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.92592573,
+      "cardsMoving": false
+    },
+    {
+      "frame": 65,
+      "seconds": 2.7083333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.9567899,
+      "cardsMoving": false
+    },
+    {
+      "frame": 66,
+      "seconds": 2.75,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": true,
+      "reveal": 0.9876541,
+      "cardsMoving": false
+    },
+    {
+      "frame": 67,
+      "seconds": 2.7916666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 68,
+      "seconds": 2.8333333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 69,
+      "seconds": 2.875,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 70,
+      "seconds": 2.9166666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 71,
+      "seconds": 2.9583333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 72,
+      "seconds": 3,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 73,
+      "seconds": 3.0416666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 74,
+      "seconds": 3.0833333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 75,
+      "seconds": 3.125,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 76,
+      "seconds": 3.1666666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 77,
+      "seconds": 3.2083333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 78,
+      "seconds": 3.25,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 79,
+      "seconds": 3.2916666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 80,
+      "seconds": 3.3333333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 81,
+      "seconds": 3.375,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 82,
+      "seconds": 3.4166666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 83,
+      "seconds": 3.4583333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 84,
+      "seconds": 3.5,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 85,
+      "seconds": 3.5416666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 86,
+      "seconds": 3.5833333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 87,
+      "seconds": 3.625,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 88,
+      "seconds": 3.6666666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 89,
+      "seconds": 3.7083333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 90,
+      "seconds": 3.75,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 91,
+      "seconds": 3.7916666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 92,
+      "seconds": 3.8333333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 93,
+      "seconds": 3.875,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 94,
+      "seconds": 3.9166666666666665,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 95,
+      "seconds": 3.9583333333333335,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 96,
+      "seconds": 4,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 97,
+      "seconds": 4.041666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 98,
+      "seconds": 4.083333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 99,
+      "seconds": 4.125,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 100,
+      "seconds": 4.166666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 101,
+      "seconds": 4.208333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 102,
+      "seconds": 4.25,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 103,
+      "seconds": 4.291666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 104,
+      "seconds": 4.333333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 105,
+      "seconds": 4.375,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 106,
+      "seconds": 4.416666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 107,
+      "seconds": 4.458333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 108,
+      "seconds": 4.5,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 109,
+      "seconds": 4.541666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 110,
+      "seconds": 4.583333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 111,
+      "seconds": 4.625,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 112,
+      "seconds": 4.666666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 113,
+      "seconds": 4.708333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 114,
+      "seconds": 4.75,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 115,
+      "seconds": 4.791666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 116,
+      "seconds": 4.833333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 117,
+      "seconds": 4.875,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 118,
+      "seconds": 4.916666666666667,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    },
+    {
+      "frame": 119,
+      "seconds": 4.958333333333333,
+      "version": 9,
+      "holdingsBounds": {
+        "x": 22,
+        "y": 544,
+        "width": 694,
+        "height": 498
+      },
+      "animating": false,
+      "reveal": 1,
+      "cardsMoving": false
+    }
+  ],
+  "checks": [
+    "Engine accepted purchase",
+    "Holding entered its actual Home zone",
+    "Actual layout bounds changed",
+    "Camera stayed fixed",
+    "Ink absent throughout actual card movement",
+    "Gradual reveal after card settlement",
+    "Borders, card opacity and pile counts settled",
+    "Complete real card membership retained"
+  ]
+}
