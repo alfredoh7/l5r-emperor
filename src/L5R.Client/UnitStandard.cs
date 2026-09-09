@@ -48,19 +48,24 @@ public partial class UnitStandard : StatTokens
     }
 
     public override bool _HasPoint(Vector2 point) => _body.HasPoint(point);
-    private static Texture2D? _spears;
+    private static Texture2D? _spears, _canvas;
     public override void _Draw()
     {
         if (Card.UnitForce is not int total) return;
         _art ??= GD.Load<Texture2D>("res://Art/unit-ribbon-reference.png");
         _spears ??= GD.Load<Texture2D>("res://Art/card-token-hardware.png");
+        _canvas ??= GD.Load<Texture2D>("res://Art/unit-standard-mounted.png");
         foreach(var shape in Silhouettes)
             DrawColoredPolygon(shape.Select(FromSource).ToArray(),Colors.White,shape.Select(p=>p/_art.GetSize()).ToArray(),_art);
         // Reuse C's actual outline and curved divider; replace only baked semantic pixels.
         Rect2 Patch(float x,float y,float w,float h) => new(FromSource(new Vector2(x,y)),new Vector2(w/41*_body.Size.X,h/145*_body.Size.Y));
-        var blank=new Rect2(457,244,16,5);
-        DrawTextureRectRegion(_art,Patch(451,210,32,38),blank);
-        DrawTextureRectRegion(_art,Patch(451,129,33,62),blank);
+        // Restore the earlier woven canvas using a full 2D cloth swatch, without
+        // stretching a five-pixel row. Keep C's short silhouette and gold rim.
+        Vector2[] cloth=[new(450,122),new(480,122),new(485,126),new(485,245),new(481,251),new(471,256),new(450,260)];
+        DrawColoredPolygon(cloth.Select(FromSource).ToArray(),new Color(.66f,.70f,.76f),
+            cloth.Select(p=>(new Vector2(360,680)+(p-new Vector2(450,122))/new Vector2(35,138)*new Vector2(142,560))/_canvas.GetSize()).ToArray(),_canvas);
+        Vector2[] divider=[new(450,197),new(484,191),new(484,199),new(475,207),new(460,209),new(450,206)];
+        DrawColoredPolygon(divider.Select(FromSource).ToArray(),new Color(.88f,.88f,.88f),divider.Select(p=>p/_art.GetSize()).ToArray(),_art);
         Vector2[][] spearShapes = [
             [new(679,255),new(701,335),new(686,347),new(686,480),new(680,496),new(674,480),new(674,348),new(657,344)],
             [new(733,210),new(757,310),new(742,325),new(742,333),new(753,334),new(753,343),new(741,343),new(741,484),new(734,500),new(727,483),new(727,343),new(715,343),new(715,334),new(727,333),new(726,325),new(710,314)],

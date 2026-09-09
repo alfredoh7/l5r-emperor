@@ -71,7 +71,7 @@ public partial class BattleDefeatBanner : Control
     public override void _Ready()
     {
         MouseFilter=MouseFilterEnum.Ignore; ZIndex=45; Visible=false;
-        _headline=Palette.Wrapped("",34,new Color("e8b6a0")); _headline.AddThemeFontOverride("font",Palette.Title); _headline.HorizontalAlignment=HorizontalAlignment.Center; AddChild(_headline);
+        _headline=Palette.Wrapped("",34,new Color("e8b6a0")); _headline.Uppercase=true; _headline.AddThemeFontOverride("font",Palette.Title); _headline.HorizontalAlignment=HorizontalAlignment.Center; AddChild(_headline);
         _cause=Palette.Wrapped("",17,Palette.PaperDim); _cause.HorizontalAlignment=HorizontalAlignment.Center; AddChild(_cause);
     }
     public override void _Draw()

@@ -19,3 +19,5 @@ Only face-up, identified cards in play show rails. Personalities, Holdings, Stro
 The short right ribbon reads the engine's UnitForce, including zero. This change adds no rules, makes no token effects authoritative in the client and does not make catalogue cards playable.
 
 Run `bash tools/check-token-rails.sh` on a native graphical Mac. Evidence and limits are in `docs/screenshots/token-rails/README.md`.
+
+2026-09-09 material refinement: the short ribbon keeps the C outline, gold curved divider and polished spear hardware, but samples a full 2D woven-cloth swatch from the earlier `unit-standard-mounted.png` asset in deeper navy. Mipmaps prevent the weave from aliasing at small table scales; no new generated bitmap or gameplay value changes.
