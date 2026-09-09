@@ -81,7 +81,13 @@ var tests = new (string Name, Action Run)[]
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
     ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
     ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
-    ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama)
+    ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama),
+    ("Daigotsu Kendo's Conqueror keeps him unbowed after a win; Ikoma Natsu's Cavalry assigns during Cavalry Maneuvers", DaigotsuKendoConquerorAndIkomaNatsuCavalry),
+    ("Mirumoto Reiyu gives an enemy Force/Follower a Force penalty equal to her own current Force", MirumotoReiyuForcePenalty),
+    ("Shinjo Horibe may bow or straighten any Personality, but only while opposed", ShinjoHoribeBowOrStraighten),
+    ("Doji Atsumichi may bow or straighten a Personality with lower Personal Honor than himself", DojiAtsumichiBowOrStraighten),
+    ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
+    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1178,6 +1184,100 @@ static void TwoHandedWeaponOverridesKensaiAndKama()
     Accept(e2,Cmd(e2,"equip",player:0,id:plain2.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
     Accept(e2,Cmd(e2,"pass",player:1));
     Reject(e2,Cmd(e2,"equip",player:0,id:twoHanded2.Id,target:kensai2.Id));
+}
+static void DaigotsuKendoConquerorAndIkomaNatsuCavalry()
+{
+    // Daigotsu Kendo carries Conqueror: winning a battle straightens him instead of bowing him.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var kendo=Add(s,"oracle-l5r-1736",0,Zone.Battlefield,province:0); // Force 3, no defenders present
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e);
+    Check(!e.State.Cards[kendo.Id].Bowed,"Conqueror: Kendo returns home unbowed after winning");
+    Equal(e.State.Cards[kendo.Id].Zone,Zone.Home);
+
+    // Ikoma Natsu carries Cavalry: assigns during Cavalry Maneuvers, not Infantry Maneuvers.
+    var s2=MatchEngine.CreateStarterMatch().State; s2.Phase=Phase.AttackDeclaration; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var natsu=Add(s2,"oracle-l5r-3623",0,Zone.Home);
+    var e2=MatchEngine.FromTestState(s2);
+    Reject(e2,Cmd(e2,"attack",player:0,assignments:new(){[natsu.Id]=0}));
+    Accept(e2,Cmd(e2,"attack",player:0,assignments:[]));
+    Accept(e2,Cmd(e2,"assignDefense",player:1,assignments:[]));
+    Equal(e2.State.Phase,Phase.CavalryDeclaration);
+    Accept(e2,Cmd(e2,"attack",player:0,assignments:new(){[natsu.Id]=0}));
+    Equal(e2.State.Cards[natsu.Id].Zone,Zone.Battlefield,"Cavalry-keyword Natsu assigns during Cavalry Maneuvers");
+}
+static void MirumotoReiyuForcePenalty()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var reiyu=Add(s,"oracle-l5r-5138",0,Zone.Battlefield,province:0); // Force 4
+    var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reiyu.Id,TargetId:target.Id,AbilityId:"reiyu-force-penalty"));
+    Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,1,"Force 5 - 4 (Reiyu's current Force) = 1");
+}
+static void ShinjoHoribeBowOrStraighten()
+{
+    // Not opposed: rejected.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var horibe=Add(s,"oracle-l5r-6885",0,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:horibe.Id,TargetId:horibe.Id,AbilityId:"horibe-bow"));
+
+    // Opposed: may bow or straighten any Personality, including an enemy's.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var horibe2=Add(s2,"oracle-l5r-6885",0,Zone.Battlefield,province:0);
+    var enemy=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:horibe2.Id,TargetId:enemy.Id,AbilityId:"horibe-bow"));
+    Check(e2.State.Cards[enemy.Id].Bowed,"Bows the target enemy Personality");
+}
+static void DojiAtsumichiBowOrStraighten()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var atsumichi=Add(s,"oracle-l5r-2060",0,Zone.Battlefield,province:0); // Personal Honor 4
+    var lowerHonor=Add(s,"training-crane-samurai",1,Zone.Battlefield,bowed:true,province:0); // PH 2
+    var equalHonor=Add(s,"training-lion-dignitary",1,Zone.Battlefield,province:0); // PH 4: not lower
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:equalHonor.Id,AbilityId:"atsumichi-bow"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:lowerHonor.Id,AbilityId:"atsumichi-straighten"));
+    Check(!e.State.Cards[lowerHonor.Id].Bowed,"Straightens the lower-Honor target");
+}
+static void TetsuoDestroyAttachmentAndWeakerWeaponed()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var tetsuo=Add(s,"oracle-l5r-7943",0,Zone.Battlefield,province:0);
+    Add(s,"training-weapon",0,Zone.Attached,attachedTo:tetsuo.Id,province:0); // Tetsuo carries 1 Weapon
+    var fewerWeapons=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // 0 Weapons
+    var notFewerWeapons=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+    Add(s,"training-weapon",1,Zone.Attached,attachedTo:notFewerWeapons.Id,province:0); // 1 Weapon: not fewer
+    var attachment=Add(s,"training-item",1,Zone.Attached,attachedTo:notFewerWeapons.Id,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:notFewerWeapons.Id,AbilityId:"tetsuo-destroy-weaker-weaponed"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:fewerWeapons.Id,AbilityId:"tetsuo-destroy-weaker-weaponed"));
+    Equal(e.State.Cards[fewerWeapons.Id].Zone,Zone.Dead);
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:attachment.Id,AbilityId:"tetsuo-destroy-attachment"));
+    Equal(e.State.Cards[attachment.Id].Zone,Zone.FateDiscard);
+}
+static void MotoShunsukeForceBonusAndMakeDead()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var shunsuke=Add(s,"oracle-l5r-5371",0,Zone.Battlefield,province:0); // base Force 3
+    Add(s,"training-crane-samurai",1,Zone.Dead); // player 1's dead pile: 2
+    Add(s,"training-crane-samurai",1,Zone.Dead);
+    Add(s,"training-lion-samurai",0,Zone.Dead); // player 0's (Shunsuke's own) dead pile: 1
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shunsuke.Id).Force,5,"Base 3 + the largest single dead pile (2)");
+
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var shunsuke2=Add(s2,"oracle-l5r-5371",0,Zone.Home);
+    var discardedEnemy=Add(s2,"training-crane-samurai",1,Zone.DynastyDiscard);
+    var ownDiscarded=Add(s2,"training-lion-samurai",0,Zone.DynastyDiscard);
+    var e2=MatchEngine.FromTestState(s2);
+    Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:ownDiscarded.Id,AbilityId:"shunsuke-make-dead"));
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:discardedEnemy.Id,AbilityId:"shunsuke-make-dead"));
+    Equal(e2.State.Cards[discardedEnemy.Id].Zone,Zone.Dead,"Becomes honorably dead");
 }
 static void CarpenterCastleAttack()
 {
