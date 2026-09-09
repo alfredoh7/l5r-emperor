@@ -129,6 +129,7 @@ public sealed partial class MatchEngine
         {
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
+            if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -392,7 +393,8 @@ public sealed partial class MatchEngine
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
         // regardless of the outcome -- the only trigger that clears it.
         Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
-        if(af>df)
+        var attackerWon=af>df;
+        if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
             GainHonor(attacker,destroyedDefenders*2,"Battle victory");
@@ -408,7 +410,40 @@ public sealed partial class MatchEngine
             GainHonor(attacker,destroyedD,"Tied battle"); GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
         }
-        foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield)) ReturnHome(card,true);
+        // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
+        // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
+        // here are still accurate even if the choice must be deferred to the attacker.
+        var conquerorCandidates=attackerWon ? a.Where(c=>c.Zone==Zone.Battlefield && Keyword(c,"Conqueror")).Select(c=>c.Id).ToArray() : [];
+        if(conquerorCandidates.Length>1)
+        {
+            _state.PendingConqueror=new PendingConqueror { PlayerId=attacker, ProvinceIndex=provinceIndex, CandidateIds=conquerorCandidates };
+            _state.PendingChoice=new("conqueror",attacker,null,"Choose a Conqueror personality to straighten instead of returning home bowed.");
+            _state.PriorityPlayerId=attacker;
+            Emit("conquerorChoice","Choose a Conqueror personality to straighten.",attacker);
+            return; // FinishBattleResolution runs once the attacker picks (ResolveConqueror).
+        }
+        FinishBattleResolution(attacker,provinceIndex,a,conquerorCandidates.Length==1?conquerorCandidates[0]:null);
+    }
+    private void ResolveConqueror(GameCommand command)
+    {
+        var pending=_state.PendingConqueror!;
+        Require(command.Type=="chooseConqueror" && command.PlayerId==pending.PlayerId && command.TargetId is not null && pending.CandidateIds.Contains(command.TargetId),
+            "Choose one of the eligible Conqueror personalities.");
+        var chosenId=command.TargetId!;
+        var a=Army(pending.PlayerId,pending.ProvinceIndex).ToArray();
+        _state.PendingChoice=null; _state.PendingConqueror=null;
+        FinishBattleResolution(pending.PlayerId,pending.ProvinceIndex,a,chosenId);
+    }
+    // Common tail of battle resolution: attacking units return home (bowed, except the Conqueror
+    // choice, if any), then the battlefield closes out. Split out so a deferred Conqueror choice can
+    // reach the same completion as the immediate (0 or 1 candidate) path.
+    private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
+    {
+        foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
+        {
+            ReturnHome(card,card.Id!=conquerorUnbowedId);
+            if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
+        }
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
@@ -436,7 +471,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
         Require(target.OwnerId==command.PlayerId && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,"Choose your Personality at home.");
         Require(def.Type!=CardType.Follower || def.HonorRequirement is null || Definition(target).PersonalHonor>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
-        Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and one Weapon.");
+        Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
@@ -463,7 +498,20 @@ public sealed partial class MatchEngine
 
     private void NextAction(int playerId) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=1-playerId; }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
-    private bool AttachmentAllowed(CardInstance attachment,CardInstance target) => new[] {"Armor","Weapon"}.All(keyword=>!Keyword(attachment,keyword) || !Attachments(target.Id).Any(c=>Keyword(c,keyword)));
+    // By default a Personality carries at most one Armor and one Weapon. Kensai (printed or granted --
+    // Keyword() already checks both) raises the Weapon cap to two. Kama independently raises it to two
+    // without granting Kensai, but the two do not stack: a Kensai wielding a Kama is still capped at
+    // two Weapons, not three.
+    private bool AttachmentAllowed(CardInstance attachment,CardInstance target)
+    {
+        if(Keyword(attachment,"Armor")) return !Attachments(target.Id).Any(c=>Keyword(c,"Armor"));
+        if(Keyword(attachment,"Weapon"))
+        {
+            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || Attachments(target.Id).Any(c=>Keyword(c,"Kama")) ? 2 : 1;
+            return Attachments(target.Id).Count(c=>Keyword(c,"Weapon"))<weaponCap;
+        }
+        return true;
+    }
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
     // "force-with-spell" (Asako Ume) and "force-if-enemy-dishonorable" (Bayushi Kahoku) are always-on
     // passive bonuses, unlike the attacking-only attacking-two/attacking-four Effects above.

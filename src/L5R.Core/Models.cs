@@ -97,6 +97,18 @@ public sealed class PendingAttack
     public string Kind { get; set; } = "";
 }
 
+/// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
+/// their attacking Personalities carries the Conqueror keyword -- a real choice for the attacker.
+/// (Exactly one candidate resolves immediately, with no pending state, since there is nothing to
+/// choose.) ProvinceIndex is enough to recompute the untouched attacking army once the choice lands;
+/// nothing about it can change while this is the only legal next command (see ResolveConqueror).</summary>
+public sealed class PendingConqueror
+{
+    public int PlayerId { get; set; }
+    public int ProvinceIndex { get; set; }
+    public string[] CandidateIds { get; set; } = [];
+}
+
 public sealed class MatchState
 {
     public long Version { get; set; }
@@ -109,6 +121,7 @@ public sealed class MatchState
     public int ConsecutivePasses { get; set; }
     public PendingChoice? PendingChoice { get; set; }
     public PendingAttack? PendingAttack { get; set; }
+    public PendingConqueror? PendingConqueror { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     public int? WinnerId { get; set; }
