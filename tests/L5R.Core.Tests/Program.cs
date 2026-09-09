@@ -70,6 +70,7 @@ var tests = new (string Name, Action Run)[]
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
     ("A discarded dishonorable Personality can become honorably dead: rehonored, no Honor-loss penalty", MakeDeadFromDiscard),
+    ("A Stronghold's Honor-loss immunity negates a matching Clan or Fate source the losing player owns, and only that", HonorLossImmunity),
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
     ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
@@ -687,6 +688,60 @@ static void MakeDeadFromDiscard()
         var inPlay=Add(s,"training-crane-samurai",0,Zone.Home);
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:inPlay.Id,AbilityId:"training-make-dead"));
+    }
+}
+static void HonorLossImmunity()
+{
+    {
+        // Fate-card source (Clan is irrelevant here -- the Strategy is Unaligned): a Battle ability
+        // that costs its own controller Honor to use is negated by the acting player's Stronghold.
+        var s=StrongholdBattle("training-honor-immune-stronghold");
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var strategy=Add(s,"training-honor-cost-strategy",0,Zone.Hand);
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strategy.Id,AbilityId:"training-honor-cost-attack"));
+        Equal(e.State.Players[0].Honor,honorBefore,"Fate-card Honor cost negated by the immune Stronghold");
+        Check(e.State.Events.Any(x=>x.Type=="honorLossNegated"));
+    }
+    {
+        // Without the immune Stronghold, the identical cost applies normally.
+        var s=StrongholdBattle("oracle-l5r-4059");
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var strategy=Add(s,"training-honor-cost-strategy",0,Zone.Hand);
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strategy.Id,AbilityId:"training-honor-cost-attack"));
+        Equal(e.State.Players[0].Honor,honorBefore-2);
+    }
+    {
+        // Clan-matching source: a Spider Clan Personality's own "loses Honor after entering play"
+        // Reaction is negated by the same Stronghold.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Cards[s.Players[0].StrongholdId].DefinitionId="training-honor-immune-stronghold";
+        Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-spider-honor-loss"; s.Cards[cardId].FaceUp=true;
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"training-honor-loss-entry"));
+        Equal(e.State.Players[0].Honor,honorBefore,"Spider Clan Honor loss negated by the immune Stronghold");
+    }
+    {
+        // A Dishonorable death from a card matching neither the immune Clan nor Fate is not negated,
+        // even under the same Stronghold -- the check is scoped, not blanket.
+        var s=Battle(9,2).State;
+        s.Cards[s.Players[1].StrongholdId].DefinitionId="training-honor-immune-stronghold";
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+        defender.Dishonorable=true;
+        var honorBefore=s.Players[1].Honor;
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[defender.Id].Zone,Zone.Dead);
+        Equal(e.State.Players[1].Honor,honorBefore-CardCatalog.Get("training-lion-veteran").PersonalHonor,"Lion Personality Honor loss is not negated by a Spider/Fate-scoped Stronghold");
     }
 }
 static void TokenPrimitives()

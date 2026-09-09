@@ -576,7 +576,7 @@ public sealed partial class MatchEngine
     private void MarkDead(CardInstance card)
     {
         card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
-        if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
+        if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
     }
     private void Rehonor(CardInstance card) => card.Dishonorable=false;
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
@@ -707,9 +707,34 @@ public sealed partial class MatchEngine
         province.CardId=id; var card=Card(id); card.Zone=Zone.Province; card.ProvinceIndex=province.Index; card.FaceUp=false;
         Emit("provinceRefilled",$"{player.Name} refilled province {province.Index+1} face down.",player.Id); // Neither player can inspect it.
     }
-    private void GainHonor(int playerId,int amount,string reason)
+    // Honor loss/gain is permanent by default, with no floor or ceiling and no memory of past
+    // changes -- but a standing passive (a Stronghold's printed text, keyed by its Effect below) can
+    // negate a loss outright when its source is a card the losing player owns and matching Clan/Fate
+    // criteria (core rules Glossary). Only ever checked against the LOSING player's own Stronghold:
+    // "cards you own" never reaches an opponent's passive. Only losses are covered so far -- no
+    // published or training card yet negates a gain, but nothing here assumes losses are the only
+    // negatable direction if one shows up.
+    private static readonly Dictionary<string,(string? Clan,bool Fate)> HonorLossImmunity = new(StringComparer.Ordinal)
+    {
+        ["training-honor-immunity"] = ("Spider", true),
+    };
+    private static bool IsFateCardType(CardType type) => type is CardType.Strategy or CardType.Follower or CardType.Item or CardType.Spell;
+    private bool HonorLossNegated(int playerId, CardInstance? source)
+    {
+        if(source is null || source.OwnerId != playerId) return false;
+        var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
+        if(!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
+        var def = Definition(source);
+        return rule.Clan == def.Clan || (rule.Fate && IsFateCardType(def.Type));
+    }
+    private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
         if(amount==0) return;
+        if(amount<0 && HonorLossNegated(playerId,source))
+        {
+            Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated.",playerId,source?.Id);
+            return;
+        }
         var player=Player(playerId); player.Honor+=amount;
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);

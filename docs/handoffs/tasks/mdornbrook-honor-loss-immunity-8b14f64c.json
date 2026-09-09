@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Implements Honor-loss immunity as a rules-engine primitive (issue #138): a Stronghold's printed passive can negate an Honor loss outright when its source is a card the losing player owns, matching a named Clan and/or Fate cards (Strategy/Follower/Item/Spell). GainHonor now accepts an optional source CardInstance, threaded through the call sites where a printed ability actually causes the change (Dishonorable death, Law of Darkness Dojo, training strikes). A data-driven HonorLossImmunity table (keyed by Stronghold Effect) keeps adding another Stronghold trivial. Two new training fixtures exercise both illustrated shapes: an enters-play self-loss (Clan match, reusing the existing own-enters-play Reaction window) and a Battle-ability Honor cost (Fate-card match, reusing the Tactical-Advantage-style hand-played Strategy pattern).",
+  "validation": "New HonorLossImmunity test: Fate-card Battle cost negated under the immune Stronghold, the same cost applies normally without it, a Clan-matching entry-loss negated, and a Dishonorable death from a non-matching Clan/type is NOT negated (proving the check is scoped, not blanket). Full suite: 88/88+34/34+8/8 pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "A one-off/reactive negation (a Reaction-timing ability negating a specific loss) is a distinct, separate shape not built in this pass -- no concrete card drives it yet, so it's deferred rather than speculatively built. Gain-side negation is supported by the mechanism's shape but has no data-table entry yet, since no card needs it.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/138",
+  "branch": "mdornbrook/honor-loss-immunity",
+  "updated": "2026-09-09T22:30:57.181521+00:00"
+}
