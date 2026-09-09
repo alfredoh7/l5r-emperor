@@ -1,0 +1,63 @@
+{
+  "Profile": "personality-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-806",
+      "Name": "Bayushi Kahoku",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kahoku has +2F while another player controls a dishonorable Personality.\nBattle: Ranged 3 Attack, with +2 strength if the target is dishonorable.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-806.jpg",
+      "Keywords": [
+        "Final Student",
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bayushi-kahoku-attack"
+      ],
+      "Effect": "force-if-enemy-dishonorable"
+    },
+    {
+      "Id": "oracle-l5r-592",
+      "Name": "Asako Ume",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Ume has +1F while she has a Spell.\nBattle: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-592.jpg",
+      "Keywords": [
+        "Fire",
+        "Phoenix Clan",
+        "Shugenja",
+        "Soul of Isawa Furiko"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "asako-ume-attack"
+      ],
+      "Effect": "force-with-spell"
+    }
+  ],
+  "Decks": []
+}

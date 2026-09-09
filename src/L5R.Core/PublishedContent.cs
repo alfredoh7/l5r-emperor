@@ -119,6 +119,60 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 3 of ability-bearing Personalities: the first wave of import wave 1 (issue #95)
+    /// -- straightforward Ranged/Melee Attack cards needing nothing beyond the primitive itself.</summary>
+    public static PublishedSnapshot PersonalityWave3 { get; } = LoadPersonalityWave3();
+
+    private static PublishedSnapshot LoadPersonalityWave3()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave3.json", "personality-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected personality-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-3 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-3 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 1 of ability-bearing Followers: Stalking Tiger, the second half of import wave 1
+    /// (issue #95), proving the Attack primitive needs no Personality-specific plumbing.</summary>
+    public static PublishedSnapshot FollowerWave1 { get; } = LoadFollowerWave1();
+
+    private static PublishedSnapshot LoadFollowerWave1()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave1.json", "follower-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-1 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 4 of ability-bearing Personalities: import wave 2 (issue #97) -- the first
+    /// target-dependent Attack strength conditional and an always-on passive Force bonus Effect.</summary>
+    public static PublishedSnapshot PersonalityWave4 { get; } = LoadPersonalityWave4();
+
+    private static PublishedSnapshot LoadPersonalityWave4()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave4.json", "personality-wave-4", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected personality-wave-4 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-4 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-4 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

@@ -1,0 +1,116 @@
+{
+  "Profile": "personality-wave-3",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6872",
+      "Name": "Shinjo Eun-Sahng",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6872.jpg",
+      "Keywords": [
+        "Tactician",
+        "Samurai",
+        "Soul of Shinjo Chu-Yeung",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinjo-eun-sahng-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7121",
+      "Name": "Shosuro Konishi",
+      "Type": "Personality",
+      "Clan": "Ninja",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7121.jpg",
+      "Keywords": [
+        "Ninja",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shosuro-konishi-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8852",
+      "Name": "Tsuruchi Kosoko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8852.jpg",
+      "Keywords": [
+        "Mantis Clan",
+        "Samurai",
+        "Soul of Tsuruchi Saya"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsuruchi-kosoko-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8840",
+      "Name": "Tsuruchi Isas",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Isas: Ranged 3 Attack. Move Isas home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8840.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Skirmisher",
+        "Soul of Mukami"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsuruchi-isas-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

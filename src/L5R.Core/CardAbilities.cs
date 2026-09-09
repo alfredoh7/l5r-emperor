@@ -59,6 +59,18 @@ public static class AbilityCatalog
         // card needing it -- proves strength can be raised or negated by either side before resolution.
         ["training-attack-boost"] = new("Reaction", "Training: +2 to a pending attack", "none", Trigger: "before-attack-resolves"),
         ["training-attack-negate"] = new("Reaction", "Training: negate a pending attack", "none", Trigger: "before-attack-resolves"),
+        // Import wave 1 (issue #95): unconditional Attacks needing nothing beyond the primitive itself.
+        ["shinjo-eun-sahng-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        ["shosuro-konishi-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        ["tsuruchi-kosoko-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        ["stalking-tiger-attack"] = new("Battle", "Melee 6 Attack", "attack"),
+        // "Bow Isas: Ranged 3 Attack. Move Isas home." -- the source bows itself as its own performer
+        // (no separate Performer field, same shape as kouki-force), then moves home after the Attack
+        // resolves regardless of outcome (ResolveAttackNow's per-ability switch).
+        ["tsuruchi-isas-attack"] = new("Battle", "Bow Isas · Ranged 3 Attack, then move him home", "attack"),
+        // Import wave 2 (issue #97): the Attack primitive's first target-dependent strength.
+        ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack"),
+        ["asako-ume-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
     });
 }
 
@@ -75,12 +87,20 @@ public sealed partial class MatchEngine
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
     // Ranged/Melee Attack strength; conditional bonuses (e.g. Shiro Shiba's Shugenja check) live here.
-    private int AttackStrength(string abilityId, PlayerState player) => abilityId switch
+    // target is the candidate/chosen target, when one exists (deferred targeting means it may be
+    // null); a target-dependent conditional simply falls back to its unconditional value then.
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null) => abilityId switch
     {
         "carpenter-castle-siege" => 5,
         "shiro-shiba-melee" => 4 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
         "monastery-fire-attack" => 5,
         "torazu-fire-attack" => 3,
+        "shinjo-eun-sahng-attack" => 4,
+        "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" => 5,
+        "stalking-tiger-attack" => 6,
+        "tsuruchi-isas-attack" => 3,
+        "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
+        "asako-ume-attack" => 4,
         _ => 0
     };
     // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
@@ -88,7 +108,8 @@ public sealed partial class MatchEngine
     private static string AttackKind(string abilityId) => abilityId switch
     {
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
-        "shiro-shiba-melee" => "Melee",
+        "shiro-shiba-melee" or "stalking-tiger-attack" => "Melee",
+        "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" => "Ranged",
         _ => ""
     };
     // Whether opening a reaction window before resolving an attack could possibly matter right now.
@@ -99,29 +120,36 @@ public sealed partial class MatchEngine
     // Steps F-G of a Ranged/Melee Attack (core rules): compare strength to the target's *current*
     // Force -- re-evaluated here, not at announce time, since a Reaction may have changed either --
     // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
-    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength)
+    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength, string? sourceId = null)
     {
-        if (strength <= 0 || targetId is null) return;
-        var target = Card(targetId);
-        if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
+        if (strength > 0 && targetId is not null)
         {
-            DestroyAttackTarget(target);
-            if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+            var target = Card(targetId);
+            if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
+            {
+                DestroyAttackTarget(target);
+                if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+            }
         }
+        // Tsuruchi Isas: "Move Isas home" is a second, unconditional effect of the same ability --
+        // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
+        if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
     }
     // Steps A-E already happened (presence, announce, performer, required targeting, costs) by the
     // time a card's own UseAbility case calls this. Returns true if a reaction window was opened --
     // the caller must `return;` so the action stays pending; false if it resolved immediately inline
     // (identical end state to before this primitive existed, when nothing can possibly react).
-    private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId)
+    // sourceId is only needed by a card whose own post-attack effect (see ResolveAttackNow) must
+    // find the exact performing instance again once a deferred reaction window closes.
+    private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null)
     {
-        var strength = AttackStrength(abilityId, attacker);
+        var strength = AttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId));
         if (!AnyAttackReactionAvailable())
         {
-            ResolveAttackNow(abilityId, attacker.Id, targetId, strength);
+            ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId);
             return false;
         }
-        _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId) };
+        _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, SourceId = sourceId, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId) };
         _state.PendingChoice = new("attackReaction", attacker.Id, null, "An attack is pending: react or pass.");
         _state.ConsecutivePasses = 0;
         _state.PriorityPlayerId = 1 - attacker.Id;
@@ -133,7 +161,7 @@ public sealed partial class MatchEngine
     {
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
-        ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength);
+        ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
         NextAction(attack.PlayerId);
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
@@ -250,7 +278,7 @@ public sealed partial class MatchEngine
                     var type = Definition(target).Type;
                     Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
                         "Attack a Follower or a Personality without Followers.");
-                    Require(CardForce(target) <= AttackStrength(id, player), "That card's Force is above the Attack's strength.");
+                    Require(CardForce(target) <= AttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
                 }
             }
             // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
@@ -369,6 +397,16 @@ public sealed partial class MatchEngine
                 break;
             case "torazu-fire-attack":
                 DestroyToken(source!, source!.Tokens.First(t => t.Type == "Fire"));
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "tsuruchi-isas-attack":
+                source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id)) return;
+                break;
+            case "bayushi-kahoku-attack": case "asako-ume-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             case "training-make-dead": MakeDead(target!, true); break;

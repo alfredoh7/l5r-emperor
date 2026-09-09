@@ -73,7 +73,11 @@ var tests = new (string Name, Action Run)[]
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
     ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
-    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow)
+    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow),
+    ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
+    ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome),
+    ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
+    ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack)
 };
 var failed=0;
 foreach(var test in tests)
@@ -893,6 +897,82 @@ static void AttackReactionWindow()
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
         Equal(e.State.Players[0].Honor,honorBefore+2,"Carpenter Castle's hit bonus still applies to a deferred resolution");
     }
+}
+static void UnconditionalAttackImportWave()
+{
+    // Shinjo Eun-Sahng (Ranged 4), Shosuro Konishi (Ranged 5), Tsuruchi Kosoko (Ranged 5) and Stalking
+    // Tiger (Melee 6): each card is its own performer with no cost and no condition -- proves the
+    // shared Attack primitive needs nothing beyond a catalog entry plus a UseAbility case per card.
+    foreach(var (cardId,abilityId,strength) in new[]
+    {
+        ("oracle-l5r-6872","shinjo-eun-sahng-attack",4),
+        ("oracle-l5r-7121","shosuro-konishi-attack",5),
+        ("oracle-l5r-8852","tsuruchi-kosoko-attack",5),
+        ("oracle-l5r-7450","stalking-tiger-attack",6),
+    })
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        // Stalking Tiger is a Follower: it needs a friendly Personality unit to attach to before it
+        // (or anything else) counts as "a unit at the current battlefield" (Army() is Personality-only).
+        var isFollower=CardCatalog.Get(cardId).Type==CardType.Follower;
+        var host=isFollower?Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0):null;
+        var performer=Add(s,cardId,0,isFollower?Zone.Attached:Zone.Battlefield,province:0,attachedTo:host?.Id);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        if(strength<5) Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:strength>=5?target.Id:null,AbilityId:abilityId));
+        Equal(e.State.Cards[target.Id].Zone,strength>=5?Zone.Dead:Zone.Battlefield,$"{cardId}: hit expectation at strength {strength} vs Force 5");
+    }
+}
+static void TsuruchiIsasAttackAndMoveHome()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var isas=Add(s,"oracle-l5r-8840",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:isas.Id,TargetId:target.Id,AbilityId:"tsuruchi-isas-attack"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Ranged 3 hits a Force-3 target");
+    Check(e.State.Cards[isas.Id].Bowed,"Bowing Isas is the cost, paid up front");
+    Equal(e.State.Cards[isas.Id].Zone,Zone.Home,"Isas moves home after the Attack resolves");
+    Equal(e.State.Cards[isas.Id].ProvinceIndex,null,"Home is not associated with a province");
+}
+static void BayushiKahokuAttack()
+{
+    // No enemy Dishonorable Personality yet: no passive Force bonus, base strength 3 can't reach a
+    // Force-5 target.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var kahoku=Add(s,"oracle-l5r-806",0,Zone.Battlefield,province:0);
+    var honorable=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, not dishonorable
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku.Id).Force,3,"No enemy is dishonorable: base Force 3");
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kahoku.Id,TargetId:honorable.Id,AbilityId:"bayushi-kahoku-attack"));
+
+    // A dishonorable enemy Personality both raises Kahoku's own Force (+2, always-on) and the Attack's
+    // strength against that specific target (+2, target-dependent) -- two separate conditionals that
+    // happen to share the same Dishonorable flag.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var kahoku2=Add(s2,"oracle-l5r-806",0,Zone.Battlefield,province:0);
+    var dishonorable=Add(s2,"training-crane-veteran",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true; // Force 5
+    var e2=MatchEngine.FromTestState(s2);
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku2.Id).Force,5,"An enemy dishonorable Personality raises Kahoku's own Force by 2");
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kahoku2.Id,TargetId:dishonorable.Id,AbilityId:"bayushi-kahoku-attack"));
+    Equal(e2.State.Cards[dishonorable.Id].Zone,Zone.Dead,"Strength 3+2=5 destroys the dishonorable Force-5 target");
+}
+static void AsakoUmeAttack()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var ume=Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 2
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ume.Id).Force,3,"No Spell attached: base Force 3");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ume.Id,TargetId:target.Id,AbilityId:"asako-ume-attack"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Ranged 4 Attack is unconditional regardless of the Spell check");
+
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var ume2=Add(s2,"oracle-l5r-592",0,Zone.Battlefield,province:0);
+    Add(s2,"training-spell",0,Zone.Attached,attachedTo:ume2.Id,province:0);
+    var e2=MatchEngine.FromTestState(s2);
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==ume2.Id).Force,4,"A Spell attached raises her own Force by 1; the Attack's strength is unaffected");
 }
 static void CarpenterCastleAttack()
 {

@@ -78,7 +78,7 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,110);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,117);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
@@ -99,6 +99,14 @@ internal static class PublishedTests
         var personalities2=PublishedContent.PersonalityWave2.Cards;Eq(personalities2.Length,1);
         foreach(var c in personalities2){Eq(c.Type,CardType.Personality);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
         Check(!personalities2.Select(c=>c.Id).Intersect(personalities.Select(c=>c.Id)).Any());
+        var personalities3=PublishedContent.PersonalityWave3.Cards;Eq(personalities3.Length,4);
+        foreach(var c in personalities3){Eq(c.Type,CardType.Personality);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        Check(!personalities3.Select(c=>c.Id).Intersect(personalities2.Select(c=>c.Id)).Any());
+        var followers1=PublishedContent.FollowerWave1.Cards;Eq(followers1.Length,1);
+        foreach(var c in followers1){Eq(c.Type,CardType.Follower);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        var personalities4=PublishedContent.PersonalityWave4.Cards;Eq(personalities4.Length,2);
+        foreach(var c in personalities4){Eq(c.Type,CardType.Personality);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        Check(!personalities4.Select(c=>c.Id).Intersect(personalities3.Select(c=>c.Id)).Any());
     }
     private static void Setup()
     {
