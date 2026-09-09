@@ -80,7 +80,8 @@ var tests = new (string Name, Action Run)[]
     ("Tactical Advantage requires a performing Tactician, is usable any number of times per turn, and gives Force equal to the discarded card's Focus Value", TacticalAdvantage),
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
     ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
-    ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment)
+    ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
+    ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1151,6 +1152,32 @@ static void CavalryManeuversSegment()
 
     Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
     Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
+}
+static void TwoHandedWeaponOverridesKensaiAndKama()
+{
+    // A Kensai may attach a Two-Handed Weapon as their only Weapon...
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var kensai=Add(s,"training-kensai",0,Zone.Home);
+    var twoHanded=Add(s,"training-two-handed-weapon",0,Zone.Hand);
+    var plain=Add(s,"training-weapon",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,Cmd(e,"equip",player:0,id:twoHanded.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Equal(e.State.Cards.Values.Count(c=>c.AttachedTo==kensai.Id),1);
+    // ...but it then blocks any further Weapon, even for a Kensai -- Two-Handed overrides the cap.
+    Accept(e,Cmd(e,"pass",player:1));
+    Reject(e,Cmd(e,"equip",player:0,id:plain.Id,target:kensai.Id));
+
+    // A Kensai with a plain Weapon already attached cannot then attach a Two-Handed one either.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var kensai2=Add(s2,"training-kensai",0,Zone.Home);
+    var plain2=Add(s2,"training-weapon",0,Zone.Hand);
+    var twoHanded2=Add(s2,"training-two-handed-weapon",0,Zone.Hand);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,Cmd(e2,"equip",player:0,id:plain2.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Reject(e2,Cmd(e2,"equip",player:0,id:twoHanded2.Id,target:kensai2.Id));
 }
 static void CarpenterCastleAttack()
 {
