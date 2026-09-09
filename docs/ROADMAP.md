@@ -6,6 +6,10 @@ Update this file as part of the PR that ships (or meaningfully advances) an item
 
 Status values: **Not started** / **In progress** / **Done**.
 
+## Current delivery priority
+
+See [NEXT_GAME_PLAN.md](NEXT_GAME_PLAN.md), coordinated under #86: expanded catalogue viewer #120; existing builder #25/#67/#68; custom Practice #29/#69; dueling #121; Shugenja/Spells #122; bounded card import waves. Continue match/platform acceptance throughout. Battle presentation is sufficient for this pass; keep fixing play-blocking defects.
+
 ## Rules-engine mechanics
 
 Confirmed by direct source audit of `src/L5R.Core` on 2026-09-09, not by absence of a card that would need them.
@@ -16,9 +20,9 @@ Confirmed by direct source audit of `src/L5R.Core` on 2026-09-09, not by absence
 |---|---|---|
 | Dishonor / Rehonor as general actions | Partial ([#90](https://github.com/alfredoh7/l5r-emperor/pull/91)) | `Rehonor(card)` and the shared `MarkDead`/`MakeDead` primitives now exist (dishonorable-death Honor loss centralized; a discarded card can become honorably dead independently of destruction) — but no action yet *dishonors* a Personality outright beyond the entry-time `enters-dishonored` Effect, and the "rehonor instead of gaining Honor" substitution (core rules p. 98–100) still has no engine hook. |
 | Reactions to Ranged/Melee Attacks | Done ([#90](https://github.com/alfredoh7/l5r-emperor/pull/91)) | The Attack primitive now opens a real Reaction window (mutable `PendingAttack.Strength`, either side may raise/lower/negate) before resolving — but only when a reaction is actually possible; no published card provides one yet, only training fixtures. |
-| Dueling | Not started | No performer/target selection, duel stat, Focus mechanism, Focus Effects, Duelist keyword, or resolution/winner/consequence application exists anywhere in the engine. This is one of the largest single gaps — several already-triaged Strongholds and many catalogue Personalities need it. |
+| Dueling | Not started ([#121](https://github.com/alfredoh7/l5r-emperor/issues/121)) | No performer/target selection, duel stat, Focus mechanism, Focus Effects, Duelist keyword, or resolution/winner/consequence application exists anywhere in the engine. This is one of the largest single gaps — several already-triaged Strongholds and many catalogue Personalities need it. |
 | Terrain | Not started | No Terrain Strategy entry-into-play-at-a-battlefield, per-battlefield Terrain state, or end-of-battle Terrain discard exists. |
-| Equip (Battle) for Shugenja/Spells | Not started | Only the Limited-timing universal Equip exists; the Battle-timing version (`choose your performing unbowed opposed Shugenja and target a Spell in your hand: attach it, paying all costs; you may take an additional Battle action to use a Battle ability on it`) does not. |
+| Equip (Battle) for Shugenja/Spells | Not started ([#122](https://github.com/alfredoh7/l5r-emperor/issues/122)) | Only the Limited-timing universal Equip exists; the Battle-timing version (`choose your performing unbowed opposed Shugenja and target a Spell in your hand: attach it, paying all costs; you may take an additional Battle action to use a Battle ability on it`) does not. |
 | Engage reaction-timing window | Not started | See [#15](https://github.com/alfredoh7/l5r-emperor/issues/15) — no window exists for "After engaging" triggers generally (Naval Invasion currently short-circuits this by resolving inline rather than through a real Reaction window). |
 | Events Phase: Region/Celestial-specific resolution | Partial | Region attachment and Celestial entry are described in the core rules doc; the Events Phase itself (Straighten→Events ordering) is implemented, but Region/Celestial card types have no published examples yet to validate against. |
 
@@ -43,7 +47,7 @@ These exist as reusable engine shapes, not just one-off card hacks — but only 
 |---|---|---|---|
 | Token artwork, sizing, placement/stacking | Not started | [#81](https://github.com/alfredoh7/l5r-emperor/issues/81) | Exhaustive token-type catalogue already compiled in the issue. Gates several rules-lane scenario validations (e.g. the Torazu Crane-deck test). |
 | In-game rules reference viewer | Not started | [#58](https://github.com/alfredoh7/l5r-emperor/issues/58) | Content source (`docs/rules/EMPEROR_EDITION_CORE_RULES.md`) already exists and keeps growing as supplements are added. |
-| Duel visual-resolution flow | Not started | *(not yet filed)* | A presentation analogous to the existing battle-resolution flow — focus/strike choices, revealed focused cards, Focus Effects, winner/loser outcome — once dueling itself lands in the engine (see Dueling above). Blocked on the engine mechanism, not just art. |
+| Duel visual-resolution flow | Not started | [#121](https://github.com/alfredoh7/l5r-emperor/issues/121) | A presentation analogous to the existing battle-resolution flow — focus/strike choices, revealed focused cards, Focus Effects, winner/loser outcome — once dueling itself lands in the engine (see Dueling above). Blocked on the engine mechanism, not just art. |
 | Reviewable game log on the play screen | Not started | [#88](https://github.com/alfredoh7/l5r-emperor/issues/88) | Every action the computer (or either player) takes, logged in simplified human-readable form: who acted, the action, who performed it, who it targeted, and the outcome. Purely a UI/QoL presentation of events the engine already emits (`GameEvent`/`Emit`) — no new engine state needed, just a client-side reviewable log view. |
 | Highlight active/priority player during decision phases | Not started | [#11](https://github.com/alfredoh7/l5r-emperor/issues/11) | |
 | Force/Chi itemized breakdown during combat | Not started | [#18](https://github.com/alfredoh7/l5r-emperor/issues/18) | |
