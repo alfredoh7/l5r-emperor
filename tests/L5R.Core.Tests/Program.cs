@@ -238,8 +238,10 @@ static void Priority()
     Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.CavalryDeclaration);
     // Infantry Maneuvers committed above; Cavalry Maneuvers follows the same attacker-then-defender order.
     Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.CavalryDefense);
-    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.BattleSelection);
-    Accept(e,Cmd(e,"selectBattle",province:0)); Equal(e.State.PriorityPlayerId,1);
+    // Nobody ever placed a unit anywhere, Infantry or Cavalry: no battlefield is unresolved, so
+    // there is nothing to select and the turn moves straight to the Dynasty Phase.
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.Phase,Phase.Dynasty);
+    Equal(e.State.UnresolvedBattlefields.Count,0);
 }
 static void Bamboo()
 {
