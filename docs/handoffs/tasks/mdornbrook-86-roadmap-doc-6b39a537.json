@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add docs/ROADMAP.md: a living, granular checklist of missing rules-engine mechanics (confirmed by direct source audit) and open visual/UI feature requests, cross-referenced to existing issues. Shared because docs/ROADMAP.md (like docs/decisions/) is not mapped to either lane in .github/collaboration.json; content is purely informational, no code touched.",
+  "validation": "Documentation only; no code touched",
+  "remaining": "None; ready for review. Populate/update as items ship.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/86",
+  "branch": "mdornbrook/86-roadmap-doc",
+  "updated": "2026-09-09T08:36:57.216060+00:00"
+}
