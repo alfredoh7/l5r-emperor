@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 771656,
+  "card_id": "oracle-l5r-10107",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10107-printing-1-image-1",
+  "image_index": 1,
+  "name": "O-Yoroi Troops",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 10107,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10107-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:07.312122+00:00",
+  "sha256": "901d1423a5d4982363d95406be34311a9c7d445435853f299cdde4152ecd3eab",
+  "source_image_hash": "e8/79",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e8/79/printing_10107_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e8/79/printing_10107_1_",
+  "width": 750
+}

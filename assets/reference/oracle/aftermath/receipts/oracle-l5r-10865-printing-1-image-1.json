@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 820152,
+  "card_id": "oracle-l5r-10865",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10865-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Heirai",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 10865,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10865-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:43.929973+00:00",
+  "sha256": "dbec22f542e7c5680e7e60087dea4221601a755e1e3ac40da36a70b6b8a94b8b",
+  "source_image_hash": "85/fb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/fb/printing_10865_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/fb/printing_10865_1_",
+  "width": 750
+}

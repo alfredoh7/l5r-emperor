@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 380605,
+  "card_id": "oracle-l5r-7676",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7676-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sutigu",
+  "numbers": [
+    "64"
+  ],
+  "oracle_id": 7676,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7676-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:48.125138+00:00",
+  "sha256": "0a6313d57a84bd3bbc34ea1a27e63a475395026f48e773338ac313a251821e5b",
+  "source_image_hash": "fe/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/85/printing_7676_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/85/printing_7676_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 703022,
+  "card_id": "oracle-l5r-10911",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10911-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsujiken's Coin",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 10911,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10911-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:16.180128+00:00",
+  "sha256": "55e5661f0d65579b0d3e56afa340de703bb7da06575991d1cf402ff71cfc7d5b",
+  "source_image_hash": "69/64",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/64/printing_10911_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/64/printing_10911_1_",
+  "width": 750
+}

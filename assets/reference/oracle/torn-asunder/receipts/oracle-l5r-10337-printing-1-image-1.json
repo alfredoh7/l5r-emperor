@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 714192,
+  "card_id": "oracle-l5r-10337",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10337-printing-1-image-1",
+  "image_index": 1,
+  "name": "Oriole Imperial Vanguard",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 10337,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10337-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:28.759761+00:00",
+  "sha256": "a8922fe721b4036db64ac65de2b34c8d4ff0008c9f7453bb90fe0ae293ccb1ae",
+  "source_image_hash": "41/48",
+  "source_url": "https://images.oracleofthevoid.com/l5r/41/48/printing_10337_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/41/48/printing_10337_1_",
+  "width": 750
+}

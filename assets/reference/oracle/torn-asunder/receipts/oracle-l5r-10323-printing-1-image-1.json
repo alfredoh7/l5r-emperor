@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 663727,
+  "card_id": "oracle-l5r-10323",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10323-printing-1-image-1",
+  "image_index": 1,
+  "name": "Riku",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 10323,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10323-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:41.640875+00:00",
+  "sha256": "29f541637b3928de40872ccc748b5ce76af59841d9bc2688dc25fb385b7f2963",
+  "source_image_hash": "af/1d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/af/1d/printing_10323_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/af/1d/printing_10323_1_",
+  "width": 750
+}

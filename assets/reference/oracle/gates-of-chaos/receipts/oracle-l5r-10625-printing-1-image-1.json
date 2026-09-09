@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799088,
+  "card_id": "oracle-l5r-10625",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10625-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Soken",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 10625,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10625-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:12.202029+00:00",
+  "sha256": "87533c9edbb604f36141b0aa81955cf9dcea73f0c057b5675d134dcf77cea614",
+  "source_image_hash": "ec/9c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ec/9c/printing_10625_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ec/9c/printing_10625_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710910,
+  "card_id": "oracle-l5r-10282",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10282-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Kazuo",
+  "numbers": [
+    "26"
+  ],
+  "oracle_id": 10282,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10282-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:20.875267+00:00",
+  "sha256": "45a50b9e8d3859db3ee2eed9608f759706b154a87485a02da19c85a8b6e9774a",
+  "source_image_hash": "a2/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a2/75/printing_10282_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a2/75/printing_10282_1_",
+  "width": 750
+}

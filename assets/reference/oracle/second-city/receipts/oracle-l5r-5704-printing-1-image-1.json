@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401928,
+  "card_id": "oracle-l5r-5704",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5704-printing-1-image-1",
+  "image_index": 1,
+  "name": "On the Hunt",
+  "numbers": [
+    "129"
+  ],
+  "oracle_id": 5704,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-5704-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:08.529002+00:00",
+  "sha256": "0c531df729ee60997ddd4accd8fe9148aa88e9fe55b302f3772fb4a30d42973f",
+  "source_image_hash": "e1/16",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/16/printing_5704_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/16/printing_5704_1_",
+  "width": 750
+}

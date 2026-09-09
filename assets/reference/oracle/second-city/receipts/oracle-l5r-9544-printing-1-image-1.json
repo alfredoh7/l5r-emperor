@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 406525,
+  "card_id": "oracle-l5r-9544",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9544-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Emoto",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 9544,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9544-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:18.130634+00:00",
+  "sha256": "321267302daa2eba249a661030582dad698f3ba8aa3c33bcd9aacf28d71b0070",
+  "source_image_hash": "23/03",
+  "source_url": "https://images.oracleofthevoid.com/l5r/23/03/printing_9544_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/23/03/printing_9544_1_",
+  "width": 750
+}

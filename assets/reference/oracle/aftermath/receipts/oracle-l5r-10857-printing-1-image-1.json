@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710483,
+  "card_id": "oracle-l5r-10857",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10857-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Ikako",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 10857,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10857-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:20.789130+00:00",
+  "sha256": "f3f7d13d51074be2140757182805a77bb4198f9d33e1242143480af590af8e4e",
+  "source_image_hash": "04/58",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/58/printing_10857_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/58/printing_10857_1_",
+  "width": 750
+}

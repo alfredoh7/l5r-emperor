@@ -1,0 +1,2134 @@
+{
+  "cards": [
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Mantis Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10211",
+      "image_ids": [
+        "oracle-l5r-10211-printing-1-image-1"
+      ],
+      "name": "Buried Treasures",
+      "oracle_id": 10211,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "artnumber": [
+            "10120014"
+          ],
+          "flavor": [
+            "<i>Even after two decades, great treasures remain hidden away in the Colonies. Some consider it their divine mandate to inherit such treasures.</i>"
+          ],
+          "number": [
+            "1"
+          ],
+          "printimagehash": [
+            "aa/98"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:57.948360",
+        "cardid": 10211,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "Buried Treasures",
+        "imagehash": "aa/98",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "artnumber": [
+              "10120014"
+            ],
+            "flavor": [
+              "<i>Even after two decades, great treasures remain hidden away in the Colonies. Some consider it their divine mandate to inherit such treasures.</i>"
+            ],
+            "number": [
+              "1"
+            ],
+            "printimagehash": [
+              "aa/98"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Mantis Clan player, draw a card."
+        ],
+        "title": [
+          "Buried Treasures"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10211",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": "After Negishi enters play: Lose 2 Honor.\nNegate Negishi's destruction from effects of actions performed by any Personality whose unit's total Gold Cost was lower than Negishi's unit's (when they performed it).",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10227",
+      "image_ids": [
+        "oracle-l5r-10227-printing-1-image-1"
+      ],
+      "name": "Daigotsu Negishi",
+      "oracle_id": 10227,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Jorge Matar"
+          ],
+          "artnumber": [
+            "10120009"
+          ],
+          "flavor": [
+            "<i>\"I am well pleased with your service, Negishi-san. I have a task that I need to entrust to a worthy vassal. Have you the courage for such a thing?\" - Daigotsu Kanpeki</i>"
+          ],
+          "number": [
+            "17"
+          ],
+          "printimagehash": [
+            "24/7d"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:43.347424",
+        "cardid": 10227,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Spider"
+        ],
+        "cost": [
+          "9"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "5"
+        ],
+        "formattedtitle": "Daigotsu Negishi &#149; Experienced",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "24/7d",
+        "keywords": [
+          "<b>Conqueror</b>",
+          "<b>Loyal</b>",
+          "<b>Unique</b>",
+          "Commander",
+          "Experienced",
+          "Samurai",
+          "Shadowlands",
+          "Spider Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Jorge Matar"
+            ],
+            "artnumber": [
+              "10120009"
+            ],
+            "flavor": [
+              "<i>\"I am well pleased with your service, Negishi-san. I have a task that I need to entrust to a worthy vassal. Have you the courage for such a thing?\" - Daigotsu Kanpeki</i>"
+            ],
+            "number": [
+              "17"
+            ],
+            "printimagehash": [
+              "24/7d"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Daigotsu Negishi - exp",
+        "text": [
+          "After Negishi enters play: Lose 2 Honor.<br>Negate Negishi's destruction from effects of actions performed by any Personality whose unit's total Gold Cost was lower than Negishi's unit's <i>(when they performed it)</i>."
+        ],
+        "title": [
+          "Daigotsu Negishi"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10227",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Political Open: Take the Imperial Favor.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10221",
+      "image_ids": [
+        "oracle-l5r-10221-printing-1-image-1"
+      ],
+      "name": "Doji Dainagon",
+      "oracle_id": 10221,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Edwin David"
+          ],
+          "artnumber": [
+            "10120002"
+          ],
+          "flavor": [
+            "<i>\"Some enjoy the trials of life, and others prefer to immerse themselves in games. The truth is that the greatest joy is in the games life offers us.\"</i>"
+          ],
+          "number": [
+            "11"
+          ],
+          "printimagehash": [
+            "60/7b"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:15.366049",
+        "cardid": 10221,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Crane"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "2"
+        ],
+        "formattedtitle": "Doji Dainagon &#149; Experienced",
+        "honor": [
+          "6"
+        ],
+        "imagehash": "60/7b",
+        "keywords": [
+          "<b>Unique</b>",
+          "Courtier",
+          "Crane Clan",
+          "Experienced",
+          "Imperial"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "3"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Edwin David"
+            ],
+            "artnumber": [
+              "10120002"
+            ],
+            "flavor": [
+              "<i>\"Some enjoy the trials of life, and others prefer to immerse themselves in games. The truth is that the greatest joy is in the games life offers us.\"</i>"
+            ],
+            "number": [
+              "11"
+            ],
+            "printimagehash": [
+              "60/7b"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Doji Dainagon - exp",
+        "text": [
+          "<b>Political Open:</b> Take the Imperial Favor."
+        ],
+        "title": [
+          "Doji Dainagon"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10221",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Reaction: After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10220",
+      "image_ids": [
+        "oracle-l5r-10220-printing-1-image-1"
+      ],
+      "name": "Hida Yamadera",
+      "oracle_id": 10220,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Edwin David"
+          ],
+          "artnumber": [
+            "10120001"
+          ],
+          "flavor": [
+            "<i>\"My curse is to live. I live when all others die. To take one's own life is a Crab's greatest cowardice. I must live to find that which can kill me.\"</i>"
+          ],
+          "number": [
+            "10"
+          ],
+          "printimagehash": [
+            "24/c1"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:19.787597",
+        "cardid": 10220,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Crab"
+        ],
+        "cost": [
+          "12"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "8"
+        ],
+        "formattedtitle": "Hida Yamadera &#149; Experienced",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "24/c1",
+        "keywords": [
+          "<b>Unique</b>",
+          "Berserker",
+          "Crab Clan",
+          "Damned",
+          "Experienced",
+          "Shadowlands"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Edwin David"
+            ],
+            "artnumber": [
+              "10120001"
+            ],
+            "flavor": [
+              "<i>\"My curse is to live. I live when all others die. To take one's own life is a Crab's greatest cowardice. I must live to find that which can kill me.\"</i>"
+            ],
+            "number": [
+              "10"
+            ],
+            "printimagehash": [
+              "24/c1"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Hida Yamadera - exp",
+        "text": [
+          "<b>Reaction:</b> After another player's Battle action resolves, if its effects destroyed Yamadera: Melee 8 Attack."
+        ],
+        "title": [
+          "Hida Yamadera"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10220",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Recon Reaction: After engaging at Jade's Roar's battlefield: You have Reconnaissance there. You have the first opportunity to take a Battle action in this battle, which must be a Terrain action.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10223",
+      "image_ids": [
+        "oracle-l5r-10223-printing-1-image-1"
+      ],
+      "name": "Jade's Roar",
+      "oracle_id": 10223,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "David Horne"
+          ],
+          "artnumber": [
+            "10120004"
+          ],
+          "designernotes": [
+            "[Art Note: One Lion in the Pride has been experienced and should be featured front and center.]"
+          ],
+          "flavor": [
+            "<i>\"The beast can appear anywhere in the Empire, and even the Colonies, carrying out the will of its mistress. There are many mysteries in the world, but I find the Jade Hand the most intriguing.\" - Ikoma Hagio</i>"
+          ],
+          "number": [
+            "13"
+          ],
+          "printimagehash": [
+            "7b/0c"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:24.587050",
+        "cardid": 10223,
+        "chi": [
+          "2"
+        ],
+        "clan": [
+          "Lion"
+        ],
+        "cost": [
+          "7"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Jade's Roar &#149; Experienced",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "7b/0c",
+        "keywords": [
+          "<b>Experienced Pride of the Hand</b>",
+          "<b>Unique</b>",
+          "Legendary",
+          "Lion",
+          "Lion Clan",
+          "Nonhuman",
+          "Scout"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "David Horne"
+            ],
+            "artnumber": [
+              "10120004"
+            ],
+            "designernotes": [
+              "[Art Note: One Lion in the Pride has been experienced and should be featured front and center.]"
+            ],
+            "flavor": [
+              "<i>\"The beast can appear anywhere in the Empire, and even the Colonies, carrying out the will of its mistress. There are many mysteries in the world, but I find the Jade Hand the most intriguing.\" - Ikoma Hagio</i>"
+            ],
+            "number": [
+              "13"
+            ],
+            "printimagehash": [
+              "7b/0c"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Jade's Roar - exp",
+        "text": [
+          "<b>Recon Reaction:</b> After engaging at Jade's Roar's battlefield: You have <b>Reconnaissance </b>there. You have the first opportunity to take a Battle action in this battle, which must be a Terrain action."
+        ],
+        "title": [
+          "Jade's Roar"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10223",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Open: If Kunji is honorably dead: Bring it into play, ignoring costs if you are a Phoenix Clan player.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10225",
+      "image_ids": [
+        "oracle-l5r-10225-printing-1-image-1"
+      ],
+      "name": "Kunji",
+      "oracle_id": 10225,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Sergio Camarena"
+          ],
+          "artnumber": [
+            "10120006"
+          ],
+          "flavor": [
+            "<i>\"An old friend who once aided our clan when we needed it most has returned. What terrible things must loom on the horizon for the Phoenix?\" - Shiba Tsukimi</i>"
+          ],
+          "number": [
+            "15"
+          ],
+          "printimagehash": [
+            "c3/e6"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:15.905408",
+        "cardid": 10225,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Phoenix"
+        ],
+        "cost": [
+          "8"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Kunji &#149; Experienced",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "c3/e6",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "<b>Unique</b>",
+          "Experienced",
+          "Fenghuang",
+          "Fire",
+          "Nonhuman",
+          "Phoenix Clan",
+          "Shugenja"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "1"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Sergio Camarena"
+            ],
+            "artnumber": [
+              "10120006"
+            ],
+            "flavor": [
+              "<i>\"An old friend who once aided our clan when we needed it most has returned. What terrible things must loom on the horizon for the Phoenix?\" - Shiba Tsukimi</i>"
+            ],
+            "number": [
+              "15"
+            ],
+            "printimagehash": [
+              "c3/e6"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Kunji - exp",
+        "text": [
+          "<b>Open:</b> If Kunji is honorably dead: Bring it into play, ignoring costs if you are a Phoenix Clan player."
+        ],
+        "title": [
+          "Kunji"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10225",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Limited: If you have attached a card from your hand this turn, bow Madoka: Draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10224",
+      "image_ids": [
+        "oracle-l5r-10224-printing-1-image-1"
+      ],
+      "name": "Moshi Madoka",
+      "oracle_id": 10224,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Charles Urbach"
+          ],
+          "artnumber": [
+            "10120005"
+          ],
+          "flavor": [
+            "<i>\"Do not mistake my demeanor for weakness. I embrace tradition and decorum, but Thunder speaks through me just as loudly as my sisters. Do not provoke its voice.\"</i>"
+          ],
+          "number": [
+            "14"
+          ],
+          "printimagehash": [
+            "47/1e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:31:48.526310",
+        "cardid": 10224,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Mantis"
+        ],
+        "cost": [
+          "6"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Moshi Madoka &#149; Experienced",
+        "honor": [
+          "2"
+        ],
+        "imagehash": "47/1e",
+        "keywords": [
+          "<b>Unique</b>",
+          "Experienced",
+          "Mantis Clan",
+          "Scout",
+          "Shugenja",
+          "Thunder"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Charles Urbach"
+            ],
+            "artnumber": [
+              "10120005"
+            ],
+            "flavor": [
+              "<i>\"Do not mistake my demeanor for weakness. I embrace tradition and decorum, but Thunder speaks through me just as loudly as my sisters. Do not provoke its voice.\"</i>"
+            ],
+            "number": [
+              "14"
+            ],
+            "printimagehash": [
+              "47/1e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Moshi Madoka - exp",
+        "text": [
+          "<b>Limited:</b> If you have attached a card from your hand this turn, bow Madoka: Draw a card."
+        ],
+        "title": [
+          "Moshi Madoka"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10224",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Spider Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10212",
+      "image_ids": [
+        "oracle-l5r-10212-printing-1-image-1"
+      ],
+      "name": "Purveyor of Questionable Goods",
+      "oracle_id": 10212,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Brent Chumly"
+          ],
+          "artnumber": [
+            "10120017"
+          ],
+          "flavor": [
+            "<i>\"Good day, my friend! I know, the trouble at the Second City is most inconvenient, but I think I have what you need right here!\"</i>"
+          ],
+          "number": [
+            "2"
+          ],
+          "printimagehash": [
+            "c4/89"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:12.526057",
+        "cardid": 10212,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "Purveyor of Questionable Goods",
+        "imagehash": "c4/89",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Brent Chumly"
+            ],
+            "artnumber": [
+              "10120017"
+            ],
+            "flavor": [
+              "<i>\"Good day, my friend! I know, the trouble at the Second City is most inconvenient, but I think I have what you need right here!\"</i>"
+            ],
+            "number": [
+              "2"
+            ],
+            "printimagehash": [
+              "c4/89"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Spider Clan player, draw a card."
+        ],
+        "title": [
+          "Purveyor of Questionable Goods"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10212",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": "Reaction: After a Tactical Battle action resolves that Byung performed: Take an additional Battle action.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10228",
+      "image_ids": [
+        "oracle-l5r-10228-printing-1-image-1"
+      ],
+      "name": "Shinjo Byung",
+      "oracle_id": 10228,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Albert Tavira"
+          ],
+          "artnumber": [
+            "10120008"
+          ],
+          "flavor": [
+            "<i>\"Our Empire endured a war with a gaijin demon goddess. It cannot be torn apart by mere human frailty. It would be an insult to all who have bled and died to save it.\"</i>"
+          ],
+          "number": [
+            "18"
+          ],
+          "printimagehash": [
+            "73/36"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:57.365111",
+        "cardid": 10228,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Unicorn"
+        ],
+        "cost": [
+          "8"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "3"
+        ],
+        "formattedtitle": "Shinjo Byung &#149; Experienced",
+        "honor": [
+          "4"
+        ],
+        "imagehash": "73/36",
+        "keywords": [
+          "<b>Cavalry</b>",
+          "<b>Tactician</b>",
+          "<b>Unique</b>",
+          "Experienced",
+          "Samurai",
+          "Unicorn Clan"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Albert Tavira"
+            ],
+            "artnumber": [
+              "10120008"
+            ],
+            "flavor": [
+              "<i>\"Our Empire endured a war with a gaijin demon goddess. It cannot be torn apart by mere human frailty. It would be an insult to all who have bled and died to save it.\"</i>"
+            ],
+            "number": [
+              "18"
+            ],
+            "printimagehash": [
+              "73/36"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Shinjo Byung - exp",
+        "text": [
+          "<b>Reaction:</b> After a Tactical Battle action resolves that Byung performed: Take an additional Battle action."
+        ],
+        "title": [
+          "Shinjo Byung"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10228",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": "Limited: Target a card in a province: Discard it. Refill the province face-up.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10226",
+      "image_ids": [
+        "oracle-l5r-10226-printing-1-image-1"
+      ],
+      "name": "Shosuro Hawado",
+      "oracle_id": 10226,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Diego Gisbert Lllorens"
+          ],
+          "artnumber": [
+            "10120007"
+          ],
+          "flavor": [
+            "<i>\"I dispatched her to the Colonies to make use of her gifts. She remains there because I have begun to find her gifts&#8230; unsettling.\" - Shosuro Keirei</i>"
+          ],
+          "number": [
+            "16"
+          ],
+          "printimagehash": [
+            "98/81"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:27.726513",
+        "cardid": 10226,
+        "chi": [
+          "3"
+        ],
+        "clan": [
+          "Ninja",
+          "Scorpion"
+        ],
+        "cost": [
+          "8"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "4"
+        ],
+        "formattedtitle": "Shosuro Hawado &#149; Experienced 2",
+        "honor": [
+          "-"
+        ],
+        "imagehash": "98/81",
+        "keywords": [
+          "<b>Experienced 2</b>",
+          "<b>Unique</b>",
+          "Ninja",
+          "Scorpion Clan",
+          "Shadowspawn"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "0"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Diego Gisbert Lllorens"
+            ],
+            "artnumber": [
+              "10120007"
+            ],
+            "flavor": [
+              "<i>\"I dispatched her to the Colonies to make use of her gifts. She remains there because I have begun to find her gifts&#8230; unsettling.\" - Shosuro Keirei</i>"
+            ],
+            "number": [
+              "16"
+            ],
+            "printimagehash": [
+              "98/81"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Shosuro Hawado - exp2",
+        "text": [
+          "<b>Limited:</b> Target a card in a province: Discard it. Refill the province face-up."
+        ],
+        "title": [
+          "Shosuro Hawado"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10226",
+      "types": [
+        "Personality"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Dragon Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10213",
+      "image_ids": [
+        "oracle-l5r-10213-printing-1-image-1"
+      ],
+      "name": "Tattoos & Trinkets",
+      "oracle_id": 10213,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Steve Argyle"
+          ],
+          "artnumber": [
+            "10120012"
+          ],
+          "flavor": [
+            "<i>\"We are nothing but a collection of memories. Should you wish to commemorate even the most insignificant of events, I can assist you.\"</i>"
+          ],
+          "number": [
+            "3"
+          ],
+          "printimagehash": [
+            "35/ed"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:14.225341",
+        "cardid": 10213,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "Tattoos & Trinkets",
+        "imagehash": "35/ed",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Steve Argyle"
+            ],
+            "artnumber": [
+              "10120012"
+            ],
+            "flavor": [
+              "<i>\"We are nothing but a collection of memories. Should you wish to commemorate even the most insignificant of events, I can assist you.\"</i>"
+            ],
+            "number": [
+              "3"
+            ],
+            "printimagehash": [
+              "35/ed"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Dragon Clan player, draw a card."
+        ],
+        "title": [
+          "Tattoos & Trinkets"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10213",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Crane Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10214",
+      "image_ids": [
+        "oracle-l5r-10214-printing-1-image-1"
+      ],
+      "name": "The Daidoji Marketplace",
+      "oracle_id": 10214,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Alayna Lemmer"
+          ],
+          "artnumber": [
+            "10120011"
+          ],
+          "flavor": [
+            "<i>The conflict between the Crane and the Mantis has lessened trade in Twin Forks City, but only slightly. Commerce endures, no matter the circumstances.</i>"
+          ],
+          "number": [
+            "4"
+          ],
+          "printimagehash": [
+            "03/3d"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:04.825108",
+        "cardid": 10214,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Daidoji Marketplace",
+        "imagehash": "03/3d",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Alayna Lemmer"
+            ],
+            "artnumber": [
+              "10120011"
+            ],
+            "flavor": [
+              "<i>The conflict between the Crane and the Mantis has lessened trade in Twin Forks City, but only slightly. Commerce endures, no matter the circumstances.</i>"
+            ],
+            "number": [
+              "4"
+            ],
+            "printimagehash": [
+              "03/3d"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Crane Clan player, draw a card."
+        ],
+        "title": [
+          "The Daidoji Marketplace"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10214",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Unicorn Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10215",
+      "image_ids": [
+        "oracle-l5r-10215-printing-1-image-1"
+      ],
+      "name": "The Ide Caravan",
+      "oracle_id": 10215,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "artnumber": [
+            "10120018"
+          ],
+          "flavor": [
+            "<i>\"It is not my business, of course, but why would you ever ship materials by sea? The humid air alone can destroy such delicate treasures!\"</i>"
+          ],
+          "number": [
+            "5"
+          ],
+          "printimagehash": [
+            "9b/8a"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:34:15.905408",
+        "cardid": 10215,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Ide Caravan",
+        "imagehash": "9b/8a",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "artnumber": [
+              "10120018"
+            ],
+            "flavor": [
+              "<i>\"It is not my business, of course, but why would you ever ship materials by sea? The humid air alone can destroy such delicate treasures!\"</i>"
+            ],
+            "number": [
+              "5"
+            ],
+            "printimagehash": [
+              "9b/8a"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Unicorn Clan player, draw a card."
+        ],
+        "title": [
+          "The Ide Caravan"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10215",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Scorpion Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10216",
+      "image_ids": [
+        "oracle-l5r-10216-printing-1-image-1"
+      ],
+      "name": "The Merchant's District",
+      "oracle_id": 10216,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Diego Gisbert Lllorens"
+          ],
+          "artnumber": [
+            "10120016"
+          ],
+          "flavor": [
+            "<i>\"A samurai finds commerce unpleasant, certainly, and yet they require it to live. It makes it a simple matter for us to gather information on them.\" - Shosuro Tanzaki</i>"
+          ],
+          "number": [
+            "6"
+          ],
+          "printimagehash": [
+            "b3/0f"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:53.127646",
+        "cardid": 10216,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Merchant's District",
+        "imagehash": "b3/0f",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Diego Gisbert Lllorens"
+            ],
+            "artnumber": [
+              "10120016"
+            ],
+            "flavor": [
+              "<i>\"A samurai finds commerce unpleasant, certainly, and yet they require it to live. It makes it a simple matter for us to gather information on them.\" - Shosuro Tanzaki</i>"
+            ],
+            "number": [
+              "6"
+            ],
+            "printimagehash": [
+              "b3/0f"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Scorpion Clan player, draw a card."
+        ],
+        "title": [
+          "The Merchant's District"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10216",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Phoenix Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10217",
+      "image_ids": [
+        "oracle-l5r-10217-printing-1-image-1"
+      ],
+      "name": "The Mystical Merchant",
+      "oracle_id": 10217,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Sergio Camarena"
+          ],
+          "artnumber": [
+            "10120015"
+          ],
+          "flavor": [
+            "<i>\"Many secrets were lost in this place. We are the Phoenix. It is our duty to find them, understand them, and ensure no one is lost to them.\" - Agasha Kurou</i>"
+          ],
+          "number": [
+            "7"
+          ],
+          "printimagehash": [
+            "33/74"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:16.145930",
+        "cardid": 10217,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Mystical Merchant",
+        "imagehash": "33/74",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Sergio Camarena"
+            ],
+            "artnumber": [
+              "10120015"
+            ],
+            "flavor": [
+              "<i>\"Many secrets were lost in this place. We are the Phoenix. It is our duty to find them, understand them, and ensure no one is lost to them.\" - Agasha Kurou</i>"
+            ],
+            "number": [
+              "7"
+            ],
+            "printimagehash": [
+              "33/74"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Phoenix Clan player, draw a card."
+        ],
+        "title": [
+          "The Mystical Merchant"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10217",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Lion Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10218",
+      "image_ids": [
+        "oracle-l5r-10218-printing-1-image-1"
+      ],
+      "name": "The Quartermaster's Depot",
+      "oracle_id": 10218,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Brent Chumley"
+          ],
+          "artnumber": [
+            "10120013"
+          ],
+          "flavor": [
+            "<i>\"The circumstances are irrelevant. The Lion wage war for the Empress, and the rest of us do whatever we must to ensure that the armies have what they require.\"</i>"
+          ],
+          "number": [
+            "8"
+          ],
+          "printimagehash": [
+            "73/7e"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:33:06.488171",
+        "cardid": 10218,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Quartermaster's Depot",
+        "imagehash": "73/7e",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Brent Chumley"
+            ],
+            "artnumber": [
+              "10120013"
+            ],
+            "flavor": [
+              "<i>\"The circumstances are irrelevant. The Lion wage war for the Empress, and the rest of us do whatever we must to ensure that the armies have what they require.\"</i>"
+            ],
+            "number": [
+              "8"
+            ],
+            "printimagehash": [
+              "73/7e"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Lion Clan player, draw a card."
+        ],
+        "title": [
+          "The Quartermaster's Depot"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10218",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": ":bow:: Produce 2 Gold.\nLimited, :bow:: If you have four or fewer cards in your hand and you are a Crab Clan player, draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10219",
+      "image_ids": [
+        "oracle-l5r-10219-printing-1-image-1"
+      ],
+      "name": "The Yasuki Peddler",
+      "oracle_id": 10219,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Shen Fei"
+          ],
+          "artnumber": [
+            "10120010"
+          ],
+          "flavor": [
+            "<i>\"I have precisely what you need. You say you do not need anything? That is only because you have not yet seen what my brother and I offer, good sir!\"</i>"
+          ],
+          "number": [
+            "9"
+          ],
+          "printimagehash": [
+            "eb/4b"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:35:44.966483",
+        "cardid": 10219,
+        "cost": [
+          "3"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "formattedtitle": "The Yasuki Peddler",
+        "imagehash": "eb/4b",
+        "keywords": [
+          "<b>Unique</b>",
+          "Market",
+          "Retainer"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Shen Fei"
+            ],
+            "artnumber": [
+              "10120010"
+            ],
+            "flavor": [
+              "<i>\"I have precisely what you need. You say you do not need anything? That is only because you have not yet seen what my brother and I offer, good sir!\"</i>"
+            ],
+            "number": [
+              "9"
+            ],
+            "printimagehash": [
+              "eb/4b"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "text": [
+          ":bow:: Produce 2 Gold.<br><b>Limited, :bow::</b> If you have four or fewer cards in your hand and you are a Crab Clan player, draw a card."
+        ],
+        "title": [
+          "The Yasuki Peddler"
+        ],
+        "type": [
+          "Holding"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10219",
+      "types": [
+        "Holding"
+      ]
+    },
+    {
+      "current_oracle_text": "Limited: Draw a card.",
+      "deck_types": [
+        "Dynasty"
+      ],
+      "historical_legality_status": "requires_review",
+      "id": "oracle-l5r-10222",
+      "image_ids": [
+        "oracle-l5r-10222-printing-1-image-1"
+      ],
+      "name": "Togashi Korimi",
+      "oracle_id": 10222,
+      "playable": false,
+      "selected_printings": [
+        {
+          "artist": [
+            "Steve Argyle"
+          ],
+          "artnumber": [
+            "10120003"
+          ],
+          "flavor": [
+            "<i>\"The distractions of the physical world are an obstacle we must overcome to reach the truth of enlightenment. Conflict, debate, politics, even clothing can stand in our path.\"</i>"
+          ],
+          "number": [
+            "12"
+          ],
+          "printimagehash": [
+            "18/5b"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Fixed"
+          ],
+          "set": [
+            "Emperor Edition Gempukku"
+          ]
+        }
+      ],
+      "source_legality_labels": [
+        "Age of Conquest (Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "source_record": {
+        "@SequenceNumber": "0000",
+        "@timestamp": "2026-06-06T14:36:22.427319",
+        "cardid": 10222,
+        "chi": [
+          "4"
+        ],
+        "clan": [
+          "Dragon"
+        ],
+        "cost": [
+          "11"
+        ],
+        "deck": [
+          "Dynasty"
+        ],
+        "force": [
+          "6"
+        ],
+        "formattedtitle": "Togashi Korimi &#149; Experienced 2",
+        "honor": [
+          "4"
+        ],
+        "imagehash": "18/5b",
+        "keywords": [
+          "<b>Experienced 2</b>",
+          "<b>Unique</b>",
+          "Dragon Clan",
+          "Earth",
+          "Monk",
+          "Tattooed"
+        ],
+        "legality": [
+          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+          "Legacy",
+          "Modern"
+        ],
+        "ph": [
+          "2"
+        ],
+        "printing": [
+          {
+            "artist": [
+              "Steve Argyle"
+            ],
+            "artnumber": [
+              "10120003"
+            ],
+            "flavor": [
+              "<i>\"The distractions of the physical world are an obstacle we must overcome to reach the truth of enlightenment. Conflict, debate, politics, even clothing can stand in our path.\"</i>"
+            ],
+            "number": [
+              "12"
+            ],
+            "printimagehash": [
+              "18/5b"
+            ],
+            "printingid": "1",
+            "rarity": [
+              "Fixed"
+            ],
+            "set": [
+              "Emperor Edition Gempukku"
+            ]
+          }
+        ],
+        "printingprimary": "1",
+        "puretexttitle": "Togashi Korimi - exp2",
+        "text": [
+          "<b>Limited:</b> Draw a card."
+        ],
+        "title": [
+          "Togashi Korimi"
+        ],
+        "type": [
+          "Personality"
+        ]
+      },
+      "source_url": "https://oracleofthevoid.com/#cardid=10222",
+      "types": [
+        "Personality"
+      ]
+    }
+  ],
+  "notice": "Reference-only; full-set offline archive.",
+  "printing_set": "Emperor Edition Gempukku",
+  "response_sha256": "5e44c37e1f459e4d22de0db5603442ce1692d04041f9cfc98bca264e57c5c678",
+  "schema_version": 1,
+  "scope": "full_set"
+}

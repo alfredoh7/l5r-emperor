@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 765227,
+  "card_id": "oracle-l5r-10880",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10880-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isidoros",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 10880,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10880-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:47.055674+00:00",
+  "sha256": "8cca0e511badee81aa06d776caf322e385162201ba8648c0ee3ecf4a40573543",
+  "source_image_hash": "cc/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/5b/printing_10880_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/5b/printing_10880_1_",
+  "width": 750
+}

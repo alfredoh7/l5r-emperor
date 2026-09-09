@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 677062,
+  "card_id": "oracle-l5r-10212",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10212-printing-1-image-1",
+  "image_index": 1,
+  "name": "Purveyor of Questionable Goods",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10212,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10212-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:18.464257+00:00",
+  "sha256": "cd8b3a36684da9b44d5911f99950b6dd5f38ad5ad1fd2b3a71904a50a5b74c91",
+  "source_image_hash": "c4/89",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c4/89/printing_10212_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c4/89/printing_10212_1_",
+  "width": 750
+}

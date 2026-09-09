@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 412355,
+  "card_id": "oracle-l5r-3891",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3891-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Sakonoko",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 3891,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-3891-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:52.084754+00:00",
+  "sha256": "a52e099cd7fa0bd9e5d42ab772994baf673dc097b290158d47565a8489a67743",
+  "source_image_hash": "2c/2a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2c/2a/printing_3891_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2c/2a/printing_3891_1_",
+  "width": 750
+}

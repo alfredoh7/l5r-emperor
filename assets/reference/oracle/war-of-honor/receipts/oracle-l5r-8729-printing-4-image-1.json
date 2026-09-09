@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 238522,
+  "card_id": "oracle-l5r-8729",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8729-printing-4-image-1",
+  "image_index": 1,
+  "name": "Traveling Peddler",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 8729,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8729-printing-4-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "4",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:12.075891+00:00",
+  "sha256": "3539bfa2d5f141fde23f4aed52901e102896d24a3847e6eca1170a66fc3264ea",
+  "source_image_hash": "02/82",
+  "source_url": "https://images.oracleofthevoid.com/l5r/02/82/printing_8729_4_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/02/82/printing_8729_4_",
+  "width": 750
+}

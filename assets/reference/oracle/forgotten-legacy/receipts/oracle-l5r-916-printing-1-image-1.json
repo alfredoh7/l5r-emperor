@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 287397,
+  "card_id": "oracle-l5r-916",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-916-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Toshimo",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 916,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-916-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:35.845754+00:00",
+  "sha256": "786377c59278ceee70102a12b48e204150f4a9261c944a39e9f77697a516222d",
+  "source_image_hash": "3c/e1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/e1/printing_916_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/e1/printing_916_1_",
+  "width": 750
+}

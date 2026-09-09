@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746956,
+  "card_id": "oracle-l5r-10392",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10392-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shifting Waves",
+  "numbers": [
+    "136"
+  ],
+  "oracle_id": 10392,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10392-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:47.660710+00:00",
+  "sha256": "e1e51df3b379f5d88491bb0131e09662ee872c1422ddcb9aaaaa70f6c3a1791a",
+  "source_image_hash": "3f/25",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/25/printing_10392_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/25/printing_10392_1_",
+  "width": 750
+}

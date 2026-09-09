@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 776629,
+  "card_id": "oracle-l5r-10091",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10091-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chuda Seki",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 10091,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10091-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:41.760200+00:00",
+  "sha256": "04b992398fc3a94ef830472e69fc9910ccf1ca6b3dd697f5f09bb84820851d27",
+  "source_image_hash": "5b/48",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5b/48/printing_10091_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/48/printing_10091_1_",
+  "width": 750
+}

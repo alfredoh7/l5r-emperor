@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 390580,
+  "card_id": "oracle-l5r-3456",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3456-printing-1-image-1",
+  "image_index": 1,
+  "name": "Horse Archers",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 3456,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-3456-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:44.641463+00:00",
+  "sha256": "c4804855ad55648d33e810a8dc67f7c841c52c87a3c50751d4e8abf0495bb76d",
+  "source_image_hash": "ef/79",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ef/79/printing_3456_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/79/printing_3456_1_",
+  "width": 750
+}

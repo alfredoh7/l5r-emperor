@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729469,
+  "card_id": "oracle-l5r-10174",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10174-printing-1-image-1",
+  "image_index": 1,
+  "name": "Turning the Story",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 10174,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10174-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:01.367907+00:00",
+  "sha256": "05cc925dcb5bf1b7d810912bb42e713ffaa63545fbae80058809ef9c335227ba",
+  "source_image_hash": "01/51",
+  "source_url": "https://images.oracleofthevoid.com/l5r/01/51/printing_10174_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/01/51/printing_10174_1_",
+  "width": 750
+}

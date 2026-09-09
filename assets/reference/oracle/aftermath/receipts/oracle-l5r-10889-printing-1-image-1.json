@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 806674,
+  "card_id": "oracle-l5r-10889",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10889-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Sujikaro",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 10889,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10889-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:46.315479+00:00",
+  "sha256": "61cbb27af019893e5a797154d7cda41483159cfe5c0efbbc801af7f468f4c69d",
+  "source_image_hash": "ea/ff",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ea/ff/printing_10889_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ea/ff/printing_10889_1_",
+  "width": 750
+}

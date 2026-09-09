@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 965208,
+  "card_id": "oracle-l5r-10596",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10596-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sleep",
+  "numbers": [
+    "180"
+  ],
+  "oracle_id": 10596,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10596-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:30:11.947202+00:00",
+  "sha256": "7c25551407fd9ec91c44bebcf4945d6e9396d3d2723ea5816fb9dc254ece507e",
+  "source_image_hash": "f1/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f1/d6/printing_10596_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f1/d6/printing_10596_1_",
+  "width": 750
+}

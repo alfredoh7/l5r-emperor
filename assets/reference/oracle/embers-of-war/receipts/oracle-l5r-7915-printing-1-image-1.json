@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 840687,
+  "card_id": "oracle-l5r-7915",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7915-printing-1-image-1",
+  "image_index": 1,
+  "name": "Terraced Farm",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 7915,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7915-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:00.359967+00:00",
+  "sha256": "6c121d998799286f1c3566715625987e0ff2170e02ceb3895f4d6722e4781af0",
+  "source_image_hash": "f0/17",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/17/printing_7915_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/17/printing_7915_1_",
+  "width": 750
+}

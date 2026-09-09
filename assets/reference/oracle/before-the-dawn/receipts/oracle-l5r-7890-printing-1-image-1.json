@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 418173,
+  "card_id": "oracle-l5r-7890",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7890-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple of the Seven Fortunes",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 7890,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7890-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:59.226539+00:00",
+  "sha256": "684a7d08da45ec9c124051e7a617a2ee3dcd8c06546c740584f83dce8ff596b6",
+  "source_image_hash": "da/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/eb/printing_7890_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/eb/printing_7890_1_",
+  "width": 750
+}

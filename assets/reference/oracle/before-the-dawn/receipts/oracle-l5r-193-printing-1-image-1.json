@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 419025,
+  "card_id": "oracle-l5r-193",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-193-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Ashiko",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 193,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-193-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:46.648561+00:00",
+  "sha256": "bc989e23db41a762c7d1b7e5ca2d9c62afb5f01f8f1a0862347dee013c87a84f",
+  "source_image_hash": "d6/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d6/86/printing_193_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d6/86/printing_193_1_",
+  "width": 750
+}

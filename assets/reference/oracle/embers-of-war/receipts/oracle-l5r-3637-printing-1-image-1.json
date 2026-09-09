@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 784296,
+  "card_id": "oracle-l5r-3637",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3637-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Shika",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 3637,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3637-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:25.061442+00:00",
+  "sha256": "b62d3763a7b677e2f293f80d804d51c279d472b88909dd6057a34075a725d281",
+  "source_image_hash": "86/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/86/4d/printing_3637_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/86/4d/printing_3637_1_",
+  "width": 750
+}

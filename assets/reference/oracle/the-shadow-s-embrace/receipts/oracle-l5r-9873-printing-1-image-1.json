@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 858349,
+  "card_id": "oracle-l5r-9873",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9873-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shieldman",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 9873,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9873-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:07.992023+00:00",
+  "sha256": "21d697394f8def60cef3866301254eecc30af650b52eae9f245de3c4d4222f86",
+  "source_image_hash": "e7/3e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/3e/printing_9873_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/3e/printing_9873_1_",
+  "width": 750
+}

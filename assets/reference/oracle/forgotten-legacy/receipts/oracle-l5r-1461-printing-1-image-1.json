@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 255456,
+  "card_id": "oracle-l5r-1461",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1461-printing-1-image-1",
+  "image_index": 1,
+  "name": "Consideration",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 1461,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1461-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:42.788745+00:00",
+  "sha256": "f97f005d0b9734e6bf4c5e1e97d9d3c1255da9b7324262e2bca6033489480b2a",
+  "source_image_hash": "51/51",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/51/printing_1461_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/51/printing_1461_1_",
+  "width": 750
+}

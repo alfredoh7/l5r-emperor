@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741796,
+  "card_id": "oracle-l5r-10077",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10077-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Iaimiko",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 10077,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10077-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:28.417451+00:00",
+  "sha256": "dd077db333cac6151612af694e6a9ca9f0d6d67d08a5b75868e0ced836fa60f7",
+  "source_image_hash": "71/2d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/2d/printing_10077_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/2d/printing_10077_1_",
+  "width": 750
+}

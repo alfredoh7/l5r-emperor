@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 800541,
+  "card_id": "oracle-l5r-10072",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10072-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Chukage",
+  "numbers": [
+    "46"
+  ],
+  "oracle_id": 10072,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10072-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:24.018667+00:00",
+  "sha256": "b620a08ed731423b912a9ab88b2d6670b8a36214ec98f9e3c026e8041434a332",
+  "source_image_hash": "dc/d9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/d9/printing_10072_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/d9/printing_10072_1_",
+  "width": 750
+}

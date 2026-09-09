@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 254898,
+  "card_id": "oracle-l5r-7222",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7222-printing-5-image-1",
+  "image_index": 1,
+  "name": "Shrine to Fukurokujin",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 7222,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7222-printing-5-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "5",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:46.365996+00:00",
+  "sha256": "06bd5fd156802d6e597ea5ac1411505a7d9e0c3a38dcdc572f6f7df24b598dbd",
+  "source_image_hash": "8e/a7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/a7/printing_7222_5_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/a7/printing_7222_5_",
+  "width": 750
+}

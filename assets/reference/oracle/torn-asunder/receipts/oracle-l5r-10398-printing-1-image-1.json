@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 716617,
+  "card_id": "oracle-l5r-10398",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10398-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Last Move",
+  "numbers": [
+    "142"
+  ],
+  "oracle_id": 10398,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10398-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:05.635014+00:00",
+  "sha256": "bb390dce7bd2792d85c64e27a34de1486df0856f6b764ec2ebf9308da17070d4",
+  "source_image_hash": "55/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/55/42/printing_10398_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/55/42/printing_10398_1_",
+  "width": 750
+}

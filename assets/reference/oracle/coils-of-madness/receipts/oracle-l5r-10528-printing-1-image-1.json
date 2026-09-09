@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1023698,
+  "card_id": "oracle-l5r-10528",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10528-printing-1-image-1",
+  "image_index": 1,
+  "name": "Justice of the Crane",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 10528,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10528-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:21.034273+00:00",
+  "sha256": "144bcfc2909ab6046441245d4bb4789688988906e5174abd453d0de7bc498ad3",
+  "source_image_hash": "49/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/49/6b/printing_10528_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/49/6b/printing_10528_1_",
+  "width": 750
+}

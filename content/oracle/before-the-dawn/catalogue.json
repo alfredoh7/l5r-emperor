@@ -20550,9 +20550,9 @@
       ]
     }
   ],
-  "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
+  "notice": "Reference-only; full-set offline archive.",
   "printing_set": "Before the Dawn",
-  "response_sha256": "f804b8d220c25b62b5fb610f99f41a41f5fa935b90d86d4aed9ccd8137399c4a",
+  "response_sha256": "25093cca0046848826f4f479da5a2a7d6d1bba9f6dbbd73453096fd2c9108c90",
   "schema_version": 1,
-  "scope": "needed_cards_only"
+  "scope": "full_set"
 }

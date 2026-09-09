@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 753332,
+  "card_id": "oracle-l5r-1771",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1771-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Susaiken",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 1771,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1771-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:50.268635+00:00",
+  "sha256": "c94a31a1dc5ff0292cf9d934a2aa951d1aa1b07eaaea8b2c5c3df6fe3354419f",
+  "source_image_hash": "0a/e0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/e0/printing_1771_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/e0/printing_1771_1_",
+  "width": 750
+}

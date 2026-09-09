@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 807970,
+  "card_id": "oracle-l5r-10848",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10848-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Obote",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 10848,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10848-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:15.043134+00:00",
+  "sha256": "9749fb055733dd6387c84fba78da2bbf56d30d12df3d2dc47b194c05563890e4",
+  "source_image_hash": "12/3a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/3a/printing_10848_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/3a/printing_10848_1_",
+  "width": 750
+}

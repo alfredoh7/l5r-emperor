@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 412480,
+  "card_id": "oracle-l5r-4291",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4291-printing-1-image-1",
+  "image_index": 1,
+  "name": "Katana of Fire",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 4291,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4291-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:41.534728+00:00",
+  "sha256": "fb63caefca0e182d331fcbc2a204e721cdac8f6d34d1d590d19939585b64f2fc",
+  "source_image_hash": "48/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/48/d4/printing_4291_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/48/d4/printing_4291_1_",
+  "width": 750
+}

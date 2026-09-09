@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 830365,
+  "card_id": "oracle-l5r-10129",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10129-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nature's Wrath",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 10129,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10129-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:03.751613+00:00",
+  "sha256": "438891e5ad0786aa69fad54d0373dbd79b240205d13209505fc15dd2b0251f96",
+  "source_image_hash": "92/99",
+  "source_url": "https://images.oracleofthevoid.com/l5r/92/99/printing_10129_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/92/99/printing_10129_1_",
+  "width": 750
+}

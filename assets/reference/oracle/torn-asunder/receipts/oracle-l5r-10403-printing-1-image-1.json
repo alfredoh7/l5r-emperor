@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748463,
+  "card_id": "oracle-l5r-10403",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10403-printing-1-image-1",
+  "image_index": 1,
+  "name": "Vital Pathways",
+  "numbers": [
+    "147"
+  ],
+  "oracle_id": 10403,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10403-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:24.699001+00:00",
+  "sha256": "47d1e8051f95df59d93de773e83506e72e9f3b5617b5ebf90b751be150e60aa0",
+  "source_image_hash": "03/d8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/d8/printing_10403_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/d8/printing_10403_1_",
+  "width": 750
+}

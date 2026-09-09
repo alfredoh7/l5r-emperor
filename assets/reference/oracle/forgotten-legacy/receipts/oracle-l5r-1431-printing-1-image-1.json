@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 267939,
+  "card_id": "oracle-l5r-1431",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1431-printing-1-image-1",
+  "image_index": 1,
+  "name": "Colonial Harbor",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 1431,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1431-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:41.770686+00:00",
+  "sha256": "9a17f7f533333bc55ab236342624c8f97652cece7cde96eae02e3ef26666bf34",
+  "source_image_hash": "11/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/94/printing_1431_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/94/printing_1431_1_",
+  "width": 750
+}

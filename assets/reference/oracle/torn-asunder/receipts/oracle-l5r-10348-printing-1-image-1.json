@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 819648,
+  "card_id": "oracle-l5r-10348",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10348-printing-1-image-1",
+  "image_index": 1,
+  "name": "Blood Wave",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 10348,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10348-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:54.477730+00:00",
+  "sha256": "fb8f50af3ee1eb6a7451f70525b89ecc58f7aba07125ebae2f82d6b04e10ae3f",
+  "source_image_hash": "31/bb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/31/bb/printing_10348_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/31/bb/printing_10348_1_",
+  "width": 750
+}

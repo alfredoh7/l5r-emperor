@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741788,
+  "card_id": "oracle-l5r-10609",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10609-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fudoist Temple",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 10609,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10609-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:30.725057+00:00",
+  "sha256": "2bce39ed9b12f6cff136dc0eb3ab49844e3c3a9fff6415cd769608a88e1b0a06",
+  "source_image_hash": "f8/96",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/96/printing_10609_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/96/printing_10609_1_",
+  "width": 750
+}

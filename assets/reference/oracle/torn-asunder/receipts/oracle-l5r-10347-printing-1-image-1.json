@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 693699,
+  "card_id": "oracle-l5r-10347",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10347-printing-1-image-1",
+  "image_index": 1,
+  "name": "Blood of Isawa's Tribe",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 10347,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10347-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:55.705189+00:00",
+  "sha256": "2bb038eb853aebc80705035bd320b8864f5870ace8eb14f025d24e4d074df016",
+  "source_image_hash": "10/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/7c/printing_10347_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/7c/printing_10347_1_",
+  "width": 750
+}

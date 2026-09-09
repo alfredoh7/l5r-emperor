@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 766030,
+  "card_id": "oracle-l5r-9938",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9938-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thuggish Techniques",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 9938,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9938-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:39.985801+00:00",
+  "sha256": "bd57196b00c1040fdff1b54e4f7bab6cd02586824f0e734d5022586f44e6414d",
+  "source_image_hash": "d6/dc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d6/dc/printing_9938_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d6/dc/printing_9938_1_",
+  "width": 750
+}

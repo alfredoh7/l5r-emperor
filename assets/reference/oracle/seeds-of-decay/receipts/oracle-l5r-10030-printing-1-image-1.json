@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 767100,
+  "card_id": "oracle-l5r-10030",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10030-printing-1-image-1",
+  "image_index": 1,
+  "name": "Incredible Tragedy",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10030,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10030-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:24.402999+00:00",
+  "sha256": "40c761b8f1b9ced6aaaff108df71ae9ac8c5d870c0a4d9d4e29c3b2745d551e2",
+  "source_image_hash": "06/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/06/6d/printing_10030_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/06/6d/printing_10030_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 281800,
+  "card_id": "oracle-l5r-1045",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1045-printing-14-image-1",
+  "image_index": 1,
+  "name": "Block Supply Lines",
+  "numbers": [
+    "89"
+  ],
+  "oracle_id": 1045,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1045-printing-14-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "14",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:01.874867+00:00",
+  "sha256": "b3b702c208e8b07b08b56ccb3f035b455b8605e75749dfd97aa22d16fde57194",
+  "source_image_hash": "9f/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9f/5a/printing_1045_14_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9f/5a/printing_1045_14_",
+  "width": 750
+}

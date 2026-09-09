@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 378528,
+  "card_id": "oracle-l5r-4537",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4537-printing-1-image-1",
+  "image_index": 1,
+  "name": "Komori Taruko",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 4537,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4537-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:01.807901+00:00",
+  "sha256": "06b24adb711ffcf012b8f8cf4add82b0580237d6bf724f46e68a639bdd28efa3",
+  "source_image_hash": "63/10",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/10/printing_4537_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/10/printing_4537_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 780233,
+  "card_id": "oracle-l5r-10657",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10657-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yogo Takashi",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 10657,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10657-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:29.825467+00:00",
+  "sha256": "1f60f6747a4f99f62e46fac9ad14edd334d8deaf71fe6513cab8f5f91019c532",
+  "source_image_hash": "df/02",
+  "source_url": "https://images.oracleofthevoid.com/l5r/df/02/printing_10657_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/df/02/printing_10657_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 812379,
+  "card_id": "oracle-l5r-10870",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10870-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Wateru",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 10870,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10870-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:53.313602+00:00",
+  "sha256": "96222bd2304df4d6b2739754b39cc320c42d5a86f0b66e7a94ead10263d7b5d8",
+  "source_image_hash": "9e/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9e/5a/printing_10870_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9e/5a/printing_10870_1_",
+  "width": 750
+}

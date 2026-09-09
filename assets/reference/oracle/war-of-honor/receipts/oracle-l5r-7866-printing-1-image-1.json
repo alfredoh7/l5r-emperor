@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 241927,
+  "card_id": "oracle-l5r-7866",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7866-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tempest of Flame",
+  "numbers": [
+    "83"
+  ],
+  "oracle_id": 7866,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7866-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:55.270655+00:00",
+  "sha256": "ea11211d412b67cca6b7f0e6c9ae540fe9b8ca698bbb4d3851309aaed585bdf4",
+  "source_image_hash": "2b/4e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2b/4e/printing_7866_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2b/4e/printing_7866_1_",
+  "width": 750
+}

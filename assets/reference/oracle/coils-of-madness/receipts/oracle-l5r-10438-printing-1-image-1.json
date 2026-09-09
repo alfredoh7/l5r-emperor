@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 932697,
+  "card_id": "oracle-l5r-10438",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10438-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Nikaru, the Flesh Eater",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 10438,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10438-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:58.036687+00:00",
+  "sha256": "c1b284b2edcf401a6e84f921263ed2ccc1ecea10bb6f6684f3f41f2ac55237ec",
+  "source_image_hash": "4e/d9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/d9/printing_10438_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/d9/printing_10438_1_",
+  "width": 750
+}

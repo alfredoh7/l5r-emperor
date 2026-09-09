@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 700895,
+  "card_id": "oracle-l5r-6883",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6883-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Hayan",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 6883,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6883-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:38.858865+00:00",
+  "sha256": "0641dc448d1c703a031f0f5c917fc83bc551dfdc1b4cbbbd6202b7a7e8c64eeb",
+  "source_image_hash": "fd/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fd/4d/printing_6883_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/4d/printing_6883_1_",
+  "width": 750
+}

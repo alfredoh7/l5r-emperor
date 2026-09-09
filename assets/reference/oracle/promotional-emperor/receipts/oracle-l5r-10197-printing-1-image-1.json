@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 904195,
+  "card_id": "oracle-l5r-10197",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10197-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Casual Stroll",
+  "numbers": [
+    "171"
+  ],
+  "oracle_id": 10197,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10197-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:47.336579+00:00",
+  "sha256": "74e4088efc52ba03b47bef6d4e9cd92b7baccbcd07ad125bf13cb583385fb425",
+  "source_image_hash": "3c/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/45/printing_10197_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/45/printing_10197_1_",
+  "width": 750
+}

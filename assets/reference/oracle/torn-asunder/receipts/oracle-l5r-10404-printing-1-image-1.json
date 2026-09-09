@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 738599,
+  "card_id": "oracle-l5r-10404",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10404-printing-1-image-1",
+  "image_index": 1,
+  "name": "Warded Premises",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 10404,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10404-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:25.951736+00:00",
+  "sha256": "774940cf222cbeabc613652480d32c53109c534b33f156a681e7a0e2d8445db2",
+  "source_image_hash": "82/ab",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/ab/printing_10404_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/ab/printing_10404_1_",
+  "width": 750
+}

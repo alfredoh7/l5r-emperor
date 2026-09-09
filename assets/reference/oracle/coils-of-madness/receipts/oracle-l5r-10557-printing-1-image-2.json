@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1036927,
+  "card_id": "oracle-l5r-10557",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10557-printing-1-image-2",
+  "image_index": 2,
+  "name": "Suikihime's Sanction",
+  "numbers": [
+    "132"
+  ],
+  "oracle_id": 10557,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10557-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:44.048876+00:00",
+  "sha256": "72b122c53e7a518514f2965852df5a6401db33f67807b1f18e12af8303ac1854",
+  "source_image_hash": "8a/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8a/de/printing_10557_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8a/de/printing_10557_1_",
+  "width": 750
+}

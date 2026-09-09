@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747959,
+  "card_id": "oracle-l5r-10128",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10128-printing-1-image-1",
+  "image_index": 1,
+  "name": "Master of Beasts",
+  "numbers": [
+    "102"
+  ],
+  "oracle_id": 10128,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10128-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:44.326194+00:00",
+  "sha256": "f1ad794011e0348f866da8c2ee4b182733635ac02fca706bb97caefc589afbf8",
+  "source_image_hash": "de/74",
+  "source_url": "https://images.oracleofthevoid.com/l5r/de/74/printing_10128_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/de/74/printing_10128_1_",
+  "width": 750
+}

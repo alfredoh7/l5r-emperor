@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386734,
+  "card_id": "oracle-l5r-1167",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1167-printing-1-image-1",
+  "image_index": 1,
+  "name": "Brothers of Goemon",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 1167,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1167-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:06.017757+00:00",
+  "sha256": "0da70b00ff63e2560af3d291757050d41615b190cfaa50f57ae5411e8c25ea46",
+  "source_image_hash": "da/18",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/18/printing_1167_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/18/printing_1167_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 457380,
+  "card_id": "oracle-l5r-6211",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6211-printing-1-image-1",
+  "image_index": 1,
+  "name": "Reckless Rush",
+  "numbers": [
+    "130"
+  ],
+  "oracle_id": 6211,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6211-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:25.420886+00:00",
+  "sha256": "c929d19ef1442fd9bbc148f7c6832f37a0bcf13ea2385a733a76559580bf8468",
+  "source_image_hash": "f3/41",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f3/41/printing_6211_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f3/41/printing_6211_1_",
+  "width": 750
+}

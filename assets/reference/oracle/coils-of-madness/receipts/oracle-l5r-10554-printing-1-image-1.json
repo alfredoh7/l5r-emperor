@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1038574,
+  "card_id": "oracle-l5r-10554",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10554-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple Grounds",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 10554,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10554-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:52.639013+00:00",
+  "sha256": "f26dd79a404a86886d31b53c44bd5eb3192e9c6cef475b7a3acc62d161e5909f",
+  "source_image_hash": "66/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/66/7d/printing_10554_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/66/7d/printing_10554_1_",
+  "width": 750
+}

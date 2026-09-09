@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 397392,
+  "card_id": "oracle-l5r-8999",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8999-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unorthodox Attack",
+  "numbers": [
+    "152"
+  ],
+  "oracle_id": 8999,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8999-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:19.601401+00:00",
+  "sha256": "4afdcbfc74886475c1e3888822e1b0d957174d65b90273f037fa3f0e270e4007",
+  "source_image_hash": "6b/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6b/a4/printing_8999_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6b/a4/printing_8999_1_",
+  "width": 750
+}

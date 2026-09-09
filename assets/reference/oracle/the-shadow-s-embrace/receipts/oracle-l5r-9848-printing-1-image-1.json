@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 770961,
+  "card_id": "oracle-l5r-9848",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9848-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Arakan",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 9848,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9848-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:39.151986+00:00",
+  "sha256": "6ec506427bd12369d2a36d5ebfaf81e94d0114e851bbf065c6f8907962492d43",
+  "source_image_hash": "93/f5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/f5/printing_9848_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/f5/printing_9848_1_",
+  "width": 750
+}

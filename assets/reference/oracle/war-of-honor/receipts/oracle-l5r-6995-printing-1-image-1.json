@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 238202,
+  "card_id": "oracle-l5r-6995",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6995-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinsei's Tomb",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 6995,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6995-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:45.406522+00:00",
+  "sha256": "ac00c1791e57631a76567285503a6b2215c07a9ab98c0924ee90febea69a9a0b",
+  "source_image_hash": "c9/d3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/d3/printing_6995_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/d3/printing_6995_1_",
+  "width": 750
+}

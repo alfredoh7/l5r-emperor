@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 826240,
+  "card_id": "oracle-l5r-10441",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10441-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Ogata",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 10441,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10441-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:59.241122+00:00",
+  "sha256": "79db5d766918742cba8995992703befd6532b729fbfe78f3e6b6fe31c068f499",
+  "source_image_hash": "4f/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4f/f7/printing_10441_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4f/f7/printing_10441_1_",
+  "width": 750
+}

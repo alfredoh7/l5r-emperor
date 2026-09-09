@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 274223,
+  "card_id": "oracle-l5r-9744",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9744-printing-2-image-1",
+  "image_index": 1,
+  "name": "Benika's Pride",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 9744,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9744-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:32:16.287987+00:00",
+  "sha256": "58fec629b84a56ccfc9672633d79c06dcbfe13c9e77c834904aae1122333fddb",
+  "source_image_hash": "2e/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2e/98/printing_9744_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2e/98/printing_9744_2_",
+  "width": 750
+}

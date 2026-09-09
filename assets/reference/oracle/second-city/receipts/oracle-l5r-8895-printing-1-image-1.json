@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 388776,
+  "card_id": "oracle-l5r-8895",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8895-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Yakusho",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 8895,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8895-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:04.331305+00:00",
+  "sha256": "9144eb4bfa899c628e4575f2a6cd13e2ff0f3e001a469c79dc367ef7be5b8d44",
+  "source_image_hash": "57/2c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/57/2c/printing_8895_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/57/2c/printing_8895_1_",
+  "width": 750
+}

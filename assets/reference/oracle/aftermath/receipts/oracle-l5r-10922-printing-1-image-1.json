@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788984,
+  "card_id": "oracle-l5r-10922",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10922-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Earth's Armor",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 10922,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10922-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:02.954800+00:00",
+  "sha256": "cf942adc5126bca24fb9b071bde640438313332b04bfc7761100e0f3b47090e9",
+  "source_image_hash": "54/31",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/31/printing_10922_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/31/printing_10922_1_",
+  "width": 750
+}

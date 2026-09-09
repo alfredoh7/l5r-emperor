@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 913866,
+  "card_id": "oracle-l5r-10831",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10831-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Kaiji",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 10831,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10831-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:34.054475+00:00",
+  "sha256": "a3212f216b08253b5f03ffcf35183b1471bb737bc01bb2a44dde27eb5e79ecf3",
+  "source_image_hash": "75/2e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/75/2e/printing_10831_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/75/2e/printing_10831_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 263454,
+  "card_id": "oracle-l5r-7089",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7089-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Aroru",
+  "numbers": [
+    "35"
+  ],
+  "oracle_id": 7089,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-7089-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:27.950606+00:00",
+  "sha256": "7401cd455cbe5b1b13d16ebe6a6f1dd54e042ecb5a294d52c1e936f96f78cc63",
+  "source_image_hash": "f0/96",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/96/printing_7089_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/96/printing_7089_1_",
+  "width": 750
+}

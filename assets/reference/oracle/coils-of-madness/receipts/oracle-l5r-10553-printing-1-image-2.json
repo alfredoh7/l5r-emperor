@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 988337,
+  "card_id": "oracle-l5r-10553",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10553-printing-1-image-2",
+  "image_index": 2,
+  "name": "The Tale of the Disgraced",
+  "numbers": [
+    "135"
+  ],
+  "oracle_id": 10553,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10553-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:11.166864+00:00",
+  "sha256": "d470a7a38f82897878cc47c337990c80ae55bc74a7cf44039d638c826b577274",
+  "source_image_hash": "b4/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/d2/printing_10553_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/d2/printing_10553_1_",
+  "width": 750
+}

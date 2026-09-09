@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 887243,
+  "card_id": "oracle-l5r-10642",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10642-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Rukia",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 10642,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10642-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:18.391249+00:00",
+  "sha256": "e5dbaeb9321f90d1a3e9c1e13d8241b0a3fb092c11b677f7c72b4ebe4d81bced",
+  "source_image_hash": "d8/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d8/84/printing_10642_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/84/printing_10642_1_",
+  "width": 750
+}

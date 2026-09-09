@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741360,
+  "card_id": "oracle-l5r-10069",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10069-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Nobukatsu",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 10069,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10069-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:59.028582+00:00",
+  "sha256": "2b3827262b0f5daf901b5208766ac0ea8a779bc18d6066919ca7b8634b887bf2",
+  "source_image_hash": "48/2a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/48/2a/printing_10069_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/48/2a/printing_10069_1_",
+  "width": 750
+}

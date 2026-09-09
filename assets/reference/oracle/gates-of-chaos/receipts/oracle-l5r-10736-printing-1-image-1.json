@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 792480,
+  "card_id": "oracle-l5r-10736",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10736-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lessons from the Heralds",
+  "numbers": [
+    "128"
+  ],
+  "oracle_id": 10736,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10736-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:07.280077+00:00",
+  "sha256": "f32f8d6218956a0df93fbf2eff69f4d4f3090194f8cf6023aacfc54c3a1be427",
+  "source_image_hash": "51/f5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/f5/printing_10736_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/f5/printing_10736_1_",
+  "width": 750
+}

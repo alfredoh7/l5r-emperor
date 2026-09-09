@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 782727,
+  "card_id": "oracle-l5r-6513",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6513-printing-1-image-1",
+  "image_index": 1,
+  "name": "Scouting the Pass",
+  "numbers": [
+    "136"
+  ],
+  "oracle_id": 6513,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6513-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:30.385713+00:00",
+  "sha256": "aba9398abfa0c8eca84cf15253608baea80185d03c4ecc4c49c37734a5894ebb",
+  "source_image_hash": "2f/19",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2f/19/printing_6513_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2f/19/printing_6513_1_",
+  "width": 750
+}

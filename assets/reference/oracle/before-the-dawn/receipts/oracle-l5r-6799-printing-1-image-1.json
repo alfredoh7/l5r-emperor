@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 391079,
+  "card_id": "oracle-l5r-6799",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6799-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Ryuba",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 6799,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6799-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:38.193731+00:00",
+  "sha256": "2054e49afbba89a5facc4c459c45d0f093e9186b023ea43af1dfb7306f539f68",
+  "source_image_hash": "ba/54",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/54/printing_6799_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/54/printing_6799_1_",
+  "width": 750
+}

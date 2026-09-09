@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 738192,
+  "card_id": "oracle-l5r-10349",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10349-printing-1-image-1",
+  "image_index": 1,
+  "name": "Earth's Protection",
+  "numbers": [
+    "93"
+  ],
+  "oracle_id": 10349,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10349-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:25.487783+00:00",
+  "sha256": "946d6298a2ed2d4c9c732d400821cc7a62c0f09851932ff60f89277165c34c49",
+  "source_image_hash": "43/73",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/73/printing_10349_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/73/printing_10349_1_",
+  "width": 750
+}

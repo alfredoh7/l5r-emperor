@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1152328,
+  "card_id": "oracle-l5r-10500",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10500-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hantei XVI",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 10500,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10500-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:51.771173+00:00",
+  "sha256": "267bf5f263bd3eb7ea5e20a61bae7a96efb2a355f9898895245a7381d9b526de",
+  "source_image_hash": "d0/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d0/8c/printing_10500_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d0/8c/printing_10500_1_",
+  "width": 750
+}

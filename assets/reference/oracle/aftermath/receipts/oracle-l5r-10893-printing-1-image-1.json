@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779324,
+  "card_id": "oracle-l5r-10893",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10893-printing-1-image-1",
+  "image_index": 1,
+  "name": "Commander's Steed",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 10893,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10893-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:02.743369+00:00",
+  "sha256": "60d876a50a53438aa6f5420d8fca22c9c0625654a1a743704e8c5922f75c84d9",
+  "source_image_hash": "51/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/5c/printing_10893_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/5c/printing_10893_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 249463,
+  "card_id": "oracle-l5r-5902",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5902-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pearl of Embers",
+  "numbers": [
+    "54"
+  ],
+  "oracle_id": 5902,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5902-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:16.941998+00:00",
+  "sha256": "10ee3c18445d9abcbc6c37dffd3c4369a8af1303f21ca74a2a4485705f3f74e2",
+  "source_image_hash": "0a/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/32/printing_5902_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/32/printing_5902_1_",
+  "width": 750
+}

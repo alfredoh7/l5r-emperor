@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1017459,
+  "card_id": "oracle-l5r-10523",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10523-printing-1-image-1",
+  "image_index": 1,
+  "name": "Heart of Fudo",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 10523,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10523-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:54.239192+00:00",
+  "sha256": "4debe6a2988413603e04b0ac42de0954b63297652d6a7b2d767dadac47aa87fb",
+  "source_image_hash": "6b/ad",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6b/ad/printing_10523_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6b/ad/printing_10523_1_",
+  "width": 750
+}

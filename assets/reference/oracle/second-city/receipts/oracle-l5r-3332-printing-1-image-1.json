@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 384094,
+  "card_id": "oracle-l5r-3332",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3332-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Tensin",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 3332,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3332-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:30.635678+00:00",
+  "sha256": "7434079a270b9c2a576a8a058187b15bec533464565d260f019b744783590654",
+  "source_image_hash": "0a/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/b4/printing_3332_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/b4/printing_3332_1_",
+  "width": 750
+}

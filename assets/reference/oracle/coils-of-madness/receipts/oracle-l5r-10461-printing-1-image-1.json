@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1056416,
+  "card_id": "oracle-l5r-10461",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10461-printing-1-image-1",
+  "image_index": 1,
+  "name": "Jikoji, Fist of Stone",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 10461,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10461-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:19.768249+00:00",
+  "sha256": "08f26cffa2e07874830f3d15124ccf7bcecedbf0b870dd54f6c64a96bdeac654",
+  "source_image_hash": "88/ea",
+  "source_url": "https://images.oracleofthevoid.com/l5r/88/ea/printing_10461_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/88/ea/printing_10461_1_",
+  "width": 750
+}

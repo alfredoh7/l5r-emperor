@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 364854,
+  "card_id": "oracle-l5r-10023",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10023-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ohsuki's Sparrow",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10023,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-10023-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:07.490638+00:00",
+  "sha256": "43ff6563bf08fb5944d501ad6c95dc8240dace86c1ff47b2d6c47fc6a3addf61",
+  "source_image_hash": "a2/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a2/86/printing_10023_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a2/86/printing_10023_1_",
+  "width": 750
+}

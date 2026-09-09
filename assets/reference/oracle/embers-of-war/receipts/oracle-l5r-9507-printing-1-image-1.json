@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 709281,
+  "card_id": "oracle-l5r-9507",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9507-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yojimbo Assemble",
+  "numbers": [
+    "155"
+  ],
+  "oracle_id": 9507,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9507-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:32.613724+00:00",
+  "sha256": "e62d90c014240a79b403fa6bce7a28e1768b2960ecfcafd15da68b71f7a43be6",
+  "source_image_hash": "38/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/38/0d/printing_9507_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/38/0d/printing_9507_1_",
+  "width": 750
+}

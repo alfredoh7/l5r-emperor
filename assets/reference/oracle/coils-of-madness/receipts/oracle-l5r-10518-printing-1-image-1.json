@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1016504,
+  "card_id": "oracle-l5r-10518",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10518-printing-1-image-1",
+  "image_index": 1,
+  "name": "Maddened Horde",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 10518,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10518-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:45.730501+00:00",
+  "sha256": "57837ffc23f29c4d4e08a5b7ab502fbee5efc54d2f778926e59234041bc84ff7",
+  "source_image_hash": "f5/9b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f5/9b/printing_10518_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f5/9b/printing_10518_1_",
+  "width": 750
+}

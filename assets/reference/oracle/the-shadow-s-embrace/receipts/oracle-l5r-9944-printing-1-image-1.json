@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 770714,
+  "card_id": "oracle-l5r-9944",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9944-printing-1-image-1",
+  "image_index": 1,
+  "name": "Watchers in the Dark",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 9944,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9944-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:01.542688+00:00",
+  "sha256": "7028a4cbc8b32023b11febabf73e021a8dfceed5f8712b50c3af5151f712804d",
+  "source_image_hash": "bd/91",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bd/91/printing_9944_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bd/91/printing_9944_1_",
+  "width": 750
+}

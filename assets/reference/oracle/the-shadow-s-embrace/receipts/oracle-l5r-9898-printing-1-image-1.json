@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 802176,
+  "card_id": "oracle-l5r-9898",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9898-printing-1-image-1",
+  "image_index": 1,
+  "name": "Cowed and Defeated",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 9898,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9898-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:33.269532+00:00",
+  "sha256": "f5f6f1630327f0c3d5d481b9b1f9739e44d2669df48870aa3409695e24ea7551",
+  "source_image_hash": "0f/70",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0f/70/printing_9898_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0f/70/printing_9898_1_",
+  "width": 750
+}

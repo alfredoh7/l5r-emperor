@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 231612,
+  "card_id": "oracle-l5r-3816",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3816-printing-2-image-1",
+  "image_index": 1,
+  "name": "Isawa Akihiro",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 3816,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3816-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:36.945074+00:00",
+  "sha256": "2402bee29f9e66955ff668cd9c643447d5797ebb8a8dc3a0bdb65a4d3f5c2b82",
+  "source_image_hash": "5f/21",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5f/21/printing_3816_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5f/21/printing_3816_2_",
+  "width": 750
+}

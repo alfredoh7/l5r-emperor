@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 809646,
+  "card_id": "oracle-l5r-10942",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10942-printing-1-image-1",
+  "image_index": 1,
+  "name": "Knowledge and Power",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 10942,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10942-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:03.887530+00:00",
+  "sha256": "aead38c33955e28bd16cd42817dc6e455ba4cb9f66f7abf98b039320e9250387",
+  "source_image_hash": "b2/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/4a/printing_10942_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/4a/printing_10942_1_",
+  "width": 750
+}

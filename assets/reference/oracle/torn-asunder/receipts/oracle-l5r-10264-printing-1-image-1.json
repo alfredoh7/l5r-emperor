@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 692821,
+  "card_id": "oracle-l5r-10264",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10264-printing-1-image-1",
+  "image_index": 1,
+  "name": "Damaged Port",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 10264,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10264-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:14.949006+00:00",
+  "sha256": "c8d831894d1c336cc6a2d95033fc9eb9e6e4cae0d5e14b09cf029fe73917558b",
+  "source_image_hash": "0c/b2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/b2/printing_10264_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/b2/printing_10264_1_",
+  "width": 750
+}

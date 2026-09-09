@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 938338,
+  "card_id": "oracle-l5r-10508",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10508-printing-1-image-2",
+  "image_index": 2,
+  "name": "Moto Xin",
+  "numbers": [
+    "147"
+  ],
+  "oracle_id": 10508,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10508-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:59.924209+00:00",
+  "sha256": "72950de7a8ec80e224dd9fd9e5ad87e3cf9822eec2c8db39ac0569409cecaa92",
+  "source_image_hash": "d0/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d0/8a/printing_10508_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d0/8a/printing_10508_1_",
+  "width": 750
+}

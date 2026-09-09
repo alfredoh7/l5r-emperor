@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754002,
+  "card_id": "oracle-l5r-10075",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10075-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Rikate",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 10075,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10075-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:27.562481+00:00",
+  "sha256": "57a6bda0acb9859371c66ea3be1eacc7b17ab6d676ee70110b335a043c28c1ac",
+  "source_image_hash": "90/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/90/24/printing_10075_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/90/24/printing_10075_1_",
+  "width": 750
+}

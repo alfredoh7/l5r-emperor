@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 867102,
+  "card_id": "oracle-l5r-10449",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10449-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Adachi",
+  "numbers": [
+    "140"
+  ],
+  "oracle_id": 10449,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10449-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:15.866821+00:00",
+  "sha256": "3d48d6c657be1b3661b69a4c25e8c03f3c8e840bf69f7f4d70719f6772f5a294",
+  "source_image_hash": "41/ea",
+  "source_url": "https://images.oracleofthevoid.com/l5r/41/ea/printing_10449_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/41/ea/printing_10449_1_",
+  "width": 750
+}

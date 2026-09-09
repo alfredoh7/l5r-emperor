@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 773816,
+  "card_id": "oracle-l5r-10686",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10686-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spitting Llama",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 10686,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10686-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:51.880821+00:00",
+  "sha256": "39330a1317e1ceee2e5cef960f7b4876a5d1d63f5295975a0d215f3bc68d3045",
+  "source_image_hash": "d6/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d6/1a/printing_10686_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d6/1a/printing_10686_1_",
+  "width": 750
+}

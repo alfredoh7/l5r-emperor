@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401146,
+  "card_id": "oracle-l5r-9605",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9605-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Minori",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 9605,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9605-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:19.206850+00:00",
+  "sha256": "b8aaed69ffdd30b054dc0d5f9496e6b104e14082916cb6ce84ed4a33b5e8875b",
+  "source_image_hash": "17/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/17/da/printing_9605_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/17/da/printing_9605_1_",
+  "width": 750
+}

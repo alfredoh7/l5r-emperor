@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1030010,
+  "card_id": "oracle-l5r-10546",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10546-printing-1-image-1",
+  "image_index": 1,
+  "name": "No Way Out",
+  "numbers": [
+    "128"
+  ],
+  "oracle_id": 10546,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10546-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:07.467997+00:00",
+  "sha256": "72b355c6c380a84a5e68acdc49522157c0db4b5dcf1f8bc566677376eea256f9",
+  "source_image_hash": "3d/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/1a/printing_10546_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/1a/printing_10546_1_",
+  "width": 750
+}

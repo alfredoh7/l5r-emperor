@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 703579,
+  "card_id": "oracle-l5r-10153",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10153-printing-1-image-1",
+  "image_index": 1,
+  "name": "Incriminating Testimony",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 10153,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10153-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:25.545791+00:00",
+  "sha256": "137f12074b8c1326a5fd4a322141073c68608b7f1677d1cf17b9034ec48e8793",
+  "source_image_hash": "45/2f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/45/2f/printing_10153_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/45/2f/printing_10153_1_",
+  "width": 750
+}

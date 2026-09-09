@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 970977,
+  "card_id": "oracle-l5r-10561",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10561-printing-1-image-1",
+  "image_index": 1,
+  "name": "The False Path",
+  "numbers": [
+    "138"
+  ],
+  "oracle_id": 10561,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10561-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:03.711789+00:00",
+  "sha256": "a065296f6af758609057d2c4f5b610288293e5442627f5942a6b53110e4fb309",
+  "source_image_hash": "bf/d3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bf/d3/printing_10561_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bf/d3/printing_10561_1_",
+  "width": 750
+}

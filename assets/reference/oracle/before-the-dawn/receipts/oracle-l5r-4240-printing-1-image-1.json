@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398073,
+  "card_id": "oracle-l5r-4240",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4240-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Yasunori",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 4240,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4240-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:59.661569+00:00",
+  "sha256": "fd96d0bc718ba41eee03ab00a1b1583954fd5c768782de6543b0aa58a8cad0e6",
+  "source_image_hash": "d2/72",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/72/printing_4240_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/72/printing_4240_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 252031,
+  "card_id": "oracle-l5r-5591",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5591-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ninube Shiho",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 5591,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5591-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:14.994144+00:00",
+  "sha256": "76ed970db9d789fa418f6588befa70ebc295925b3941519aa3d17ef7f27e91c1",
+  "source_image_hash": "17/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/17/b4/printing_5591_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/17/b4/printing_5591_1_",
+  "width": 750
+}

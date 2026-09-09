@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1092496,
+  "card_id": "oracle-l5r-10457",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10457-printing-1-image-1",
+  "image_index": 1,
+  "name": "Usagi Seki, the Untouchable",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 10457,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10457-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:27.831690+00:00",
+  "sha256": "3b74129a41b507c0b11e5855fa7877f38873b618fcfc051200e95d2e11d84de5",
+  "source_image_hash": "9c/40",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9c/40/printing_10457_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9c/40/printing_10457_1_",
+  "width": 750
+}

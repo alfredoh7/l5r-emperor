@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 757526,
+  "card_id": "oracle-l5r-10929",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10929-printing-1-image-1",
+  "image_index": 1,
+  "name": "Banzai!",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 10929,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10929-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:48.496411+00:00",
+  "sha256": "84bcb1d96adc9fadd1dac5598f6e7d06118ea4294b62a50548c86c47331482f2",
+  "source_image_hash": "ea/2d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ea/2d/printing_10929_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ea/2d/printing_10929_1_",
+  "width": 750
+}

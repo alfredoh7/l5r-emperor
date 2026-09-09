@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 591162,
+  "card_id": "oracle-l5r-10810",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10810-printing-1-image-1",
+  "image_index": 1,
+  "name": "Breached Oni",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10810,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10810-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:58.049497+00:00",
+  "sha256": "447d1d4330a1da1de7740aff518cddcf67c4aeda75e3e19d42bf63d409c656ff",
+  "source_image_hash": "d4/1d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/1d/printing_10810_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/1d/printing_10810_1_",
+  "width": 750
+}

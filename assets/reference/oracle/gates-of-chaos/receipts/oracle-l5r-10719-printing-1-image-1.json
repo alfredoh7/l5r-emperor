@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 833479,
+  "card_id": "oracle-l5r-10719",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10719-printing-1-image-1",
+  "image_index": 1,
+  "name": "Recovering What Was Lost",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 10719,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10719-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:32.489000+00:00",
+  "sha256": "9796f2e1409e9311581bf9fc86aeb9a88700a1b3a6e69511cd487ab63e698588",
+  "source_image_hash": "f1/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f1/1a/printing_10719_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f1/1a/printing_10719_1_",
+  "width": 750
+}

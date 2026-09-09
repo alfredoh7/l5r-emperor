@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1179904,
+  "card_id": "oracle-l5r-10476",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10476-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Ryuzo",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 10476,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10476-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:11.845292+00:00",
+  "sha256": "e6aefaca4093a569b210a23b5abce0a5a5c476574f081452b30a440e68107236",
+  "source_image_hash": "65/a1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/65/a1/printing_10476_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/65/a1/printing_10476_1_",
+  "width": 750
+}

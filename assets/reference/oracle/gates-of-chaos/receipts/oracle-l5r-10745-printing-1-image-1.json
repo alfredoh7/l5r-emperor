@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 871608,
+  "card_id": "oracle-l5r-10745",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10745-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sorrowful Prayer",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 10745,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10745-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:48.239732+00:00",
+  "sha256": "90a3c30830388519f956c4e6fb798dffe1f5419f4fb0842c8590717dbb42a339",
+  "source_image_hash": "68/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/f6/printing_10745_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/f6/printing_10745_1_",
+  "width": 750
+}

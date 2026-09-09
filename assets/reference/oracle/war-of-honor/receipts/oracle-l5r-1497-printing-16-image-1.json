@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 224857,
+  "card_id": "oracle-l5r-1497",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1497-printing-16-image-1",
+  "image_index": 1,
+  "name": "Copper Mine",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 1497,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1497-printing-16-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "16",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:11.737237+00:00",
+  "sha256": "0ca4ceb2744be2d4ff430ab0d6de134943540957397d71ab9297933737d2d6bb",
+  "source_image_hash": "1b/1c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1b/1c/printing_1497_16_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/1c/printing_1497_16_",
+  "width": 750
+}

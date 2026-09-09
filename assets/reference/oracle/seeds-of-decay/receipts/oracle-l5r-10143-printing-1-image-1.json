@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 843420,
+  "card_id": "oracle-l5r-10143",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10143-printing-1-image-1",
+  "image_index": 1,
+  "name": "Determined Challenge",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 10143,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10143-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:53.538906+00:00",
+  "sha256": "a45b94775329f52538ee4932c1f26b81ecabfd7609f3435159b465c3a594be15",
+  "source_image_hash": "4b/a2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/a2/printing_10143_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/a2/printing_10143_1_",
+  "width": 750
+}

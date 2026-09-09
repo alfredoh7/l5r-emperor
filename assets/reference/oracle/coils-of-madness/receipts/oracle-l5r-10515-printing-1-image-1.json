@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 976219,
+  "card_id": "oracle-l5r-10515",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10515-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thunderous Legion",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 10515,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10515-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:12.362288+00:00",
+  "sha256": "db9fd891321a628e69fc798794f9fb701c9633fc2df68a1854e766615c02fb18",
+  "source_image_hash": "dd/27",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/27/printing_10515_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/27/printing_10515_1_",
+  "width": 750
+}

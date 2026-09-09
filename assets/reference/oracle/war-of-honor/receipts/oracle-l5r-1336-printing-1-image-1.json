@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 231766,
+  "card_id": "oracle-l5r-1336",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1336-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chokehold",
+  "numbers": [
+    "93"
+  ],
+  "oracle_id": 1336,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1336-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:07.809632+00:00",
+  "sha256": "47f008082d06c63441df2adafafc2296b3c912c4596562c4edb0f88e440a9cd9",
+  "source_image_hash": "a6/54",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a6/54/printing_1336_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a6/54/printing_1336_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1054380,
+  "card_id": "oracle-l5r-10483",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10483-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rokkaku, Master of Scrolls",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 10483,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10483-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:28.114827+00:00",
+  "sha256": "3ed8060f73631a7d0b924b235b43de1671225d4aa5caeb9b0fff4c5480f47c93",
+  "source_image_hash": "10/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/a9/printing_10483_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/a9/printing_10483_1_",
+  "width": 750
+}

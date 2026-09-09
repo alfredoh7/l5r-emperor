@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1067473,
+  "card_id": "oracle-l5r-10471",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10471-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Minori",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 10471,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10471-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:34.376349+00:00",
+  "sha256": "d409ddac25ac7ef61a50d1544128fe9680faa4174e2aed9424aea02acc3644ae",
+  "source_image_hash": "cf/00",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/00/printing_10471_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/00/printing_10471_1_",
+  "width": 750
+}

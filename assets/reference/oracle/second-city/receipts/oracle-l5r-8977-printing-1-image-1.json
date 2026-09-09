@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 421982,
+  "card_id": "oracle-l5r-8977",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8977-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unexpected Support",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 8977,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8977-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:05.428423+00:00",
+  "sha256": "d107217db1d6bb01dae1e470bd0edfa015a3c0729e11b87646cd3b479a628d5d",
+  "source_image_hash": "9b/82",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/82/printing_8977_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/82/printing_8977_1_",
+  "width": 750
+}

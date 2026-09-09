@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 667222,
+  "card_id": "oracle-l5r-10414",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10414-printing-1-image-1",
+  "image_index": 1,
+  "name": "Summon Fushicho",
+  "numbers": [
+    "158"
+  ],
+  "oracle_id": 10414,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10414-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:30:21.406198+00:00",
+  "sha256": "4a60c991fcad215185becd55e5e9ce9ab03213cbdab95e586afd5fd0e6e34e45",
+  "source_image_hash": "12/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/b3/printing_10414_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/b3/printing_10414_1_",
+  "width": 750
+}

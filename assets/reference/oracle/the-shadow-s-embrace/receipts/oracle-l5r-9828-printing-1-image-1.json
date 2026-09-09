@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 906082,
+  "card_id": "oracle-l5r-9828",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9828-printing-1-image-1",
+  "image_index": 1,
+  "name": "Zlkyt",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 9828,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9828-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:11.443584+00:00",
+  "sha256": "e627763ab1fe108dd62cb7e15ac947d7f8ac748bf0e5ea4453b681595062245f",
+  "source_image_hash": "16/aa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/aa/printing_9828_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/aa/printing_9828_1_",
+  "width": 750
+}

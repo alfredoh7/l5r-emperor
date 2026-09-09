@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 234307,
+  "card_id": "oracle-l5r-6630",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6630-printing-3-image-1",
+  "image_index": 1,
+  "name": "Settling the Homeless",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 6630,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6630-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:04.780989+00:00",
+  "sha256": "181fc849c67213a72dab106bdad86bb13783dc74a01c4d1baa9d5e935ddc3706",
+  "source_image_hash": "82/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/8a/printing_6630_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/8a/printing_6630_3_",
+  "width": 750
+}

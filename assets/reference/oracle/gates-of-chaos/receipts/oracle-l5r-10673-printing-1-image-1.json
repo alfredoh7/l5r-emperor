@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 879062,
+  "card_id": "oracle-l5r-10673",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10673-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Daiken",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 10673,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10673-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:20.838226+00:00",
+  "sha256": "6c48ae10a1af5cb30d5905b4d578df78d7324fe6f31314bc11ef5dab2538dbac",
+  "source_image_hash": "49/4b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/49/4b/printing_10673_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/49/4b/printing_10673_1_",
+  "width": 750
+}

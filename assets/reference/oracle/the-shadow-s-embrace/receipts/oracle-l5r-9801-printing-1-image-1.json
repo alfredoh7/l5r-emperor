@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 739767,
+  "card_id": "oracle-l5r-9801",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9801-printing-1-image-1",
+  "image_index": 1,
+  "name": "Versatile Farm",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 9801,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9801-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:55.555411+00:00",
+  "sha256": "15435b24c528b440255cb427406c3b889fe575dfdb11cace8c31779c54ad1b00",
+  "source_image_hash": "9f/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9f/15/printing_9801_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9f/15/printing_9801_1_",
+  "width": 750
+}

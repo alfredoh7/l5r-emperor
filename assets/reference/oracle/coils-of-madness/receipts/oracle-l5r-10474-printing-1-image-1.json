@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1051360,
+  "card_id": "oracle-l5r-10474",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10474-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hamuro, the Wise",
+  "numbers": [
+    "54"
+  ],
+  "oracle_id": 10474,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10474-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:50.489772+00:00",
+  "sha256": "4ba5907c019dd1437cd846bbbdb82fe6dc469277e291cd860dd8c5ed31834744",
+  "source_image_hash": "7f/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7f/eb/printing_10474_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7f/eb/printing_10474_1_",
+  "width": 750
+}

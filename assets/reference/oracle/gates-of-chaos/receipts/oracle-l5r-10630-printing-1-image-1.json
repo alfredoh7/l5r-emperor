@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730360,
+  "card_id": "oracle-l5r-10630",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10630-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Bojan",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 10630,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10630-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:15.695529+00:00",
+  "sha256": "7d3b73e3bcc7b6f253018baf8631b9c6469194a402a57f62667f8ad6ba0f6915",
+  "source_image_hash": "54/88",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/88/printing_10630_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/88/printing_10630_1_",
+  "width": 750
+}

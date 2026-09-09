@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 745138,
+  "card_id": "oracle-l5r-9904",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9904-printing-1-image-1",
+  "image_index": 1,
+  "name": "Duel to First Blood",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 9904,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9904-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:47.377267+00:00",
+  "sha256": "bba62f2bdde9b958ab564e380aaf97519dea3adfc9325f00bce6c6ccac076d05",
+  "source_image_hash": "92/66",
+  "source_url": "https://images.oracleofthevoid.com/l5r/92/66/printing_9904_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/92/66/printing_9904_1_",
+  "width": 750
+}

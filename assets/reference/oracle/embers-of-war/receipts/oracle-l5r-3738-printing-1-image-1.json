@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 713069,
+  "card_id": "oracle-l5r-3738",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3738-printing-1-image-1",
+  "image_index": 1,
+  "name": "Inescapable Snare",
+  "numbers": [
+    "102"
+  ],
+  "oracle_id": 3738,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3738-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:34.419017+00:00",
+  "sha256": "6b6619d07b782fb12db1b97c5b63c053a23b3ba00a34177083750e2b3c874c8d",
+  "source_image_hash": "ae/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/93/printing_3738_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/93/printing_3738_1_",
+  "width": 750
+}

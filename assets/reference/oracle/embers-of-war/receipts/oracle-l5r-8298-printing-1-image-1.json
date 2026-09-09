@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741346,
+  "card_id": "oracle-l5r-8298",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8298-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Scorpion Wall is Finished",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 8298,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8298-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:14.202750+00:00",
+  "sha256": "127a69c3e1be67c2db4e7e7889df20c9cd6d0fcd27bd1804a1d5ef11bebb5aac",
+  "source_image_hash": "07/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/80/printing_8298_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/80/printing_8298_1_",
+  "width": 750
+}

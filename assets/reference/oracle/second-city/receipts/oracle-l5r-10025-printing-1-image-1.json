@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 368813,
+  "card_id": "oracle-l5r-10025",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10025-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tokoru's Bear",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10025,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-10025-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:02.232294+00:00",
+  "sha256": "64ad7e18825d924a3377c9770fa96b4bb29b0010e6942e6eef2ffce8b5284a7c",
+  "source_image_hash": "08/e3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/08/e3/printing_10025_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/08/e3/printing_10025_1_",
+  "width": 750
+}

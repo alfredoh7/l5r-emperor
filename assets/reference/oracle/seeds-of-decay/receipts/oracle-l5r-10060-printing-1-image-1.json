@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746959,
+  "card_id": "oracle-l5r-10060",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10060-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Michitsu",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 10060,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10060-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:16.815646+00:00",
+  "sha256": "ea17961ee0748d99b621450af319d9d3bdc1abcd59d49507f094c8b49dadddd2",
+  "source_image_hash": "a1/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a1/b9/printing_10060_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a1/b9/printing_10060_1_",
+  "width": 750
+}

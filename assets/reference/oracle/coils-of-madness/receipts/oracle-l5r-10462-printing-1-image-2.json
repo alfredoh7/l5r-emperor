@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 965773,
+  "card_id": "oracle-l5r-10462",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10462-printing-1-image-2",
+  "image_index": 2,
+  "name": "Ikoma Ayumi",
+  "numbers": [
+    "142"
+  ],
+  "oracle_id": 10462,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10462-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:05.437960+00:00",
+  "sha256": "10437be9cc8ce85ad66af26e43b2eceac256fcc80d4cd7e8c279cda2612f9c1c",
+  "source_image_hash": "d7/69",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/69/printing_10462_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/69/printing_10462_1_",
+  "width": 750
+}

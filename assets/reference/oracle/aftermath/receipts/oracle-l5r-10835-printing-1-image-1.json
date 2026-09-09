@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 783371,
+  "card_id": "oracle-l5r-10835",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10835-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Gorobei",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 10835,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10835-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:54.337425+00:00",
+  "sha256": "97af15f5e7a69792e66522d4d4e2cce7892d8ed7bce723411a47a04b9b680007",
+  "source_image_hash": "78/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/78/5b/printing_10835_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/78/5b/printing_10835_1_",
+  "width": 750
+}

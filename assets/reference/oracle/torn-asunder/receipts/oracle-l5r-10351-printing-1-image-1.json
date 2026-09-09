@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 704467,
+  "card_id": "oracle-l5r-10351",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10351-printing-1-image-1",
+  "image_index": 1,
+  "name": "Path to Inner Peace",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 10351,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10351-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:32.294262+00:00",
+  "sha256": "76243e29adc0a34d66b0133f3132f19e28fb79b3cb038128d47e274f4d0e346a",
+  "source_image_hash": "f5/58",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f5/58/printing_10351_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f5/58/printing_10351_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 623725,
+  "card_id": "oracle-l5r-10199",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10199-printing-1-image-1",
+  "image_index": 1,
+  "name": "Merihiko's Swarm",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10199,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10199-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:47.891599+00:00",
+  "sha256": "eb41a5f87fe2feca2a29f14696d63fde0167e1d95620ee8869e16453adb86c0a",
+  "source_image_hash": "53/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/53/22/printing_10199_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/53/22/printing_10199_1_",
+  "width": 750
+}

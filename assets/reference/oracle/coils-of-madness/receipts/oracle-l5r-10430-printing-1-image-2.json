@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 954961,
+  "card_id": "oracle-l5r-10430",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10430-printing-1-image-2",
+  "image_index": 2,
+  "name": "Recruitment Station",
+  "numbers": [
+    "18"
+  ],
+  "oracle_id": 10430,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10430-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:24.462402+00:00",
+  "sha256": "abfb6c03328434ae52b95d7f1333d2b049a367a21e1003972a107e3dd6ecc922",
+  "source_image_hash": "cc/0e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/0e/printing_10430_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/0e/printing_10430_1_",
+  "width": 750
+}

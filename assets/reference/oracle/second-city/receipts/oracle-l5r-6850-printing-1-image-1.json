@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 374942,
+  "card_id": "oracle-l5r-6850",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6850-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shikaro",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 6850,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6850-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:23.442213+00:00",
+  "sha256": "eb9489b953c4d14d9453e32629563aa6b37b99e48af7e42eff80ef118a60cf36",
+  "source_image_hash": "4e/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/ce/printing_6850_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/ce/printing_6850_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 814009,
+  "card_id": "oracle-l5r-10223",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10223-printing-1-image-1",
+  "image_index": 1,
+  "name": "Jade's Roar",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10223,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10223-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:15.093053+00:00",
+  "sha256": "47491a457bea4613006d39ade94fbf7d93724c3f0a08363fa8567316c9ace5f5",
+  "source_image_hash": "7b/0c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7b/0c/printing_10223_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7b/0c/printing_10223_1_",
+  "width": 750
+}

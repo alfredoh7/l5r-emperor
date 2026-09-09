@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 404951,
+  "card_id": "oracle-l5r-9710",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9710-printing-1-image-1",
+  "image_index": 1,
+  "name": "Oathsworn Deathseeker",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 9710,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9710-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:17.857617+00:00",
+  "sha256": "c2aeb5bf9088955fa191b632dbe42b904574b8b2af56bf74b01327b7aabdd1ed",
+  "source_image_hash": "d2/27",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/27/printing_9710_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/27/printing_9710_1_",
+  "width": 750
+}

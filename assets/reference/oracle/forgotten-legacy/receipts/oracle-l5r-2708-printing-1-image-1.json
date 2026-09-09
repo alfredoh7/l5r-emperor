@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 277931,
+  "card_id": "oracle-l5r-2708",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2708-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fruitless Search",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 2708,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-2708-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:54.752722+00:00",
+  "sha256": "339727dde5edecfff2535f29298c4b9a979442f1812a1f2b7c32b38fee0f5dd1",
+  "source_image_hash": "3f/a2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/a2/printing_2708_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/a2/printing_2708_1_",
+  "width": 750
+}

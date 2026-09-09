@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 251624,
+  "card_id": "oracle-l5r-1997",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1997-printing-10-image-1",
+  "image_index": 1,
+  "name": "Diamond Mine",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 1997,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1997-printing-10-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "10",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:16.813164+00:00",
+  "sha256": "09f6e02226d9e259420b805752c18bb1d0c988324c0b57db1e1ce0ef3035e240",
+  "source_image_hash": "70/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/70/23/printing_1997_10_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/70/23/printing_1997_10_",
+  "width": 750
+}

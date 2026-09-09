@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 262245,
+  "card_id": "oracle-l5r-8475",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8475-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thunder's Wrath",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 8475,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8475-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:43.025274+00:00",
+  "sha256": "484dee59211bc71a4524673f0a7eeb4520a39c909547098f29e790aa63e9a2e6",
+  "source_image_hash": "ae/4f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/4f/printing_8475_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/4f/printing_8475_1_",
+  "width": 750
+}

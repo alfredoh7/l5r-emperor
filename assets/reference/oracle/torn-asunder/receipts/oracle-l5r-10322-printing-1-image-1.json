@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 856788,
+  "card_id": "oracle-l5r-10322",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10322-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mumoku no Oni",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 10322,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10322-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:21.739457+00:00",
+  "sha256": "3c8d5d4d760db8eb808d0858608b9ab5e43174481f0ec09169aacc6659035007",
+  "source_image_hash": "b3/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/7c/printing_10322_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/7c/printing_10322_1_",
+  "width": 750
+}

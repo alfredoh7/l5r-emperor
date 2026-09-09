@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 815860,
+  "card_id": "oracle-l5r-9796",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9796-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fortress of Lidless Eyes",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 9796,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9796-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:56.876729+00:00",
+  "sha256": "3746677193dfa1f98909260e2f7ececc35f1107bab19fc9d1a03e7a0e6bf2de4",
+  "source_image_hash": "27/b5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/27/b5/printing_9796_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/27/b5/printing_9796_1_",
+  "width": 750
+}

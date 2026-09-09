@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 869013,
+  "card_id": "oracle-l5r-10495",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10495-printing-1-image-2",
+  "image_index": 2,
+  "name": "Akumasa",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 10495,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10495-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:43.247875+00:00",
+  "sha256": "23eeb954e07ca935f6089de6c545472d034fd3df01d4fbef9f24da5c6b38cf4c",
+  "source_image_hash": "a3/59",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/59/printing_10495_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/59/printing_10495_1_",
+  "width": 750
+}

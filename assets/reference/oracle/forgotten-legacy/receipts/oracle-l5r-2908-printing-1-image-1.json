@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 271372,
+  "card_id": "oracle-l5r-2908",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2908-printing-1-image-1",
+  "image_index": 1,
+  "name": "Gripped by Terror",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 2908,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-2908-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:56.830838+00:00",
+  "sha256": "11a201fef690ba3b5b54a44a5d3f1ac3959be04d9de33dc83097f7f4a6d5b680",
+  "source_image_hash": "3b/81",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3b/81/printing_2908_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3b/81/printing_2908_1_",
+  "width": 750
+}

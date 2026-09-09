@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 743044,
+  "card_id": "oracle-l5r-10608",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10608-printing-1-image-1",
+  "image_index": 1,
+  "name": "Exquisite Silk Works",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 10608,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10608-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:25.825012+00:00",
+  "sha256": "fa6593d1320adf1f0aae4c9fc3b9a452a3b20f3f3b9f44fe368eea3c3b150bbd",
+  "source_image_hash": "16/dc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/dc/printing_10608_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/dc/printing_10608_1_",
+  "width": 750
+}

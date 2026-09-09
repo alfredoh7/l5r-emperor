@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729079,
+  "card_id": "oracle-l5r-6376",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6376-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rokku",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 6376,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6376-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:26.960162+00:00",
+  "sha256": "b44f30224eb09f346114378478f0d24e8039f7bdea79a056d3122d98c146cae3",
+  "source_image_hash": "26/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/26/db/printing_6376_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/26/db/printing_6376_1_",
+  "width": 750
+}

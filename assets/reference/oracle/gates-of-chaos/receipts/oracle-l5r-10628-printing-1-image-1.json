@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 885611,
+  "card_id": "oracle-l5r-10628",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10628-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Tobei",
+  "numbers": [
+    "26"
+  ],
+  "oracle_id": 10628,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10628-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:14.925278+00:00",
+  "sha256": "276315844d503966c7349d9a6f5d97db3767266f14769d40b9de82b7e1b031b1",
+  "source_image_hash": "97/53",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/53/printing_10628_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/53/printing_10628_1_",
+  "width": 750
+}

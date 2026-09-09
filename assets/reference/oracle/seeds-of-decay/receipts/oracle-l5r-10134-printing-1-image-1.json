@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 781283,
+  "card_id": "oracle-l5r-10134",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10134-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Earth's Strength",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 10134,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10134-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:52.960108+00:00",
+  "sha256": "f67c753dacf34b23e50aa0887a17c4948ad5acf73492e2f6fa07bfd7eac7dc81",
+  "source_image_hash": "39/99",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/99/printing_10134_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/99/printing_10134_1_",
+  "width": 750
+}

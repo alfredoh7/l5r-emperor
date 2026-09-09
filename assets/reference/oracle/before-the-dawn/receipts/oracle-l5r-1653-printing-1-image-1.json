@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409672,
+  "card_id": "oracle-l5r-1653",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1653-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Masafuni",
+  "numbers": [
+    "18"
+  ],
+  "oracle_id": 1653,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1653-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:11.307258+00:00",
+  "sha256": "11cdb0bad3ed516faec2d6457883363175e27ff281313528b8e972f9e0aa220a",
+  "source_image_hash": "14/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/7a/printing_1653_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/7a/printing_1653_1_",
+  "width": 750
+}

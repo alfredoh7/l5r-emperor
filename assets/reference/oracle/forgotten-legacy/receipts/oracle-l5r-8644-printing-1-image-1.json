@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261879,
+  "card_id": "oracle-l5r-8644",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8644-printing-1-image-1",
+  "image_index": 1,
+  "name": "Toritaka Chokichi",
+  "numbers": [
+    "11"
+  ],
+  "oracle_id": 8644,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8644-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:45.085098+00:00",
+  "sha256": "3dd1bfb3c488af6ea79a0b9c832699d98a02eb9d6da47e001e8f5404a3155250",
+  "source_image_hash": "ff/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ff/05/printing_8644_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ff/05/printing_8644_1_",
+  "width": 750
+}

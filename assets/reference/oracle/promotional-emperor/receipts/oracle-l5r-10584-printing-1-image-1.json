@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 942787,
+  "card_id": "oracle-l5r-10584",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10584-printing-1-image-1",
+  "image_index": 1,
+  "name": "Armed Rice Farmer",
+  "numbers": [
+    "168"
+  ],
+  "oracle_id": 10584,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10584-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:26:00.611258+00:00",
+  "sha256": "5c0e0ad3361f48b80824c26947b07c8893ee043687b71f621a2c33d86b0bc00d",
+  "source_image_hash": "3c/78",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/78/printing_10584_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/78/printing_10584_1_",
+  "width": 750
+}

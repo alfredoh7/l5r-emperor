@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1054393,
+  "card_id": "oracle-l5r-10556",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10556-printing-1-image-1",
+  "image_index": 1,
+  "name": "Strength in the Earth",
+  "numbers": [
+    "130"
+  ],
+  "oracle_id": 10556,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10556-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:39.099914+00:00",
+  "sha256": "f3afc4bea168521c5740ccabb4f6ba16c859f6871434a71f9b396564c2f29704",
+  "source_image_hash": "dd/67",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/67/printing_10556_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/67/printing_10556_1_",
+  "width": 750
+}

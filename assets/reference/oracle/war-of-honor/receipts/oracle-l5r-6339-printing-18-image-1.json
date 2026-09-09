@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 311018,
+  "card_id": "oracle-l5r-6339",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6339-printing-18-image-1",
+  "image_index": 1,
+  "name": "Ring of Water",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 6339,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6339-printing-18-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "18",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:00.736347+00:00",
+  "sha256": "b7b4f8b361ba1b22c56eee77ef5238234de75d35dbc55aaf8fc6e7ff97a8dbca",
+  "source_image_hash": "2d/ea",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2d/ea/printing_6339_18_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2d/ea/printing_6339_18_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 611566,
+  "card_id": "oracle-l5r-10200",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10200-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ninja",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10200,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10200-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:04.895082+00:00",
+  "sha256": "85afc19e05c008b3f076304f09989d37844e061092894e9b1812c89f6bcf4126",
+  "source_image_hash": "0b/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0b/d4/printing_10200_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0b/d4/printing_10200_1_",
+  "width": 750
+}

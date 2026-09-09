@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1008505,
+  "card_id": "oracle-l5r-10416",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10416-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fudo's Assurances",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10416,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10416-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:43.910131+00:00",
+  "sha256": "54c9700d593475a08dc9b1eb774fa6e8f436e85fbd8a8e466809d18aad4d3576",
+  "source_image_hash": "3f/49",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/49/printing_10416_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/49/printing_10416_1_",
+  "width": 750
+}

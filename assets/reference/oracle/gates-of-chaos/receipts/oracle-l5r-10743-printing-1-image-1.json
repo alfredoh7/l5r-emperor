@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 838588,
+  "card_id": "oracle-l5r-10743",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10743-printing-1-image-1",
+  "image_index": 1,
+  "name": "Claiming the Ruins",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 10743,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10743-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:07.379602+00:00",
+  "sha256": "3f56cf2c2d41a7332fb00b15ef9c23d38b0e236d5b14e9b4901a73dad452bcbd",
+  "source_image_hash": "f2/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f2/3f/printing_10743_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f2/3f/printing_10743_1_",
+  "width": 750
+}

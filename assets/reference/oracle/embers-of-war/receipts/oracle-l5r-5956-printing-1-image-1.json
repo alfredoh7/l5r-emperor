@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 677944,
+  "card_id": "oracle-l5r-5956",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5956-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pillar Tattoo",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 5956,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5956-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:13.080998+00:00",
+  "sha256": "bb5d8a7dc0c4404b157884441d27330b87b62d80a16f3bbd6f06ab0c59076140",
+  "source_image_hash": "4e/e0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/e0/printing_5956_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/e0/printing_5956_1_",
+  "width": 750
+}

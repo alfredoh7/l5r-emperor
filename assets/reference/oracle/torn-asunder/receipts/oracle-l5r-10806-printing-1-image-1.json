@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 682995,
+  "card_id": "oracle-l5r-10806",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10806-printing-1-image-1",
+  "image_index": 1,
+  "name": "Charter",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10806,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10806-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:03.901322+00:00",
+  "sha256": "4fdfcdaa3ebd1424c36fae9cd5f42f6b0ae0dffe9dffeec7ebc3b6a1afa2dda8",
+  "source_image_hash": "7e/29",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7e/29/printing_10806_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7e/29/printing_10806_1_",
+  "width": 750
+}

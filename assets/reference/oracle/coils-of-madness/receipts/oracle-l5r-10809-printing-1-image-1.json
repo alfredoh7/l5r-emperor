@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799007,
+  "card_id": "oracle-l5r-10809",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10809-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bat",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10809,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10809-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:00.734346+00:00",
+  "sha256": "15288a86d99fbbd14aa3c2ed74cc3065ff5491625c34131392cab85d9b617233",
+  "source_image_hash": "cf/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/42/printing_10809_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/42/printing_10809_1_",
+  "width": 750
+}

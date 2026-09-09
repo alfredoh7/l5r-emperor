@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 404566,
+  "card_id": "oracle-l5r-1983",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1983-printing-1-image-1",
+  "image_index": 1,
+  "name": "Destructive Priorities",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 1983,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1983-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:17.869514+00:00",
+  "sha256": "2fcb929a3544c4f566e7a686124fad15819d8a8492f27bae868fc8d4b8e58d1e",
+  "source_image_hash": "e4/d3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e4/d3/printing_1983_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e4/d3/printing_1983_1_",
+  "width": 750
+}

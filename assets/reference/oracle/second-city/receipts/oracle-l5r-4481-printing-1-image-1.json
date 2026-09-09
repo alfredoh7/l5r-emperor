@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 389840,
+  "card_id": "oracle-l5r-4481",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4481-printing-1-image-1",
+  "image_index": 1,
+  "name": "Know No Fear",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 4481,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4481-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:49.020968+00:00",
+  "sha256": "a8891556be59faace661e403eedb10fb37bf2dcec03544fa7a18bcac3e048fa6",
+  "source_image_hash": "c5/30",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/30/printing_4481_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/30/printing_4481_1_",
+  "width": 750
+}

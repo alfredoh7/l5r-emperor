@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401546,
+  "card_id": "oracle-l5r-2862",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2862-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Yurishi",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 2862,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2862-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:23.222949+00:00",
+  "sha256": "45324a6340b70f0a5d3168cb607657214a33d2702d9671cba403abe7d5bd3799",
+  "source_image_hash": "ec/3e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ec/3e/printing_2862_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ec/3e/printing_2862_1_",
+  "width": 750
+}

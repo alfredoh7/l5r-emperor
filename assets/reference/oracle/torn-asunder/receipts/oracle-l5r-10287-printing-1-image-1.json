@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 790713,
+  "card_id": "oracle-l5r-10287",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10287-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Yozo",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 10287,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10287-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:16.911522+00:00",
+  "sha256": "d6d1f783b4118561c70e83936dce279fde8792eee9fb8503be44e79444c7d683",
+  "source_image_hash": "06/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/06/6b/printing_10287_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/06/6b/printing_10287_1_",
+  "width": 750
+}

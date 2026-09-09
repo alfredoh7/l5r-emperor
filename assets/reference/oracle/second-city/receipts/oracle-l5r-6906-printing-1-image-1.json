@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 395244,
+  "card_id": "oracle-l5r-6906",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6906-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Kinto",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 6906,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6906-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:25.549453+00:00",
+  "sha256": "883667004a2797ed78eb43205aa3fd55b50b88475e3ebd7603225ca11f696915",
+  "source_image_hash": "17/2f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/17/2f/printing_6906_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/17/2f/printing_6906_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779504,
+  "card_id": "oracle-l5r-10309",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10309-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Kazutoshi",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 10309,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10309-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:52.024453+00:00",
+  "sha256": "83b504e669cec2014545c84c186ad864a3bec63f6bde948cd4c2cd6496b62187",
+  "source_image_hash": "61/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/6d/printing_10309_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/6d/printing_10309_1_",
+  "width": 750
+}

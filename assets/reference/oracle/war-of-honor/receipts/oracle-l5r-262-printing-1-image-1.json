@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 263804,
+  "card_id": "oracle-l5r-262",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-262-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Regulars",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 262,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-262-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:44.931735+00:00",
+  "sha256": "d99856e8790e28b119ad5048db52f8fe32e76e94111bd48c1e4e9b42707493d9",
+  "source_image_hash": "ee/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ee/da/printing_262_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ee/da/printing_262_1_",
+  "width": 750
+}

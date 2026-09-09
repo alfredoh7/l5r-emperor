@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 698721,
+  "card_id": "oracle-l5r-7593",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7593-printing-1-image-1",
+  "image_index": 1,
+  "name": "Stuck in Rokugan",
+  "numbers": [
+    "142"
+  ],
+  "oracle_id": 7593,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7593-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:49.722980+00:00",
+  "sha256": "ec9d82952b95040a2ec408c48448b1ba86a447c5c7bdfd574ea31c6e41261fb7",
+  "source_image_hash": "0a/e5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/e5/printing_7593_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/e5/printing_7593_1_",
+  "width": 750
+}

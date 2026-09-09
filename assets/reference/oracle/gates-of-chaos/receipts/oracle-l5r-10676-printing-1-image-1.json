@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 802956,
+  "card_id": "oracle-l5r-10676",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10676-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Yoshie",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 10676,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10676-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:44.488919+00:00",
+  "sha256": "66f47c6d6e21ef1fa806ce4f32f7472fdecb65be93f04c4db057b7f05ffad28e",
+  "source_image_hash": "6b/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6b/4c/printing_10676_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6b/4c/printing_10676_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 650034,
+  "card_id": "oracle-l5r-10400",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10400-printing-1-image-1",
+  "image_index": 1,
+  "name": "Touch of the Night",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 10400,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10400-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:13.968559+00:00",
+  "sha256": "39fea8a56c364b75fda79294332ebb7ee464d207f85a33c2be2e649d9292a78f",
+  "source_image_hash": "ef/a3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ef/a3/printing_10400_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/a3/printing_10400_1_",
+  "width": 750
+}

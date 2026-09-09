@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 618412,
+  "card_id": "oracle-l5r-10211",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10211-printing-1-image-1",
+  "image_index": 1,
+  "name": "Buried Treasures",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10211,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10211-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:10.398443+00:00",
+  "sha256": "1a269dd7eeb58df99fdca5b4b83968a40244f7ea3d3ed23cfc324a05add31a16",
+  "source_image_hash": "aa/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/aa/98/printing_10211_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/98/printing_10211_1_",
+  "width": 750
+}

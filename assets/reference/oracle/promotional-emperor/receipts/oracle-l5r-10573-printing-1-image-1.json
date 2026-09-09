@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 959366,
+  "card_id": "oracle-l5r-10573",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10573-printing-1-image-1",
+  "image_index": 1,
+  "name": "Family Dojo",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 10573,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10573-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:09.304844+00:00",
+  "sha256": "8d5560d5026e550233f538d2eec14b4a3c67dbc663ba073c24f8b994fcc57e93",
+  "source_image_hash": "1a/2c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/2c/printing_10573_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/2c/printing_10573_1_",
+  "width": 750
+}

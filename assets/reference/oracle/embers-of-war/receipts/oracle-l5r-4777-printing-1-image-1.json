@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 765710,
+  "card_id": "oracle-l5r-4777",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4777-printing-1-image-1",
+  "image_index": 1,
+  "name": "Low Market",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 4777,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4777-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:55.493854+00:00",
+  "sha256": "743a44c3a6e3753946cedc799bcf43c18f3bf49e503277d67500bc0a7dd06df7",
+  "source_image_hash": "fa/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fa/86/printing_4777_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fa/86/printing_4777_1_",
+  "width": 750
+}

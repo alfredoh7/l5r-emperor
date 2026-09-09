@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 983721,
+  "card_id": "oracle-l5r-10486",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10486-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kokujin",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 10486,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10486-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:38.112235+00:00",
+  "sha256": "c06fc5030fcc4c6affcc02f49cb4b5a966f62539cb4037501448cb19546fedef",
+  "source_image_hash": "2f/11",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2f/11/printing_10486_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2f/11/printing_10486_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 817921,
+  "card_id": "oracle-l5r-1921",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1921-printing-1-image-1",
+  "image_index": 1,
+  "name": "Deep Snows",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 1921,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1921-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:57.229117+00:00",
+  "sha256": "a9392c93ea739bd7fa488df46316504c51847acad422312a5a25112778531468",
+  "source_image_hash": "d2/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/e9/printing_1921_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/e9/printing_1921_1_",
+  "width": 750
+}

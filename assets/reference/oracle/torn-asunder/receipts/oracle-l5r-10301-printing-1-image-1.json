@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748714,
+  "card_id": "oracle-l5r-10301",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10301-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Tansen",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 10301,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10301-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:33.306159+00:00",
+  "sha256": "9d70b5d94166691ef3db7785465961c447f95779734b082639fccb2ffee136d3",
+  "source_image_hash": "b8/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b8/94/printing_10301_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b8/94/printing_10301_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 235324,
+  "card_id": "oracle-l5r-8537",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8537-printing-3-image-1",
+  "image_index": 1,
+  "name": "Togashi Kanmu",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 8537,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8537-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:07.046191+00:00",
+  "sha256": "609a43bd1be15b0048ba24cdd5a75a06b3c815749a3a715d20c30d104b47e4f8",
+  "source_image_hash": "17/cb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/17/cb/printing_8537_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/17/cb/printing_8537_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 740688,
+  "card_id": "oracle-l5r-10169",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10169-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sound the Retreat",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 10169,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10169-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:36.661314+00:00",
+  "sha256": "2e8c6958559258d323027b8a2de0d5883b517a817404173a03d34f966db55c98",
+  "source_image_hash": "52/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/52/da/printing_10169_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/52/da/printing_10169_1_",
+  "width": 750
+}

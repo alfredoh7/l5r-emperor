@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 389766,
+  "card_id": "oracle-l5r-4371",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4371-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsu Akai",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 4371,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4371-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:43.669672+00:00",
+  "sha256": "f1751a5b504e3dff7365f42c2c164faa3ff245740a6352e913bb41c21b10606e",
+  "source_image_hash": "37/7e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/37/7e/printing_4371_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/37/7e/printing_4371_1_",
+  "width": 750
+}

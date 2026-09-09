@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1060699,
+  "card_id": "oracle-l5r-10456",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10456-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Noboru, the Shattered Star",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 10456,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10456-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:16.127968+00:00",
+  "sha256": "0dd1f50ae2126fc1ab812b0658d2eddf9fa7934c0925b20c0b367538f3653f40",
+  "source_image_hash": "fa/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fa/a4/printing_10456_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fa/a4/printing_10456_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385891,
+  "card_id": "oracle-l5r-397",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-397-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ancient Feud",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 397,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-397-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:40.756920+00:00",
+  "sha256": "05e4bb9bb1e42c0572bf3ce593d2a662ec97178698c56e3a1123b2919e55788a",
+  "source_image_hash": "46/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/46/de/printing_397_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/46/de/printing_397_1_",
+  "width": 750
+}

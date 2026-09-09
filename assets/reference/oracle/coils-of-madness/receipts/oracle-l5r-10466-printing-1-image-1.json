@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1016952,
+  "card_id": "oracle-l5r-10466",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10466-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Tomiko",
+  "numbers": [
+    "46"
+  ],
+  "oracle_id": 10466,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10466-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:54.829166+00:00",
+  "sha256": "37505cf601750e3ac8455d5c77a1ba0d121b734f6037720b5fe851e55a229391",
+  "source_image_hash": "7a/0e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7a/0e/printing_10466_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7a/0e/printing_10466_1_",
+  "width": 750
+}

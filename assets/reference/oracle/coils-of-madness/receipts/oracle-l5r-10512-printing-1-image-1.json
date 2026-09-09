@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1052887,
+  "card_id": "oracle-l5r-10512",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10512-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsiang, the Benevolent",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 10512,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10512-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:21.299590+00:00",
+  "sha256": "f4427410c31494f5b02225c918e342e275d43e02e3bf4fd723876a2f1d7ac4bb",
+  "source_image_hash": "11/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/05/printing_10512_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/05/printing_10512_1_",
+  "width": 750
+}

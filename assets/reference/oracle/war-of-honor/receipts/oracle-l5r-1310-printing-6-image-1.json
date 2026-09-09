@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 259380,
+  "card_id": "oracle-l5r-1310",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1310-printing-6-image-1",
+  "image_index": 1,
+  "name": "Chasing Osano-Wo",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 1310,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1310-printing-6-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "6",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:06.751563+00:00",
+  "sha256": "5ddfbfe5189f7e8e18bc1ead45448f40c880c8236a586aabb3d44bc35a910274",
+  "source_image_hash": "84/3d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/84/3d/printing_1310_6_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/84/3d/printing_1310_6_",
+  "width": 750
+}

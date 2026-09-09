@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 936463,
+  "card_id": "oracle-l5r-10559",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10559-printing-1-image-2",
+  "image_index": 2,
+  "name": "A Magistrate Falls",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 10559,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10559-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:37.000213+00:00",
+  "sha256": "f5a22f7d5c634e22e5009334c79808707cea81d4da6882a28e6395a096607b20",
+  "source_image_hash": "db/d1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/db/d1/printing_10559_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/db/d1/printing_10559_1_",
+  "width": 750
+}

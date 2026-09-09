@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 838875,
+  "card_id": "oracle-l5r-3849",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3849-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Koiso",
+  "numbers": [
+    "46"
+  ],
+  "oracle_id": 3849,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3849-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:36.705796+00:00",
+  "sha256": "859e479634b4881a2245951fe3bf7a5ff710f0e26de7811076c4ab895301a5f3",
+  "source_image_hash": "d2/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/a4/printing_3849_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/a4/printing_3849_1_",
+  "width": 750
+}

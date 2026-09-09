@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747091,
+  "card_id": "oracle-l5r-10928",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10928-printing-1-image-1",
+  "image_index": 1,
+  "name": "Absolution",
+  "numbers": [
+    "113"
+  ],
+  "oracle_id": 10928,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10928-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:40.019217+00:00",
+  "sha256": "1be38ad6fb64c8d6f0a1c4d5f4f1e81a5a4fdf3f4d5c4a8c0b9d123068df559e",
+  "source_image_hash": "31/4e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/31/4e/printing_10928_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/31/4e/printing_10928_1_",
+  "width": 750
+}

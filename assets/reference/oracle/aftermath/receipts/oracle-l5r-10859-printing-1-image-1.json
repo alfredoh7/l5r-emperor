@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 723069,
+  "card_id": "oracle-l5r-10859",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10859-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Toganin",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 10859,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10859-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:31.429289+00:00",
+  "sha256": "b9b8a34590738ea4c86daba1875b66587655933c9be60f4a3bc8a20a470f61d4",
+  "source_image_hash": "f9/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/c2/printing_10859_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/c2/printing_10859_1_",
+  "width": 750
+}

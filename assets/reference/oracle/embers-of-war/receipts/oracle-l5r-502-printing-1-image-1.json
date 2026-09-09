@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 694375,
+  "card_id": "oracle-l5r-502",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-502-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Konomi",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 502,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-502-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:31.409761+00:00",
+  "sha256": "bef104a59138f0bf936ea91ff6634d5886ba73fcafb04fc3e1c1f6443ce637d6",
+  "source_image_hash": "02/3b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/02/3b/printing_502_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/02/3b/printing_502_1_",
+  "width": 750
+}

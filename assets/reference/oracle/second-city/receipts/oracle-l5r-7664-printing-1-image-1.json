@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 431331,
+  "card_id": "oracle-l5r-7664",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7664-printing-1-image-1",
+  "image_index": 1,
+  "name": "Surety of Purpose",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 7664,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7664-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:47.110094+00:00",
+  "sha256": "0dd7fbfa3b40b7797cfc2c441ac5b69407c54fd18e9247d046ec09e88f6aa259",
+  "source_image_hash": "2c/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2c/db/printing_7664_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2c/db/printing_7664_1_",
+  "width": 750
+}

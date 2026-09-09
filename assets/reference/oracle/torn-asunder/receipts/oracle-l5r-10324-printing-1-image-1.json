@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 695023,
+  "card_id": "oracle-l5r-10324",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10324-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seppun Ryota",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 10324,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10324-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:45.270713+00:00",
+  "sha256": "da37f732baea92d42f8a0205a4df08d86de93b071e68167b898aa794c89c3fcb",
+  "source_image_hash": "a0/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a0/ce/printing_10324_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a0/ce/printing_10324_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710416,
+  "card_id": "oracle-l5r-10926",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10926-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Small Favor",
+  "numbers": [
+    "111"
+  ],
+  "oracle_id": 10926,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10926-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:37.680266+00:00",
+  "sha256": "251deb793d33ba94a8fa09964551c9f7f63166530b51009570220ad39ac9a539",
+  "source_image_hash": "6c/b0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6c/b0/printing_10926_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6c/b0/printing_10926_1_",
+  "width": 750
+}

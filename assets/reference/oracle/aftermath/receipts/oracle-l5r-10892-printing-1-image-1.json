@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788018,
+  "card_id": "oracle-l5r-10892",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10892-printing-1-image-1",
+  "image_index": 1,
+  "name": "Black Riders",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 10892,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10892-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:55.660734+00:00",
+  "sha256": "941ef88cba4c9dc985bfc07630f750c05c02d88993d6b50aaeb8f20e7de1048b",
+  "source_image_hash": "2d/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2d/ec/printing_10892_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2d/ec/printing_10892_1_",
+  "width": 750
+}

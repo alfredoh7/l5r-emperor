@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750964,
+  "card_id": "oracle-l5r-10345",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10345-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thunder Bow",
+  "numbers": [
+    "89"
+  ],
+  "oracle_id": 10345,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10345-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:11.590249+00:00",
+  "sha256": "221dbab4bbbd33d0aa6d2ad3a4a1d88fc4d228e69fe29a0e1ce018bbbc07a586",
+  "source_image_hash": "03/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/be/printing_10345_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/be/printing_10345_1_",
+  "width": 750
+}

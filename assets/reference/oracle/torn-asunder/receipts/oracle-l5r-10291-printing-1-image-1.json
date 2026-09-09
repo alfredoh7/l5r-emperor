@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 793281,
+  "card_id": "oracle-l5r-10291",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10291-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Satoru",
+  "numbers": [
+    "35"
+  ],
+  "oracle_id": 10291,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10291-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:44.615701+00:00",
+  "sha256": "1e35ac077dae84377327c2ed9b52c5d296f8243133b7296c04ef03449cd0d8a3",
+  "source_image_hash": "af/48",
+  "source_url": "https://images.oracleofthevoid.com/l5r/af/48/printing_10291_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/af/48/printing_10291_1_",
+  "width": 750
+}

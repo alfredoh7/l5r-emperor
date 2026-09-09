@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750557,
+  "card_id": "oracle-l5r-10181",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10181-printing-1-image-1",
+  "image_index": 1,
+  "name": "Virtuous Charity",
+  "numbers": [
+    "155"
+  ],
+  "oracle_id": 10181,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10181-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:13.162725+00:00",
+  "sha256": "51acab3a1801187005d127fa37af127267897b9e077cf797ba69d255330d6106",
+  "source_image_hash": "62/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/62/eb/printing_10181_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/62/eb/printing_10181_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 885792,
+  "card_id": "oracle-l5r-10665",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10665-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chuda Hikano",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 10665,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10665-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:06.149778+00:00",
+  "sha256": "23501390a964df52e625bc3be4afce7de9134ad35bdee7e60bc864efdb07e6d7",
+  "source_image_hash": "79/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/79/42/printing_10665_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/79/42/printing_10665_1_",
+  "width": 750
+}

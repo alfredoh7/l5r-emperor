@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 383816,
+  "card_id": "oracle-l5r-6774",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6774-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Kudome",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 6774,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6774-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:22.403394+00:00",
+  "sha256": "e8d57f1b2672bcce5d9ab7b85269cd1ee53007032945199d5a8334e4d24aaa30",
+  "source_image_hash": "94/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/94/6b/printing_6774_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/94/6b/printing_6774_1_",
+  "width": 750
+}

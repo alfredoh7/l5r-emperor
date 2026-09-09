@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 794269,
+  "card_id": "oracle-l5r-10891",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10891-printing-1-image-1",
+  "image_index": 1,
+  "name": "Band of Brothers",
+  "numbers": [
+    "76"
+  ],
+  "oracle_id": 10891,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10891-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:46.063749+00:00",
+  "sha256": "d9fd554dc1bd0a413e445d43d483f21cf6e0f1476e3abe89b16f2950db8888af",
+  "source_image_hash": "3d/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/45/printing_10891_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/45/printing_10891_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1050141,
+  "card_id": "oracle-l5r-10514",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10514-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fudo's Fiends",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 10514,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10514-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:45.234928+00:00",
+  "sha256": "153813cf34bf1b26e205cbd07e0f9cb1ec898c07a5e380bb0a70cd2d3fbf3613",
+  "source_image_hash": "4b/9a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/9a/printing_10514_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/9a/printing_10514_1_",
+  "width": 750
+}

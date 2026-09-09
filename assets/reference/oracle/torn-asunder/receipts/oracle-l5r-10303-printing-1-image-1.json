@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 868779,
+  "card_id": "oracle-l5r-10303",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10303-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Kyuudo",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 10303,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10303-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:46.177238+00:00",
+  "sha256": "886d3635ca3fe7afa27daaa9d237e317d9a3b8f8456a4aad1a9dcac26857defe",
+  "source_image_hash": "6d/aa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6d/aa/printing_10303_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6d/aa/printing_10303_1_",
+  "width": 750
+}

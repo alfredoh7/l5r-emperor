@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 420425,
+  "card_id": "oracle-l5r-5534",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5534-printing-1-image-1",
+  "image_index": 1,
+  "name": "Never Enough Soldiers",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 5534,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5534-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:14.595868+00:00",
+  "sha256": "11f10b9a6e461dad7387b4e880009fed7bb1557223dce39d6c897858c39cc4ee",
+  "source_image_hash": "e6/b1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e6/b1/printing_5534_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e6/b1/printing_5534_1_",
+  "width": 750
+}

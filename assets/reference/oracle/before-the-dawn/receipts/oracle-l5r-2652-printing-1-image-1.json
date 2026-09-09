@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 396730,
+  "card_id": "oracle-l5r-2652",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2652-printing-1-image-1",
+  "image_index": 1,
+  "name": "Forging Destiny",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 2652,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2652-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:33.899148+00:00",
+  "sha256": "bdfccfd25817caaf9a4ea8c10c054d082b6b8cfa6a111bfd54dcce0e80b14d08",
+  "source_image_hash": "c2/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c2/15/printing_2652_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c2/15/printing_2652_1_",
+  "width": 750
+}

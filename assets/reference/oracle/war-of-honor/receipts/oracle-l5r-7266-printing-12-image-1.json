@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 239255,
+  "card_id": "oracle-l5r-7266",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7266-printing-12-image-1",
+  "image_index": 1,
+  "name": "Silver Mine",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 7266,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7266-printing-12-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "12",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:47.344414+00:00",
+  "sha256": "394c87470ffad7ee90a18af594606ca7e83c5dd6ed78057e46fb95acd2c6eda8",
+  "source_image_hash": "fb/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fb/05/printing_7266_12_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/05/printing_7266_12_",
+  "width": 750
+}

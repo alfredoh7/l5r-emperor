@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 792934,
+  "card_id": "oracle-l5r-10714",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10714-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ritual Preparation",
+  "numbers": [
+    "138"
+  ],
+  "oracle_id": 10714,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10714-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:35.917965+00:00",
+  "sha256": "aa01ee1fc960a582708e8d91fbfa24c3b349454e1e0d77c621bf12449c20defc",
+  "source_image_hash": "76/35",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/35/printing_10714_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/35/printing_10714_1_",
+  "width": 750
+}

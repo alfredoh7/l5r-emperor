@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 717941,
+  "card_id": "oracle-l5r-10663",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10663-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lao-she",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 10663,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10663-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:04.888482+00:00",
+  "sha256": "177cbf0a20d2d282193d3a6e461e4f31b8230057c92a6e15de1cf4e98d91700e",
+  "source_image_hash": "37/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/37/b9/printing_10663_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/37/b9/printing_10663_1_",
+  "width": 750
+}

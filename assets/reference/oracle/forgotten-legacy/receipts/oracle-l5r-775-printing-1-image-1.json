@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261120,
+  "card_id": "oracle-l5r-775",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-775-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Higaonna",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 775,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-775-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:34.872873+00:00",
+  "sha256": "559d544cdb1b271d70db9894a6b4a951d3235a0cbdb211e8c14b48b1845f4cc6",
+  "source_image_hash": "0f/16",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0f/16/printing_775_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0f/16/printing_775_1_",
+  "width": 750
+}

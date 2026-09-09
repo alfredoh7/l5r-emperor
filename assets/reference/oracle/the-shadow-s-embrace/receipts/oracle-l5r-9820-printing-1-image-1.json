@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 828560,
+  "card_id": "oracle-l5r-9820",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9820-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shugorei",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 9820,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9820-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:16.315137+00:00",
+  "sha256": "04b652f0feddcc7b3cbd5507b267125ac6547f9fad1dd7453d51e15ef3f856b7",
+  "source_image_hash": "d2/c6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/c6/printing_9820_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/c6/printing_9820_1_",
+  "width": 750
+}

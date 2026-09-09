@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 715838,
+  "card_id": "oracle-l5r-10407",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10407-printing-1-image-1",
+  "image_index": 1,
+  "name": "Family Maneuvers",
+  "numbers": [
+    "151"
+  ],
+  "oracle_id": 10407,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10407-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:10.467187+00:00",
+  "sha256": "945038c17e292086e5333413173a1a65b65e36b6c4cb245cb95bf82863a3d7e7",
+  "source_image_hash": "7d/b6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7d/b6/printing_10407_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7d/b6/printing_10407_1_",
+  "width": 750
+}

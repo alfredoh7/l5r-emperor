@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 381249,
+  "card_id": "oracle-l5r-224",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-224-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Kamina",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 224,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-224-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:39.731104+00:00",
+  "sha256": "12b5e3b4717b971364c6c77b26fdd184694a348eaea61a7c1813c98d7780b3b2",
+  "source_image_hash": "3f/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/e9/printing_224_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/e9/printing_224_1_",
+  "width": 750
+}

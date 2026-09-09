@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 763239,
+  "card_id": "oracle-l5r-10935",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10935-printing-1-image-1",
+  "image_index": 1,
+  "name": "Directing the Battle",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 10935,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10935-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:15.851813+00:00",
+  "sha256": "f5f0bde10837de2f7ad1e57adf242aeb4b2ce958bfab2e8bd5964b8be49c3d3d",
+  "source_image_hash": "d4/52",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/52/printing_10935_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/52/printing_10935_1_",
+  "width": 750
+}

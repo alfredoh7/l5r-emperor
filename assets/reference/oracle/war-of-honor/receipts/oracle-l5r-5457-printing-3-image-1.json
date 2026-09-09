@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 252228,
+  "card_id": "oracle-l5r-5457",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5457-printing-3-image-1",
+  "image_index": 1,
+  "name": "My Enemy's Mercy",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 5457,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-5457-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:49.803051+00:00",
+  "sha256": "274f015f7e9b26228941d0a3aa2216d8c523919d293a33b18ec2c61e657222e2",
+  "source_image_hash": "2e/f9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2e/f9/printing_5457_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2e/f9/printing_5457_3_",
+  "width": 750
+}

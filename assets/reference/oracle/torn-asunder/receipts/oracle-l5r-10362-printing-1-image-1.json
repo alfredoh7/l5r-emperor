@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 742361,
+  "card_id": "oracle-l5r-10362",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10362-printing-1-image-1",
+  "image_index": 1,
+  "name": "Avenging the Fallen",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 10362,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10362-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:48.541489+00:00",
+  "sha256": "84394d39f75128165db5c3d0ab677b98291782b21d7bbf04e71ecdd99478a243",
+  "source_image_hash": "7f/7f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7f/7f/printing_10362_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7f/7f/printing_10362_1_",
+  "width": 750
+}

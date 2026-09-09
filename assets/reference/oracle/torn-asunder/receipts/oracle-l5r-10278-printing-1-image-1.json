@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 770640,
+  "card_id": "oracle-l5r-10278",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10278-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Akahiko",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 10278,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10278-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:42.434924+00:00",
+  "sha256": "fc14ad685f4b70fe4b1e179e3bfc40fbb8d04840380dba80c035793a22715be7",
+  "source_image_hash": "cb/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cb/b4/printing_10278_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cb/b4/printing_10278_1_",
+  "width": 750
+}

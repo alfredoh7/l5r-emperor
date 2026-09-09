@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1043501,
+  "card_id": "oracle-l5r-10496",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10496-printing-1-image-1",
+  "image_index": 1,
+  "name": "Otomo Suikihime, Queen of Fools",
+  "numbers": [
+    "75"
+  ],
+  "oracle_id": 10496,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10496-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:10.054497+00:00",
+  "sha256": "c20e3343bed0546fa2e527dee0e93e4aa5c9f53adb8143c8094eb4d5c8b085dc",
+  "source_image_hash": "cd/1d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cd/1d/printing_10496_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cd/1d/printing_10496_1_",
+  "width": 750
+}

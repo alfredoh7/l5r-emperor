@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 801837,
+  "card_id": "oracle-l5r-10887",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10887-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Paikao",
+  "numbers": [
+    "72"
+  ],
+  "oracle_id": 10887,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10887-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:21.944657+00:00",
+  "sha256": "d9f7a44c7713abed42aef9543244270cd1eb40aab620fdb152347131fcc5830f",
+  "source_image_hash": "e7/dc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/dc/printing_10887_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/dc/printing_10887_1_",
+  "width": 750
+}

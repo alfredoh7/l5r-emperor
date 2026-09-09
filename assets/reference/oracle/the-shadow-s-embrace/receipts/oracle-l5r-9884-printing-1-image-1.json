@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747946,
+  "card_id": "oracle-l5r-9884",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9884-printing-1-image-1",
+  "image_index": 1,
+  "name": "Beseech Sakkaku",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 9884,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9884-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:19.053543+00:00",
+  "sha256": "761d0ce2d936c3bd91593bb325581248f9288fab65cd6eaf22732d58d9b2bddd",
+  "source_image_hash": "12/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/4a/printing_9884_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/4a/printing_9884_1_",
+  "width": 750
+}

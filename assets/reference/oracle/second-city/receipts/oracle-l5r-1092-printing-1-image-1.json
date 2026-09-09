@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 384072,
+  "card_id": "oracle-l5r-1092",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1092-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bonds of Coin",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 1092,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1092-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:52.757695+00:00",
+  "sha256": "02e508c686cfe358c128dd87a8c9386743140162d1d2a70fdb5a3806654bcd21",
+  "source_image_hash": "a2/fe",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a2/fe/printing_1092_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a2/fe/printing_1092_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 410100,
+  "card_id": "oracle-l5r-3788",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3788-printing-1-image-1",
+  "image_index": 1,
+  "name": "Intervening Spirit",
+  "numbers": [
+    "93"
+  ],
+  "oracle_id": 3788,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3788-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:35.828248+00:00",
+  "sha256": "e9a335ce0aaf6aabc0e7130debec2375ff6a110cf311647105cfd8988d2cbe71",
+  "source_image_hash": "eb/74",
+  "source_url": "https://images.oracleofthevoid.com/l5r/eb/74/printing_3788_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/eb/74/printing_3788_1_",
+  "width": 750
+}

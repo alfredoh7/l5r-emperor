@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1075512,
+  "card_id": "oracle-l5r-10469",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10469-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 10469,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10469-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:22.665129+00:00",
+  "sha256": "131d7aac56186ce86e1af41efc9ecf5225e89201a4a4096588f4b52a2530bc62",
+  "source_image_hash": "eb/02",
+  "source_url": "https://images.oracleofthevoid.com/l5r/eb/02/printing_10469_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/eb/02/printing_10469_1_",
+  "width": 750
+}

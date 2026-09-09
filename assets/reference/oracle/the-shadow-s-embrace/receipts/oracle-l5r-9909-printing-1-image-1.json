@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772453,
+  "card_id": "oracle-l5r-9909",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9909-printing-1-image-1",
+  "image_index": 1,
+  "name": "Forthrightness",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 9909,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9909-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:55.706175+00:00",
+  "sha256": "4e9ebceeb72abbc0f5b4f24ae84ffa5106158f9843fbc361c7aa10c2368debd3",
+  "source_image_hash": "ba/a3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/a3/printing_9909_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/a3/printing_9909_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 274425,
+  "card_id": "oracle-l5r-9746",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9746-printing-1-image-1",
+  "image_index": 1,
+  "name": "Emerald Champion",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 9746,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9746-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:32:48.757745+00:00",
+  "sha256": "3a48b9f2660d48405e21d8b14a8bea93ac0960df1f05cae07bd570168849f498",
+  "source_image_hash": "c3/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c3/45/printing_9746_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c3/45/printing_9746_1_",
+  "width": 750
+}

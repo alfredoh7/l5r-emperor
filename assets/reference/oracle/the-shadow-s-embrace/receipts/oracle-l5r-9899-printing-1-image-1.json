@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 727782,
+  "card_id": "oracle-l5r-9899",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9899-printing-1-image-1",
+  "image_index": 1,
+  "name": "Crippled Sensei",
+  "numbers": [
+    "111"
+  ],
+  "oracle_id": 9899,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9899-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:34.424414+00:00",
+  "sha256": "127ba0a2507bc4b2b4b47798a37b4299cf4f601c2a3c8a712f1b0d6b4e91dadc",
+  "source_image_hash": "30/7e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/30/7e/printing_9899_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/30/7e/printing_9899_1_",
+  "width": 750
+}

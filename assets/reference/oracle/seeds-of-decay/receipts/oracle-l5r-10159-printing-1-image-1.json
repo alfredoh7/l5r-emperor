@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 735060,
+  "card_id": "oracle-l5r-10159",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10159-printing-1-image-1",
+  "image_index": 1,
+  "name": "Military Promotion",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 10159,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10159-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:50.248929+00:00",
+  "sha256": "f780c1c80610b147c85df774534f25d3e83ed64827e53b90ed174985d5332d32",
+  "source_image_hash": "e8/6e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e8/6e/printing_10159_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e8/6e/printing_10159_1_",
+  "width": 750
+}

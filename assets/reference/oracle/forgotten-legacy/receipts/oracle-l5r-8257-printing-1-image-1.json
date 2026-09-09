@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 287790,
+  "card_id": "oracle-l5r-8257",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8257-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Perfect Moment",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 8257,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8257-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:37.966566+00:00",
+  "sha256": "e04626b4619db30c6210662d0fa62e4d63dc1a13bad5b7cf93ab8032b1b4fa8e",
+  "source_image_hash": "55/bc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/55/bc/printing_8257_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/55/bc/printing_8257_1_",
+  "width": 750
+}

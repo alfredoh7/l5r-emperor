@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1097025,
+  "card_id": "oracle-l5r-10502",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10502-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Shakash",
+  "numbers": [
+    "80"
+  ],
+  "oracle_id": 10502,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10502-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:08.676338+00:00",
+  "sha256": "159a92ff283cd8b96663b074d1ee5e80347176e9ee338bd152a5edbe559c29a7",
+  "source_image_hash": "53/6c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/53/6c/printing_10502_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/53/6c/printing_10502_1_",
+  "width": 750
+}

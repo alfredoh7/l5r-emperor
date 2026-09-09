@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1027485,
+  "card_id": "oracle-l5r-10437",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10437-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida O-Ushi",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 10437,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10437-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:55.498356+00:00",
+  "sha256": "32802cc1406f5f402daf138f3794f9549724dc4f1cf94bb3553e71064df55569",
+  "source_image_hash": "c2/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c2/63/printing_10437_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c2/63/printing_10437_1_",
+  "width": 750
+}

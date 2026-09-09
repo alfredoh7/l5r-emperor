@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 673770,
+  "card_id": "oracle-l5r-10294",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10294-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Sango",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 10294,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10294-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:09.840173+00:00",
+  "sha256": "48eb664df8b965f49190bd40a65996120709ccc0ca023a7bbfa66cf42520a705",
+  "source_image_hash": "02/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/02/cc/printing_10294_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/02/cc/printing_10294_1_",
+  "width": 750
+}

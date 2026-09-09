@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 701344,
+  "card_id": "oracle-l5r-10045",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10045-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Tsujiken",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10045,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10045-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:17.742994+00:00",
+  "sha256": "d1b216ffdd3b1261e5abfe7628f86e597c6a64ecaeb597b2c656c2eb5f61556f",
+  "source_image_hash": "bf/65",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bf/65/printing_10045_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bf/65/printing_10045_1_",
+  "width": 750
+}

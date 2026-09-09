@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 819334,
+  "card_id": "oracle-l5r-10175",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10175-printing-1-image-1",
+  "image_index": 1,
+  "name": "Two Hands",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 10175,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10175-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:02.493629+00:00",
+  "sha256": "136d8afc502384b7a03bdc7f9c9c2909c2401a1401b962ae89a130b1afcf0049",
+  "source_image_hash": "0a/e5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/e5/printing_10175_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/e5/printing_10175_1_",
+  "width": 750
+}

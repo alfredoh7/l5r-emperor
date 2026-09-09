@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 251172,
+  "card_id": "oracle-l5r-2032",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2032-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disreputable House",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 2032,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2032-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:17.867959+00:00",
+  "sha256": "22d0b83ec8c4e2cf5781a847a4c2d89deb5c6dccd4c5d697303224a738622281",
+  "source_image_hash": "66/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/66/45/printing_2032_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/66/45/printing_2032_1_",
+  "width": 750
+}

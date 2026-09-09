@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 912624,
+  "card_id": "oracle-l5r-10649",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10649-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Hajime",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 10649,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10649-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:47.501397+00:00",
+  "sha256": "2e1fb68f14903d5a8ff48e35f8717833801eb29c1821bb7afc7de00376fa1596",
+  "source_image_hash": "3a/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3a/93/printing_10649_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3a/93/printing_10649_1_",
+  "width": 750
+}

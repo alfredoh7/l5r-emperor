@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730484,
+  "card_id": "oracle-l5r-9929",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9929-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spiritual Manipulation",
+  "numbers": [
+    "141"
+  ],
+  "oracle_id": 9929,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9929-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:19.851870+00:00",
+  "sha256": "5abb9f318ea63a31f48fd91c25b53fd3b0114ddb7a9737d2beb748b376e4b5e6",
+  "source_image_hash": "03/dd",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/dd/printing_9929_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/dd/printing_9929_1_",
+  "width": 750
+}

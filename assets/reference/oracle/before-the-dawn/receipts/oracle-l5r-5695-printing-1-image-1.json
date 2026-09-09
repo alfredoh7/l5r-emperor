@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 411569,
+  "card_id": "oracle-l5r-5695",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5695-printing-1-image-1",
+  "image_index": 1,
+  "name": "Omigawa",
+  "numbers": [
+    "64"
+  ],
+  "oracle_id": 5695,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5695-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:20.023113+00:00",
+  "sha256": "768a3c3776064e24f3107919a1a5495adb38bfb0777dfa3966328b03e4eeaed2",
+  "source_image_hash": "fe/a0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/a0/printing_5695_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/a0/printing_5695_1_",
+  "width": 750
+}

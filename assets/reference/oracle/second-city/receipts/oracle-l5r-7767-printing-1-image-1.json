@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 407625,
+  "card_id": "oracle-l5r-7767",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7767-printing-1-image-1",
+  "image_index": 1,
+  "name": "Taming the Beast",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 7767,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7767-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:51.232844+00:00",
+  "sha256": "afe8ea7b54be6d4371fdafb240043d26a0183412792dbb3725c552576d511716",
+  "source_image_hash": "27/20",
+  "source_url": "https://images.oracleofthevoid.com/l5r/27/20/printing_7767_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/27/20/printing_7767_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401203,
+  "card_id": "oracle-l5r-6490",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6490-printing-1-image-1",
+  "image_index": 1,
+  "name": "Scars of War",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 6490,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6490-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:31.614242+00:00",
+  "sha256": "0012530fef02196814a0e4d5b0fb74440682d8366ca91ea28d7b75be4a1c6929",
+  "source_image_hash": "d3/87",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d3/87/printing_6490_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d3/87/printing_6490_1_",
+  "width": 750
+}

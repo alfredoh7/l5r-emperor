@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 232306,
+  "card_id": "oracle-l5r-4948",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4948-printing-2-image-1",
+  "image_index": 1,
+  "name": "Matsu Mansaiko",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 4948,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4948-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:43.950662+00:00",
+  "sha256": "ae7d53629123108c70394194a0ff6370bf4fb63a2936678cb51c95b83d2eb197",
+  "source_image_hash": "7b/f3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7b/f3/printing_4948_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7b/f3/printing_4948_2_",
+  "width": 750
+}

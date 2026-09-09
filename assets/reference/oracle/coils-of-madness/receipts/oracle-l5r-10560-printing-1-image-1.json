@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1013327,
+  "card_id": "oracle-l5r-10560",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10560-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moments of Destiny",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 10560,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10560-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:51.056397+00:00",
+  "sha256": "be2e6cefbab5f59d8d2c017bc5178bf072f209e01d9319a4364316fca1fbe481",
+  "source_image_hash": "8f/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8f/22/printing_10560_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8f/22/printing_10560_1_",
+  "width": 750
+}

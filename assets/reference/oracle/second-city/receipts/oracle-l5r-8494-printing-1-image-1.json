@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 391261,
+  "card_id": "oracle-l5r-8494",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8494-printing-1-image-1",
+  "image_index": 1,
+  "name": "Times of Strife",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 8494,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8494-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:57.644889+00:00",
+  "sha256": "2133dd8099708fc9b767c1f4e8b6d35e081adcf7d52abf5c6bb09ae07d5d496c",
+  "source_image_hash": "b6/c4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b6/c4/printing_8494_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b6/c4/printing_8494_1_",
+  "width": 750
+}

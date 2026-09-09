@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 705624,
+  "card_id": "oracle-l5r-10317",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10317-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Shiraume",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 10317,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10317-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:13.803214+00:00",
+  "sha256": "9a0aa9adfec4095142978babcf4a526158e49e33ccdea5001eb5453496031789",
+  "source_image_hash": "a8/c7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/c7/printing_10317_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/c7/printing_10317_1_",
+  "width": 750
+}

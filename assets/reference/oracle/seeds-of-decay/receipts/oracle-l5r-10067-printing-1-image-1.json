@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 844724,
+  "card_id": "oracle-l5r-10067",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10067-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thunder Dragon",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 10067,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10067-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:54.189769+00:00",
+  "sha256": "0c711ca5a9b20dc1c1f146764cbfc57bd18679e8bc74d5fbeddf4cb107c9ac18",
+  "source_image_hash": "0d/ff",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0d/ff/printing_10067_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0d/ff/printing_10067_1_",
+  "width": 750
+}

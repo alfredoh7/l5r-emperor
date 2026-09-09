@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 404627,
+  "card_id": "oracle-l5r-430",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-430-printing-1-image-1",
+  "image_index": 1,
+  "name": "Archery Range",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 430,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-430-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:41.806008+00:00",
+  "sha256": "52ab540e85997e3d7187dc30c216d8b61f7d195a738e4d1ba30de4acae69a179",
+  "source_image_hash": "74/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/90/printing_430_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/90/printing_430_1_",
+  "width": 750
+}

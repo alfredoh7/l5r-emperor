@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1025433,
+  "card_id": "oracle-l5r-10473",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10473-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Kaitoko",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 10473,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10473-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:53.270554+00:00",
+  "sha256": "549efc4e89c71a41a6fb26f67ebaed50cc8ee517597a206dad1fb22a3dfa0f03",
+  "source_image_hash": "59/77",
+  "source_url": "https://images.oracleofthevoid.com/l5r/59/77/printing_10473_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/59/77/printing_10473_1_",
+  "width": 750
+}

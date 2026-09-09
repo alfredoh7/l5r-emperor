@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1078068,
+  "card_id": "oracle-l5r-10454",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10454-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Kazuya",
+  "numbers": [
+    "141"
+  ],
+  "oracle_id": 10454,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10454-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:48.408810+00:00",
+  "sha256": "717fc3deeb53c507153eef1fcf81011112c92e4385fb145f185507768961124e",
+  "source_image_hash": "3d/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/4d/printing_10454_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/4d/printing_10454_1_",
+  "width": 750
+}

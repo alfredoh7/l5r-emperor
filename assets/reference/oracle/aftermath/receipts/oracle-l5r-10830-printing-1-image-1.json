@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 767594,
+  "card_id": "oracle-l5r-10830",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10830-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yukihime's Hot Springs",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 10830,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10830-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:33.805975+00:00",
+  "sha256": "2f840e38e1ed5cd56f8567c6e90de4f9cc100ee76af240e13016af8473b75bfe",
+  "source_image_hash": "6f/a7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6f/a7/printing_10830_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6f/a7/printing_10830_1_",
+  "width": 750
+}

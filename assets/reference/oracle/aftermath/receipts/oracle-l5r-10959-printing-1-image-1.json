@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 826035,
+  "card_id": "oracle-l5r-10959",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10959-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Way of the World",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 10959,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10959-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:07.701033+00:00",
+  "sha256": "4ba5cbd5bb5c6f2ac6d97fc71138c546d56f6eba817a38eef5d6dfbe1829be2a",
+  "source_image_hash": "57/34",
+  "source_url": "https://images.oracleofthevoid.com/l5r/57/34/printing_10959_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/57/34/printing_10959_1_",
+  "width": 750
+}

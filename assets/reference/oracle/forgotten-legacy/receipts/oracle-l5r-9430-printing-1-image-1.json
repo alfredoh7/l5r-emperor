@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 269749,
+  "card_id": "oracle-l5r-9430",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9430-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yamazaki",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 9430,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-9430-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:51.068367+00:00",
+  "sha256": "a168851a6c0a87dfdd8bb6fb960dd6880604fa38a484671093e5a1a5c9d2d570",
+  "source_image_hash": "83/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/83/df/printing_9430_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/83/df/printing_9430_1_",
+  "width": 750
+}

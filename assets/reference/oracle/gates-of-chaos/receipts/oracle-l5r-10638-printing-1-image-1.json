@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 841272,
+  "card_id": "oracle-l5r-10638",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10638-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Ayumu",
+  "numbers": [
+    "37"
+  ],
+  "oracle_id": 10638,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10638-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:43.846030+00:00",
+  "sha256": "778f3c0822df72cd91a5d78ebdfcfffc15e80a571b358ba960024a57aae09690",
+  "source_image_hash": "8e/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/7a/printing_10638_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/7a/printing_10638_1_",
+  "width": 750
+}

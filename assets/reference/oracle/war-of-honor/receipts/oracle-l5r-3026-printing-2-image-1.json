@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 256642,
+  "card_id": "oracle-l5r-3026",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3026-printing-2-image-1",
+  "image_index": 1,
+  "name": "Heaven's Tears",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 3026,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3026-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:33.031034+00:00",
+  "sha256": "7ee7e2fead701d4609431c6c50b931af1f33ee1cce75fbe1511053c42c859ac9",
+  "source_image_hash": "2c/33",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2c/33/printing_3026_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2c/33/printing_3026_2_",
+  "width": 750
+}

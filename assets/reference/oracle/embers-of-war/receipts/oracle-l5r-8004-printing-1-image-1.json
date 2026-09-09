@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 797289,
+  "card_id": "oracle-l5r-8004",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8004-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Cycle of Vengeance",
+  "numbers": [
+    "146"
+  ],
+  "oracle_id": 8004,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8004-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:03.987077+00:00",
+  "sha256": "11ad12ae856835ac57f55ba8ce57ad39576f5a9235b8ad33e4113e29659d3e7d",
+  "source_image_hash": "76/c4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/c4/printing_8004_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/c4/printing_8004_1_",
+  "width": 750
+}

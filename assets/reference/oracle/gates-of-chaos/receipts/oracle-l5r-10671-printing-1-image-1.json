@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 826398,
+  "card_id": "oracle-l5r-10671",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10671-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Sayaka",
+  "numbers": [
+    "75"
+  ],
+  "oracle_id": 10671,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10671-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:23.906332+00:00",
+  "sha256": "c037e5d305b05fee40449191d99353784cecbebb41fa1a1903a04a1fd4fd5673",
+  "source_image_hash": "58/8f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/58/8f/printing_10671_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/58/8f/printing_10671_1_",
+  "width": 750
+}

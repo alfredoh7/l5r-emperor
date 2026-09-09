@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 273594,
+  "card_id": "oracle-l5r-5395",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5395-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Xiao",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 5395,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5395-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:13.024584+00:00",
+  "sha256": "940b16e9ffe7af76c3fb409e9f9028d8ab9121876cce2de746559bcc39d08aaa",
+  "source_image_hash": "97/47",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/47/printing_5395_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/47/printing_5395_1_",
+  "width": 750
+}

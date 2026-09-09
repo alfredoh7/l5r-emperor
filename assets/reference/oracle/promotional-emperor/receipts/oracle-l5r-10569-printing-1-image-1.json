@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 970396,
+  "card_id": "oracle-l5r-10569",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10569-printing-1-image-1",
+  "image_index": 1,
+  "name": "Inari's Festival",
+  "numbers": [
+    "151"
+  ],
+  "oracle_id": 10569,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10569-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:55.734561+00:00",
+  "sha256": "9ada857dcea27e3a4ce670d0c9e3dcb998ed22c18293b9713b2918cd18d0f4fe",
+  "source_image_hash": "6e/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/7d/printing_10569_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/7d/printing_10569_1_",
+  "width": 750
+}

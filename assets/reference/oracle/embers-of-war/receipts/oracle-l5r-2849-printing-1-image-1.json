@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 673010,
+  "card_id": "oracle-l5r-2849",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2849-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Gochiso",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 2849,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2849-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:08.780251+00:00",
+  "sha256": "49e577cde1942cf763c2ba944ce58134f2a3f5c771ef1836103b01efcda6957f",
+  "source_image_hash": "25/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/25/eb/printing_2849_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/25/eb/printing_2849_1_",
+  "width": 750
+}

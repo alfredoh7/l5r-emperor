@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401134,
+  "card_id": "oracle-l5r-6123",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6123-printing-1-image-1",
+  "image_index": 1,
+  "name": "Quagmire",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 6123,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6123-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:10.649050+00:00",
+  "sha256": "d2eaff4ae7767d32a3f8c33e70678c15f0081549c211e3deff997d778162b7ad",
+  "source_image_hash": "ca/82",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ca/82/printing_6123_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ca/82/printing_6123_1_",
+  "width": 750
+}

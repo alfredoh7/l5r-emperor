@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 768178,
+  "card_id": "oracle-l5r-10856",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10856-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Yamazaru",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 10856,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10856-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:02.622426+00:00",
+  "sha256": "c60cbd7f19caf7da6d1ec4a22bb22aae34830490e9c1b4b6c831b8c2acbe32b6",
+  "source_image_hash": "13/e2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/e2/printing_10856_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/e2/printing_10856_1_",
+  "width": 750
+}

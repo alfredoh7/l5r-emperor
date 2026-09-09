@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 251518,
+  "card_id": "oracle-l5r-6425",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6425-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ryoshun's Guidance",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 6425,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-6425-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:22.997206+00:00",
+  "sha256": "c24566af8cccbc71a6a596348187a944f04969f645ab9736a20199ec638d8059",
+  "source_image_hash": "39/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/63/printing_6425_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/63/printing_6425_1_",
+  "width": 750
+}

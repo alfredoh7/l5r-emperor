@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 388192,
+  "card_id": "oracle-l5r-879",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-879-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Shibata",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 879,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-879-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:59.644117+00:00",
+  "sha256": "e9025ec2eaa05951f0741386dd4cc1fd2ceb3157ff0c0fae617d513b4d704c30",
+  "source_image_hash": "51/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/6b/printing_879_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/6b/printing_879_1_",
+  "width": 750
+}

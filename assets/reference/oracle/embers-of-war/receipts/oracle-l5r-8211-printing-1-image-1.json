@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747784,
+  "card_id": "oracle-l5r-8211",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8211-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Marshalling Fields",
+  "numbers": [
+    "157"
+  ],
+  "oracle_id": 8211,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8211-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:10.598110+00:00",
+  "sha256": "30212bec60882981f7266b127c51e53be845db7fd2f21bd97b10093be0fee0b0",
+  "source_image_hash": "73/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/7c/printing_8211_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/7c/printing_8211_1_",
+  "width": 750
+}

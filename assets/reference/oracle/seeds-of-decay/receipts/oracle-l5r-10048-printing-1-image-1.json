@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774347,
+  "card_id": "oracle-l5r-10048",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10048-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Kitahime",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 10048,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10048-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:44.123933+00:00",
+  "sha256": "a33b240bc18df5ed47d4d392e59e18ba8ba6721b0b5c5edc2ba6c6463cb41e33",
+  "source_image_hash": "4c/43",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4c/43/printing_10048_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4c/43/printing_10048_1_",
+  "width": 750
+}

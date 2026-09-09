@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 408344,
+  "card_id": "oracle-l5r-6662",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6662-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shadow Tactics",
+  "numbers": [
+    "134"
+  ],
+  "oracle_id": 6662,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6662-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:34.862986+00:00",
+  "sha256": "53a5d09788b401ff1c8cb7b0007e781e4e822c5baeb720c7719a4d4f6a7aa5ea",
+  "source_image_hash": "e2/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/db/printing_6662_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/db/printing_6662_1_",
+  "width": 750
+}

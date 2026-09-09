@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 759100,
+  "card_id": "oracle-l5r-10846",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10846-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Shinji",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 10846,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10846-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:58.015899+00:00",
+  "sha256": "3ee861924fee677de81af975d3277f1a8183da5a0d235b52f89615377e091ba4",
+  "source_image_hash": "01/2f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/01/2f/printing_10846_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/01/2f/printing_10846_1_",
+  "width": 750
+}

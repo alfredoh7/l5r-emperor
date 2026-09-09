@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 728945,
+  "card_id": "oracle-l5r-9163",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9163-printing-1-image-1",
+  "image_index": 1,
+  "name": "Village Raiders",
+  "numbers": [
+    "86"
+  ],
+  "oracle_id": 9163,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9163-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:30.280879+00:00",
+  "sha256": "70c94b5a2bca9104c7fc3ad79d9fa8416684c1cfb787c9f3a63707facd495cc7",
+  "source_image_hash": "db/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/db/a4/printing_9163_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/db/a4/printing_9163_1_",
+  "width": 750
+}

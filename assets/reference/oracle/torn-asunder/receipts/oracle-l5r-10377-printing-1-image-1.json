@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732179,
+  "card_id": "oracle-l5r-10377",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10377-printing-1-image-1",
+  "image_index": 1,
+  "name": "Harmony",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 10377,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10377-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:39.603481+00:00",
+  "sha256": "bbcd11e5d921554610bb04ad1023885349dea255b4dc2a9b61d24688af18ae31",
+  "source_image_hash": "af/60",
+  "source_url": "https://images.oracleofthevoid.com/l5r/af/60/printing_10377_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/af/60/printing_10377_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 810658,
+  "card_id": "oracle-l5r-10397",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10397-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tactical Sacrifice",
+  "numbers": [
+    "141"
+  ],
+  "oracle_id": 10397,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10397-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:02.042034+00:00",
+  "sha256": "3217c808500a777371905217bed21c06dad6894bd7e1516c2efe34c0fe55dce6",
+  "source_image_hash": "81/9a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/81/9a/printing_10397_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/81/9a/printing_10397_1_",
+  "width": 750
+}

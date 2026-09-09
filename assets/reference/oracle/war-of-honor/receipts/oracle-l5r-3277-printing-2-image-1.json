@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 310423,
+  "card_id": "oracle-l5r-3277",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3277-printing-2-image-1",
+  "image_index": 1,
+  "name": "Hired Legion",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 3277,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3277-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:34.021534+00:00",
+  "sha256": "595de063460cc902a35c0ed30bcb743e2ef881beb1ede9c49c4e2a9f6d4a2b18",
+  "source_image_hash": "3e/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/db/printing_3277_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/db/printing_3277_2_",
+  "width": 750
+}

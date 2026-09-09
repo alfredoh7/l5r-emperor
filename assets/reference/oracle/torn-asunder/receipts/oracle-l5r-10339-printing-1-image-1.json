@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 814222,
+  "card_id": "oracle-l5r-10339",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10339-printing-1-image-1",
+  "image_index": 1,
+  "name": "Uji's Saboteurs",
+  "numbers": [
+    "83"
+  ],
+  "oracle_id": 10339,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10339-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:17.580822+00:00",
+  "sha256": "cd80e6f37293c154c2c05021029f4a79b0eda0ef84b56829fdd3a94cd82bce88",
+  "source_image_hash": "67/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/7d/printing_10339_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/7d/printing_10339_1_",
+  "width": 750
+}

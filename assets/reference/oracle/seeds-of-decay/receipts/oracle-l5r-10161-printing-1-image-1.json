@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 672931,
+  "card_id": "oracle-l5r-10161",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10161-printing-1-image-1",
+  "image_index": 1,
+  "name": "Only a Shadow",
+  "numbers": [
+    "135"
+  ],
+  "oracle_id": 10161,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10161-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:10.710877+00:00",
+  "sha256": "da348fcf09830ec435932b3794240fa85782b46f936e7793ef1b779b9a571c57",
+  "source_image_hash": "e1/c4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/c4/printing_10161_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/c4/printing_10161_1_",
+  "width": 750
+}

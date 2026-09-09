@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 252926,
+  "card_id": "oracle-l5r-2321",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2321-printing-2-image-1",
+  "image_index": 1,
+  "name": "Emissary of the Ivory Kingdoms",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 2321,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2321-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:19.939103+00:00",
+  "sha256": "422cf22e333e0f0912bde39535e115395b2e1c73acd914f932478ffeed6c245f",
+  "source_image_hash": "4d/d3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4d/d3/printing_2321_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4d/d3/printing_2321_2_",
+  "width": 750
+}

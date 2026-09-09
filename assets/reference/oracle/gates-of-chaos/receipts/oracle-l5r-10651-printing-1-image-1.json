@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 803739,
+  "card_id": "oracle-l5r-10651",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10651-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Norimichi",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 10651,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10651-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:48.985014+00:00",
+  "sha256": "9f6b3b5d0229b3a4db7fb0adaa74cfa377abfe1879f5ae0f42a5cc7c795531b9",
+  "source_image_hash": "a4/08",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a4/08/printing_10651_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/08/printing_10651_1_",
+  "width": 750
+}

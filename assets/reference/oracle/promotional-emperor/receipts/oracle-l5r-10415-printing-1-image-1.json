@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 705984,
+  "card_id": "oracle-l5r-10415",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10415-printing-1-image-1",
+  "image_index": 1,
+  "name": "It Was a Cat",
+  "numbers": [
+    "159"
+  ],
+  "oracle_id": 10415,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10415-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:28:01.637171+00:00",
+  "sha256": "05274660a51dac2345fffa831f699638f23c2fb6f1c0eb3bdf3e513af9586378",
+  "source_image_hash": "b8/47",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b8/47/printing_10415_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b8/47/printing_10415_1_",
+  "width": 750
+}

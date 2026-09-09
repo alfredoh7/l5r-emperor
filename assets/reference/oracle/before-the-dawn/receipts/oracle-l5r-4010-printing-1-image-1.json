@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 408950,
+  "card_id": "oracle-l5r-4010",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4010-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Yupadi",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 4010,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4010-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:54.324511+00:00",
+  "sha256": "794c4c401264596bf4c31d3cf144581b133fb2c82b11b8da0fb7f9172aa3c2b5",
+  "source_image_hash": "69/3a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/3a/printing_4010_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/3a/printing_4010_1_",
+  "width": 750
+}

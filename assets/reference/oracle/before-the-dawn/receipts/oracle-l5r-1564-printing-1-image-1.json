@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386163,
+  "card_id": "oracle-l5r-1564",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1564-printing-1-image-1",
+  "image_index": 1,
+  "name": "Crimson Shadow Armor",
+  "numbers": [
+    "89"
+  ],
+  "oracle_id": 1564,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1564-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:10.222005+00:00",
+  "sha256": "3ef26be26267298508f610b0e055cae7d0d048b32d675b10044848640a5da61f",
+  "source_image_hash": "ac/f9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ac/f9/printing_1564_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ac/f9/printing_1564_1_",
+  "width": 750
+}

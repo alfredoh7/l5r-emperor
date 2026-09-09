@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1032995,
+  "card_id": "oracle-l5r-10429",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10429-printing-1-image-1",
+  "image_index": 1,
+  "name": "Border Keep",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10429,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10429-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:09.640943+00:00",
+  "sha256": "c70edde76f2c5fa16f58ee00e71f141c07ee6b22253fc5b205c557b271e182e5",
+  "source_image_hash": "ec/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ec/90/printing_10429_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ec/90/printing_10429_1_",
+  "width": 750
+}

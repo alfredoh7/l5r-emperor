@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 830058,
+  "card_id": "oracle-l5r-10908",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10908-printing-1-image-1",
+  "image_index": 1,
+  "name": "Stonemason's Hammer",
+  "numbers": [
+    "93"
+  ],
+  "oracle_id": 10908,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10908-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:52.156122+00:00",
+  "sha256": "684cdc0cdbc173e6e5a3c539d1a5f45d89e75e733fcc10bc44327d3a0a86ffb8",
+  "source_image_hash": "54/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/42/printing_10908_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/42/printing_10908_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746488,
+  "card_id": "oracle-l5r-10084",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10084-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yogo Ugimori",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 10084,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10084-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:20.182049+00:00",
+  "sha256": "f863032d941f9a54a0d84d4afe41022424fd43494465d415da5ead1790f2beae",
+  "source_image_hash": "ec/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ec/b9/printing_10084_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ec/b9/printing_10084_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 796984,
+  "card_id": "oracle-l5r-5928",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5928-printing-1-image-1",
+  "image_index": 1,
+  "name": "Perplexing Guests",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 5928,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5928-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:10.723522+00:00",
+  "sha256": "92a2c74ec850b1611650213df72ca5df56ab09007c9adb4d0b8a1b5a5d1d917f",
+  "source_image_hash": "f4/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f4/5c/printing_5928_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f4/5c/printing_5928_1_",
+  "width": 750
+}

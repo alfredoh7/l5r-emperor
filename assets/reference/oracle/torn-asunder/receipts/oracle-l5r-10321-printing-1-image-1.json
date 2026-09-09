@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 692608,
+  "card_id": "oracle-l5r-10321",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10321-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chun",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 10321,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10321-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:07.642840+00:00",
+  "sha256": "15ac31adbb0ea116099692b65ec2cad68d5bd2cf1c808a3b064067614f3db0a4",
+  "source_image_hash": "34/ac",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/ac/printing_10321_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/ac/printing_10321_1_",
+  "width": 750
+}

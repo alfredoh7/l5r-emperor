@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1016010,
+  "card_id": "oracle-l5r-10452",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10452-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsuki Daisuke",
+  "numbers": [
+    "35"
+  ],
+  "oracle_id": 10452,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10452-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:29.190510+00:00",
+  "sha256": "e5a7cc3d606d90ff9681aa5af009ffb8e35f7f66079d1ea39fc6a24684a9f371",
+  "source_image_hash": "f1/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f1/4d/printing_10452_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f1/4d/printing_10452_1_",
+  "width": 750
+}

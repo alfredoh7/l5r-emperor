@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 757077,
+  "card_id": "oracle-l5r-10166",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10166-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sharing Gossip",
+  "numbers": [
+    "140"
+  ],
+  "oracle_id": 10166,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10166-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:27.284831+00:00",
+  "sha256": "1ca1f78ce8d01c872287ef7024888fac8faf0eaedbff72d40f88b0b810573016",
+  "source_image_hash": "5a/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5a/d6/printing_10166_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5a/d6/printing_10166_1_",
+  "width": 750
+}

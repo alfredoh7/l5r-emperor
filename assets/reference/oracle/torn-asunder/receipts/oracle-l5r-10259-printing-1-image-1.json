@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 664911,
+  "card_id": "oracle-l5r-10259",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10259-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Dangerous Game",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10259,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10259-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:36.477647+00:00",
+  "sha256": "90069c610435bb1f6fda926512e63338d7fd9f6c97608509a418a546a0f4ad78",
+  "source_image_hash": "e4/89",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e4/89/printing_10259_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e4/89/printing_10259_1_",
+  "width": 750
+}

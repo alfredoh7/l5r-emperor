@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 699259,
+  "card_id": "oracle-l5r-10050",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10050-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Yuka",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 10050,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10050-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:55.847764+00:00",
+  "sha256": "bcea49a1832878a87c4a2530cad39ac8cb8bdf94cab6a2221d365b6c75ffd3ce",
+  "source_image_hash": "d7/88",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/88/printing_10050_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/88/printing_10050_1_",
+  "width": 750
+}

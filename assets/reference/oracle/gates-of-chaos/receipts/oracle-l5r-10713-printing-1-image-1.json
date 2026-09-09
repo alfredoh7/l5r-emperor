@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 813945,
+  "card_id": "oracle-l5r-10713",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10713-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Welcome Reprieve",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 10713,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10713-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:40.406620+00:00",
+  "sha256": "3278ebff24677c5c5522dd30920388cb73d27b39e49230e6084b38fa4fb42070",
+  "source_image_hash": "ca/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ca/90/printing_10713_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ca/90/printing_10713_1_",
+  "width": 750
+}

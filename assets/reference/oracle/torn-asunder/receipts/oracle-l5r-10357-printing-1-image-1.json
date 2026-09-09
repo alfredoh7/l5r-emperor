@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741071,
+  "card_id": "oracle-l5r-10357",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10357-printing-1-image-1",
+  "image_index": 1,
+  "name": "Witness the Untold",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 10357,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10357-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:28.310794+00:00",
+  "sha256": "44a5f3622b2c7bc778dd7342984395628ce258a9f81eb8c343393eb019c00730",
+  "source_image_hash": "a8/56",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/56/printing_10357_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/56/printing_10357_1_",
+  "width": 750
+}

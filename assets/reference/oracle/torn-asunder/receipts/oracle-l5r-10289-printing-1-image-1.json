@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 761586,
+  "card_id": "oracle-l5r-10289",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10289-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Mihato",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 10289,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10289-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:12.771894+00:00",
+  "sha256": "1fa2bb8134bb7368eb0b401009c360c35d51455e290fbfb5a41a1cf2126de46a",
+  "source_image_hash": "ae/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/01/printing_10289_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/01/printing_10289_1_",
+  "width": 750
+}

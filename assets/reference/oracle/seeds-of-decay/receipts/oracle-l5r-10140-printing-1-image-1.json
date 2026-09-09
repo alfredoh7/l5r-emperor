@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 826235,
+  "card_id": "oracle-l5r-10140",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10140-printing-1-image-1",
+  "image_index": 1,
+  "name": "Courting Trouble",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 10140,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10140-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:42.950544+00:00",
+  "sha256": "d25ceef32868c1668f21a92c211961539b53e33509f41c08396314ce18f0725f",
+  "source_image_hash": "dd/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/a9/printing_10140_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/a9/printing_10140_1_",
+  "width": 750
+}

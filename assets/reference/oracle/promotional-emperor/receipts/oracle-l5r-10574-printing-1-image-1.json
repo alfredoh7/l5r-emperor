@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1007793,
+  "card_id": "oracle-l5r-10574",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10574-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hidden Weapons",
+  "numbers": [
+    "158"
+  ],
+  "oracle_id": 10574,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10574-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:44.644603+00:00",
+  "sha256": "07c3f6b9b2171f84b736aefffac0a5d938298fd489df645eea4fa0653891f52b",
+  "source_image_hash": "05/fe",
+  "source_url": "https://images.oracleofthevoid.com/l5r/05/fe/printing_10574_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/05/fe/printing_10574_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 717922,
+  "card_id": "oracle-l5r-10218",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10218-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Quartermaster's Depot",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 10218,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10218-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:27.682961+00:00",
+  "sha256": "091be2f6fa0889587aed26d4f4862b8a5e4604d258c9315df4cbaac2f05288f0",
+  "source_image_hash": "73/7e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/7e/printing_10218_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/7e/printing_10218_1_",
+  "width": 750
+}

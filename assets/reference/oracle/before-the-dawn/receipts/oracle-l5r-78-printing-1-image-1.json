@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385702,
+  "card_id": "oracle-l5r-78",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-78-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Simple Yari",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 78,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-78-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:44.505616+00:00",
+  "sha256": "9f1002c5caf4c86e6455d450ee3e770264d63e0b0770cf90cce7fb46d943c42a",
+  "source_image_hash": "5f/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5f/4a/printing_78_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5f/4a/printing_78_1_",
+  "width": 750
+}

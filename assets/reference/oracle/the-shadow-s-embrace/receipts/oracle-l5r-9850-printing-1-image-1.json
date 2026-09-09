@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 795991,
+  "card_id": "oracle-l5r-9850",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9850-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Bunoro",
+  "numbers": [
+    "62"
+  ],
+  "oracle_id": 9850,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9850-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:58.149983+00:00",
+  "sha256": "86de022aa8c3b8a3a752d453efea857b79f55780738790b9422a7ce5a5364941",
+  "source_image_hash": "3e/40",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/40/printing_9850_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/40/printing_9850_1_",
+  "width": 750
+}

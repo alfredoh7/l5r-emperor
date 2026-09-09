@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409590,
+  "card_id": "oracle-l5r-6141",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6141-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rage of the Spirits",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 6141,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6141-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:12.789264+00:00",
+  "sha256": "44a1164470c4fee0d68c5009109bd5e63f785768bb1f3e0add8dc88598091fb6",
+  "source_image_hash": "3d/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/2b/printing_6141_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/2b/printing_6141_1_",
+  "width": 750
+}

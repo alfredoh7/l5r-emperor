@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 731948,
+  "card_id": "oracle-l5r-10338",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10338-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sycophants",
+  "numbers": [
+    "82"
+  ],
+  "oracle_id": 10338,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10338-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:00.835017+00:00",
+  "sha256": "70524c23e16be8ba18363e98095fd5816137ddccc6de319ab836257bff39cf16",
+  "source_image_hash": "b9/59",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b9/59/printing_10338_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/59/printing_10338_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 796502,
+  "card_id": "oracle-l5r-10295",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10295-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Yoshito",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 10295,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10295-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:11.004771+00:00",
+  "sha256": "34b699592607dc509324a3540f250c107e0e5c8f0fe3efa2f96c5c6f098c08c4",
+  "source_image_hash": "04/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/eb/printing_10295_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/eb/printing_10295_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 410660,
+  "card_id": "oracle-l5r-599",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-599-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ascending the Ranks",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 599,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-599-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:55.343948+00:00",
+  "sha256": "b66a71517c21dd6f2ede2494614c4f9881f0b2bec70c7f679a691383d7de4aab",
+  "source_image_hash": "43/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/5c/printing_599_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/5c/printing_599_1_",
+  "width": 750
+}

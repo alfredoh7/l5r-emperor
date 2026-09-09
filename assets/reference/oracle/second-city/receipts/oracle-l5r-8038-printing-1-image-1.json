@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398259,
+  "card_id": "oracle-l5r-8038",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8038-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Earth Flows",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 8038,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8038-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:55.484144+00:00",
+  "sha256": "9978d170f327dd0c87c597126cd76287ab3044aabd0047437ac842e5bd7de93c",
+  "source_image_hash": "97/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/98/printing_8038_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/98/printing_8038_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 841167,
+  "card_id": "oracle-l5r-10055",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10055-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Takeshi",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 10055,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10055-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:42.580752+00:00",
+  "sha256": "b50dab2b678fe5c56422c67a67bdc90b34ce19d133bd71b37f62a0fe06f3543a",
+  "source_image_hash": "4e/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/f6/printing_10055_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/f6/printing_10055_1_",
+  "width": 750
+}

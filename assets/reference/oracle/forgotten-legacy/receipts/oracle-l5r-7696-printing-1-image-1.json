@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 279492,
+  "card_id": "oracle-l5r-7696",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7696-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sword for Hire",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 7696,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-7696-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:32.919577+00:00",
+  "sha256": "b86e675812e8811def6f147bc6ec8c7bd4ead729c9cef5b51cb113d5b97c07d7",
+  "source_image_hash": "c6/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c6/b3/printing_7696_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c6/b3/printing_7696_1_",
+  "width": 750
+}

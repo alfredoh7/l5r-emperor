@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 238523,
+  "card_id": "oracle-l5r-895",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-895-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Sorii",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 895,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-895-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:56.826980+00:00",
+  "sha256": "a570e78214c9158b45981235f18a672bc55cac90be5cc028e135de35c9a1b9e3",
+  "source_image_hash": "7a/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7a/b4/printing_895_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7a/b4/printing_895_2_",
+  "width": 750
+}

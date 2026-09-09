@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 679751,
+  "card_id": "oracle-l5r-10964",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10964-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unpleasant Truths",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 10964,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10964-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:22.032018+00:00",
+  "sha256": "f2d90c1e4c6e87b6d07c7df741b8666df8c9a1e68dab0757f6f83d276c943462",
+  "source_image_hash": "e2/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/4c/printing_10964_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/4c/printing_10964_1_",
+  "width": 750
+}

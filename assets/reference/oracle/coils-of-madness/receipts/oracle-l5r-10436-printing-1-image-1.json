@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 981038,
+  "card_id": "oracle-l5r-10436",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10436-printing-1-image-1",
+  "image_index": 1,
+  "name": "Suikihime's Chambers",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10436,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10436-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:41.519774+00:00",
+  "sha256": "503ec10feb8eabfe3f7cb6c58868c42d8a5c7a71bfecd035371c136284033723",
+  "source_image_hash": "cc/cd",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/cd/printing_10436_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/cd/printing_10436_1_",
+  "width": 750
+}

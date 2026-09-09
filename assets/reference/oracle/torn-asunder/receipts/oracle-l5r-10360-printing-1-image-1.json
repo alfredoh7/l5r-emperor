@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730450,
+  "card_id": "oracle-l5r-10360",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10360-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Threat Enacted",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 10360,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10360-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:37.656438+00:00",
+  "sha256": "0a9af9f6d9eadac1778a2e64225efb0d57481111ea4b69165ff971e340001ba1",
+  "source_image_hash": "54/8f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/8f/printing_10360_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/8f/printing_10360_1_",
+  "width": 750
+}

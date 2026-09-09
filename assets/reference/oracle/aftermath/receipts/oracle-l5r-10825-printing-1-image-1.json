@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 803238,
+  "card_id": "oracle-l5r-10825",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10825-printing-1-image-1",
+  "image_index": 1,
+  "name": "House of Prophecy",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10825,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10825-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:40.019865+00:00",
+  "sha256": "2a78b98e9532618c7e8c14936376a80b46fd1772ade46d8117def96a7e1b4e14",
+  "source_image_hash": "0e/ac",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/ac/printing_10825_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/ac/printing_10825_1_",
+  "width": 750
+}

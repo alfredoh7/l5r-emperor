@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 707950,
+  "card_id": "oracle-l5r-10350",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10350-printing-1-image-1",
+  "image_index": 1,
+  "name": "Opening the Veil",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 10350,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10350-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:27.631286+00:00",
+  "sha256": "7e0e82a4523bb851ac2200d127ab195e14b3b75d6f51d8c8215c5be6ebf5c30c",
+  "source_image_hash": "74/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/de/printing_10350_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/de/printing_10350_1_",
+  "width": 750
+}

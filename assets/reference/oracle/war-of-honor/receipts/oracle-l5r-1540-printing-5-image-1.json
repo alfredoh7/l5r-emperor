@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 255529,
+  "card_id": "oracle-l5r-1540",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1540-printing-5-image-1",
+  "image_index": 1,
+  "name": "Courtesy",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 1540,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1540-printing-5-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "5",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:12.722196+00:00",
+  "sha256": "b868e74bdbea9c225ec17e6cd64aedf8ba238d30985d9c66b3a8c8624badcabc",
+  "source_image_hash": "f0/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/3c/printing_1540_5_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/3c/printing_1540_5_",
+  "width": 750
+}

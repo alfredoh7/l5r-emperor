@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 417852,
+  "card_id": "oracle-l5r-7494",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7494-printing-1-image-1",
+  "image_index": 1,
+  "name": "Stolen Merchandise",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 7494,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7494-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:51.299626+00:00",
+  "sha256": "db42c14c03c1702d41745559d859523f4ab5c025fffe7538a608faf967d92f86",
+  "source_image_hash": "f8/8d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/8d/printing_7494_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/8d/printing_7494_1_",
+  "width": 750
+}

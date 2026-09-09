@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 825282,
+  "card_id": "oracle-l5r-10882",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10882-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iweko Shibatsu",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 10882,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10882-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:50.809310+00:00",
+  "sha256": "fe55cd87985bdb437015097bf5e2b58455660042df5498b3166f9b22f12048f7",
+  "source_image_hash": "a9/9b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/9b/printing_10882_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/9b/printing_10882_1_",
+  "width": 750
+}

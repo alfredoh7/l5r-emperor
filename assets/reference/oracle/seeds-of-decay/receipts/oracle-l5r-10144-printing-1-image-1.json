@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729147,
+  "card_id": "oracle-l5r-10144",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10144-printing-1-image-1",
+  "image_index": 1,
+  "name": "Dragon Tattoo",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 10144,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10144-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:57.022992+00:00",
+  "sha256": "02adf13c7b517d3863ec3a175a9f06775b4bbbe2040420c259bdec5e15b4da2c",
+  "source_image_hash": "70/bf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/70/bf/printing_10144_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/70/bf/printing_10144_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 411230,
+  "card_id": "oracle-l5r-8521",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8521-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Hizumi",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 8521,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8521-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:00.829735+00:00",
+  "sha256": "88fd2c6bc952278644a50a6fbcc7a41056f6150b579da8017a073b3675eb3396",
+  "source_image_hash": "0f/88",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0f/88/printing_8521_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0f/88/printing_8521_1_",
+  "width": 750
+}

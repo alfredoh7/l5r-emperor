@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 681351,
+  "card_id": "oracle-l5r-10123",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10123-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sandalwood Incense",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 10123,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10123-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:21.392139+00:00",
+  "sha256": "09a149f7ee057b3c5eefa2477fe9b8c100945012b03c4b617aea74df5af71feb",
+  "source_image_hash": "92/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/92/32/printing_10123_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/92/32/printing_10123_1_",
+  "width": 750
+}

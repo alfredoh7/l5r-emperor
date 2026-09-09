@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 761559,
+  "card_id": "oracle-l5r-10149",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10149-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fair Warning",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 10149,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10149-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:04.132446+00:00",
+  "sha256": "4732f97fcc148620034b68a9d45dede5f5519dac9468a39867f1b2cb7ecacd1e",
+  "source_image_hash": "9d/e4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9d/e4/printing_10149_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9d/e4/printing_10149_1_",
+  "width": 750
+}

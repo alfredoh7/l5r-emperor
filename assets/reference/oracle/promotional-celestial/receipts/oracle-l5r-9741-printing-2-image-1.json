@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 265956,
+  "card_id": "oracle-l5r-9741",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9741-printing-2-image-1",
+  "image_index": 1,
+  "name": "The Walking Dead",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 9741,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9741-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:34:55.402144+00:00",
+  "sha256": "c38c0f9a1ec6d4838ecf8bec618b4c7d68bcc196526bcb6c576fb549067d7d97",
+  "source_image_hash": "93/28",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/28/printing_9741_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/28/printing_9741_2_",
+  "width": 750
+}

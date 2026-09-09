@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 907972,
+  "card_id": "oracle-l5r-10697",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10697-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shard of the Great Death's Bones",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 10697,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10697-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:39.469143+00:00",
+  "sha256": "99c4a2639354fcd1a6f6db96ff915af480a76b1a14c00d608e7fd4246c5a5463",
+  "source_image_hash": "8f/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8f/55/printing_10697_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8f/55/printing_10697_1_",
+  "width": 750
+}

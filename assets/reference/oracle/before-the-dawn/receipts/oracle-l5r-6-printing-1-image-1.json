@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409454,
+  "card_id": "oracle-l5r-6",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Champion in Court",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 6,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:41.414530+00:00",
+  "sha256": "a63fd18e39731b423e9abae74ecb1fdc1d3ab35cf2df4f5211674db4397c3ab4",
+  "source_image_hash": "67/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/90/printing_6_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/90/printing_6_1_",
+  "width": 750
+}

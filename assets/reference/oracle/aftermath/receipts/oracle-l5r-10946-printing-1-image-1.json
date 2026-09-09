@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730252,
+  "card_id": "oracle-l5r-10946",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10946-printing-1-image-1",
+  "image_index": 1,
+  "name": "Marshal Your Strength",
+  "numbers": [
+    "131"
+  ],
+  "oracle_id": 10946,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10946-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:13.437315+00:00",
+  "sha256": "4ac0a0bf558d1a260a7ede476722de3325fabb10f87e7bb745d2e50efa6f22ea",
+  "source_image_hash": "8d/c0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8d/c0/printing_10946_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8d/c0/printing_10946_1_",
+  "width": 750
+}

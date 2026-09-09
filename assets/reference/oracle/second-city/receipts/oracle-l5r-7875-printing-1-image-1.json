@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401920,
+  "card_id": "oracle-l5r-7875",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7875-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple of Hotei",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 7875,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7875-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:54.382853+00:00",
+  "sha256": "b6eee2b9f69f6ffac2d21283a9230bb3e60bc03c8ad00b36910deb30d27349a1",
+  "source_image_hash": "ba/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/23/printing_7875_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/23/printing_7875_1_",
+  "width": 750
+}

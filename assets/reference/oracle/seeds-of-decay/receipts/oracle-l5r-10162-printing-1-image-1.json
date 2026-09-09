@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779719,
+  "card_id": "oracle-l5r-10162",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10162-printing-1-image-1",
+  "image_index": 1,
+  "name": "Out of My Sight!",
+  "numbers": [
+    "136"
+  ],
+  "oracle_id": 10162,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10162-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:13.173782+00:00",
+  "sha256": "2ec4fe34cc7d28f568fcc7b5799bd3082d85a3711ace469b12863276bb5cc58b",
+  "source_image_hash": "59/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/59/24/printing_10162_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/59/24/printing_10162_1_",
+  "width": 750
+}

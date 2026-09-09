@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779251,
+  "card_id": "oracle-l5r-10157",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10157-printing-1-image-1",
+  "image_index": 1,
+  "name": "Martial Manipulation",
+  "numbers": [
+    "131"
+  ],
+  "oracle_id": 10157,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10157-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:40.884425+00:00",
+  "sha256": "65ec5b92fe994463e10dc85e34c7d6c045010f85052c8f0e269861ed9a53878d",
+  "source_image_hash": "27/a8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/27/a8/printing_10157_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/27/a8/printing_10157_1_",
+  "width": 750
+}

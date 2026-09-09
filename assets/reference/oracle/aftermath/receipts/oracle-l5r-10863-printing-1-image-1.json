@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 888476,
+  "card_id": "oracle-l5r-10863",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10863-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Tsumaro",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 10863,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10863-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:45.910690+00:00",
+  "sha256": "6b634e31c2f779c65c914fdd7f37552133df7b4fe198f513504c0e00db5aaa0f",
+  "source_image_hash": "cd/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cd/24/printing_10863_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cd/24/printing_10863_1_",
+  "width": 750
+}

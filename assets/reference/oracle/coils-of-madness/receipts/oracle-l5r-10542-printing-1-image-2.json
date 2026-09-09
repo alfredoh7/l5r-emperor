@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 966673,
+  "card_id": "oracle-l5r-10542",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10542-printing-1-image-2",
+  "image_index": 2,
+  "name": "Among the Clouds",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 10542,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10542-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:45.708744+00:00",
+  "sha256": "533066c4bd37e03e1b51917f7c9b79b5cdfe2eb24cb05e8c1da7b156591794ae",
+  "source_image_hash": "3d/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/8c/printing_10542_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/8c/printing_10542_1_",
+  "width": 750
+}

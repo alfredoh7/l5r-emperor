@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748420,
+  "card_id": "oracle-l5r-10056",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10056-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Tamoko",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 10056,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10056-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:43.773364+00:00",
+  "sha256": "3dd8b0b8e3bd41caa8b89c73fe0eda24e31ec7d75e9c26fb145f08c55a9bfc8b",
+  "source_image_hash": "1a/b2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/b2/printing_10056_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/b2/printing_10056_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 244477,
+  "card_id": "oracle-l5r-9165",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9165-printing-3-image-1",
+  "image_index": 1,
+  "name": "Viper Tattoo",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 9165,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9165-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:16.078644+00:00",
+  "sha256": "4836f4a3f39441a0947c121cc742d23c1f88f757316dc70a69f4ded7316066ef",
+  "source_image_hash": "ab/6e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ab/6e/printing_9165_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ab/6e/printing_9165_3_",
+  "width": 750
+}

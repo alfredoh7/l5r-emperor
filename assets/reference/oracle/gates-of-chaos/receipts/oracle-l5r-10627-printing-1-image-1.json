@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 828375,
+  "card_id": "oracle-l5r-10627",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10627-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Tametaka",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 10627,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10627-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:13.422353+00:00",
+  "sha256": "944e83589a2f3742f9deb6e02f1382739a8efba0ff0dfcdb9436bdfe39bc2a20",
+  "source_image_hash": "7b/0a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7b/0a/printing_10627_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7b/0a/printing_10627_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 802975,
+  "card_id": "oracle-l5r-10939",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10939-printing-1-image-1",
+  "image_index": 1,
+  "name": "Find Your Center",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 10939,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10939-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:26.829148+00:00",
+  "sha256": "d282a7b087f9719ea69b181137440ac0667e282bf15dfdbe3f42b832988b4352",
+  "source_image_hash": "83/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/83/cc/printing_10939_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/83/cc/printing_10939_1_",
+  "width": 750
+}

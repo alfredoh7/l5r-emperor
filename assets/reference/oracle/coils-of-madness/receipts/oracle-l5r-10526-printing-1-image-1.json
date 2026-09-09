@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 977533,
+  "card_id": "oracle-l5r-10526",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10526-printing-1-image-1",
+  "image_index": 1,
+  "name": "Koan's Scroll Satchel",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 10526,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10526-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:34.332137+00:00",
+  "sha256": "e8b06494b6437698d46ad3febc367cbd71e54711e02de906be726b4ed144442f",
+  "source_image_hash": "b2/4f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/4f/printing_10526_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/4f/printing_10526_1_",
+  "width": 750
+}

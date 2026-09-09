@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 720100,
+  "card_id": "oracle-l5r-10051",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10051-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Yusugi",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 10051,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10051-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:30.188488+00:00",
+  "sha256": "212e1c12b71f3fb0a10cbf93effe92a315d19f03d947dd53906854edda027839",
+  "source_image_hash": "73/4e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/4e/printing_10051_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/4e/printing_10051_1_",
+  "width": 750
+}

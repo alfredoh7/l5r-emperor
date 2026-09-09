@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 679978,
+  "card_id": "oracle-l5r-10365",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10365-printing-1-image-1",
+  "image_index": 1,
+  "name": "Calling the Darkness",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 10365,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10365-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:00.425014+00:00",
+  "sha256": "c5ce46eafcb3316e300b502035e49b07b6eed94f3d8c8e87d7ca997752e269be",
+  "source_image_hash": "f1/e7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f1/e7/printing_10365_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f1/e7/printing_10365_1_",
+  "width": 750
+}

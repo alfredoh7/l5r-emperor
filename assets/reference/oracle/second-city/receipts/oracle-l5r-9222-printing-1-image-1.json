@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 379205,
+  "card_id": "oracle-l5r-9222",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9222-printing-1-image-1",
+  "image_index": 1,
+  "name": "War Weariness",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 9222,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9222-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:10.650027+00:00",
+  "sha256": "2f37745dc3ae66af2d8aec9b7c8d81ab16b3c6c9551748228df275348b545501",
+  "source_image_hash": "97/d0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/d0/printing_9222_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/d0/printing_9222_1_",
+  "width": 750
+}

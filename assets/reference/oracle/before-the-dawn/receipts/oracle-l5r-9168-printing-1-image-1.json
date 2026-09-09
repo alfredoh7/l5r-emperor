@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 419529,
+  "card_id": "oracle-l5r-9168",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9168-printing-1-image-1",
+  "image_index": 1,
+  "name": "Visage of the Orochi",
+  "numbers": [
+    "153"
+  ],
+  "oracle_id": 9168,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9168-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:23.867991+00:00",
+  "sha256": "09180f86d4af9ee32bb728a3ff15b025894bb4af24f579689abcf55fd67223e6",
+  "source_image_hash": "f0/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/86/printing_9168_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/86/printing_9168_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754844,
+  "card_id": "oracle-l5r-561",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-561-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Megu",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 561,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-561-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:33.752564+00:00",
+  "sha256": "17e94857d566a4a4fe25557fefa5ff35c2147748d9b50e58cdde6c129c46d46b",
+  "source_image_hash": "e1/8d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/8d/printing_561_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/8d/printing_561_1_",
+  "width": 750
+}

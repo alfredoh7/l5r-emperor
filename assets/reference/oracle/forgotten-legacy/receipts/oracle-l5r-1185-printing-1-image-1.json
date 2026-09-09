@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 273494,
+  "card_id": "oracle-l5r-1185",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1185-printing-1-image-1",
+  "image_index": 1,
+  "name": "Burning Dreams",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 1185,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1185-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:39.796750+00:00",
+  "sha256": "f4a904b48b71a91815238e69741389c2113087c45372e41071c6b6a0bb5ef619",
+  "source_image_hash": "68/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/05/printing_1185_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/05/printing_1185_1_",
+  "width": 750
+}

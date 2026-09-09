@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 845078,
+  "card_id": "oracle-l5r-10678",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10678-printing-1-image-1",
+  "image_index": 1,
+  "name": "Clay Kshatriya",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 10678,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10678-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:08.579342+00:00",
+  "sha256": "6883e987db2bbb9438011f33325a20e01899465d3f8781d367105975a4b77a1f",
+  "source_image_hash": "08/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/08/7a/printing_10678_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/08/7a/printing_10678_1_",
+  "width": 750
+}

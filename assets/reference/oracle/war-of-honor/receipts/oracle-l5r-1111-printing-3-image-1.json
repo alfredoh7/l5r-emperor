@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 235436,
+  "card_id": "oracle-l5r-1111",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1111-printing-3-image-1",
+  "image_index": 1,
+  "name": "Border Village",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 1111,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1111-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:03.792050+00:00",
+  "sha256": "7abb564e50d97e27ae0a112d1f6e160a7a6c3f5098184c1bdd12999c07d3744a",
+  "source_image_hash": "0e/17",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/17/printing_1111_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/17/printing_1111_3_",
+  "width": 750
+}

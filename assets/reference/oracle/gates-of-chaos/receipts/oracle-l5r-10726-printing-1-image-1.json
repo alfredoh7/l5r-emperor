@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774274,
+  "card_id": "oracle-l5r-10726",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10726-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nubane's Defense",
+  "numbers": [
+    "134"
+  ],
+  "oracle_id": 10726,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10726-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:26.677182+00:00",
+  "sha256": "9f98cb898ad8569da8680cfaf135ff886c66709399b68bc0a30a3cd649e13f7b",
+  "source_image_hash": "a7/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a7/84/printing_10726_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a7/84/printing_10726_1_",
+  "width": 750
+}

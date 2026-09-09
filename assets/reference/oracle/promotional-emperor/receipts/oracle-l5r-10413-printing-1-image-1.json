@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 688521,
+  "card_id": "oracle-l5r-10413",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10413-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lantern of Revelation",
+  "numbers": [
+    "157"
+  ],
+  "oracle_id": 10413,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10413-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:28:30.636661+00:00",
+  "sha256": "a86476957e0befef3607751260849d4475ffcb47e9b777ce50969325061ef700",
+  "source_image_hash": "4b/ef",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/ef/printing_10413_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/ef/printing_10413_1_",
+  "width": 750
+}

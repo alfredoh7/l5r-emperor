@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 666874,
+  "card_id": "oracle-l5r-10411",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10411-printing-1-image-1",
+  "image_index": 1,
+  "name": "Enigmatic Pendant",
+  "numbers": [
+    "155"
+  ],
+  "oracle_id": 10411,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10411-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:00.942078+00:00",
+  "sha256": "740746c25df912100d7fc8858c53ad17dd9e0972270f9bb6375c58530c69576a",
+  "source_image_hash": "3f/3a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/3a/printing_10411_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/3a/printing_10411_1_",
+  "width": 750
+}

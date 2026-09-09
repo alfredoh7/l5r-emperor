@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 371960,
+  "card_id": "oracle-l5r-5086",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5086-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Ezuno",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 5086,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-5086-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:58.634193+00:00",
+  "sha256": "4f4b9e1fd714c6a67e23984414b3549aeea4b723cd422642a3fbb5e29f488ffb",
+  "source_image_hash": "1e/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1e/63/printing_5086_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1e/63/printing_5086_1_",
+  "width": 750
+}

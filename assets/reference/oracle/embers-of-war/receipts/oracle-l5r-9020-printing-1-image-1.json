@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 699160,
+  "card_id": "oracle-l5r-9020",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9020-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unstoppable Strike",
+  "numbers": [
+    "154"
+  ],
+  "oracle_id": 9020,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9020-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:27.807648+00:00",
+  "sha256": "607168c349ed16539c02f878f038d24235f99a966f2378293390b11d22ec2274",
+  "source_image_hash": "8b/fc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8b/fc/printing_9020_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8b/fc/printing_9020_1_",
+  "width": 750
+}

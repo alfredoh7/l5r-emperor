@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754021,
+  "card_id": "oracle-l5r-10951",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10951-printing-1-image-1",
+  "image_index": 1,
+  "name": "Provoked Violence",
+  "numbers": [
+    "136"
+  ],
+  "oracle_id": 10951,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10951-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:33.098293+00:00",
+  "sha256": "795ad38d2f14e65a42b5e944a2475b64b21e766f806e58886fdf35c91f8922da",
+  "source_image_hash": "10/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/55/printing_10951_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/55/printing_10951_1_",
+  "width": 750
+}

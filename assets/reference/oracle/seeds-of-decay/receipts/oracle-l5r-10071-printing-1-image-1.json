@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774034,
+  "card_id": "oracle-l5r-10071",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10071-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Iwashi",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 10071,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10071-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:22.520783+00:00",
+  "sha256": "be83c96d39d7165f56377b94b863826ab9b12f934aea1126ad77ea3b3aa5df16",
+  "source_image_hash": "91/af",
+  "source_url": "https://images.oracleofthevoid.com/l5r/91/af/printing_10071_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/91/af/printing_10071_1_",
+  "width": 750
+}

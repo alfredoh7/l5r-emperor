@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 235552,
+  "card_id": "oracle-l5r-6634",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6634-printing-3-image-1",
+  "image_index": 1,
+  "name": "Seven Stings Keep",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 6634,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6634-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:05.730220+00:00",
+  "sha256": "5764924843211e6ac09e6ed9951d70d60246e19fd45117ed57ea03f33f21ff31",
+  "source_image_hash": "73/11",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/11/printing_6634_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/11/printing_6634_3_",
+  "width": 750
+}

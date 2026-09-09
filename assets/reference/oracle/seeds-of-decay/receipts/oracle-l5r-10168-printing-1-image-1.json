@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 811502,
+  "card_id": "oracle-l5r-10168",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10168-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shifting Terrain",
+  "numbers": [
+    "142"
+  ],
+  "oracle_id": 10168,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10168-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:30.783401+00:00",
+  "sha256": "0c665da6f183a878af0cd680f167b7b136833f26575343a0d3bebb9f2334952e",
+  "source_image_hash": "30/56",
+  "source_url": "https://images.oracleofthevoid.com/l5r/30/56/printing_10168_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/30/56/printing_10168_1_",
+  "width": 750
+}

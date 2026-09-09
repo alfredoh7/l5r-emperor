@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748766,
+  "card_id": "oracle-l5r-10366",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10366-printing-1-image-1",
+  "image_index": 1,
+  "name": "Charge Into Danger",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 10366,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10366-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:02.788704+00:00",
+  "sha256": "fbd44c574d6cf5ae13fdc03cfa577102aa0b2c8fe5e2d366af6ffa0c448409e3",
+  "source_image_hash": "e2/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/63/printing_10366_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/63/printing_10366_1_",
+  "width": 750
+}

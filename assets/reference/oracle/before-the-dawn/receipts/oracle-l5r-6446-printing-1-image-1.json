@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409771,
+  "card_id": "oracle-l5r-6446",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6446-printing-1-image-1",
+  "image_index": 1,
+  "name": "Saibankan's Justice",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 6446,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6446-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:30.526413+00:00",
+  "sha256": "6976c44c20f5913f9a9fa3cf511f2bba32779687d673911374476f7353b5dbf1",
+  "source_image_hash": "c7/95",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c7/95/printing_6446_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c7/95/printing_6446_1_",
+  "width": 750
+}

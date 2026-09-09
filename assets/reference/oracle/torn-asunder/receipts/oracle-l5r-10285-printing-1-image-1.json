@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 687788,
+  "card_id": "oracle-l5r-10285",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10285-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Kyoshiro",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 10285,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10285-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:14.561773+00:00",
+  "sha256": "4fb5e1562d74b8b9cf4e9c39ac80853e755bfb16eff19279f7b001dbc42ab1d2",
+  "source_image_hash": "a9/ea",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/ea/printing_10285_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/ea/printing_10285_1_",
+  "width": 750
+}

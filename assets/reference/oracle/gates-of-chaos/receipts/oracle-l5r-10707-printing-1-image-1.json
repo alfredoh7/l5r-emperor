@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799463,
+  "card_id": "oracle-l5r-10707",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10707-printing-1-image-1",
+  "image_index": 1,
+  "name": "Gates of Chikushudo",
+  "numbers": [
+    "102"
+  ],
+  "oracle_id": 10707,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10707-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:31.883618+00:00",
+  "sha256": "287761f81c1effff274faaf47e1c7a2348b9b77f1f91d279b6f5465439f69280",
+  "source_image_hash": "52/89",
+  "source_url": "https://images.oracleofthevoid.com/l5r/52/89/printing_10707_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/52/89/printing_10707_1_",
+  "width": 750
+}

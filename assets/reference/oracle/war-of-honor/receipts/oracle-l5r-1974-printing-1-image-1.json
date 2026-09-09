@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 242963,
+  "card_id": "oracle-l5r-1974",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1974-printing-1-image-1",
+  "image_index": 1,
+  "name": "Desperate Mediation",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 1974,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1974-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:15.792181+00:00",
+  "sha256": "05ad5d7741a3b79e3c6f6b90f09cc74d1efe00660b246e903943d69382599d36",
+  "source_image_hash": "cf/36",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/36/printing_1974_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/36/printing_1974_1_",
+  "width": 750
+}

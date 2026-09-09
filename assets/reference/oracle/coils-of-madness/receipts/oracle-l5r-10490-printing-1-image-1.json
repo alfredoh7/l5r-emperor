@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 994363,
+  "card_id": "oracle-l5r-10490",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10490-printing-1-image-1",
+  "image_index": 1,
+  "name": "Toku Saiga, the Metal Storm",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 10490,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10490-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:17.386095+00:00",
+  "sha256": "45afdb5693e9b7b373196795839ce4200b26ba9f75514abf97a1991e55f4edc3",
+  "source_image_hash": "48/3d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/48/3d/printing_10490_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/48/3d/printing_10490_1_",
+  "width": 750
+}

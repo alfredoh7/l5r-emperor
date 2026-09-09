@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 451904,
+  "card_id": "oracle-l5r-9713",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9713-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fledgling Ashigaru",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 9713,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9713-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:32.815869+00:00",
+  "sha256": "22ff2eb2d68c22e6865b4cafec02ea2be2976ea712d6adecc325f5a2a563451e",
+  "source_image_hash": "f2/e0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f2/e0/printing_9713_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f2/e0/printing_9713_1_",
+  "width": 750
+}

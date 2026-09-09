@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 453425,
+  "card_id": "oracle-l5r-1164",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1164-printing-1-image-1",
+  "image_index": 1,
+  "name": "Brothers in Battle",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 1164,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1164-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:04.969956+00:00",
+  "sha256": "eb960766f910adbea5f3f5dfeac0cf93504e7edcf98fc8d9b8a7252ea94a0a02",
+  "source_image_hash": "0e/26",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/26/printing_1164_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/26/printing_1164_1_",
+  "width": 750
+}

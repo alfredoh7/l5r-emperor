@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 397033,
+  "card_id": "oracle-l5r-232",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-232-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Kobi",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 232,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-232-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:47.759649+00:00",
+  "sha256": "7bdb4ff73feba3522d2dc1e2d776aeb57ff9885d7166bb9e39d2f62638d80392",
+  "source_image_hash": "e8/3a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e8/3a/printing_232_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e8/3a/printing_232_1_",
+  "width": 750
+}

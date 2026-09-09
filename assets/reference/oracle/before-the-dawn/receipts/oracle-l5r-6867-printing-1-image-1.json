@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403206,
+  "card_id": "oracle-l5r-6867",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6867-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Dak-ho",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 6867,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6867-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:39.574057+00:00",
+  "sha256": "0cd7b6e0673ae02dc8a52b3702af19cecc5cd588e9dd65e2cf78a8022fc5a66d",
+  "source_image_hash": "cd/78",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cd/78/printing_6867_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cd/78/printing_6867_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401885,
+  "card_id": "oracle-l5r-8896",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8896-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Yashiro",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 8896,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8896-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:18.482493+00:00",
+  "sha256": "3a6b8b8df946f332af91307466ca3aa3494f93bb7d37165d503bd6552c4f2984",
+  "source_image_hash": "95/62",
+  "source_url": "https://images.oracleofthevoid.com/l5r/95/62/printing_8896_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/95/62/printing_8896_1_",
+  "width": 750
+}

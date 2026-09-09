@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 703364,
+  "card_id": "oracle-l5r-10106",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10106-printing-1-image-1",
+  "image_index": 1,
+  "name": "Horseback Warriors",
+  "numbers": [
+    "80"
+  ],
+  "oracle_id": 10106,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10106-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:17.093638+00:00",
+  "sha256": "585255694d3c9040b33f672cdd4afc5f5e0aed6fc55589988654e94fae4f0344",
+  "source_image_hash": "ad/1d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ad/1d/printing_10106_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ad/1d/printing_10106_1_",
+  "width": 750
+}

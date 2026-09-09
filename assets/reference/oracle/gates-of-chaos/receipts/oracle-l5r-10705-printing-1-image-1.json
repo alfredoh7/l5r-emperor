@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799625,
+  "card_id": "oracle-l5r-10705",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10705-printing-1-image-1",
+  "image_index": 1,
+  "name": "My Ancestor's Steed",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 10705,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10705-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:23.125700+00:00",
+  "sha256": "604e128494ef5148b731acbf3935618971f137cc929f20b75798039d495851a4",
+  "source_image_hash": "1c/9c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1c/9c/printing_10705_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1c/9c/printing_10705_1_",
+  "width": 750
+}

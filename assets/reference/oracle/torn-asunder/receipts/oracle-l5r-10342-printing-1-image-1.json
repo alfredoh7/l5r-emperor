@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 721902,
+  "card_id": "oracle-l5r-10342",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10342-printing-1-image-1",
+  "image_index": 1,
+  "name": "Paneki's Mask",
+  "numbers": [
+    "86"
+  ],
+  "oracle_id": 10342,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10342-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:31.098730+00:00",
+  "sha256": "f4ce7bc3a8eb8c3a366c76a915fc5fe37a0eddbcb2f98ed8ef16fe67bf9afe68",
+  "source_image_hash": "51/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/45/printing_10342_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/45/printing_10342_1_",
+  "width": 750
+}

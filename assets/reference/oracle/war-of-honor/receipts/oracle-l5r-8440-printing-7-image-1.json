@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 251547,
+  "card_id": "oracle-l5r-8440",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8440-printing-7-image-1",
+  "image_index": 1,
+  "name": "The Wrath of Osano-Wo",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 8440,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8440-printing-7-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "7",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:03.096816+00:00",
+  "sha256": "45f3165829d38b67ffd72e7d551acba81a6589f8819ac523f7ce811954c98072",
+  "source_image_hash": "97/cf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/cf/printing_8440_7_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/cf/printing_8440_7_",
+  "width": 750
+}

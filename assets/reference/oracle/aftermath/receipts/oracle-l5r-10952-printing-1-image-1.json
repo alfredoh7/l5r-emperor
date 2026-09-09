@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 783101,
+  "card_id": "oracle-l5r-10952",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10952-printing-1-image-1",
+  "image_index": 1,
+  "name": "Respect",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 10952,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10952-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:35.509094+00:00",
+  "sha256": "63b8cb6b549285863cadd61db3ceaee85b10bba2c83a2833add63aaec86d8602",
+  "source_image_hash": "33/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/33/23/printing_10952_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/33/23/printing_10952_1_",
+  "width": 750
+}

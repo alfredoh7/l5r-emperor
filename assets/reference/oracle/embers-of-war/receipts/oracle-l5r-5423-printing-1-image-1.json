@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 816655,
+  "card_id": "oracle-l5r-5423",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5423-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moving and Unmoving",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 5423,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5423-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:04.858023+00:00",
+  "sha256": "d612e1f6aa673130bc93daa4f0e155c22ebe6150884d7b6d246070d2144a35d6",
+  "source_image_hash": "d8/13",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d8/13/printing_5423_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/13/printing_5423_1_",
+  "width": 750
+}

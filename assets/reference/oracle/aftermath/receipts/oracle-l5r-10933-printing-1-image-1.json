@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 824529,
+  "card_id": "oracle-l5r-10933",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10933-printing-1-image-1",
+  "image_index": 1,
+  "name": "Demonstrating Technique",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 10933,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10933-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:13.544829+00:00",
+  "sha256": "7341df816e2607a8b87f4d3bda32eee1e8fee157d6f7b1126f58541aab932c93",
+  "source_image_hash": "cd/18",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cd/18/printing_10933_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cd/18/printing_10933_1_",
+  "width": 750
+}

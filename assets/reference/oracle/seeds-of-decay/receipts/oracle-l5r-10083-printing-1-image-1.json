@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 793483,
+  "card_id": "oracle-l5r-10083",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10083-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yogo Heijin",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 10083,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10083-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:18.979199+00:00",
+  "sha256": "188ff957c01e1ed2ab9f987093b39242d192a3749138389fced699be4f454745",
+  "source_image_hash": "d3/04",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d3/04/printing_10083_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d3/04/printing_10083_1_",
+  "width": 750
+}

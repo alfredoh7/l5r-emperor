@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 712061,
+  "card_id": "oracle-l5r-9846",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9846-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Nobu",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 9846,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9846-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:13.992395+00:00",
+  "sha256": "13329fe26bdc1223798477ea2087b1fc97fd75c5f8f009c0df22f3415f31ae56",
+  "source_image_hash": "f9/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/ec/printing_9846_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/ec/printing_9846_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 675648,
+  "card_id": "oracle-l5r-10214",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10214-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Daidoji Marketplace",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10214,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10214-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:23.095247+00:00",
+  "sha256": "28b008bc45a30fd15c11f7623457ab3bd2fc5cf4d4a49299dc770791fe026a6f",
+  "source_image_hash": "03/3d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/3d/printing_10214_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/3d/printing_10214_1_",
+  "width": 750
+}

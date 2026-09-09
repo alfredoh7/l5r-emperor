@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 770380,
+  "card_id": "oracle-l5r-10947",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10947-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mercantile Conflict",
+  "numbers": [
+    "132"
+  ],
+  "oracle_id": 10947,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10947-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:16.952534+00:00",
+  "sha256": "2115024288fe179638a617e942950797ff8c53aada8ef502c3223ed52c5ed84d",
+  "source_image_hash": "10/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/b9/printing_10947_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/b9/printing_10947_1_",
+  "width": 750
+}

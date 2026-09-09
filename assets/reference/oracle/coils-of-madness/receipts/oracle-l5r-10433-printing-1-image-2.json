@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1008781,
+  "card_id": "oracle-l5r-10433",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10433-printing-1-image-2",
+  "image_index": 2,
+  "name": "Colonial Temple",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 10433,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10433-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:14.656945+00:00",
+  "sha256": "5528949ff7266889f76b9b7ac4f1a42f063968dcaed222366502119e39dddad3",
+  "source_image_hash": "f4/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f4/80/printing_10433_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f4/80/printing_10433_1_",
+  "width": 750
+}
