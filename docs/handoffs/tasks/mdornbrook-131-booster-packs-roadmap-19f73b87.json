@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Adds 'Open Booster Packs minigame, launchable from the main menu' to docs/ROADMAP.md's Open visual/UI feature requests table, per explicit request. Filed issue #131 to track it; scope (art, pack contents/odds, persistence, ties to the wider card catalogue) is not yet defined -- this is a roadmap entry, not an implementation.",
+  "validation": "Docs-only change; no code touched, no build/test impact.",
+  "remaining": "Implementation not started; scope needs definition before work begins.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/131",
+  "branch": "mdornbrook/131-booster-packs-roadmap",
+  "updated": "2026-09-09T19:02:26.213244+00:00"
+}
