@@ -173,6 +173,24 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 5 of ability-bearing Personalities: import wave (issue #111) -- Cavalry, Conqueror
+    /// and Tactician-adjacent cards needing only small extensions of already-proven patterns.</summary>
+    public static PublishedSnapshot PersonalityWave5 { get; } = LoadPersonalityWave5();
+
+    private static PublishedSnapshot LoadPersonalityWave5()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave5.json", "personality-wave-5", requireDecks: false);
+        if(snapshot.Cards.Length != 7)
+            throw new InvalidOperationException("Unexpected personality-wave-5 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-5 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-5 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

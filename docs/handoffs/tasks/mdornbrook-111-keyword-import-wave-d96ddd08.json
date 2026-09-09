@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import wave: 7 cards carrying Cavalry, Conqueror, or Tactician found while searching all 228 not-yet-imported cards with those keywords (plus Kensai). Daigotsu Kendo (pure Conqueror reminder text), Ikoma Natsu (Cavalry + an inert control-transfer restriction), Mirumoto Reiyu (Force penalty = her own current Force, reuses enemy-force), Shinjo Horibe and Doji Atsumichi (bow-or-straighten, same shape as paid-bow/paid-straighten, gated on opposed/lower-Honor-than-self), Tetsuo (destroy an attachment plus destroy an enemy with fewer Weapons than himself), Moto Shunsuke (new force-max-dead-pile Effect plus MakeDead with an owner restriction). Only 30 of 228 candidates had downloaded scans; 2 more (Nishimura, Utaku Elite Guard) were judged achievable but deferred as riskier, the other 21 are genuinely blocked on real gaps (documented per-card in docs/ROADMAP.md). Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 85/85 core tests (6 new, covering all 7 cards), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "21 of the 30 scan-available candidates remain genuinely blocked on unbuilt mechanisms (documented per-card); 2 more (Nishimura, Utaku Elite Guard) are achievable but deferred pending further design confidence; the other ~200 candidates from the full 228-card search have no downloaded reference scan.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/111",
+  "branch": "mdornbrook/111-keyword-import-wave",
+  "updated": "2026-09-09T14:48:35.558498+00:00"
+}

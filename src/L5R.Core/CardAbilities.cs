@@ -81,6 +81,21 @@ public static class AbilityCatalog
         // Battle-timing by default; a card that grants an Action-segment variant would need its own
         // catalog entry reusing the same UseAbility case, not a change to this one.
         ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle"),
+        // Import wave (issue #111): Cavalry/Conqueror/Tactician-adjacent cards needing only small,
+        // already-precedented extensions of existing target categories and primitives.
+        ["reiyu-force-penalty"] = new("Battle", "Target enemy Force/Follower · Force penalty = Reiyu's Force", "enemy-force"),
+        // "If opposed" is a per-ability presence Require (ValidateAbility), same shape as
+        // torazu-fire-attack's own Fire-token Require. Bow/straighten are two alternate abilities,
+        // matching the existing paid-bow/paid-straighten split, targeting any Personality.
+        ["horibe-bow"] = new("Battle", "If opposed · bow a target Personality", "personality"),
+        ["horibe-straighten"] = new("Battle", "If opposed · straighten a target Personality", "personality"),
+        ["atsumichi-bow"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · bow him", "personality-lower-honor-than-self"),
+        ["atsumichi-straighten"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · straighten him", "personality-lower-honor-than-self"),
+        ["tetsuo-destroy-attachment"] = new("Battle", "Target an attachment · destroy it", "attachment"),
+        ["tetsuo-destroy-weaker-weaponed"] = new("Battle", "Target an enemy Personality with fewer Weapons · destroy it", "enemy-personality-fewer-weapons-than-self"),
+        // "Target another player's discarded Personality" is an owner restriction on the existing
+        // discarded-personality category, checked inline where that category is validated.
+        ["shunsuke-make-dead"] = new("Limited", "Target another player's discarded Personality · he becomes honorably dead", "discarded-personality"),
     });
 }
 
@@ -258,6 +273,8 @@ public sealed partial class MatchEngine
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
+        if (id is "horibe-bow" or "horibe-straighten")
+            Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -322,6 +339,7 @@ public sealed partial class MatchEngine
                 var target = Card(command.TargetId);
                 Require(Definition(target).Type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.FateDiscard,
                     "Target a discarded Personality.");
+                if (id == "shunsuke-make-dead") Require(target.OwnerId != player.Id, "Target another player's discarded Personality.");
             }
             else
             {
@@ -353,6 +371,9 @@ public sealed partial class MatchEngine
                         "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
+                        "personality-lower-honor-than-self" => personality && Definition(target).PersonalHonor < Definition(source!).PersonalHonor,
+                        "enemy-personality-fewer-weapons-than-self" => personality && !own &&
+                            Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -451,6 +472,14 @@ public sealed partial class MatchEngine
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
                 DiscardFate(player, target!);
                 break;
+            case "reiyu-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(source)); break;
+            case "horibe-bow": target!.Bowed = true; break;
+            case "horibe-straighten": Straighten(target!); break;
+            case "atsumichi-bow": target!.Bowed = true; break;
+            case "atsumichi-straighten": Straighten(target!); break;
+            case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
+            case "tetsuo-destroy-weaker-weaponed": DestroyUnits([target!], true); break;
+            case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
             case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
