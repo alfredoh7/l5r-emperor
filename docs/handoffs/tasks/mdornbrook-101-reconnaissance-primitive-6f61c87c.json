@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Build the Reconnaissance primitive: a per-player, per-province boolean (ProvinceState.Reconnaissance), HasReconnaissance/GrantReconnaissance, and an enemy-province targeting shape keyed by index rather than a card id. It resets to No for both players once the battle at that province resolves (ResolveBattle, regardless of outcome), and also clears when the province's card is replaced (Refill) or the province is destroyed (DestroyProvince). Training fixture (training-scout) exercises granting and a Reconnaissance-gated Battle effect ahead of any real card needing it. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
-  "validation": "bash tools/check.sh --skip-client: 74/74 core tests (2 new: Reconnaissance, ReconnaissanceClearsOnProvinceChange, the latter now also covering the battle-resolution reset on both a surviving and a destroyed province), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "summary": "Build the Reconnaissance primitive: a per-player, per-province boolean (ProvinceState.Reconnaissance), HasReconnaissance/GrantReconnaissance, and an enemy-province targeting shape keyed by index rather than a card id. It clears only when the battle at that province resolves (ResolveBattle, regardless of outcome) -- a province refilling with a new card or being destroyed does not clear it on its own. Training fixture (training-scout) exercises granting and a Reconnaissance-gated Battle effect ahead of any real card needing it. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 74/74 core tests (2 new: Reconnaissance, ReconnaissanceOnlyClearsOnBattleResolution), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
   "remaining": "No published card exercises it yet; no UI surfacing; AbilityActions()'s generic action-discovery query does not yet enumerate province-index targets (only matters once a real card needs it).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/101",
   "branch": "mdornbrook/101-reconnaissance-primitive",
-  "updated": "2026-09-09T13:17:08.593694+00:00"
+  "updated": "2026-09-09T13:22:01.912535+00:00"
 }

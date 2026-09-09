@@ -56,10 +56,8 @@ public sealed class ProvinceState
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
-    // by player id, defaulted to false. No ability removes it directly, but it resets to false for
-    // both players once a battle at this province resolves (ResolveBattle), and also clears when the
-    // province's card is replaced (Refill) or the province itself is destroyed (DestroyProvince),
-    // since it represents knowledge of a specific face-down card that is no longer there.
+    // by player id, defaulted to false. No ability removes it directly; it resets to false for both
+    // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
     public bool[] Reconnaissance { get; set; } = new bool[2];
 }
 

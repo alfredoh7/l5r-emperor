@@ -93,7 +93,7 @@ public sealed partial class MatchEngine
     // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
-    // Resets to false when the battle there resolves (see ResolveBattle), not just on replace/destroy.
+    // Resets to false only when the battle there resolves (see ResolveBattle).
     private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
     private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
     {

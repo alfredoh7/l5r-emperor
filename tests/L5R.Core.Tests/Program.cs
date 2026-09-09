@@ -76,7 +76,7 @@ var tests = new (string Name, Action Run)[]
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
     ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
     ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
-    ("Reconnaissance is cleared when its province's card is replaced, when its battle resolves (destroyed or not), or the province is destroyed outright", ReconnaissanceClearsOnProvinceChange)
+    ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution)
 };
 var failed=0;
 foreach(var test in tests)
@@ -987,8 +987,10 @@ static void Reconnaissance()
     Accept(en,new GameCommand("useAbility",0,en.Version,CardId:scoutNoRecon.Id,TargetId:withoutRecon.Id,AbilityId:"training-reconnaissance-strike"));
     Equal(en.State.Players[1].Honor,honorBefore2,"No Reconnaissance in this province: the action succeeds but its gated portion does nothing");
 }
-static void ReconnaissanceClearsOnProvinceChange()
+static void ReconnaissanceOnlyClearsOnBattleResolution()
 {
+    // Refilling a province with a new, unseen card does NOT clear Reconnaissance on its own --
+    // resolving a battle there is the only thing that does.
     var s=MatchEngine.CreateEconomyScenario().State;
     s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
     var scout=Add(s,"training-scout",1,Zone.Home);
@@ -999,7 +1001,7 @@ static void ReconnaissanceClearsOnProvinceChange()
     var dynasty=e.State; dynasty.Phase=Phase.Dynasty; dynasty.PriorityPlayerId=0; dynasty.ActivePlayerId=0;
     e=MatchEngine.FromTestState(dynasty);
     Accept(e,Cmd(e,"purchase",id:id,sources:e.QuotePurchase(0,id).Payments[0].SourceIds));
-    Check(!e.State.Players[0].Provinces[2].Reconnaissance[1],"Cleared once the province refills with a new, unseen card");
+    Check(e.State.Players[0].Provinces[2].Reconnaissance[1],"Still granted after the province refills -- only a battle resolving there clears it");
 
     // A tied battle resolves without destroying the province -- Reconnaissance still resets to No.
     var e2=Battle(3,3);
@@ -1008,12 +1010,12 @@ static void ReconnaissanceClearsOnProvinceChange()
     Check(!e2.State.Players[1].Provinces[0].Destroyed,"Sanity: a tied battle does not destroy the province");
     Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance resets to No once the battle resolves, whether or not the province survives");
 
-    // Destroying a province also clears it (same precedent values as ProvinceThreshold).
+    // Destroying a province via battle also clears it (same precedent values as ProvinceThreshold).
     var e3=Battle(9,2,6);
     e3.State.Players[1].Provinces[0].Reconnaissance[0]=true;
     Resolve(e3);
     Check(e3.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
-    Check(!e3.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province is destroyed");
+    Check(!e3.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province's battle resolves, including when destroyed");
 }
 static void CarpenterCastleAttack()
 {
