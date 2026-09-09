@@ -92,6 +92,7 @@ public partial class PhaseTrack : Control
         var next = SegmentFor(view.Phase);
         if (_active < 0 && next >= 0) _weights[next] = 1;
         _active = next;
+        HelpButton.Disabled = next < 0;
         _turnContext=$"Turn {view.TurnNumber} · {view.Players.Single(p=>p.Id==view.ActivePlayerId).Clan}";
         if(_areas.Count==0)
         for (var i = 0; i < _names.Length; i++)

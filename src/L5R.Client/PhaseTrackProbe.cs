@@ -73,7 +73,7 @@ public partial class PhaseTrackProbe : Control
                 RenderingServer.ForceDraw();if(!_still!.SequenceEqual(GetViewport().GetTexture().GetImage().GetData()))throw new Exception("Reduced motion changed pixels");
                 _track.Present(_view with{Phase=Phase.Finished});_stage++;return;
             }
-            if(_track.ActiveSegment!=-1)throw new Exception("Finished match highlights a playable phase");
+            if(_track.ActiveSegment!=-1||!_track.HelpButton.Disabled)throw new Exception("Finished match highlights a playable phase");
             GD.Print("SIX_PHASE_PASS: all enum mappings, six native states, hover Events help, keyboard arrows/Escape, no Pass dispatch, viewport fit, pixel-stable reduced motion, Finished unlit.");GetTree().Quit();
         }
         catch(Exception e){GD.PushError(e.ToString());Save("failure");GetTree().Quit(1);}
