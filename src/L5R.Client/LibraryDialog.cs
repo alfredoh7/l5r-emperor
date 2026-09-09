@@ -188,8 +188,7 @@ public partial class CatalogueScreen : Control
         {
             _advanced=new PopupPanel {Theme=Theme};AddChild(_advanced);var box=new VBoxContainer();box.AddThemeConstantOverride("separation",14);_advanced.AddChild(box);
             box.AddChild(CatalogueArt.Label("More filters",22,true));box.AddChild(CatalogueArt.Label("Printing set",17));_set.CustomMinimumSize=new Vector2(330,42);_set.Reparent(box);_set.Visible=true;
-            box.AddChild(CatalogueArt.Label("Scans download on demand.\nLoaded scans remain available offline.",16));
-            var offline=new CheckBox {Text="Use cached scans only",ButtonPressed=Scans.Offline};offline.Toggled+=v=>{Scans.Offline=v;Scans.Retry();};box.AddChild(offline);
+            box.AddChild(CatalogueArt.Label("All catalogue artwork is installed locally.\nNo connection is needed to browse.",16));
             box.AddChild(CatalogueArt.Button("Imported decks & source archive",()=>{_advanced.Hide();LegacyLibraryDialog.Show(this);}));
             box.AddChild(CatalogueArt.Button("Done",()=>_advanced.Hide()));
         }
