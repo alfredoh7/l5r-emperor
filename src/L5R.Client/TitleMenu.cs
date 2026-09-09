@@ -5,7 +5,7 @@ namespace L5R.Client;
 public partial class TitleMenu : Control
 {
     public Action<int> StartMatch = _ => { };
-    public Action PrivateMatch = () => { }, Library = () => { }, Resume = () => { }, PreferencesChanged = () => { };
+    public Action PrivateMatch = () => { }, Library = () => { }, DeckBuilder = () => { }, Resume = () => { }, PreferencesChanged = () => { };
     public Func<bool> CanResume = () => false;
     public Func<bool> IsOnline = () => false;
     public MenuPreferences Preferences = null!;
@@ -64,11 +64,14 @@ public partial class TitleMenu : Control
     public void ShowMain()
     {
         Clear("main");
+        Entries.AddThemeConstantOverride("separation", 4);
         Entry("Play", ShowPlay);
         Entry("Private Match", PrivateMatch);
         Entry("Card Library", Library);
+        Entry("Deck Builder", DeckBuilder);
         Entry("Options", ShowOptions);
         Entry("Quit", ShowQuit);
+        foreach(var button in Entries.GetChildren().OfType<Button>()){button.CustomMinimumSize=new Vector2(0,72);button.AddThemeFontSizeOverride("font_size",66);}
         if (CanResume()) _message.Text = IsOnline() ? "Your private table continues online. Play → Return to table." : "Your practice is paused. Play → Return to table.";
         FocusFirst();
     }

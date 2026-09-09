@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved visual deck builder with setup categories, local plain-text drafts, mat/list density, filters and comparison; retain catalogue/WebP dependency PR124.",
+  "validation": "Full tools/check.sh --skip-client passed. Client builds with zero warnings/errors. Native Mac check-deck-builder.sh passed setup replacement, input, comparison, corrupted import, exact save/load, unsaved cancel, external overwrite cancel/confirm, 1280/1672/1920 layouts and real menu entry. Source-to-game captures reviewed and committed under docs/screenshots/deck-builder.",
+  "remaining": "Ready for Alfredo visual review and mdornbrook review of basic draft checks. PR124 dependency remains open. CI pending final push; no native Windows graphical test. Custom draft match launching stays in issue29.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/25",
+  "branch": "codex/25-deck-builder",
+  "updated": "2026-09-09T20:27:36.705464+00:00"
+}
