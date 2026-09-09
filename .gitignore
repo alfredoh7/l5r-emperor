@@ -1,6 +1,6 @@
 .DS_Store
-.tools/
-.cache/
+.tools
+.cache
 **/bin/
 **/obj/
 **/.godot/

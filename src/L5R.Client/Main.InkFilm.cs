@@ -76,10 +76,13 @@ public partial class Main
                 holdingsBounds = new { x = current.Position.X, y = current.Position.Y, width = current.Size.X, height = current.Size.Y },
                 animating = _matSections.IsAnimating, reveal, cardsMoving = moving
             });
-            // Capture after Godot has laid out and painted newly rebuilt native
-            // controls. Forcing a draw inside Main._Process can save a blank
-            // intermediate frame before the new card controls receive their draw.
-            await ToSignal(RenderingServer.Singleton, RenderingServer.SignalName.FramePostDraw);
+            // Allow deferred native layout before drawing. macOS may stop emitting
+            // FramePostDraw when the recording window becomes occluded; explicit
+            // drawing after two process frames keeps capture reliable without
+            // recording the half-built controls immediately inside Render().
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+            RenderingServer.ForceDraw(false); RenderingServer.ForceSync();
             var folder = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(_capturePath!)!, "ink-purchase-frames");
             System.IO.Directory.CreateDirectory(folder);
             using var frame = GetViewport().GetTexture().GetImage();

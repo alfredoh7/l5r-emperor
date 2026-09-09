@@ -310,6 +310,7 @@ public sealed partial class MatchEngine
     }
     private void PassReaction()
     {
+        Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
         _state.ConsecutivePasses++;
         if(_state.ConsecutivePasses==2)
         {
@@ -323,6 +324,7 @@ public sealed partial class MatchEngine
 
     private void Pass()
     {
+        Emit("passed", $"{Player(_state.PriorityPlayerId).Name} passed.", _state.PriorityPlayerId);
         switch(_state.Phase)
         {
             case Phase.Action:

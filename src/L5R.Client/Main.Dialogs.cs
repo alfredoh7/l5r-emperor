@@ -160,7 +160,21 @@ public partial class Main
         var (_, body) = Dialog("Match history", 760, 620);
         var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(720, 540), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; body.AddChild(scroll);
         var rows = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; scroll.AddChild(rows);
-        foreach (var e in View.Events.Reverse()) rows.AddChild(Palette.Wrapped($"{e.Sequence:000}   {e.Message}", 15, Palette.PaperDim));
+        var events = (_session.Snapshot?.View.Events ?? View.Events).ToArray();
+        for (var i = events.Length - 1; i >= 0;)
+        {
+            var end = i;
+            var battle = Array.FindLastIndex(events, i, i + 1, e => e.Type == "battleResolved");
+            if (battle >= 0 && !events.Skip(battle + 1).Take(i - battle).Any(e => e.Type == "battleResolved" || e.Type == "phaseChanged"))
+            {
+                var details = new VBoxContainer { Visible = false }; var excerpt = events[battle..(end + 1)];
+                var caption = excerpt.FirstOrDefault(e => e.Type == "provinceDestroyed")?.Message ?? events[battle].Message;
+                rows.AddChild(Palette.Button(caption + " · Details", () => details.Visible = !details.Visible));
+                foreach (var e in excerpt) details.AddChild(Palette.Wrapped(e.Message, 15, Palette.PaperDim));
+                rows.AddChild(details); i = battle - 1;
+            }
+            else { rows.AddChild(Palette.Wrapped($"{events[i].Sequence:000}   {events[i].Message}", 15, Palette.PaperDim)); i--; }
+        }
     }
 
     private void ShowCoverage()
