@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Approved deck builder workflow implemented; revised the rejected flat UI with image-generated lacquer/brass control materials, framed panels/cards, selected states, setup thumbnails and coherent dialogs. Main-menu font fitting preserves six entries with prior WeatheredQuill UI.",
-  "validation": "Core/content/AI/server/transport checks passed, including 8 draft regressions. Revised client compiled with zero warnings/errors. Native Mac deck-builder probe passed setup replacement, keyboard/mouse editing, comparison, corrupt import, exact save/load, unsaved and external overwrite cancel/confirm, dropdown capture, viewport density and six-entry real menu. Native screenshots reviewed against approved sources; combined-preview verification in progress. Combined preview native checks passed with previous battle/UI branches retained; deterministic combined-preview checks passed. Compact save-copy/export menu verified; corrected unsupported ellipsis with an SVG icon.",
-  "remaining": "Awaiting Alfredo visual acceptance of the material pass and mdornbrook shared rules review. PR134 remains draft; final CI pending push. Catalogue dependency PR124 remains open. Custom match launch is issue29; native Windows graphical acceptance not performed.",
+  "summary": "Implemented approved bonsai My Decks landing with live actions and original card backs, doubled collection sidebar with large artwork thumbnails, and B comparison mat with readable parchment rules and native responsive scaling.",
+  "validation": "Client compiled with zero warnings/errors; native Mac deck-builder probe passed setup, quantities, two/three-card comparison, long rules scrolling, save/load and error/overwrite/unsaved handling, 1280/1672/1920 layouts and actual main-menu entry. Native screenshots compared against committed approved sources.",
+  "remaining": "Combined playable preview update and final CI pending. PR134 shared review from mdornbrook and dependency PR124 remain open. Native Windows graphical acceptance not performed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/25",
   "branch": "codex/25-deck-builder",
-  "updated": "2026-09-09T20:50:49.166112+00:00"
+  "updated": "2026-09-09T22:13:15.866458+00:00"
 }

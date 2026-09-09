@@ -43,7 +43,13 @@ public partial class DeckThumbnail : Control
     {
         DrawRect(new Rect2(Vector2.Zero,Size),new Color("171b1d"));
         var tex=_scans.Get(_card.Printings.FirstOrDefault());
-        if(tex is not null)DrawTextureRectRegion(tex,new Rect2(1,1,Size.X-2,Size.Y-2),new Rect2(tex.GetWidth()*.1f,tex.GetHeight()*.16f,tex.GetWidth()*.8f,tex.GetHeight()*.52f));
+        if(tex is not null)
+        {
+            var crop=new Rect2(tex.GetWidth()*.1f,tex.GetHeight()*.15f,tex.GetWidth()*.8f,tex.GetHeight()*.43f);
+            var ratio=(Size.X-2)/(Size.Y-2);var fitted=crop.Size;
+            if(fitted.X/fitted.Y>ratio)fitted.X=fitted.Y*ratio;else fitted.Y=fitted.X/ratio;
+            DrawTextureRectRegion(tex,new Rect2(1,1,Size.X-2,Size.Y-2),new Rect2(crop.Position+(crop.Size-fitted)/2,fitted));
+        }
         DrawRect(new Rect2(Vector2.Zero,Size),new Color("8a7045"),false,1);
     }
 }
@@ -57,7 +63,7 @@ public partial class DeckSurface : ScrollContainer
     private readonly Dictionary<int,Control> _visible=[];
     public CatalogueData.Card[] Cards=[];
     public bool Rows, Setup;
-    public float CardWidth=176;
+    public float CardWidth=196,RowHeight=60;
     public string Group="Type";
     public Func<CatalogueData.Card,Control> MakeCard=null!;
     public int VisibleCount=>_visible.Count;
@@ -75,7 +81,7 @@ public partial class DeckSurface : ScrollContainer
         float y=4,w=Size.X-18;
         if(Rows)
         {
-            foreach(var card in Cards){_entries.Add(new(card,"",new Rect2(2,y,w-4,58)));y+=60;}
+            foreach(var card in Cards){_entries.Add(new(card,"",new Rect2(2,y,w-4,RowHeight-2)));y+=RowHeight;}
         }
         else
         {

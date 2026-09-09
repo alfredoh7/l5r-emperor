@@ -14,6 +14,11 @@ public static class DeckSkin
         return new StyleBoxTexture{Texture=atlas,TextureMarginLeft=12,TextureMarginRight=12,TextureMarginTop=5,TextureMarginBottom=5,
             ContentMarginLeft=padding,ContentMarginRight=padding,ContentMarginTop=4,ContentMarginBottom=4};
     }
+    public static StyleBoxTexture Parchment()
+    {
+        var texture=GD.Load<Texture2D>("res://Art/DeckBuilder/comparison-parchment-v2.png");
+        return new StyleBoxTexture{Texture=texture,TextureMarginLeft=18,TextureMarginRight=18,TextureMarginTop=18,TextureMarginBottom=18,ContentMarginLeft=24,ContentMarginRight=24,ContentMarginTop=20,ContentMarginBottom=20};
+    }
     public static StyleBoxTexture Frame()
     {
         var texture=GD.Load<Texture2D>("res://Art/DeckBuilder/panel-frame-v2.png");var s=texture.GetWidth()/1536f;
@@ -74,12 +79,15 @@ public static class DeckSkin
 /// <summary>Preserves the cloth's proportions behind a separately sliced gilded frame.</summary>
 public partial class DeckPanelStyle : StyleBox
 {
+    public bool FullArt;
     public DeckPanelStyle(){ContentMarginLeft=16;ContentMarginRight=16;ContentMarginTop=16;ContentMarginBottom=16;}
     public override Vector2 _GetMinimumSize()=>new(32,32);
     public override void _Draw(Rid canvasItem,Rect2 rect)
     {
         if(rect.Size.X<=0||rect.Size.Y<=0)return;
-        var cloth=GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png");var size=cloth.GetSize()*.65f;var aspect=rect.Size.X/rect.Size.Y;
+        var cloth=GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png");
+        if(FullArt){RenderingServer.CanvasItemAddTextureRect(canvasItem,rect,cloth.GetRid());return;}
+        var size=cloth.GetSize()*.65f;var aspect=rect.Size.X/rect.Size.Y;
         if(size.X/size.Y>aspect)size.X=size.Y*aspect;else size.Y=size.X/aspect;
         RenderingServer.CanvasItemAddTextureRectRegion(canvasItem,rect,cloth.GetRid(),new Rect2((cloth.GetSize()-size)/2,size));
         DeckSkin.Frame().Draw(canvasItem,rect);

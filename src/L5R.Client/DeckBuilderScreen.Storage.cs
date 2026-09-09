@@ -8,21 +8,23 @@ public partial class DeckBuilderScreen
     {
         Page="decks";HideHover();_overlay.Hide();
         foreach(var c in new Control[]{_setupStrip,_left,_toolbar,_setupTools,Collection,Mat,_status,_count,_empty,_name,_save,_dirtyLabel,_header.GetNode<Control>("Copy")})c.Hide();
-        _library.Show();BuildDeckList();_lines.QueueRedraw();
+        _header.Hide();_library.Show();BuildDeckList();_lines.QueueRedraw();
     }
     private void BuildDeckList()
     {
-        Palette.Clear(_library);Put(_library,CatalogueArt.Label("My decks",38,true),20,12,500,55);
+        Palette.Clear(_library);
+        string[] files;try{files=Store.Files();}catch(Exception e){Notice("Could not open the local deck folder: "+e.Message);files=[];}
+        void Folder(){Directory.CreateDirectory(Store.DirectoryPath);OS.ShellOpen(Store.DirectoryPath);}
+        if(files.Length==0)
+        {
+            Put(_library,new DeckLibraryLanding(NewDeck,ImportDeck,Folder,()=>Closed?.Invoke()),0,0,_library.Size.X,_library.Size.Y);return;
+        }
+        Put(_library,CatalogueArt.Label("My decks",38,true),40,20,500,55);
         Put(_library,CatalogueArt.Button("Import deck",ImportDeck),_library.Size.X-345,15,150,44);
         Put(_library,CatalogueArt.Button("New deck",NewDeck),_library.Size.X-177,15,150,44);
         Put(_library,CatalogueArt.Label("Saved on this device · plain-text files you can share",19),20,77,_library.Size.X-40,28);
         var scroll=new ScrollContainer{HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};Put(_library,scroll,20,128,_library.Size.X-40,_library.Size.Y-188);
         var grid=new GridContainer{Columns=Math.Max(1,(int)((_library.Size.X-60)/480)),SizeFlagsHorizontal=SizeFlags.ExpandFill};grid.AddThemeConstantOverride("h_separation",22);grid.AddThemeConstantOverride("v_separation",22);scroll.AddChild(grid);
-        string[] files;try{files=Store.Files();}catch(Exception e){Notice("Could not open the local deck folder: "+e.Message);files=[];}
-        if(files.Length==0)
-        {
-            var empty=new VBoxContainer{CustomMinimumSize=new Vector2(600,300)};empty.AddChild(CatalogueArt.Label("Your first deck starts here",29,true));empty.AddChild(Palette.Wrapped("Choose a Clan and Stronghold, then gather cards on the mat. Save a draft whenever you like—even before it is complete.",23,CatalogueArt.Ivory));grid.AddChild(empty);
-        }
         foreach(var path in files)
         {
             var item=new PanelContainer{CustomMinimumSize=new Vector2(450,285),SizeFlagsHorizontal=SizeFlags.ExpandFill};item.AddThemeStyleboxOverride("panel",new DeckPanelStyle());grid.AddChild(item);
@@ -50,7 +52,7 @@ public partial class DeckBuilderScreen
     }
     private void EnterEditor()
     {
-        Page="editor";_library.Hide();foreach(var c in new Control[]{_setupStrip,_left,_toolbar,Collection,Mat,_status,_count,_name,_save,_dirtyLabel,_header.GetNode<Control>("Copy")})c.Show();
+        Page="editor";_header.Show();_library.Hide();foreach(var c in new Control[]{_setupStrip,_left,_toolbar,Collection,Mat,_status,_count,_name,_save,_dirtyLabel,_header.GetNode<Control>("Copy")})c.Show();
         BuildSetupStrip();SetSetup("");Fit();UpdateStatus();
     }
     public bool OpenFile(string path)

@@ -27,3 +27,15 @@ Run `bash tools/check-deck-builder.sh` on a native graphical desktop. It isolate
 ## Material refinement pass
 
 The UI lead rejected the first implementation's flat controls. The second pass uses generated lacquer/brass materials in `DeckSkin`, with nine-slice framing, explicit selected tabs, thumbnail setup rows, live radio/checkbox markers, stronger body lettering, and proportionally sampled cloth behind inspection/dialogs. Full source prompts are in `assets/ui/deck-builder/material-pass-prompts.json`. These materials are imported at their intended UI scale; the original generator output remains committed. The working layout and draft semantics are preserved. Final visual acceptance remains with Alfredo; screenshots are evidence, not a claim of pixel-identical approval.
+
+## Approved bonsai / collection / comparison refinement
+
+Alfredo approved the bonsai My Decks landing, **A's expanded artwork-thumbnail collection** and **B's comparison mat**. The approval attachment pictured B's full-card collection, but the written choice explicitly selected A; the implementation follows that choice. The approved images are `assets/ui/deck-builder/approved-bonsai-library.png`, `approved-A-collection.png`, and `approved-B-comparison.png`.
+
+The empty library uses an image-generated textless art plate with three equal native buttons and live labels. Original Dynasty/Fate textures are drawn over the two decorative stack surfaces. The lacquer case is non-clan-specific bonsai artwork. Once decks exist, the saved-draft library remains available with open/duplicate/export; no storage semantics changed.
+
+The collection is doubled from 310 to 600 logical pixels, with approximately five artwork rows visible, 132-pixel thumbnails, 24-pixel names and compact quantity controls. UI scale follows the viewport so high-resolution windows do not strand tiny controls in large empty spaces. Thumbnails crop to artwork without distortion; full card views keep original scan proportions.
+
+Comparison uses large uncropped cards, adjacent quantity actions and aligned parchment rules panels with readable dark text. Two and three cards are supported, with independent scrolling for long rules. Escape and Back close it. Generated parchment is rounded by a native shader to avoid rectangular corner artifacts. WeatheredQuill headings and original card scans intentionally preserve the established game assets instead of generated typography or invented card text.
+
+Source-to-game evidence and responsive/input captures are in `docs/screenshots/deck-builder/index-v3.html`. Production prompts and provenance are in `assets/ui/deck-builder/approved-refinement-prompts.json`.

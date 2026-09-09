@@ -14,7 +14,9 @@ public partial class DeckBuilderProbe : Node
             _out=OS.GetCmdlineUserArgs().FirstOrDefault(a=>a.StartsWith("--out="))?[6..]??ProjectSettings.GlobalizePath("res://../../artifacts/deck-builder-checks");Directory.CreateDirectory(_out);
             var storage=Path.Combine(_out,"decks-"+Guid.NewGuid().ToString("N"));
             _screen=new DeckBuilderScreen{StorageDirectory=storage};AddChild(_screen);_screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-            await Wait(2);await Capture("empty-decks");Click(Button("New deck"));await Wait(3);await Capture("setup");
+            await Wait(2);await Capture("empty-decks");
+            Check(Button("New deck").Size==Button("Import deck").Size&&Button("New deck").Size==Button("Open deck folder").Size,"three equal landing actions");
+            Button("New deck").GrabFocus();await Wait(.2);await Capture("landing-focus");Click(Button("New deck"));await Wait(3);await Capture("setup");
             Check(_screen.Draft.Count("Border Keep")==1&&_screen.Draft.Count("Bamboo Harvesters")==1,"default setup chosen outside deck totals");
             Check(_screen.Draft.Review().Dynasty==0&&_screen.Draft.Review().Fate==0,"setup excluded from counts");
             var select=Walk(_screen).OfType<Button>().First(b=>b.Text=="Select"&&b.IsVisibleInTree());Click(select);await Wait(.5);Check(_screen.Draft.Cards.Count(c=>c.SetupSlot=="Stronghold")==1,"native single stronghold selection");await Capture("setup-selected");
@@ -25,6 +27,8 @@ public partial class DeckBuilderProbe : Node
             var all=new[]{source.StrongholdId,"oracle-l5r-1106","oracle-l5r-679"}.Concat(source.Dynasty).Concat(source.Fate);
             var entries=all.GroupBy(id=>id).Select(g=>new DeckEntry(_screen.Data.Cards.Single(c=>c.Id==g.Key).Name,g.Count())).ToArray();
             var path=_screen.Store.Save("Crane — Court and Steel",new Deck("Emperor",entries));Check(_screen.OpenFile(path),"published deck loads into builder");await Wait(5);await Capture("mat");
+            Check(_screen.Collection.Size.X>=590,"collection has doubled logical width");
+            Search("Asahina");await Wait(3);await Capture("collection-large");Search("");await Wait(.3);
             var more=Walk(_screen).OfType<MenuButton>().Single();Click(more);await Wait(.3);Check(more.GetPopup().ItemCount==2,"compact save-copy and export actions available");await Capture("deck-actions");KeyPress(Key.Escape);await Wait(.3);
             Click(Walk(_screen).OfType<OptionButton>().First(o=>o.Text=="All clans"&&o.IsVisibleInTree()));await Wait(.3);await Capture("filter-menu");KeyPress(Key.Escape);await Wait(.3);
             var before=_screen.Draft.Review();Check(before.Dynasty==source.Dynasty.Length&&before.Fate==source.Fate.Length,"authoritative source totals");
@@ -36,6 +40,11 @@ public partial class DeckBuilderProbe : Node
             Click(Button("List"));await Wait(.3);Check(_screen.Mat.Rows,"list view selected through native input");Click(Button("Mat"));await Wait(.3);
             var compareToggle=Walk(_screen.Mat).OfType<CheckBox>().First(c=>c.IsVisibleInTree());Click(compareToggle);await Wait(.3);Check(compareToggle.ButtonPressed,"native comparison selection");
             _screen.ShowComparison(members);await Wait(3);await Capture("compare");KeyPress(Key.Escape);await Wait(.3);
+            var events=_screen.Data.Cards.Where(c=>c.Name=="A Fever in the Blood"||c.Name=="A Dangerous Game").GroupBy(c=>c.Name).Select(g=>g.First()).OrderBy(c=>c.Name=="A Fever in the Blood"?0:1).ToArray();
+            _screen.ShowComparison(events);await Wait(3);await Capture("compare-two");
+            var parchments=Walk(_screen).OfType<Panel>().Where(p=>p.Name.ToString().StartsWith("RulesParchment")).ToArray();Check(parchments.Length==2&&parchments.All(p=>p.Size.Y>=180),"two readable rules panels");
+            var longRules=_screen.Data.Cards.OrderByDescending(c=>c.CurrentOracleText.Length).Take(3).ToArray();_screen.ShowComparison(longRules);await Wait(2);await Capture("compare-long-rules");
+            var rulesScroll=Walk(_screen).OfType<ScrollContainer>().First(s=>s.Name=="RulesScroll"&&s.GetVScrollBar().MaxValue>s.Size.Y);rulesScroll.ScrollVertical=100;await Wait(.2);Check(rulesScroll.ScrollVertical>0,"long comparison rules remain scrollable");KeyPress(Key.Escape);await Wait(.3);
             var snapshot=DeckFormat.Write(_screen.Draft.ToDeck());var bad=Path.Combine(_out,"malformed.txt");File.WriteAllText(bad,"Legality: Emperor\n1 Missing Imaginary Card");Check(!_screen.OpenFile(bad)&&DeckFormat.Write(_screen.Draft.ToDeck())==snapshot,"bad import preserves draft");await Wait(.4);KeyPress(Key.Enter);await Wait(.4);Check(!Walk(_screen).OfType<AcceptDialog>().Any(d=>d.Visible),"error notice dismissed with keyboard");
             _screen.SaveDraft();await Wait(.3);Check(!_screen.Dirty&&DeckFileStore.Read(path)==snapshot,"save and reopen exact text roundtrip");
             _screen.Adjust(card,1);await Wait(.4);await Capture("before-guard");Click(Button("‹ My decks"));await Wait(.3);await Capture("after-guard");Check(Walk(_screen).OfType<ConfirmationDialog>().Any(),"unsaved navigation guarded");KeyPress(Key.Escape);await Wait(.3);Check(_screen.Page=="editor"&&_screen.Dirty,"cancel keeps draft");
@@ -47,6 +56,9 @@ public partial class DeckBuilderProbe : Node
             GetWindow().Size=new Vector2I(1280,800);await Wait(1);await Capture("small-window");
             Check(_screen.Mat.GetGlobalRect().End.X<=1280,"mat within compact viewport");
             GetWindow().Size=new Vector2I(1920,1080);await Wait(.5);await Capture("wide-window");
+            _screen.ShowComparison(events);await Wait(.4);await Capture("wide-compare");KeyPress(Key.Escape);await Wait(.3);
+            GetWindow().Size=new Vector2I(1280,800);await Wait(.4);_screen.ShowComparison(events);await Wait(.4);await Capture("small-compare");KeyPress(Key.Escape);await Wait(.3);
+            _screen.ShowDecks();await Wait(.3);await Capture("small-saved-decks");GetWindow().Size=new Vector2I(1920,1080);await Wait(.4);
             _screen.QueueFree();await Wait(.3);var main=GD.Load<PackedScene>("res://Main.tscn").Instantiate();AddChild(main);await Wait(2);await Capture("main-menu");
             var menu=Walk(main).OfType<TitleMenu>().Single();Check(menu.Entries.GetChildren().OfType<Button>().All(b=>b.GetGlobalRect().End.Y<=GetViewport().GetVisibleRect().Size.Y),"all six menu entries fit in viewport");var entry=Walk(menu).OfType<Button>().Single(b=>string.Equals(b.Text,"Deck Builder",StringComparison.OrdinalIgnoreCase)&&b.IsVisibleInTree());Click(entry);await Wait(2);
             Check(GetTree().Root.GetNodeOrNull("DeckBuilderLayer") is not null,"main menu opens deck builder");await Capture("menu-deck-builder");

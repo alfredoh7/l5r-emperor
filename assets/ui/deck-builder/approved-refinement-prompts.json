@@ -1,0 +1,22 @@
+{
+  "mode": "built-in image_gen",
+  "sources": {
+    "landing": "approved-bonsai-library.png",
+    "collection": "approved-A-collection.png",
+    "comparison": "approved-B-comparison.png"
+  },
+  "prompts": {
+    "bonsai": "PRODUCTION ASSET EXTRACTION: Edit the provided approved game menu screenshot into a TEXTLESS runtime art plate. Preserve all pixels/composition as closely as possible: same exact bonsai lacquer box, same two black/green card stacks, same navy cloth folds, same gold mountains, exact same three buttons, exact same borders and dimensions. Remove ONLY every text glyph in image: 'Back', 'MY DECKS', game name upper-right, NEW DECK and its subtitle, IMPORT DECK and its subtitle, OPEN DECK FOLDER, note under buttons, Saved on this device. Cleanly inpaint letters with their immediate materials. PRESERVE all button icons, arrows, vertical icon dividers and decoration, header Back chevron, buttons themselves, perimeter frame, box and decks. Text printed on the two card backs is part of card art and must remain. No layout changes, no scaling/movement, no new elements. This must match reference exactly except removed UI lettering so native live labels can be placed over it. Output full same-aspect landscape image.",
+    "parchment": "Create one production UI bitmap asset: a blank horizontal aged ivory parchment panel with thin gilded rounded brass edge and a tiny soft outer shadow. Aspect3.5:1, entire single panel fills canvas. Cream warm desaturated paper, extremely subtle fibers and aged corners, center very clean pale ivory for readable dark text. Match luxurious restrained L5R navy-and-gold historical Japanese game UI. Border only4px wide at1536px canvas, double fine gold/ivory highlight and darker bronze edge, gently rounded corners radius14. No words, no icons, no ornaments, no scene, no gradients that darken text area. Opaque full panel with no transparent/checkerboard background. This will be nine-sliced as the rules parchment in a comparison view.",
+    "parchment_refinement": "Edit generated parchment: thin gold hairline border, clean ivory textured center, subtle rounded corners; remove chunky bronze bevel. Request transparent outer corners. Returned RGB corners are clipped by the native rounded-panel shader."
+  },
+  "notes": [
+    "User explicitly selected A sidebar, although latest attachment showed B sidebar.",
+    "Original Dynasty and Fate textures are drawn over the decorative case art; card scans retain their aspect ratio.",
+    "Concept typography uses illustrative serif text; runtime preserves WeatheredQuill headings and Alegreya body."
+  ],
+  "runtime_assets": [
+    "src/L5R.Client/Art/DeckBuilder/bonsai-library.png",
+    "src/L5R.Client/Art/DeckBuilder/comparison-parchment-v2.png"
+  ]
+}

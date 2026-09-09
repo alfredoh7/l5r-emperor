@@ -37,6 +37,7 @@ public partial class DeckBuilderScreen : Control
     private string _setupSlot="",_setupClan="Crane",_savedFingerprint="",_savedName="";
     private string? _currentPath;
     private float _w=1672,_h=941;
+    private const float SidebarWidth=620, MatLeft=656;
     private bool _building,_list;
     private int _hoverTicket;
     private bool _previousEmbed;
@@ -52,7 +53,7 @@ public partial class DeckBuilderScreen : Control
         var bg=new TextureRect{Texture=GD.Load<Texture2D>("res://Art/DeckBuilder/work-mat.png"),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.Scale,MouseFilter=MouseFilterEnum.Ignore};AddChild(bg);bg.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddChild(_lines);_lines.Draw+=DrawFrames;
         AddChild(_canvas);foreach(var c in new[]{_header,_setupStrip,_left,_toolbar,_setupTools,_library})_canvas.AddChild(c);
-        Collection=new DeckSurface{Rows=true,MakeCard=c=>MakeRow(c,true)};_canvas.AddChild(Collection);
+        Collection=new DeckSurface{Rows=true,RowHeight=110,MakeCard=c=>MakeRow(c,true)};_canvas.AddChild(Collection);
         Mat=new DeckSurface{MakeCard=MakeTile};_canvas.AddChild(Mat);
         _status=CatalogueArt.Label("",17);_canvas.AddChild(_status);_count=CatalogueArt.Label("",17);_canvas.AddChild(_count);
         _empty=CatalogueArt.Label("",24);_empty.HorizontalAlignment=HorizontalAlignment.Center;_canvas.AddChild(_empty);
@@ -81,16 +82,16 @@ public partial class DeckBuilderScreen : Control
     }
     private void BuildCollectionControls()
     {
-        _collectionTab=CatalogueArt.Button("Collection",()=>SetSetup(""));Put(_left,_collectionTab,12,6,148,40);
-        _setupTab=CatalogueArt.Button("Setup",()=>SetSetup("Stronghold"));Put(_left,_setupTab,166,6,148,40);
-        Search=new LineEdit{PlaceholderText="Search names or rules…",ClearButtonEnabled=true};Put(_left,Search,12,58,300,40);Search.TextChanged+=_=>ApplyFilters();
+        _collectionTab=CatalogueArt.Button("Collection",()=>SetSetup(""));Put(_left,_collectionTab,12,6,290,40);
+        _setupTab=CatalogueArt.Button("Setup",()=>SetSetup("Stronghold"));Put(_left,_setupTab,310,6,290,40);
+        Search=new LineEdit{PlaceholderText="Search names or rules…",ClearButtonEnabled=true};Put(_left,Search,12,58,588,42);Search.TextChanged+=_=>ApplyFilters();
         _clan=Option(new[]{"All clans","Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"},ApplyFilters);
         _type=Option(new[]{"All types","Personality","Holding","Region","Event","Celestial","Follower","Item","Spell","Strategy","Ring"},ApplyFilters);
         _keyword=Option(new[]{"Any keyword"}.Concat(Data.Cards.SelectMany(c=>c.Keywords).Distinct().Order()).ToArray(),ApplyFilters);
         _gold=Option(new[]{"Any Gold","0","1","2","3","4","5","6","7","8","9","10+"},ApplyFilters);
         _support=Option(new[]{"All cards","Implemented"},ApplyFilters);
-        Put(_left,_clan,12,110,148,36);Put(_left,_type,166,110,148,36);Put(_left,_keyword,12,154,300,36);Put(_left,_gold,12,198,148,36);Put(_left,_support,166,198,148,36);
-        Put(_left,CatalogueArt.Label("In deck",15),230,242,80,22);
+        Put(_left,_clan,12,110,188,36);Put(_left,_type,210,110,188,36);Put(_left,_keyword,408,110,192,36);Put(_left,_gold,12,154,188,36);Put(_left,_support,210,154,188,36);
+        Put(_left,CatalogueArt.Label("In deck",15),508,163,80,22);
     }
     private void BuildToolbar()
     {
@@ -100,30 +101,30 @@ public partial class DeckBuilderScreen : Control
         var list=CatalogueArt.Button("List",()=>{_list=true;RefreshMat();});list.Name="ListTab";Put(_toolbar,list,440,8,80,38);
         _compareButton=CatalogueArt.Button("Compare (0)",()=>ShowComparison(_compare.Select(id=>_byId[id]).ToArray()));Put(_toolbar,_compareButton,540,8,156,38);
         var label=CatalogueArt.Label("Card size",16);label.Name="SizeLabel";_toolbar.AddChild(label);
-        var slider=new HSlider{Name="CardSize",MinValue=110,MaxValue=270,Step=2,Value=176,TooltipText="Resize card faces; controls remain readable."};slider.ValueChanged+=v=>{Mat.CardWidth=(float)v;HideHover();RefreshMat();};_toolbar.AddChild(slider);
+        var slider=new HSlider{Name="CardSize",MinValue=110,MaxValue=270,Step=2,Value=196,TooltipText="Resize card faces; controls remain readable."};slider.ValueChanged+=v=>{Mat.CardWidth=(float)v;HideHover();RefreshMat();};_toolbar.AddChild(slider);
     }
     private void Fit()
     {
-        var scale=Math.Min(1f,Math.Min(Size.X/1500f,Size.Y/840f));if(scale<=0)return;
+        var scale=Math.Min(Size.X/1672f,Size.Y/941f);if(scale<=0)return;
         _canvas.Scale=Vector2.One*scale;_w=Size.X/scale;_h=Size.Y/scale;_canvas.Size=new Vector2(_w,_h);
-        Place(_header,0,0,_w,70);Place(_setupStrip,14,74,_w-28,76);Place(_left,16,164,326,278);
-        Place(Collection,28,442,310,_h-492);Place(_toolbar,362,158,_w-380,58);Place(Mat,362,216,_w-380,_h-269);
-        Place(_empty,392,360,_w-440,100);Place(_status,378,_h-43,_w-600,28);Place(_count,24,_h-40,325,25);
+        Place(_header,0,0,_w,70);Place(_setupStrip,14,74,_w-28,76);Place(_left,16,158,SidebarWidth,198);
+        Place(Collection,28,362,SidebarWidth-20,_h-414);Collection.RowHeight=Math.Clamp((Collection.Size.Y-4)/5,104,150);Place(_toolbar,MatLeft,158,_w-MatLeft-18,58);Place(Mat,MatLeft,216,_w-MatLeft-18,_h-269);
+        Place(_empty,MatLeft+30,360,_w-MatLeft-64,100);Place(_status,MatLeft+16,_h-43,_w-MatLeft-40,28);Place(_count,24,_h-40,SidebarWidth,25);
         Place(_name,560,16,Math.Clamp(_w-1280,240,390),42);
         Place(_dirtyLabel,_w-700,22,160,30);Place(_save,_w-530,15,180,42);Place(_header.GetNode<Control>("Copy"),_w-342,15,38,42);Place(_header.GetNode<Control>("Brand"),_w-290,16,264,40);
         Place(_toolbar.GetNode<Control>("SizeLabel"),_toolbar.Size.X-280,16,85,25);Place(_toolbar.GetNode<Control>("CardSize"),_toolbar.Size.X-187,14,172,32);
-        Place(_setupTools,362,158,_w-380,58);Place(_library,22,84,_w-44,_h-104);_overlay.Size=_canvas.Size;
+        Place(_setupTools,MatLeft,158,_w-MatLeft-18,58);Place(_library,0,0,_w,_h);_overlay.Size=_canvas.Size;
         if(IsInsideTree()){BuildSetupStrip();if(Page=="decks")BuildDeckList();else if(_setupSlot.Length>0)BuildSetupChoices();}
         Collection.Relayout();Mat.Relayout();HideHover();if(_overlay.Visible&&_inspectionCards.Length>0)ShowComparison(_inspectionCards);_lines.QueueRedraw();
     }
     private void DrawFrames()
     {
-        if(_canvas.Scale.X<=0)return;var s=_canvas.Scale.X;
+        if(_canvas.Scale.X<=0||Page=="decks")return;var s=_canvas.Scale.X;
         foreach(var y in new[]{70f,154f,_h-50})_lines.DrawLine(new Vector2(18,y)*s,new Vector2(_w-18,y)*s,new Color(.64f,.49f,.26f,.65f),1);
         if(Page!="decks")
         {
-            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2(13*s,155*s,337*s,(_h-205)*s));
-            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2(352*s,155*s,(_w-366)*s,(_h-205)*s));
+            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2(13*s,155*s,(SidebarWidth+12)*s,(_h-205)*s));
+            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2((MatLeft-10)*s,155*s,(_w-MatLeft-4)*s,(_h-205)*s));
         }
     }
     private void BuildSetupStrip()
@@ -155,20 +156,20 @@ public partial class DeckBuilderScreen : Control
     private void BuildSetupChoices()
     {
         Palette.Clear(_left);
-        Put(_left,CatalogueArt.Button("Collection",()=>SetSetup("")),12,6,148,40);var setupTab=CatalogueArt.Button("Setup",()=>{});DeckSkin.Selected(setupTab,true);Put(_left,setupTab,166,6,148,40);
+        Put(_left,CatalogueArt.Button("Collection",()=>SetSetup("")),12,6,290,40);var setupTab=CatalogueArt.Button("Setup",()=>{});DeckSkin.Selected(setupTab,true);Put(_left,setupTab,310,6,290,40);
         var clans=Option(new[]{"Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"},()=>{});
         clans.Select(Array.IndexOf(new[]{"Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"},_setupClan));
-        clans.ItemSelected+=i=>{_setupClan=clans.GetItemText((int)i);BuildSetupChoices();};Put(_left,clans,12,62,300,42);
+        clans.ItemSelected+=i=>{_setupClan=clans.GetItemText((int)i);BuildSetupChoices();};Put(_left,clans,12,62,588,42);
         var y=124f;foreach(var slot in DeckWorkshop.SetupSlots)
         {
             var info=Draft.Cards.FirstOrDefault(c=>c.SetupSlot==slot);var b=CatalogueArt.Button(slot+"\n"+(info?.Name??"Select a card"),()=>SetSetup(slot));b.Alignment=HorizontalAlignment.Left;
             var style=DeckSkin.Plate(slot==_setupSlot?1:0);style.ContentMarginLeft=88;style.ContentMarginRight=26;b.AddThemeStyleboxOverride("normal",style);
             foreach(var state in new[]{"hover","pressed"}){var h=DeckSkin.Plate(1);h.ContentMarginLeft=88;h.ContentMarginRight=26;b.AddThemeStyleboxOverride(state,h);}
-            b.AccessibilityName="Choose "+slot;b.AddThemeFontSizeOverride("font_size",18);b.ClipText=true;Put(_left,b,12,y,300,84);
+            b.AccessibilityName="Choose "+slot;b.AddThemeFontSizeOverride("font_size",18);b.ClipText=true;Put(_left,b,12,y,588,84);
             if(info is not null)Put(b,new DeckThumbnail(_byId[info.Id],Scans),8,8,68,68);
-            var mark=new TextureRect{Texture=DeckSkin.Icon(info is null?"radio":"selected"),MouseFilter=MouseFilterEnum.Ignore};Put(b,mark,272,32,20,20);y+=96;
+            var mark=new TextureRect{Texture=DeckSkin.Icon(info is null?"radio":"selected"),MouseFilter=MouseFilterEnum.Ignore};Put(b,mark,555,32,20,20);y+=96;
         }
-        Put(_left,Palette.Wrapped("Choose one of each.\nKept outside both decks.\n\nBorder Keep starts in play.\nBamboo Harvesters starts bowed for the second player only.",18,CatalogueArt.Ivory),16,y+20,285,225);
+        Put(_left,Palette.Wrapped("Choose one of each.\nKept outside both decks.\n\nBorder Keep starts in play.\nBamboo Harvesters starts bowed for the second player only.",18,CatalogueArt.Ivory),16,y+20,555,225);
         Palette.Clear(_setupTools);_setupTools.Visible=true;_toolbar.Visible=false;Put(_setupTools,CatalogueArt.Label("Choose your "+_setupSlot,32,true),14,6,_toolbar.Size.X-190,48);
         Put(_setupTools,CatalogueArt.Button("Back to deck",()=>SetSetup("")),_toolbar.Size.X-170,8,150,38);
         var infos=Data.Cards.Where(c=>new DeckCardInfo(c.Id,c.Name,c.Types,c.DeckTypes,c.Keywords,c.Playable).SetupSlot==_setupSlot);
