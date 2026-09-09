@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Import wave 2: Bayushi Kahoku and Asako Ume, the first cards using a target-dependent Attack strength conditional and an always-on passive Force Effect hook. Widened AttackStrength(id, player, target) and added PersonalityForce Effect cases (force-with-spell, force-if-enemy-dishonorable). Shared-file change: touches src/L5R.Client/Content/Published only to add scanned artwork, no client code changed.",
+  "validation": "bash tools/check.sh --skip-client: 72/72 + 33/33 + 8/8 tests pass, new BayushiKahokuAttack and AsakoUmeAttack tests added.",
+  "remaining": "16 further Tier 2 candidates triaged but not shipped this round; docs/ROADMAP.md has the full per-card breakdown (5 scan-blocked, 1 exposes an Item-Battle-presence gap, 10 need a mechanism beyond strength/Force parameters, itemized in a table).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/97",
+  "branch": "mdornbrook/97-attack-import-wave-2",
+  "updated": "2026-09-09T11:38:51.799035+00:00"
+}
