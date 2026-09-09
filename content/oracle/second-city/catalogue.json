@@ -1,286 +1,17 @@
 {
   "cards": [
     {
-      "current_oracle_text": "",
+      "current_oracle_text": "Reaction: After Meiyu enters play: Give her three +1F Fire tokens.",
       "deck_types": [
         "Dynasty"
       ],
       "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-566",
+      "id": "oracle-l5r-8550",
       "image_ids": [
-        "oracle-l5r-566-printing-1-image-1"
+        "oracle-l5r-8550-printing-1-image-1"
       ],
-      "name": "Asako Moeru",
-      "oracle_id": 566,
-      "playable": false,
-      "selected_printings": [
-        {
-          "artist": [
-            "Lake Hurwitz"
-          ],
-          "artnumber": [
-            "10030048"
-          ],
-          "flavor": [
-            "<i>\"No! Your status is nothing to me! You, and your students, shall not escape judgment.\"</i>"
-          ],
-          "number": [
-            "47"
-          ],
-          "printimagehash": [
-            "b8/5e"
-          ],
-          "printingid": "1",
-          "rarity": [
-            "Common"
-          ],
-          "set": [
-            "Second City"
-          ]
-        }
-      ],
-      "source_legality_labels": [
-        "Age of Conquest (Emperor)",
-        "Destroyer War (Celestial)",
-        "Legacy",
-        "Modern"
-      ],
-      "source_record": {
-        "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:34:18.984998",
-        "cardid": 566,
-        "chi": [
-          "3"
-        ],
-        "clan": [
-          "Phoenix"
-        ],
-        "cost": [
-          "4"
-        ],
-        "deck": [
-          "Dynasty"
-        ],
-        "force": [
-          "0"
-        ],
-        "formattedtitle": "Asako Moeru",
-        "honor": [
-          "0"
-        ],
-        "imagehash": "b8/5e",
-        "keywords": [
-          "Inquisitor",
-          "Ishiken",
-          "Magistrate",
-          "Phoenix Clan",
-          "Shugenja",
-          "Void"
-        ],
-        "legality": [
-          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-          "Destroyer&nbsp;War&nbsp;(Celestial)",
-          "Legacy",
-          "Modern"
-        ],
-        "ph": [
-          "3"
-        ],
-        "printing": [
-          {
-            "artist": [
-              "Lake Hurwitz"
-            ],
-            "artnumber": [
-              "10030048"
-            ],
-            "flavor": [
-              "<i>\"No! Your status is nothing to me! You, and your students, shall not escape judgment.\"</i>"
-            ],
-            "number": [
-              "47"
-            ],
-            "printimagehash": [
-              "b8/5e"
-            ],
-            "printingid": "1",
-            "rarity": [
-              "Common"
-            ],
-            "set": [
-              "Second City"
-            ]
-          },
-          {
-            "artist": [
-              "Lake Hurwitz"
-            ],
-            "flavor": [
-              "<i>\"No! Your status is nothing to me! You, and your students, shall not escape judgment.\"</i>"
-            ],
-            "legaldate": [
-              "Upon Release"
-            ],
-            "printimagehash": [
-              "09/db"
-            ],
-            "printingid": "2",
-            "rarity": [
-              "Promo"
-            ],
-            "set": [
-              "Promotional&ndash;Emperor"
-            ]
-          }
-        ],
-        "printingprimary": "1",
-        "title": [
-          "Asako Moeru"
-        ],
-        "type": [
-          "Personality"
-        ]
-      },
-      "source_url": "https://oracleofthevoid.com/#cardid=566",
-      "types": [
-        "Personality"
-      ]
-    },
-    {
-      "current_oracle_text": "",
-      "deck_types": [
-        "Dynasty"
-      ],
-      "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-4150",
-      "image_ids": [
-        "oracle-l5r-4150-printing-1-image-1"
-      ],
-      "name": "Kaiu Watsuki",
-      "oracle_id": 4150,
-      "playable": false,
-      "selected_printings": [
-        {
-          "artist": [
-            "Andy Hepworth"
-          ],
-          "artnumber": [
-            "10030018"
-          ],
-          "flavor": [
-            "<i>\"We sometimes play a game amongst each other. One Kaiu devises the strongest fortification possible, and the others must figure out its weaknesses. Me? I have never lost.\"</i>"
-          ],
-          "number": [
-            "17"
-          ],
-          "printimagehash": [
-            "b5/c8"
-          ],
-          "printingid": "1",
-          "rarity": [
-            "Common"
-          ],
-          "set": [
-            "Second City"
-          ]
-        }
-      ],
-      "source_legality_labels": [
-        "Age of Conquest (Emperor)",
-        "Destroyer War (Celestial)",
-        "Legacy",
-        "Modern"
-      ],
-      "source_record": {
-        "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:34:21.865734",
-        "cardid": 4150,
-        "chi": [
-          "3"
-        ],
-        "clan": [
-          "Crab"
-        ],
-        "cost": [
-          "6"
-        ],
-        "deck": [
-          "Dynasty"
-        ],
-        "force": [
-          "3"
-        ],
-        "formattedtitle": "Kaiu Watsuki",
-        "honor": [
-          "3"
-        ],
-        "imagehash": "b5/c8",
-        "keywords": [
-          "<b>Tactician</b>",
-          "Crab Clan",
-          "Samurai",
-          "Siege"
-        ],
-        "legality": [
-          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-          "Destroyer&nbsp;War&nbsp;(Celestial)",
-          "Legacy",
-          "Modern"
-        ],
-        "ph": [
-          "3"
-        ],
-        "printing": [
-          {
-            "artist": [
-              "Andy Hepworth"
-            ],
-            "artnumber": [
-              "10030018"
-            ],
-            "flavor": [
-              "<i>\"We sometimes play a game amongst each other. One Kaiu devises the strongest fortification possible, and the others must figure out its weaknesses. Me? I have never lost.\"</i>"
-            ],
-            "number": [
-              "17"
-            ],
-            "printimagehash": [
-              "b5/c8"
-            ],
-            "printingid": "1",
-            "rarity": [
-              "Common"
-            ],
-            "set": [
-              "Second City"
-            ]
-          }
-        ],
-        "printingprimary": "1",
-        "title": [
-          "Kaiu Watsuki"
-        ],
-        "type": [
-          "Personality"
-        ]
-      },
-      "source_url": "https://oracleofthevoid.com/#cardid=4150",
-      "types": [
-        "Personality"
-      ]
-    },
-    {
-      "current_oracle_text": "",
-      "deck_types": [
-        "Dynasty"
-      ],
-      "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-5285",
-      "image_ids": [
-        "oracle-l5r-5285-printing-1-image-1"
-      ],
-      "name": "Moshi Tomeno",
-      "oracle_id": 5285,
+      "name": "Togashi Meiyu",
+      "oracle_id": 8550,
       "playable": false,
       "selected_printings": [
         {
@@ -288,16 +19,16 @@
             "Alex Tooth"
           ],
           "artnumber": [
-            "10030043"
+            "10030027"
           ],
           "flavor": [
-            "<i>\"More than two decades and we have barely scratched the surface of the mysteries held in this place. We must forgo the constant securing of position and instead delve with all fervor into our exploration!\"</i>"
+            "<i>\"The lord of this province has declared war on his neighbor? Why do you disturb us with such things? Resolve such minor squabbles yourselves.\"</i>"
           ],
           "number": [
-            "41"
+            "32"
           ],
           "printimagehash": [
-            "51/de"
+            "99/21"
           ],
           "printingid": "1",
           "rarity": [
@@ -316,34 +47,33 @@
       ],
       "source_record": {
         "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:35:53.127646",
-        "cardid": 5285,
+        "@timestamp": "2026-06-06T14:34:24.726304",
+        "cardid": 8550,
         "chi": [
           "3"
         ],
         "clan": [
-          "Mantis"
+          "Dragon"
         ],
         "cost": [
-          "4"
+          "5"
         ],
         "deck": [
           "Dynasty"
         ],
         "force": [
-          "3"
+          "0"
         ],
-        "formattedtitle": "Moshi Tomeno",
+        "formattedtitle": "Togashi Meiyu",
         "honor": [
           "4"
         ],
-        "imagehash": "51/de",
+        "imagehash": "99/21",
         "keywords": [
-          "<b>Loyal</b>",
-          "<b>Naval</b>",
-          "Mantis Clan",
-          "Shugenja",
-          "Thunder"
+          "Dragon Clan",
+          "Fire",
+          "Monk",
+          "Tattooed"
         ],
         "legality": [
           "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
@@ -360,16 +90,16 @@
               "Alex Tooth"
             ],
             "artnumber": [
-              "10030043"
+              "10030027"
             ],
             "flavor": [
-              "<i>\"More than two decades and we have barely scratched the surface of the mysteries held in this place. We must forgo the constant securing of position and instead delve with all fervor into our exploration!\"</i>"
+              "<i>\"The lord of this province has declared war on his neighbor? Why do you disturb us with such things? Resolve such minor squabbles yourselves.\"</i>"
             ],
             "number": [
-              "41"
+              "32"
             ],
             "printimagehash": [
-              "51/de"
+              "99/21"
             ],
             "printingid": "1",
             "rarity": [
@@ -378,143 +108,50 @@
             "set": [
               "Second City"
             ]
-          }
-        ],
-        "printingprimary": "1",
-        "title": [
-          "Moshi Tomeno"
-        ],
-        "type": [
-          "Personality"
-        ]
-      },
-      "source_url": "https://oracleofthevoid.com/#cardid=5285",
-      "types": [
-        "Personality"
-      ]
-    },
-    {
-      "current_oracle_text": "",
-      "deck_types": [
-        "Dynasty"
-      ],
-      "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-6931",
-      "image_ids": [
-        "oracle-l5r-6931-printing-1-image-1"
-      ],
-      "name": "Shinjo Sanenari",
-      "oracle_id": 6931,
-      "playable": false,
-      "selected_printings": [
-        {
-          "artist": [
-            "Diego Gisbert Llorens"
-          ],
-          "artnumber": [
-            "10030068"
-          ],
-          "flavor": [
-            "<i>\"His brother married into the Imperial families, and is much beloved in court. The bond between the brothers is well known, and any who lifts a blade against Sanenari invites the wrath of the Imperials.\" - Moto Naleesh</i>"
-          ],
-          "number": [
-            "68"
-          ],
-          "printimagehash": [
-            "70/34"
-          ],
-          "printingid": "1",
-          "rarity": [
-            "Common"
-          ],
-          "set": [
-            "Second City"
-          ]
-        }
-      ],
-      "source_legality_labels": [
-        "Age of Conquest (Emperor)",
-        "Destroyer War (Celestial)",
-        "Legacy",
-        "Modern"
-      ],
-      "source_record": {
-        "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:31:43.805643",
-        "cardid": 6931,
-        "chi": [
-          "3"
-        ],
-        "clan": [
-          "Unicorn"
-        ],
-        "cost": [
-          "5"
-        ],
-        "deck": [
-          "Dynasty"
-        ],
-        "force": [
-          "2"
-        ],
-        "formattedtitle": "Shinjo Sanenari",
-        "honor": [
-          "4"
-        ],
-        "imagehash": "70/34",
-        "keywords": [
-          "<b>Tactician</b>",
-          "Sacrosanct",
-          "Samurai",
-          "Unicorn Clan"
-        ],
-        "legality": [
-          "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-          "Destroyer&nbsp;War&nbsp;(Celestial)",
-          "Legacy",
-          "Modern"
-        ],
-        "ph": [
-          "2"
-        ],
-        "printing": [
+          },
           {
             "artist": [
-              "Diego Gisbert Llorens"
+              "Alex Tooth"
             ],
-            "artnumber": [
-              "10030068"
+            "clan": [
+              "Dragon"
             ],
             "flavor": [
-              "<i>\"His brother married into the Imperial families, and is much beloved in court. The bond between the brothers is well known, and any who lifts a blade against Sanenari invites the wrath of the Imperials.\" - Moto Naleesh</i>"
+              "\"The lord of this province has declared war on<br>his neighbor? Why do you disturb us with such<br>things? Resolve such minor squabbles yourselves.\""
             ],
             "number": [
-              "68"
+              "30"
             ],
             "printimagehash": [
-              "70/34"
+              "fd/99"
             ],
-            "printingid": "1",
+            "printingid": "2",
             "rarity": [
-              "Common"
+              "Fixed"
             ],
             "set": [
-              "Second City"
+              "Emperor Edition Demo Decks"
+            ],
+            "title": [
+              "Togashi Meiyu"
+            ],
+            "type": [
+              "Personality"
             ]
           }
         ],
         "printingprimary": "1",
-        "story": [
-          "2010 Winner's Choice - Juan Sanchez"
+        "text": [
+          "<b>Reaction:</b> After Meiyu enters play: Give her three +1F <b>Fire </b>tokens."
         ],
         "title": [
-          "Shinjo Sanenari"
+          "Togashi Meiyu"
         ],
         "type": [
           "Personality"
         ]
       },
-      "source_url": "https://oracleofthevoid.com/#cardid=6931",
+      "source_url": "https://oracleofthevoid.com/#cardid=8550",
       "types": [
         "Personality"
       ]
@@ -522,7 +159,7 @@
   ],
   "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
   "printing_set": "Second City",
-  "response_sha256": "42e9c8c0d937411a37c10ac9f258455c82cfc44a77d5d92978916ad70d295328",
+  "response_sha256": "fe54daeca39b5fbc0e5d2046cadf6eebf8c2a53edd5aaaba246bc0d8b826c4bf",
   "schema_version": 1,
   "scope": "needed_cards_only"
 }

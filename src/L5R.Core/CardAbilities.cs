@@ -4,8 +4,9 @@ namespace L5R.Core;
 
 // Performer is set only when the ability separately selects a performing card before its target
 // (e.g. "Choose your performing unbowed Personality and target..."); most abilities leave it null
-// and use only their source card and Target.
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null);
+// and use only their source card and Target. Trigger identifies what opens a Reaction-timing
+// ability's window; so far only "own-enters-play" exists (see Purchase()'s post-entry window).
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null);
 
 public static class AbilityCatalog
 {
@@ -46,6 +47,11 @@ public static class AbilityCatalog
         ["training-create-token"] = new("Open", "Training: give target Personality a +1F Training token", "own-personality"),
         ["training-move-token"] = new("Open", "Training: move a token from target to performer", "own-personality-with-token", Performer: "own-personality"),
         ["training-destroy-token"] = new("Open", "Training: destroy a token on target", "own-personality-with-token"),
+        ["monastery-fire-token"] = new("Limited", "Target your Tattooed Personality · +1F Fire token", "own-tattooed-personality"),
+        ["monastery-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 5 Attack", "attack", Performer: "own-personality-with-fire-token-at-battle"),
+        ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
+        ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
+        ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
     });
 }
 
@@ -66,6 +72,8 @@ public sealed partial class MatchEngine
     {
         "carpenter-castle-siege" => 5,
         "shiro-shiba-melee" => 4 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
+        "monastery-fire-attack" => 5,
+        "torazu-fire-attack" => 3,
         _ => 0
     };
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
@@ -94,6 +102,9 @@ public sealed partial class MatchEngine
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
             "Battle" => _state.Phase == Phase.Battle,
+            // Legal only inside the post-entry reaction window opened for this exact card (Purchase()).
+            "Reaction" => _state.PendingChoice is not null && _state.PendingChoice.Type is "proclaim" or "entryReaction"
+                && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
             _ => false
         }, $"{ability.Timing} timing is unavailable now.");
         var player = Player(command.PlayerId);
@@ -125,6 +136,9 @@ public sealed partial class MatchEngine
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
+        // check above already requires the source itself (a Personality) to be at this battlefield.
+        if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -133,6 +147,8 @@ public sealed partial class MatchEngine
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
+                // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
+                "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
@@ -199,6 +215,7 @@ public sealed partial class MatchEngine
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
+                        "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -262,6 +279,23 @@ public sealed partial class MatchEngine
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
             case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
             case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
+            case "monastery-fire-token": CreateToken(target!, "Fire", id, "Force", 1); break;
+            case "monastery-fire-attack":
+            {
+                var performer = Card(command.PerformerId!);
+                DestroyToken(performer, performer.Tokens.First(t => t.Type == "Fire"));
+                if (target is not null) DestroyAttackTarget(target);
+                break;
+            }
+            case "meiyu-fire-tokens": case "torazu-fire-tokens":
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                break;
+            case "torazu-fire-attack":
+                DestroyToken(source!, source!.Tokens.First(t => t.Type == "Fire"));
+                if (target is not null) DestroyAttackTarget(target);
+                break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -379,6 +413,7 @@ public sealed partial class MatchEngine
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
+                "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             if (performers.Length == 0) performers = [null];

@@ -1,0 +1,37 @@
+{
+  "Profile": "personality-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8590",
+      "Name": "Togashi Torazu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Torazu enters play: Give him three +1F Fire tokens.\nBattle: Destroy a Fire token on Torazu: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8590.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Soul of Togashi Shintaro",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "torazu-fire-tokens",
+        "torazu-fire-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

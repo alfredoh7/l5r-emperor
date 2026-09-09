@@ -1,0 +1,35 @@
+{
+  "Profile": "personality-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8550",
+      "Name": "Togashi Meiyu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Meiyu enters play: Give her three +1F Fire tokens.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8550.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "meiyu-fire-tokens"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -78,7 +78,7 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,107);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,110);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
@@ -92,6 +92,13 @@ internal static class PublishedTests
         var strongholds2=PublishedContent.StrongholdWave2.Cards;Eq(strongholds2.Length,2);
         foreach(var c in strongholds2){Eq(c.Type,CardType.Stronghold);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
         Check(!strongholds2.Select(c=>c.Id).Intersect(strongholds.Select(c=>c.Id)).Any());
+        var strongholds3=PublishedContent.StrongholdWave3.Cards;Eq(strongholds3.Length,1);
+        foreach(var c in strongholds3){Eq(c.Type,CardType.Stronghold);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        var personalities=PublishedContent.PersonalityWave1.Cards;Eq(personalities.Length,1);
+        foreach(var c in personalities){Eq(c.Type,CardType.Personality);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        var personalities2=PublishedContent.PersonalityWave2.Cards;Eq(personalities2.Length,1);
+        foreach(var c in personalities2){Eq(c.Type,CardType.Personality);Check(c.Text.Length>0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
+        Check(!personalities2.Select(c=>c.Id).Intersect(personalities.Select(c=>c.Id)).Any());
     }
     private static void Setup()
     {

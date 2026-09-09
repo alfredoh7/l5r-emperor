@@ -1,44 +1,41 @@
 {
   "cards": [
     {
-      "current_oracle_text": "",
+      "current_oracle_text": "Limited: Target your Tattooed Personality: Give him a +1F Fire token.\nBattle: Destroy a Fire token on your performing Personality: Ranged 5 Attack.",
       "deck_types": [
-        "Dynasty"
+        "Pre-Game"
       ],
       "historical_legality_status": "requires_review",
-      "id": "oracle-l5r-10099",
+      "id": "oracle-l5r-10183",
       "image_ids": [
-        "oracle-l5r-10099-printing-1-image-1"
+        "oracle-l5r-10183-printing-1-image-1"
       ],
-      "name": "Moto Miyu",
-      "oracle_id": 10099,
+      "name": "Monastery of New Thought",
+      "oracle_id": 10183,
       "playable": false,
       "selected_printings": [
         {
           "artist": [
-            "Aurelien Hubert"
+            "Noah Bradley"
           ],
           "artnumber": [
-            "10070072"
+            "10070158"
           ],
           "designer": [
             "Bryan"
           ],
-          "designernotes": [
-            "[Art Note: Vanilla Unicorn Shugenja, though he is a Conqueror which is rare for Unicorn.]"
-          ],
           "flavor": [
-            "<i>Words of death rose in the shugenja's mouth, and ranks upon ranks fell away before them.</i>"
+            "<i>\"Their methods and actions are as indecipherable as ever, yes, but I believe we have no choice. We must trust in the Togashi to be our eyes and hands throughout the Colonies.\" - Kitsuki Daisuke</i>"
           ],
           "number": [
-            "73"
+            "157"
           ],
           "printimagehash": [
-            "de/7d"
+            "a9/24"
           ],
           "printingid": "1",
           "rarity": [
-            "Common"
+            "Fixed"
           ],
           "set": [
             "Seeds of Decay"
@@ -52,70 +49,44 @@
       ],
       "source_record": {
         "@SequenceNumber": "0000",
-        "@timestamp": "2026-06-06T14:33:14.225341",
-        "cardid": 10099,
-        "chi": [
-          "3"
-        ],
+        "@timestamp": "2026-06-06T14:34:32.664908",
+        "cardid": 10183,
         "clan": [
-          "Unicorn"
-        ],
-        "cost": [
-          "8"
+          "Dragon"
         ],
         "deck": [
-          "Dynasty"
+          "Pre-Game"
         ],
-        "force": [
-          "4"
-        ],
-        "formattedtitle": "Moto Miyu",
-        "honor": [
-          "0"
-        ],
-        "imagehash": "de/7d",
-        "keywords": [
-          "<b>Cavalry</b>",
-          "<b>Conqueror</b>",
-          "Death Priest",
-          "Shugenja",
-          "Unicorn Clan",
-          "Water"
-        ],
+        "formattedtitle": "Monastery of New Thought",
+        "imagehash": "a9/24",
         "legality": [
           "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
           "Legacy",
           "Modern"
         ],
-        "ph": [
-          "1"
-        ],
         "printing": [
           {
             "artist": [
-              "Aurelien Hubert"
+              "Noah Bradley"
             ],
             "artnumber": [
-              "10070072"
+              "10070158"
             ],
             "designer": [
               "Bryan"
             ],
-            "designernotes": [
-              "[Art Note: Vanilla Unicorn Shugenja, though he is a Conqueror which is rare for Unicorn.]"
-            ],
             "flavor": [
-              "<i>Words of death rose in the shugenja's mouth, and ranks upon ranks fell away before them.</i>"
+              "<i>\"Their methods and actions are as indecipherable as ever, yes, but I believe we have no choice. We must trust in the Togashi to be our eyes and hands throughout the Colonies.\" - Kitsuki Daisuke</i>"
             ],
             "number": [
-              "73"
+              "157"
             ],
             "printimagehash": [
-              "de/7d"
+              "a9/24"
             ],
             "printingid": "1",
             "rarity": [
-              "Common"
+              "Fixed"
             ],
             "set": [
               "Seeds of Decay"
@@ -123,22 +94,34 @@
           }
         ],
         "printingprimary": "1",
+        "production": [
+          "4"
+        ],
+        "startinghonor": [
+          "5"
+        ],
+        "strength": [
+          "7"
+        ],
+        "text": [
+          "<b>Limited:</b> Target your Tattooed Personality: Give him a +1F <b>Fire </b>token.<br><b>Battle:</b> Destroy a Fire token on your performing Personality: Ranged 5 Attack."
+        ],
         "title": [
-          "Moto Miyu"
+          "Monastery of New Thought"
         ],
         "type": [
-          "Personality"
+          "Stronghold"
         ]
       },
-      "source_url": "https://oracleofthevoid.com/#cardid=10099",
+      "source_url": "https://oracleofthevoid.com/#cardid=10183",
       "types": [
-        "Personality"
+        "Stronghold"
       ]
     }
   ],
   "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive.",
   "printing_set": "Seeds of Decay",
-  "response_sha256": "049a30f92f1ced6e2a85efbd67d8f6acaca0ebf242fe28b426bf1b51714aae9e",
+  "response_sha256": "43d875b23c6a69e1d346beeb6512e212fae376a1206d041aee46b8c8d9b083b6",
   "schema_version": 1,
   "scope": "needed_cards_only"
 }
