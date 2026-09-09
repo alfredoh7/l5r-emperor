@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved A six-phase rail with C hover/focus contextual help for issue65, following issue10 merged enum contract.",
-  "validation": "Read issue10 rules handoff and current phase mapping; implementation and native checks pending.",
-  "remaining": "Implement artwork, six-segment mapping, help and native regression checks.",
+  "summary": "Implement A six-phase bitmap rail with live Musashi labels and C compact hover/focus help. Map Straighten, Events, Action, Attack sub-states, Dynasty and End explicitly; Finished unlit. Preserve priority/Pass and engine timing. Fix Straighten/Events help fallback.",
+  "validation": "279 regression checks passed; client build zero warnings/errors; Godot import passed. Six native phase states at 1672 and scaled1280, hover content, keyboard arrows/Escape, no Pass dispatch, static reduced-motion pixels and real-board1920/1280 passed. Source comparison, compact help and board captures visually reviewed. Launcher generated and shell syntax checked.",
+  "remaining": "CI and mdornbrook semantic-help review pending before merge; no Windows graphical playtest. Phase transitions are unchanged; held phase captures are presentation fixtures.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/65",
   "branch": "codex/65-six-phase-ui",
-  "updated": "2026-09-09T12:14:24.930575+00:00"
+  "updated": "2026-09-09T12:30:14.142512+00:00"
 }

@@ -4,4 +4,4 @@ Alfredo approved the Continuous Brass Rail (A) with Compact Rail + Context (C) h
 
 The phase bar displays authoritative state; it must not advance phases or insert delays into automatic Straighten/Events transitions. Attack comprises existing attack/battle sub-states. Preserve the current separate priority indicator and Pass action. Help text must describe the actual phase rather than the old ended-match fallback for Straighten/Events.
 
-Sources: assets/ui/six-phase-track/approved-A.png and approved-C.png. Implementation and native validation pending in the initial draft; see the task handoff for latest evidence. Shared semantic help will request mdornbrook review. No engine timing or rules changes are planned.
+Sources: assets/ui/six-phase-track/approved-A.png and approved-C.png. Implemented in PR99; see the task handoff and native screenshots for validation. Shared semantic help will request mdornbrook review. No engine timing or rules changes are planned.
