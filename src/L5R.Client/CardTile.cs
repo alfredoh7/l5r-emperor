@@ -60,6 +60,12 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
+        if (ShowTokenRail && CardTokenRail.HasTokens(Card))
+        {
+            AlignUnitRightEdge = true;
+            TokenRail = new CardTokenRail { CardAnchor = this, Offset = TokenRailOffset, Companions = TokenRailCompanions };
+            AddChild(TokenRail);
+        }
         _bowDestination = Card.Bowed ? Mathf.Pi / 2 : 0;
         _bowAngle = (PreviousBowed ?? Card.Bowed) ? Mathf.Pi / 2 : 0;
         if (ReducedMotion) _bowAngle = _bowDestination;
@@ -90,6 +96,11 @@ public partial class CardTile : Button
     // The same projected quadrilateral drives drawing, hit testing and arrows.
     // Bow rotation takes place in the table plane before camera foreshortening.
     public bool AlignUnitRightEdge { get; set; }
+    public bool ShowTokenRail { get; set; } = true;
+    public float TokenRailOffset { get; set; }
+    public CardTile[] TokenRailCompanions { get; set; } = [];
+    public Func<string,string?>? TokenSourceName { get; set; }
+    public CardTokenRail? TokenRail { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
