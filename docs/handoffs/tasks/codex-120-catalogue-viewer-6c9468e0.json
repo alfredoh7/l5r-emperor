@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Approved catalogue gallery and inspection redesign started",
-  "validation": "Read issue 120, current main and overlapping PR 99 heading-only edit; generated source-derived cloth asset.",
-  "remaining": "Implementation, native visual comparisons, data and input validation are in progress.",
+  "lane": "shared",
+  "summary": "Built approved A catalogue gallery with B on-demand inspection, source-derived materials, real scans and authoritative support display",
+  "validation": "Native Godot reference/compact screenshots inspected against A/B; actual keyboard search, clan/family/support filters, click/reclick/Escape, non-overlap, exact scroll restoration, missing-scan and bounded cache checks pass. 110 content and 37 collaboration tests, 85 core, 33 published, 8 deck format, 13 AI, 5 server and 4 transport tests pass. Main-menu entry captured. Windows graphical playtest not performed.",
+  "remaining": "CI and Mendon review of printing/support data integration; Alfredo visual playtest. No rules authority changed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/120",
   "branch": "codex/120-catalogue-viewer",
-  "updated": "2026-09-09T17:46:28.556505+00:00"
+  "updated": "2026-09-09T18:08:21.308846+00:00"
 }

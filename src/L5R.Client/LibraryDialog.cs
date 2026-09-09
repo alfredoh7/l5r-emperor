@@ -1,587 +1,209 @@
 using Godot;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-
 namespace L5R.Client;
 
-/// <summary>Offline reference browser. Call LibraryDialog.Show(this) from a scene node.</summary>
+/// <summary>The approved open gallery and on-demand inspector, inside the existing game window.</summary>
 public static class LibraryDialog
 {
-    private const string BundlePath = "res://Content/library.json";
-    private static Bundle? _cached;
-
     public static void Show(Node parent)
     {
+        if(parent.GetTree().Root.GetNodeOrNull<CanvasLayer>("CatalogueLayer") is not null)return;
+        var layer=new CanvasLayer {Name="CatalogueLayer",Layer=80};parent.GetTree().Root.AddChild(layer);
         try
         {
-            if (_cached is null)
-            {
-                using var file = Godot.FileAccess.Open(BundlePath, Godot.FileAccess.ModeFlags.Read);
-                if (file is null) throw new InvalidOperationException("The reference library is missing from this build.");
-                _cached = JsonSerializer.Deserialize<Bundle>(file.GetAsText(), new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
-                }) ?? throw new InvalidOperationException("The reference library could not be read.");
-                if (_cached.SchemaVersion != 1) throw new InvalidOperationException("This reference library uses an unsupported format.");
-            }
-            new Browser(_cached).Open(parent);
+            var screen=new CatalogueScreen();layer.AddChild(screen);screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+            screen.Closed+=layer.QueueFree;
         }
-        catch (Exception error)
+        catch(Exception e){layer.QueueFree();GD.PushError("Catalogue: "+e.Message);var alert=new AcceptDialog {DialogText="The catalogue could not be loaded. Please verify the game content bundle.",Title="Card library"};parent.AddChild(alert);alert.CloseRequested+=alert.QueueFree;alert.Confirmed+=alert.QueueFree;alert.Canceled+=alert.QueueFree;alert.PopupCentered();}
+    }
+}
+
+public partial class CatalogueScreen : Control
+{
+    public event Action? Closed;
+    public CatalogueData Data {get;}=new();
+    public CatalogueScans Scans {get;}=new();
+    public CatalogueGrid Grid {get;private set;}=null!;
+    public LineEdit Search {get;private set;}=null!;
+    public Rect2 InspectorRect=>_detail.GetGlobalRect();
+    public string SelectedId=>_selected?.Id??"";
+    private readonly Control _canvas=new(),_header=new(),_clans=new(),_filters=new(),_detail=new();
+    private Control _backdrop=null!,_detailFrame=null!;
+    private readonly Dictionary<string,Button> _clanButtons=[],_familyButtons=[];
+    private OptionButton _type=null!,_keyword=null!,_sort=null!,_set=null!;
+    private Button _allCards=null!,_playable=null!,_clear=null!,_back=null!,_closeDetail=null!;
+    private Label _count=null!,_footer=null!;
+    private ScrollContainer _detailScroll=null!;
+    private VBoxContainer _detailBody=null!;
+    private TextureRect? _face;
+    private Label? _scanState;
+    private CatalogueData.Card? _selected;
+    private CatalogueData.Printing? _printing;
+    private PopupPanel? _advanced;
+    private string _clan="All",_family="All";
+    private bool _playableOnly,_loading;
+    private float _w,_h;
+    private int _browseScroll;
+    public override void _Ready()
+    {
+        Theme=CatalogueArt.Theme();MouseFilter=MouseFilterEnum.Stop;FocusMode=FocusModeEnum.All;
+        _backdrop=CatalogueArt.Backdrop();AddChild(_backdrop);_backdrop.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        AddChild(_canvas);_canvas.AddChild(_header);_canvas.AddChild(_clans);_canvas.AddChild(_filters);
+        Grid=new CatalogueGrid(Scans);_canvas.AddChild(Grid);Grid.Selected=SelectCard;
+        _canvas.AddChild(_detail);_detailFrame=CatalogueArt.Backdrop();_detail.AddChild(_detailFrame);_detailFrame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        _detail.Visible=false;
+        _back=CatalogueArt.Button("‹  Back",()=>Closed?.Invoke());Put(_header,_back,28,17,130,44);_back.AddThemeStyleboxOverride("normal",new StyleBoxEmpty());
+        Put(_header,CatalogueArt.Label("Card library",44,true),202,12,390,60);
+        Search=new LineEdit {PlaceholderText="Search cards, keywords, or rules…",ClearButtonEnabled=true};Put(_header,Search,618,20,600,44);Search.TextChanged+=_=>ApplyFilter();
+        _clear=CatalogueArt.Button("Clear filters",ResetFilters);_header.AddChild(_clear);
+        var clanNames=new[]{"All","Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"};
+        foreach(var clan in clanNames)
         {
-            GD.PushError($"Library: {error.Message}");
-            var dialog = new AcceptDialog
-            {
-                Title = "Library unavailable", Theme = Palette.MakeTheme(),
-                DialogText = "The packaged reference library could not be loaded. Rebuild the content bundle and open the library again.",
-                DialogAutowrap = true, Size = new Vector2I(520, 180)
-            };
-            parent.AddChild(dialog);
-            dialog.Confirmed += dialog.QueueFree;
-            dialog.Canceled += dialog.QueueFree;
-            dialog.PopupCentered();
+            var b=CatalogueArt.Button("",()=>{_clan=clan;ApplyFilter();});b.AccessibilityName=clan+" cards";b.TooltipText=clan=="All"?"All clans":clan+" cards";_clans.AddChild(b);_clanButtons[clan]=b;
+            b.AddChild(CatalogueArt.Clan(clan));b.AddChild(CatalogueArt.Label(clan,18));
         }
+        foreach(var family in new[]{"All","Dynasty","Fate","Strongholds"})
+        {var b=CatalogueArt.Button(family,()=>{_family=family;ApplyFilter();});_filters.AddChild(b);_familyButtons[family]=b;}
+        _type=Option("Type",Data.Cards.SelectMany(c=>c.Types).Distinct().Order().ToArray());_filters.AddChild(_type);
+        _keyword=Option("Keywords",Data.Cards.SelectMany(c=>c.Keywords).Distinct().Order().ToArray());_filters.AddChild(_keyword);
+        var more=CatalogueArt.Button("More filters",ShowAdvanced);more.Name="MoreFilters";_filters.AddChild(more);
+        _allCards=CatalogueArt.Button("◉  Entire catalogue",()=>{_playableOnly=false;ApplyFilter();});_filters.AddChild(_allCards);
+        _playable=CatalogueArt.Button("○  Playable now",()=>{_playableOnly=true;ApplyFilter();});_filters.AddChild(_playable);
+        _sort=Option("",["Name A–Z","Name Z–A","Gold cost","Force","Chi"]);_filters.AddChild(_sort);
+        _count=CatalogueArt.Label("",16);_canvas.AddChild(_count);
+        _footer=CatalogueArt.Label("Click a card to inspect  ·  Esc to return",16);_footer.HorizontalAlignment=HorizontalAlignment.Center;_canvas.AddChild(_footer);
+        var density=Option("",["Small cards","Medium cards","Large cards"]);density.Name="Density";density.Selected=1;density.ItemSelected+=i=>{Grid.Density=(int)i;Grid.LayoutCards();};_canvas.AddChild(density);
+        _closeDetail=CatalogueArt.Button("×",CloseInspector);_closeDetail.TooltipText="Close card details · Esc";Put(_detail,_closeDetail,0,0,44,44);
+        _detailScroll=new ScrollContainer {HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};_detail.AddChild(_detailScroll);
+        _detailBody=new VBoxContainer {SizeFlagsHorizontal=SizeFlags.ExpandFill};_detailBody.AddThemeConstantOverride("separation",12);_detailScroll.AddChild(_detailBody);
+        _set=Option("All printings",Data.Cards.SelectMany(c=>c.Printings).Select(p=>p.Set).Where(s=>s!="Game printing").Distinct().Order().ToArray());
+        AddChild(_set);_set.Visible=false;
+        Resized+=Fit;Scans.Changed+=UpdateFace;TreeExiting+=Scans.Close;
+        ApplyFilter();Fit();GrabFocus();
     }
-
-    private sealed class Browser(Bundle data)
+    private static void Put(Control parent,Control child,float x,float y,float w,float h){parent.AddChild(child);child.Position=new Vector2(x,y);child.Size=new Vector2(w,h);}
+    private OptionButton Option(string first,string[] values)
     {
-        private readonly Dictionary<string, Card> _cards = data.Cards.ToDictionary(card => card.Id);
-        private readonly Dictionary<string, Texture2D> _textures = [];
-
-        public void Open(Node parent)
+        var o=new OptionButton {FitToLongestItem=false,ClipText=true};if(first!="")o.AddItem(first);foreach(var value in values)o.AddItem(value);o.GetPopup().AllowSearch=true;o.GetPopup().MaxSize=new Vector2I(700,500);o.TooltipText="Type while this menu is open to jump to an option.";o.ItemSelected+=_=>ApplyFilter();return o;
+    }
+    private string Value(OptionButton o)=>o.Selected<=0?"":o.GetItemText(o.Selected);
+    public void ApplyFilter()
+    {
+        if(_loading||Grid is null||_sort is null)return;
+        var results=Data.Filter(Search.Text,_clan,_family,Value(_type),Value(_keyword),_playableOnly,_sort.GetItemText(_sort.Selected),_set is null?"":Value(_set));
+        Grid.SetCards(results);_count.Text=$"{results.Length:N0} {(results.Length==1?"result":"results")}  ·  {Data.Cards.Length:N0} cards";
+        foreach(var (key,b) in _clanButtons)Highlight(b,key==_clan);
+        foreach(var (key,b) in _familyButtons)Highlight(b,key==_family);
+        _allCards.Text=(_playableOnly?"○":"◉")+"  Entire catalogue";_playable.Text=(_playableOnly?"◉":"○")+"  Playable now";
+        Highlight(_allCards,!_playableOnly);Highlight(_playable,_playableOnly);
+        _clear.Visible=Search.Text!=""||_clan!="All"||_family!="All"||Value(_type)!=""||Value(_keyword)!=""||_playableOnly||(_set is not null&&Value(_set)!="");
+        _footer.Text=results.Length==0?"No matching cards · Clear filters or try a shorter search":"Click a card to inspect  ·  Esc to return";
+        if(_selected is not null&&!results.Any(c=>c.Id==_selected.Id))CloseInspector();
+    }
+    private void Highlight(Button b,bool active)
+    {
+        var clan=_clanButtons.ContainsValue(b);
+        var style=Palette.Box(active?new Color("30271a"):clan?Colors.Transparent:new Color("0a1115"),active?new Color("d2aa66"):new Color("51442d"),6,2);
+        if(clan&&!active){style.BorderWidthLeft=style.BorderWidthTop=style.BorderWidthBottom=0;}
+        if(active){style.ShadowColor=new Color(.86f,.65f,.31f,.22f);style.ShadowSize=6;style.BorderWidthLeft=style.BorderWidthRight=style.BorderWidthTop=style.BorderWidthBottom=2;}
+        b.AddThemeStyleboxOverride("normal",style);
+    }
+    public void ResetFilters()
+    {_loading=true;Search.Text="";_clan="All";_family="All";_playableOnly=false;_type.Selected=0;_keyword.Selected=0;_set.Selected=0;_loading=false;ApplyFilter();}
+    private void Fit()
+    {
+        if(Grid is null||Size.X<100)return;
+        // Scale only below 1440 to keep small windows usable; the grid genuinely reflows.
+        var scale=Math.Min(1f,Size.X/1440f);scale=Math.Max(.66f,scale);
+        _canvas.Scale=Vector2.One*scale;_w=Size.X/scale;_h=Size.Y/scale;_canvas.Size=new Vector2(_w,_h);
+        _header.Size=new Vector2(_w,78);Search.Size=new Vector2(Math.Max(300,_w-1028),44);_clear.Position=new Vector2(_w-195,20);_clear.Size=new Vector2(150,44);
+        var dw=Math.Clamp(_w*.275f,360,460);var galleryWidth=_w-88-(_detail.Visible?dw+24:0);
+        _clans.Position=new Vector2(44,82);_clans.Size=new Vector2(galleryWidth,78);
+        var cw=galleryWidth/11;
+        var i=0;foreach(var b in _clanButtons.Values){b.Position=new Vector2(i++*cw,0);b.Size=new Vector2(cw-2,78);var icon=b.GetChild<Control>(0);icon.Position=new Vector2((cw-42)/2,5);icon.Size=new Vector2(40,40);var label=b.GetChild<Label>(1);label.Position=new Vector2(0,46);label.Size=new Vector2(cw,26);label.HorizontalAlignment=HorizontalAlignment.Center;}
+        _filters.Position=new Vector2(44,180);_filters.Size=new Vector2(_w-88,40);var x=0f;
+        foreach(var (key,b) in _familyButtons){var width=key=="Strongholds"?130:84;b.Position=new Vector2(x,0);b.Size=new Vector2(width,40);x+=width;}
+        x+=18;foreach(var b in new Control[]{_type,_keyword,_filters.GetNode<Button>("MoreFilters")}){b.Position=new Vector2(x,0);b.Size=new Vector2(126,40);x+=134;}
+        x+=12;_allCards.Position=new Vector2(x,0);_allCards.Size=new Vector2(180,40);x+=185;_playable.Position=new Vector2(x,0);_playable.Size=new Vector2(150,40);
+        _sort.Position=new Vector2(_w-278,0);_sort.Size=new Vector2(190,40);
+        if(_detail.Visible){_allCards.Position=new Vector2(0,49);_playable.Position=new Vector2(190,49);_sort.Position=new Vector2(galleryWidth-190,49);}
+        var gridTop=_detail.Visible?287:238;
+        Grid.Position=new Vector2(36,gridTop);Grid.Size=new Vector2(galleryWidth+16,_h-gridTop-52);
+        _detail.Position=new Vector2(_w-dw-28,82);_detail.Size=new Vector2(dw,_h-129);
+        _closeDetail.Position=new Vector2(dw-62,15);_closeDetail.Size=new Vector2(42,42);
+        _detailScroll.Position=new Vector2(22,65);_detailScroll.Size=new Vector2(dw-44,_detail.Size.Y-88);
+        _detailBody.CustomMinimumSize=new Vector2(dw-64,0);
+        if(_face is not null)_face.CustomMinimumSize=new Vector2(0,Math.Min((dw-70)*1.4f,_detail.Size.Y-370));
+        _count.Position=new Vector2(45,_h-38);_count.Size=new Vector2(340,27);
+        _footer.Position=new Vector2(390,_h-38);_footer.Size=new Vector2(_w-1000,27);
+        var density=_canvas.GetNode<OptionButton>("Density");density.Position=new Vector2(_w-255,_h-44);density.Size=new Vector2(210,34);
+        Grid.LayoutCards();QueueRedraw();
+    }
+    public override void _Draw()
+    {
+        var s=_canvas.Scale.X;foreach(var y in new[]{78f,163f,229f})DrawLine(new Vector2(25,y*s),new Vector2((y>78&&_detail.Visible?_detail.Position.X-12:_w-25)*s,y*s),new Color(.56f,.43f,.22f,.6f),1);
+    }
+    public void SelectCard(CatalogueData.Card card)
+    {
+        if(_selected?.Id==card.Id){CloseInspector();return;}
+        if(!_detail.Visible)_browseScroll=Grid.ScrollVertical;
+        _selected=card;_printing=card.Printings.FirstOrDefault();_detail.Visible=true;Grid.Select(card.Id);BuildInspector();Fit();Callable.From(()=>{if(_selected?.Id==card.Id)Grid.EnsureCard(card.Id);}).CallDeferred();
+    }
+    public void CloseInspector()
+    {_selected=null;_printing=null;_detail.Visible=false;Grid.Select(null);Fit();Grid.ScrollVertical=_browseScroll;Grid.GrabFocus();}
+    private void BuildInspector()
+    {
+        if(_selected is null)return;var card=_selected;Palette.Clear(_detailBody);
+        foreach(var label in _detail.GetChildren().OfType<Label>().ToArray()){_detail.RemoveChild(label);label.QueueFree();}
+        Put(_detail,CatalogueArt.Label("Card details",26,true),22,20,275,34);
+        _face=new TextureRect {ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,TextureFilter=TextureFilterEnum.LinearWithMipmaps};_detailBody.AddChild(_face);
+        _scanState=CatalogueArt.Label("",15);_scanState.AutowrapMode=TextServer.AutowrapMode.WordSmart;_detailBody.AddChild(_scanState);
+        var status=CatalogueArt.Label(card.Playable?"✓  Game version playable":"Not yet playable",18);status.HorizontalAlignment=HorizontalAlignment.Center;
+        var statusPanel=new PanelContainer();statusPanel.AddThemeStyleboxOverride("panel",Palette.Box(card.Playable?new Color("203327"):new Color("2e2720"),new Color("776644"),8));statusPanel.AddChild(status);_detailBody.AddChild(statusPanel);
+        _detailBody.AddChild(CatalogueArt.Label(card.Name,23));
+        var printing=new OptionButton {FitToLongestItem=false};foreach(var p in card.Printings)printing.AddItem(p.Label);
+        if(card.Printings.Length==0){printing.AddItem("No scan indexed");printing.Disabled=true;}
+        printing.ItemSelected+=i=>{_printing=card.Printings[(int)i];UpdateFace();};_detailBody.AddChild(printing);
+        AddDisclosure("Rules text",()=>{
+            var body=new VBoxContainer();body.AddChild(Palette.Wrapped("Current Oracle reference",14,CatalogueArt.Gold));body.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(card.CurrentOracleText)?"No rules text recorded in the catalogue.":CatalogueData.PlainText(card.CurrentOracleText),18,CatalogueArt.Ivory));
+            if(card.Definition is {} def){body.AddChild(new HSeparator());body.AddChild(Palette.Wrapped("Game printing / implemented profile",14,CatalogueArt.Gold));body.AddChild(Palette.Wrapped(def.Text.Length>0?def.Text:"No printed rules text in the implemented definition.",18,CatalogueArt.Ivory));}
+            body.AddChild(Palette.Wrapped("Oracle wording can include later errata. Alternate scans do not change the game's pinned printing.",14,CatalogueArt.Muted));return body;});
+        AddDisclosure("Printing details",()=>{
+            var body=new VBoxContainer();body.AddChild(Palette.Wrapped(string.Join(" · ",card.Types.Concat(card.Clans)),17,CatalogueArt.Ivory));
+            body.AddChild(Palette.Wrapped(string.Join(" · ",card.Keywords),16,CatalogueArt.Gold));
+            body.AddChild(Palette.Wrapped(string.Join("   ",card.Stats.Select(s=>s.Key+" "+string.Join(" / ",s.Value))),16,CatalogueArt.Ivory));
+            body.AddChild(Palette.Wrapped("Catalogue membership: Age of Conquest (Emperor). Scan selection is a reference, not certification of historical legality.",14,CatalogueArt.Muted));
+            var source=CatalogueArt.Button("Open Oracle source ↗",()=>{if(card.SourceUrl.StartsWith("https://oracleofthevoid.com/",StringComparison.Ordinal))OS.ShellOpen(card.SourceUrl);});body.AddChild(source);
+            var scan=CatalogueArt.Button("Open selected scan source ↗",()=>{if(_printing?.SourceUrl.StartsWith("https://images.oracleofthevoid.com/",StringComparison.Ordinal)==true)OS.ShellOpen(_printing.SourceUrl);});body.AddChild(scan);
+            var retry=CatalogueArt.Button("Retry missing scan",()=>{Scans.Retry();UpdateFace();});body.AddChild(retry);return body;});
+        _detailScroll.ScrollVertical=0;UpdateFace();
+    }
+    private void AddDisclosure(string label,Func<Control> create)
+    {
+        var box=new VBoxContainer {Visible=false};var button=CatalogueArt.Button(label+"  ›",()=>{if(box.GetChildCount()==0)box.AddChild(create());box.Visible=!box.Visible;if(box.Visible)Callable.From(()=>_detailScroll.EnsureControlVisible(box)).CallDeferred();});box.VisibilityChanged+=()=>button.Text=label+(box.Visible?"  ▾":"  ›");button.Alignment=HorizontalAlignment.Left;button.CustomMinimumSize=new Vector2(0,42);_detailBody.AddChild(button);_detailBody.AddChild(box);
+    }
+    private void UpdateFace(){if(_face is null||_selected is null)return;_face.Texture=Scans.Get(_printing);if(_scanState is not null){_scanState.Visible=_face.Texture is null;_scanState.Text=Scans.State(_printing);} }
+    private void ShowAdvanced()
+    {
+        if(_advanced is null)
         {
-            var dialog = new Window
-            {
-                Title = "Reference library", Theme = LibraryTheme(),
-                Size = new Vector2I(1280, 790), MinSize = new Vector2I(960, 600),
-                ContentScaleMode = Window.ContentScaleModeEnum.Disabled,
-                WrapControls = false, Unresizable = false, Exclusive = true, Transient = true
-            };
-            parent.AddChild(dialog);
-            dialog.CloseRequested += dialog.QueueFree;
-            dialog.WindowInput += input =>
-            {
-                if (input is InputEventKey { Pressed: true, Keycode: Key.Escape })
-                {
-                    dialog.SetInputAsHandled();
-                    dialog.QueueFree();
-                }
-            };
-            var panel = new PanelContainer { ClipContents = true };
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(Palette.Ink, Palette.Gold, 20));
-            dialog.AddChild(panel);
-            panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-            // A plain Control keeps transient text minimum sizes from expanding the
-            // window. Header, scrolling workspace, and footer have separate bounds.
-            var body = new Control { ClipContents = true };
-            panel.AddChild(body);
-            var header = new VBoxContainer { ClipContents = true };
-            header.AddChild(Palette.Text("The collection", 30, Palette.Paper, true));
-            header.AddChild(Palette.Wrapped("Your imported decks, the Emperor reference catalogue, and supplied card scans. These reference decks are not yet playable.", 16, Palette.PaperDim));
-            body.AddChild(header);
-            header.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.TopWide);
-            header.OffsetBottom = 96;
-            var workspace = new Control { ClipContents = true };
-            body.AddChild(workspace);
-            workspace.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
-            workspace.OffsetTop = 104;
-            workspace.OffsetBottom = -64;
-            var tabs = new TabContainer
-            {
-                SizeFlagsVertical = Control.SizeFlags.ExpandFill,
-                UseHiddenTabsForMinSize = false, ClipContents = true
-            };
-            tabs.AddChild(DeckTab());
-            tabs.AddChild(CatalogueTab());
-            tabs.AddChild(ArtworkTab());
-            workspace.AddChild(tabs);
-            tabs.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.TopLeft);
-            void FitTabs() => tabs.Size = workspace.Size;
-            workspace.Resized += FitTabs;
-            tabs.MinimumSizeChanged += () => Callable.From(FitTabs).CallDeferred();
-            var footer = new HBoxContainer();
-            body.AddChild(footer);
-            footer.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.BottomWide);
-            footer.OffsetTop = -44;
-            footer.AddChild(new Control { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill });
-            var close = Palette.Button("Return to table", dialog.QueueFree);
-            close.CustomMinimumSize = new Vector2(180, 44);
-            footer.AddChild(close);
-            dialog.PopupCenteredClamped(new Vector2I(1280, 790), 0.94f);
+            _advanced=new PopupPanel {Theme=Theme};AddChild(_advanced);var box=new VBoxContainer();box.AddThemeConstantOverride("separation",14);_advanced.AddChild(box);
+            box.AddChild(CatalogueArt.Label("More filters",22,true));box.AddChild(CatalogueArt.Label("Printing set",17));_set.CustomMinimumSize=new Vector2(330,42);_set.Reparent(box);_set.Visible=true;
+            box.AddChild(CatalogueArt.Label("Scans download on demand.\nLoaded scans remain available offline.",16));
+            var offline=new CheckBox {Text="Use cached scans only",ButtonPressed=Scans.Offline};offline.Toggled+=v=>{Scans.Offline=v;Scans.Retry();};box.AddChild(offline);
+            box.AddChild(CatalogueArt.Button("Imported decks & source archive",()=>{_advanced.Hide();LegacyLibraryDialog.Show(this);}));
+            box.AddChild(CatalogueArt.Button("Done",()=>_advanced.Hide()));
         }
-
-        private Control DeckTab()
+        _advanced.PopupCentered(new Vector2I(410,330));
+    }
+    public override void _UnhandledInput(InputEvent e)
+    {
+        if(e is InputEventKey {Pressed:true,Echo:false} key)
         {
-            var page = Page("Imported decks");
-            var layout = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-            page.AddChild(layout);
-            var navigation = Column(225);
-            navigation.AddChild(Palette.Text($"{data.Decks.Length} imported decks", 18, Palette.Paper, true));
-            var decks = List();
-            foreach (var deck in data.Decks)
-            {
-                var index = decks.AddItem(deck.Name);
-                decks.SetItemTooltip(index, $"{deck.DeclaredEra} source label · {deck.CardCount} supplied cards");
-            }
-            navigation.AddChild(decks);
-            navigation.AddChild(Palette.Wrapped("Era names are labels from the supplied deck files.", 14, Palette.Muted));
-            layout.AddChild(navigation);
-            var contents = Column(370);
-            var title = Palette.Text("", 24, Palette.Paper, true);
-            title.ClipText = true;
-            var summary = Palette.Wrapped("", 15, Palette.PaperDim);
-            var status = Palette.Wrapped("", 14, Palette.Gold);
-            contents.AddChild(title);
-            contents.AddChild(summary);
-            contents.AddChild(status);
-            var entries = List();
-            contents.AddChild(entries);
-            layout.AddChild(contents);
-            var detail = DetailColumn();
-            layout.AddChild(detail.Scroll);
-            Deck? selected = null;
-
-            void SelectEntry(int index)
-            {
-                if (selected is null || index < 0 || index >= selected.Entries.Length) return;
-                var entry = selected.Entries[index];
-                if (entry.CardId is not null && _cards.TryGetValue(entry.CardId, out var card))
-                    ShowCard(detail.Content, card, $"{entry.Quantity} in {selected.Name}");
-                else
-                {
-                    Palette.Clear(detail.Content);
-                    detail.Content.AddChild(Title(entry.Name));
-                    detail.Content.AddChild(Palette.Text($"{entry.Quantity} supplied · identity unresolved", 15, Palette.Gold));
-                    detail.Content.AddChild(Palette.Wrapped(entry.ResolutionReason, 16, Palette.PaperDim));
-                    detail.Content.AddChild(Palette.Wrapped("The saved catalogue covers Emperor. An unmatched name in an Ivory-labelled file may belong to a different era; no identity or edition is inferred.", 16, Palette.PaperDim));
-                }
-                detail.Scroll.ScrollVertical = 0;
-            }
-
-            void SelectDeck(int index)
-            {
-                selected = data.Decks[index];
-                title.Text = selected.Name;
-                var partitions = selected.PartitionCounts;
-                summary.Text = $"{selected.DeclaredEra} source label · {selected.CardCount} supplied cards\n"
-                    + string.Join(" · ", partitions.Select(part => $"{PartitionName(part.Key)} {part.Value}"));
-                var resolved = selected.ResolutionCounts.GetValueOrDefault("resolved");
-                status.Text = $"{resolved}/{selected.EntryCount} entries identified · legality unverified";
-                entries.Clear();
-                for (var i = 0; i < selected.Entries.Length; i++)
-                {
-                    var entry = selected.Entries[i];
-                    entries.AddItem($"{entry.Quantity}×  {entry.Name}");
-                    entries.SetItemTooltip(i, entry.CardId is null ? "Identity unresolved" : string.Join(" · ", entry.Types));
-                    if (entry.CardId is null) entries.SetItemCustomFgColor(i, Palette.Gold);
-                }
-                if (selected.Entries.Length > 0) { entries.Select(0); SelectEntry(0); }
-            }
-
-            decks.ItemSelected += index => SelectDeck((int)index);
-            entries.ItemSelected += index => SelectEntry((int)index);
-            if (data.Decks.Length > 0) { decks.Select(0); SelectDeck(0); }
-            return page;
+            if(key.Keycode==Key.F11)return;
+            if(key.Keycode==Key.Escape){if(_detail.Visible)CloseInspector();else Closed?.Invoke();}
+            else if((key.CtrlPressed||key.MetaPressed)&&key.Keycode==Key.F)Search.GrabFocus();
+            GetViewport().SetInputAsHandled();
         }
-
-        private Control CatalogueTab()
-        {
-            var page = Page("Card catalogue");
-            page.AddChild(Palette.Wrapped($"Oracle of the Void · Emperor catalogue membership · saved {data.CatalogueSource.RetrievedOn}. Current text may include later wording or errata; historical legality and game support are unverified.", 15, Palette.PaperDim));
-            var search = new LineEdit
-            {
-                PlaceholderText = "Search names, clans, keywords, or rules text…", ClearButtonEnabled = true,
-                CustomMinimumSize = new Vector2(0, 44), SizeFlagsHorizontal = Control.SizeFlags.ExpandFill,
-                TooltipText = "Every search word must appear in the card name or metadata."
-            };
-            var tools = new HBoxContainer();
-            tools.AddChild(search);
-            var type = new OptionButton { CustomMinimumSize = new Vector2(180, 44) };
-            type.AddItem("All card types");
-            foreach (var item in data.Cards.SelectMany(card => card.Types).Distinct().Order()) type.AddItem(item);
-            tools.AddChild(type);
-            page.AddChild(tools);
-            var layout = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-            var navigation = Column(445);
-            var count = Palette.Text("", 15, Palette.Muted);
-            navigation.AddChild(count);
-            var results = List();
-            navigation.AddChild(results);
-            layout.AddChild(navigation);
-            var detail = DetailColumn();
-            layout.AddChild(detail.Scroll);
-            page.AddChild(layout);
-            Card[] visible = [];
-            var searchable = data.Cards.Select(card => (Card: card,
-                Text: string.Join(" ", new[] { card.Name, card.CurrentOracleText }
-                    .Concat(card.Clans).Concat(card.Keywords).Concat(card.Types)).ToLowerInvariant())).ToArray();
-
-            void SelectCard(int index)
-            {
-                if (index < 0 || index >= visible.Length) return;
-                ShowCard(detail.Content, visible[index], "Reference metadata");
-                detail.Scroll.ScrollVertical = 0;
-            }
-
-            void Filter()
-            {
-                var terms = search.Text.ToLowerInvariant().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                var cardType = type.Selected == 0 ? null : type.GetItemText(type.Selected);
-                visible = searchable.Where(item => (cardType is null || item.Card.Types.Contains(cardType))
-                    && terms.All(term => item.Text.Contains(term, StringComparison.Ordinal))).Select(item => item.Card).ToArray();
-                results.Clear();
-                foreach (var card in visible)
-                {
-                    var index = results.AddItem(card.Name);
-                    results.SetItemTooltip(index, string.Join(" · ", card.Types.Concat(card.Clans)));
-                }
-                count.Text = $"{visible.Length:N0} of {data.Cards.Length:N0} cards · reference only";
-                if (visible.Length > 0) { results.Select(0); SelectCard(0); }
-                else
-                {
-                    Palette.Clear(detail.Content);
-                    detail.Content.AddChild(Title("No matching cards"));
-                    detail.Content.AddChild(Palette.Wrapped("Try a shorter name, another keyword, or all card types.", 16, Palette.PaperDim));
-                }
-            }
-
-            results.ItemSelected += index => SelectCard((int)index);
-            search.TextChanged += _ => Filter();
-            type.ItemSelected += _ => Filter();
-            Filter();
-            return page;
-        }
-
-        private Control ArtworkTab()
-        {
-            var page = Page("Uploaded artwork");
-            var linkedCount = data.Artwork.Count(art => art.MappingStatus == "source_path_match");
-            page.AddChild(Palette.Wrapped($"{data.Artwork.Length} supplied scans · {linkedCount} named by image paths in the Sun and Moon database, updated in 2017. These links do not verify the pictured printing or historical legality.", 15, Palette.PaperDim));
-            var layout = new HBoxContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-            page.AddChild(layout);
-            var gallery = Column(440);
-            var search = new LineEdit
-            {
-                PlaceholderText = "Search card names or filenames…", ClearButtonEnabled = true,
-                CustomMinimumSize = new Vector2(0, 40)
-            };
-            gallery.AddChild(search);
-            var folders = new OptionButton { CustomMinimumSize = new Vector2(0, 40) };
-            folders.AddItem("All source folders");
-            foreach (var folder in data.Artwork.Select(art => art.SourceFolder).Distinct().Order()) folders.AddItem(folder);
-            gallery.AddChild(folders);
-            var count = Palette.Text("", 14, Palette.Muted);
-            gallery.AddChild(count);
-            var images = List();
-            images.IconMode = ItemList.IconModeEnum.Top;
-            images.FixedIconSize = new Vector2I(94, 132);
-            images.FixedColumnWidth = 132;
-            images.SameColumnWidth = true;
-            images.MaxColumns = 3;
-            images.MaxTextLines = 3;
-            images.AddThemeConstantOverride("v_separation", 18);
-            gallery.AddChild(images);
-            layout.AddChild(gallery);
-            var preview = DetailColumn();
-            layout.AddChild(preview.Scroll);
-            Artwork[] visible = [];
-
-            void SelectImage(int index)
-            {
-                if (index < 0 || index >= visible.Length) return;
-                var art = visible[index];
-                Palette.Clear(preview.Content);
-                var linked = art.MappingStatus == "source_path_match";
-                preview.Content.AddChild(Title(linked && !string.IsNullOrWhiteSpace(art.CardName) ? art.CardName : art.Filename));
-                preview.Content.AddChild(Palette.Wrapped($"{art.SourceFolder}/{art.Filename} · {art.Width} × {art.Height}", 14, Palette.PaperDim));
-                preview.Content.AddChild(Palette.Wrapped(linked
-                    ? "Source path match · printing and legality unverified"
-                    : art.MappingStatus == "ambiguous" ? "Multiple possible source records · identity unresolved" : "No unique source record linked", 14, Palette.Gold));
-                preview.Content.AddChild(new TextureRect
-                {
-                    Texture = Texture(art.ResourcePath),
-                    ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
-                    StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
-                    CustomMinimumSize = new Vector2(0, 360),
-                    SizeFlagsHorizontal = Control.SizeFlags.ExpandFill
-                });
-                if (linked)
-                {
-                    preview.Content.AddChild(new HSeparator());
-                    preview.Content.AddChild(Palette.Text("SUN AND MOON SOURCE · UPDATED 2017", 13, Palette.Muted));
-                    preview.Content.AddChild(Palette.Wrapped($"Database {art.DatabaseVersion} · {art.CardType}\nSource card ID {art.SourceCardId} · record {art.LegacyCardId}", 14, Palette.PaperDim));
-                    preview.Content.AddChild(Palette.Wrapped($"Database image path: {art.SourceImagePath}\nImage edition label: {art.ImageEdition}", 14, Palette.PaperDim));
-                    if (art.DeclaredLegalities.Length > 0)
-                        preview.Content.AddChild(Palette.Wrapped("Source legality tags (unverified): " + string.Join(" · ", art.DeclaredLegalities), 14, Palette.PaperDim));
-                    preview.Content.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(art.MappingReason)
-                        ? "The database names this uploaded file in its image path. The scan's printing still requires review."
-                        : art.MappingReason, 14, Palette.Muted));
-                    preview.Content.AddChild(Palette.Text("SOURCE RULES TEXT", 13, Palette.Muted));
-                    preview.Content.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(art.LegacyText)
-                        ? "No rules text recorded in this source record." : DisplayOracleText(art.LegacyText), 17));
-                    preview.Content.AddChild(Palette.Wrapped("This is the database's wording, not verified Emperor printing text or executable card behavior.", 14, Palette.Muted));
-                }
-                else if (!string.IsNullOrWhiteSpace(art.MappingReason))
-                    preview.Content.AddChild(Palette.Wrapped(art.MappingReason, 15, Palette.PaperDim));
-                preview.Scroll.ScrollVertical = 0;
-            }
-
-            void Filter()
-            {
-                var folder = folders.Selected == 0 ? null : folders.GetItemText(folders.Selected);
-                var terms = search.Text.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                visible = data.Artwork.Where(art => (folder is null || art.SourceFolder == folder)
-                    && terms.All(term => $"{art.CardName} {art.Filename} {art.SourceFolder} {art.CardType}".Contains(term, StringComparison.OrdinalIgnoreCase))).ToArray();
-                images.Clear();
-                foreach (var art in visible)
-                {
-                    var linked = art.MappingStatus == "source_path_match" && !string.IsNullOrWhiteSpace(art.CardName);
-                    var name = linked ? $"{art.CardName}\n{art.Filename}" : art.Filename;
-                    var index = images.AddItem(name, Texture(art.ResourcePath));
-                    images.SetItemTooltip(index, $"{name}\n{art.SourceFolder} · {(linked ? "2017 database path match; printing unverified" : "identity unresolved")}");
-                }
-                count.Text = $"{visible.Length} of {data.Artwork.Length} scans";
-                if (visible.Length > 0)
-                {
-                    images.Select(0); SelectImage(0);
-                    Callable.From(images.EnsureCurrentIsVisible).CallDeferred();
-                }
-                else
-                {
-                    Palette.Clear(preview.Content);
-                    preview.Content.AddChild(Title("No matching scans"));
-                    preview.Content.AddChild(Palette.Wrapped("Try a shorter card name or choose all source folders.", 16, Palette.PaperDim));
-                }
-            }
-
-            page.VisibilityChanged += () =>
-            {
-                if (page.IsVisibleInTree() && visible.Length > 0)
-                    Callable.From(images.EnsureCurrentIsVisible).CallDeferred();
-            };
-            images.ItemSelected += index => SelectImage((int)index);
-            folders.ItemSelected += _ => Filter();
-            search.TextChanged += _ => Filter();
-            Filter();
-            return page;
-        }
-
-        private Texture2D? Texture(string path)
-        {
-            if (_textures.TryGetValue(path, out var existing)) return existing;
-            var texture = GD.Load<Texture2D>(path);
-            if (texture is not null) _textures[path] = texture;
-            return texture;
-        }
-
-        private void ShowCard(VBoxContainer detail, Card card, string context)
-        {
-            Palette.Clear(detail);
-            detail.AddChild(Palette.Text(context, 14, Palette.Gold));
-            detail.AddChild(Title(card.Name));
-            detail.AddChild(Palette.Wrapped(string.Join(" · ", card.Types.Concat(card.DeckTypes).Concat(card.Clans)), 16, Palette.PaperDim));
-            if (card.Stats.Count > 0)
-            {
-                detail.AddChild(new HSeparator());
-                detail.AddChild(Palette.Wrapped(string.Join("    ", card.Stats.Select(stat => $"{StatName(stat.Key)} {string.Join(" / ", stat.Value)}")), 17));
-            }
-            if (card.Keywords.Length > 0) detail.AddChild(Palette.Wrapped(string.Join(" · ", card.Keywords), 15, Palette.Gold));
-            detail.AddChild(new HSeparator());
-            detail.AddChild(Palette.Text("CURRENT ORACLE TEXT", 13, Palette.Muted));
-            var displayedText = DisplayOracleText(card.CurrentOracleText);
-            detail.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(displayedText) ? "No rules text recorded in the saved catalogue." : displayedText, 17));
-            if (displayedText != card.CurrentOracleText)
-                detail.AddChild(Palette.Wrapped("Gold and bow symbols are shown as words in brackets.", 14, Palette.Muted));
-            detail.AddChild(Palette.Wrapped("Reference only. Review the Emperor printing before treating this wording as a historical rule. Source-linked scans are listed separately in Uploaded artwork; their printing era remains unverified.", 14, Palette.Muted));
-            foreach (var reference in card.LegacyReferences)
-            {
-                var source = new VBoxContainer { Visible = false };
-                source.AddThemeConstantOverride("separation", 12);
-                var toggle = Palette.Button("Show 2017 source reference", () => source.Visible = !source.Visible);
-                toggle.TooltipText = "Sun and Moon database wording and identity evidence";
-                source.VisibilityChanged += () => toggle.Text = source.Visible
-                    ? "Hide 2017 source reference" : "Show 2017 source reference";
-                detail.AddChild(toggle);
-                detail.AddChild(source);
-                source.AddChild(Palette.Text("SUN AND MOON · UPDATED 2017", 13, Palette.Muted));
-                source.AddChild(Palette.Wrapped($"Database {reference.DatabaseVersion} · source card ID {reference.SourceCardId}\nSource record {reference.LegacyCardId}", 14, Palette.PaperDim));
-                source.AddChild(Palette.Wrapped(reference.TextComparison == "same_plain_text"
-                    ? "Plain text matches current Oracle. Historical printing verification remains open."
-                    : "Wording differs from current Oracle and needs review. This comparison does not identify which wording is historically correct.", 14, Palette.Gold));
-                if (reference.MatchEvidence.Length > 0)
-                    source.AddChild(Palette.Wrapped("Identity evidence: " + string.Join(" · ", reference.MatchEvidence), 14, Palette.Muted));
-                if (reference.DeclaredLegalities.Length > 0)
-                    source.AddChild(Palette.Wrapped("Source legality tags (unverified): " + string.Join(" · ", reference.DeclaredLegalities), 14, Palette.Muted));
-                source.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(reference.LegacyText)
-                    ? "No rules text recorded in this source record." : DisplayOracleText(reference.LegacyText), 17));
-            }
-            if (card.SourceUrl.StartsWith("https://oracleofthevoid.com/", StringComparison.Ordinal))
-                detail.AddChild(Palette.Button("View source in browser ↗", () => OS.ShellOpen(card.SourceUrl)));
-        }
-    }
-
-    private static string DisplayOracleText(string text)
-    {
-        // Display substitutions only: the packaged source text remains unchanged.
-        var words = text.Replace(":bow:", "[Bow]", StringComparison.Ordinal);
-        return Regex.Replace(words, @":g(\d+|star):", match =>
-            $"[{(match.Groups[1].Value == "star" ? "*" : match.Groups[1].Value)} Gold]");
-    }
-
-    private static string PartitionName(string name) => name switch
-    {
-        "Pre-Game" => "Stronghold / pregame", "Starting holdings (selection unverified)" => "Starting holdings", _ => name
-    };
-
-    private static string StatName(string name) => name switch
-    {
-        "cost" => "Gold", "force" => "Force", "chi" => "Chi", "focus" => "Focus",
-        "honor" => "Honor requirement", "ph" => "Personal honor", "production" => "Gold production",
-        "startinghonor" => "Starting honor", "strength" => "Province strength", _ => name
-    };
-
-    private static Label Title(string text)
-    {
-        var label = Palette.Wrapped(text, 27);
-        label.AddThemeFontOverride("font", Palette.Title);
-        return label;
-    }
-
-    private static VBoxContainer Page(string name)
-    {
-        var page = new VBoxContainer { Name = name, SizeFlagsVertical = Control.SizeFlags.ExpandFill };
-        page.AddThemeConstantOverride("separation", 16);
-        return page;
-    }
-
-    private static VBoxContainer Column(int width, bool expand = false) => new()
-    {
-        CustomMinimumSize = new Vector2(width, 0),
-        SizeFlagsHorizontal = expand ? Control.SizeFlags.ExpandFill : Control.SizeFlags.Fill,
-        SizeFlagsVertical = Control.SizeFlags.ExpandFill
-    };
-
-    private static ItemList List()
-    {
-        var list = new ItemList
-        {
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
-            AutoHeight = false, AutoWidth = false, ClipContents = true,
-            AllowReselect = true, TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis
-        };
-        list.AddThemeConstantOverride("v_separation", 12);
-        list.AddThemeFontSizeOverride("font_size", 16);
-        return list;
-    }
-
-    private static (ScrollContainer Scroll, VBoxContainer Content) DetailColumn()
-    {
-        var scroll = new ScrollContainer
-        {
-            SizeFlagsHorizontal = Control.SizeFlags.ExpandFill, SizeFlagsVertical = Control.SizeFlags.ExpandFill,
-            HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled
-        };
-        var content = Column(0, true);
-        content.AddThemeConstantOverride("separation", 16);
-        scroll.AddChild(content);
-        return (scroll, content);
-    }
-
-    private static Theme LibraryTheme()
-    {
-        var theme = Palette.MakeTheme();
-        theme.SetStylebox("panel", "AcceptDialog", Palette.Box(Palette.Ink, Palette.Gold, 20));
-        theme.SetStylebox("panel", "TabContainer", Palette.Box(Palette.Ink, null, 18));
-        theme.SetStylebox("tab_selected", "TabContainer", Palette.Box(new Color("364b3b"), Palette.Gold, 14));
-        theme.SetStylebox("tab_unselected", "TabContainer", Palette.Box(new Color("22362c"), null, 14));
-        theme.SetColor("font_selected_color", "TabContainer", Palette.Paper);
-        theme.SetColor("font_unselected_color", "TabContainer", Palette.PaperDim);
-        theme.SetStylebox("panel", "ItemList", Palette.Box(new Color("17281f"), new Color("405344"), 10));
-        theme.SetStylebox("selected", "ItemList", Palette.Box(new Color("3b503f"), Palette.Gold, 6));
-        theme.SetStylebox("selected_focus", "ItemList", Palette.Box(new Color("3b503f"), Palette.Gold, 6));
-        theme.SetColor("font_color", "ItemList", Palette.PaperDim);
-        theme.SetColor("font_selected_color", "ItemList", Palette.Paper);
-        return theme;
-    }
-
-    private sealed class Bundle
-    {
-        public int SchemaVersion { get; set; }
-        public CatalogueSource CatalogueSource { get; set; } = new();
-        public Card[] Cards { get; set; } = [];
-        public Deck[] Decks { get; set; } = [];
-        public Artwork[] Artwork { get; set; } = [];
-    }
-
-    private sealed class CatalogueSource
-    {
-        public string RetrievedOn { get; set; } = "date unavailable";
-    }
-
-    private sealed class Card
-    {
-        public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string[] Types { get; set; } = [];
-        public string[] DeckTypes { get; set; } = [];
-        public string[] Clans { get; set; } = [];
-        public string[] Keywords { get; set; } = [];
-        public Dictionary<string, string[]> Stats { get; set; } = [];
-        public string CurrentOracleText { get; set; } = "";
-        public string SourceUrl { get; set; } = "";
-        public LegacyReference[] LegacyReferences { get; set; } = [];
-    }
-
-    private sealed class LegacyReference
-    {
-        public string LegacyCardId { get; set; } = "";
-        public string SourceCardId { get; set; } = "";
-        public string DatabaseVersion { get; set; } = "";
-        public string LegacyText { get; set; } = "";
-        public string TextComparison { get; set; } = "";
-        public string[] DeclaredLegalities { get; set; } = [];
-        public string[] MatchEvidence { get; set; } = [];
-    }
-
-    private sealed class Deck
-    {
-        public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string DeclaredEra { get; set; } = "";
-        public int CardCount { get; set; }
-        public int EntryCount { get; set; }
-        public Dictionary<string, int> PartitionCounts { get; set; } = [];
-        public Dictionary<string, int> ResolutionCounts { get; set; } = [];
-        public Entry[] Entries { get; set; } = [];
-    }
-
-    private sealed class Entry
-    {
-        public string Name { get; set; } = "";
-        public int Quantity { get; set; }
-        public string? CardId { get; set; }
-        public string ResolutionStatus { get; set; } = "";
-        public string ResolutionReason { get; set; } = "";
-        public string[] Types { get; set; } = [];
-        public string[] DeckTypes { get; set; } = [];
-    }
-
-    private sealed class Artwork
-    {
-        public string Filename { get; set; } = "";
-        public string CardName { get; set; } = "";
-        public string CardType { get; set; } = "";
-        public string LegacyCardId { get; set; } = "";
-        public string SourceCardId { get; set; } = "";
-        public string ImageEdition { get; set; } = "";
-        public string SourceImagePath { get; set; } = "";
-        public string[] DeclaredLegalities { get; set; } = [];
-        public string LegacyText { get; set; } = "";
-        public string DatabaseVersion { get; set; } = "";
-        public string MappingStatus { get; set; } = "unmapped";
-        public string MappingReason { get; set; } = "";
-        public string ResourcePath { get; set; } = "";
-        public string SourceFolder { get; set; } = "";
-        public int Width { get; set; }
-        public int Height { get; set; }
+        else if(e is InputEventMouseButton)GetViewport().SetInputAsHandled();
     }
 }
