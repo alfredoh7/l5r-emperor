@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Approved catalogue gallery and inspection redesign started",
+  "validation": "Read issue 120, current main and overlapping PR 99 heading-only edit; generated source-derived cloth asset.",
+  "remaining": "Implementation, native visual comparisons, data and input validation are in progress.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/120",
+  "branch": "codex/120-catalogue-viewer",
+  "updated": "2026-09-09T17:46:28.556505+00:00"
+}
