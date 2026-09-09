@@ -329,13 +329,15 @@ public sealed partial class MatchEngine
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
-            case Phase.AttackDeclaration: SetPhase(Phase.Dynasty,_state.ActivePlayerId); break;
+            // Declining to assign any Infantry is not a decision to skip the whole Attack Phase --
+            // Cavalry Maneuvers is a separate step that must still get its own opportunity, exactly
+            // as an empty Cavalry declaration below only declines further Cavalry, not the Battle
+            // Phase that follows it.
+            case Phase.AttackDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.DefenseAssignment:
             case Phase.CavalryDefense:
                 AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[]));
                 break;
-            // Unlike a pass in AttackDeclaration (which abandons the attack outright), passing here
-            // only declines further Cavalry assignments -- Infantry Maneuvers already committed.
             case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
@@ -360,15 +362,18 @@ public sealed partial class MatchEngine
     }
 
     // Infantry Maneuvers (AttackDeclaration/DefenseAssignment) always runs first; Cavalry Maneuvers
-    // (CavalryDeclaration/CavalryDefense) follows, using the same battlefields Infantry Maneuvers
-    // already fixed -- every non-destroyed enemy province, set once by the Infantry attacker step.
+    // (CavalryDeclaration/CavalryDefense) follows, adding to the same battlefields Infantry
+    // Maneuvers already opened -- only provinces where the attacker actually placed a unit,
+    // recomputed after each of the two attacker steps so a Cavalry-only or Infantry-only
+    // declaration is just as capable of putting a province up for battle as a mixed one.
     private void DeclareAttack(GameCommand command)
     {
         Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry);
-        if(!cavalry) _state.UnresolvedBattlefields=targets.Order().ToList();
+        _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
+            .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
         SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,1-command.PlayerId);
     }
@@ -377,7 +382,9 @@ public sealed partial class MatchEngine
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
         Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry);
-        SetPhase(cavalry?Phase.BattleSelection:Phase.CavalryDeclaration,_state.ActivePlayerId);
+        // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
+        // battlefield-selection/resolution phases outright rather than stall with zero choices.
+        SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
     private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry)
     {

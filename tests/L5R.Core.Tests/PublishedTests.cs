@@ -31,6 +31,7 @@ internal static class PublishedTests
             ("Items add Force and Chi even bowed; Armor and Weapon limits enforced", Attachments),
             ("Followers meet Personal Honor requirement and stay separate from Personality Force", Followers),
             ("Lion attack traits turn on and off as units move", AttackTraits),
+            ("Passing Infantry Maneuvers with nothing to assign still reaches Cavalry Maneuvers", CavalryAfterEmptyInfantry),
             ("Halls triggers on Combat destruction, not Resolution casualties", Ancestor),
             ("Lobby and Shunya use Favor with individual once-per-turn limits", Favor),
             ("Favor draw discards from hand and handles empty Fate deck", FavorCycle),
@@ -269,6 +270,20 @@ internal static class PublishedTests
         {
             var s=State(true);s.ActivePlayerId=1;var p=Add(s,id,1,Zone.Battlefield,province:0);var e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,attacking);p.Zone=Zone.Home;e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,home);p.Zone=Zone.Battlefield;s.ActivePlayerId=0;e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,home);
         }
+    }
+    private static void CavalryAfterEmptyInfantry()
+    {
+        // A pass with no Infantry to assign only declines Infantry Maneuvers -- it must not skip
+        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack.
+        var s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
+        var cavalry=Add(s,3623,0,Zone.Home); // Ikoma Natsu: printed Cavalry keyword.
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Eq(e.State.Phase,Phase.DefenseAssignment);
+        Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);Eq(e.State.PriorityPlayerId,0);
+        Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
+        Eq(Card(e,cavalry.Id).Zone,Zone.Battlefield);Eq(Card(e,cavalry.Id).ProvinceIndex,0);
+        Check(e.State.UnresolvedBattlefields.Contains(0));
+        Eq(e.State.Phase,Phase.CavalryDefense);
     }
     private static void Ancestor()
     {
