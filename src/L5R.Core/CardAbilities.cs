@@ -6,7 +6,11 @@ namespace L5R.Core;
 // (e.g. "Choose your performing unbowed Personality and target..."); most abilities leave it null
 // and use only their source card and Target. Trigger identifies what opens a Reaction-timing
 // ability's window; so far only "own-enters-play" exists (see Purchase()'s post-entry window).
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null);
+// UsageKey lets two catalog entries that are really one printed ability with a choice of effects
+// (e.g. "bow or straighten him") share a single once-per-turn use, instead of each half getting
+// its own independent use by virtue of being a separate dictionary key; defaults to the entry's
+// own id, which is every other ability's actual behavior.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null);
 
 public static class AbilityCatalog
 {
@@ -85,12 +89,14 @@ public static class AbilityCatalog
         // already-precedented extensions of existing target categories and primitives.
         ["reiyu-force-penalty"] = new("Battle", "Target enemy Force/Follower · Force penalty = Reiyu's Force", "enemy-force"),
         // "If opposed" is a per-ability presence Require (ValidateAbility), same shape as
-        // torazu-fire-attack's own Fire-token Require. Bow/straighten are two alternate abilities,
-        // matching the existing paid-bow/paid-straighten split, targeting any Personality.
-        ["horibe-bow"] = new("Battle", "If opposed · bow a target Personality", "personality"),
-        ["horibe-straighten"] = new("Battle", "If opposed · straighten a target Personality", "personality"),
-        ["atsumichi-bow"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · bow him", "personality-lower-honor-than-self"),
-        ["atsumichi-straighten"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · straighten him", "personality-lower-honor-than-self"),
+        // torazu-fire-attack's own Fire-token Require. Bow and straighten are the same single
+        // printed ability's two alternative effects (unlike paid-bow/paid-straighten, which are
+        // genuinely two separate abilities on unrelated cards) -- they share one UsageKey so using
+        // either spends the one use, rather than each half getting its own independent once-per-turn.
+        ["horibe-bow"] = new("Battle", "If opposed · bow a target Personality", "personality", UsageKey: "horibe-bow-straighten"),
+        ["horibe-straighten"] = new("Battle", "If opposed · straighten a target Personality", "personality", UsageKey: "horibe-bow-straighten"),
+        ["atsumichi-bow"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · bow him", "personality-lower-honor-than-self", UsageKey: "atsumichi-bow-straighten"),
+        ["atsumichi-straighten"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · straighten him", "personality-lower-honor-than-self", UsageKey: "atsumichi-bow-straighten"),
         ["tetsuo-destroy-attachment"] = new("Battle", "Target an attachment · destroy it", "attachment"),
         ["tetsuo-destroy-weaker-weaponed"] = new("Battle", "Target an enemy Personality with fewer Weapons · destroy it", "enemy-personality-fewer-weapons-than-self"),
         // "Target another player's discarded Personality" is an owner restriction on the existing
@@ -259,7 +265,8 @@ public sealed partial class MatchEngine
         }
         // "Any number of times per turn" (Tactical Advantage): exempt from the once-per-turn dedupe
         // entirely -- its own cost (discarding a card) is the only real limit on repeated use.
-        Require(id == "tactical-advantage" || !uses.TryGetValue(id, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        var usageKey = ability.UsageKey ?? id;
+        Require(id == "tactical-advantage" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -391,7 +398,7 @@ public sealed partial class MatchEngine
         var source = command.CardId is null ? null : Card(command.CardId);
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
-        uses[id] = _state.TurnNumber;
+        uses[ability.UsageKey ?? id] = _state.TurnNumber;
         if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
             Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")

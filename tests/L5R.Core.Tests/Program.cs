@@ -1230,6 +1230,9 @@ static void ShinjoHoribeBowOrStraighten()
     var e2=MatchEngine.FromTestState(s2);
     Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:horibe2.Id,TargetId:enemy.Id,AbilityId:"horibe-bow"));
     Check(e2.State.Cards[enemy.Id].Bowed,"Bows the target enemy Personality");
+    // Bow and straighten are the same single printed ability's two effects, not two independent
+    // once-per-turn abilities: having just bowed, straightening (even a different target) is spent too.
+    Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:horibe2.Id,TargetId:horibe2.Id,AbilityId:"horibe-straighten"));
 }
 static void DojiAtsumichiBowOrStraighten()
 {
@@ -1237,10 +1240,14 @@ static void DojiAtsumichiBowOrStraighten()
     var atsumichi=Add(s,"oracle-l5r-2060",0,Zone.Battlefield,province:0); // Personal Honor 4
     var lowerHonor=Add(s,"training-crane-samurai",1,Zone.Battlefield,bowed:true,province:0); // PH 2
     var equalHonor=Add(s,"training-lion-dignitary",1,Zone.Battlefield,province:0); // PH 4: not lower
+    var another=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // a second eligible lower-Honor target
     var e=MatchEngine.FromTestState(s);
     Reject(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:equalHonor.Id,AbilityId:"atsumichi-bow"));
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:lowerHonor.Id,AbilityId:"atsumichi-straighten"));
     Check(!e.State.Cards[lowerHonor.Id].Bowed,"Straightens the lower-Honor target");
+    // Bow and straighten are the same single printed ability's two effects, not two independent
+    // once-per-turn abilities: having just straightened, bowing (even a different target) is spent too.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:another.Id,AbilityId:"atsumichi-bow"));
 }
 static void TetsuoDestroyAttachmentAndWeakerWeaponed()
 {
