@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Move macOS desktop CI to one repository-scoped runner on Alfredo’s Mac Studio; preserve hosted Windows/Linux checks and cancel superseded desktop runs.",
+  "validation": "Workflow inspected; runner installation and end-to-end CI validation in progress.",
+  "remaining": "Register and start runner; verify live macOS and Windows CI; request mdornbrook review before merging.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/100",
+  "branch": "codex/100-local-mac-runner",
+  "updated": "2026-09-09T13:04:05.798117+00:00"
+}
