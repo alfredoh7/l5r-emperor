@@ -1,0 +1,33 @@
+{
+  "Profile": "follower-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7450",
+      "Name": "Stalking Tiger",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Melee 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7450.jpg",
+      "Keywords": [
+        "Cat",
+        "Nonhuman"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "stalking-tiger-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

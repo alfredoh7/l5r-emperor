@@ -85,6 +85,9 @@ public sealed class PendingAttack
 {
     public string AbilityId { get; set; } = "";
     public int PlayerId { get; set; }
+    // The card that made the attack, when a card-specific post-attack effect (e.g. Tsuruchi Isas'
+    // "Move Isas home") needs the exact instance rather than just its controller.
+    public string? SourceId { get; set; }
     public string? TargetId { get; set; }
     public int Strength { get; set; }
     public string Kind { get; set; } = "";
