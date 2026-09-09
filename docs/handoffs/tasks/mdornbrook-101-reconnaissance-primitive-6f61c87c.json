@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build the Reconnaissance primitive: a per-player, per-province boolean (ProvinceState.Reconnaissance), HasReconnaissance/GrantReconnaissance, and an enemy-province targeting shape keyed by index rather than a card id. Once granted it persists until the province's card is replaced (Refill) or the province is destroyed (DestroyProvince). Training fixture (training-scout) exercises granting and a Reconnaissance-gated Battle effect ahead of any real card needing it, matching the Token/Attack primitive-first discipline. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 74/74 core tests (2 new: Reconnaissance, ReconnaissanceClearsOnProvinceChange), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "No published card exercises it yet; no UI surfacing; AbilityActions()'s generic action-discovery query does not yet enumerate province-index targets (only matters once a real card needs it).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/101",
+  "branch": "mdornbrook/101-reconnaissance-primitive",
+  "updated": "2026-09-09T13:09:58.663916+00:00"
+}

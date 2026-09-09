@@ -71,6 +71,10 @@ public static class AbilityCatalog
         // Import wave 2 (issue #97): the Attack primitive's first target-dependent strength.
         ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack"),
         ["asako-ume-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        // Training-only: exercises the Reconnaissance primitive (issue #93) ahead of any published
+        // card needing it -- a per-player, per-province boolean that gates only part of an effect.
+        ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
+        ["training-reconnaissance-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor if you have Reconnaissance there", "enemy-personality"),
     });
 }
 
@@ -86,6 +90,17 @@ public sealed partial class MatchEngine
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
+    // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
+    // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
+    // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
+    private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
+    private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
+    {
+        var province = Player(provinceOwnerId).Provinces[provinceIndex];
+        if (province.Reconnaissance[playerId]) return;
+        province.Reconnaissance[playerId] = true;
+        Emit("reconnaissanceGained", $"{Player(playerId).Name} gained Reconnaissance in {Player(provinceOwnerId).Name}'s province {provinceIndex + 1}.", playerId);
+    }
     // Ranged/Melee Attack strength; conditional bonuses (e.g. Shiro Shiba's Shugenja check) live here.
     // target is the candidate/chosen target, when one exists (deferred targeting means it may be
     // null); a target-dependent conditional simply falls back to its unconditional value then.
@@ -261,6 +276,14 @@ public sealed partial class MatchEngine
             Require(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
                 player.Provinces.Any(p => !p.Destroyed && p.CardId == id)), "Choose cards in your provinces.");
         }
+        // Reconnaissance is granted at a specific province, not a card -- selected by index
+        // (GameCommand.Province, already used by selectBattle) rather than TargetId/CardIds.
+        else if (ability.Target == "enemy-province")
+        {
+            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
+            Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
+                "Choose one of the enemy's provinces.");
+        }
         else
         {
             Require(command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
@@ -408,6 +431,10 @@ public sealed partial class MatchEngine
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
+            case "training-reconnaissance-strike":
+                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike");
                 break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;

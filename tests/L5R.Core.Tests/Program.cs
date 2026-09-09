@@ -74,7 +74,9 @@ var tests = new (string Name, Action Run)[]
     ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
     ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome),
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
-    ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack)
+    ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
+    ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
+    ("Reconnaissance is cleared when its province's card is replaced or the province is destroyed", ReconnaissanceClearsOnProvinceChange)
 };
 var failed=0;
 foreach(var test in tests)
@@ -948,6 +950,63 @@ static void AsakoUmeAttack()
     Add(s2,"training-spell",0,Zone.Attached,attachedTo:ume2.Id,province:0);
     var e2=MatchEngine.FromTestState(s2);
     Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==ume2.Id).Force,4,"A Spell attached raises her own Force by 1; the Attack's strength is unaffected");
+}
+static void Reconnaissance()
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var scout=Add(s,"training-scout",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    Check(!e.State.Players[1].Provinces[0].Reconnaissance[0],"Defaults to false");
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:4)); // out of range
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:0));
+    Check(e.State.Players[1].Provinces[0].Reconnaissance[0],"Granted for player 0 in player 1's province 0");
+    Check(!e.State.Players[1].Provinces[1].Reconnaissance[0],"Not granted at a different province");
+    Check(!e.State.Players[1].Provinces[0].Reconnaissance[1],"Not granted to the other player");
+    Check(!e.State.Players[0].Provinces[0].Reconnaissance[0],"Not granted in the granting player's own province");
+
+    // Move the same, now-Reconnaissance-carrying state into a battle and exercise the gated effect:
+    // with Reconnaissance in the target's province, the strike's Honor-loss portion proceeds.
+    var battle=e.State; battle.Phase=Phase.Battle; battle.CurrentBattleProvince=0; battle.UnresolvedBattlefields=[0]; battle.PriorityPlayerId=0;
+    Add(battle,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+    var scoutAtBattle=Add(battle,"training-scout",0,Zone.Battlefield,province:0);
+    var withRecon=Add(battle,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var eb=MatchEngine.FromTestState(battle);
+    var honorBefore=eb.State.Players[1].Honor;
+    Accept(eb,new GameCommand("useAbility",0,eb.Version,CardId:scoutAtBattle.Id,TargetId:withRecon.Id,AbilityId:"training-reconnaissance-strike"));
+    Equal(eb.State.Players[1].Honor,honorBefore-2,"Reconnaissance is present in this province: the Honor-loss portion proceeds");
+
+    // Without Reconnaissance, the same ability still succeeds -- its gated portion just does nothing.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Battle; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0]; s2.PriorityPlayerId=0;
+    Add(s2,"training-lion-samurai",0,Zone.Battlefield,province:0);
+    var scoutNoRecon=Add(s2,"training-scout",0,Zone.Battlefield,province:0);
+    var withoutRecon=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var en=MatchEngine.FromTestState(s2);
+    var honorBefore2=en.State.Players[1].Honor;
+    Accept(en,new GameCommand("useAbility",0,en.Version,CardId:scoutNoRecon.Id,TargetId:withoutRecon.Id,AbilityId:"training-reconnaissance-strike"));
+    Equal(en.State.Players[1].Honor,honorBefore2,"No Reconnaissance in this province: the action succeeds but its gated portion does nothing");
+}
+static void ReconnaissanceClearsOnProvinceChange()
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+    var scout=Add(s,"training-scout",1,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    var id=ProvinceCard(e,2);
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:2));
+    Check(e.State.Players[0].Provinces[2].Reconnaissance[1],"Granted before the province refills");
+    var dynasty=e.State; dynasty.Phase=Phase.Dynasty; dynasty.PriorityPlayerId=0; dynasty.ActivePlayerId=0;
+    e=MatchEngine.FromTestState(dynasty);
+    Accept(e,Cmd(e,"purchase",id:id,sources:e.QuotePurchase(0,id).Payments[0].SourceIds));
+    Check(!e.State.Players[0].Provinces[2].Reconnaissance[1],"Cleared once the province refills with a new, unseen card");
+
+    // Destroying a province also clears it (same precedent values as ProvinceThreshold).
+    var e2=Battle(9,2,6);
+    e2.State.Players[1].Provinces[0].Reconnaissance[0]=true;
+    Resolve(e2);
+    Check(e2.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
+    Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province is destroyed");
 }
 static void CarpenterCastleAttack()
 {

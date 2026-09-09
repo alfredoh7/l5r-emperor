@@ -516,6 +516,7 @@ public sealed partial class MatchEngine
         province.Destroyed=true;
         if(province.CardId is string id) { var card=Card(id); card.Zone=Zone.DynastyDiscard; card.FaceUp=true; card.ProvinceIndex=null; }
         province.CardId=null;
+        province.Reconnaissance=new bool[2];
         Emit("provinceDestroyed",$"{Player(owner).Name}'s province {province.Index+1} was destroyed.",owner);
         if(Player(owner).Provinces.All(p=>p.Destroyed)) Win(1-owner,"Military victory");
     }
@@ -614,6 +615,8 @@ public sealed partial class MatchEngine
         if(province.Destroyed || province.CardId is not null || player.DynastyDeck.Count==0) return;
         var id=player.DynastyDeck[0]; player.DynastyDeck.RemoveAt(0);
         province.CardId=id; var card=Card(id); card.Zone=Zone.Province; card.ProvinceIndex=province.Index; card.FaceUp=false;
+        // A new, unseen card: any prior Reconnaissance here was knowledge of the card that just left.
+        province.Reconnaissance=new bool[2];
         Emit("provinceRefilled",$"{player.Name} refilled province {province.Index+1} face down.",player.Id); // Neither player can inspect it.
     }
     private void GainHonor(int playerId,int amount,string reason)
