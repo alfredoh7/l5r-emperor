@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implements Terrain as a rules-engine primitive (issue #135): a Terrain-keyword Strategy plays via PlayStrategy as a Battle action with no target, capped at one Terrain per battlefield, landing in Zone.Battlefield instead of discarding. FinishBattleResolution discards it after battle effects apply. New terrain-at-battle target category lets a Battle ability target it. Client rendering needed no changes (Army/board rendering already has no Personality-type filter). Shared-file note: docs/ROADMAP.md is touched only to move the Terrain row from Not-started to the primitives table documenting this same rules change -- no unrelated doc edits, no client code touched, everything else is core engine.",
+  "validation": "New TerrainPrimitive test covers play, one-per-battlefield block, destroy via ability, replay after clearing, and auto-discard at resolution. Full suite 86/86+34/34+8/8 pass. tools/check.sh --skip-client passes.",
+  "remaining": "Training fixtures only, no published card yet. Client visual placement verified by code reading only. Open PR 92 overlaps these files but appears based on a stale branch point; ordinary merge-conflict resolution applies when it lands.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/135",
+  "branch": "mdornbrook/135-terrain-primitive",
+  "updated": "2026-09-09T21:06:24.267467+00:00"
+}

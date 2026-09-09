@@ -63,6 +63,9 @@ public static class AbilityCatalog
         // card needing it -- proves strength can be raised or negated by either side before resolution.
         ["training-attack-boost"] = new("Reaction", "Training: +2 to a pending attack", "none", Trigger: "before-attack-resolves"),
         ["training-attack-negate"] = new("Reaction", "Training: negate a pending attack", "none", Trigger: "before-attack-resolves"),
+        // Training-only: exercises the Terrain primitive's "may be a target for battle actions that
+        // target a Terrain" clause, ahead of any published card needing it.
+        ["training-destroy-terrain"] = new("Battle", "Training: destroy the Terrain at this battlefield", "terrain-at-battle"),
         // Import wave 1 (issue #95): unconditional Attacks needing nothing beyond the primitive itself.
         ["shinjo-eun-sahng-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
         ["shosuro-konishi-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
@@ -381,6 +384,7 @@ public sealed partial class MatchEngine
                         "personality-lower-honor-than-self" => personality && Definition(target).PersonalHonor < Definition(source!).PersonalHonor,
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
+                        "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -436,6 +440,7 @@ public sealed partial class MatchEngine
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
+            case "training-destroy-terrain": DiscardTerrain(target!); break;
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
@@ -545,6 +550,14 @@ public sealed partial class MatchEngine
     {
         player.Hand.Remove(card.Id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("fateDiscarded", $"{player.Name} discarded {Definition(card).Name}.", player.Id, card.Id);
+    }
+    // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by
+    // an ability targeting it, or automatically once its printed effects have been applied during
+    // battle resolution (FinishBattleResolution) -- both paths share this single removal.
+    private void DiscardTerrain(CardInstance terrain)
+    {
+        terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
+        Emit("terrainDiscarded", $"{Definition(terrain).Name} was removed from play.", terrain.OwnerId, terrain.Id);
     }
     // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
     // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.

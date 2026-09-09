@@ -47,6 +47,7 @@ var tests = new (string Name, Action Run)[]
     ("Latched dishonor defeat resolves before end-phase draw", DishonorTiming),
     ("End phase requires exact hand-limit discard", HandLimit),
     ("Battle Strategies require presence and valid local targets", StrategyLegality),
+    ("Terrain plays as a Battle action, caps at one per battlefield, is targetable, and leaves at resolution", TerrainPrimitive),
     ("Equip validates Personal Honor, payment and action priority", Equip),
     ("Temporary Force expires at turn end", ExpiringForce),
     ("Same seed and accepted command replay reproduce complete state", Replay),
@@ -369,6 +370,34 @@ static void StrategyLegality()
     var own=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
     Accept(e,Cmd(e,"playStrategy",id:rally.Id,target:own.Id)); Equal(e.State.PriorityPlayerId,0);
     Equal(e.State.Cards[rally.Id].Zone,Zone.FateDiscard);
+}
+static void TerrainPrimitive()
+{
+    // MatchEngine.State returns a fresh Copy() on every access -- every fixture card this scenario
+    // needs must go into the state passed to FromTestState up front, not added onto e.State later.
+    var s=Battle(5,2).State;
+    var attacker=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var terrain=Add(s,"training-terrain",1,Zone.Hand);
+    var second=Add(s,"training-terrain",0,Zone.Hand);
+    var destroyer=Add(s,"training-terrain-destroyer",0,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,Cmd(e,"playStrategy",id:terrain.Id,target:attacker.Id)); // Terrain takes no target.
+    Accept(e,Cmd(e,"playStrategy",id:terrain.Id));
+    Equal(e.State.Cards[terrain.Id].Zone,Zone.Battlefield); Equal(e.State.Cards[terrain.Id].ProvinceIndex,0); Equal(e.State.PriorityPlayerId,0);
+    // At most one Terrain per battlefield until the one in play is destroyed.
+    Reject(e,Cmd(e,"playStrategy",id:second.Id));
+    // The Terrain in play may be targeted by a Battle ability built for it.
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:terrain.Id,AbilityId:"training-destroy-terrain"));
+    Equal(e.State.Cards[terrain.Id].Zone,Zone.FateDiscard);
+    // Once destroyed, a fresh Terrain may be played at the same battlefield again (after the
+    // opponent's action opportunity, which using the ability handed to them, passes back).
+    Accept(e,Cmd(e,"pass")); Equal(e.State.PriorityPlayerId,0);
+    Accept(e,Cmd(e,"playStrategy",id:second.Id));
+    Equal(e.State.Cards[second.Id].Zone,Zone.Battlefield);
+    // Terrain leaves automatically at battle resolution, its printed effects already applied --
+    // never a separate destroy step, and never carried into a later battle at this province.
+    Resolve(e);
+    Equal(e.State.Cards[second.Id].Zone,Zone.FateDiscard); Check(e.State.Cards[second.Id].ProvinceIndex is null);
 }
 static void Equip()
 {

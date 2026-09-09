@@ -474,6 +474,11 @@ public sealed partial class MatchEngine
             ReturnHome(card,card.Id!=conquerorUnbowedId);
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
+        // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
+        // ResolveBattle) but before the battlefield itself closes out -- never carried into a later
+        // battle at the same province, or across turns.
+        foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain")).ToArray())
+            DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
@@ -511,10 +516,26 @@ public sealed partial class MatchEngine
     private void PlayStrategy(GameCommand command)
     {
         Require(_state.Phase==Phase.Battle,"This Strategy can only be played during a battle.");
-        var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
+        var card=Card(command.CardId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type==CardType.Strategy,"Choose a supported Strategy from your hand.");
-        Require(Army(command.PlayerId,_state.CurrentBattleProvince!.Value).Any(),"You need a unit at the current battlefield to take a Battle action.");
-        Require(target.Zone==Zone.Battlefield && target.ProvinceIndex==_state.CurrentBattleProvince && Definition(target).Type==CardType.Personality,"Target a Personality at the current battlefield.");
+        var province=_state.CurrentBattleProvince!.Value;
+        Require(Army(command.PlayerId,province).Any(),"You need a unit at the current battlefield to take a Battle action.");
+        // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
+        // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
+        // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
+        if(Keyword(card,"Terrain"))
+        {
+            Require(command.TargetId is null,"Playing a Terrain does not target another card.");
+            Require(!_state.Cards.Values.Any(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Keyword(c,"Terrain")),
+                "This battlefield already has a Terrain in play.");
+            Player(command.PlayerId).Hand.Remove(card.Id);
+            card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
+            Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            NextAction(command.PlayerId);
+            return;
+        }
+        var target=Card(command.TargetId);
+        Require(target.Zone==Zone.Battlefield && target.ProvinceIndex==province && Definition(target).Type==CardType.Personality,"Target a Personality at the current battlefield.");
         switch(def.Effect)
         {
             case "force-three": Require(target.OwnerId==command.PlayerId,"Training rally targets your Personality."); ApplyModifier(target,card.Id,def.Effect,"Force",3); break;
