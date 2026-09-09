@@ -134,15 +134,18 @@ public sealed partial class MatchEngine
                 break;
             case Phase.AttackDeclaration:
             case Phase.DefenseAssignment:
-                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality).Select(c=>c.Id).ToArray();
+            case Phase.CavalryDeclaration:
+            case Phase.CavalryDefense:
+                var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
+                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
                 var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
-                var attack=_state.Phase==Phase.AttackDeclaration;
+                var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
-                    Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} units",
-                        Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?"No unbowed Personalities at home.":null,
+                    Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
+                        Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,
                         targets:units,provinces:provinces);
-                Add("pass",attack?"Skip attack":"Assign no defenders",Command("pass"));
+                Add("pass",attack?(cavalrySegment?"Skip Cavalry Maneuvers":"Skip attack"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"));
                 break;
             case Phase.BattleSelection:
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));

@@ -325,7 +325,13 @@ public sealed partial class MatchEngine
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.AttackDeclaration: SetPhase(Phase.Dynasty,_state.ActivePlayerId); break;
-            case Phase.DefenseAssignment: AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
+            case Phase.DefenseAssignment:
+            case Phase.CavalryDefense:
+                AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[]));
+                break;
+            // Unlike a pass in AttackDeclaration (which abandons the attack outright), passing here
+            // only declines further Cavalry assignments -- Infantry Maneuvers already committed.
+            case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
@@ -348,33 +354,45 @@ public sealed partial class MatchEngine
         SetPhase(Phase.DynastyDiscard,command.PlayerId);
     }
 
+    // Infantry Maneuvers (AttackDeclaration/DefenseAssignment) always runs first; Cavalry Maneuvers
+    // (CavalryDeclaration/CavalryDefense) follows, using the same battlefields Infantry Maneuvers
+    // already fixed -- every non-destroyed enemy province, set once by the Infantry attacker step.
     private void DeclareAttack(GameCommand command)
     {
-        Require(_state.Phase==Phase.AttackDeclaration,"Declare an attack after the Action Phase.");
+        Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
+        var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
-        Assign(command,targets);
-        _state.UnresolvedBattlefields=targets.Order().ToList();
-        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack.",command.PlayerId);
-        SetPhase(Phase.DefenseAssignment,1-command.PlayerId);
+        Assign(command,targets,cavalry);
+        if(!cavalry) _state.UnresolvedBattlefields=targets.Order().ToList();
+        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
+        SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,1-command.PlayerId);
     }
     private void AssignDefense(GameCommand command)
     {
-        Require(_state.Phase==Phase.DefenseAssignment,"Defenders assign after the attacking army.");
-        Assign(command,_state.UnresolvedBattlefields.ToHashSet());
-        SetPhase(Phase.BattleSelection,_state.ActivePlayerId);
+        Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
+        var cavalry=_state.Phase==Phase.CavalryDefense;
+        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry);
+        SetPhase(cavalry?Phase.BattleSelection:Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
-    private void Assign(GameCommand command,HashSet<int> provinces)
+    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry)
     {
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
             Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
+            Require(IsCavalryUnit(card)==cavalry,cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
         }
     }
+    // Cavalry (core rules Attack Phase): a unit is Cavalry only if the Personality AND every attached
+    // Follower carry the Cavalry keyword -- there is no printed "Infantry" keyword, so any unit
+    // missing Cavalry anywhere in it defaults to Infantry and must assign, if at all, during Infantry
+    // Maneuvers, regardless of how many of its other cards are Cavalry.
+    private bool IsCavalryUnit(CardInstance personality) => Keyword(personality,"Cavalry") &&
+        Attachments(personality.Id).Where(c=>Definition(c).Type==CardType.Follower).All(f=>Keyword(f,"Cavalry"));
     private void SelectBattle(GameCommand command)
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");

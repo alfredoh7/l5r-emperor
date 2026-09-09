@@ -79,7 +79,8 @@ var tests = new (string Name, Action Run)[]
     ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution),
     ("Tactical Advantage requires a performing Tactician, is usable any number of times per turn, and gives Force equal to the discarded card's Focus Value", TacticalAdvantage),
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
-    ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap)
+    ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
+    ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment)
 };
 var failed=0;
 foreach(var test in tests)
@@ -226,8 +227,11 @@ static void Priority()
 {
     var e=MatchEngine.CreateStarterMatch(); Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.Action); Equal(e.State.PriorityPlayerId,1);
     Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.AttackDeclaration);
-    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1);
-    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0);
+    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.DefenseAssignment);
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.CavalryDeclaration);
+    // Infantry Maneuvers committed above; Cavalry Maneuvers follows the same attacker-then-defender order.
+    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.CavalryDefense);
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.BattleSelection);
     Accept(e,Cmd(e,"selectBattle",province:0)); Equal(e.State.PriorityPlayerId,1);
 }
 static void Bamboo()
@@ -1116,6 +1120,37 @@ static void KensaiAndKamaWeaponCap()
     Equal(e3.State.Cards.Values.Count(c=>c.AttachedTo==kensai2.Id),2,"Kensai + Kama: still two Weapons total");
     Accept(e3,Cmd(e3,"pass",player:1));
     Reject(e3,Cmd(e3,"equip",player:0,id:kw2.Id,target:kensai2.Id));
+}
+static void CavalryManeuversSegment()
+{
+    var s=MatchEngine.CreateStarterMatch().State; s.Phase=Phase.AttackDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var infantry=Add(s,"training-crane-samurai",0,Zone.Home); // no Cavalry keyword: Infantry
+    var soloCavalry=Add(s,"training-cavalry",0,Zone.Home); // Cavalry keyword, no Followers: Cavalry
+    var mixedUnit=Add(s,"training-cavalry",0,Zone.Home); // Cavalry Personality...
+    Add(s,"training-follower",0,Zone.Attached,attachedTo:mixedUnit.Id); // ...+ a non-Cavalry Follower: still Infantry
+    var pureCavalryUnit=Add(s,"training-cavalry",0,Zone.Home); // Cavalry Personality...
+    Add(s,"training-cavalry-follower",0,Zone.Attached,attachedTo:pureCavalryUnit.Id); // ...+ a Cavalry Follower: Cavalry
+    var e=MatchEngine.FromTestState(s);
+
+    // Infantry Maneuvers: only the two Infantry units (plain, and the mixed Cavalry+non-Cavalry-Follower one).
+    Reject(e,Cmd(e,"attack",player:0,assignments:new(){[soloCavalry.Id]=0}));
+    Reject(e,Cmd(e,"attack",player:0,assignments:new(){[pureCavalryUnit.Id]=0}));
+    Accept(e,Cmd(e,"attack",player:0,assignments:new(){[infantry.Id]=0,[mixedUnit.Id]=1}));
+    Equal(e.State.Cards[infantry.Id].Zone,Zone.Battlefield);
+    Equal(e.State.Cards[mixedUnit.Id].Zone,Zone.Battlefield,"A Cavalry Personality with a non-Cavalry Follower assigns as Infantry");
+    Equal(e.State.Phase,Phase.DefenseAssignment);
+
+    Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
+    Equal(e.State.Phase,Phase.CavalryDeclaration,"Cavalry Maneuvers follows Infantry Maneuvers");
+
+    // Cavalry Maneuvers: only the two genuine Cavalry units (both members of the unit carry Cavalry).
+    Accept(e,Cmd(e,"attack",player:0,assignments:new(){[soloCavalry.Id]=0,[pureCavalryUnit.Id]=1}));
+    Equal(e.State.Cards[soloCavalry.Id].Zone,Zone.Battlefield);
+    Equal(e.State.Cards[pureCavalryUnit.Id].Zone,Zone.Battlefield,"A Cavalry Personality with a Cavalry Follower assigns as Cavalry");
+    Equal(e.State.Phase,Phase.CavalryDefense);
+
+    Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
+    Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
 }
 static void CarpenterCastleAttack()
 {
