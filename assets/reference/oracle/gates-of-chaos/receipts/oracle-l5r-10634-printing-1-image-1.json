@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 858191,
+  "card_id": "oracle-l5r-10634",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10634-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Noritada",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 10634,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10634-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:13.139351+00:00",
+  "sha256": "634a558aa9d018536fbe2a71372af56d6d83e154f65170110a722e38c323198a",
+  "source_image_hash": "98/76",
+  "source_url": "https://images.oracleofthevoid.com/l5r/98/76/printing_10634_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/98/76/printing_10634_1_",
+  "width": 750
+}

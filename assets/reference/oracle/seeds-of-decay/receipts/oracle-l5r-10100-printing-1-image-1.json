@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 751429,
+  "card_id": "oracle-l5r-10100",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10100-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Taigo",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 10100,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10100-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:59.019886+00:00",
+  "sha256": "89569250cfbf3ed6c50832cc6a8097dfddc8c5e046fad388204f3635a516cd4b",
+  "source_image_hash": "13/e1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/e1/printing_10100_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/e1/printing_10100_1_",
+  "width": 750
+}

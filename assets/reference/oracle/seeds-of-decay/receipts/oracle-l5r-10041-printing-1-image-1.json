@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 763201,
+  "card_id": "oracle-l5r-10041",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10041-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Nitani",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 10041,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10041-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:14.782632+00:00",
+  "sha256": "f34c75ddbf46c9479f6b844eed9b1ce1ae9b6c9ff97810dbbfe2a8112148b2fb",
+  "source_image_hash": "f7/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f7/ca/printing_10041_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f7/ca/printing_10041_1_",
+  "width": 750
+}

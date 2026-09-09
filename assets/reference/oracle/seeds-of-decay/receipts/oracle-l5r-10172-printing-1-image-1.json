@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 728720,
+  "card_id": "oracle-l5r-10172",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10172-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Arrow's Eye",
+  "numbers": [
+    "146"
+  ],
+  "oracle_id": 10172,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10172-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:49.524306+00:00",
+  "sha256": "852e53cf4409ed26d4881ae30d174beb6978a976461e34d19461242048ce6964",
+  "source_image_hash": "76/b2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/b2/printing_10172_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/b2/printing_10172_1_",
+  "width": 750
+}

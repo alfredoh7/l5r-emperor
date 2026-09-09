@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 699130,
+  "card_id": "oracle-l5r-10274",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10274-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Nagai",
+  "numbers": [
+    "18"
+  ],
+  "oracle_id": 10274,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10274-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:56.836767+00:00",
+  "sha256": "4e57741afd50b9ab0146239e8a47803e6c57dddcb9afe28e1d1210fd8d1bc876",
+  "source_image_hash": "dd/bf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/bf/printing_10274_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/bf/printing_10274_1_",
+  "width": 750
+}

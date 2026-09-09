@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 393230,
+  "card_id": "oracle-l5r-8721",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8721-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tranquil Garden",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 8721,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8721-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:03.290732+00:00",
+  "sha256": "7f30868c2e51b853f62fc9c1a301338b5b7ffeec352f91d2c91c39c32144cd90",
+  "source_image_hash": "32/ab",
+  "source_url": "https://images.oracleofthevoid.com/l5r/32/ab/printing_8721_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/32/ab/printing_8721_1_",
+  "width": 750
+}

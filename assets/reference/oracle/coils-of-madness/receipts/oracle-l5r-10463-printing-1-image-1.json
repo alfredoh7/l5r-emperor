@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1041849,
+  "card_id": "oracle-l5r-10463",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10463-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Nimuro",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 10463,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10463-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:47.092659+00:00",
+  "sha256": "144d5facf05b44ec16390ea2ac07d918cd2dc1af3b1e17fd47a5e52ce1295772",
+  "source_image_hash": "a1/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a1/be/printing_10463_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a1/be/printing_10463_1_",
+  "width": 750
+}

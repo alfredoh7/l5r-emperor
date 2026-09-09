@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730299,
+  "card_id": "oracle-l5r-10187",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10187-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bandit's Sanctuary",
+  "numbers": [
+    "161"
+  ],
+  "oracle_id": 10187,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10187-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:26:07.572633+00:00",
+  "sha256": "2053ff31b03b8d370b7bb66457c50698ae8c1021b0d64fc6cd41a0d72131fbb3",
+  "source_image_hash": "9b/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/22/printing_10187_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/22/printing_10187_1_",
+  "width": 750
+}

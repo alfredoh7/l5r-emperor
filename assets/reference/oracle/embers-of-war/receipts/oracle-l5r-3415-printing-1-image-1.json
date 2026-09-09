@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 766305,
+  "card_id": "oracle-l5r-3415",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3415-printing-1-image-1",
+  "image_index": 1,
+  "name": "Honest Assessment",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 3415,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3415-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:21.573791+00:00",
+  "sha256": "63e0e556d6b40b92eeb9d86dca2df553fe0068215885ada0e68c4b33ab019810",
+  "source_image_hash": "74/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/5b/printing_3415_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/5b/printing_3415_1_",
+  "width": 750
+}

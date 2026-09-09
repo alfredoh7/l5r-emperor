@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398423,
+  "card_id": "oracle-l5r-7151",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7151-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Rin",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 7151,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7151-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:28.964588+00:00",
+  "sha256": "07e9e6a1cc0d14ee78a5e9b0c592ab71a3ede4b15633edf49be356f92e39be8e",
+  "source_image_hash": "c3/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c3/94/printing_7151_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c3/94/printing_7151_1_",
+  "width": 750
+}

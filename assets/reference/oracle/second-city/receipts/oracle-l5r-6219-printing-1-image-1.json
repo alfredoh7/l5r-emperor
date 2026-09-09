@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 393202,
+  "card_id": "oracle-l5r-6219",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6219-printing-1-image-1",
+  "image_index": 1,
+  "name": "Red Crane Dojo",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 6219,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-6219-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:14.978159+00:00",
+  "sha256": "55d6b2ea80e77a0e988089986b46e98109dc9de609e4820d311f3425a9f292ff",
+  "source_image_hash": "52/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/52/c2/printing_6219_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/52/c2/printing_6219_1_",
+  "width": 750
+}

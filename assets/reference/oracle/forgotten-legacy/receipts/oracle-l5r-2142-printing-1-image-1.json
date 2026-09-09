@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 272780,
+  "card_id": "oracle-l5r-2142",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2142-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Rengetsu",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 2142,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-2142-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:49.780495+00:00",
+  "sha256": "8dd487a25284dae9a842bd2086dbca522b903310e0e415b85c16203cfdba8a1b",
+  "source_image_hash": "a3/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/4a/printing_2142_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/4a/printing_2142_1_",
+  "width": 750
+}

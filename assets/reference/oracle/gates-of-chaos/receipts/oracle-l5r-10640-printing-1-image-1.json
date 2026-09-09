@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 771019,
+  "card_id": "oracle-l5r-10640",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10640-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsu Ririko",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 10640,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10640-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:56.396899+00:00",
+  "sha256": "12859eceaa985a87aeb4c4a81b314672d3095390856f81ff8cb200c175098828",
+  "source_image_hash": "d9/52",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d9/52/printing_10640_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d9/52/printing_10640_1_",
+  "width": 750
+}

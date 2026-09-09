@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 827016,
+  "card_id": "oracle-l5r-10815",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10815-printing-1-image-1",
+  "image_index": 1,
+  "name": "Renyu's Dog",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10815,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10815-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:25.654205+00:00",
+  "sha256": "9028b5b3a33227b7d336d975803921867ea59281647987516b1a8df781e6e22b",
+  "source_image_hash": "34/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/5b/printing_10815_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/5b/printing_10815_1_",
+  "width": 750
+}

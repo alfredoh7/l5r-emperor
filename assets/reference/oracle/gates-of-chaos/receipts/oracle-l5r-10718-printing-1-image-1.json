@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 769757,
+  "card_id": "oracle-l5r-10718",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10718-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Crystal Tears",
+  "numbers": [
+    "142"
+  ],
+  "oracle_id": 10718,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10718-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:02.404929+00:00",
+  "sha256": "18dd2f23e359e8eb1895acb8f16ae860f5cf44051e0d151e09e542da3c6a53ae",
+  "source_image_hash": "9a/c9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9a/c9/printing_10718_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9a/c9/printing_10718_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261252,
+  "card_id": "oracle-l5r-9436",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9436-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Daiki",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 9436,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-9436-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:52.120890+00:00",
+  "sha256": "4ed5c0463d726c968e8b05e3a687547c8806e9d1a2005329f0e8710e644f899e",
+  "source_image_hash": "c9/10",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/10/printing_9436_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/10/printing_9436_1_",
+  "width": 750
+}

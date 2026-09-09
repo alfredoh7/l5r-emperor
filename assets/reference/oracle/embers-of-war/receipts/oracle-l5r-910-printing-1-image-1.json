@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 805791,
+  "card_id": "oracle-l5r-910",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-910-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Tenzan",
+  "numbers": [
+    "52"
+  ],
+  "oracle_id": 910,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-910-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:40.747937+00:00",
+  "sha256": "1c3ec32a45259143d07bb4053dfeeacc7c431f823c420747a046722b58ffe931",
+  "source_image_hash": "4a/d7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4a/d7/printing_910_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/d7/printing_910_1_",
+  "width": 750
+}

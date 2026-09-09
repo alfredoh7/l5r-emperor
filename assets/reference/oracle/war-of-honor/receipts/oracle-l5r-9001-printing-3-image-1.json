@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 244391,
+  "card_id": "oracle-l5r-9001",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9001-printing-3-image-1",
+  "image_index": 1,
+  "name": "Unpredictable Strategy",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 9001,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9001-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:13.044543+00:00",
+  "sha256": "4133f15f4ef479e42f9d1dde905b848d9f62fe1ac2ee3d913cd696c1716d4a6b",
+  "source_image_hash": "ca/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ca/da/printing_9001_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ca/da/printing_9001_3_",
+  "width": 750
+}

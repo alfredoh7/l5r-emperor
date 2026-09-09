@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 999483,
+  "card_id": "oracle-l5r-10497",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10497-printing-1-image-1",
+  "image_index": 1,
+  "name": "P'an Ku",
+  "numbers": [
+    "76"
+  ],
+  "oracle_id": 10497,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10497-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:12.502326+00:00",
+  "sha256": "d68cd2510409af0e3cd9167579dc658e5992f73b3c3e1cd2523123c54afeae69",
+  "source_image_hash": "a8/ba",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/ba/printing_10497_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/ba/printing_10497_1_",
+  "width": 750
+}

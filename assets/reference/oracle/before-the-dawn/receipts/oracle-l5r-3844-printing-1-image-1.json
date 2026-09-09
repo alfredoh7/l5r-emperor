@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 405091,
+  "card_id": "oracle-l5r-3844",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3844-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Kaname",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 3844,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-3844-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:51.041669+00:00",
+  "sha256": "6dd88b4d458870b213ace1f008de855d75d08414691f3c5b2a77df1c439e7c1a",
+  "source_image_hash": "94/c0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/94/c0/printing_3844_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/94/c0/printing_3844_1_",
+  "width": 750
+}

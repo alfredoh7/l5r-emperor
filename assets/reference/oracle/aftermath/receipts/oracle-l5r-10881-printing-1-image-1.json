@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 811712,
+  "card_id": "oracle-l5r-10881",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10881-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iweko Seiken",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 10881,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10881-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:49.571375+00:00",
+  "sha256": "772732062fe0560f09dc523d8c348e5d67b2dc28959e78ba81428db0c05e5476",
+  "source_image_hash": "82/2c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/2c/printing_10881_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/2c/printing_10881_1_",
+  "width": 750
+}

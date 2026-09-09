@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 825771,
+  "card_id": "oracle-l5r-3861",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3861-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Mina",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 3861,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3861-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:37.827312+00:00",
+  "sha256": "a914b1417b28aca1bba65cc8dad18b97ae664fd9a1c652acaf82592d4ddefe70",
+  "source_image_hash": "ea/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ea/e9/printing_3861_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ea/e9/printing_3861_1_",
+  "width": 750
+}

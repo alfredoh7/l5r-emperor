@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 787437,
+  "card_id": "oracle-l5r-10119",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10119-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Deciding Moment",
+  "numbers": [
+    "93"
+  ],
+  "oracle_id": 10119,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10119-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:51.804650+00:00",
+  "sha256": "79b99671eff52e9e255329c5e2004079227accac38616f7f36497b1debfe8a08",
+  "source_image_hash": "97/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/6f/printing_10119_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/6f/printing_10119_1_",
+  "width": 750
+}

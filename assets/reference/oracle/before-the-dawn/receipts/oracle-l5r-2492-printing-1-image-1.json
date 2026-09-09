@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 408084,
+  "card_id": "oracle-l5r-2492",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2492-printing-1-image-1",
+  "image_index": 1,
+  "name": "Favors",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 2492,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2492-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:29.585765+00:00",
+  "sha256": "79b08b5fefd9e5d535fce60c69b2b128d12dde956ee1807ce5240df5b747f9c7",
+  "source_image_hash": "65/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/65/15/printing_2492_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/65/15/printing_2492_1_",
+  "width": 750
+}

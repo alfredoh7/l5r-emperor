@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 800985,
+  "card_id": "oracle-l5r-10847",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10847-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Noboru",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 10847,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10847-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:13.830001+00:00",
+  "sha256": "c2dc36ec3e1cd285e9d552f4d3a73df3e9b5c0295944ae42ca7b90e806ff5ee9",
+  "source_image_hash": "e1/9c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/9c/printing_10847_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/9c/printing_10847_1_",
+  "width": 750
+}

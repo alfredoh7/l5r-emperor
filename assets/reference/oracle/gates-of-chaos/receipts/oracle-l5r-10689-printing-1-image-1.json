@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788821,
+  "card_id": "oracle-l5r-10689",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10689-printing-1-image-1",
+  "image_index": 1,
+  "name": "Watersteel Sword",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 10689,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10689-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:25.052755+00:00",
+  "sha256": "0105b21c3f2f4f3ecab67ac763fb455b3307215250e06cdf44b9bafb7e9bed3d",
+  "source_image_hash": "76/60",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/60/printing_10689_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/60/printing_10689_1_",
+  "width": 750
+}

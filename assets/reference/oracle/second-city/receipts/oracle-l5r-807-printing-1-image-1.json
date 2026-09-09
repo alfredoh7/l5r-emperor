@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403347,
+  "card_id": "oracle-l5r-807",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-807-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Kahoku",
+  "numbers": [
+    "52"
+  ],
+  "oracle_id": 807,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-807-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:47.406208+00:00",
+  "sha256": "b7ddac7a1e7ded6b2d7459274f2dd55edbab1c6c4fcf050d1216e713d94c638a",
+  "source_image_hash": "e7/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/b3/printing_807_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/b3/printing_807_1_",
+  "width": 750
+}

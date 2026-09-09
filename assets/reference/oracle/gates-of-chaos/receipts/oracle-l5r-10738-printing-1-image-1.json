@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 847870,
+  "card_id": "oracle-l5r-10738",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10738-printing-1-image-1",
+  "image_index": 1,
+  "name": "Allied Efforts",
+  "numbers": [
+    "113"
+  ],
+  "oracle_id": 10738,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10738-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:47.704323+00:00",
+  "sha256": "803f17d3ebc2205b5934c6cdae309c807b617c1ab5c81d53ae6d979caff0225a",
+  "source_image_hash": "cf/e8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/e8/printing_10738_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/e8/printing_10738_1_",
+  "width": 750
+}

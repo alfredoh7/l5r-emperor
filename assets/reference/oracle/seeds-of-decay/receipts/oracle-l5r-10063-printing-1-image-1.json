@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 763546,
+  "card_id": "oracle-l5r-10063",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10063-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsu Kouki",
+  "numbers": [
+    "37"
+  ],
+  "oracle_id": 10063,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10063-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:33.765438+00:00",
+  "sha256": "b9274882d32a9feacf4d245a42a2386678d8c33750d981837c43fee46fccc698",
+  "source_image_hash": "be/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/be/d6/printing_10063_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/be/d6/printing_10063_1_",
+  "width": 750
+}

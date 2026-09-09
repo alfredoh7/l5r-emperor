@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 835270,
+  "card_id": "oracle-l5r-10088",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10088-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Yurishi",
+  "numbers": [
+    "62"
+  ],
+  "oracle_id": 10088,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10088-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:07.782378+00:00",
+  "sha256": "8075640f2c84523363f89e83ab19f2f460490660a5aa809c7d9fa8a65cba46f0",
+  "source_image_hash": "5b/25",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5b/25/printing_10088_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/25/printing_10088_1_",
+  "width": 750
+}

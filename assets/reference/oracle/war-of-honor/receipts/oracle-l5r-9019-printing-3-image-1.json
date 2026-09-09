@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261128,
+  "card_id": "oracle-l5r-9019",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9019-printing-3-image-1",
+  "image_index": 1,
+  "name": "Unstoppable Power",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 9019,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9019-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:14.019128+00:00",
+  "sha256": "615263ca07b3b73fc1b3efa655ec73b60586272c1b8fa7aab25a134f4212dc2e",
+  "source_image_hash": "88/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/88/45/printing_9019_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/88/45/printing_9019_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 265452,
+  "card_id": "oracle-l5r-1607",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1607-printing-1-image-1",
+  "image_index": 1,
+  "name": "Cursed Relic",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 1607,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1607-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:44.787747+00:00",
+  "sha256": "46b8fd2b648ea534baac3c2bca1d729d9d97e1c1e9f7737483627d04c8cf49e3",
+  "source_image_hash": "59/73",
+  "source_url": "https://images.oracleofthevoid.com/l5r/59/73/printing_1607_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/59/73/printing_1607_1_",
+  "width": 750
+}

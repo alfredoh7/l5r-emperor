@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 762287,
+  "card_id": "oracle-l5r-5958",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5958-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pillowbook",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 5958,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5958-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:14.279026+00:00",
+  "sha256": "4072f76669f92f8527f1f021580190f054f2ec8164cd7107c872c480c2e213cd",
+  "source_image_hash": "46/72",
+  "source_url": "https://images.oracleofthevoid.com/l5r/46/72/printing_5958_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/46/72/printing_5958_1_",
+  "width": 750
+}

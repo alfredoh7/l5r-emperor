@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754144,
+  "card_id": "oracle-l5r-10405",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10405-printing-1-image-1",
+  "image_index": 1,
+  "name": "Without Mercy",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 10405,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10405-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:27.155092+00:00",
+  "sha256": "d8828c12d8cd080d4adf8f41e9d50cff694d6f88e36ad1863904711741bf3dd3",
+  "source_image_hash": "12/a6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/a6/printing_10405_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/a6/printing_10405_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 807423,
+  "card_id": "oracle-l5r-10821",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10821-printing-1-image-1",
+  "image_index": 1,
+  "name": "Marriage of the Emerald Champion",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10821,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10821-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:12.292014+00:00",
+  "sha256": "c8faeb179104c91ec42498222b29085094b809ea668feb154915c6ccb8e18a11",
+  "source_image_hash": "c9/53",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/53/printing_10821_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/53/printing_10821_1_",
+  "width": 750
+}

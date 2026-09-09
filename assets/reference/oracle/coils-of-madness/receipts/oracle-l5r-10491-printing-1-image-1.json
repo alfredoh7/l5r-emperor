@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 941070,
+  "card_id": "oracle-l5r-10491",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10491-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yunmen, the Whisper",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 10491,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10491-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:38.194587+00:00",
+  "sha256": "ae5a56a8cf328a7db427c716ebf0f378a386ac44f881b74a9e8a82e2706b0dfd",
+  "source_image_hash": "47/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/47/3c/printing_10491_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/47/3c/printing_10491_1_",
+  "width": 750
+}

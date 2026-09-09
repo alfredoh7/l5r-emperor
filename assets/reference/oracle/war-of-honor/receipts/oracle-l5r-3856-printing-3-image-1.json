@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 245314,
+  "card_id": "oracle-l5r-3856",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3856-printing-3-image-1",
+  "image_index": 1,
+  "name": "Isawa Kyoko",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 3856,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3856-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:38.981228+00:00",
+  "sha256": "bc3d25a4ddc59867c3ccb1192b641ed64ece0ff80b91c3f9d344bd48686e9285",
+  "source_image_hash": "81/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/81/a9/printing_3856_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/81/a9/printing_3856_3_",
+  "width": 750
+}

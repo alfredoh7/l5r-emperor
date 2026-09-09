@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 686641,
+  "card_id": "oracle-l5r-10167",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10167-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shield Formation",
+  "numbers": [
+    "141"
+  ],
+  "oracle_id": 10167,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10167-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:29.593708+00:00",
+  "sha256": "8cf22e879ed69393b0740776bd9f1c2e8e167a8d51bce64686e4635d0842f39d",
+  "source_image_hash": "18/08",
+  "source_url": "https://images.oracleofthevoid.com/l5r/18/08/printing_10167_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/18/08/printing_10167_1_",
+  "width": 750
+}

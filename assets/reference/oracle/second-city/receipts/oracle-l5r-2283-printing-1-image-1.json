@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382737,
+  "card_id": "oracle-l5r-2283",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2283-printing-1-image-1",
+  "image_index": 1,
+  "name": "Effortless Counterattack",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 2283,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2283-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:11.636000+00:00",
+  "sha256": "382dae692d96be8fa4c4bc1561ac07070e8614d88b8defa6910c5ca874a1326d",
+  "source_image_hash": "16/e1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/e1/printing_2283_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/e1/printing_2283_1_",
+  "width": 750
+}

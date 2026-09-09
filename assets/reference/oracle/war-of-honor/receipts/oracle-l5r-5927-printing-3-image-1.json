@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 247800,
+  "card_id": "oracle-l5r-5927",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5927-printing-3-image-1",
+  "image_index": 1,
+  "name": "Permanent Encampment",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 5927,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-5927-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:51.821363+00:00",
+  "sha256": "b231d0b244820e332b403d71b26cf6818f63615e0bd1502ed4763766586d7458",
+  "source_image_hash": "bf/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bf/a4/printing_5927_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bf/a4/printing_5927_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 752379,
+  "card_id": "oracle-l5r-9803",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9803-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chiisai",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 9803,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9803-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:29.629523+00:00",
+  "sha256": "d48babdd7d6916c8369190c726ca4bb9d9fa59ac492217c0a9d3f6827d430b41",
+  "source_image_hash": "86/49",
+  "source_url": "https://images.oracleofthevoid.com/l5r/86/49/printing_9803_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/86/49/printing_9803_1_",
+  "width": 750
+}

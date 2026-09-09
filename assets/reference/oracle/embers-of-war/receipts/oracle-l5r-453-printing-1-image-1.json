@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 719513,
+  "card_id": "oracle-l5r-453",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-453-printing-1-image-1",
+  "image_index": 1,
+  "name": "Armor of the Uruwashii",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 453,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-453-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:30.273898+00:00",
+  "sha256": "aaab62631fdab8f671e7e06720fd0aa1cf2f29014624ce50c04f07e01162e1a1",
+  "source_image_hash": "9b/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/be/printing_453_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/be/printing_453_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 827578,
+  "card_id": "oracle-l5r-10819",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10819-printing-1-image-1",
+  "image_index": 1,
+  "name": "Changing the Game",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10819,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10819-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:00.373553+00:00",
+  "sha256": "6cccb54373ae63096c0bc363292a2e3fc9288315f78a605981faed87b4a45499",
+  "source_image_hash": "3d/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/1a/printing_10819_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/1a/printing_10819_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 805694,
+  "card_id": "oracle-l5r-10193",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10193-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamahime",
+  "numbers": [
+    "167"
+  ],
+  "oracle_id": 10193,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10193-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:30:26.238977+00:00",
+  "sha256": "34231f1a32aeb0ac807d91abaff5315c675a99ac09d7d7302ca5e56a90b599f5",
+  "source_image_hash": "c8/e8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c8/e8/printing_10193_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c8/e8/printing_10193_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 844225,
+  "card_id": "oracle-l5r-10899",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10899-printing-1-image-1",
+  "image_index": 1,
+  "name": "Legulus's Legion",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 10899,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10899-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:06.266913+00:00",
+  "sha256": "52cef8d133f808d20eacc661abcc5a782f149e5fc80f1cb51d45514292de12ee",
+  "source_image_hash": "5b/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5b/a4/printing_10899_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/a4/printing_10899_1_",
+  "width": 750
+}

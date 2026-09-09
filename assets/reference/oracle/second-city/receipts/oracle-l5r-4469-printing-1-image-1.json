@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382990,
+  "card_id": "oracle-l5r-4469",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4469-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Ohsuki",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 4469,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4469-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:46.873256+00:00",
+  "sha256": "da160906910827396424538a0b0ed5918ac992b6f3cee1aec76e4630e2ca814d",
+  "source_image_hash": "0f/12",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0f/12/printing_4469_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0f/12/printing_4469_1_",
+  "width": 750
+}

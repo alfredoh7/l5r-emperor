@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 754549,
+  "card_id": "oracle-l5r-10131",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10131-printing-1-image-1",
+  "image_index": 1,
+  "name": "Scent of Dishonor",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 10131,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10131-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:22.550898+00:00",
+  "sha256": "0f5ea3b23a452b3102319ddbfae5c813ab0b04b371e4e3b3e8f334ab41dc9f0f",
+  "source_image_hash": "8e/20",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/20/printing_10131_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/20/printing_10131_1_",
+  "width": 750
+}

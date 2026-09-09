@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 781950,
+  "card_id": "oracle-l5r-9908",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9908-printing-1-image-1",
+  "image_index": 1,
+  "name": "Forged Documents",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 9908,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9908-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:54.558657+00:00",
+  "sha256": "fbeaffa3ab29191d7a9195ee94d446121acea0beedd83fa7ed9db89cd23f4136",
+  "source_image_hash": "c7/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c7/05/printing_9908_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c7/05/printing_9908_1_",
+  "width": 750
+}

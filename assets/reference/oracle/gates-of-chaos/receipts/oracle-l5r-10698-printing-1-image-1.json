@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785047,
+  "card_id": "oracle-l5r-10698",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10698-printing-1-image-1",
+  "image_index": 1,
+  "name": "Translated Story of Shaharazad",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 10698,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10698-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:17.829352+00:00",
+  "sha256": "bf396b6db9c40873aef3bb899981a2a4b0c421506dd5e01defdf827cf22c86cf",
+  "source_image_hash": "eb/47",
+  "source_url": "https://images.oracleofthevoid.com/l5r/eb/47/printing_10698_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/eb/47/printing_10698_1_",
+  "width": 750
+}

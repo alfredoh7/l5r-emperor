@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 279185,
+  "card_id": "oracle-l5r-533",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-533-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Chukage",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 533,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-533-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:28.832336+00:00",
+  "sha256": "dc27c69e2c136ae7462d2a2dbf6c79c45cf0ec4c216c09869ac5ee576a8f0210",
+  "source_image_hash": "f8/77",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/77/printing_533_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/77/printing_533_1_",
+  "width": 750
+}

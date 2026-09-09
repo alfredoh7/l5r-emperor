@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 236246,
+  "card_id": "oracle-l5r-881",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-881-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Shigeo",
+  "numbers": [
+    "62"
+  ],
+  "oracle_id": 881,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-881-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:55.880065+00:00",
+  "sha256": "6815fe40a0c1c130cd4455270c5fbeacbcc7bac24f0b27da0c90811046a26775",
+  "source_image_hash": "09/8b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/09/8b/printing_881_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/09/8b/printing_881_2_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 321082,
+  "card_id": "oracle-l5r-562",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-562-printing-3-image-1",
+  "image_index": 1,
+  "name": "Asako Meisuru",
+  "numbers": [
+    "52"
+  ],
+  "oracle_id": 562,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-562-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:47.899583+00:00",
+  "sha256": "d93f76b0179a4cf1b51cbebff8d37b0a3629ca2f91bd80a24c0a28c6a48daba0",
+  "source_image_hash": "bb/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bb/24/printing_562_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bb/24/printing_562_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 766644,
+  "card_id": "oracle-l5r-9883",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9883-printing-1-image-1",
+  "image_index": 1,
+  "name": "Vanquisher's Blades",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 9883,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9883-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:54.404320+00:00",
+  "sha256": "0f06c20bc5bf0abd575f3008e612c307116967313871e6a061473584434d5bc9",
+  "source_image_hash": "71/69",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/69/printing_9883_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/69/printing_9883_1_",
+  "width": 750
+}

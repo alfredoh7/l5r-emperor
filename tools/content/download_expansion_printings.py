@@ -25,6 +25,7 @@ from urllib.request import Request, urlopen
 from PIL import Image
 
 from download_oracle_printings import image_info, select_records
+from normalize_oracle import values
 
 API_URL = "https://api.oracleofthevoid.com/search"
 IMAGE_HOST = "https://images.oracleofthevoid.com/l5r/"
@@ -127,7 +128,12 @@ def scope_to_needed(response: dict, needed_oracle_ids: set[int]) -> dict:
     return {**response, "hits": {**hits, "total": len(kept), "hits": kept}}
 
 
-def run(printing_set: str, needed_ids: set[str]) -> dict:
+def run(printing_set: str, needed_ids: set[str] | None = None) -> dict:
+    """needed_ids=None means "every card this set's search returns" (a full-set archive, used to
+    build the offline reference cache) rather than a wave-scoped subset. In that mode a single
+    card with no supported image reference is recorded as a failure and skipped, not fatal to the
+    whole set -- select_records' all-or-nothing validation only suits a small, pre-vetted subset.
+    """
     slug = slugify(unescape(printing_set))
     source_dir = ROOT / "assets/reference/oracle" / slug
     output = ROOT / "content/oracle" / slug
@@ -135,14 +141,30 @@ def run(printing_set: str, needed_ids: set[str]) -> dict:
     request_bytes = json.dumps(response, ensure_ascii=False).encode("utf-8")
     save_json(source_dir / "search-request.json", request)
     save_json(source_dir / "search-response.json", response)
+    full_set = needed_ids is None
+    if full_set:
+        hits = response.get("hits", {}).get("hits", [])
+        needed_ids = {f"oracle-l5r-{int(float(hit['_source']['cardid']))}" for hit in hits}
     needed_oracle_ids = {int(c.removeprefix("oracle-l5r-")) for c in needed_ids}
     scoped_response = scope_to_needed(response, needed_oracle_ids)
     # The query matches the raw indexed value (e.g. literal "&ndash;"); select_records compares
     # against HTML-unescaped printing.set values, so the two must agree on the same decoded form.
-    cards, jobs = select_records(scoped_response, unescape(printing_set))
-    downloaded, failures = [], []
+    downloaded, failures, cards, jobs = [], [], [], []
+    if full_set:
+        # Unlike the wave-scoped path below, validate and fetch one card at a time so a single bad
+        # entry (a promo/alt-art printing with no supported image) can't block the rest of the set.
+        for hit in scoped_response.get("hits", {}).get("hits", []):
+            single = {**scoped_response, "hits": {**scoped_response["hits"], "total": 1, "hits": [hit]}}
+            card_id = f"oracle-l5r-{int(float(hit['_source']['cardid']))}"
+            try:
+                one_cards, one_jobs = select_records(single, unescape(printing_set))
+                cards.extend(one_cards); jobs.extend(one_jobs)
+            except Exception as error:
+                failures.append({"id": card_id, "card_id": card_id, "name": " / ".join(values(hit["_source"], "title")), "error": str(error)})
+    else:
+        cards, jobs = select_records(scoped_response, unescape(printing_set))
     covered_cards = {c["id"] for c in cards}
-    missing_cards = needed_ids - covered_cards
+    missing_cards = needed_ids - covered_cards - {f["card_id"] for f in failures}
     for job in [j for j in jobs if j["card_id"] in needed_ids]:
         try:
             downloaded.append(download_one(source_dir, job))
@@ -150,8 +172,8 @@ def run(printing_set: str, needed_ids: set[str]) -> dict:
         except Exception as error:
             failures.append({"id": job["id"], "card_id": job["card_id"], "name": job["name"], "error": str(error)})
     save_json(output / "catalogue.json", {"schema_version": 1, "printing_set": printing_set,
-              "scope": "needed_cards_only", "response_sha256": sha(request_bytes), "cards": cards,
-              "notice": "Reference-only; scoped fetch for a specific wiring wave, not a full-set archive."})
+              "scope": "full_set" if full_set else "needed_cards_only", "response_sha256": sha(request_bytes), "cards": cards,
+              "notice": "Reference-only; " + ("full-set offline archive." if full_set else "scoped fetch for a specific wiring wave, not a full-set archive.")})
     save_json(output / "artwork-manifest.json", {"printing_set": printing_set, "needed": sorted(needed_ids),
               "missing_from_set": sorted(missing_cards), "downloaded": downloaded, "failures": failures,
               "complete": not failures and not missing_cards})
@@ -163,7 +185,9 @@ def run(printing_set: str, needed_ids: set[str]) -> dict:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--set", required=True, help="Exact printing set label, e.g. 'Second City'")
-    parser.add_argument("--cards", required=True, help="Comma-separated oracle-l5r-<id> card IDs to fetch from this set")
+    parser.add_argument("--cards", help="Comma-separated oracle-l5r-<id> card IDs to fetch from this set. "
+                         "Omit to fetch every card this set's search returns (a full-set offline archive).")
     args = parser.parse_args()
-    result = run(args.set, {c.strip() for c in args.cards.split(",") if c.strip()})
+    ids = {c.strip() for c in args.cards.split(",") if c.strip()} if args.cards else None
+    result = run(args.set, ids)
     print(json.dumps(result, indent=2))

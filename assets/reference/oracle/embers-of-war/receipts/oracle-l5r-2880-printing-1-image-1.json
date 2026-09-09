@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 763403,
+  "card_id": "oracle-l5r-2880",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2880-printing-1-image-1",
+  "image_index": 1,
+  "name": "Gozaru no Oni",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 2880,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2880-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:09.923191+00:00",
+  "sha256": "91277ae524b5570160e4b5ed403daba9037d5d30fcb6f1dab77b9c6e2ca0ff78",
+  "source_image_hash": "87/7b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/7b/printing_2880_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/7b/printing_2880_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 819013,
+  "card_id": "oracle-l5r-10035",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10035-printing-1-image-1",
+  "image_index": 1,
+  "name": "Incense Mill",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10035,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10035-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:23.194656+00:00",
+  "sha256": "07e413b7743d78128fbccf72f382b0b951abd4c8cbdd91c7662b9b79bb3dca1d",
+  "source_image_hash": "9c/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9c/d2/printing_10035_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9c/d2/printing_10035_1_",
+  "width": 750
+}

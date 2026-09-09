@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 790248,
+  "card_id": "oracle-l5r-10065",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10065-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Merihiko",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 10065,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10065-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:36.153028+00:00",
+  "sha256": "94f3e7fafb6b359911dc375c735af9fa79874d7ec321f764fc1bac6e3fcc6b8f",
+  "source_image_hash": "03/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/cc/printing_10065_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/cc/printing_10065_1_",
+  "width": 750
+}

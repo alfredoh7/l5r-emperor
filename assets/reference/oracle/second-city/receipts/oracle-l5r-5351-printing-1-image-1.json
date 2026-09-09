@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 392033,
+  "card_id": "oracle-l5r-5351",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5351-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Ming-Gwok",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 5351,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-5351-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:03.223278+00:00",
+  "sha256": "af1fd2d5f47cb45b05bc853d5d754d1bb4c0ca7f46ffb0e300579b552a75f1c1",
+  "source_image_hash": "5c/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5c/24/printing_5351_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5c/24/printing_5351_1_",
+  "width": 750
+}

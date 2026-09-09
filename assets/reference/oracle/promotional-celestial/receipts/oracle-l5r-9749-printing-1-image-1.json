@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261644,
+  "card_id": "oracle-l5r-9749",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9749-printing-1-image-1",
+  "image_index": 1,
+  "name": "Readied Blade",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 9749,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9749-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:34:07.858636+00:00",
+  "sha256": "a7cc3d644bf7d6d106de5422ce5c997bf64228be69670a576c91264f9bee7330",
+  "source_image_hash": "dc/5f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/5f/printing_9749_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/5f/printing_9749_1_",
+  "width": 750
+}

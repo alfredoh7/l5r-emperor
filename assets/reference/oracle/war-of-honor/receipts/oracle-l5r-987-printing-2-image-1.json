@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 243940,
+  "card_id": "oracle-l5r-987",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-987-printing-2-image-1",
+  "image_index": 1,
+  "name": "Black and White",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 987,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-987-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:59.816178+00:00",
+  "sha256": "c54eecfc357b683d1ac7b164b77327d69a1827023b348615bdeba60dea455073",
+  "source_image_hash": "ed/35",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ed/35/printing_987_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ed/35/printing_987_2_",
+  "width": 750
+}

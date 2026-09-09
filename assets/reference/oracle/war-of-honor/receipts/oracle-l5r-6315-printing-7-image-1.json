@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 231267,
+  "card_id": "oracle-l5r-6315",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6315-printing-7-image-1",
+  "image_index": 1,
+  "name": "Rich Coffers",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 6315,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6315-printing-7-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "7",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:56.703111+00:00",
+  "sha256": "650635aadb2547e11f7f59986e3437475704ad716f14a37d30301d4d767039f3",
+  "source_image_hash": "71/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/f6/printing_6315_7_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/f6/printing_6315_7_",
+  "width": 750
+}

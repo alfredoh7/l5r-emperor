@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 834199,
+  "card_id": "oracle-l5r-5923",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5923-printing-1-image-1",
+  "image_index": 1,
+  "name": "Perfect Sacrifice",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 5923,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5923-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:09.532183+00:00",
+  "sha256": "ca8bc6b4ecc2a024822160fa037b0f64e50dc5f76dbf95791f4e437a075004e9",
+  "source_image_hash": "8e/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/6f/printing_5923_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/6f/printing_5923_1_",
+  "width": 750
+}

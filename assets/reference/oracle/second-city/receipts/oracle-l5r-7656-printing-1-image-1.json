@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385989,
+  "card_id": "oracle-l5r-7656",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7656-printing-1-image-1",
+  "image_index": 1,
+  "name": "Superior Reach",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 7656,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7656-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:46.039254+00:00",
+  "sha256": "06c2a1c31e3759bdf95e2a0aa19b72fad1e0b766a1e1c0c90d89e60166644165",
+  "source_image_hash": "dd/60",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/60/printing_7656_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/60/printing_7656_1_",
+  "width": 750
+}

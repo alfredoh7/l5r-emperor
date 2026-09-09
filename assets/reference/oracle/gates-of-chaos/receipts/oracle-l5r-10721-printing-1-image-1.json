@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 839048,
+  "card_id": "oracle-l5r-10721",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10721-printing-1-image-1",
+  "image_index": 1,
+  "name": "Defensive Formation",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 10721,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10721-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:18.475534+00:00",
+  "sha256": "49db785ed18104821f6d271c44658b043aeb0cfeca900def95936fef17b1ea62",
+  "source_image_hash": "21/ac",
+  "source_url": "https://images.oracleofthevoid.com/l5r/21/ac/printing_10721_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/21/ac/printing_10721_1_",
+  "width": 750
+}

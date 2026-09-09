@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 929967,
+  "card_id": "oracle-l5r-10539",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10539-printing-1-image-1",
+  "image_index": 1,
+  "name": "Flame Lash",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 10539,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10539-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:41.405788+00:00",
+  "sha256": "b3f5ad0f135e07db39d2918be7f53d9b12de91b55d86ae1d96c516edfc53f93f",
+  "source_image_hash": "72/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/72/df/printing_10539_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/72/df/printing_10539_1_",
+  "width": 750
+}

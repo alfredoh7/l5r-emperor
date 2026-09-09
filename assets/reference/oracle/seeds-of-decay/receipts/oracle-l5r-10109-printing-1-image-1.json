@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 764012,
+  "card_id": "oracle-l5r-10109",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10109-printing-1-image-1",
+  "image_index": 1,
+  "name": "Water Spider Adept",
+  "numbers": [
+    "83"
+  ],
+  "oracle_id": 10109,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10109-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:14.314262+00:00",
+  "sha256": "06cd3519921977788efb466eda3cc864506403f4e774da1925d6d892a09e7545",
+  "source_image_hash": "93/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/85/printing_10109_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/85/printing_10109_1_",
+  "width": 750
+}

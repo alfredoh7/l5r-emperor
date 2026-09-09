@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 417970,
+  "card_id": "oracle-l5r-3150",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3150-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Mimori",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 3150,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3150-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:28.546346+00:00",
+  "sha256": "cf387f62a461d12e0b5a2124e8fb7d46a7d2656d378e1f7e27455cca06f53d9f",
+  "source_image_hash": "7e/e3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7e/e3/printing_3150_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7e/e3/printing_3150_1_",
+  "width": 750
+}

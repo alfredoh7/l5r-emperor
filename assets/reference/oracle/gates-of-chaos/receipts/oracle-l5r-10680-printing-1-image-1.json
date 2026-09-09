@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 831570,
+  "card_id": "oracle-l5r-10680",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10680-printing-1-image-1",
+  "image_index": 1,
+  "name": "Enslaved Djinn",
+  "numbers": [
+    "80"
+  ],
+  "oracle_id": 10680,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10680-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:23.487241+00:00",
+  "sha256": "a8efa38b22e2cf5a3cbeb2c83afa32bcd35815aa2aeeefeaf70672fd0fc85771",
+  "source_image_hash": "da/77",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/77/printing_10680_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/77/printing_10680_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772737,
+  "card_id": "oracle-l5r-10076",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10076-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Momoko",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 10076,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10076-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:27.865479+00:00",
+  "sha256": "42036a82f301e9714354e3b4af88f79014fb39563cdc13e06b65b2a0c67e7e6c",
+  "source_image_hash": "11/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/e9/printing_10076_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/e9/printing_10076_1_",
+  "width": 750
+}

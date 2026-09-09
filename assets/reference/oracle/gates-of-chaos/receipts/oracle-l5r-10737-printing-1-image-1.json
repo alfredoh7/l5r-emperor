@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 811422,
+  "card_id": "oracle-l5r-10737",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10737-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lost Caravan",
+  "numbers": [
+    "130"
+  ],
+  "oracle_id": 10737,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10737-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:11.037328+00:00",
+  "sha256": "3ecb6446d24459d66b2ed8bc70d2037cb50705312b30d2527ba3739d296a3cdd",
+  "source_image_hash": "56/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/56/75/printing_10737_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/56/75/printing_10737_1_",
+  "width": 750
+}

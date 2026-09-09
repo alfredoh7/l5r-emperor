@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 778984,
+  "card_id": "oracle-l5r-10613",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10613-printing-1-image-1",
+  "image_index": 1,
+  "name": "Imperial Explorer's Dojo",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10613,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10613-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:46.247993+00:00",
+  "sha256": "e615797a5f0f44c8ad6aa9001cc4e9ddaaae865436611c8f034d79cbb7180a31",
+  "source_image_hash": "81/38",
+  "source_url": "https://images.oracleofthevoid.com/l5r/81/38/printing_10613_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/81/38/printing_10613_1_",
+  "width": 750
+}

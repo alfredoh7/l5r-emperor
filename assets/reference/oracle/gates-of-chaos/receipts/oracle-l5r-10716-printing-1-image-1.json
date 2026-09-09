@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 853222,
+  "card_id": "oracle-l5r-10716",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10716-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chaos of Battle",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 10716,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10716-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:04.936290+00:00",
+  "sha256": "6c72ddebe5166c8a387c40152d2b919844c35e5b6bd225e257b89ef1d41d20a0",
+  "source_image_hash": "c4/e5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c4/e5/printing_10716_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c4/e5/printing_10716_1_",
+  "width": 750
+}

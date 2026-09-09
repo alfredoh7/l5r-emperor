@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399083,
+  "card_id": "oracle-l5r-8452",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8452-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thoughts of Wind",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 8452,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8452-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:12.133909+00:00",
+  "sha256": "176210e24e40dc56716db07e5ef3bd5d6a8c56e8150c37298eba547b35f39970",
+  "source_image_hash": "1a/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/da/printing_8452_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/da/printing_8452_1_",
+  "width": 750
+}

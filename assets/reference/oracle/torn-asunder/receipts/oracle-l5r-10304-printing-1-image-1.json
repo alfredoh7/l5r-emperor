@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 803349,
+  "card_id": "oracle-l5r-10304",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10304-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Suzukaze",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 10304,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10304-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:47.350920+00:00",
+  "sha256": "96ac7635e06b93113159b93f4b361320f203233fffc6ad91f506875fcc60c6be",
+  "source_image_hash": "b1/8b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b1/8b/printing_10304_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b1/8b/printing_10304_1_",
+  "width": 750
+}

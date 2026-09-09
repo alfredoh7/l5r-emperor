@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 719510,
+  "card_id": "oracle-l5r-10036",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10036-printing-1-image-1",
+  "image_index": 1,
+  "name": "Overlooked Palace",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10036,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10036-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:14.336961+00:00",
+  "sha256": "abe2a18ec158fc1ba479901fef7869b8687bd8ca3c4fad4b16d57d99b079edc4",
+  "source_image_hash": "a3/c4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/c4/printing_10036_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/c4/printing_10036_1_",
+  "width": 750
+}

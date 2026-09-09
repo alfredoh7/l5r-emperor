@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 745043,
+  "card_id": "oracle-l5r-9865",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9865-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fallow Lands",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 9865,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9865-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:50.979141+00:00",
+  "sha256": "e95b3479992a3996f0ae6209327a9e9f32fe4dcda5b108bf49b38a2c31234677",
+  "source_image_hash": "39/e5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/e5/printing_9865_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/e5/printing_9865_1_",
+  "width": 750
+}

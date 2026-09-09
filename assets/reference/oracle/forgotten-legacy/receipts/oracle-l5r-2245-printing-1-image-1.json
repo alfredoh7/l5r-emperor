@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 281581,
+  "card_id": "oracle-l5r-2245",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2245-printing-1-image-1",
+  "image_index": 1,
+  "name": "Duel of Haiku",
+  "numbers": [
+    "67"
+  ],
+  "oracle_id": 2245,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-2245-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:50.766874+00:00",
+  "sha256": "af8b50bb59d93d4384467eeb49c5e002c17d27605d9bd19eeaf2f9c3175450cb",
+  "source_image_hash": "09/07",
+  "source_url": "https://images.oracleofthevoid.com/l5r/09/07/printing_2245_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/09/07/printing_2245_1_",
+  "width": 750
+}

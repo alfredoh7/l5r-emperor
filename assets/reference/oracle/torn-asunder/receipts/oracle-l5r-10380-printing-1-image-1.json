@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799984,
+  "card_id": "oracle-l5r-10380",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10380-printing-1-image-1",
+  "image_index": 1,
+  "name": "Imprudent Misstep",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 10380,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10380-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:49.455725+00:00",
+  "sha256": "6f9532406ea38f0b37661f99d51335504ec641ac4156e2f0fb37b993ec82eb07",
+  "source_image_hash": "e7/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/84/printing_10380_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/84/printing_10380_1_",
+  "width": 750
+}

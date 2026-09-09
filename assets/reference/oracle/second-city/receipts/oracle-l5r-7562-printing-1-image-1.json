@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 387632,
+  "card_id": "oracle-l5r-7562",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7562-printing-1-image-1",
+  "image_index": 1,
+  "name": "Strength of the Tsunami",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 7562,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7562-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:44.955267+00:00",
+  "sha256": "1baf87500144405779828bfc1188fff61e09b9398ad7d20e371388ea390f7398",
+  "source_image_hash": "b4/6c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/6c/printing_7562_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/6c/printing_7562_1_",
+  "width": 750
+}

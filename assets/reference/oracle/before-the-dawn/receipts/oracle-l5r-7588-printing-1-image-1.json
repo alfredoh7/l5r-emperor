@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 406407,
+  "card_id": "oracle-l5r-7588",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7588-printing-1-image-1",
+  "image_index": 1,
+  "name": "String of Victories",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 7588,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7588-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:54.519994+00:00",
+  "sha256": "c92f784cf015a46eed0c2e6ac8a21eeb79249f429f667d90008bfb7a63507ffd",
+  "source_image_hash": "57/61",
+  "source_url": "https://images.oracleofthevoid.com/l5r/57/61/printing_7588_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/57/61/printing_7588_1_",
+  "width": 750
+}

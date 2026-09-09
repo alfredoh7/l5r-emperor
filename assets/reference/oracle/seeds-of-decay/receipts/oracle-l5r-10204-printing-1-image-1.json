@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 619677,
+  "card_id": "oracle-l5r-10204",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10204-printing-1-image-1",
+  "image_index": 1,
+  "name": "Masayoshi's Blade",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10204,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10204-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:43.199646+00:00",
+  "sha256": "3ef281c6aadc072d8e5ffac51b27f06eb4564d39d237290c0368d201868990b1",
+  "source_image_hash": "cc/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/c1/printing_10204_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/c1/printing_10204_1_",
+  "width": 750
+}

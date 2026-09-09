@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 265235,
+  "card_id": "oracle-l5r-541",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-541-printing-2-image-1",
+  "image_index": 1,
+  "name": "Asako Hoshimi",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 541,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-541-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:46.904044+00:00",
+  "sha256": "183f5cc59ee76f12a1e441ad9a2251e9cadd662fd17e683d1ea18a998baea379",
+  "source_image_hash": "57/1b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/57/1b/printing_541_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/57/1b/printing_541_2_",
+  "width": 750
+}

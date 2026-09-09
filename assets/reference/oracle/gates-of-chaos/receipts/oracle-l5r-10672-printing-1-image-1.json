@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732041,
+  "card_id": "oracle-l5r-10672",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10672-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ide Hinobu",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 10672,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10672-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:42.598101+00:00",
+  "sha256": "d453f942078f5054a3ab3d56e5065736752b5fe940f0b2052255ccefb6e8c839",
+  "source_image_hash": "c9/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/94/printing_10672_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/94/printing_10672_1_",
+  "width": 750
+}

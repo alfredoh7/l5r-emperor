@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 776957,
+  "card_id": "oracle-l5r-9829",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9829-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Kichi",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 9829,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9829-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:53:20.583951+00:00",
+  "sha256": "e9a55b73de97be7932a0d5c27c1e99e27bd6a95eb49000dfa89aa8bc19d143be",
+  "source_image_hash": "ea/76",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ea/76/printing_9829_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ea/76/printing_9829_1_",
+  "width": 750
+}

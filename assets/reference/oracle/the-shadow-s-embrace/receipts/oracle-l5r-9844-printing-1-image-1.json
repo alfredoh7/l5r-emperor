@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 781335,
+  "card_id": "oracle-l5r-9844",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9844-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Waru",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 9844,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9844-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:17.900076+00:00",
+  "sha256": "2a4e6ce7ba2a00aba0ddb43eced8f71d7bdcefed7ddf3d0bc182efebf182e955",
+  "source_image_hash": "d7/9a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/9a/printing_9844_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/9a/printing_9844_1_",
+  "width": 750
+}

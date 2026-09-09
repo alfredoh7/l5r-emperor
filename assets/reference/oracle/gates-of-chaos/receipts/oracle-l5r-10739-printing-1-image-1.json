@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 819174,
+  "card_id": "oracle-l5r-10739",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10739-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Doomseeker's Tomb",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 10739,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10739-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:36.790508+00:00",
+  "sha256": "4c6aac092d0fc2537dadca0c9e6c071f9dafed110335bbcf1a3fc2512e6509c2",
+  "source_image_hash": "43/00",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/00/printing_10739_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/00/printing_10739_1_",
+  "width": 750
+}

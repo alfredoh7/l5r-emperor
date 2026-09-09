@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1004903,
+  "card_id": "oracle-l5r-10498",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10498-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Takaki",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 10498,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10498-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:17.073741+00:00",
+  "sha256": "e15b403d11f021ed8d4253e880dd449755d94633ebe2cda79c733638e5d2b31e",
+  "source_image_hash": "31/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/31/1a/printing_10498_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/31/1a/printing_10498_1_",
+  "width": 750
+}

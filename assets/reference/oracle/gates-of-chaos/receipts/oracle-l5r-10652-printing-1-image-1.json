@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 833989,
+  "card_id": "oracle-l5r-10652",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10652-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Tsurao",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 10652,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10652-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:40.708211+00:00",
+  "sha256": "0e7c2c441f2e65736f2b85a2900bed9e47d282de4f8eeed6124ee2fc4d1a801c",
+  "source_image_hash": "20/38",
+  "source_url": "https://images.oracleofthevoid.com/l5r/20/38/printing_10652_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/20/38/printing_10652_1_",
+  "width": 750
+}

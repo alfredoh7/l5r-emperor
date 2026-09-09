@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 907223,
+  "card_id": "oracle-l5r-10435",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10435-printing-1-image-2",
+  "image_index": 2,
+  "name": "Temple of Madness",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 10435,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10435-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:56.253411+00:00",
+  "sha256": "bd004bdd7105bca4bfbf53ecf54a0e0e5e5274bca033134abfa41d96cf720a97",
+  "source_image_hash": "f0/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/b4/printing_10435_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/b4/printing_10435_1_",
+  "width": 750
+}

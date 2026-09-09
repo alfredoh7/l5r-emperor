@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750895,
+  "card_id": "oracle-l5r-9794",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9794-printing-1-image-1",
+  "image_index": 1,
+  "name": "Star-Crossed Lovers",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 9794,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9794-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:20.982873+00:00",
+  "sha256": "e3e8ff9361856b22798829da815d7a7886760df6ce0fb8c5851e20262fe16407",
+  "source_image_hash": "b5/35",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b5/35/printing_9794_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b5/35/printing_9794_1_",
+  "width": 750
+}

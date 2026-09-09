@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 237762,
+  "card_id": "oracle-l5r-6276",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6276-printing-3-image-1",
+  "image_index": 1,
+  "name": "Restoring Order",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 6276,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6276-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:55.701437+00:00",
+  "sha256": "e487bcc2fb6eabb4f1f5fc2ddeb30531327c30073a2e898e5804fc7d6b7952f3",
+  "source_image_hash": "29/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/29/94/printing_6276_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/29/94/printing_6276_3_",
+  "width": 750
+}

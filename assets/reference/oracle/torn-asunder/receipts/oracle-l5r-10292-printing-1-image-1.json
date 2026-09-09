@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750266,
+  "card_id": "oracle-l5r-10292",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10292-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Shizuka",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 10292,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10292-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:45.774710+00:00",
+  "sha256": "7b73b2b671e149de4284c3790b196fde308979007a75a22f3bb05e40edf23e93",
+  "source_image_hash": "03/8b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/8b/printing_10292_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/8b/printing_10292_1_",
+  "width": 750
+}

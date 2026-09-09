@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 654290,
+  "card_id": "oracle-l5r-6374",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6374-printing-2-image-1",
+  "image_index": 1,
+  "name": "Rocky Terrain",
+  "numbers": [
+    "132"
+  ],
+  "oracle_id": 6374,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6374-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:28.739192+00:00",
+  "sha256": "4d22e8f6cbb619ffb20918222405a8c527cf5ef9562d6c68b1f123c50d0d9efb",
+  "source_image_hash": "b3/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/01/printing_6374_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/01/printing_6374_2_",
+  "width": 750
+}

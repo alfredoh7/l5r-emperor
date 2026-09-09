@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 414804,
+  "card_id": "oracle-l5r-5013",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5013-printing-1-image-1",
+  "image_index": 1,
+  "name": "Measure of Devotion",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 5013,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5013-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:07.105834+00:00",
+  "sha256": "483239ea6a7a8e59cb7e10af8b9a477640cdbe45d1e219d678063e6633af73e8",
+  "source_image_hash": "14/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/0d/printing_5013_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/0d/printing_5013_1_",
+  "width": 750
+}

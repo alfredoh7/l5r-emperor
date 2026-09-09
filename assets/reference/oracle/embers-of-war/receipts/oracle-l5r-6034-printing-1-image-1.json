@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 868636,
+  "card_id": "oracle-l5r-6034",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6034-printing-1-image-1",
+  "image_index": 1,
+  "name": "Power of Strength",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 6034,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6034-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:15.474636+00:00",
+  "sha256": "e889bbf13997dbf4d9c431564f94ba4ec2baea54ceb1cbfbceea03c67a0ec456",
+  "source_image_hash": "bc/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bc/8a/printing_6034_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bc/8a/printing_6034_1_",
+  "width": 750
+}

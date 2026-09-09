@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1000894,
+  "card_id": "oracle-l5r-10499",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10499-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sengmai, the Unbreakable",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 10499,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10499-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:29.324631+00:00",
+  "sha256": "7d07a57c03d9f7ecbfaa6f06a859c21e18fb4cfe6e3cb5509fe1e640055fc515",
+  "source_image_hash": "e8/b7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e8/b7/printing_10499_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e8/b7/printing_10499_1_",
+  "width": 750
+}

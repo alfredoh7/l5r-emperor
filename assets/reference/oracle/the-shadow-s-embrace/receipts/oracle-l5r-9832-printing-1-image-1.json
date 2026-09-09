@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 771855,
+  "card_id": "oracle-l5r-9832",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9832-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Ebumi",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 9832,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9832-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:07.422118+00:00",
+  "sha256": "7ce61f7e66d5a31cd8f26be58bcf21958af08c1c6c30e218108482a70d9bf605",
+  "source_image_hash": "b6/70",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b6/70/printing_9832_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b6/70/printing_9832_1_",
+  "width": 750
+}

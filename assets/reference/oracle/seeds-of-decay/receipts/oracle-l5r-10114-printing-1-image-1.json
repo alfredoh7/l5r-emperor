@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 873899,
+  "card_id": "oracle-l5r-10114",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10114-printing-1-image-1",
+  "image_index": 1,
+  "name": "Celestial Sword of the Scorpion",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 10114,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10114-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:40.610527+00:00",
+  "sha256": "037ef6e50cfe5a8e63526ccac67112522871943e2645af48f8e656f86666710a",
+  "source_image_hash": "f2/0c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f2/0c/printing_10114_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f2/0c/printing_10114_1_",
+  "width": 750
+}

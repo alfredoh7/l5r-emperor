@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 734085,
+  "card_id": "oracle-l5r-10915",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10915-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chikushudo's Infusion",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 10915,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10915-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:01.567355+00:00",
+  "sha256": "af9c5b53fe77643212c97f1edb36f97d3696236b83b2384f37a4582996c3f335",
+  "source_image_hash": "bf/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bf/de/printing_10915_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bf/de/printing_10915_1_",
+  "width": 750
+}

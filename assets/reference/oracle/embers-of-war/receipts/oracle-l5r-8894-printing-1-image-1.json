@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 923326,
+  "card_id": "oracle-l5r-8894",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8894-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Tomaru",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 8894,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8894-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:24.191951+00:00",
+  "sha256": "7e44a1b95e9e49539b3a1284e3498b2b40af1950ada519eb3ada2d1bf4b817c5",
+  "source_image_hash": "a7/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a7/0d/printing_8894_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a7/0d/printing_8894_1_",
+  "width": 750
+}

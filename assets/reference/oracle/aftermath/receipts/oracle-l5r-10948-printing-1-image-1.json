@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 738100,
+  "card_id": "oracle-l5r-10948",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10948-printing-1-image-1",
+  "image_index": 1,
+  "name": "Move the Troops",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 10948,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10948-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:23.076763+00:00",
+  "sha256": "3383b0448100007b62071649f40b6d95ed5810270ea2158ba30b775f953ce43d",
+  "source_image_hash": "da/fb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/fb/printing_10948_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/fb/printing_10948_1_",
+  "width": 750
+}

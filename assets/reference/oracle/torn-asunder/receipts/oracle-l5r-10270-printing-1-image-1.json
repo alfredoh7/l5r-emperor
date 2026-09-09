@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 789583,
+  "card_id": "oracle-l5r-10270",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10270-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Tachikaze",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10270,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10270-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:09.197444+00:00",
+  "sha256": "9d7cf0bef20b1a0d6de071837e2d894c55b25470557c7fe2dc08c665f3bfd22b",
+  "source_image_hash": "68/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/4a/printing_10270_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/4a/printing_10270_1_",
+  "width": 750
+}

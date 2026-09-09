@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 707484,
+  "card_id": "oracle-l5r-10943",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10943-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lonely Battlefield",
+  "numbers": [
+    "128"
+  ],
+  "oracle_id": 10943,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10943-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:07.453015+00:00",
+  "sha256": "60c9fe7b71f7e5e4da5f4b8bc7c87ab8eca0a306662c3358edeaff2a0c1211de",
+  "source_image_hash": "c3/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c3/d4/printing_10943_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c3/d4/printing_10943_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 938707,
+  "card_id": "oracle-l5r-10666",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10666-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Lost Colossus",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 10666,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10666-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:07.031808+00:00",
+  "sha256": "fdf4863144f1e6c4fff46e6ff993dcc01ce0476634bd1fe666f18299b1d2570a",
+  "source_image_hash": "37/96",
+  "source_url": "https://images.oracleofthevoid.com/l5r/37/96/printing_10666_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/37/96/printing_10666_1_",
+  "width": 750
+}

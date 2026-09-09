@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 975339,
+  "card_id": "oracle-l5r-10417",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10417-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hantei's Guidance",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10417,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10417-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:53.032922+00:00",
+  "sha256": "c8424fdec41d17fb07d83e2d9b64ac934bd28c8d41407d700bf6532d016a20e7",
+  "source_image_hash": "4d/62",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4d/62/printing_10417_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4d/62/printing_10417_1_",
+  "width": 750
+}

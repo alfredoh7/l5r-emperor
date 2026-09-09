@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 731157,
+  "card_id": "oracle-l5r-10924",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10924-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yojimbo of Earth",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 10924,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10924-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:30.283229+00:00",
+  "sha256": "5a389c2357c2309d5dca6f26c79184dd2947607ee85a4982aeb5d18020b2ea62",
+  "source_image_hash": "ce/a6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ce/a6/printing_10924_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ce/a6/printing_10924_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 872416,
+  "card_id": "oracle-l5r-10677",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10677-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Bestial Ones",
+  "numbers": [
+    "86"
+  ],
+  "oracle_id": 10677,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10677-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:00.042654+00:00",
+  "sha256": "a0190b13c45e2298f6691939ec56990d8dedc7c1e3eddc313cbb6da4fb2e2b9f",
+  "source_image_hash": "cd/61",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cd/61/printing_10677_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cd/61/printing_10677_1_",
+  "width": 750
+}

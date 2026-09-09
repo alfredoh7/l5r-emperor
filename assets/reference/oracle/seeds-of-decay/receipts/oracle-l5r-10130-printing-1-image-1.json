@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 740321,
+  "card_id": "oracle-l5r-10130",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10130-printing-1-image-1",
+  "image_index": 1,
+  "name": "Peace of the Kami",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 10130,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10130-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:15.512678+00:00",
+  "sha256": "c9cfd1afd5bef0dc3805a8537293d6d0b22860a7fc134177327cbdfd84657fa9",
+  "source_image_hash": "a8/59",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/59/printing_10130_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/59/printing_10130_1_",
+  "width": 750
+}

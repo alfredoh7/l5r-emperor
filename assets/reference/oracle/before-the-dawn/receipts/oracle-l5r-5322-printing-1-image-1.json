@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 424877,
+  "card_id": "oracle-l5r-5322",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5322-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Hailung",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 5322,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5322-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:12.413968+00:00",
+  "sha256": "f93c01ceeeb5b43817221b5ddb175bcff6a6e1c0c8008c641fab285173149143",
+  "source_image_hash": "4a/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4a/8a/printing_5322_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/8a/printing_5322_1_",
+  "width": 750
+}

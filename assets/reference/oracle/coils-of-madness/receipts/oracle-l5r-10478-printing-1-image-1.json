@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1105183,
+  "card_id": "oracle-l5r-10478",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10478-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tonbo Inuyama, the Eye of Tomorrow",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 10478,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10478-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:18.718603+00:00",
+  "sha256": "ddf8a67ecbef1ea64a5e2e84c7f08625f31dbc4368a402bd0ce1c11b1915137b",
+  "source_image_hash": "3e/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/0d/printing_10478_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/0d/printing_10478_1_",
+  "width": 750
+}

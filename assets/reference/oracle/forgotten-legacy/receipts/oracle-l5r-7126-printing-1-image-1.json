@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 256304,
+  "card_id": "oracle-l5r-7126",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7126-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Makiko",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 7126,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-7126-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:28.935307+00:00",
+  "sha256": "fed546e76f876a760f1c456b285effe2c000fb980463ed4ed64ca89580862558",
+  "source_image_hash": "b9/39",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b9/39/printing_7126_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/39/printing_7126_1_",
+  "width": 750
+}

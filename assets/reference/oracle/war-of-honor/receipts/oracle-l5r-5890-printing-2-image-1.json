@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 234484,
+  "card_id": "oracle-l5r-5890",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5890-printing-2-image-1",
+  "image_index": 1,
+  "name": "Paths of Honor & Glory",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 5890,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-5890-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:50.800466+00:00",
+  "sha256": "ea6ee7686b0bd898535e1437af6b3822515ada179268e1d50acf44d9c444752f",
+  "source_image_hash": "a6/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a6/93/printing_5890_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a6/93/printing_5890_2_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 246465,
+  "card_id": "oracle-l5r-8586",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8586-printing-3-image-1",
+  "image_index": 1,
+  "name": "Togashi Taro",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 8586,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8586-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:11.032494+00:00",
+  "sha256": "721d36484f1b28150e07af6774ab243b00322b0a62d0a27984512f2ac9f6f0db",
+  "source_image_hash": "8d/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8d/15/printing_8586_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8d/15/printing_8586_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732194,
+  "card_id": "oracle-l5r-10267",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10267-printing-1-image-1",
+  "image_index": 1,
+  "name": "Merchant Outpost",
+  "numbers": [
+    "11"
+  ],
+  "oracle_id": 10267,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10267-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:12.206345+00:00",
+  "sha256": "9f640555a4725ca6197902a403d0ef07b139dfa64a860f4dca5de9a93c36e0a6",
+  "source_image_hash": "f9/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/32/printing_10267_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/32/printing_10267_1_",
+  "width": 750
+}

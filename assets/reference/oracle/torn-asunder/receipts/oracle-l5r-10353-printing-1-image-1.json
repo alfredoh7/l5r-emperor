@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 956521,
+  "card_id": "oracle-l5r-10353",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10353-printing-1-image-1",
+  "image_index": 1,
+  "name": "Scorching Lash",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 10353,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10353-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:44.126524+00:00",
+  "sha256": "5fd11cf48dce40b2ea6ba5baaf5719e6a4ba0cba378f3879b9be4d046b5ba539",
+  "source_image_hash": "26/dd",
+  "source_url": "https://images.oracleofthevoid.com/l5r/26/dd/printing_10353_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/26/dd/printing_10353_1_",
+  "width": 750
+}

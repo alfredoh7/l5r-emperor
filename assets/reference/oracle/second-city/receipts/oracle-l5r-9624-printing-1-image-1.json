@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 394210,
+  "card_id": "oracle-l5r-9624",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9624-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Sakuma",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 9624,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9624-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:20.326917+00:00",
+  "sha256": "4f6cef8ae185b84fec1d5586a1e3c16235667ee2e22e833bd3de139d5155acb5",
+  "source_image_hash": "64/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/64/93/printing_9624_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/64/93/printing_9624_1_",
+  "width": 750
+}

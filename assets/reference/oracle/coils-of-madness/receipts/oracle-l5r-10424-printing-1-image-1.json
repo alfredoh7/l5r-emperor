@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 940333,
+  "card_id": "oracle-l5r-10424",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10424-printing-1-image-1",
+  "image_index": 1,
+  "name": "An End to Hostilities",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10424,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10424-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:48.195102+00:00",
+  "sha256": "678488e5ba4fc2f786326ed8d4cce4ebabc990c675907a65f9389fd099f4bb6a",
+  "source_image_hash": "ff/79",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ff/79/printing_10424_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ff/79/printing_10424_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 662126,
+  "card_id": "oracle-l5r-10222",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10222-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Korimi",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 10222,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10222-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:29.906131+00:00",
+  "sha256": "e41ad7023043dfb91f4d1a7df4edf270d4eb167219466085dc2e5e50398d6d09",
+  "source_image_hash": "18/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/18/5b/printing_10222_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/18/5b/printing_10222_1_",
+  "width": 750
+}

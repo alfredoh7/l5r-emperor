@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 410001,
+  "card_id": "oracle-l5r-7285",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7285-printing-1-image-1",
+  "image_index": 1,
+  "name": "Skipping the Puddle",
+  "numbers": [
+    "135"
+  ],
+  "oracle_id": 7285,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7285-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:33.385395+00:00",
+  "sha256": "951d23daa7b82273f7e52635e7bff255f1e5e105a0ce83855dd342f898fed877",
+  "source_image_hash": "8c/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8c/ca/printing_7285_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8c/ca/printing_7285_1_",
+  "width": 750
+}

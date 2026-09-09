@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 777093,
+  "card_id": "oracle-l5r-10851",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10851-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Takakura",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 10851,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10851-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:42.407617+00:00",
+  "sha256": "204804777c86751520f9efc4e870d08f9a6cb110f296271b7c96370cfd1914f5",
+  "source_image_hash": "61/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/15/printing_10851_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/15/printing_10851_1_",
+  "width": 750
+}

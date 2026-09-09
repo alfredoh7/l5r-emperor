@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 752854,
+  "card_id": "oracle-l5r-10196",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10196-printing-1-image-1",
+  "image_index": 1,
+  "name": "Deadly Ninja-to",
+  "numbers": [
+    "170"
+  ],
+  "oracle_id": 10196,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10196-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:26:46.593171+00:00",
+  "sha256": "59a593a2a9c0b07b8689b5284cd04f3d8ed8ce098b38ec0c70db86878960efeb",
+  "source_image_hash": "72/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/72/6d/printing_10196_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/72/6d/printing_10196_1_",
+  "width": 750
+}

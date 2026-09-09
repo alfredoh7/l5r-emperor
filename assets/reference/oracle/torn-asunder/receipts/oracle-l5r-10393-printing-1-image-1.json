@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 825699,
+  "card_id": "oracle-l5r-10393",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10393-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spiritual Coalescence",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 10393,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10393-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:54.941118+00:00",
+  "sha256": "bae360d981e153045070ea2bf0b3d81382e5c4a270459d0b217f0c192e0fc8eb",
+  "source_image_hash": "83/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/83/4c/printing_10393_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/83/4c/printing_10393_1_",
+  "width": 750
+}

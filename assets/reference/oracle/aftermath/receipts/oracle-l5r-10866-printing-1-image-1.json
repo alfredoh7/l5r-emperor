@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 757379,
+  "card_id": "oracle-l5r-10866",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10866-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Broken Man",
+  "numbers": [
+    "51"
+  ],
+  "oracle_id": 10866,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10866-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:01.731408+00:00",
+  "sha256": "1cd069cd574d7b44535048636ece974ce1fff60569d60d1c93e0938ade026868",
+  "source_image_hash": "96/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/96/d2/printing_10866_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/96/d2/printing_10866_1_",
+  "width": 750
+}

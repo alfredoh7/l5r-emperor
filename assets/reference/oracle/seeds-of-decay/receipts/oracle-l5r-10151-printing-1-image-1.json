@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 809807,
+  "card_id": "oracle-l5r-10151",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10151-printing-1-image-1",
+  "image_index": 1,
+  "name": "Harsh Taskmaster",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 10151,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10151-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:11.274026+00:00",
+  "sha256": "feed47e0d2fa3227fc14d6cd86b2069f3455a0a10ceef7970c6176e3d6682ece",
+  "source_image_hash": "f5/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f5/3f/printing_10151_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f5/3f/printing_10151_1_",
+  "width": 750
+}

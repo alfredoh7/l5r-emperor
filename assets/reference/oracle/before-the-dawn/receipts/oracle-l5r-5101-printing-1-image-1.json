@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 418830,
+  "card_id": "oracle-l5r-5101",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5101-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Houken",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 5101,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5101-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:08.176598+00:00",
+  "sha256": "78eef3bebce776f9dafc51f4a30dfa88ca2243b06495e37323417a3009d44ef9",
+  "source_image_hash": "8f/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8f/7d/printing_5101_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8f/7d/printing_5101_1_",
+  "width": 750
+}

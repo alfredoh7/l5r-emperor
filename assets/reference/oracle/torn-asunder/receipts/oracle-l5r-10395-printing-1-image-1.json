@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 796194,
+  "card_id": "oracle-l5r-10395",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10395-printing-1-image-1",
+  "image_index": 1,
+  "name": "Suck the Marrow",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 10395,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10395-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:58.480940+00:00",
+  "sha256": "7e8f641475f8657e339668c5df9dca0e0fd8c5c39dc38bfc309fc362648700cb",
+  "source_image_hash": "a7/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a7/f6/printing_10395_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a7/f6/printing_10395_1_",
+  "width": 750
+}

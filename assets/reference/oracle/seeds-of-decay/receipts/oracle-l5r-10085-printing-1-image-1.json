@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 784944,
+  "card_id": "oracle-l5r-10085",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10085-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Yamato",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 10085,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10085-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:45.354192+00:00",
+  "sha256": "efafedf1cf8d4888d4190b2cf3a17562e7ae06fe80329187f026c5690bd63434",
+  "source_image_hash": "10/e5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/e5/printing_10085_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/e5/printing_10085_1_",
+  "width": 750
+}

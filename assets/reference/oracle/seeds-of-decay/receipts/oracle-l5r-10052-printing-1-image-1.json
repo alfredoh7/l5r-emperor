@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 844799,
+  "card_id": "oracle-l5r-10052",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10052-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsuki Minori",
+  "numbers": [
+    "26"
+  ],
+  "oracle_id": 10052,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10052-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:34.930423+00:00",
+  "sha256": "6cad2558157cfeb78d020248293aec66de8bb67281c3ccfd422100c28cd8a610",
+  "source_image_hash": "b8/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b8/d6/printing_10052_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b8/d6/printing_10052_1_",
+  "width": 750
+}

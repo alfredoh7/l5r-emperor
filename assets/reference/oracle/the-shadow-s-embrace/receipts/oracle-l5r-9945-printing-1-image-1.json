@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741151,
+  "card_id": "oracle-l5r-9945",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9945-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bishamon's Tower",
+  "numbers": [
+    "157"
+  ],
+  "oracle_id": 9945,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9945-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:20.206630+00:00",
+  "sha256": "77244ba3d41d580eca9f93064f380143297eaaf1a26074947e811401be58b79e",
+  "source_image_hash": "a5/11",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a5/11/printing_9945_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a5/11/printing_9945_1_",
+  "width": 750
+}

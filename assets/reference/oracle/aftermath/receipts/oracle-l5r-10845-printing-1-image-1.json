@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 795474,
+  "card_id": "oracle-l5r-10845",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10845-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Kalen",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 10845,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10845-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:19.609877+00:00",
+  "sha256": "015f9889e90fba194b2fb00d7672a847a304d0da53d8706e0202cd442c914ed9",
+  "source_image_hash": "cf/4b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/4b/printing_10845_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/4b/printing_10845_1_",
+  "width": 750
+}

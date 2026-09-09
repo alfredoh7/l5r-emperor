@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 400601,
+  "card_id": "oracle-l5r-2858",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2858-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Sawaki",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 2858,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2858-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:38.212181+00:00",
+  "sha256": "bfdfdf9bfa1cabcb99083812dc1f110a48c397d075c15c7f127845d32060c9a8",
+  "source_image_hash": "2a/68",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2a/68/printing_2858_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2a/68/printing_2858_1_",
+  "width": 750
+}

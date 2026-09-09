@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772400,
+  "card_id": "oracle-l5r-10082",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10082-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soshi Kodanshi",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 10082,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10082-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:35.433439+00:00",
+  "sha256": "20b80bbf07eb307bac62214515b9829aa91597ed8b31c5334b7bfb82fa723d69",
+  "source_image_hash": "16/cf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/cf/printing_10082_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/cf/printing_10082_1_",
+  "width": 750
+}

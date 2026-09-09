@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 801377,
+  "card_id": "oracle-l5r-10068",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10068-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Kohrogi",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 10068,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10068-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:57.864566+00:00",
+  "sha256": "c89416ed0025bcb7e16e8bf9163cdb77a14c6b37731470e6604ea5f43b815735",
+  "source_image_hash": "87/08",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/08/printing_10068_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/08/printing_10068_1_",
+  "width": 750
+}

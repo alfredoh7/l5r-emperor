@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 817421,
+  "card_id": "oracle-l5r-10953",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10953-printing-1-image-1",
+  "image_index": 1,
+  "name": "Return to Action",
+  "numbers": [
+    "138"
+  ],
+  "oracle_id": 10953,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10953-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:36.745460+00:00",
+  "sha256": "e747db3cd9655c9ee30c36790ede9e380f58da484873f1b77536ca19dab797b1",
+  "source_image_hash": "4e/a0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/a0/printing_10953_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/a0/printing_10953_1_",
+  "width": 750
+}

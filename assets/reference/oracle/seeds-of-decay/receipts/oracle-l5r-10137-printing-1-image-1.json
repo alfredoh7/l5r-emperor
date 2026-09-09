@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732716,
+  "card_id": "oracle-l5r-10137",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10137-printing-1-image-1",
+  "image_index": 1,
+  "name": "Black Marketeering",
+  "numbers": [
+    "111"
+  ],
+  "oracle_id": 10137,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10137-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:32.277906+00:00",
+  "sha256": "34d9a710a42b6be0458f936fc8e8c72a6c5265b0811f616971204ca10bf0426a",
+  "source_image_hash": "a5/a8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a5/a8/printing_10137_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a5/a8/printing_10137_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 707557,
+  "card_id": "oracle-l5r-6454",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6454-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sakti",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 6454,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6454-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:28.101915+00:00",
+  "sha256": "bd8bcd23c5d4db376a1cbcae2b1658f80190e09534fd3e93ab28a393f4f30d29",
+  "source_image_hash": "dd/96",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/96/printing_6454_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/96/printing_6454_1_",
+  "width": 750
+}

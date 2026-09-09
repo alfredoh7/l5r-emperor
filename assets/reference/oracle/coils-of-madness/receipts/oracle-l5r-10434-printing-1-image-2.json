@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 852276,
+  "card_id": "oracle-l5r-10434",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10434-printing-1-image-2",
+  "image_index": 2,
+  "name": "Questionable Merchant",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 10434,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10434-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:18.269658+00:00",
+  "sha256": "43b69c4b655f6bf260c05dd3274a61db22c4e2ab40a928ca2a0ecf5292eb8bfb",
+  "source_image_hash": "ae/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/d6/printing_10434_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/d6/printing_10434_1_",
+  "width": 750
+}

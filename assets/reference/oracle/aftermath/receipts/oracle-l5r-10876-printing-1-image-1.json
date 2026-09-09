@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 834162,
+  "card_id": "oracle-l5r-10876",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10876-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Kanpeki",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 10876,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10876-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:12.298837+00:00",
+  "sha256": "f7545865157437fd410f72b7d7afafbe35162bad7b20ee15bed07dda1968ec7b",
+  "source_image_hash": "7f/06",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7f/06/printing_10876_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7f/06/printing_10876_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 258557,
+  "card_id": "oracle-l5r-4909",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4909-printing-3-image-1",
+  "image_index": 1,
+  "name": "Matsu Fumiyo",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 4909,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4909-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:42.995541+00:00",
+  "sha256": "608b8c8e788f41a5d1e7f6f43766293ecfce251c599580901e3381907d780c7e",
+  "source_image_hash": "e5/b6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e5/b6/printing_4909_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e5/b6/printing_4909_3_",
+  "width": 750
+}

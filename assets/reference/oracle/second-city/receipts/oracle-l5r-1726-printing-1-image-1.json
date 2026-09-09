@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 419432,
+  "card_id": "oracle-l5r-1726",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1726-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Hotako",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 1726,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1726-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:02.230289+00:00",
+  "sha256": "747b5f8e6eb557f28284a68a0c643a3b7e6ec60c8f8f5982109326f9a88c2d6e",
+  "source_image_hash": "45/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/45/63/printing_1726_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/45/63/printing_1726_1_",
+  "width": 750
+}

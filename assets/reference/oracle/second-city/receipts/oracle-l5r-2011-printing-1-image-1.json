@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 387167,
+  "card_id": "oracle-l5r-2011",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2011-printing-1-image-1",
+  "image_index": 1,
+  "name": "Discovering a Conspiracy",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 2011,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2011-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:04.320480+00:00",
+  "sha256": "dbaed6c14270191f429cdf0cce1893a075b9f3ecc9c5ec8760e58c5adb915673",
+  "source_image_hash": "87/58",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/58/printing_2011_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/58/printing_2011_1_",
+  "width": 750
+}

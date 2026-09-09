@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 903804,
+  "card_id": "oracle-l5r-10276",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10276-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kuni Shinoda",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 10276,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10276-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:06.391235+00:00",
+  "sha256": "fe4e6d8c812b6d04780023733dd5393602b5cb7b3e91059fe0000b78be6a1ac2",
+  "source_image_hash": "e1/0b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/0b/printing_10276_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/0b/printing_10276_1_",
+  "width": 750
+}

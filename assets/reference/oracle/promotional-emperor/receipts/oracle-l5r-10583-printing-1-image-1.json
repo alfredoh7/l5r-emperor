@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 943372,
+  "card_id": "oracle-l5r-10583",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10583-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kataoka",
+  "numbers": [
+    "170"
+  ],
+  "oracle_id": 10583,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10583-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:28:15.014772+00:00",
+  "sha256": "01fde643f88ff9d499d37b8454a5d28541a7e733e1acb0720b75b3f675ef953b",
+  "source_image_hash": "d4/a6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/a6/printing_10583_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/a6/printing_10583_1_",
+  "width": 750
+}

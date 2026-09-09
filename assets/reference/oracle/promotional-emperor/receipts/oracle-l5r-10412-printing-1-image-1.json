@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 688711,
+  "card_id": "oracle-l5r-10412",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10412-printing-1-image-1",
+  "image_index": 1,
+  "name": "Family Sword",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 10412,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10412-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:12.938215+00:00",
+  "sha256": "d805dd11381c2063eba6a9b1450a59f12177ee54e44e89da610b8c362a9b5f09",
+  "source_image_hash": "69/fe",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/fe/printing_10412_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/fe/printing_10412_1_",
+  "width": 750
+}

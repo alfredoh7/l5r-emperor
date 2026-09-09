@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 715622,
+  "card_id": "oracle-l5r-10097",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10097-printing-1-image-1",
+  "image_index": 1,
+  "name": "Zansho",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 10097,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10097-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:24.799423+00:00",
+  "sha256": "e5eb154b9953090aa6b01d836f44af93dae424ec2c49e5dcd7e0b3c90ace4397",
+  "source_image_hash": "41/d7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/41/d7/printing_10097_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/41/d7/printing_10097_1_",
+  "width": 750
+}

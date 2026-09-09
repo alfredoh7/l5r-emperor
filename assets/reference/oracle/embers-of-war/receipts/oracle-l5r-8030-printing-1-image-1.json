@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 769655,
+  "card_id": "oracle-l5r-8030",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8030-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Distant Reaches",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 8030,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8030-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:05.100672+00:00",
+  "sha256": "39fe50108253aa5a8739b5dc0422ba55f3ce2241178233456c786ed74325ddc6",
+  "source_image_hash": "f9/28",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/28/printing_8030_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/28/printing_8030_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 783953,
+  "card_id": "oracle-l5r-10080",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10080-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Shibata",
+  "numbers": [
+    "54"
+  ],
+  "oracle_id": 10080,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10080-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:31.103105+00:00",
+  "sha256": "b5f7008b0578580e6575f457465e01ca337505a8d1bfae5e5a3f8de9d2baaf32",
+  "source_image_hash": "86/fa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/86/fa/printing_10080_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/86/fa/printing_10080_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 657218,
+  "card_id": "oracle-l5r-10224",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10224-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Madoka",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10224,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10224-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:17.351438+00:00",
+  "sha256": "1e939fc7d4b83e89dde307e2603a67af4d3e78a0de35de147624c79fdfa91d3f",
+  "source_image_hash": "47/1e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/47/1e/printing_10224_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/47/1e/printing_10224_1_",
+  "width": 750
+}

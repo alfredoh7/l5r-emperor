@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 935330,
+  "card_id": "oracle-l5r-10594",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10594-printing-1-image-1",
+  "image_index": 1,
+  "name": "Imperial Sword",
+  "numbers": [
+    "178"
+  ],
+  "oracle_id": 10594,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10594-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:54.513824+00:00",
+  "sha256": "cea15236a7a095507a4f8380cb1aef74d9cfea8be5b6b1391f9acbee1c1329e1",
+  "source_image_hash": "fc/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fc/5a/printing_10594_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fc/5a/printing_10594_1_",
+  "width": 750
+}

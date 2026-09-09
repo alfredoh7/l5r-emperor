@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399934,
+  "card_id": "oracle-l5r-7512",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7512-printing-1-image-1",
+  "image_index": 1,
+  "name": "Stormless Fury",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 7512,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7512-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:42.836150+00:00",
+  "sha256": "23bb5ce9aa140eb53bd2dc16318ae21497b4cc25d348e835c138a9e6eab9dd5d",
+  "source_image_hash": "61/c5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/c5/printing_7512_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/c5/printing_7512_1_",
+  "width": 750
+}

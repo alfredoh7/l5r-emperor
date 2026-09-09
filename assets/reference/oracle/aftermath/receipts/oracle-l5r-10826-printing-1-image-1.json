@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 842591,
+  "card_id": "oracle-l5r-10826",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10826-printing-1-image-1",
+  "image_index": 1,
+  "name": "Jade Pearl Inn",
+  "numbers": [
+    "11"
+  ],
+  "oracle_id": 10826,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10826-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:52.034327+00:00",
+  "sha256": "a4ed85efb93f12c249cdd91dfb92233d53e5cfdde4fff07dde2c1de6fc53117f",
+  "source_image_hash": "ba/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/3f/printing_10826_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/3f/printing_10826_1_",
+  "width": 750
+}

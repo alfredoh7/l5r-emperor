@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 718327,
+  "card_id": "oracle-l5r-10269",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10269-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Forgotten Bay Dojo",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10269,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10269-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:04.428046+00:00",
+  "sha256": "107714bcbb462f2a89ff24ae2ab4e43104e138bbccbb51fb7d500f7e05f75a9f",
+  "source_image_hash": "d7/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/c1/printing_10269_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/c1/printing_10269_1_",
+  "width": 750
+}

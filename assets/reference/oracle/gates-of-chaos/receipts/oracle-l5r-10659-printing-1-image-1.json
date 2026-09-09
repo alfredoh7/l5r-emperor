@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 767626,
+  "card_id": "oracle-l5r-10659",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10659-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Kikumura",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 10659,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10659-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:16.128449+00:00",
+  "sha256": "ea26fcac28b58ec207f188c8d9d1c74889c0c8c63f55601595f0a257a7b2466a",
+  "source_image_hash": "a8/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/24/printing_10659_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/24/printing_10659_1_",
+  "width": 750
+}

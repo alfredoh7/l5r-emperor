@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747013,
+  "card_id": "oracle-l5r-10354",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10354-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Sky's Barrier",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 10354,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10354-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:07.928511+00:00",
+  "sha256": "b05de65996f9561bb88824a8879e2cade6f8ce6c2f4f4e43e01fbec7b0076857",
+  "source_image_hash": "b3/8d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/8d/printing_10354_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/8d/printing_10354_1_",
+  "width": 750
+}

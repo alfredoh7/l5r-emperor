@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 756071,
+  "card_id": "oracle-l5r-10930",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10930-printing-1-image-1",
+  "image_index": 1,
+  "name": "Benediction",
+  "numbers": [
+    "115"
+  ],
+  "oracle_id": 10930,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10930-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:54.453791+00:00",
+  "sha256": "b4a8c127ac48e83547540ab07c9ab74d49b6a69206d323729eb075426b98e252",
+  "source_image_hash": "95/03",
+  "source_url": "https://images.oracleofthevoid.com/l5r/95/03/printing_10930_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/95/03/printing_10930_1_",
+  "width": 750
+}

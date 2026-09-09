@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 392511,
+  "card_id": "oracle-l5r-3737",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3737-printing-1-image-1",
+  "image_index": 1,
+  "name": "Indomitable Home",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 3737,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-3737-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:48.881889+00:00",
+  "sha256": "1a9304666bfe4921f29dcd6ebc4110dbcef555f477e51a081f25304a4b929fd4",
+  "source_image_hash": "db/11",
+  "source_url": "https://images.oracleofthevoid.com/l5r/db/11/printing_3737_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/db/11/printing_3737_1_",
+  "width": 750
+}

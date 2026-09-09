@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 777994,
+  "card_id": "oracle-l5r-6565",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6565-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seeking the Question",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 6565,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6565-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:33.863509+00:00",
+  "sha256": "54c2a4c112fd328b045a81ee50bbf200fd2ccf3797882137de3b4683961985d3",
+  "source_image_hash": "d2/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/0d/printing_6565_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/0d/printing_6565_1_",
+  "width": 750
+}

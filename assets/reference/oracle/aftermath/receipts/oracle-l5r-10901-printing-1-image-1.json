@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741549,
+  "card_id": "oracle-l5r-10901",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10901-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seasoned Ashigaru",
+  "numbers": [
+    "86"
+  ],
+  "oracle_id": 10901,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10901-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:41.526365+00:00",
+  "sha256": "7d40237f8310a604b43cff21f5dec79157ddf0ebc58543772562ec0e217df6a5",
+  "source_image_hash": "2c/16",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2c/16/printing_10901_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2c/16/printing_10901_1_",
+  "width": 750
+}

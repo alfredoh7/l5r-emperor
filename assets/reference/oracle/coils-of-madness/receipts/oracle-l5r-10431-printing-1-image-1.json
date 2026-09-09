@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 944910,
+  "card_id": "oracle-l5r-10431",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10431-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple of Tengen",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 10431,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10431-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:57.497185+00:00",
+  "sha256": "68abe56c01460c9e0b72cbe3424508c893bbd05290bd704861c75a4004566123",
+  "source_image_hash": "a8/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a8/85/printing_10431_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a8/85/printing_10431_1_",
+  "width": 750
+}

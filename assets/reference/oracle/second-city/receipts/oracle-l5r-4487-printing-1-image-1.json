@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 391258,
+  "card_id": "oracle-l5r-4487",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4487-printing-1-image-1",
+  "image_index": 1,
+  "name": "Know Their Minds",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 4487,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4487-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:50.064050+00:00",
+  "sha256": "f048f279c9fb77db5a4405f9782be2cd9c593be3ee03aefb9ece49e5ae450284",
+  "source_image_hash": "4d/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4d/a9/printing_4487_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4d/a9/printing_4487_1_",
+  "width": 750
+}

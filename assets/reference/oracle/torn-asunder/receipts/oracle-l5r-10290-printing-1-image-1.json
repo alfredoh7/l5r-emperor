@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 756921,
+  "card_id": "oracle-l5r-10290",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10290-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Chiyo",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 10290,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10290-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:38.891361+00:00",
+  "sha256": "e4df6ce049313e736e9c73e4dfb7825becc7fe51b4ce1e74dbc2ceaffa374035",
+  "source_image_hash": "98/25",
+  "source_url": "https://images.oracleofthevoid.com/l5r/98/25/printing_10290_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/98/25/printing_10290_1_",
+  "width": 750
+}

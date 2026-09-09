@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 704765,
+  "card_id": "oracle-l5r-9889",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9889-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Earth's Hunger",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 9889,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9889-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:28.128519+00:00",
+  "sha256": "4b0e05b2f0971c5f03a35b439b5ecb4f1228d1a1ee75138e552b1193e5ede23b",
+  "source_image_hash": "e9/d6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e9/d6/printing_9889_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e9/d6/printing_9889_1_",
+  "width": 750
+}

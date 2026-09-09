@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 407503,
+  "card_id": "oracle-l5r-8570",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8570-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Sakata",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 8570,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8570-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:13.171609+00:00",
+  "sha256": "cc86a24550ebfc7ffcde6e86cf49254cf706b1cbfb1b7a1a5f5204091547ab73",
+  "source_image_hash": "82/20",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/20/printing_8570_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/20/printing_8570_1_",
+  "width": 750
+}

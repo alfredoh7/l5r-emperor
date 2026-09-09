@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785873,
+  "card_id": "oracle-l5r-10884",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10884-printing-1-image-1",
+  "image_index": 1,
+  "name": "Usui",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 10884,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10884-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:24.400008+00:00",
+  "sha256": "4c171e01f2edc02465b5e1ce58d8e9dacabdc6172966d0047baa56b002345671",
+  "source_image_hash": "e0/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e0/df/printing_10884_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e0/df/printing_10884_1_",
+  "width": 750
+}

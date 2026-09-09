@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 271379,
+  "card_id": "oracle-l5r-7303",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7303-printing-13-image-1",
+  "image_index": 1,
+  "name": "Small Farm",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 7303,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7303-printing-13-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "13",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:49.320338+00:00",
+  "sha256": "c5f27bcda350f3a1d709a8c0d3ee407939a1ac862cab59d3001d180831474941",
+  "source_image_hash": "e7/26",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/26/printing_7303_13_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/26/printing_7303_13_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 733316,
+  "card_id": "oracle-l5r-10927",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10927-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Warrior's Brutality",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 10927,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10927-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:38.864448+00:00",
+  "sha256": "479d76c1b48af163ac7a2746e01db25f8a905e28e0dedeec15acaa983d9e4747",
+  "source_image_hash": "a3/14",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/14/printing_10927_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/14/printing_10927_1_",
+  "width": 750
+}

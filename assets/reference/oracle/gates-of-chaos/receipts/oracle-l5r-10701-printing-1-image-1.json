@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 830450,
+  "card_id": "oracle-l5r-10701",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10701-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kiyoshi's Wrath",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 10701,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10701-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:00.132251+00:00",
+  "sha256": "d066fa129317dbea8862ddfdd7a251feb9b9619afa90c213e8bfad6475bfd477",
+  "source_image_hash": "dc/1b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/1b/printing_10701_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/1b/printing_10701_1_",
+  "width": 750
+}

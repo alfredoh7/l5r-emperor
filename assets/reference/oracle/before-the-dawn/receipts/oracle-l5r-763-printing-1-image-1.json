@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 400528,
+  "card_id": "oracle-l5r-763",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-763-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Ebara",
+  "numbers": [
+    "52"
+  ],
+  "oracle_id": 763,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-763-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:58.624631+00:00",
+  "sha256": "93b4e57285fe7434266c3d3398c9861783155b0e211a8d000d327be15b8ba077",
+  "source_image_hash": "ef/c9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ef/c9/printing_763_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/c9/printing_763_1_",
+  "width": 750
+}

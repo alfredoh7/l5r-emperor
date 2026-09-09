@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 242365,
+  "card_id": "oracle-l5r-1814",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1814-printing-2-image-1",
+  "image_index": 1,
+  "name": "Dance of the Void",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 1814,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1814-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:13.780906+00:00",
+  "sha256": "15a0e32f731023bbfbdb06c01f702a60604630ffc597b102b895a9fb268882cc",
+  "source_image_hash": "77/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/77/7c/printing_1814_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/77/7c/printing_1814_2_",
+  "width": 750
+}

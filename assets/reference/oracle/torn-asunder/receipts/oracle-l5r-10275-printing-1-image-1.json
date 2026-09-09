@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 717684,
+  "card_id": "oracle-l5r-10275",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10275-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kuni Renyu",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10275,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10275-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:05.162409+00:00",
+  "sha256": "96a26cd635d8198fb548b5bd2f3c48c476719dfce2c2aee3b517ea9182dfe479",
+  "source_image_hash": "58/d5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/58/d5/printing_10275_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/58/d5/printing_10275_1_",
+  "width": 750
+}

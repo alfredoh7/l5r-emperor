@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779458,
+  "card_id": "oracle-l5r-10912",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10912-printing-1-image-1",
+  "image_index": 1,
+  "name": "Versatile Blade",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 10912,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10912-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:26.736993+00:00",
+  "sha256": "1f61d55bbb9d4d3c98dff7715c11e6443b41d2c5b09f59a3d588ae02dc73bee9",
+  "source_image_hash": "54/11",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/11/printing_10912_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/11/printing_10912_1_",
+  "width": 750
+}

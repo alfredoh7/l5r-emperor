@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 849859,
+  "card_id": "oracle-l5r-10886",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10886-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Wattu",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 10886,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10886-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:48.312963+00:00",
+  "sha256": "601d15cc5b488054dd90c09b42cd39ffdd9da123bf49150c2990844a6176f151",
+  "source_image_hash": "e2/a0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/a0/printing_10886_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/a0/printing_10886_1_",
+  "width": 750
+}

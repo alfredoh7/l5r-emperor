@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748247,
+  "card_id": "oracle-l5r-10135",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10135-printing-1-image-1",
+  "image_index": 1,
+  "name": "Advanced Intelligence",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 10135,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10135-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:13.264339+00:00",
+  "sha256": "1be7a182f5a22e13f8a023c5e8e420eb56cf76176dda61c7d9186ce216fa4388",
+  "source_image_hash": "39/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/ca/printing_10135_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/ca/printing_10135_1_",
+  "width": 750
+}

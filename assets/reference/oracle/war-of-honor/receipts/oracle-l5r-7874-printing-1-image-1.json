@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 239720,
+  "card_id": "oracle-l5r-7874",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7874-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple of Harmony",
+  "numbers": [
+    "28"
+  ],
+  "oracle_id": 7874,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7874-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:56.284243+00:00",
+  "sha256": "beec3d5be69f98ba37dc6f1cc3a77287d6b579972b4f0affc2225637d0d81cb6",
+  "source_image_hash": "6e/40",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/40/printing_7874_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/40/printing_7874_1_",
+  "width": 750
+}

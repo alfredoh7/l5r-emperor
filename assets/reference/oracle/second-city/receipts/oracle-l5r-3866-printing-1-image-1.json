@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 383172,
+  "card_id": "oracle-l5r-3866",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3866-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Mitsuko",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 3866,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3866-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:37.899558+00:00",
+  "sha256": "669d95e1141a1c63ae40188b24c3a7c2c5d0afda70dcb10585977a2c6a985c56",
+  "source_image_hash": "9d/f2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9d/f2/printing_3866_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9d/f2/printing_3866_1_",
+  "width": 750
+}

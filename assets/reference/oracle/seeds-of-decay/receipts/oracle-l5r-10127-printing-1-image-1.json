@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 726980,
+  "card_id": "oracle-l5r-10127",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10127-printing-1-image-1",
+  "image_index": 1,
+  "name": "Immolation",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 10127,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10127-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:20.747628+00:00",
+  "sha256": "dbffe76ee6d4b738fd1cb21f3b7b3eddad094dd8e0453e953fdd0d84e72e5493",
+  "source_image_hash": "eb/4e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/eb/4e/printing_10127_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/eb/4e/printing_10127_1_",
+  "width": 750
+}

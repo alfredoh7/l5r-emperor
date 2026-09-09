@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 802440,
+  "card_id": "oracle-l5r-10298",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10298-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Harumi",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 10298,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10298-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:30.683015+00:00",
+  "sha256": "f600b08f9797530c5227588fad80da70b395dafa9510d1608a7b7a84a85899c3",
+  "source_image_hash": "d4/54",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/54/printing_10298_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/54/printing_10298_1_",
+  "width": 750
+}

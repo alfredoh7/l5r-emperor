@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 811954,
+  "card_id": "oracle-l5r-4806",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4806-printing-1-image-1",
+  "image_index": 1,
+  "name": "Makito",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 4806,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4806-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:56.682145+00:00",
+  "sha256": "d120004ba11e563e6670955ca27eec48a9851c9969ba76d4aabef9e857414d16",
+  "source_image_hash": "69/63",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/63/printing_4806_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/63/printing_4806_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 268949,
+  "card_id": "oracle-l5r-4464",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4464-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Hisano",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 4464,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-4464-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:08.979776+00:00",
+  "sha256": "62fa8485ec08a24f86ce28379a74a6250d22896d46880e3b476920b04ae349c5",
+  "source_image_hash": "93/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/7c/printing_4464_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/7c/printing_4464_1_",
+  "width": 750
+}

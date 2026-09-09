@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1095373,
+  "card_id": "oracle-l5r-10537",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10537-printing-1-image-2",
+  "image_index": 2,
+  "name": "Tempest of Air",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 10537,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10537-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:51.343439+00:00",
+  "sha256": "0778039a087c3b5ae1ae4a1255b7292a6a0ea63777a8342dc2715f7745a784dd",
+  "source_image_hash": "7c/b1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7c/b1/printing_10537_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7c/b1/printing_10537_1_",
+  "width": 750
+}

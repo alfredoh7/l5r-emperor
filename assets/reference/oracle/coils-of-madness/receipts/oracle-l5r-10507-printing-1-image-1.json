@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1001489,
+  "card_id": "oracle-l5r-10507",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10507-printing-1-image-1",
+  "image_index": 1,
+  "name": "Komori Miyano, the Shadow Wing",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 10507,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10507-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:39.404737+00:00",
+  "sha256": "f6f906156cfdc4c30b52004dc30db85725449c625f3a782d9f5ab022d4358c35",
+  "source_image_hash": "ca/46",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ca/46/printing_10507_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ca/46/printing_10507_1_",
+  "width": 750
+}

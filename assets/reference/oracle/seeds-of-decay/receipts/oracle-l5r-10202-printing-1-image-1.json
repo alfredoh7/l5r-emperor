@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 600534,
+  "card_id": "oracle-l5r-10202",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10202-printing-1-image-1",
+  "image_index": 1,
+  "name": "Your Name is Mine",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10202,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10202-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:23.666809+00:00",
+  "sha256": "675026a32a87c2a0266f2bc422013b54310801b9a02b15f385b0c903e1b851df",
+  "source_image_hash": "22/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/22/01/printing_10202_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/22/01/printing_10202_1_",
+  "width": 750
+}

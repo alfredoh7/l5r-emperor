@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 440823,
+  "card_id": "oracle-l5r-967",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-967-printing-1-image-1",
+  "image_index": 1,
+  "name": "Beyond the Line",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 967,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-967-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:02.825205+00:00",
+  "sha256": "d9ccaf283d87a63ed18429ba414007d195753079fff50c98fdf5da2f6c2ce731",
+  "source_image_hash": "cf/e0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/e0/printing_967_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/e0/printing_967_1_",
+  "width": 750
+}

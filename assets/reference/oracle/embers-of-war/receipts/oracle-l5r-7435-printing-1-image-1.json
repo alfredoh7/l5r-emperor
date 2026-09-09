@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 669290,
+  "card_id": "oracle-l5r-7435",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7435-printing-1-image-1",
+  "image_index": 1,
+  "name": "Splintered Weapon",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 7435,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7435-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:46.331333+00:00",
+  "sha256": "49674e327b1f92e1425b187265297431be4fbaa746c2c9b51c52cd835e6a87ea",
+  "source_image_hash": "b3/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/3f/printing_7435_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/3f/printing_7435_1_",
+  "width": 750
+}

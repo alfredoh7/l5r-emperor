@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 793434,
+  "card_id": "oracle-l5r-9906",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9906-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fields of Victory",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 9906,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9906-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:52.174762+00:00",
+  "sha256": "a3cc14f187db8bd27b7dde40c6a3698489cd74748a3495fd2af32030e0fe7167",
+  "source_image_hash": "06/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/06/c1/printing_9906_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/06/c1/printing_9906_1_",
+  "width": 750
+}

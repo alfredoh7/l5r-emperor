@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 704288,
+  "card_id": "oracle-l5r-10213",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10213-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tattoos & Trinkets",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10213,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10213-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:21.975371+00:00",
+  "sha256": "4f445cec2d31654a8dd5baefe5cdbba12dad698db2e3a5735c4a4a4438ac6da3",
+  "source_image_hash": "35/ed",
+  "source_url": "https://images.oracleofthevoid.com/l5r/35/ed/printing_10213_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/35/ed/printing_10213_1_",
+  "width": 750
+}

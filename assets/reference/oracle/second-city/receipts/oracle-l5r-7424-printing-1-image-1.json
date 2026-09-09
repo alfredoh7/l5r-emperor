@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 371342,
+  "card_id": "oracle-l5r-7424",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7424-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spirit of the Monk",
+  "numbers": [
+    "138"
+  ],
+  "oracle_id": 7424,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7424-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:38.723140+00:00",
+  "sha256": "44b26993f21b93c4ebef630b4b882571e84a41d881320ba0a35de76ef6ca06ff",
+  "source_image_hash": "20/82",
+  "source_url": "https://images.oracleofthevoid.com/l5r/20/82/printing_7424_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/20/82/printing_7424_1_",
+  "width": 750
+}

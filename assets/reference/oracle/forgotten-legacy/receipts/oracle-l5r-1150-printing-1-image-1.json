@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 285896,
+  "card_id": "oracle-l5r-1150",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1150-printing-1-image-1",
+  "image_index": 1,
+  "name": "Broken Alliance",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 1150,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1150-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:38.807056+00:00",
+  "sha256": "1ce453731935fe6f9b98bd7b8d9d11661d2202eaa0af5b0eede93af4fdbee97b",
+  "source_image_hash": "b3/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/8c/printing_1150_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/8c/printing_1150_1_",
+  "width": 750
+}

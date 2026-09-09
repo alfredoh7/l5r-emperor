@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 240516,
+  "card_id": "oracle-l5r-777",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-777-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Hikoko",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 777,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-777-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:50.938636+00:00",
+  "sha256": "d83d284734eec716ff4ab6f5b376fc109e1ff6ae3759d2e50e8fe9af92c6ff52",
+  "source_image_hash": "0c/4f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/4f/printing_777_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/4f/printing_777_2_",
+  "width": 750
+}

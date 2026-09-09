@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 981383,
+  "card_id": "oracle-l5r-10585",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10585-printing-1-image-1",
+  "image_index": 1,
+  "name": "Gaijin Sorcerer",
+  "numbers": [
+    "169"
+  ],
+  "oracle_id": 10585,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10585-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:22.518983+00:00",
+  "sha256": "50cedb558bc92ad1374616bba81b5981eeddc8eb8bcb531f2f5de3b1fbfd7915",
+  "source_image_hash": "70/1f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/70/1f/printing_10585_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/70/1f/printing_10585_1_",
+  "width": 750
+}

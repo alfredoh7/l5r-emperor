@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 271892,
+  "card_id": "oracle-l5r-1902",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1902-printing-1-image-1",
+  "image_index": 1,
+  "name": "Deathseeker Troop",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 1902,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1902-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:14.778241+00:00",
+  "sha256": "5171d95a3d75165e6852ba04a3c30f4d6495312a1d6578f4e503e735245e5e7e",
+  "source_image_hash": "3a/2a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3a/2a/printing_1902_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3a/2a/printing_1902_1_",
+  "width": 750
+}

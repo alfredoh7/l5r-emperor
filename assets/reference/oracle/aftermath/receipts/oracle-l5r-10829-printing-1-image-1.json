@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 735811,
+  "card_id": "oracle-l5r-10829",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10829-printing-1-image-1",
+  "image_index": 1,
+  "name": "Well-Defended Farm",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10829,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10829-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:27.906062+00:00",
+  "sha256": "a5de21766481706b664a555236ebdbc860cd656f9abced859e4437e92cf388b5",
+  "source_image_hash": "51/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/7d/printing_10829_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/7d/printing_10829_1_",
+  "width": 750
+}

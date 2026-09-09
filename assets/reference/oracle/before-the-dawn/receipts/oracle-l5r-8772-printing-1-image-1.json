@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386434,
+  "card_id": "oracle-l5r-8772",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8772-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsubute",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 8772,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8772-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:16.342732+00:00",
+  "sha256": "1a2fa1ae86bfd5bc90a11cfaccc884153b5c9573daf492719e3c1e1850c6d48d",
+  "source_image_hash": "99/61",
+  "source_url": "https://images.oracleofthevoid.com/l5r/99/61/printing_8772_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/99/61/printing_8772_1_",
+  "width": 750
+}

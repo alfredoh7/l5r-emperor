@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 235989,
+  "card_id": "oracle-l5r-10020",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10020-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hisano's Guide",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10020,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-10020-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:00.981136+00:00",
+  "sha256": "bc5eda06e123304d01651b17d798a1b6be54b1a2f5dc241380d6308318ec22ae",
+  "source_image_hash": "f8/95",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/95/printing_10020_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/95/printing_10020_1_",
+  "width": 750
+}

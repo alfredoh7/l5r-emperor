@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799685,
+  "card_id": "oracle-l5r-8568",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8568-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Rikyou",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 8568,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8568-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:18.956125+00:00",
+  "sha256": "be81f18df8311927c28d0bc8f3c09567844432144dc561902fd1be0c11988d1f",
+  "source_image_hash": "19/f9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/19/f9/printing_8568_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/19/f9/printing_8568_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 773991,
+  "card_id": "oracle-l5r-3660",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3660-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Yamahatsu",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 3660,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3660-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:27.540676+00:00",
+  "sha256": "544e878e17599d165acc2cbcfe765b0e72d738ea6934559afd4240c716551292",
+  "source_image_hash": "40/d7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/40/d7/printing_3660_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/40/d7/printing_3660_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 860562,
+  "card_id": "oracle-l5r-10668",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10668-printing-1-image-1",
+  "image_index": 1,
+  "name": "Legulus",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 10668,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10668-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:06.077511+00:00",
+  "sha256": "72f272c83b88c43836550b35a87a3a88cbbd0e451c85ce0914617075452db4d6",
+  "source_image_hash": "df/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/df/c2/printing_10668_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/df/c2/printing_10668_1_",
+  "width": 750
+}

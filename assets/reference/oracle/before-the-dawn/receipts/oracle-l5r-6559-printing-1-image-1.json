@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403800,
+  "card_id": "oracle-l5r-6559",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6559-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seek the Stain",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 6559,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6559-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:33.782676+00:00",
+  "sha256": "bec4aa1339092ed93697909ed61f317bdd01d9d4d80cfc99e5ba8c75f85c435c",
+  "source_image_hash": "c3/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c3/6f/printing_6559_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c3/6f/printing_6559_1_",
+  "width": 750
+}

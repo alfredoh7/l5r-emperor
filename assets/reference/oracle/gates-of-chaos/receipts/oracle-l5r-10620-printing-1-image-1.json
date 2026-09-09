@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 816368,
+  "card_id": "oracle-l5r-10620",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10620-printing-1-image-1",
+  "image_index": 1,
+  "name": "Toritaka Chokichi",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10620,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10620-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:14.351431+00:00",
+  "sha256": "085345c728f44a4184d08f0abfb3c27ac1e08348b148327058097093d4f3209a",
+  "source_image_hash": "64/a8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/64/a8/printing_10620_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/64/a8/printing_10620_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 995455,
+  "card_id": "oracle-l5r-10562",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10562-printing-1-image-1",
+  "image_index": 1,
+  "name": "Foothold of the Mad",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 10562,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10562-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:42.659802+00:00",
+  "sha256": "5be9463e3bc13a36322e275658a468955bebe9f079158ff9bb47d3802dcf00c1",
+  "source_image_hash": "46/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/46/7d/printing_10562_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/46/7d/printing_10562_1_",
+  "width": 750
+}

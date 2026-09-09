@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1003752,
+  "card_id": "oracle-l5r-10558",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10558-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Heavens' Blessing",
+  "numbers": [
+    "134"
+  ],
+  "oracle_id": 10558,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10558-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:04.889375+00:00",
+  "sha256": "8e3b80afa82653c29931e6b462a8cdee4ff4419e7394ace75d600070e7e61d1a",
+  "source_image_hash": "56/07",
+  "source_url": "https://images.oracleofthevoid.com/l5r/56/07/printing_10558_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/56/07/printing_10558_1_",
+  "width": 750
+}

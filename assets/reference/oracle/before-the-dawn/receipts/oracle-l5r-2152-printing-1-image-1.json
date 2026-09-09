@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 415028,
+  "card_id": "oracle-l5r-2152",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2152-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Shigeyuki",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 2152,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2152-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:23.211281+00:00",
+  "sha256": "f8e84080cd2bb30acf7371e085eb2b2341bdcc89fed3adcad0c8c4ccefc91e76",
+  "source_image_hash": "48/6c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/48/6c/printing_2152_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/48/6c/printing_2152_1_",
+  "width": 750
+}

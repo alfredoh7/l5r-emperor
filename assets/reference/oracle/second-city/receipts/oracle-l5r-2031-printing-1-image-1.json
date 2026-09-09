@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 394973,
+  "card_id": "oracle-l5r-2031",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2031-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disreputable Deal",
+  "numbers": [
+    "115"
+  ],
+  "oracle_id": 2031,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2031-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:07.475930+00:00",
+  "sha256": "6b956471db3a5262ed284da4f23d354130251a4e2f8fc40fd6fb615a6bd7e77f",
+  "source_image_hash": "8e/f5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/f5/printing_2031_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/f5/printing_2031_1_",
+  "width": 750
+}

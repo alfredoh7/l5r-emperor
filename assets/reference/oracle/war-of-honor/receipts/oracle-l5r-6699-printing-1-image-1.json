@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 243362,
+  "card_id": "oracle-l5r-6699",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6699-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shameful Rebuke",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 6699,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6699-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:43.365870+00:00",
+  "sha256": "118ad473a85484d6c702b41ee2448de9ef36ba44cac4887ccb72510a141a4ab5",
+  "source_image_hash": "95/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/95/a4/printing_6699_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/95/a4/printing_6699_1_",
+  "width": 750
+}

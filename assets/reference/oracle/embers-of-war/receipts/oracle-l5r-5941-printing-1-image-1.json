@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 783877,
+  "card_id": "oracle-l5r-5941",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5941-printing-1-image-1",
+  "image_index": 1,
+  "name": "Phantom Visage",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 5941,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5941-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:11.959170+00:00",
+  "sha256": "15b3f52d486c6582157e360e1bddb7835e412589fdf7890c6308ef24437679ab",
+  "source_image_hash": "ca/38",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ca/38/printing_5941_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ca/38/printing_5941_1_",
+  "width": 750
+}

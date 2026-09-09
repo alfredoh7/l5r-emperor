@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1027445,
+  "card_id": "oracle-l5r-10465",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10465-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Tonogi",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 10465,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10465-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:35.695091+00:00",
+  "sha256": "94fb1930bad3242f9f6223356dc8449fd328bc9101cb99d97cc00df8caa1fada",
+  "source_image_hash": "af/1c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/af/1c/printing_10465_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/af/1c/printing_10465_1_",
+  "width": 750
+}

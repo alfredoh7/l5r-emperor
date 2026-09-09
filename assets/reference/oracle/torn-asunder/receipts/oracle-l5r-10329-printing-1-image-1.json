@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785821,
+  "card_id": "oracle-l5r-10329",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10329-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Ji-Yun",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 10329,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10329-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:21.098231+00:00",
+  "sha256": "23a0f45ca6e429dddf7e8c0710a648c7f37e5cf9986b3ed779fdc27f9a3e6772",
+  "source_image_hash": "6d/3e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6d/3e/printing_10329_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6d/3e/printing_10329_1_",
+  "width": 750
+}

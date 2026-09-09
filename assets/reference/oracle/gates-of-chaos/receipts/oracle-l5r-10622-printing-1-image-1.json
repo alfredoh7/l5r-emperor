@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 798855,
+  "card_id": "oracle-l5r-10622",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10622-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Daisuki",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 10622,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10622-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:26.240245+00:00",
+  "sha256": "37aaadc254d7a285792cec3b85bdb40e41268c04641e5065c9e957c0938813ff",
+  "source_image_hash": "e3/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e3/1a/printing_10622_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e3/1a/printing_10622_1_",
+  "width": 750
+}

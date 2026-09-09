@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403900,
+  "card_id": "oracle-l5r-9642",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9642-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Tarao",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 9642,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9642-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:31.665651+00:00",
+  "sha256": "b6db8fe98ea331771323008a4b0f7f1b971c10488fcd867720bb531330393dae",
+  "source_image_hash": "37/ff",
+  "source_url": "https://images.oracleofthevoid.com/l5r/37/ff/printing_9642_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/37/ff/printing_9642_1_",
+  "width": 750
+}

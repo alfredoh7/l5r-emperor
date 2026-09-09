@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401006,
+  "card_id": "oracle-l5r-9378",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9378-printing-1-image-1",
+  "image_index": 1,
+  "name": "Words of Consecration",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 9378,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9378-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:24.930436+00:00",
+  "sha256": "74fbd8b28079a77f72215d511464bda3a6442f35668dd704f0357c5f79184b0f",
+  "source_image_hash": "51/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/3c/printing_9378_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/3c/printing_9378_1_",
+  "width": 750
+}

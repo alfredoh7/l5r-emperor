@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 736838,
+  "card_id": "oracle-l5r-10399",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10399-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Passing of Tradition",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 10399,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10399-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:06.781681+00:00",
+  "sha256": "0ec76075dbcb76cdecab3e7806fa499ccaa74114944a1d29bc027ab79b69c170",
+  "source_image_hash": "16/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/ce/printing_10399_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/ce/printing_10399_1_",
+  "width": 750
+}

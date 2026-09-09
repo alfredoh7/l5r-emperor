@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 275183,
+  "card_id": "oracle-l5r-5906",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5906-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pearls & Spirits",
+  "numbers": [
+    "79"
+  ],
+  "oracle_id": 5906,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5906-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:18.958580+00:00",
+  "sha256": "a1ee1e5010e84d5ca735b28bda8bf9e2e4581b9fc06c3ff63c51acd622d5324c",
+  "source_image_hash": "d9/67",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d9/67/printing_5906_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d9/67/printing_5906_1_",
+  "width": 750
+}

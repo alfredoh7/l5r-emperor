@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 653502,
+  "card_id": "oracle-l5r-10327",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10327-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Sihung",
+  "numbers": [
+    "71"
+  ],
+  "oracle_id": 10327,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10327-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:48.868398+00:00",
+  "sha256": "60b88052c6abd4f1954cc53b1448ea67eabaa0d74fc418b3cbd3354733760fa2",
+  "source_image_hash": "0b/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0b/e9/printing_10327_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0b/e9/printing_10327_1_",
+  "width": 750
+}

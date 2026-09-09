@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 838014,
+  "card_id": "oracle-l5r-9804",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9804-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Bakari",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 9804,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9804-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:53:01.718586+00:00",
+  "sha256": "7b8fcec93b9a669089540521111c436b3f0a8d7cef0035ac807a83265d7bf70f",
+  "source_image_hash": "9e/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9e/7a/printing_9804_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9e/7a/printing_9804_1_",
+  "width": 750
+}

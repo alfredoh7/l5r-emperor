@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 744432,
+  "card_id": "oracle-l5r-10028",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10028-printing-1-image-1",
+  "image_index": 1,
+  "name": "Megumi's Guidance",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10028,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10028-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:46.748378+00:00",
+  "sha256": "385939f0d254859583e5f4df799f08ed97e29b8e35b3ca89951c4d358c5de0f9",
+  "source_image_hash": "20/15",
+  "source_url": "https://images.oracleofthevoid.com/l5r/20/15/printing_10028_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/20/15/printing_10028_1_",
+  "width": 750
+}

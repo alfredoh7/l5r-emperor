@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 706590,
+  "card_id": "oracle-l5r-10281",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10281-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Iza",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 10281,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10281-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:19.681707+00:00",
+  "sha256": "eb5527d710848c810e31c08b73cf261511c6b44b953e883c05bf09e0e06de7a9",
+  "source_image_hash": "81/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/81/db/printing_10281_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/81/db/printing_10281_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401711,
+  "card_id": "oracle-l5r-8633",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8633-printing-1-image-1",
+  "image_index": 1,
+  "name": "Too Close to Home",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 8633,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8633-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:14.307198+00:00",
+  "sha256": "ede3120f366de6a5d89c0976f737cc3a846269508c662355fcc9601459fbdff6",
+  "source_image_hash": "09/28",
+  "source_url": "https://images.oracleofthevoid.com/l5r/09/28/printing_8633_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/09/28/printing_8633_1_",
+  "width": 750
+}

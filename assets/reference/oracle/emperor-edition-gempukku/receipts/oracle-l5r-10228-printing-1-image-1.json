@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 652857,
+  "card_id": "oracle-l5r-10228",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10228-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Byung",
+  "numbers": [
+    "18"
+  ],
+  "oracle_id": 10228,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10228-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:19.739916+00:00",
+  "sha256": "8f6d70b66a8c1f61cdd789cddc0c73897ee844f53475788f9d34ef6e3e151935",
+  "source_image_hash": "73/36",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/36/printing_10228_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/36/printing_10228_1_",
+  "width": 750
+}

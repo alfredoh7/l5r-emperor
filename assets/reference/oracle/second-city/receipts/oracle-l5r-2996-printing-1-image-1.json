@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 384189,
+  "card_id": "oracle-l5r-2996",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2996-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hasty Fortifications",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 2996,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2996-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:26.379700+00:00",
+  "sha256": "878768fa6ec692958d437169d8670d9fb03a53cee4a2b41fbde52c3522a54394",
+  "source_image_hash": "40/43",
+  "source_url": "https://images.oracleofthevoid.com/l5r/40/43/printing_2996_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/40/43/printing_2996_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 752057,
+  "card_id": "oracle-l5r-10152",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10152-printing-1-image-1",
+  "image_index": 1,
+  "name": "Imperial Protection",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 10152,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10152-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:21.942750+00:00",
+  "sha256": "4642c358c80c156386dd32bd3a9c1cc87d566ce33ca55cc56a4257eb2da9d7ee",
+  "source_image_hash": "63/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/86/printing_10152_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/86/printing_10152_1_",
+  "width": 750
+}

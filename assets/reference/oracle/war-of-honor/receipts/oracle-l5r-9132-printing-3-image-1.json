@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 248784,
+  "card_id": "oracle-l5r-9132",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9132-printing-3-image-1",
+  "image_index": 1,
+  "name": "Venerable Plains of the Ikoma",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 9132,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9132-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:15.067677+00:00",
+  "sha256": "8a3d228f3d2efe0e1754bf4a3930bf08247eafd49c4ea34b5ba7a91d496f9be2",
+  "source_image_hash": "1d/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1d/d4/printing_9132_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1d/d4/printing_9132_3_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 822137,
+  "card_id": "oracle-l5r-10682",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10682-printing-1-image-1",
+  "image_index": 1,
+  "name": "Camel Mounts",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 10682,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10682-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:02.463258+00:00",
+  "sha256": "788900ec75b999f41816d82e32960c2b00704d2becceb21afaef8190302e3565",
+  "source_image_hash": "02/06",
+  "source_url": "https://images.oracleofthevoid.com/l5r/02/06/printing_10682_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/02/06/printing_10682_1_",
+  "width": 750
+}

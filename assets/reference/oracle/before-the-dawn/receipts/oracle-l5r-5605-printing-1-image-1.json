@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 397534,
+  "card_id": "oracle-l5r-5605",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5605-printing-1-image-1",
+  "image_index": 1,
+  "name": "No Time for Games",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 5605,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5605-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:16.786141+00:00",
+  "sha256": "2424670c642ebc7c6522ddd707a68fe285c2866e6a7172c0fb420425bdd5742a",
+  "source_image_hash": "ab/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ab/df/printing_5605_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ab/df/printing_5605_1_",
+  "width": 750
+}

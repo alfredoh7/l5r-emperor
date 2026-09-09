@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 832630,
+  "card_id": "oracle-l5r-10165",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10165-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sentinel Spirit",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 10165,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10165-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:24.890246+00:00",
+  "sha256": "b42010c32ca0585bb3347a9c1cea85934d6efd4a165b8391a167b85c4d3948d4",
+  "source_image_hash": "c5/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/22/printing_10165_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/22/printing_10165_1_",
+  "width": 750
+}

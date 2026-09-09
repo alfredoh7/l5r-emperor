@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 688635,
+  "card_id": "oracle-l5r-10941",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10941-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hold the Walls",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 10941,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10941-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:38.823229+00:00",
+  "sha256": "de196d1927a3c32cd5a663d2cba083fd21b1b29a1d671387028e0d0b60286166",
+  "source_image_hash": "7c/d1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7c/d1/printing_10941_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7c/d1/printing_10941_1_",
+  "width": 750
+}

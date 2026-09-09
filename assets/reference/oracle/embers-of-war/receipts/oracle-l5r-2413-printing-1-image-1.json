@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 697564,
+  "card_id": "oracle-l5r-2413",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2413-printing-1-image-1",
+  "image_index": 1,
+  "name": "Exploited Advantage",
+  "numbers": [
+    "113"
+  ],
+  "oracle_id": 2413,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2413-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:00.755633+00:00",
+  "sha256": "19fb4dca42bac253f71f2fc5d56cddb6fc075ac6aa90e0909c4ef25191d0234f",
+  "source_image_hash": "fe/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/45/printing_2413_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/45/printing_2413_1_",
+  "width": 750
+}

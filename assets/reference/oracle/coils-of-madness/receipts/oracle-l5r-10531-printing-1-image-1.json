@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 882942,
+  "card_id": "oracle-l5r-10531",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10531-printing-1-image-1",
+  "image_index": 1,
+  "name": "False Ring of Air",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 10531,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10531-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:32.537789+00:00",
+  "sha256": "6f1d2fc64440ef231ee3de97857614403a9c3850058674c021eb52655898aa91",
+  "source_image_hash": "5c/65",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5c/65/printing_10531_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5c/65/printing_10531_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788766,
+  "card_id": "oracle-l5r-10111",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10111-printing-1-image-1",
+  "image_index": 1,
+  "name": "Blades of the Black Dragon",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 10111,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10111-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:33.466415+00:00",
+  "sha256": "26e53517be0cf01d4e048545775b669441c0ff75fe62c7fa792358f27ee533d4",
+  "source_image_hash": "c5/37",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/37/printing_10111_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/37/printing_10111_1_",
+  "width": 750
+}

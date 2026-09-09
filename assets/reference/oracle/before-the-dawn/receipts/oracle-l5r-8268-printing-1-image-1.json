@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382975,
+  "card_id": "oracle-l5r-8268",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8268-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Price of Honor",
+  "numbers": [
+    "145"
+  ],
+  "oracle_id": 8268,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8268-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:04.592937+00:00",
+  "sha256": "43af321812a64f78bd2076e09bf613e54dbfbc15336925f7495a68ef12b403da",
+  "source_image_hash": "6a/43",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6a/43/printing_8268_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/43/printing_8268_1_",
+  "width": 750
+}

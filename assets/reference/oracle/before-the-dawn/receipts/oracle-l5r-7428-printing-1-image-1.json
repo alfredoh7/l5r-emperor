@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 421335,
+  "card_id": "oracle-l5r-7428",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7428-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spirit of the Truth",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 7428,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7428-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:48.097744+00:00",
+  "sha256": "834ffefb082724e9bddc570d786e9a53f79cac2f88b3f68684664ae34a60622d",
+  "source_image_hash": "c6/ef",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c6/ef/printing_7428_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c6/ef/printing_7428_1_",
+  "width": 750
+}

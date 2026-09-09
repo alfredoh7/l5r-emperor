@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 796917,
+  "card_id": "oracle-l5r-10335",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10335-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disciples of Master Coin",
+  "numbers": [
+    "79"
+  ],
+  "oracle_id": 10335,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10335-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:18.497361+00:00",
+  "sha256": "a994e58a84f86764afe2e0dd315d2948de8da1fd1ef4c7340d051d1121357e2c",
+  "source_image_hash": "34/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/0f/printing_10335_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/0f/printing_10335_1_",
+  "width": 750
+}

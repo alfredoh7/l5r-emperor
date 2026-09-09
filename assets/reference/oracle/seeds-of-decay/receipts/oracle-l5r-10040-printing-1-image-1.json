@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 867477,
+  "card_id": "oracle-l5r-10040",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10040-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Kaiji",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10040,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10040-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:13.619844+00:00",
+  "sha256": "1f72ac8ed031c4ceb626b3146552938758adb3f69762e79a62ae7533ec99c375",
+  "source_image_hash": "90/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/90/cc/printing_10040_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/90/cc/printing_10040_1_",
+  "width": 750
+}

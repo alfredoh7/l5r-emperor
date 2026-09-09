@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772260,
+  "card_id": "oracle-l5r-10297",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10297-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Ira",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 10297,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10297-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:19.285554+00:00",
+  "sha256": "8ba9119905f34aa811021871c79357ec4359b4ee58eb01fb96657a11f5ca88a9",
+  "source_image_hash": "a1/76",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a1/76/printing_10297_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a1/76/printing_10297_1_",
+  "width": 750
+}

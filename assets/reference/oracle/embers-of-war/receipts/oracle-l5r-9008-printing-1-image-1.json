@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799482,
+  "card_id": "oracle-l5r-9008",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9008-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unsafe Passage",
+  "numbers": [
+    "153"
+  ],
+  "oracle_id": 9008,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9008-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:26.615576+00:00",
+  "sha256": "8c33797cbd7b2ba720e4ad66167599ba44f5d80db0da36b13684f16e49fdd9fc",
+  "source_image_hash": "41/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/41/90/printing_9008_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/41/90/printing_9008_1_",
+  "width": 750
+}

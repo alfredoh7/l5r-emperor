@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750467,
+  "card_id": "oracle-l5r-10708",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10708-printing-1-image-1",
+  "image_index": 1,
+  "name": "Befriend the Tides",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 10708,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10708-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:57.641783+00:00",
+  "sha256": "b51946ea35840f11643c1a3132603fcf9d8e99397a1b2dcc737e1d0881b8c32d",
+  "source_image_hash": "c5/f8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/f8/printing_10708_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/f8/printing_10708_1_",
+  "width": 750
+}

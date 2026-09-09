@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 911162,
+  "card_id": "oracle-l5r-10529",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10529-printing-1-image-1",
+  "image_index": 1,
+  "name": "Armor of the Mad",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 10529,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10529-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:49.441009+00:00",
+  "sha256": "18d51cab1bdcd32af666a60c8ebd538a7d75b598538f8d1b37982066704e343e",
+  "source_image_hash": "21/0b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/21/0b/printing_10529_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/21/0b/printing_10529_1_",
+  "width": 750
+}

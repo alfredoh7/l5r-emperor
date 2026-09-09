@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 913062,
+  "card_id": "oracle-l5r-10616",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10616-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Breeding Ground",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10616,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10616-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:01.224232+00:00",
+  "sha256": "91c20292d2242a8093deb61059a9632ded16ce6e1d94792803d20cddcc559bfc",
+  "source_image_hash": "6e/49",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/49/printing_10616_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/49/printing_10616_1_",
+  "width": 750
+}

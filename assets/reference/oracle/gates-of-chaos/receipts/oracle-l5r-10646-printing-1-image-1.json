@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 815768,
+  "card_id": "oracle-l5r-10646",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10646-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Hiromi",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 10646,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10646-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:31.030296+00:00",
+  "sha256": "7cdebae360a9bb62b4707fadbc2fac92dbf69c829455542d83ec924c0f2385b4",
+  "source_image_hash": "b5/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b5/d2/printing_10646_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b5/d2/printing_10646_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409654,
+  "card_id": "oracle-l5r-9344",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9344-printing-1-image-1",
+  "image_index": 1,
+  "name": "Winds of Dismissal",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 9344,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9344-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:12.815601+00:00",
+  "sha256": "d38e69e72a0ec2cee94ade97df0be1f1ba38411924a0bf0edf97354529ece428",
+  "source_image_hash": "04/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/24/printing_9344_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/24/printing_9344_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 973207,
+  "card_id": "oracle-l5r-10519",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10519-printing-1-image-1",
+  "image_index": 1,
+  "name": "Reconnaissance Scouts",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 10519,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10519-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:21.896217+00:00",
+  "sha256": "b1408cd8c7f32d5b763e72d3276ccafac0a97bd37e033f6cbb8fbd6709c3a654",
+  "source_image_hash": "c2/5d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c2/5d/printing_10519_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c2/5d/printing_10519_1_",
+  "width": 750
+}

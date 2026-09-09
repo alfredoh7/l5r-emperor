@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 684297,
+  "card_id": "oracle-l5r-10122",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10122-printing-1-image-1",
+  "image_index": 1,
+  "name": "Okesa-goma",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 10122,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10122-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:09.580027+00:00",
+  "sha256": "bf88709bc95ab218af2a6009959f371e542da03c1f162d47e4c6d85ef81aa2fd",
+  "source_image_hash": "ae/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/5c/printing_10122_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/5c/printing_10122_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 642994,
+  "card_id": "oracle-l5r-9802",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9802-printing-1-image-1",
+  "image_index": 1,
+  "name": "Whispering Archive",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 9802,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9802-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:02.697707+00:00",
+  "sha256": "4bf81f9efd5b6aa04c356b8ddddd81e3abdb301b231f9b620bb05c4b2f1beba8",
+  "source_image_hash": "4f/f3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4f/f3/printing_9802_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4f/f3/printing_9802_1_",
+  "width": 750
+}

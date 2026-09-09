@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746656,
+  "card_id": "oracle-l5r-1663",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1663-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Narizane",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 1663,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1663-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:47.916209+00:00",
+  "sha256": "1337c1bb85840fac0059bebe9f83432b478c031e13611ec66c13f47c62370e07",
+  "source_image_hash": "10/cf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/cf/printing_1663_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/cf/printing_1663_1_",
+  "width": 750
+}

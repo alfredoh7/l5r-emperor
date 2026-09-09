@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399575,
+  "card_id": "oracle-l5r-5524",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5524-printing-1-image-1",
+  "image_index": 1,
+  "name": "Necessary Evil",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 5524,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5524-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:13.523407+00:00",
+  "sha256": "a363cfe7b323fc954b43bdab9f6d930a68b0d475b1406ebd16c2a5242e21db63",
+  "source_image_hash": "1e/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1e/32/printing_5524_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1e/32/printing_5524_1_",
+  "width": 750
+}

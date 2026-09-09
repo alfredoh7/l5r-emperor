@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 249284,
+  "card_id": "oracle-l5r-9743",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9743-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unicorn Scout",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 9743,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9743-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:35:03.815962+00:00",
+  "sha256": "ae659c003f9d66c18e5bfeae0dce7c86dba46edd7f25618e03723d6e17a72bcd",
+  "source_image_hash": "11/ae",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/ae/printing_9743_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/ae/printing_9743_1_",
+  "width": 750
+}

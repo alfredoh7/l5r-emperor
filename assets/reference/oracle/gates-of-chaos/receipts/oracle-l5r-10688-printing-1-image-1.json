@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 830423,
+  "card_id": "oracle-l5r-10688",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10688-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yodotai Legionnaire",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 10688,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10688-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:27.460688+00:00",
+  "sha256": "df2241aec5e3a8d1de01843cd4ddf3778e8f29696eabed47540beecaa3a4b38a",
+  "source_image_hash": "22/5e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/22/5e/printing_10688_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/22/5e/printing_10688_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 815810,
+  "card_id": "oracle-l5r-10741",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10741-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Eternal Rainbows",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 10741,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10741-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:03.520041+00:00",
+  "sha256": "759e9a778123a75f5cd4fd61fab11c8e71ea56fccea4d30959871841d966ac2a",
+  "source_image_hash": "ce/f6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ce/f6/printing_10741_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ce/f6/printing_10741_1_",
+  "width": 750
+}

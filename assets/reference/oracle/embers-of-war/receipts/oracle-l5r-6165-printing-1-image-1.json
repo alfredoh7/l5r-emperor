@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 718407,
+  "card_id": "oracle-l5r-6165",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6165-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rata",
+  "numbers": [
+    "66"
+  ],
+  "oracle_id": 6165,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6165-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:21.299351+00:00",
+  "sha256": "8da2b42f667d675c588503a3e194d24ffcad1930022c42b2076658d9e28b2742",
+  "source_image_hash": "b2/ac",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/ac/printing_6165_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/ac/printing_6165_1_",
+  "width": 750
+}

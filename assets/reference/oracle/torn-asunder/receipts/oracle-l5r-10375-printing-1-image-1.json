@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732666,
+  "card_id": "oracle-l5r-10375",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10375-printing-1-image-1",
+  "image_index": 1,
+  "name": "Generational Gap",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 10375,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10375-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:32.537835+00:00",
+  "sha256": "87f45351ae768b2726837c7d7a6c552e845db8ece8ce46ec82aa5b42e17840d8",
+  "source_image_hash": "e4/b7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e4/b7/printing_10375_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e4/b7/printing_10375_1_",
+  "width": 750
+}

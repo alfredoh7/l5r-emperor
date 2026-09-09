@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 415540,
+  "card_id": "oracle-l5r-8353",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8353-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Spirit of Knowledge",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 8353,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8353-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:08.923458+00:00",
+  "sha256": "a4937a13d3855e182c8a533628affb780edadc1e9956353c497d79b84550cf20",
+  "source_image_hash": "0c/72",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/72/printing_8353_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/72/printing_8353_1_",
+  "width": 750
+}

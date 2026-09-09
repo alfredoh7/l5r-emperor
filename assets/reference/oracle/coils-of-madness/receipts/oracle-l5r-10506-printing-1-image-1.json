@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1079355,
+  "card_id": "oracle-l5r-10506",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10506-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Karasu",
+  "numbers": [
+    "83"
+  ],
+  "oracle_id": 10506,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10506-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:15.717196+00:00",
+  "sha256": "6effdc524e7f455f2bd52300816291afbb6eb6668e2bab02d9bd880bc448e773",
+  "source_image_hash": "89/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/89/d4/printing_10506_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/89/d4/printing_10506_1_",
+  "width": 750
+}

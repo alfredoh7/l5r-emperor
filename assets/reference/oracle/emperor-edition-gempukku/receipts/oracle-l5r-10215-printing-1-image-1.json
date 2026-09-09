@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 682108,
+  "card_id": "oracle-l5r-10215",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10215-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Ide Caravan",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10215,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10215-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:24.189894+00:00",
+  "sha256": "082fea6c932d0213908954503267cf13d70f21f5b301ddd0042bbd449aa2e9b2",
+  "source_image_hash": "9b/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/8a/printing_10215_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/8a/printing_10215_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 383867,
+  "card_id": "oracle-l5r-1489",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1489-printing-1-image-1",
+  "image_index": 1,
+  "name": "Control Your Destiny",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 1489,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1489-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:57.074655+00:00",
+  "sha256": "f734f3434868e55246c040d7b577e941047a6fef1bf3ce72c39f5f149b52616c",
+  "source_image_hash": "ba/ff",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/ff/printing_1489_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/ff/printing_1489_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 895659,
+  "card_id": "oracle-l5r-10188",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10188-printing-1-image-1",
+  "image_index": 1,
+  "name": "Exquisite Gardens",
+  "numbers": [
+    "162"
+  ],
+  "oracle_id": 10188,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10188-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:06.830290+00:00",
+  "sha256": "40cdb7e1a61f027a7993887104a09a74aeeafe503c2f3c977db09912855510eb",
+  "source_image_hash": "f9/f8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/f8/printing_10188_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/f8/printing_10188_1_",
+  "width": 750
+}

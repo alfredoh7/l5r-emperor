@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 247039,
+  "card_id": "oracle-l5r-1106",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1106-printing-4-image-1",
+  "image_index": 1,
+  "name": "Border Keep",
+  "numbers": [
+    "11"
+  ],
+  "oracle_id": 1106,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1106-printing-4-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "4",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:02.832757+00:00",
+  "sha256": "aa77c034577e4d03964e846cb548a5abc223b8d92899c4f44e972fd4c140eee0",
+  "source_image_hash": "50/2e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/50/2e/printing_1106_4_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/50/2e/printing_1106_4_",
+  "width": 750
+}

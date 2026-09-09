@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 659112,
+  "card_id": "oracle-l5r-10808",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10808-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yuribara's Butterflies",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10808,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10808-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:34.493159+00:00",
+  "sha256": "56074bcb0a0b6dc7976fd3c39b3d902264c7ede8212c6585f3ff7b1ec20114fd",
+  "source_image_hash": "92/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/92/d4/printing_10808_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/92/d4/printing_10808_1_",
+  "width": 750
+}

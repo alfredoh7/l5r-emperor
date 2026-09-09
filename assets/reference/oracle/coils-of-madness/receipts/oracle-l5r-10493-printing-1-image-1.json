@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 982008,
+  "card_id": "oracle-l5r-10493",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10493-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Usohara",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 10493,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10493-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:54.511806+00:00",
+  "sha256": "28bbd459e5b84d2c52a045c04fe7ac8f5ec9f5d3b401144d10634e47dac73c9e",
+  "source_image_hash": "47/83",
+  "source_url": "https://images.oracleofthevoid.com/l5r/47/83/printing_10493_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/47/83/printing_10493_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 380975,
+  "card_id": "oracle-l5r-9172",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9172-printing-1-image-1",
+  "image_index": 1,
+  "name": "Visitation",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 9172,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9172-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:08.579306+00:00",
+  "sha256": "b1cd1a637c1a1f0da4b1cb48c5f97fa1f6413c40155127dc12d0270ff374f164",
+  "source_image_hash": "05/e2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/05/e2/printing_9172_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/05/e2/printing_9172_1_",
+  "width": 750
+}

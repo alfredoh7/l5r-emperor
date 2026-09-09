@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 874109,
+  "card_id": "oracle-l5r-10094",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10094-printing-1-image-1",
+  "image_index": 1,
+  "name": "Otomo Suikihime",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 10094,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10094-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:11.933438+00:00",
+  "sha256": "6f1f2648d3f8c98143396e7f03176df21c6d3f9ded7302fa985e10da1c6ff634",
+  "source_image_hash": "01/f4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/01/f4/printing_10094_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/01/f4/printing_10094_1_",
+  "width": 750
+}

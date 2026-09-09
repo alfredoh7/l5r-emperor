@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 851574,
+  "card_id": "oracle-l5r-10711",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10711-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unsettling Gathering",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 10711,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10711-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:22.618370+00:00",
+  "sha256": "a59f72d42bfa86d707e7107fb84ab2352873a590dfaddbea561b96084e49409c",
+  "source_image_hash": "39/41",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/41/printing_10711_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/41/printing_10711_1_",
+  "width": 750
+}

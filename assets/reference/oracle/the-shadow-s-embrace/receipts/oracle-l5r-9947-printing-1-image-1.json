@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 867923,
+  "card_id": "oracle-l5r-9947",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9947-printing-1-image-1",
+  "image_index": 1,
+  "name": "The New Foundries",
+  "numbers": [
+    "159"
+  ],
+  "oracle_id": 9947,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9947-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:32.967240+00:00",
+  "sha256": "6ae5b60d68dd2e42caf03bc16d7eb9f6f7c2a8a9fb9cf604e2d7501183253d8d",
+  "source_image_hash": "6e/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/7c/printing_9947_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/7c/printing_9947_1_",
+  "width": 750
+}

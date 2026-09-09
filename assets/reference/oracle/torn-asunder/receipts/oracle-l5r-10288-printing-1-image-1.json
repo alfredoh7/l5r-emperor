@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747059,
+  "card_id": "oracle-l5r-10288",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10288-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Tsuchiya",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 10288,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10288-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:03.275032+00:00",
+  "sha256": "71afc7b353cad20ccffec2617b8c69dcf32739a45e334e2d3f42ce44c43774aa",
+  "source_image_hash": "55/f5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/55/f5/printing_10288_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/55/f5/printing_10288_1_",
+  "width": 750
+}

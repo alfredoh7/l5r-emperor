@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 894431,
+  "card_id": "oracle-l5r-8219",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8219-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Menacing Sky",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 8219,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8219-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:11.871138+00:00",
+  "sha256": "e3a09f742b55c17d635ee766c9164300814f13a720d97e619ea2861a5bac3292",
+  "source_image_hash": "b9/9e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b9/9e/printing_8219_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/9e/printing_8219_1_",
+  "width": 750
+}

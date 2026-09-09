@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403018,
+  "card_id": "oracle-l5r-9086",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9086-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Mai",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 9086,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9086-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:07.539638+00:00",
+  "sha256": "4c30e6fba5db09b791b4b6661ded28d0f2c027fa9ce39653be6b1178ef077ecd",
+  "source_image_hash": "d8/5e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d8/5e/printing_9086_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/5e/printing_9086_1_",
+  "width": 750
+}

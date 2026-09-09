@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 233898,
+  "card_id": "oracle-l5r-7937",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7937-printing-5-image-1",
+  "image_index": 1,
+  "name": "Tetsu Kama Mura",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 7937,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7937-printing-5-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "5",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:59.148006+00:00",
+  "sha256": "a8f4b9b535192640dd71931a8bc5d425a9783dcc3099339e76b376b0575e6195",
+  "source_image_hash": "53/68",
+  "source_url": "https://images.oracleofthevoid.com/l5r/53/68/printing_7937_5_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/53/68/printing_7937_5_",
+  "width": 750
+}

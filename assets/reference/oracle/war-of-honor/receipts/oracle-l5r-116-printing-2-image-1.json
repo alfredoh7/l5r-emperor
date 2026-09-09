@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 233101,
+  "card_id": "oracle-l5r-116",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-116-printing-2-image-1",
+  "image_index": 1,
+  "name": "Acrobat Troupe",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 116,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-116-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:40.882278+00:00",
+  "sha256": "f47abbed4d44095fc4864a31ee899441e24dcf3f01b86329b0e9f1238265cd23",
+  "source_image_hash": "12/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/12/84/printing_116_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/12/84/printing_116_2_",
+  "width": 750
+}

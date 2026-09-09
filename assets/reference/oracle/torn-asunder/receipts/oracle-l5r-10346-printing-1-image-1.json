@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 736267,
+  "card_id": "oracle-l5r-10346",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10346-printing-1-image-1",
+  "image_index": 1,
+  "name": "Anchored in Earth",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 10346,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10346-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:41.269720+00:00",
+  "sha256": "f681537ffff87c2859b256bf1b329213a191675b74101015ed3cc096f60face7",
+  "source_image_hash": "85/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/d2/printing_10346_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/d2/printing_10346_1_",
+  "width": 750
+}

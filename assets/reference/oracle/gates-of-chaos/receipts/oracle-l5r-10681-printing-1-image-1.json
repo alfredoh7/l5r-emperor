@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 853458,
+  "card_id": "oracle-l5r-10681",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10681-printing-1-image-1",
+  "image_index": 1,
+  "name": "Frontier Farmer",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 10681,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10681-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:29.546648+00:00",
+  "sha256": "3feb8c5f6a935d12d87943b1f24ebc3b676b8e0a0c62a78bd0c7a3219454fe76",
+  "source_image_hash": "fe/05",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/05/printing_10681_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/05/printing_10681_1_",
+  "width": 750
+}

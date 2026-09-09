@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788099,
+  "card_id": "oracle-l5r-10828",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10828-printing-1-image-1",
+  "image_index": 1,
+  "name": "Suana Dojo",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10828,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10828-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:54.409056+00:00",
+  "sha256": "edb3a1fb1eefad744d91cf9200c956b066ebbd72f330b41bc2fe04d290032732",
+  "source_image_hash": "24/7b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/24/7b/printing_10828_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/24/7b/printing_10828_1_",
+  "width": 750
+}

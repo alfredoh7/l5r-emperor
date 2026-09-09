@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 822294,
+  "card_id": "oracle-l5r-10750",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10750-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Tomb of Sun Tao",
+  "numbers": [
+    "146"
+  ],
+  "oracle_id": 10750,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10750-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:10.718936+00:00",
+  "sha256": "3e0127382bf6e8390530e8be3c807a43ea978c6f4c70e22175baa3d237ff96f4",
+  "source_image_hash": "65/3a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/65/3a/printing_10750_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/65/3a/printing_10750_1_",
+  "width": 750
+}

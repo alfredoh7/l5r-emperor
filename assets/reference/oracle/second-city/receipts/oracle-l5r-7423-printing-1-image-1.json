@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 396648,
+  "card_id": "oracle-l5r-7423",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7423-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spirit of the Duelist",
+  "numbers": [
+    "137"
+  ],
+  "oracle_id": 7423,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7423-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:37.600635+00:00",
+  "sha256": "e0aaa7387a8a3b7ea2df76bd0a05496b21eb5377db813cf892e8b1c0b3c26871",
+  "source_image_hash": "fe/04",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fe/04/printing_7423_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/04/printing_7423_1_",
+  "width": 750
+}

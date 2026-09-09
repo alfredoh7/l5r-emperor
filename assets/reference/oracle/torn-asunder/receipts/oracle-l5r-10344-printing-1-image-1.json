@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 748947,
+  "card_id": "oracle-l5r-10344",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10344-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sturdy Armor",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 10344,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10344-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:57.335495+00:00",
+  "sha256": "edd53946d5084ed9a51008c4c31a2eb2d8c2c23c56a49522ed6bae615c7f48af",
+  "source_image_hash": "3e/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/ce/printing_10344_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/ce/printing_10344_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 767195,
+  "card_id": "oracle-l5r-10074",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10074-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Kijo",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 10074,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10074-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:26.419681+00:00",
+  "sha256": "ea85c3fcfc2a95bb8d3e2000114ec949025ec9f5f52e4a46ee78d8d2606f5254",
+  "source_image_hash": "da/c6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/c6/printing_10074_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/c6/printing_10074_1_",
+  "width": 750
+}

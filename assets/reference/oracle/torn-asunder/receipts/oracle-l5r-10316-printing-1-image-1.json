@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729217,
+  "card_id": "oracle-l5r-10316",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10316-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Hashibei",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 10316,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10316-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:12.646645+00:00",
+  "sha256": "2cb05f3a02918827992f2159c875eafebf63e92c4afb2687a1971b721138fa16",
+  "source_image_hash": "6e/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/ce/printing_10316_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/ce/printing_10316_1_",
+  "width": 750
+}

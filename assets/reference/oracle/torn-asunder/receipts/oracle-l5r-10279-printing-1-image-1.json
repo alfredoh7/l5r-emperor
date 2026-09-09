@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 780842,
+  "card_id": "oracle-l5r-10279",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10279-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Nanae",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 10279,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10279-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:43.649416+00:00",
+  "sha256": "88066d846c1bcf5874cbf52a7280406a61481d75f49d87a387e3558f2d7ec348",
+  "source_image_hash": "a0/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a0/b9/printing_10279_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a0/b9/printing_10279_1_",
+  "width": 750
+}

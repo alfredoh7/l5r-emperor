@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 388921,
+  "card_id": "oracle-l5r-5337",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5337-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Jun-Ni",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 5337,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-5337-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:02.108231+00:00",
+  "sha256": "abb56467975689fc5f125c8f2cb556500a484177f8f3be268b241900b389b47b",
+  "source_image_hash": "07/3b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/3b/printing_5337_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/3b/printing_5337_1_",
+  "width": 750
+}

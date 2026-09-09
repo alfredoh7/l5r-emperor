@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 914462,
+  "card_id": "oracle-l5r-10841",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10841-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Tatsuki",
+  "numbers": [
+    "26"
+  ],
+  "oracle_id": 10841,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10841-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:19.696687+00:00",
+  "sha256": "6c7fc084f93a18dd1aee04a43cb26671d518cb3fbf601cc2554153379a0fed51",
+  "source_image_hash": "4b/2c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/2c/printing_10841_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/2c/printing_10841_1_",
+  "width": 750
+}

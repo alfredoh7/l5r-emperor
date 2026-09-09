@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 719452,
+  "card_id": "oracle-l5r-10604",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10604-printing-1-image-1",
+  "image_index": 1,
+  "name": "Journey's End Siege",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10604,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10604-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:53.683555+00:00",
+  "sha256": "270c9b35697d7e7ffb1380d8aeefb807e4160c84ae4b16d3d9bef56cf8efa259",
+  "source_image_hash": "be/ef",
+  "source_url": "https://images.oracleofthevoid.com/l5r/be/ef/printing_10604_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/be/ef/printing_10604_1_",
+  "width": 750
+}

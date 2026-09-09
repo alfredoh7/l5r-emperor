@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 679075,
+  "card_id": "oracle-l5r-10133",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10133-printing-1-image-1",
+  "image_index": 1,
+  "name": "Suitengu's Path",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 10133,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10133-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:41.399884+00:00",
+  "sha256": "e9d5b19ea28c36b4f7337711cff62cac9cdab543fc7a6cd983c3a6981cfb6388",
+  "source_image_hash": "88/be",
+  "source_url": "https://images.oracleofthevoid.com/l5r/88/be/printing_10133_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/88/be/printing_10133_1_",
+  "width": 750
+}

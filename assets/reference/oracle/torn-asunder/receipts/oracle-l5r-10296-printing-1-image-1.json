@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 859425,
+  "card_id": "oracle-l5r-10296",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10296-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Yuribara",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 10296,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10296-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:02.673545+00:00",
+  "sha256": "53cd5228f56b3a48b25ab1a9aa19a5e213cbc54464c2738542211a9f7e9d71dc",
+  "source_image_hash": "13/89",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/89/printing_10296_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/89/printing_10296_1_",
+  "width": 750
+}

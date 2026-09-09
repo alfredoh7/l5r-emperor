@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 381824,
+  "card_id": "oracle-l5r-708",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-708-printing-1-image-1",
+  "image_index": 1,
+  "name": "Barred Passage",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 708,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-708-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:45.259270+00:00",
+  "sha256": "c87f6d868bd5553b987a2740dcb175e16d38957b41191a2e9b14f8de6adbed1b",
+  "source_image_hash": "e0/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e0/eb/printing_708_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e0/eb/printing_708_1_",
+  "width": 750
+}

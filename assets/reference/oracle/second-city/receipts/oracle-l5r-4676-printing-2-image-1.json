@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 360788,
+  "card_id": "oracle-l5r-4676",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4676-printing-2-image-1",
+  "image_index": 1,
+  "name": "Law of Darkness Dojo",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 4676,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4676-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:53.366879+00:00",
+  "sha256": "e0edf15769646a57439164e1d785f47436354d6cbd54eafc2b54aef34eb2bc24",
+  "source_image_hash": "0c/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/4d/printing_4676_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/4d/printing_4676_2_",
+  "width": 750
+}

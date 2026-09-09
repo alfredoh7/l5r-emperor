@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 261924,
+  "card_id": "oracle-l5r-1750",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1750-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Murota",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 1750,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-1750-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:47.791533+00:00",
+  "sha256": "b7a007b97d9d52bf36d4ab3324af3b30fc09dc21e00e6e0e9a244648a72a9d1f",
+  "source_image_hash": "a5/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a5/df/printing_1750_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a5/df/printing_1750_1_",
+  "width": 750
+}

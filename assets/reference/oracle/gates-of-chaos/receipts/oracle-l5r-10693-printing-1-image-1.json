@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779464,
+  "card_id": "oracle-l5r-10693",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10693-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lost Blade of the Maharaja",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 10693,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10693-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:09.755342+00:00",
+  "sha256": "daa2aa4b10ed7373f2703482961bd77d4447617c0726da9c09e071aae63be591",
+  "source_image_hash": "8f/a7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8f/a7/printing_10693_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8f/a7/printing_10693_1_",
+  "width": 750
+}

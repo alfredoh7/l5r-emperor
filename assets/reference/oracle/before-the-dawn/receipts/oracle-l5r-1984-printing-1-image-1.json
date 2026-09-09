@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 417363,
+  "card_id": "oracle-l5r-1984",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1984-printing-1-image-1",
+  "image_index": 1,
+  "name": "Detained",
+  "numbers": [
+    "113"
+  ],
+  "oracle_id": 1984,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1984-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:18.964384+00:00",
+  "sha256": "ada460bf0316ad756353d4039bb36ba9214aa70bc5a980bca46136222164e846",
+  "source_image_hash": "b3/6e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/6e/printing_1984_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/6e/printing_1984_1_",
+  "width": 750
+}

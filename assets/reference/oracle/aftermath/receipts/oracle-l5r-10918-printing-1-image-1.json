@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 725971,
+  "card_id": "oracle-l5r-10918",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10918-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mystical Augmentation",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 10918,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10918-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:24.203225+00:00",
+  "sha256": "ecc368a8cd126db5ea02c24ac029ce9e8355544bd0253e1e5c2ccebc00a26e2c",
+  "source_image_hash": "67/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/db/printing_10918_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/db/printing_10918_1_",
+  "width": 750
+}

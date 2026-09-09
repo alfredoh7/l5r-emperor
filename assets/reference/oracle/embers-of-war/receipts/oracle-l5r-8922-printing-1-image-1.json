@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 829699,
+  "card_id": "oracle-l5r-8922",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8922-printing-1-image-1",
+  "image_index": 1,
+  "name": "Two Fronts",
+  "numbers": [
+    "152"
+  ],
+  "oracle_id": 8922,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8922-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:25.415467+00:00",
+  "sha256": "421c41f366406e290155e70c3a46abec1b599ae32c3d2927e802c487c3aede05",
+  "source_image_hash": "94/02",
+  "source_url": "https://images.oracleofthevoid.com/l5r/94/02/printing_8922_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/94/02/printing_8922_1_",
+  "width": 750
+}

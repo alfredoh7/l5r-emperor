@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 761202,
+  "card_id": "oracle-l5r-4179",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4179-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Kae",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 4179,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4179-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:45.167179+00:00",
+  "sha256": "06dda7b5d29e950c57622818337996a02f68d7a2b2cc952f15e44ee03e7f1662",
+  "source_image_hash": "5b/c8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5b/c8/printing_4179_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/c8/printing_4179_1_",
+  "width": 750
+}

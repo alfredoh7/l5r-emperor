@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 392455,
+  "card_id": "oracle-l5r-6213",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6213-printing-1-image-1",
+  "image_index": 1,
+  "name": "Record of Failure",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 6213,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6213-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:26.455409+00:00",
+  "sha256": "81326703b03edd64b57057fca8fa78cece8a3e39e93cf08e3294a56817413357",
+  "source_image_hash": "27/51",
+  "source_url": "https://images.oracleofthevoid.com/l5r/27/51/printing_6213_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/27/51/printing_6213_1_",
+  "width": 750
+}

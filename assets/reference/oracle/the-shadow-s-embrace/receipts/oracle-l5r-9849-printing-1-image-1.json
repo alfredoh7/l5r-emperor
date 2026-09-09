@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730519,
+  "card_id": "oracle-l5r-9849",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9849-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Rafu",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 9849,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9849-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:40.355923+00:00",
+  "sha256": "a97e7cb8a1e52249645aa9a22f1438be29c73ea778dd0650749495d7d98873fa",
+  "source_image_hash": "b2/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/75/printing_9849_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/75/printing_9849_1_",
+  "width": 750
+}

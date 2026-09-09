@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 688054,
+  "card_id": "oracle-l5r-10319",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10319-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ninube Tsukau",
+  "numbers": [
+    "63"
+  ],
+  "oracle_id": 10319,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10319-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:24.074190+00:00",
+  "sha256": "2316f956427b1e0f37207c92e3c70edc1e62896d98c2d99f51be0d4954e4bcfe",
+  "source_image_hash": "da/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/6d/printing_10319_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/6d/printing_10319_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799125,
+  "card_id": "oracle-l5r-9791",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9791-printing-1-image-1",
+  "image_index": 1,
+  "name": "Discovering the Temple",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 9791,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9791-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:45.097970+00:00",
+  "sha256": "7336ba26f7de894d0672d0ff6f1fc8b64b58ff20087e9c7d1c1ff20519c8c74d",
+  "source_image_hash": "b3/21",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/21/printing_9791_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/21/printing_9791_1_",
+  "width": 750
+}

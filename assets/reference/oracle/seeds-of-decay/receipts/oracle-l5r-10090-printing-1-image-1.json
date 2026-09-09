@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 780142,
+  "card_id": "oracle-l5r-10090",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10090-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ninube Hajime",
+  "numbers": [
+    "64"
+  ],
+  "oracle_id": 10090,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10090-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:06.089629+00:00",
+  "sha256": "8772693aaf2f878c5c4e21d35d84fa5fb48201ea4d385f7f78218b4eab5846b5",
+  "source_image_hash": "a4/fa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a4/fa/printing_10090_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/fa/printing_10090_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 760951,
+  "card_id": "oracle-l5r-10032",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10032-printing-1-image-1",
+  "image_index": 1,
+  "name": "Starting on the Path",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10032,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10032-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:37.814484+00:00",
+  "sha256": "9a172274ae9d88e7efe8887f8ccabe8a37818adab8d80d3ce172b5fe5129a548",
+  "source_image_hash": "cf/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/6b/printing_10032_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/6b/printing_10032_1_",
+  "width": 750
+}

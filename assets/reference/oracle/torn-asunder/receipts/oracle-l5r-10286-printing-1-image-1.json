@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 752194,
+  "card_id": "oracle-l5r-10286",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10286-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Yonekura",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 10286,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10286-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:15.679221+00:00",
+  "sha256": "d9ef59dec5193c68148a53148216dcdfd2ffd2a73c34c117985587fae870ce2b",
+  "source_image_hash": "07/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/98/printing_10286_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/98/printing_10286_1_",
+  "width": 750
+}

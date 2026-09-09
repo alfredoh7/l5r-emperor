@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 860754,
+  "card_id": "oracle-l5r-9885",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9885-printing-1-image-1",
+  "image_index": 1,
+  "name": "Channel the Moon",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 9885,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9885-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:28.507016+00:00",
+  "sha256": "4c6cc8e885f2f4d01503d14f1dc42b9d5769b60d37d2ccf69fcb962359afae59",
+  "source_image_hash": "73/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/8c/printing_9885_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/8c/printing_9885_1_",
+  "width": 750
+}

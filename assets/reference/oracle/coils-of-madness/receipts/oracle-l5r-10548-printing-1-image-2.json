@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 966177,
+  "card_id": "oracle-l5r-10548",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10548-printing-1-image-2",
+  "image_index": 2,
+  "name": "Deliberations",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 10548,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10548-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:26.256219+00:00",
+  "sha256": "2d891f0bed305b936b5895f4fc9a16e15f9e10395e69646010682fae26030c20",
+  "source_image_hash": "95/8a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/95/8a/printing_10548_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/95/8a/printing_10548_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 715679,
+  "card_id": "oracle-l5r-10312",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10312-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Tanihara",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 10312,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10312-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:52.446973+00:00",
+  "sha256": "c63067bb80966f33d1deb0c79f17081849bef01e9678be9c5cc07b04e671f081",
+  "source_image_hash": "25/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/25/ec/printing_10312_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/25/ec/printing_10312_1_",
+  "width": 750
+}

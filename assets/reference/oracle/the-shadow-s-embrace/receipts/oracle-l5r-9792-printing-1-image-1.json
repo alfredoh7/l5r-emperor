@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 775295,
+  "card_id": "oracle-l5r-9792",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9792-printing-1-image-1",
+  "image_index": 1,
+  "name": "Distant Expansion",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 9792,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9792-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:46.213547+00:00",
+  "sha256": "647d18c04662d61afff4c1878e41b3a83f49713ef711de80badd8a039cbf8b61",
+  "source_image_hash": "49/ed",
+  "source_url": "https://images.oracleofthevoid.com/l5r/49/ed/printing_9792_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/49/ed/printing_9792_1_",
+  "width": 750
+}

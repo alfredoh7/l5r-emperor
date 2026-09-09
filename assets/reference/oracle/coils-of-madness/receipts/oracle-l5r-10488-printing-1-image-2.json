@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 989327,
+  "card_id": "oracle-l5r-10488",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10488-printing-1-image-2",
+  "image_index": 2,
+  "name": "Nishiguchi",
+  "numbers": [
+    "146"
+  ],
+  "oracle_id": 10488,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10488-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:04.960808+00:00",
+  "sha256": "8bdc0ea25f2bd76821a4cd111782f3cc05b52125ac144976a4a3d53e4747c5d6",
+  "source_image_hash": "f8/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/93/printing_10488_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/93/printing_10488_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401775,
+  "card_id": "oracle-l5r-9186",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9186-printing-1-image-1",
+  "image_index": 1,
+  "name": "Volcano Tattoo",
+  "numbers": [
+    "151"
+  ],
+  "oracle_id": 9186,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9186-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:09.610393+00:00",
+  "sha256": "798657d50242c1710c494b9b4de9de8b442c18e2c13c2f4bf2e4c3d8c598679d",
+  "source_image_hash": "03/79",
+  "source_url": "https://images.oracleofthevoid.com/l5r/03/79/printing_9186_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/03/79/printing_9186_1_",
+  "width": 750
+}

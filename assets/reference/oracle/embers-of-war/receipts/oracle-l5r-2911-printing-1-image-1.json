@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 818403,
+  "card_id": "oracle-l5r-2911",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2911-printing-1-image-1",
+  "image_index": 1,
+  "name": "Growing Hostility",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 2911,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2911-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:12.216660+00:00",
+  "sha256": "8c801526a0431d32ee5fad8255d102ff97c7f4fc1fa3efa46ac68bb0f09153c1",
+  "source_image_hash": "a1/db",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a1/db/printing_2911_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a1/db/printing_2911_1_",
+  "width": 750
+}

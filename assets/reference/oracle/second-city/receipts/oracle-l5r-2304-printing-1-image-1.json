@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398605,
+  "card_id": "oracle-l5r-2304",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2304-printing-1-image-1",
+  "image_index": 1,
+  "name": "Elite Sentry",
+  "numbers": [
+    "80"
+  ],
+  "oracle_id": 2304,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2304-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:12.691344+00:00",
+  "sha256": "07757fa17deea88822f9e3ff3e0f89804b6c8c26494be11ea2661d4dbe7f9241",
+  "source_image_hash": "6c/2d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6c/2d/printing_2304_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6c/2d/printing_2304_1_",
+  "width": 750
+}

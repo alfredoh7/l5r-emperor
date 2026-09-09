@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 964512,
+  "card_id": "oracle-l5r-10509",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10509-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Ming-Gwok",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 10509,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10509-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:56.136157+00:00",
+  "sha256": "67d29328f58d5380038d26886f67109e2dd3e119ca2686457eae698ef845ad12",
+  "source_image_hash": "1c/00",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1c/00/printing_10509_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1c/00/printing_10509_1_",
+  "width": 750
+}

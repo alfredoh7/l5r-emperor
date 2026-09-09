@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 825111,
+  "card_id": "oracle-l5r-10730",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10730-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unexpected Discovery",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 10730,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10730-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:21.323020+00:00",
+  "sha256": "9dcb0376ee1e185402e934ad570041bf05fb53927da357afbd6748145f3602d5",
+  "source_image_hash": "a3/a8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/a8/printing_10730_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/a8/printing_10730_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385543,
+  "card_id": "oracle-l5r-7806",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7806-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Yayu",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 7806,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7806-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:53.326758+00:00",
+  "sha256": "c26f5c2c7140ac323484d22e9533b475693ba36523113306afe2905b8b530ed7",
+  "source_image_hash": "09/97",
+  "source_url": "https://images.oracleofthevoid.com/l5r/09/97/printing_7806_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/09/97/printing_7806_1_",
+  "width": 750
+}

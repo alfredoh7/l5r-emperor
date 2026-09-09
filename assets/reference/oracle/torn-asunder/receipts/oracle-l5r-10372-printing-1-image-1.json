@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772614,
+  "card_id": "oracle-l5r-10372",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10372-printing-1-image-1",
+  "image_index": 1,
+  "name": "Forest Cover",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 10372,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10372-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:27.818360+00:00",
+  "sha256": "1e10dd39d827db3b03a204ebc384f39f4b90b10bffe7ec4ad7812fd25112e6a9",
+  "source_image_hash": "cc/95",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/95/printing_10372_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/95/printing_10372_1_",
+  "width": 750
+}

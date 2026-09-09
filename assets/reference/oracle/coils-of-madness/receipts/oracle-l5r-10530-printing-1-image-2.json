@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 997157,
+  "card_id": "oracle-l5r-10530",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10530-printing-1-image-2",
+  "image_index": 2,
+  "name": "Parangu",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 10530,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10530-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:16.238099+00:00",
+  "sha256": "ee7231ef06e9e924b95f50d90354e603724b294b5472158e0404c4a66ac1ceac",
+  "source_image_hash": "ee/a7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ee/a7/printing_10530_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ee/a7/printing_10530_1_",
+  "width": 750
+}

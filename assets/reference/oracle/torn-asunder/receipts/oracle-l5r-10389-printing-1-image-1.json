@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 850780,
+  "card_id": "oracle-l5r-10389",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10389-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ready the Defenses",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 10389,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10389-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:35.743293+00:00",
+  "sha256": "18136ede5dfd77f6bd504ba55b2dacad988937bdcdfc501c8cc956c40858d281",
+  "source_image_hash": "bf/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bf/55/printing_10389_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bf/55/printing_10389_1_",
+  "width": 750
+}

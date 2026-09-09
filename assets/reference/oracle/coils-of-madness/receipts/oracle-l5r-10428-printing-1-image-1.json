@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1044953,
+  "card_id": "oracle-l5r-10428",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10428-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bamboo Harvesters",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 10428,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10428-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:59.561635+00:00",
+  "sha256": "77038a699ff74a4e9bbce91843431a68a23efc41ac13c380908d97ce5ee2b3da",
+  "source_image_hash": "aa/7f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/aa/7f/printing_10428_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/7f/printing_10428_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 810507,
+  "card_id": "oracle-l5r-10626",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10626-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Razan",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 10626,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10626-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:20.960830+00:00",
+  "sha256": "e1fea6c10d2fddf7ae4a5410041a0ffb5acc7e365a4cf558f46a63f5c484637d",
+  "source_image_hash": "45/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/45/f7/printing_10626_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/45/f7/printing_10626_1_",
+  "width": 750
+}

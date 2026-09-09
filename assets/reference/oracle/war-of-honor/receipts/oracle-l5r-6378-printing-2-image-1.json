@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 257109,
+  "card_id": "oracle-l5r-6378",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6378-printing-2-image-1",
+  "image_index": 1,
+  "name": "Ronin Brotherhood",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 6378,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6378-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:02.691630+00:00",
+  "sha256": "bcd80e0ee3f86989cb1867dbf02c6e0c002fc3bf21e93830916ff24992aa4a77",
+  "source_image_hash": "cf/b0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/b0/printing_6378_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/b0/printing_6378_2_",
+  "width": 750
+}

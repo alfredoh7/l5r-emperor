@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382968,
+  "card_id": "oracle-l5r-9085",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9085-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Liu-Xeung",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 9085,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9085-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:06.472006+00:00",
+  "sha256": "f9d7c3ed53abea59ee02303e725b56a52986597c0e221a1ecc95d39bcb2abfd3",
+  "source_image_hash": "1c/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1c/6f/printing_9085_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1c/6f/printing_9085_1_",
+  "width": 750
+}

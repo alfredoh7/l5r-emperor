@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 759692,
+  "card_id": "oracle-l5r-10644",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10644-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Gombei",
+  "numbers": [
+    "43"
+  ],
+  "oracle_id": 10644,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10644-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:19.013111+00:00",
+  "sha256": "e848b2ac27badcf84e0f59d19db4b544b46f8bc0d41b642a5b0b9c06e8ee6ef9",
+  "source_image_hash": "7b/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7b/5c/printing_10644_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7b/5c/printing_10644_1_",
+  "width": 750
+}

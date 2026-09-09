@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 264518,
+  "card_id": "oracle-l5r-5533",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5533-printing-1-image-1",
+  "image_index": 1,
+  "name": "Never Beyond My Reach",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 5533,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5533-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:14.001019+00:00",
+  "sha256": "486fc7ced046cd092bc48dd26235762188a4b8309d9633f87b82b60f361cdf2a",
+  "source_image_hash": "96/5f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/96/5f/printing_5533_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/96/5f/printing_5533_1_",
+  "width": 750
+}

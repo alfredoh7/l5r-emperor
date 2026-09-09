@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 259366,
+  "card_id": "oracle-l5r-4975",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4975-printing-2-image-1",
+  "image_index": 1,
+  "name": "Matsu Sakaki",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 4975,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4975-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:46.932793+00:00",
+  "sha256": "730a92e0019444c0f50ba8796948cc8cafcccfeb8ea4d651c12753874e411dc6",
+  "source_image_hash": "6d/ee",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6d/ee/printing_4975_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6d/ee/printing_4975_2_",
+  "width": 750
+}

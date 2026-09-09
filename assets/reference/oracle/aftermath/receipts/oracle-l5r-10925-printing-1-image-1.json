@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 849439,
+  "card_id": "oracle-l5r-10925",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10925-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Moving Battle",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 10925,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10925-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:36.512902+00:00",
+  "sha256": "9ba71013f11f90b6ada68e4ef452e267b11220f816dbc0fc6081487af150c030",
+  "source_image_hash": "28/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/28/23/printing_10925_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/28/23/printing_10925_1_",
+  "width": 750
+}

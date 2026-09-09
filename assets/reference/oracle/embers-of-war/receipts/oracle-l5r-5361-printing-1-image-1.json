@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 780365,
+  "card_id": "oracle-l5r-5361",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5361-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moto Rani",
+  "numbers": [
+    "72"
+  ],
+  "oracle_id": 5361,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5361-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:03.682864+00:00",
+  "sha256": "b08a9582839e92dabc23a7c9137916ebb2f4484968ec426ba701398d162b2521",
+  "source_image_hash": "d2/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d2/ec/printing_5361_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/ec/printing_5361_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 728881,
+  "card_id": "oracle-l5r-5286",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5286-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moshi Tomiko",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 5286,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5286-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:01.373991+00:00",
+  "sha256": "5401393353220097507b71e1e74b7f7304b999feb49d999646c24e14e52fa189",
+  "source_image_hash": "04/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/24/printing_5286_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/24/printing_5286_1_",
+  "width": 750
+}

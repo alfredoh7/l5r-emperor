@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 771058,
+  "card_id": "oracle-l5r-10940",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10940-printing-1-image-1",
+  "image_index": 1,
+  "name": "Grasp the Swords",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 10940,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10940-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:32.842683+00:00",
+  "sha256": "51d39c62bbfd12ffad15f778929e831c8a4b220b855769cf009ea5808f44cc9c",
+  "source_image_hash": "97/d8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/d8/printing_10940_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/d8/printing_10940_1_",
+  "width": 750
+}

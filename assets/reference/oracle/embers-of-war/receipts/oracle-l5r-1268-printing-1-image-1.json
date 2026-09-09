@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 820945,
+  "card_id": "oracle-l5r-1268",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1268-printing-1-image-1",
+  "image_index": 1,
+  "name": "Celestial Sword of the Lion",
+  "numbers": [
+    "88"
+  ],
+  "oracle_id": 1268,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1268-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:43.146592+00:00",
+  "sha256": "ac3548abb19bdba700de015751b41161a853dcbe49f3bb89da027860d29e6bce",
+  "source_image_hash": "25/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/25/85/printing_1268_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/25/85/printing_1268_1_",
+  "width": 750
+}

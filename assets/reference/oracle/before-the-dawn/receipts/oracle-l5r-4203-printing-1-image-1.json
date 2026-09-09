@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399237,
+  "card_id": "oracle-l5r-4203",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4203-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Munemori",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 4203,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4203-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:57.545458+00:00",
+  "sha256": "8fb31c2df5b4c4ad7a2ff33ca850f6806c27adbcc0257daa3315ddb858a610cd",
+  "source_image_hash": "e0/52",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e0/52/printing_4203_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e0/52/printing_4203_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 415038,
+  "card_id": "oracle-l5r-2276",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2276-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ebisu's Honesty",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 2276,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2276-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:25.335144+00:00",
+  "sha256": "c66ec68628945dae1a774a39f3e07410e10d14bbfa0a04110f0882e9148679a7",
+  "source_image_hash": "15/0c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/15/0c/printing_2276_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/15/0c/printing_2276_1_",
+  "width": 750
+}

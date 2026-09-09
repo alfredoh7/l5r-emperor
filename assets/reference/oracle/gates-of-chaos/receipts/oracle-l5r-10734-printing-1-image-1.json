@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 780840,
+  "card_id": "oracle-l5r-10734",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10734-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ivory Magistrate Outpost",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 10734,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10734-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:51.305192+00:00",
+  "sha256": "031a337137f35780cc62605dd720e03943afcfdacc41f20ee75fa27373f58955",
+  "source_image_hash": "34/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/45/printing_10734_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/45/printing_10734_1_",
+  "width": 750
+}
