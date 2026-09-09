@@ -11,3 +11,7 @@ Alfredo selected 1A Frayed ink, 2B Daisho seal, 3A Crimson breathing ink, 4A Bro
 - Battle exchanges occupy a collapsible, reserved left column, distinct from the right action inspector. It presents public events, including explicit accepted pass events from the engine. The client does not infer passes from priority changes or compute battle outcomes.
 
 Use the source-to-game workflow in `docs/ART_IMPLEMENTATION.md`. The exact selected reference crops, source-derived production assets, prompts, and verification notes are in `assets/ui/battle-escalation/`. Preserve full card faces, bowed orientation, attachment membership and existing compact spacing. This acceptance is visual direction, not expert rules certification.
+
+## Superseding feedback: withdraw the left journal
+
+Alfredo requested removal of the left-side battle log after playtesting. Remove its panel, toggle, reserved board width and input interception; do not replace it with another log UI in this pass. Return the space to the board. Retain named destruction notices, blood animation, battle tracker, ordinary history and engine events. The earlier journal artwork and evidence remain historical references for a possible future redesign, not the current approved UI.

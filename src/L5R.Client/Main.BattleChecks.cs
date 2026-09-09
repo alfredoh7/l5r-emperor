@@ -57,7 +57,6 @@ public partial class Main
                 GD.Print("COMPACT_BOARD_PASS: original 218-unit province pitch, no retained court band, Home on table-facing side from both seats.");
             }
             GD.Print($"BATTLE_COURT_PASS: {_battleCourts.Count} connected courts; both seats nearest their provinces; real stacks fit disjoint bounds.");
-            await ProbeBattleJournalInput();
             if (_assignments.Count > 0)
             {
                 var version = View.Version; var plans = new Dictionary<string, int>(_assignments);

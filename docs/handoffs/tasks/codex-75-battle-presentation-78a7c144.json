@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Preserve compact province-connected battles; implement approved frayed fallen frames, Daisho, attack-gated blood absorption and pulse, broad assignment arrows, named destruction and public aftermath in a worn left-side battle journal. Emit actor-tagged accepted pass events without changing legality.",
-  "validation": "275 deterministic checks passed; final core/published/deck repeated after public-card thumbnail metadata; client build/import passed; eight native Mac battle scenarios passed with journal input isolation, draft/confirmed attack gating, defense, action deaths, battle deaths, province falls and reduced motion; native ultrawide camera/input passed through Play Latest.command; source comparison and gameplay captures reviewed; launcher plist/executable/target verified; git diff --check passed.",
-  "remaining": "GitHub CI and mdornbrook shared review before merge. No native Windows graphical playtest, expert rules acceptance or network burst/reconnect cinematic acceptance claimed. Audio remains a future pass.",
+  "summary": "Province battle presentation remains; withdraw the left Battle exchanges panel and toggle after Alfredo playtesting. Restore board width and normal input; preserve blood animation, named defeats, battle tracker and ordinary history. No replacement log UI or rules change.",
+  "validation": "Removal follow-up: client build and headless Godot import passed; three native Mac scenarios passed (1920 action death, 1280 reduced-motion province fall, 2560 camera/input), captures visually reviewed; launcher refreshed and executable/plist/checkout path verified; git diff --check passed. Earlier battle pass separately passed 275 deterministic checks and Mac/Windows CI; those are not rerun claims for this UI-only removal.",
+  "remaining": "Follow-up CI and existing mdornbrook shared review before merging PR76. Native Windows graphical testing not performed. Left log intentionally deferred; retained artwork is historical.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/75",
   "branch": "codex/75-battle-presentation",
-  "updated": "2026-09-09T02:28:21.637535+00:00"
+  "updated": "2026-09-09T02:58:27.670199+00:00"
 }

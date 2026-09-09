@@ -39,7 +39,7 @@ public partial class Main
         var visible=BattleJournal.Visible(_motionView).Where(c=>c.Definition is not null).DistinctBy(c=>c.Id).ToDictionary(c=>c.Id);
         var names=casualties.Select(e=>e.CardId is { } id && visible.TryGetValue(id,out var card)?card.Definition!.Name:e.Message).ToArray();
         _battleDefeatHeadline=names.Length>0 ? string.Join(" · ",names.Take(2))+" destroyed"+(names.Length>2?$" · +{names.Length-2}":"") : _battleOutcomeText;
-        _battleDefeatCause=events.Any(e=>e.Type=="battleResolved")?"Battle resolution": "Battle action · outcome recorded in Battle exchanges";
+        _battleDefeatCause=events.Any(e=>e.Type=="battleResolved")?"Battle resolution": "Battle action";
         _actionOutcome=!events.Any(e=>e.Type=="battleResolved");
         _outcomeHold=names.Length>1?1.8:1.35;
         if(_reducedMotion) { _staticOutcomeUntil=_battleVisualTime+3; return; }
@@ -51,7 +51,7 @@ public partial class Main
     private void ProcessBattlePresentation(double delta)
     {
         _battleVisualTime += delta;
-        if(!PresentationBusy && _defeatBanner.Visible && _battleVisualTime>=_staticOutcomeUntil) RenderBattleJournal();
+        if(!PresentationBusy && _defeatBanner.Visible && _battleVisualTime>=_staticOutcomeUntil) RenderBattleFeedback();
         if (!PresentationBusy) return;
         if (_session.Snapshot is null) { _battlePresentationStage = 0; _presentationSnapshot = null; return; }
         _battlePresentationClock += delta;
@@ -74,7 +74,7 @@ public partial class Main
             foreach (var key in _fallTimes.Keys.ToArray()) if (_fallTimes[key] == -1) _fallTimes[key] = _battleVisualTime;
         }
         if (_battlePresentationStage == 3 && _battlePresentationClock >= 1.25)
-        { _battlePresentationStage = 0; RenderInspector(); RenderPhaseActions(); RenderTimeline(); RenderBattleJournal(); FrameNewBattle(); }
+        { _battlePresentationStage = 0; RenderInspector(); RenderPhaseActions(); RenderTimeline(); RenderBattleFeedback(); FrameNewBattle(); }
 
     }
 

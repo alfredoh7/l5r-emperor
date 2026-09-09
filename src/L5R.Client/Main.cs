@@ -327,7 +327,7 @@ public partial class Main : Node
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildCameraControls();
-        BuildBattleJournal();
+        BuildBattleFeedback();
         BuildFullscreenGate();
         GetViewport().SizeChanged += FitPresentation; FitPresentation();
     }
@@ -371,7 +371,7 @@ public partial class Main : Node
         }
         ObserveBattleJournal();
         PrepareBattlePresentation();
-        RenderBattleJournal();
+        RenderBattleFeedback();
         FitTableViewport();
         ObserveBattleResolution();
         if (_displayedVersion != View.Version)
@@ -387,7 +387,7 @@ public partial class Main : Node
         if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
-        RenderBattleJournal();
+        RenderBattleFeedback();
     }
 
     private void RenderTimeline()

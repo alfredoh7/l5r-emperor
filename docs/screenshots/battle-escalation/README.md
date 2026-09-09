@@ -1,5 +1,7 @@
 # Native battle escalation review — 2026-09-09
 
+**Superseded layout:** the left log in these original captures has been removed at Alfredo’s request. See [the current log-removal captures](log-removal/README.md). The original source/art evidence remains below for reference.
+
 These are real native Godot Mac captures from published Lion/Crane practice matches, not generated gameplay images. Selected concept sources and derivation prompts are in `assets/ui/battle-escalation/`. The source comparison itself uses the actual runtime renderer on an inspection canvas.
 
 - [Source / runtime comparison](source-comparison.png): original corner pigment at equal scale, live court material, Daisho, broad arrow and frayed perimeter. Corner proportions and source texture remain raster art; only plain runs resize. The right court is orthographic inspection, not the perspective game table.

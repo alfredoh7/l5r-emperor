@@ -1,5 +1,7 @@
 # Battle escalation artwork
 
+**Current feedback:** the left Battle exchanges panel and toggle have been removed after playtesting. Its art and earlier captures below are retained only as references for a possible future redesign. Named defeat notices, blood courts and ordinary history remain.
+
 Accepted selections: 1A Frayed ink; 2B Daisho seal; 3A Crimson breathing ink (+25% blood coverage); 4A Broad ink arrow; 5A Named defeat + 5B Aftermath; 6B Battle exchanges on the left. See `docs/decisions/2026-09-09-battle-escalation.md` and issue #75 / PR #76.
 
 ## Source to runtime
