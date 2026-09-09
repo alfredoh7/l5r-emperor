@@ -78,6 +78,20 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"attackReaction" })
+        {
+            // Open to either side -- list this player's own eligible before-attack-resolves Reactions.
+            foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && !c.Bowed)
+                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
+                .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
+            {
+                var used=card.AbilityUses.ContainsKey(reactionId);
+                Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                    new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                    used?"This reaction has already been used.":null,card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});

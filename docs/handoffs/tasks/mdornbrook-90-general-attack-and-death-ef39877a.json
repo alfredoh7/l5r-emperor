@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Two related additions: (1) extract a shared 'becoming dead' primitive (MarkDead/Rehonor/MakeDead) so the dishonorable-death Honor-loss rule applies uniformly, plus a discarded-personality-becomes-dead primitive for future Temple-of-Death-style cards. (2) Rebuild the Ranged/Melee Attack primitive as a general resolution pathway: strength is now mutable PendingAttack state, opening a real Reaction window before resolution only when a reaction is actually possible -- the four existing published attack cards resolve identically to before when nothing can react (all their existing tests pass unchanged). Shared because Models.cs/MatchQueries.cs are explicitly shared client-facing contract files.",
+  "validation": "bash tools/check.sh: full suite passed (retried once after the known transient Godot import flake). All four existing Attack-card tests (Carpenter Castle, Shiro Shiba, Monastery, Torazu) pass unchanged, confirming the reaction window correctly skips itself when nothing can react. Two new regressions: MakeDeadFromDiscard, AttackReactionWindow (negate and boost, including the per-ability hit bonus firing correctly on a deferred resolution).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/90",
+  "branch": "mdornbrook/90-general-attack-and-death",
+  "updated": "2026-09-09T10:40:07.940900+00:00"
+}

@@ -77,6 +77,19 @@ public sealed class PlayerState
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
+/// <summary>A Ranged/Melee Attack awaiting resolution, open to reaction (core rules: "players must
+/// have an opportunity to react"). Strength is deliberately mutable state, not a one-shot value --
+/// either player's Reaction may raise, lower, or (by driving it to 0 or below) negate it before
+/// Kind/Strength are compared against the target's current Force at actual resolution time.</summary>
+public sealed class PendingAttack
+{
+    public string AbilityId { get; set; } = "";
+    public int PlayerId { get; set; }
+    public string? TargetId { get; set; }
+    public int Strength { get; set; }
+    public string Kind { get; set; } = "";
+}
+
 public sealed class MatchState
 {
     public long Version { get; set; }
@@ -88,6 +101,7 @@ public sealed class MatchState
     public Phase Phase { get; set; }
     public int ConsecutivePasses { get; set; }
     public PendingChoice? PendingChoice { get; set; }
+    public PendingAttack? PendingAttack { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     public int? WinnerId { get; set; }
