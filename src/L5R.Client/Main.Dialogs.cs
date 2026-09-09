@@ -40,7 +40,7 @@ public partial class Main
         body.AddChild(Palette.Wrapped("Play the published 40/40 Lion and Crane decks with every card ability automated, or use the training scenarios to learn the flow.", 16, Palette.PaperDim));
         void Start(bool economy, bool published = false, int seat = 0)
         {
-            void Begin() { ResetStatHistory(); _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
+            void Begin() { _turnBloomGate.Reset(); _turnBloom.Cancel(); ResetStatHistory(); _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
             if (_session.Online || _session.Snapshot?.View.Version > 0) Confirm("Start a new practice?", "This leaves the current table. Export a practice replay first if you want to keep it.", Begin);
             else Begin();
         }

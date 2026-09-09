@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Implement approved automatic YOUR TURN Ink Bloom with original artwork, uppercase Weathered Quill, pointer/keyboard pass-through and reduced motion.",
+  "validation": "Client compiles. Native material/lifecycle/input probe passes; real Main integration and source comparison in progress.",
+  "remaining": "Finish native integration, multiple viewport checks and combined playable preview; CI pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/11",
+  "branch": "codex/11-turn-ink-bloom",
+  "updated": "2026-09-09T13:53:31.637819+00:00"
+}
