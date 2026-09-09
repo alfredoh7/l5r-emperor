@@ -79,6 +79,7 @@ def select_records(response: dict, printing_set: str = SET) -> tuple[list[dict],
             hashes = printing.get("printimagehash", [])
             if not isinstance(hashes, list) or not hashes:
                 raise ValueError(f"No supported image references for {card_id}/{printing_id}")
+            embedded_urls = values(printing, "images")
             for index, image_hash in enumerate(hashes, 1):
                 if not isinstance(image_hash, str) or not re.fullmatch(r"[0-9a-f]{2}/[0-9a-f]{2}", image_hash):
                     raise ValueError(f"Unsafe/unsupported image hash: {image_hash!r}")
@@ -88,12 +89,20 @@ def select_records(response: dict, printing_set: str = SET) -> tuple[list[dict],
                 seen_images.add(identity)
                 image_id = f"oracle-l5r-{card_id}-printing-{printing_id}-image-{index}"
                 image_ids.append(image_id)
+                # The {card_id}_{printing_id} URL pattern can go stale after Oracle
+                # renumbers/consolidates a card record; when the source embeds its own
+                # url prefix (still under the same hash), prefer that -- it's the one
+                # actually serving the image -- but only if it matches the expected shape.
+                default_prefix = f"{IMAGE_HOST}{image_hash}/printing_{card_id}_{printing_id}_"
+                embedded = embedded_urls[index - 1] if index - 1 < len(embedded_urls) else None
+                embedded_pattern = rf"{re.escape(IMAGE_HOST)}{re.escape(image_hash)}/printing_\d+_\d+_"
+                url_prefix = embedded if embedded and re.fullmatch(embedded_pattern, embedded) else default_prefix
                 jobs.append({"id": image_id, "card_id": f"oracle-l5r-{card_id}",
                              "oracle_id": int(card_id), "printing_id": printing_id,
                              "image_index": index, "source_image_hash": image_hash,
                              "printing_set": printing_set, "name": " / ".join(values(card, "title")),
                              "numbers": values(printing, "number"),
-                             "url_prefix": f"{IMAGE_HOST}{image_hash}/printing_{card_id}_{printing_id}_"})
+                             "url_prefix": url_prefix})
         cards.append({"id": f"oracle-l5r-{card_id}", "oracle_id": int(card_id),
                       "name": " / ".join(values(card, "title")), "types": values(card, "type"),
                       "deck_types": values(card, "deck"), "source_legality_labels": values(card, "legality"),

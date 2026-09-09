@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fixes 2 of 5 remaining Oracle image-fetch failures from issue #117's bulk download: select_records() (shared by both download scripts) was reconstructing image URLs as {IMAGE_HOST}{hash}/printing_{card_id}_{printing_id}_, which 404/403'd for Daigotsu Kanpeki and Shiba Tsukimi's Promotional-Emperor promo printings because Oracle's own data embeds a different, authoritative URL (referencing a pre-consolidation card/printing ID) under the printing's 'images' field. Now prefers that embedded URL when present and shape-validated (same host, same hash, digit-only ids), falling back to the reconstructed pattern otherwise.",
+  "validation": "Verified both URLs directly (200 OK on the embedded URL vs 403 on the reconstructed one) before writing the fix. Re-ran Promotional-Emperor: both cards now download successfully (320 vs 318 images), down to 1 failure in that set. py_compile and JSON validation pass. The remaining 3 failures (Hida Kisada promo printing 3, Akodo Shigetoshi Deckbacker, Cover Card printing 6) use a genuinely different/absent image-reference scheme (named PNG files or no printimagehash at all) and are not fixable by this change; none are playable game cards needed for import (a duplicate promo variant already covered by the base Emperor Edition printing, a deck-box back reference, and a rulebook cover card).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/117",
+  "branch": "mdornbrook/117-promo-url-fix",
+  "updated": "2026-09-09T17:05:04.193162+00:00"
+}
