@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implemented approved bonsai My Decks landing with live actions and original card backs, doubled collection sidebar with large artwork thumbnails, and B comparison mat with readable parchment rules and native responsive scaling.",
-  "validation": "Client compiled with zero warnings/errors; native Mac deck-builder probe passed setup, quantities, two/three-card comparison, long rules scrolling, save/load and error/overwrite/unsaved handling, 1280/1672/1920 layouts and actual main-menu entry. Native screenshots compared against committed approved sources.",
-  "remaining": "Combined playable preview update and final CI pending. PR134 shared review from mdornbrook and dependency PR124 remain open. Native Windows graphical acceptance not performed.",
+  "summary": "Approved bonsai My Decks, A expanded collection and B parchment comparison implemented with original card scans/backs and live native controls; current main battle presentation integrated without conflicts.",
+  "validation": "Core/content/AI/server/transport checks passed after main integration. Client zero warnings/errors. Native Mac feature and combined-preview checks passed setup, quantity/search/list/compare, two/three cards and long rules scrolling, save/reopen, invalid import recovery, unsaved/external overwrite decisions, 1280/1672/1920 viewports and actual main-menu entry. Source/game images reviewed; clickable preview launcher refreshed and target verified.",
+  "remaining": "PR134 awaiting CI and mdornbrook shared review; dependency PR124 remains open. Native Windows graphical testing not performed. Custom deck match launch remains issue29.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/25",
   "branch": "codex/25-deck-builder",
-  "updated": "2026-09-09T22:13:15.866458+00:00"
+  "updated": "2026-09-09T22:17:42.300696+00:00"
 }
