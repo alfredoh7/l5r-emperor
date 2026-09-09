@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 404827,
+  "card_id": "oracle-l5r-2363",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2363-printing-1-image-1",
+  "image_index": 1,
+  "name": "Erosion",
+  "numbers": [
+    "97"
+  ],
+  "oracle_id": 2363,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2363-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:28.535417+00:00",
+  "sha256": "db024c9a778cff6da72dd888510c63eac857e3b86c12adb1413339cfcdf63249",
+  "source_image_hash": "05/25",
+  "source_url": "https://images.oracleofthevoid.com/l5r/05/25/printing_2363_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/05/25/printing_2363_1_",
+  "width": 750
+}

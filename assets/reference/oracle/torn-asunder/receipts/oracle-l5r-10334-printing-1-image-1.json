@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 696430,
+  "card_id": "oracle-l5r-10334",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10334-printing-1-image-1",
+  "image_index": 1,
+  "name": "Destrier",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 10334,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10334-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:17.298382+00:00",
+  "sha256": "a5fe94deffdf2a9c56a3a68fdd9d8cca5c17a2f0dbf8b5486fdf1ba652d3f064",
+  "source_image_hash": "dd/f1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/f1/printing_10334_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/f1/printing_10334_1_",
+  "width": 750
+}

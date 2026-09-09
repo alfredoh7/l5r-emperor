@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 968686,
+  "card_id": "oracle-l5r-10536",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10536-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hidden Power",
+  "numbers": [
+    "115"
+  ],
+  "oracle_id": 10536,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10536-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:56.789591+00:00",
+  "sha256": "15fd5d6e57a3772be7e7bc530f6beb22b5512589313f44fc54b01a67528c32f4",
+  "source_image_hash": "e3/70",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e3/70/printing_10536_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e3/70/printing_10536_1_",
+  "width": 750
+}

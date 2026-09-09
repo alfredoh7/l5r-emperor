@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 736562,
+  "card_id": "oracle-l5r-10280",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10280-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Ibara",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 10280,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10280-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:09.983804+00:00",
+  "sha256": "e0b10e63daf249a26af52924c3d07e5e5810afff364186f4b3e6c8785817fae1",
+  "source_image_hash": "96/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/96/90/printing_10280_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/96/90/printing_10280_1_",
+  "width": 750
+}

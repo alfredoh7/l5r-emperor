@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 645660,
+  "card_id": "oracle-l5r-10814",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10814-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ki Podling",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10814,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10814-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:59.171871+00:00",
+  "sha256": "a5883fb4b82d02bbdfa1d213eea2d49327eccec09a0c9a18d1f9e99e071d7e65",
+  "source_image_hash": "2e/9e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2e/9e/printing_10814_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2e/9e/printing_10814_1_",
+  "width": 750
+}

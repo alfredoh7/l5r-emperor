@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 400149,
+  "card_id": "oracle-l5r-2331",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2331-printing-1-image-1",
+  "image_index": 1,
+  "name": "En'you",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 2331,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2331-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:27.427084+00:00",
+  "sha256": "8eae5526973a33fd7afa9b8e3d6710840ecd4f74ef8a5163916f838ef3cb4a15",
+  "source_image_hash": "73/44",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/44/printing_2331_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/44/printing_2331_1_",
+  "width": 750
+}

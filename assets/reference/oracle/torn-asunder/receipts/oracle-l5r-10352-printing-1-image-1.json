@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 760065,
+  "card_id": "oracle-l5r-10352",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10352-printing-1-image-1",
+  "image_index": 1,
+  "name": "Read the Essence",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 10352,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10352-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:34.567847+00:00",
+  "sha256": "b29c34c38522485e776cdf00605b4846183c505998744dc6ccfa1eda505778ad",
+  "source_image_hash": "b2/27",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b2/27/printing_10352_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b2/27/printing_10352_1_",
+  "width": 750
+}

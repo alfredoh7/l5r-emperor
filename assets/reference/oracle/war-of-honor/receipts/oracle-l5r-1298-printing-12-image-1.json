@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 233736,
+  "card_id": "oracle-l5r-1298",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1298-printing-12-image-1",
+  "image_index": 1,
+  "name": "Charge",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 1298,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1298-printing-12-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "12",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:05.738737+00:00",
+  "sha256": "a29aca0242d37d316bba8eb468e7409dd7b2a482b924de04bc7a72927e5c0416",
+  "source_image_hash": "23/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/23/4c/printing_1298_12_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/23/4c/printing_1298_12_",
+  "width": 750
+}

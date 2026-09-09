@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 247055,
+  "card_id": "oracle-l5r-128",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-128-printing-2-image-1",
+  "image_index": 1,
+  "name": "Agasha Asai",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 128,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-128-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:41.912794+00:00",
+  "sha256": "ebc174e56fb06e380fd3d8a2736e210b0769b2fbdac7ae87e2c1e338ecb0c16f",
+  "source_image_hash": "ae/67",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/67/printing_128_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/67/printing_128_2_",
+  "width": 750
+}

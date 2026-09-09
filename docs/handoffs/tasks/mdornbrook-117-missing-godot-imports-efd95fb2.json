@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fixes broken card art for Doji Atsumichi and Ikoma Natsu in the live Lion/Crane deck (reported via screenshot: Godot was showing its built-in broken-texture placeholder, not the card scan). Root cause: 14 card scans across the Published content folder were committed without their Godot .jpg.import sidecar, so Godot never imported them as textures and silently fell back to a placeholder at runtime -- the source .jpg files themselves were always correct (verified byte-identical to their Oracle of the Void receipts). Ran the Godot editor headlessly (--headless --editor --quit-after) to force a full project reimport, which generated the missing .import files for all 14 affected cards, not just the 2 reported (the other 12 are dormant catalogue entries not currently in any live deck, so nobody had seen them yet).",
+  "validation": "Rebuilt (dotnet build, 0 warnings/errors) and relaunched the client after generating the imports. Confirmed via git diff that the headless reimport did not alter any of the ~200 already-working .import files it also touched (git diff shows 0 insertions/deletions on all of them -- pure line-ending/mtime noise from Godot's writer, left unstaged). Only the 14 genuinely new .import files are included in this change. Visual confirmation of the in-game render is pending the user's own check (asked them to look at the relaunched client); could not automate a screenshot of the Godot window since it is not a Start-menu-registered app resolvable by the desktop computer-use tool.",
+  "remaining": "Awaiting the user's visual confirmation that Doji Atsumichi/Ikoma Natsu now render correctly in the running client.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/117",
+  "branch": "mdornbrook/117-missing-godot-imports",
+  "updated": "2026-09-09T18:07:14.788281+00:00"
+}

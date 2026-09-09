@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 764793,
+  "card_id": "oracle-l5r-10712",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10712-printing-1-image-1",
+  "image_index": 1,
+  "name": "A New Perspective",
+  "numbers": [
+    "111"
+  ],
+  "oracle_id": 10712,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10712-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:39.187194+00:00",
+  "sha256": "def3230371e0f47526b35f7d5ae9bd14fb640e3b94c242a8644e3c04abbd47be",
+  "source_image_hash": "82/40",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/40/printing_10712_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/40/printing_10712_1_",
+  "width": 750
+}

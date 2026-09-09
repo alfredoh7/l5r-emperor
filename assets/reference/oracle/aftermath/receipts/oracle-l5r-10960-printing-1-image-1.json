@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 800453,
+  "card_id": "oracle-l5r-10960",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10960-printing-1-image-1",
+  "image_index": 1,
+  "name": "Thoughtless Sacrifice",
+  "numbers": [
+    "145"
+  ],
+  "oracle_id": 10960,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10960-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:11.358980+00:00",
+  "sha256": "76e74b5b792851ef082b90dd5bed1c28deb1a8bdc21b0f46e24f2aefecd9eeef",
+  "source_image_hash": "71/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/22/printing_10960_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/22/printing_10960_1_",
+  "width": 750
+}

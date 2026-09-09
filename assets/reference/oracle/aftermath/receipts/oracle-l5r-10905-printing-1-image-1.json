@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 788993,
+  "card_id": "oracle-l5r-10905",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10905-printing-1-image-1",
+  "image_index": 1,
+  "name": "Khalimpeh-jiak",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 10905,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10905-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:56.731158+00:00",
+  "sha256": "ba0a8ac1ccdb235a7663f52385e409b684d58356d59a2629b29a2586e78082a6",
+  "source_image_hash": "d7/af",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/af/printing_10905_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/af/printing_10905_1_",
+  "width": 750
+}

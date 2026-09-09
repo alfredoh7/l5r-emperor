@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 787849,
+  "card_id": "oracle-l5r-10150",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10150-printing-1-image-1",
+  "image_index": 1,
+  "name": "Grappling the Snake",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 10150,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10150-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:08.921704+00:00",
+  "sha256": "ae555728ddb026c809b473bc380a765b0f876599bc7ac8e065b0181c9770ec32",
+  "source_image_hash": "99/8b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/99/8b/printing_10150_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/99/8b/printing_10150_1_",
+  "width": 750
+}

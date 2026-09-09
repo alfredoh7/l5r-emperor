@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386296,
+  "card_id": "oracle-l5r-7261",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7261-printing-1-image-1",
+  "image_index": 1,
+  "name": "Silent Terror",
+  "numbers": [
+    "134"
+  ],
+  "oracle_id": 7261,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7261-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:31.095085+00:00",
+  "sha256": "5ec7dc0c290a7fec2ddfbd30f265b40b37bccc34537d5688f0c898eff16d925d",
+  "source_image_hash": "34/6d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/6d/printing_7261_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/6d/printing_7261_1_",
+  "width": 750
+}

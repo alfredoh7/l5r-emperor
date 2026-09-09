@@ -6,7 +6,11 @@ namespace L5R.Core;
 // (e.g. "Choose your performing unbowed Personality and target..."); most abilities leave it null
 // and use only their source card and Target. Trigger identifies what opens a Reaction-timing
 // ability's window; so far only "own-enters-play" exists (see Purchase()'s post-entry window).
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null);
+// UsageKey lets two catalog entries that are really one printed ability with a choice of effects
+// (e.g. "bow or straighten him") share a single once-per-turn use, instead of each half getting
+// its own independent use by virtue of being a separate dictionary key; defaults to the entry's
+// own id, which is every other ability's actual behavior.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null);
 
 public static class AbilityCatalog
 {
@@ -52,6 +56,52 @@ public static class AbilityCatalog
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
+        // Training-only: exercises the "a discarded Personality becomes (honorably) dead" primitive
+        // ahead of any published card needing it (e.g. a future Temple of Death-style effect).
+        ["training-make-dead"] = new("Open", "Training: a discarded Personality becomes honorably dead", "discarded-personality"),
+        // Training-only: exercises the Ranged/Melee Attack reaction window ahead of any published
+        // card needing it -- proves strength can be raised or negated by either side before resolution.
+        ["training-attack-boost"] = new("Reaction", "Training: +2 to a pending attack", "none", Trigger: "before-attack-resolves"),
+        ["training-attack-negate"] = new("Reaction", "Training: negate a pending attack", "none", Trigger: "before-attack-resolves"),
+        // Import wave 1 (issue #95): unconditional Attacks needing nothing beyond the primitive itself.
+        ["shinjo-eun-sahng-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        ["shosuro-konishi-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        ["tsuruchi-kosoko-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        ["stalking-tiger-attack"] = new("Battle", "Melee 6 Attack", "attack"),
+        // "Bow Isas: Ranged 3 Attack. Move Isas home." -- the source bows itself as its own performer
+        // (no separate Performer field, same shape as kouki-force), then moves home after the Attack
+        // resolves regardless of outcome (ResolveAttackNow's per-ability switch).
+        ["tsuruchi-isas-attack"] = new("Battle", "Bow Isas · Ranged 3 Attack, then move him home", "attack"),
+        // Import wave 2 (issue #97): the Attack primitive's first target-dependent strength.
+        ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack"),
+        ["asako-ume-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        // Training-only: exercises the Reconnaissance primitive (issue #93) ahead of any published
+        // card needing it -- a per-player, per-province boolean that gates only part of an effect.
+        ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
+        ["training-reconnaissance-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor if you have Reconnaissance there", "enemy-personality"),
+        // Tactician (core rules Glossary): every player always has this ability, regardless of what
+        // they control -- "any number of times per turn" (see the ValidateAbility exemption below)
+        // is the point, so its own cost (discarding a card) is the only real limit on repeated use.
+        // Battle-timing by default; a card that grants an Action-segment variant would need its own
+        // catalog entry reusing the same UseAbility case, not a change to this one.
+        ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle"),
+        // Import wave (issue #111): Cavalry/Conqueror/Tactician-adjacent cards needing only small,
+        // already-precedented extensions of existing target categories and primitives.
+        ["reiyu-force-penalty"] = new("Battle", "Target enemy Force/Follower · Force penalty = Reiyu's Force", "enemy-force"),
+        // "If opposed" is a per-ability presence Require (ValidateAbility), same shape as
+        // torazu-fire-attack's own Fire-token Require. Bow and straighten are the same single
+        // printed ability's two alternative effects (unlike paid-bow/paid-straighten, which are
+        // genuinely two separate abilities on unrelated cards) -- they share one UsageKey so using
+        // either spends the one use, rather than each half getting its own independent once-per-turn.
+        ["horibe-bow"] = new("Battle", "If opposed · bow a target Personality", "personality", UsageKey: "horibe-bow-straighten"),
+        ["horibe-straighten"] = new("Battle", "If opposed · straighten a target Personality", "personality", UsageKey: "horibe-bow-straighten"),
+        ["atsumichi-bow"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · bow him", "personality-lower-honor-than-self", UsageKey: "atsumichi-bow-straighten"),
+        ["atsumichi-straighten"] = new("Battle", "Target a Personality with lower Personal Honor than Atsumichi · straighten him", "personality-lower-honor-than-self", UsageKey: "atsumichi-bow-straighten"),
+        ["tetsuo-destroy-attachment"] = new("Battle", "Target an attachment · destroy it", "attachment"),
+        ["tetsuo-destroy-weaker-weaponed"] = new("Battle", "Target an enemy Personality with fewer Weapons · destroy it", "enemy-personality-fewer-weapons-than-self"),
+        // "Target another player's discarded Personality" is an owner restriction on the existing
+        // discarded-personality category, checked inline where that category is validated.
+        ["shunsuke-make-dead"] = new("Limited", "Target another player's discarded Personality · he becomes honorably dead", "discarded-personality"),
     });
 }
 
@@ -67,15 +117,96 @@ public sealed partial class MatchEngine
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
+    // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
+    // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
+    // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
+    // Resets to false only when the battle there resolves (see ResolveBattle).
+    private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
+    private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
+    {
+        var province = Player(provinceOwnerId).Provinces[provinceIndex];
+        if (province.Reconnaissance[playerId]) return;
+        province.Reconnaissance[playerId] = true;
+        Emit("reconnaissanceGained", $"{Player(playerId).Name} gained Reconnaissance in {Player(provinceOwnerId).Name}'s province {provinceIndex + 1}.", playerId);
+    }
     // Ranged/Melee Attack strength; conditional bonuses (e.g. Shiro Shiba's Shugenja check) live here.
-    private int AttackStrength(string abilityId, PlayerState player) => abilityId switch
+    // target is the candidate/chosen target, when one exists (deferred targeting means it may be
+    // null); a target-dependent conditional simply falls back to its unconditional value then.
+    private int AttackStrength(string abilityId, PlayerState player, CardInstance? target = null) => abilityId switch
     {
         "carpenter-castle-siege" => 5,
         "shiro-shiba-melee" => 4 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
         "monastery-fire-attack" => 5,
         "torazu-fire-attack" => 3,
+        "shinjo-eun-sahng-attack" => 4,
+        "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" => 5,
+        "stalking-tiger-attack" => 6,
+        "tsuruchi-isas-attack" => 3,
+        "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
+        "asako-ume-attack" => 4,
         _ => 0
     };
+    // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
+    // share the same resolution pathway (core rules Glossary — Ranged Attack/Melee Attack).
+    private static string AttackKind(string abilityId) => abilityId switch
+    {
+        "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
+        "shiro-shiba-melee" or "stalking-tiger-attack" => "Melee",
+        "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" => "Ranged",
+        _ => ""
+    };
+    // Whether opening a reaction window before resolving an attack could possibly matter right now.
+    // No kind-restricted Reaction exists yet (see AttackKind); once one does, filter by attack.Kind here.
+    private bool AnyAttackReactionAvailable() => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
+        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-attack-resolves" &&
+            (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber)));
+    // Steps F-G of a Ranged/Melee Attack (core rules): compare strength to the target's *current*
+    // Force -- re-evaluated here, not at announce time, since a Reaction may have changed either --
+    // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
+    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength, string? sourceId = null)
+    {
+        if (strength > 0 && targetId is not null)
+        {
+            var target = Card(targetId);
+            if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
+            {
+                DestroyAttackTarget(target);
+                if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+            }
+        }
+        // Tsuruchi Isas: "Move Isas home" is a second, unconditional effect of the same ability --
+        // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
+        if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
+    }
+    // Steps A-E already happened (presence, announce, performer, required targeting, costs) by the
+    // time a card's own UseAbility case calls this. Returns true if a reaction window was opened --
+    // the caller must `return;` so the action stays pending; false if it resolved immediately inline
+    // (identical end state to before this primitive existed, when nothing can possibly react).
+    // sourceId is only needed by a card whose own post-attack effect (see ResolveAttackNow) must
+    // find the exact performing instance again once a deferred reaction window closes.
+    private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null)
+    {
+        var strength = AttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId));
+        if (!AnyAttackReactionAvailable())
+        {
+            ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId);
+            return false;
+        }
+        _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, SourceId = sourceId, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId) };
+        _state.PendingChoice = new("attackReaction", attacker.Id, null, "An attack is pending: react or pass.");
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = 1 - attacker.Id;
+        Emit("reactionWindow", "Attack reaction window opened.", attacker.Id);
+        return true;
+    }
+    // Called once both players pass consecutively in the attackReaction window (Apply()).
+    private void ResolveAttack()
+    {
+        var attack = _state.PendingAttack!;
+        _state.PendingAttack = null;
+        ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        NextAction(attack.PlayerId);
+    }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
@@ -102,9 +233,16 @@ public sealed partial class MatchEngine
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
             "Battle" => _state.Phase == Phase.Battle,
-            // Legal only inside the post-entry reaction window opened for this exact card (Purchase()).
-            "Reaction" => _state.PendingChoice is not null && _state.PendingChoice.Type is "proclaim" or "entryReaction"
-                && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+            // Legal only inside the matching reaction window: entering-play reactions are gated to
+            // the exact card and its own controller (only they may ever act there); an attack
+            // reaction is open to either side, already enforced by the top-level priority check.
+            "Reaction" => _state.PendingChoice is not null && ability.Trigger switch
+            {
+                "own-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                "before-attack-resolves" => _state.PendingChoice.Type == "attackReaction",
+                _ => false
+            },
             _ => false
         }, $"{ability.Timing} timing is unavailable now.");
         var player = Player(command.PlayerId);
@@ -125,7 +263,10 @@ public sealed partial class MatchEngine
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        Require(!uses.TryGetValue(id, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        // "Any number of times per turn" (Tactical Advantage): exempt from the once-per-turn dedupe
+        // entirely -- its own cost (discarding a card) is the only real limit on repeated use.
+        var usageKey = ability.UsageKey ?? id;
+        Require(id == "tactical-advantage" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -139,6 +280,8 @@ public sealed partial class MatchEngine
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
+        if (id is "horibe-bow" or "horibe-straighten")
+            Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -149,6 +292,8 @@ public sealed partial class MatchEngine
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
+                // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
+                "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
@@ -165,6 +310,14 @@ public sealed partial class MatchEngine
             Require(ids.Length is >=1 and <=4 && ids.Distinct().Count() == ids.Length, "Choose one or more different province cards.");
             Require(ids.All(id => _state.Cards.TryGetValue(id, out var c) && c.OwnerId == player.Id && c.Zone == Zone.Province &&
                 player.Provinces.Any(p => !p.Destroyed && p.CardId == id)), "Choose cards in your provinces.");
+        }
+        // Reconnaissance is granted at a specific province, not a card -- selected by index
+        // (GameCommand.Province, already used by selectBattle) rather than TargetId/CardIds.
+        else if (ability.Target == "enemy-province")
+        {
+            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
+            Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
+                "Choose one of the enemy's provinces.");
         }
         else
         {
@@ -183,8 +336,17 @@ public sealed partial class MatchEngine
                     var type = Definition(target).Type;
                     Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
                         "Attack a Follower or a Personality without Followers.");
-                    Require(CardForce(target) <= AttackStrength(id, player), "That card's Force is above the Attack's strength.");
+                    Require(CardForce(target) <= AttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
                 }
+            }
+            // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
+            // in play -- it sits in a discard pile without yet being marked dead.
+            else if (ability.Target == "discarded-personality")
+            {
+                var target = Card(command.TargetId);
+                Require(Definition(target).Type == CardType.Personality && target.Zone is Zone.DynastyDiscard or Zone.FateDiscard,
+                    "Target a discarded Personality.");
+                if (id == "shunsuke-make-dead") Require(target.OwnerId != player.Id, "Target another player's discarded Personality.");
             }
             else
             {
@@ -216,6 +378,9 @@ public sealed partial class MatchEngine
                         "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
+                        "personality-lower-honor-than-self" => personality && Definition(target).PersonalHonor < Definition(source!).PersonalHonor,
+                        "enemy-personality-fewer-weapons-than-self" => personality && !own &&
+                            Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -233,7 +398,7 @@ public sealed partial class MatchEngine
         var source = command.CardId is null ? null : Card(command.CardId);
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
-        uses[id] = _state.TurnNumber;
+        uses[ability.UsageKey ?? id] = _state.TurnNumber;
         if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
             Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
@@ -273,9 +438,9 @@ public sealed partial class MatchEngine
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
-                if (target is not null) { DestroyAttackTarget(target); GainHonor(player.Id, 2, "Carpenter Castle"); }
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
-            case "shiro-shiba-melee": if (target is not null) DestroyAttackTarget(target); break;
+            case "shiro-shiba-melee": if (ResolveOrDeferAttack(id, player, target?.Id)) return; break;
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
             case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
             case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
@@ -284,7 +449,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 DestroyToken(performer, performer.Tokens.First(t => t.Type == "Fire"));
-                if (target is not null) DestroyAttackTarget(target);
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             }
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
@@ -294,8 +459,37 @@ public sealed partial class MatchEngine
                 break;
             case "torazu-fire-attack":
                 DestroyToken(source!, source!.Tokens.First(t => t.Type == "Fire"));
-                if (target is not null) DestroyAttackTarget(target);
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
+            case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "tsuruchi-isas-attack":
+                source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id)) return;
+                break;
+            case "bayushi-kahoku-attack": case "asako-ume-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
+            case "training-reconnaissance-strike":
+                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike");
+                break;
+            case "tactical-advantage":
+                ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
+                DiscardFate(player, target!);
+                break;
+            case "reiyu-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(source)); break;
+            case "horibe-bow": target!.Bowed = true; break;
+            case "horibe-straighten": Straighten(target!); break;
+            case "atsumichi-bow": target!.Bowed = true; break;
+            case "atsumichi-straighten": Straighten(target!); break;
+            case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
+            case "tetsuo-destroy-weaker-weaponed": DestroyUnits([target!], true); break;
+            case "shunsuke-make-dead": MakeDead(target!, true); break;
+            case "training-make-dead": MakeDead(target!, true); break;
+            case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
+            case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -414,6 +608,7 @@ public sealed partial class MatchEngine
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
+                "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             if (performers.Length == 0) performers = [null];
@@ -424,7 +619,9 @@ public sealed partial class MatchEngine
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(), _ => inPlay };
+                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
+                    "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {

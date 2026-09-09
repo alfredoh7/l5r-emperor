@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 257637,
+  "card_id": "oracle-l5r-3679",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3679-printing-5-image-1",
+  "image_index": 1,
+  "name": "Imperial Ambassadorship",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 3679,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3679-printing-5-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "5",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:35.981221+00:00",
+  "sha256": "f2e0a51d7a16b661078147f38408596c427ae00f3347bb8f91b9a3130e4855c8",
+  "source_image_hash": "85/ed",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/ed/printing_3679_5_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/ed/printing_3679_5_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 961595,
+  "card_id": "oracle-l5r-10592",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10592-printing-1-image-1",
+  "image_index": 1,
+  "name": "Family Sensei",
+  "numbers": [
+    "172"
+  ],
+  "oracle_id": 10592,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10592-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:11.771217+00:00",
+  "sha256": "bf87f3ac5809f36e1a77d4d3accd1432f5b90a494fac1df3762d866d6ae672f0",
+  "source_image_hash": "0a/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0a/85/printing_10592_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0a/85/printing_10592_1_",
+  "width": 750
+}

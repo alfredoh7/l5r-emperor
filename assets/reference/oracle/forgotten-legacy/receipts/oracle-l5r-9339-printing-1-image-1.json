@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 269172,
+  "card_id": "oracle-l5r-9339",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9339-printing-1-image-1",
+  "image_index": 1,
+  "name": "Wind of the Moon",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 9339,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-9339-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:50.073710+00:00",
+  "sha256": "c0a7f6ad154a71b3e030d9751387bc5a625a1024b6448c02664f7a7ba2587838",
+  "source_image_hash": "8c/e4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8c/e4/printing_9339_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8c/e4/printing_9339_1_",
+  "width": 750
+}

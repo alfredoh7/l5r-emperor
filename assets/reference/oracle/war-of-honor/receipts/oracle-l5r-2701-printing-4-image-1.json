@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 275814,
+  "card_id": "oracle-l5r-2701",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2701-printing-4-image-1",
+  "image_index": 1,
+  "name": "From Every Side",
+  "numbers": [
+    "101"
+  ],
+  "oracle_id": 2701,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2701-printing-4-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "4",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:26.133983+00:00",
+  "sha256": "376b8a59657cf76ca93e462394b1095f75c928615800c200f4d87570ed6e0585",
+  "source_image_hash": "04/60",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/60/printing_2701_4_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/60/printing_2701_4_",
+  "width": 750
+}

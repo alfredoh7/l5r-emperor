@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 797434,
+  "card_id": "oracle-l5r-9895",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9895-printing-1-image-1",
+  "image_index": 1,
+  "name": "Your Heart's Enemy",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 9895,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9895-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:10.238503+00:00",
+  "sha256": "d55a9240abd5fb6085a2e3b702d6e9c3d32f70d5f96db80a0236d26ddfbf7eea",
+  "source_image_hash": "3c/b2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/b2/printing_9895_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/b2/printing_9895_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 439050,
+  "card_id": "oracle-l5r-7271",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7271-printing-1-image-1",
+  "image_index": 1,
+  "name": "Singh Remnants",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 7271,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7271-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:32.175094+00:00",
+  "sha256": "66d761da42c592d0651fa60c176df279e437cfd9c5d2c26aed25d5a028648897",
+  "source_image_hash": "2f/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2f/c2/printing_7271_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2f/c2/printing_7271_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799762,
+  "card_id": "oracle-l5r-10284",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10284-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Kojinrue",
+  "numbers": [
+    "28"
+  ],
+  "oracle_id": 10284,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10284-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:13.415119+00:00",
+  "sha256": "a3f4e10b956c8720e61ef480b3df9f122d7f230282d1b02064ced344363a1382",
+  "source_image_hash": "8d/9c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8d/9c/printing_10284_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8d/9c/printing_10284_1_",
+  "width": 750
+}

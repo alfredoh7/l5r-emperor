@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 823740,
+  "card_id": "oracle-l5r-7958",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7958-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Ancestral Sword of Hantei",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 7958,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7958-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:01.606918+00:00",
+  "sha256": "87a4fc39e6a4ac673e0e9d46f82282bbca4f1a320993bce6a87917e14831d7ac",
+  "source_image_hash": "b5/27",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b5/27/printing_7958_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b5/27/printing_7958_1_",
+  "width": 750
+}

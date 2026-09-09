@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774654,
+  "card_id": "oracle-l5r-9926",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9926-printing-1-image-1",
+  "image_index": 1,
+  "name": "Serenity in Air",
+  "numbers": [
+    "138"
+  ],
+  "oracle_id": 9926,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9926-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:01.981378+00:00",
+  "sha256": "14bf940f6d3e0cbe84b83cb1c685b4f067fda89fa350615a56e5b442a2fb48de",
+  "source_image_hash": "a9/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/5a/printing_9926_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/5a/printing_9926_1_",
+  "width": 750
+}

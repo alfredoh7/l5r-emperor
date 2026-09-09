@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 662600,
+  "card_id": "oracle-l5r-10203",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10203-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ronin Follower",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10203,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10203-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:19.115623+00:00",
+  "sha256": "8122669b405c759e100d58b48c049d8e8f380479e4de448b895e7864fa4b07ca",
+  "source_image_hash": "ce/b2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ce/b2/printing_10203_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ce/b2/printing_10203_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729542,
+  "card_id": "oracle-l5r-10266",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10266-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hero's Memorial",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10266,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10266-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:40.712484+00:00",
+  "sha256": "3a96c0bd032ad12322db1dc88a34bffbd72306462578258e9d0ff09ca88849f8",
+  "source_image_hash": "43/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/98/printing_10266_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/98/printing_10266_1_",
+  "width": 750
+}

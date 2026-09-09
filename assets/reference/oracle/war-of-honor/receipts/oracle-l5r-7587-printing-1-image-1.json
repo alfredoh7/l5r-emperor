@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 240832,
+  "card_id": "oracle-l5r-7587",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7587-printing-1-image-1",
+  "image_index": 1,
+  "name": "Striking Through the Void",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 7587,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-7587-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:54.318993+00:00",
+  "sha256": "3bb7d2ace64bf067b6b3c1b2a3ea7c333fb598258f962a29b1dae18e9521be3b",
+  "source_image_hash": "1b/62",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1b/62/printing_7587_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/62/printing_7587_1_",
+  "width": 750
+}

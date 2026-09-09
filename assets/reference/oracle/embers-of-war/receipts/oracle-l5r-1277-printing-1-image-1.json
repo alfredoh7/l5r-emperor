@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710254,
+  "card_id": "oracle-l5r-1277",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1277-printing-1-image-1",
+  "image_index": 1,
+  "name": "Centering the Soul",
+  "numbers": [
+    "96"
+  ],
+  "oracle_id": 1277,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1277-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:45.487184+00:00",
+  "sha256": "15d03539e4a91e5b55d4ae44457f98f0e99091cfb1775f504f1c6aec754877c5",
+  "source_image_hash": "1a/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/4c/printing_1277_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/4c/printing_1277_1_",
+  "width": 750
+}

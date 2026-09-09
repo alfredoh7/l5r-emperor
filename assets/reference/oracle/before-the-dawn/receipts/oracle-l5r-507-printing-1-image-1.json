@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 414495,
+  "card_id": "oracle-l5r-507",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-507-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Nanae",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 507,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-507-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:52.076510+00:00",
+  "sha256": "9546731929809ba392cd318717d058df198aa725584cff3b3a6fb9391551eb45",
+  "source_image_hash": "d6/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d6/cc/printing_507_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d6/cc/printing_507_1_",
+  "width": 750
+}

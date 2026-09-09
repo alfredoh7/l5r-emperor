@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 755759,
+  "card_id": "oracle-l5r-637",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-637-printing-1-image-1",
+  "image_index": 1,
+  "name": "Astonishing Accusation",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 637,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-637-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:37.231745+00:00",
+  "sha256": "1d876ef51caefb776ed28b5af0fd3f1ee69f6f0e6321cfc66a80558d984d2cef",
+  "source_image_hash": "9c/f1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9c/f1/printing_637_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9c/f1/printing_637_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 782825,
+  "card_id": "oracle-l5r-3075",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3075-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Bakishi",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 3075,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3075-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:16.675686+00:00",
+  "sha256": "53af4cd29699bd8fe3626dcfc4ab30d80933b4de248576e9f7d3daf0b19e88f9",
+  "source_image_hash": "55/67",
+  "source_url": "https://images.oracleofthevoid.com/l5r/55/67/printing_3075_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/55/67/printing_3075_1_",
+  "width": 750
+}

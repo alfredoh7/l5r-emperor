@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 393891,
+  "card_id": "oracle-l5r-8436",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8436-printing-1-image-1",
+  "image_index": 1,
+  "name": "The World Disappears",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 8436,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8436-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:11.000582+00:00",
+  "sha256": "c91d799e02d0c0fc5ea8d18ea11cc56f9af74bc9ebd02b2f5676ba9dd183789c",
+  "source_image_hash": "a3/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/a9/printing_8436_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/a9/printing_8436_1_",
+  "width": 750
+}

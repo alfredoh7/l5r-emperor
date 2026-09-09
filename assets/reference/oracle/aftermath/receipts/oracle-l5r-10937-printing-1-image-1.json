@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747286,
+  "card_id": "oracle-l5r-10937",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10937-printing-1-image-1",
+  "image_index": 1,
+  "name": "Expanding the Gardens",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 10937,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10937-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:24.499660+00:00",
+  "sha256": "1a5c294f7158ffb26676648f5446690276d9451370fae031ce01c2c5a5935563",
+  "source_image_hash": "b0/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b0/23/printing_10937_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b0/23/printing_10937_1_",
+  "width": 750
+}

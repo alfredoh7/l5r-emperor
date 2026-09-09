@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403729,
+  "card_id": "oracle-l5r-4638",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4638-printing-2-image-1",
+  "image_index": 1,
+  "name": "Kyuden Hida",
+  "numbers": [
+    "154"
+  ],
+  "oracle_id": 4638,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4638-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:03.916531+00:00",
+  "sha256": "7e5f705d0f72c69a9546351b9c28feb63fd17409f35c0e2075649bb37cb22f33",
+  "source_image_hash": "01/a2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/01/a2/printing_4638_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/01/a2/printing_4638_2_",
+  "width": 750
+}

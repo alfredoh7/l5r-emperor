@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 243850,
+  "card_id": "oracle-l5r-3648",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3648-printing-2-image-1",
+  "image_index": 1,
+  "name": "Ikoma Toraji",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 3648,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-3648-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:34.988747+00:00",
+  "sha256": "0109eabe52c2bf6ef07ff27bad0e459c73f0299ca01ab4d6c45c5bed5b7e0db8",
+  "source_image_hash": "99/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/99/de/printing_3648_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/99/de/printing_3648_2_",
+  "width": 750
+}

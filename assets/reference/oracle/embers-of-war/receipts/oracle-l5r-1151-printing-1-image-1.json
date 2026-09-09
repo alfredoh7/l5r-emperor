@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 849734,
+  "card_id": "oracle-l5r-1151",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1151-printing-1-image-1",
+  "image_index": 1,
+  "name": "Broken Cipher",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 1151,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1151-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:41.979122+00:00",
+  "sha256": "2cd2d9e78ab0cb6ace623154a2e7645fb69d1c82807758d17b42ef5589eb7602",
+  "source_image_hash": "80/49",
+  "source_url": "https://images.oracleofthevoid.com/l5r/80/49/printing_1151_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/80/49/printing_1151_1_",
+  "width": 750
+}

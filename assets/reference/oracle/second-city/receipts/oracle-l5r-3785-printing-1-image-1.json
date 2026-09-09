@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 365677,
+  "card_id": "oracle-l5r-3785",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3785-printing-1-image-1",
+  "image_index": 1,
+  "name": "Interference",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 3785,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3785-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:34.766680+00:00",
+  "sha256": "fb3b5a8688fe517b042f0f1f1ec73b55d39901cb82243fe114a3e36c0910cc2e",
+  "source_image_hash": "4f/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4f/eb/printing_3785_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4f/eb/printing_3785_1_",
+  "width": 750
+}

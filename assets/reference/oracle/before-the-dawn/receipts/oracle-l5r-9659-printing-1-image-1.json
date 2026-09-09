@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 394454,
+  "card_id": "oracle-l5r-9659",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9659-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Zinan",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 9659,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9659-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:32.728678+00:00",
+  "sha256": "fe074d8aa17cccaa99bac3fbb283c1b388ee6bb5c1af4b6013a052e418866912",
+  "source_image_hash": "69/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/eb/printing_9659_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/eb/printing_9659_1_",
+  "width": 750
+}

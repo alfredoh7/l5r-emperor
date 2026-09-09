@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 718814,
+  "card_id": "oracle-l5r-10046",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10046-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Akikusa",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 10046,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10046-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:21.693178+00:00",
+  "sha256": "921ddff3444417dd72504c4a3010a85efbbd7fcb771a48ea34575232a89f0551",
+  "source_image_hash": "10/33",
+  "source_url": "https://images.oracleofthevoid.com/l5r/10/33/printing_10046_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/10/33/printing_10046_1_",
+  "width": 750
+}

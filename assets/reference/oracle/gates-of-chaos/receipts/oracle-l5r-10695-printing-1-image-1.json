@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 787134,
+  "card_id": "oracle-l5r-10695",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10695-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seppun's Blessed Blade",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 10695,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10695-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:38.300567+00:00",
+  "sha256": "4a70324a38b96abd2776d98cf3740b93c8c9a86eb9dfe69c19a5eb4b1daa9593",
+  "source_image_hash": "dd/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dd/3c/printing_10695_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dd/3c/printing_10695_1_",
+  "width": 750
+}

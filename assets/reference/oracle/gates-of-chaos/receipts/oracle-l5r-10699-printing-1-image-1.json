@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 889848,
+  "card_id": "oracle-l5r-10699",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10699-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Thunder Resounds",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 10699,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10699-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:09.300254+00:00",
+  "sha256": "5cba0030a1cb9dc75af581af73bf444f8b3e6857cd7522cd61540ab42e4defd8",
+  "source_image_hash": "fd/1a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fd/1a/printing_10699_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/1a/printing_10699_1_",
+  "width": 750
+}

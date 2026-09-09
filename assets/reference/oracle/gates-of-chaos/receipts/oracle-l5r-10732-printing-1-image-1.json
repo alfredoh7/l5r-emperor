@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 769110,
+  "card_id": "oracle-l5r-10732",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10732-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hidden Storehouse of House Rafiq",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 10732,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10732-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:36.598119+00:00",
+  "sha256": "d5c502e499f9aeb267bb1efb34b258e77fd1ec545d00a6404b61c369335b35aa",
+  "source_image_hash": "d8/6e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d8/6e/printing_10732_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/6e/printing_10732_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 832114,
+  "card_id": "oracle-l5r-10715",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10715-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ashalan Ambush",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 10715,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10715-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:53.765883+00:00",
+  "sha256": "c3690a35082fed12d3c62b5dd9ffa1e81df43c33487e87390f7a925e8eb8a2da",
+  "source_image_hash": "f4/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f4/ce/printing_10715_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f4/ce/printing_10715_1_",
+  "width": 750
+}

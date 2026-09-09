@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409995,
+  "card_id": "oracle-l5r-340",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-340-printing-1-image-1",
+  "image_index": 1,
+  "name": "Amazing Feat",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 340,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-340-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:49.921682+00:00",
+  "sha256": "07e9ea9821b98e886b3ca9666244a49a8e3c7f0a124c2364e0d876a1e3614dea",
+  "source_image_hash": "00/08",
+  "source_url": "https://images.oracleofthevoid.com/l5r/00/08/printing_340_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/00/08/printing_340_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 742478,
+  "card_id": "oracle-l5r-6265",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6265-printing-1-image-1",
+  "image_index": 1,
+  "name": "Request Authorization",
+  "numbers": [
+    "133"
+  ],
+  "oracle_id": 6265,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6265-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:23.575098+00:00",
+  "sha256": "28ee56a4ae099c92629e750c6bf5d071b0406143feda826fc7773c3ca705e0f4",
+  "source_image_hash": "74/5f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/5f/printing_6265_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/5f/printing_6265_1_",
+  "width": 750
+}

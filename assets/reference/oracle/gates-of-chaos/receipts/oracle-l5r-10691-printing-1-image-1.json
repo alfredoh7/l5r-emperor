@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 784181,
+  "card_id": "oracle-l5r-10691",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10691-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kshatriya Artifacts",
+  "numbers": [
+    "89"
+  ],
+  "oracle_id": 10691,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10691-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:01.330263+00:00",
+  "sha256": "234f1fdc66cca9cf614e46ea1860ce82a7b03d9ed2b0583c68de07a4ed9bb8ad",
+  "source_image_hash": "73/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/73/ca/printing_10691_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/73/ca/printing_10691_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 832174,
+  "card_id": "oracle-l5r-6653",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6653-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shadow Dragon",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 6653,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6653-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:34.997586+00:00",
+  "sha256": "b41120499a2b7ad9ea30b5c4ecfdb16e801eadc179730c6b657a4f0c92f1dfe7",
+  "source_image_hash": "67/34",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/34/printing_6653_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/34/printing_6653_1_",
+  "width": 750
+}

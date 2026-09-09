@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 782185,
+  "card_id": "oracle-l5r-10261",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10261-printing-1-image-1",
+  "image_index": 1,
+  "name": "Rejected Mediation",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10261,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10261-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:38.101146+00:00",
+  "sha256": "e76191751aa0755b3bc345c6035672e3df16363f8d38b829e5bd54d73c16c07d",
+  "source_image_hash": "a5/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a5/4d/printing_10261_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a5/4d/printing_10261_1_",
+  "width": 750
+}

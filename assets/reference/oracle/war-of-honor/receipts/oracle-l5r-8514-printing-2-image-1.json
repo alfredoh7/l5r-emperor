@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 237217,
+  "card_id": "oracle-l5r-8514",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8514-printing-2-image-1",
+  "image_index": 1,
+  "name": "Togashi Chiko",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 8514,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8514-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:05.034402+00:00",
+  "sha256": "990269e928f5b7eb3ea8a854300c040ed54d409e78f23900af80dbd805d10f5c",
+  "source_image_hash": "d0/13",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d0/13/printing_8514_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d0/13/printing_8514_2_",
+  "width": 750
+}

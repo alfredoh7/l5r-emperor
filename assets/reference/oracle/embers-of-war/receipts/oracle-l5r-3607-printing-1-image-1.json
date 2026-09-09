@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 835853,
+  "card_id": "oracle-l5r-3607",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3607-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Hakige",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 3607,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3607-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:23.876149+00:00",
+  "sha256": "2fb2e157ce8100f2291d9517d191b6dfe265096fb525f96324dc37823d75f0c3",
+  "source_image_hash": "29/a0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/29/a0/printing_3607_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/29/a0/printing_3607_1_",
+  "width": 750
+}

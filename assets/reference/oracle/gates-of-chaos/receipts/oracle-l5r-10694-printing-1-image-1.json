@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 810794,
+  "card_id": "oracle-l5r-10694",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10694-printing-1-image-1",
+  "image_index": 1,
+  "name": "Map of the Northern Colonies",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 10694,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10694-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:13.433693+00:00",
+  "sha256": "0a78376c37c7674db52f69b071613da0f6ac690cfae68ea5339814fda0108765",
+  "source_image_hash": "f9/31",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/31/printing_10694_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/31/printing_10694_1_",
+  "width": 750
+}

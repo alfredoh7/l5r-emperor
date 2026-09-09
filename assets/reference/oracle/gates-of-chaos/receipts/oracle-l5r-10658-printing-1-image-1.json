@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 802068,
+  "card_id": "oracle-l5r-10658",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10658-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yogo Nobukai",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 10658,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10658-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:28.637590+00:00",
+  "sha256": "46cc79eb2a6f32ab91e7383eced08d571fe44f6ba7077b262f84adc415166e1e",
+  "source_image_hash": "71/13",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/13/printing_10658_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/13/printing_10658_1_",
+  "width": 750
+}

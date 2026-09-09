@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 721206,
+  "card_id": "oracle-l5r-10043",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10043-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Okaru",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 10043,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10043-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:29.028844+00:00",
+  "sha256": "e09e49151ef2ae358f76c4964bf96a2cd79451749cd146eda0c6fdc1f2fe208a",
+  "source_image_hash": "3f/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/0f/printing_10043_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/0f/printing_10043_1_",
+  "width": 750
+}

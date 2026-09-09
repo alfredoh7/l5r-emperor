@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730220,
+  "card_id": "oracle-l5r-10956",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10956-printing-1-image-1",
+  "image_index": 1,
+  "name": "Strategic Withdrawal",
+  "numbers": [
+    "141"
+  ],
+  "oracle_id": 10956,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10956-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:53.268427+00:00",
+  "sha256": "c5ff7a7a463332998a6e3c4bda9019cf360c11566f9a7b86b977f68787511ab5",
+  "source_image_hash": "5f/4c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5f/4c/printing_10956_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5f/4c/printing_10956_1_",
+  "width": 750
+}

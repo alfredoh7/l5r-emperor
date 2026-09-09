@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 834300,
+  "card_id": "oracle-l5r-10902",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10902-printing-1-image-1",
+  "image_index": 1,
+  "name": "Senior Infantry Legion",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 10902,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10902-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:42.721053+00:00",
+  "sha256": "71d1990c87a9fd885ad12eb756003d022a833a4269d0dd5c041428c8c7b088c1",
+  "source_image_hash": "3e/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/0f/printing_10902_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/0f/printing_10902_1_",
+  "width": 750
+}

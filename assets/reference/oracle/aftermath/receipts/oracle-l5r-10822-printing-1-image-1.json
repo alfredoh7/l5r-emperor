@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730375,
+  "card_id": "oracle-l5r-10822",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10822-printing-1-image-1",
+  "image_index": 1,
+  "name": "Purge of Fudoism",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 10822,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10822-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:34.312256+00:00",
+  "sha256": "b4a7430f7697f8fd8d7abcb3e011db9d83033c9ad1f3cf6f8c43f7e2b20cb676",
+  "source_image_hash": "8b/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8b/3c/printing_10822_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8b/3c/printing_10822_1_",
+  "width": 750
+}

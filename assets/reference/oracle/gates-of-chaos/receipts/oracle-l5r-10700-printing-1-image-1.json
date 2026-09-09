@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 793350,
+  "card_id": "oracle-l5r-10700",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10700-printing-1-image-1",
+  "image_index": 1,
+  "name": "Constructing the Self",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 10700,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10700-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:10.941975+00:00",
+  "sha256": "c135f5910a93b294201b3836da29a1fd00c853c14b3b836e752174ca27ef24af",
+  "source_image_hash": "c9/61",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/61/printing_10700_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/61/printing_10700_1_",
+  "width": 750
+}

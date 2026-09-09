@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 797388,
+  "card_id": "oracle-l5r-10654",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10654-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Manami",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 10654,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10654-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:56.474910+00:00",
+  "sha256": "2f09123da37411bf9381e2aadeb90a1131f04eb491761e03a2f04388baed4bdf",
+  "source_image_hash": "69/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/d4/printing_10654_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/d4/printing_10654_1_",
+  "width": 750
+}

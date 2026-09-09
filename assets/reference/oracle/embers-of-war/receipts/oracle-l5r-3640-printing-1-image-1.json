@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 680199,
+  "card_id": "oracle-l5r-3640",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3640-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Sido",
+  "numbers": [
+    "35"
+  ],
+  "oracle_id": 3640,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3640-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:26.383875+00:00",
+  "sha256": "e8746618227b0c1167b0d78eda5684bfda76774a91cb5d6c802cc230c1be2c7c",
+  "source_image_hash": "80/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/80/93/printing_3640_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/80/93/printing_3640_1_",
+  "width": 750
+}

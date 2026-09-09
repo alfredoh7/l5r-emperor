@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 246260,
+  "card_id": "oracle-l5r-8360",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8360-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Storm Within",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 8360,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8360-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:02.098933+00:00",
+  "sha256": "bb0904ac3a12bf8dfd22806e55b49ba456e35db44b517b8db710682b17c4248e",
+  "source_image_hash": "96/f2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/96/f2/printing_8360_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/96/f2/printing_8360_1_",
+  "width": 750
+}

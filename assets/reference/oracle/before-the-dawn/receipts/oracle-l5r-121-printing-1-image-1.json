@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 391085,
+  "card_id": "oracle-l5r-121",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-121-printing-1-image-1",
+  "image_index": 1,
+  "name": "Advance Warning",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 121,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-121-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:45.570472+00:00",
+  "sha256": "e18fbaf6ee2b2b802a821297660ddb5c44599827af1ce89ad4fd31ff5a96017d",
+  "source_image_hash": "c5/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/6f/printing_121_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/6f/printing_121_1_",
+  "width": 750
+}

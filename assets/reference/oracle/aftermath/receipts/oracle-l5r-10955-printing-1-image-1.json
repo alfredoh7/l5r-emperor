@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 751397,
+  "card_id": "oracle-l5r-10955",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10955-printing-1-image-1",
+  "image_index": 1,
+  "name": "Steal an Advantage",
+  "numbers": [
+    "140"
+  ],
+  "oracle_id": 10955,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10955-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:50.960326+00:00",
+  "sha256": "95a1eb784758f4e2fd18533e48401f0f3fa53aebe52d96aadc12b96f465f9bbe",
+  "source_image_hash": "b4/c0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/c0/printing_10955_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/c0/printing_10955_1_",
+  "width": 750
+}

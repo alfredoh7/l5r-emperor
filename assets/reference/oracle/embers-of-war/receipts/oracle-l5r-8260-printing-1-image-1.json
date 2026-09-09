@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 720025,
+  "card_id": "oracle-l5r-8260",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8260-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Plain of Glass",
+  "numbers": [
+    "158"
+  ],
+  "oracle_id": 8260,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8260-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:13.047854+00:00",
+  "sha256": "2ece742d571744e6dc333c73d390e9e0e0614daa7ef56c560eff55fcaba068df",
+  "source_image_hash": "ef/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ef/0f/printing_8260_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/0f/printing_8260_1_",
+  "width": 750
+}

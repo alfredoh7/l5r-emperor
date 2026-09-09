@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710576,
+  "card_id": "oracle-l5r-10216",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10216-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Merchant's District",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10216,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10216-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:25.401703+00:00",
+  "sha256": "90a96c2a960909eed4f1c9ea198e6d5b2042f4671fa9ce2a76aadd009bc45e19",
+  "source_image_hash": "b3/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/0f/printing_10216_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/0f/printing_10216_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 868931,
+  "card_id": "oracle-l5r-10807",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10807-printing-1-image-1",
+  "image_index": 1,
+  "name": "The False Nimuro",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10807,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10807-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:02.463594+00:00",
+  "sha256": "d1ce9a6b6711e93c44f7715dba5193355724750f8f49e91f51b241e7294c5049",
+  "source_image_hash": "3f/e8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/e8/printing_10807_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/e8/printing_10807_1_",
+  "width": 750
+}

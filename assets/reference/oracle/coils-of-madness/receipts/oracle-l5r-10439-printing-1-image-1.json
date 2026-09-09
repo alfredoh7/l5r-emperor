@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 971211,
+  "card_id": "oracle-l5r-10439",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10439-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kasuga Aizawa, the Razor's Edge",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 10439,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10439-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:26.638293+00:00",
+  "sha256": "54d32c57204dc8faaa3f9e9e0c46a934ff950b1dbe15b10d2b14d91933d5621d",
+  "source_image_hash": "d7/1e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/1e/printing_10439_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/1e/printing_10439_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 745513,
+  "card_id": "oracle-l5r-10921",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10921-printing-1-image-1",
+  "image_index": 1,
+  "name": "Searing Siege",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 10921,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10921-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:40.333571+00:00",
+  "sha256": "f3fa6403c4a875c98a5704432e26873619d2548544f33930d7dac32a934e2a9b",
+  "source_image_hash": "85/70",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/70/printing_10921_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/70/printing_10921_1_",
+  "width": 750
+}

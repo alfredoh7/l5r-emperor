@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 787295,
+  "card_id": "oracle-l5r-10727",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10727-printing-1-image-1",
+  "image_index": 1,
+  "name": "Exotic Farmlands",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 10727,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10727-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:24.653885+00:00",
+  "sha256": "d491b4aadc5c9d13b7f67a2e85c62970a4174e55a2c9b700651afed688a38f84",
+  "source_image_hash": "bb/0e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bb/0e/printing_10727_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bb/0e/printing_10727_1_",
+  "width": 750
+}

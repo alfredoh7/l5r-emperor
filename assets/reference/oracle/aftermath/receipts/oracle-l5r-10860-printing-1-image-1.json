@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 813259,
+  "card_id": "oracle-l5r-10860",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10860-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Yashinko",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 10860,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10860-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:32.597421+00:00",
+  "sha256": "4742328dbe80518f3cb773002f2fd677c13b4bde110c8f696d510a4cb595ca61",
+  "source_image_hash": "71/d4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/d4/printing_10860_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/d4/printing_10860_1_",
+  "width": 750
+}

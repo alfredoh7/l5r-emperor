@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409263,
+  "card_id": "oracle-l5r-1783",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1783-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Yajinden",
+  "numbers": [
+    "62"
+  ],
+  "oracle_id": 1783,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1783-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:14.664962+00:00",
+  "sha256": "cbfc1bf4a8e4053d8d45c1c38b920c86fcd99df11c81fd5ac2918d8a3c0a59fd",
+  "source_image_hash": "86/53",
+  "source_url": "https://images.oracleofthevoid.com/l5r/86/53/printing_1783_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/86/53/printing_1783_1_",
+  "width": 750
+}

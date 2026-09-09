@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741947,
+  "card_id": "oracle-l5r-10283",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10283-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Tatsuzo",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 10283,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10283-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:22.014294+00:00",
+  "sha256": "b8ce31dc51a6ff6065bc48ef2856b280516cd50205b6fa0b2ab53fe95420d9a7",
+  "source_image_hash": "52/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/52/8c/printing_10283_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/52/8c/printing_10283_1_",
+  "width": 750
+}

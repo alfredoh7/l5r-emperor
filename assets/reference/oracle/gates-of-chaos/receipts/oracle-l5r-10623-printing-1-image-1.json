@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 948470,
+  "card_id": "oracle-l5r-10623",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10623-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Kitiaru",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 10623,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10623-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:48.910749+00:00",
+  "sha256": "0f201a1033351831b25298c1dedecf355b18b95e9ae57ada0c9aec6500626b0a",
+  "source_image_hash": "5a/7b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5a/7b/printing_10623_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5a/7b/printing_10623_1_",
+  "width": 750
+}

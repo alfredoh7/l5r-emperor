@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 430025,
+  "card_id": "oracle-l5r-943",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-943-printing-1-image-1",
+  "image_index": 1,
+  "name": "Beautiful Host",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 943,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-943-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:01.751609+00:00",
+  "sha256": "8d68843c5eeac4f0b9d78964cef97f422ace215f06ac2efde00839bbe8306068",
+  "source_image_hash": "f8/85",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/85/printing_943_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/85/printing_943_1_",
+  "width": 750
+}

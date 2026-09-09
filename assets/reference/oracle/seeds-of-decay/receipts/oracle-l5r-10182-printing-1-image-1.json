@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 688157,
+  "card_id": "oracle-l5r-10182",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10182-printing-1-image-1",
+  "image_index": 1,
+  "name": "Wide Valley",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 10182,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10182-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:15.485122+00:00",
+  "sha256": "5f4f3c87d64264d668461b95c5a1d26fa178f5388c8fd9671c16cf0f7ce9e3c9",
+  "source_image_hash": "14/59",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/59/printing_10182_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/59/printing_10182_1_",
+  "width": 750
+}

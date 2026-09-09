@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 848858,
+  "card_id": "oracle-l5r-10656",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10656-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soshi Kodanshi",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 10656,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10656-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:49.482725+00:00",
+  "sha256": "f7d968a23fc79ed01e8f0b7b27df6ed91ac9c789e11a55fa59078bcde0c2c87a",
+  "source_image_hash": "e0/53",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e0/53/printing_10656_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e0/53/printing_10656_1_",
+  "width": 750
+}

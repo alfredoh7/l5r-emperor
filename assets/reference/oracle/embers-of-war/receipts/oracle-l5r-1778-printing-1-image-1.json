@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750601,
+  "card_id": "oracle-l5r-1778",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1778-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Tenbatsu",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 1778,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1778-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:52.626108+00:00",
+  "sha256": "129ce481383a052e613919a98bf286b8e403eacd95a088845f83a7ef34ecdd14",
+  "source_image_hash": "a1/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a1/23/printing_1778_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a1/23/printing_1778_1_",
+  "width": 750
+}

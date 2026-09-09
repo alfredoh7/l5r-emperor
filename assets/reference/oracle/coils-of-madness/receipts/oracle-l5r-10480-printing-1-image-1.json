@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1062485,
+  "card_id": "oracle-l5r-10480",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10480-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Nitoshi",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 10480,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10480-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:04.520591+00:00",
+  "sha256": "030e003f1c34e440c7b2181de2785f60ef41f720025504d4c22fd489932d9d8d",
+  "source_image_hash": "21/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/21/42/printing_10480_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/21/42/printing_10480_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1062721,
+  "card_id": "oracle-l5r-10503",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10503-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsi Hayamizu, the Hand of Steel",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 10503,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10503-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:20.047390+00:00",
+  "sha256": "46979ea53d5e6176e3c8ff96c24c07cc99e437194c8912768f0de8a96ad9b912",
+  "source_image_hash": "32/a2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/32/a2/printing_10503_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/32/a2/printing_10503_1_",
+  "width": 750
+}

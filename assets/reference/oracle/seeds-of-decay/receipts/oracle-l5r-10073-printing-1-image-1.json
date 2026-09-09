@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 845578,
+  "card_id": "oracle-l5r-10073",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10073-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Jukko",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 10073,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10073-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:25.194979+00:00",
+  "sha256": "762097f8b9c931e50d4b869e79a06e7bffe2d7d3d000052fbad58366ae594627",
+  "source_image_hash": "b9/29",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b9/29/printing_10073_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/29/printing_10073_1_",
+  "width": 750
+}

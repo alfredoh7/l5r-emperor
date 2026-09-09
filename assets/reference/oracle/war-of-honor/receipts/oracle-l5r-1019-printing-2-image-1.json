@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 229243,
+  "card_id": "oracle-l5r-1019",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1019-printing-2-image-1",
+  "image_index": 1,
+  "name": "Blades of the Fallen Phoenix",
+  "numbers": [
+    "72"
+  ],
+  "oracle_id": 1019,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1019-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:00.819682+00:00",
+  "sha256": "7b33ad379ceb802c63c293cb70e600107b81a36efa7ea8c8e2b4219c94f9f37c",
+  "source_image_hash": "89/12",
+  "source_url": "https://images.oracleofthevoid.com/l5r/89/12/printing_1019_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/89/12/printing_1019_2_",
+  "width": 750
+}

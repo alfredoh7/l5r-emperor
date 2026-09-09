@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 370203,
+  "card_id": "oracle-l5r-9715",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9715-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsi Weapon",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 9715,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9715-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:15.337768+00:00",
+  "sha256": "5afd7235b78f38d17b0318c2ed98624995a454c4d85a8927c1acaee608eddaf4",
+  "source_image_hash": "77/a3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/77/a3/printing_9715_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/77/a3/printing_9715_1_",
+  "width": 750
+}

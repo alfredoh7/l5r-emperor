@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 837631,
+  "card_id": "oracle-l5r-10635",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10635-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Dairuko",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 10635,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10635-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:44.046198+00:00",
+  "sha256": "7197e7c53c13226bde9f80fac181f8abdad353caa9d09b59270066a896b7a7ab",
+  "source_image_hash": "98/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/98/75/printing_10635_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/98/75/printing_10635_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409602,
+  "card_id": "oracle-l5r-1292",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1292-printing-1-image-1",
+  "image_index": 1,
+  "name": "Champion of Thunder",
+  "numbers": [
+    "79"
+  ],
+  "oracle_id": 1292,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1292-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:55.969772+00:00",
+  "sha256": "2ff56d02cbc5ebf90c254ca0ada57571889ab67ff05e585b2be5f7c1216e7b4d",
+  "source_image_hash": "59/a4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/59/a4/printing_1292_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/59/a4/printing_1292_1_",
+  "width": 750
+}

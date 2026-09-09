@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1094746,
+  "card_id": "oracle-l5r-10477",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10477-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Iaimiko",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 10477,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10477-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:30.576791+00:00",
+  "sha256": "442a435d779d661322c3a315ee4adec395da8587e8803eadf88365d9b2b9cd22",
+  "source_image_hash": "14/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/14/7a/printing_10477_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/14/7a/printing_10477_1_",
+  "width": 750
+}

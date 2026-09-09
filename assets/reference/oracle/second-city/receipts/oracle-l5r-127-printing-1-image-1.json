@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 427507,
+  "card_id": "oracle-l5r-127",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-127-printing-1-image-1",
+  "image_index": 1,
+  "name": "Again!",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 127,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-127-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:36.579084+00:00",
+  "sha256": "17ae25efa2be396bc91e1d2f69422c4ef3246a1ee28ab7f65ae0046a355b1a3c",
+  "source_image_hash": "c5/de",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c5/de/printing_127_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c5/de/printing_127_1_",
+  "width": 750
+}

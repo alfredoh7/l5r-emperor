@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 828492,
+  "card_id": "oracle-l5r-10636",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10636-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Kamina",
+  "numbers": [
+    "35"
+  ],
+  "oracle_id": 10636,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10636-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:45.249443+00:00",
+  "sha256": "b523c9de02645932f659d2c758c6b6c96203a4d8e633bb04181a1a4c73fb2912",
+  "source_image_hash": "a9/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/55/printing_10636_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/55/printing_10636_1_",
+  "width": 750
+}

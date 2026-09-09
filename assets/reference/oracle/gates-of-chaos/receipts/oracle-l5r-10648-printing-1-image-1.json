@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 830957,
+  "card_id": "oracle-l5r-10648",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10648-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Ifukube",
+  "numbers": [
+    "46"
+  ],
+  "oracle_id": 10648,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10648-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:51.283662+00:00",
+  "sha256": "b463deb06128ff06678432079738a451dbf241d4f5460d701e2ba9f654aa8ed7",
+  "source_image_hash": "f7/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f7/b4/printing_10648_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f7/b4/printing_10648_1_",
+  "width": 750
+}

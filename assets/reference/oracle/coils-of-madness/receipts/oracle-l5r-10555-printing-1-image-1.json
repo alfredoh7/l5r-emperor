@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1067743,
+  "card_id": "oracle-l5r-10555",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10555-printing-1-image-1",
+  "image_index": 1,
+  "name": "Strength of the Divine",
+  "numbers": [
+    "131"
+  ],
+  "oracle_id": 10555,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10555-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:40.321642+00:00",
+  "sha256": "a87d83eaac1bca8c9effde7752edcf756899021eed1904febfb0c097c5ad5737",
+  "source_image_hash": "aa/18",
+  "source_url": "https://images.oracleofthevoid.com/l5r/aa/18/printing_10555_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/18/printing_10555_1_",
+  "width": 750
+}

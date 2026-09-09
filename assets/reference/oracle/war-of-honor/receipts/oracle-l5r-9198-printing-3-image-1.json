@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 252691,
+  "card_id": "oracle-l5r-9198",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9198-printing-3-image-1",
+  "image_index": 1,
+  "name": "Wall of Honor",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 9198,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9198-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:17.117435+00:00",
+  "sha256": "e8a8544ea9267bc9fba7cb241cbc6cd515c4794594f24fca8bb2740c64c4a36a",
+  "source_image_hash": "08/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/08/ca/printing_9198_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/08/ca/printing_9198_3_",
+  "width": 750
+}

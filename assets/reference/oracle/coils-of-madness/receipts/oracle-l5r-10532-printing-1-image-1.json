@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1029878,
+  "card_id": "oracle-l5r-10532",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10532-printing-1-image-1",
+  "image_index": 1,
+  "name": "False Ring of Earth",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 10532,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10532-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:33.795541+00:00",
+  "sha256": "98b43be144db3200af6d81c204a4b2c467752f963f121bfed95329506202ce54",
+  "source_image_hash": "fc/b9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fc/b9/printing_10532_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fc/b9/printing_10532_1_",
+  "width": 750
+}

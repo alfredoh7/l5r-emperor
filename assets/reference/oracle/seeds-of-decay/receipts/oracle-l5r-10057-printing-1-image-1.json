@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 818891,
+  "card_id": "oracle-l5r-10057",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10057-printing-1-image-1",
+  "image_index": 1,
+  "name": "Togashi Hiroto",
+  "numbers": [
+    "31"
+  ],
+  "oracle_id": 10057,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10057-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:55.385877+00:00",
+  "sha256": "e1396a937b34e9a985a09ebe049cae10e9ec3a2dac3f6ed11238a277abf3ef93",
+  "source_image_hash": "5f/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5f/c1/printing_10057_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5f/c1/printing_10057_1_",
+  "width": 750
+}

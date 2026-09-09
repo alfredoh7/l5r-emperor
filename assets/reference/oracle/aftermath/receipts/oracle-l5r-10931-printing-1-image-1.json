@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 843454,
+  "card_id": "oracle-l5r-10931",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10931-printing-1-image-1",
+  "image_index": 1,
+  "name": "Breaking the Rhythm",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 10931,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10931-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:58.023656+00:00",
+  "sha256": "d2e378e1d4d95b365d6f57da88ead45ee1d2442e2836e258283986384fa0a38a",
+  "source_image_hash": "08/62",
+  "source_url": "https://images.oracleofthevoid.com/l5r/08/62/printing_10931_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/08/62/printing_10931_1_",
+  "width": 750
+}

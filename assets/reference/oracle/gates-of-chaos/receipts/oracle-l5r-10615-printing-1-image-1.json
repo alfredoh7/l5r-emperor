@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 847403,
+  "card_id": "oracle-l5r-10615",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10615-printing-1-image-1",
+  "image_index": 1,
+  "name": "Coastal Pearl Bed",
+  "numbers": [
+    "6"
+  ],
+  "oracle_id": 10615,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10615-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:09.766439+00:00",
+  "sha256": "a503eeb1de95516366860f1d017e00d2b8d06814d2bbf49587eb2c4deaea4eb0",
+  "source_image_hash": "25/9a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/25/9a/printing_10615_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/25/9a/printing_10615_1_",
+  "width": 750
+}

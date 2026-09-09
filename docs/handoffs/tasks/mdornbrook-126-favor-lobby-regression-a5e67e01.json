@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Adds a regression test locking in that spending the Imperial Favor (favor-cycle) does not consume the separate once-per-turn Lobby limit: they are tracked by independent AbilityUses keys, so once the opponent's action opportunity passes back, the same active player may Lobby again the same turn. Investigated playtest bug #3 (Lobby blocked after spending Favor to draw a card); could not reproduce a blocking bug in the engine -- a faithful step-by-step reproduction (hold Favor, favor-cycle to spend it, opponent passes, Lobby again) accepts correctly. Filing this as a locked-in regression test rather than a fix, since no defect was found.",
+  "validation": "New PublishedTests.cs case passes (dotnet run on tests/L5R.Core.Tests). Full bash tools/check.sh --skip-client passes (5/5 server integration, 4/4 client transport).",
+  "remaining": "The originally reported in-game block (issue #126, bug 3) is not yet explained; awaiting more detail from the user (exact action sequence, or a saved practice replay) to investigate further if it recurs. Bugs 1 (cavalry assignment visibility) and 2 (unexpected bow on recruit) from the same issue are still in progress.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/126",
+  "branch": "mdornbrook/126-favor-lobby-regression",
+  "updated": "2026-09-09T18:25:23.473538+00:00"
+}

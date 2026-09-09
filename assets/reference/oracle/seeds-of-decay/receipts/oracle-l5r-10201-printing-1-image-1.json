@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 742083,
+  "card_id": "oracle-l5r-10201",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10201-printing-1-image-1",
+  "image_index": 1,
+  "name": "Detached Personality",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 10201,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10201-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:52.373120+00:00",
+  "sha256": "2347cd98d571d9d9e1243045cdc07293016f6115077686c5f0b85a11c34ee5a1",
+  "source_image_hash": "a7/30",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a7/30/printing_10201_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a7/30/printing_10201_1_",
+  "width": 750
+}

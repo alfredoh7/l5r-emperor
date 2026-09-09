@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 757379,
+  "card_id": "oracle-l5r-10271",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10271-printing-1-image-1",
+  "image_index": 1,
+  "name": "Vast Paddy Fields",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 10271,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10271-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:23.492083+00:00",
+  "sha256": "1c59e283e571abe361fa9563fbad802ec30f3e0dd790bba24fc51d267f3a5f37",
+  "source_image_hash": "6e/c5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/c5/printing_10271_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/c5/printing_10271_1_",
+  "width": 750
+}

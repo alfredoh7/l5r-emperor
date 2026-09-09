@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 232148,
+  "card_id": "oracle-l5r-2584",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2584-printing-2-image-1",
+  "image_index": 1,
+  "name": "Fist and Blade",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 2584,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2584-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:24.141040+00:00",
+  "sha256": "3c1730ab2babbe00d9c62bbbdb68e7d772f6253542b6ae23e70f0794b909d2e4",
+  "source_image_hash": "e5/64",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e5/64/printing_2584_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e5/64/printing_2584_2_",
+  "width": 750
+}

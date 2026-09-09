@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386572,
+  "card_id": "oracle-l5r-9390",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9390-printing-1-image-1",
+  "image_index": 1,
+  "name": "Wrathful Ancestor",
+  "numbers": [
+    "152"
+  ],
+  "oracle_id": 9390,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9390-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:13.892670+00:00",
+  "sha256": "58bd14246ba2956398c9381728f93a5bae91478b30a2349025580dce3780fd47",
+  "source_image_hash": "27/19",
+  "source_url": "https://images.oracleofthevoid.com/l5r/27/19/printing_9390_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/27/19/printing_9390_1_",
+  "width": 750
+}

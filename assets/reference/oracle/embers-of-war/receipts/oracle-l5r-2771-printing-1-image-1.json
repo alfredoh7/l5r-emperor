@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 801446,
+  "card_id": "oracle-l5r-2771",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2771-printing-1-image-1",
+  "image_index": 1,
+  "name": "Games of Will",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 2771,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2771-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:07.636168+00:00",
+  "sha256": "1626f3b74939b960adcab037b6f381ed32f46d49c5f8a61050ab57130c2cd572",
+  "source_image_hash": "19/10",
+  "source_url": "https://images.oracleofthevoid.com/l5r/19/10/printing_2771_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/19/10/printing_2771_1_",
+  "width": 750
+}

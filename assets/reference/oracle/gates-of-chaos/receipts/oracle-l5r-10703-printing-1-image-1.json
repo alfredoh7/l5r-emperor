@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 826195,
+  "card_id": "oracle-l5r-10703",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10703-printing-1-image-1",
+  "image_index": 1,
+  "name": "Cast Aside Appearances",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 10703,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10703-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:03.671850+00:00",
+  "sha256": "ec599e17ea60202fcad645ab35572210ecbb8fa18177703993a39242b55f8052",
+  "source_image_hash": "da/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/55/printing_10703_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/55/printing_10703_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 781721,
+  "card_id": "oracle-l5r-4189",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4189-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kakita Kenta",
+  "numbers": [
+    "24"
+  ],
+  "oracle_id": 4189,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4189-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:46.317893+00:00",
+  "sha256": "b05735817b015277c3b665e67ef58c5a39d0b56b35fce2072aeaa3d0f68bffcb",
+  "source_image_hash": "6b/42",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6b/42/printing_4189_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6b/42/printing_4189_1_",
+  "width": 750
+}

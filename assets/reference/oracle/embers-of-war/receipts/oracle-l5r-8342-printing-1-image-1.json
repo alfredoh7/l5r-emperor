@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 760490,
+  "card_id": "oracle-l5r-8342",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8342-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Snow Has Teeth",
+  "numbers": [
+    "149"
+  ],
+  "oracle_id": 8342,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8342-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:15.407602+00:00",
+  "sha256": "5476381ade9abbbf9c3f795affcf8289bfed8a3b1a2706c5fe8d8a1ac2f1ab2b",
+  "source_image_hash": "c8/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c8/6b/printing_8342_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c8/6b/printing_8342_1_",
+  "width": 750
+}

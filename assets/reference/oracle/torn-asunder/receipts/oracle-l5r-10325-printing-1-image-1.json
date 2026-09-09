@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 812969,
+  "card_id": "oracle-l5r-10325",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10325-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Shaocheng",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 10325,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10325-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:53.411704+00:00",
+  "sha256": "e726a9825f4d111d7bb3ecc86bcb9665e11f89f3e45cd29ceaa526c6d3d71821",
+  "source_image_hash": "80/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/80/c1/printing_10325_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/80/c1/printing_10325_1_",
+  "width": 750
+}

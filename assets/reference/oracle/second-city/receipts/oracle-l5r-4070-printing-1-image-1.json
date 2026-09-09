@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 433335,
+  "card_id": "oracle-l5r-4070",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4070-printing-1-image-1",
+  "image_index": 1,
+  "name": "Jurojin's Blessing",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 4070,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4070-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:38.986950+00:00",
+  "sha256": "b8a0d8b9060cc5d564ce98e9f54eba5fe5a63bd6df19b3eea8f399abc986d6dd",
+  "source_image_hash": "01/ee",
+  "source_url": "https://images.oracleofthevoid.com/l5r/01/ee/printing_4070_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/01/ee/printing_4070_1_",
+  "width": 750
+}

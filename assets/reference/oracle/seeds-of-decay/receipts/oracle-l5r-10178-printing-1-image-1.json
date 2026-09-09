@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 728538,
+  "card_id": "oracle-l5r-10178",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10178-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unsettling Doubts",
+  "numbers": [
+    "152"
+  ],
+  "oracle_id": 10178,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10178-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:07.256983+00:00",
+  "sha256": "f84395d1279165da363455455a4ad5b7deb5329d2b6ab4b126d0d971c38cc08b",
+  "source_image_hash": "dc/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/23/printing_10178_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/23/printing_10178_1_",
+  "width": 750
+}

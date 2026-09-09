@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 991519,
+  "card_id": "oracle-l5r-10425",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10425-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Second Battle of Beiden Pass",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10425,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10425-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:07.508295+00:00",
+  "sha256": "6b939861faf47dc1340ea552a4303c2f8542f3ce7974840b1dd518e5de337b53",
+  "source_image_hash": "0b/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0b/0f/printing_10425_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0b/0f/printing_10425_1_",
+  "width": 750
+}

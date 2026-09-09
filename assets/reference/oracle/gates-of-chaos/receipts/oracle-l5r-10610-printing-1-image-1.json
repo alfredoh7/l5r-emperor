@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 747226,
+  "card_id": "oracle-l5r-10610",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10610-printing-1-image-1",
+  "image_index": 1,
+  "name": "Glassworks",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10610,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10610-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:33.083937+00:00",
+  "sha256": "69a3a53c6f5f88686d4995c2f6584bc5afea7d9b18dbeb55d9ac7499ecc12cf6",
+  "source_image_hash": "f3/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f3/24/printing_10610_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f3/24/printing_10610_1_",
+  "width": 750
+}

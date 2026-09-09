@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 369792,
+  "card_id": "oracle-l5r-7360",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7360-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soshi Neiru",
+  "numbers": [
+    "57"
+  ],
+  "oracle_id": 7360,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7360-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:35.481224+00:00",
+  "sha256": "849f05f319d88af8d66b3dccf7b5b7424905d8484f8f5c8502d9915ec850a856",
+  "source_image_hash": "44/e8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/44/e8/printing_7360_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/44/e8/printing_7360_1_",
+  "width": 750
+}

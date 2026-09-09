@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772652,
+  "card_id": "oracle-l5r-9800",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9800-printing-1-image-1",
+  "image_index": 1,
+  "name": "Small-Time Bully",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 9800,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9800-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:17.509015+00:00",
+  "sha256": "07cf1ff5b8ca92c830f52adff67f441cb998eca0d5bd9e7482a5451f8c61c695",
+  "source_image_hash": "46/9f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/46/9f/printing_9800_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/46/9f/printing_9800_1_",
+  "width": 750
+}

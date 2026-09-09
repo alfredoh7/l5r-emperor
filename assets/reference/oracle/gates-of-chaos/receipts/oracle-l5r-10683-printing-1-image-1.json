@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 870886,
+  "card_id": "oracle-l5r-10683",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10683-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kamalakar's Harem",
+  "numbers": [
+    "82"
+  ],
+  "oracle_id": 10683,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10683-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:55.249584+00:00",
+  "sha256": "8e2fb77299915ce98b6bad463a9b7f95dced599dfb1a138bd5a7f60bbb1b2834",
+  "source_image_hash": "e2/53",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e2/53/printing_10683_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e2/53/printing_10683_1_",
+  "width": 750
+}

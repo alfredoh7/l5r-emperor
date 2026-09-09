@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 946398,
+  "card_id": "oracle-l5r-10540",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10540-printing-1-image-1",
+  "image_index": 1,
+  "name": "Koan's Whisper",
+  "numbers": [
+    "116"
+  ],
+  "oracle_id": 10540,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10540-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:36.848343+00:00",
+  "sha256": "c35529168a7f544a331f2271f0bb405ad59fb297c39f5a527181a3200a101ae5",
+  "source_image_hash": "4b/5e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/5e/printing_10540_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/5e/printing_10540_1_",
+  "width": 750
+}

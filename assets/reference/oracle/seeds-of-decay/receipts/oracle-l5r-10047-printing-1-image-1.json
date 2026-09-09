@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 759385,
+  "card_id": "oracle-l5r-10047",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10047-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Tsugio",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 10047,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10047-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:22.853907+00:00",
+  "sha256": "f7d014693d2481b721d1940f1c430ed8a0a1090fbc4d0c77bd1eac9537d1780f",
+  "source_image_hash": "64/06",
+  "source_url": "https://images.oracleofthevoid.com/l5r/64/06/printing_10047_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/64/06/printing_10047_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774208,
+  "card_id": "oracle-l5r-10328",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10328-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Tselu",
+  "numbers": [
+    "72"
+  ],
+  "oracle_id": 10328,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10328-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:50.031653+00:00",
+  "sha256": "9f6ff4fbf4544cd8c9942d04600e2e5da3a45a94bd80e493c7c67205af523104",
+  "source_image_hash": "1e/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1e/93/printing_10328_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1e/93/printing_10328_1_",
+  "width": 750
+}

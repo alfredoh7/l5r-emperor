@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 804589,
+  "card_id": "oracle-l5r-7373",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7373-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soshi Yoshihara",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 7373,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7373-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:45.117702+00:00",
+  "sha256": "948642190468ddc15a5f2c694e4c72cd5128f741648b5bf46e7c48c7ef2ec6ae",
+  "source_image_hash": "7d/29",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7d/29/printing_7373_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7d/29/printing_7373_1_",
+  "width": 750
+}

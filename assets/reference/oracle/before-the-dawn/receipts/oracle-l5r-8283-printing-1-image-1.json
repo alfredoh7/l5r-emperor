@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 409342,
+  "card_id": "oracle-l5r-8283",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8283-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Red Hunger",
+  "numbers": [
+    "76"
+  ],
+  "oracle_id": 8283,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8283-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:05.673030+00:00",
+  "sha256": "4d4a0f9f6c76df4970f489bcb579b553fb7a0cb22b26498cde13116011cd9c0e",
+  "source_image_hash": "41/b6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/41/b6/printing_8283_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/41/b6/printing_8283_1_",
+  "width": 750
+}

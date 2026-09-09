@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 864090,
+  "card_id": "oracle-l5r-10692",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10692-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lantern Oil",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 10692,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10692-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:03.727658+00:00",
+  "sha256": "b8eb18240cde6f3ff334f37d2cc77f098178676c60cef98851f3f036c1c8c643",
+  "source_image_hash": "a9/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/b3/printing_10692_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/b3/printing_10692_1_",
+  "width": 750
+}

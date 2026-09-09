@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 415515,
+  "card_id": "oracle-l5r-1696",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1696-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Yuki",
+  "numbers": [
+    "22"
+  ],
+  "oracle_id": 1696,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1696-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:00.217837+00:00",
+  "sha256": "fabc54ebf26de4d647993dd4545850f7781b500fc59dd4d89f15bd43b5df8db7",
+  "source_image_hash": "cf/21",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cf/21/printing_1696_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cf/21/printing_1696_1_",
+  "width": 750
+}

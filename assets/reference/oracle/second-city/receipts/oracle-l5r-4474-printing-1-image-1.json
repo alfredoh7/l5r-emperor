@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385388,
+  "card_id": "oracle-l5r-4474",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4474-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Tokoru",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 4474,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4474-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:47.970051+00:00",
+  "sha256": "41e4f94245cd4b210bbe7c315af988c6d91f6d38436df7016acc9c0499e2c7fb",
+  "source_image_hash": "e1/fe",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/fe/printing_4474_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/fe/printing_4474_1_",
+  "width": 750
+}

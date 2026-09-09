@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 793922,
+  "card_id": "oracle-l5r-10359",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10359-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Close Call",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 10359,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10359-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:35.278028+00:00",
+  "sha256": "8072e00baff45b30eb4e2030ae827cd1098167c59d6b3064db83a9bf543375d0",
+  "source_image_hash": "1d/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1d/45/printing_10359_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1d/45/printing_10359_1_",
+  "width": 750
+}

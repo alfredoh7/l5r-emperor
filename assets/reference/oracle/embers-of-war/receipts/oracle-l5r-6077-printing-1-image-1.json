@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 709882,
+  "card_id": "oracle-l5r-6077",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6077-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pronouncement of Guilt",
+  "numbers": [
+    "131"
+  ],
+  "oracle_id": 6077,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6077-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:20.144118+00:00",
+  "sha256": "dd193cab7285ba46bc942c71f1d699e176524c2abe9f6403985047ab22aa6f2b",
+  "source_image_hash": "07/3c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/3c/printing_6077_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/3c/printing_6077_1_",
+  "width": 750
+}

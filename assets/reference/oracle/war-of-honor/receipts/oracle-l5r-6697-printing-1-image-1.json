@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 236196,
+  "card_id": "oracle-l5r-6697",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6697-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shameful Death",
+  "numbers": [
+    "113"
+  ],
+  "oracle_id": 6697,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6697-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:06.713668+00:00",
+  "sha256": "10e6cfb7374dc9a78e423696822157291d12a25bd6cbf64203e22faf61f5054d",
+  "source_image_hash": "1a/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/d2/printing_6697_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/d2/printing_6697_1_",
+  "width": 750
+}

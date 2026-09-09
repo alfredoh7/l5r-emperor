@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 257335,
+  "card_id": "oracle-l5r-2346",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2346-printing-4-image-1",
+  "image_index": 1,
+  "name": "Enlistment",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 2346,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2346-printing-4-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "4",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:20.897129+00:00",
+  "sha256": "4f75e621bbaaef4485e6669125327426278ee236e1189841b443400feb3034ab",
+  "source_image_hash": "3e/51",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3e/51/printing_2346_4_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3e/51/printing_2346_4_",
+  "width": 750
+}

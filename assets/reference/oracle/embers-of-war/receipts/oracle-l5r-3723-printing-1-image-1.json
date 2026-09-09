@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 697910,
+  "card_id": "oracle-l5r-3723",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3723-printing-1-image-1",
+  "image_index": 1,
+  "name": "In Search of Guidance",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 3723,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3723-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:29.802452+00:00",
+  "sha256": "94a0e78b5536a1cd96fe45a12b927462b23393dc433da4382aed066af0f8762d",
+  "source_image_hash": "fa/0b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fa/0b/printing_3723_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fa/0b/printing_3723_1_",
+  "width": 750
+}

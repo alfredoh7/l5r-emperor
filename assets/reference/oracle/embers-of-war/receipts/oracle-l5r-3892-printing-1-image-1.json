@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 856204,
+  "card_id": "oracle-l5r-3892",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3892-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Sanetomo",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 3892,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3892-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:38.996401+00:00",
+  "sha256": "a3a104b56f5bcb36c18e2a75d5af9e03918330dee301bc47fe99aaf5aa013236",
+  "source_image_hash": "fc/3b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fc/3b/printing_3892_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fc/3b/printing_3892_1_",
+  "width": 750
+}

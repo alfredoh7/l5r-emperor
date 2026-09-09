@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 255115,
+  "card_id": "oracle-l5r-3974",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3974-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iuchi Abodan",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 3974,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-3974-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:05.855467+00:00",
+  "sha256": "a6b69bbe9f0dbf6b4755fd3a23360e68058489668ff7b6eb4dedeb05168a643f",
+  "source_image_hash": "a3/2f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a3/2f/printing_3974_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a3/2f/printing_3974_1_",
+  "width": 750
+}

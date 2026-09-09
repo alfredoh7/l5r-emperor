@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 808128,
+  "card_id": "oracle-l5r-10879",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10879-printing-1-image-1",
+  "image_index": 1,
+  "name": "Susumu Takada",
+  "numbers": [
+    "64"
+  ],
+  "oracle_id": 10879,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10879-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:56.837978+00:00",
+  "sha256": "65a4610cc12523b394efa88da20e7928d6c30d59b49ee202e7cc6f18477a25a5",
+  "source_image_hash": "c4/31",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c4/31/printing_10879_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c4/31/printing_10879_1_",
+  "width": 750
+}

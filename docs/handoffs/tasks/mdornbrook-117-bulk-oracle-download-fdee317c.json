@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Bulk-downloaded Oracle of the Void scans across all 16 printing sets needed for full Emperor-legal coverage (2,143 cards), extending download_expansion_printings.py with a full-set mode (--cards now optional) that validates/downloads each card individually so one bad promo entry can't block the rest of a set. Builds an offline reference scan cache (2,950 receipts, 2.2GB local/gitignored) so future card imports no longer depend on Oracle of the Void's live availability.",
+  "validation": "Smoke-tested full-set mode on War of Honor (127/127, 0 failures) before running the remaining sets. All 16 sets fetched: 14 complete with 0 failures; Promotional-Emperor (294/295 cards, 3 image failures: 1 missing image ref, 2 HTTP 403s) and Promotional-Celestial (167/169 cards, 2 missing image refs) have a handful of genuinely unavailable source images, recorded transparently in each artwork-manifest.json rather than silently dropped. Verified via py_compile and JSON validation that no bulk images leaked into git (only receipts/catalogue/manifest JSON tracked, per existing .gitignore convention). No C# code touched; tools/check.sh not applicable.",
+  "remaining": "5 individual card images (of ~2950) remain unavailable from the source and are logged as failures in the two Promotional sets' manifests; can be retried later if the API adds coverage. None blocking.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/117",
+  "branch": "mdornbrook/117-bulk-oracle-download",
+  "updated": "2026-09-09T16:37:20.299888+00:00"
+}

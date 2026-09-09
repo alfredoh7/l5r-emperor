@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 239804,
+  "card_id": "oracle-l5r-8582",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8582-printing-3-image-1",
+  "image_index": 1,
+  "name": "Togashi Shiori",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 8582,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8582-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:10.038663+00:00",
+  "sha256": "14bd80f178821a8b26b114aa793c73ecf6df85519c8e2540713317448c0f2882",
+  "source_image_hash": "f5/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f5/5a/printing_8582_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f5/5a/printing_8582_3_",
+  "width": 750
+}

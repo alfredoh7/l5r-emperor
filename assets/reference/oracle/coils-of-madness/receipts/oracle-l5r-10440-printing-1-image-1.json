@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 988843,
+  "card_id": "oracle-l5r-10440",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10440-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kuni Renyu",
+  "numbers": [
+    "25"
+  ],
+  "oracle_id": 10440,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10440-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:40.631878+00:00",
+  "sha256": "5515e15156b3355b85b4c37d66105a660a10bfbdc2935c4a5c272946e186a0a8",
+  "source_image_hash": "c9/71",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/71/printing_10440_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/71/printing_10440_1_",
+  "width": 750
+}

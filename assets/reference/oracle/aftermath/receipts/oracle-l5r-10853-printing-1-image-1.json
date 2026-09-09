@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 813522,
+  "card_id": "oracle-l5r-10853",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10853-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Miura",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 10853,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10853-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:14.645173+00:00",
+  "sha256": "7869b8a82192a58aa2f7c0b124645d855715846f9a550af119ca697b03b9429a",
+  "source_image_hash": "0f/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0f/5a/printing_10853_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0f/5a/printing_10853_1_",
+  "width": 750
+}

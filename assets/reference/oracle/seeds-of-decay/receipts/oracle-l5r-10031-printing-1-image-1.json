@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 742210,
+  "card_id": "oracle-l5r-10031",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10031-printing-1-image-1",
+  "image_index": 1,
+  "name": "Offering Reverence",
+  "numbers": [
+    "5"
+  ],
+  "oracle_id": 10031,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10031-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:08.482281+00:00",
+  "sha256": "499225888d124ce20465b462b4e3b25f60aa13451727aa161342d2895aaac3a8",
+  "source_image_hash": "c7/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c7/4a/printing_10031_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c7/4a/printing_10031_1_",
+  "width": 750
+}

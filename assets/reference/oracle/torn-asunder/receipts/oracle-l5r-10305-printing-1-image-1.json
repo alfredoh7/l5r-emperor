@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 850265,
+  "card_id": "oracle-l5r-10305",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10305-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Hibana",
+  "numbers": [
+    "49"
+  ],
+  "oracle_id": 10305,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10305-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:51.915432+00:00",
+  "sha256": "c0f6faa314a81015af0681af9ded8a1125397eb8d4652b225908490e4015790d",
+  "source_image_hash": "b7/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b7/c2/printing_10305_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b7/c2/printing_10305_1_",
+  "width": 750
+}

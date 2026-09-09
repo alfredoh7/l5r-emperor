@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 987931,
+  "card_id": "oracle-l5r-10516",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10516-printing-1-image-2",
+  "image_index": 2,
+  "name": "Aberrations",
+  "numbers": [
+    "89"
+  ],
+  "oracle_id": 10516,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10516-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:39.486528+00:00",
+  "sha256": "4e81ace51050a71c5d57e1b70b506eb91cbc126f4c0edd5a9328fc8f1d1f273d",
+  "source_image_hash": "ab/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ab/01/printing_10516_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ab/01/printing_10516_1_",
+  "width": 750
+}

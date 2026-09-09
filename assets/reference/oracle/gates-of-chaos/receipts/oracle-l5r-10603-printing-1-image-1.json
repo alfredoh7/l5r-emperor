@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 789991,
+  "card_id": "oracle-l5r-10603",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10603-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Fever in the Blood",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 10603,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10603-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:37.950866+00:00",
+  "sha256": "f353b4d705a4ba3e9ef36519ddc923b8111f4658caf1094a759033fce653a3cf",
+  "source_image_hash": "46/b4",
+  "source_url": "https://images.oracleofthevoid.com/l5r/46/b4/printing_10603_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/46/b4/printing_10603_1_",
+  "width": 750
+}

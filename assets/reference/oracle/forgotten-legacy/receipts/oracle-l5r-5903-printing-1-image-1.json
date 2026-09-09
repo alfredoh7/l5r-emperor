@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 271404,
+  "card_id": "oracle-l5r-5903",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5903-printing-1-image-1",
+  "image_index": 1,
+  "name": "Pearl of Rage",
+  "numbers": [
+    "55"
+  ],
+  "oracle_id": 5903,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-5903-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:17.942000+00:00",
+  "sha256": "ba1eb634029cb86eb6f4d5c5933cbf388802eed13ec81ad393455f3ab172203a",
+  "source_image_hash": "67/14",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/14/printing_5903_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/14/printing_5903_1_",
+  "width": 750
+}

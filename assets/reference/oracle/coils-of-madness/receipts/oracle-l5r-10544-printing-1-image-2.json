@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1000887,
+  "card_id": "oracle-l5r-10544",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10544-printing-1-image-2",
+  "image_index": 2,
+  "name": "Death of the Winds",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 10544,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10544-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:23.499038+00:00",
+  "sha256": "0c9e35927a74c1ffa4334db4c237f78532b413e1c8961d70041518d7a5a39e09",
+  "source_image_hash": "78/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/78/75/printing_10544_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/78/75/printing_10544_1_",
+  "width": 750
+}

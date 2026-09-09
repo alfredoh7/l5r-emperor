@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 270039,
+  "card_id": "oracle-l5r-515",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-515-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asahina Shigemitsu",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 515,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-515-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:27.833538+00:00",
+  "sha256": "bcded02a007a5ef032155df490c00d9abdda4485973a742f46c43c60590e0011",
+  "source_image_hash": "b8/a6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b8/a6/printing_515_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b8/a6/printing_515_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1021794,
+  "card_id": "oracle-l5r-10448",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10448-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Hoturi",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 10448,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10448-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:31.325072+00:00",
+  "sha256": "b81c7fded00c9085d5d3e4562149d835e35c2f3a041e16096ce9733a4dab1814",
+  "source_image_hash": "4c/cb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4c/cb/printing_10448_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4c/cb/printing_10448_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 806314,
+  "card_id": "oracle-l5r-10685",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10685-printing-1-image-1",
+  "image_index": 1,
+  "name": "Spawn of Vritra",
+  "numbers": [
+    "84"
+  ],
+  "oracle_id": 10685,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10685-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:50.710384+00:00",
+  "sha256": "f64feaaf874f9e865c26e749c509290b970ad3b2a7f8af5c2a2bf1f1f4845a5b",
+  "source_image_hash": "8e/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8e/80/printing_10685_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8e/80/printing_10685_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398624,
+  "card_id": "oracle-l5r-298",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-298-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Tezuka",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 298,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-298-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:48.822886+00:00",
+  "sha256": "e957a0ac54b2d19b2cf52f340c7619a00a9ddd6e5846ba24aded62cd5a33c896",
+  "source_image_hash": "6e/35",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6e/35/printing_298_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6e/35/printing_298_1_",
+  "width": 750
+}

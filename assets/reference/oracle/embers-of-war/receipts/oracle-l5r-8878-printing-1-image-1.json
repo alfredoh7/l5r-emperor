@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 728654,
+  "card_id": "oracle-l5r-8878",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8878-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Shichiro",
+  "numbers": [
+    "40"
+  ],
+  "oracle_id": 8878,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8878-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:22.563931+00:00",
+  "sha256": "8a428cc45889cbd02000ed596fb6580f9226c4b9ff55c4e4d530906a239be7ea",
+  "source_image_hash": "0c/01",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/01/printing_8878_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/01/printing_8878_1_",
+  "width": 750
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build the Tactician, Conqueror, and Kensai keyword mechanisms per the user's precise rules text: (1) tactical-advantage, a universal PlayerAbility exempted entirely from the once-per-turn dedupe (a first), discarding a card to give the performing Tactician Force equal to its Focus Value; (2) Conqueror, an automatic ResolveBattle check after an attacker win that straightens one Conqueror-keyword attacking Personality, deferring to a new PendingConqueror/PendingChoice pair when the attacker must pick among two or more, via a new FinishBattleResolution tail shared with the immediate path; (3) Kensai/Kama, AttachmentAllowed now allows two Weapons when the wielder has Kensai (printed or granted) or a Kama is involved, capped at two even when both apply. Training fixtures (training-tactician, training-conqueror, training-kensai, training-weapon, training-kama, training-focus-strategy) prove each ahead of any published card needing it. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 77/77 core tests (3 new: TacticalAdvantage, ConquerorStraightensAfterVictory, KensaiAndKamaWeaponCap), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "No published card exercises any of the three yet; no UI surfacing for the new chooseConqueror decision or the enemy-province-style province targeting Tactical Advantage doesn't need but Reconnaissance still does.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/104",
+  "branch": "mdornbrook/104-tactician-conqueror-kensai",
+  "updated": "2026-09-09T13:53:57.902486+00:00"
+}

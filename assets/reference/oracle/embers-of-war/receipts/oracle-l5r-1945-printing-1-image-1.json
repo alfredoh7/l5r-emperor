@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 722863,
+  "card_id": "oracle-l5r-1945",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1945-printing-1-image-1",
+  "image_index": 1,
+  "name": "Delving into History",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 1945,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1945-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:58.378767+00:00",
+  "sha256": "99cc4cadf60b91677caa63d55ee2da5d417a8c229db5f302ba07388ab882e7cf",
+  "source_image_hash": "85/61",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/61/printing_1945_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/61/printing_1945_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 990879,
+  "card_id": "oracle-l5r-10570",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10570-printing-1-image-1",
+  "image_index": 1,
+  "name": "Frost Dragon Festival",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 10570,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10570-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:17.773643+00:00",
+  "sha256": "6bb3ebe4c1cab00b0c9f431636a921f89f11951cc0fff51f4f41fb3b8b2e7e70",
+  "source_image_hash": "69/a7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/69/a7/printing_10570_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/69/a7/printing_10570_1_",
+  "width": 750
+}

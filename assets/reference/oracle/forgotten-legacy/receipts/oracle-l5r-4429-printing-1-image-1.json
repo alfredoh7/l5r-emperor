@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 264035,
+  "card_id": "oracle-l5r-4429",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4429-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsuki Nubane",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 4429,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-4429-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:07.893386+00:00",
+  "sha256": "db5c1910fa41aa90984412c2b7acd16731527a7d0e397773a4dc6cbdf8a7fe44",
+  "source_image_hash": "bd/65",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bd/65/printing_4429_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bd/65/printing_4429_1_",
+  "width": 750
+}

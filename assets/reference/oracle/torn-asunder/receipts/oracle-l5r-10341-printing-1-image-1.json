@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 697091,
+  "card_id": "oracle-l5r-10341",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10341-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kage's Teachings",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 10341,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10341-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:55.669291+00:00",
+  "sha256": "17190bba11850646aaf466c23b9e92d0e1f0bef9daa2576c2dee45990abf0661",
+  "source_image_hash": "e4/2d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e4/2d/printing_10341_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e4/2d/printing_10341_1_",
+  "width": 750
+}

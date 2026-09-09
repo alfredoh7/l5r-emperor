@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 817950,
+  "card_id": "oracle-l5r-10170",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10170-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sticks and Stones",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 10170,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10170-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:40.254069+00:00",
+  "sha256": "7021cf4149904aea0dd9323401d32834753517f5871634e5af36da5b1a705990",
+  "source_image_hash": "ff/8e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ff/8e/printing_10170_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ff/8e/printing_10170_1_",
+  "width": 750
+}

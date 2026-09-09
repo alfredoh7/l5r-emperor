@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 404678,
+  "card_id": "oracle-l5r-2856",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2856-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Plot",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 2856,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2856-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:22.161351+00:00",
+  "sha256": "98fcf5c700b922303e42d11502d364eed3a2b5774704937d005f703d88c922af",
+  "source_image_hash": "39/73",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/73/printing_2856_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/73/printing_2856_1_",
+  "width": 750
+}

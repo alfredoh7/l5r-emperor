@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 264517,
+  "card_id": "oracle-l5r-4793",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4793-printing-2-image-1",
+  "image_index": 1,
+  "name": "Magistrate's Accusation",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 4793,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4793-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:42.006120+00:00",
+  "sha256": "4a5b3e3f2f17ca0ccbc1f2a9077ff1d771b33fc14acc9915d6bf82be163acb52",
+  "source_image_hash": "76/22",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/22/printing_4793_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/22/printing_4793_2_",
+  "width": 750
+}

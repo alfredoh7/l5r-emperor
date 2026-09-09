@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 828101,
+  "card_id": "oracle-l5r-1777",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1777-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Takayasu",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 1777,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1777-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:51.470582+00:00",
+  "sha256": "2d8584ab3ac712479cadf4c7365e5d49d4c9f9cf25cb5620cabe343e84b5c262",
+  "source_image_hash": "00/02",
+  "source_url": "https://images.oracleofthevoid.com/l5r/00/02/printing_1777_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/00/02/printing_1777_1_",
+  "width": 750
+}

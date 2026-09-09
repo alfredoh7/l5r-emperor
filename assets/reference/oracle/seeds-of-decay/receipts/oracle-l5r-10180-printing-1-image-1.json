@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 792980,
+  "card_id": "oracle-l5r-10180",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10180-printing-1-image-1",
+  "image_index": 1,
+  "name": "Vengeful Dismissal",
+  "numbers": [
+    "154"
+  ],
+  "oracle_id": 10180,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10180-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:11.988534+00:00",
+  "sha256": "4006a93a83d520b1538511734253e351cfb1875f07c12daa5c00a4084c5d048e",
+  "source_image_hash": "f5/81",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f5/81/printing_10180_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f5/81/printing_10180_1_",
+  "width": 750
+}

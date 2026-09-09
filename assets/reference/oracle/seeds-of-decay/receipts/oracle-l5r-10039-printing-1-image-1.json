@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741591,
+  "card_id": "oracle-l5r-10039",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10039-printing-1-image-1",
+  "image_index": 1,
+  "name": "Temple to Fudo",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10039,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10039-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:46.052134+00:00",
+  "sha256": "3c3a516c6c52f38f2b5840d005c79651d3aadfb66eb60888ac6cb219b912abc6",
+  "source_image_hash": "0d/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0d/8c/printing_10039_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0d/8c/printing_10039_1_",
+  "width": 750
+}

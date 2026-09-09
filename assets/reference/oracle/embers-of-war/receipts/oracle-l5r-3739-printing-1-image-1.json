@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 735817,
+  "card_id": "oracle-l5r-3739",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3739-printing-1-image-1",
+  "image_index": 1,
+  "name": "Inexorable",
+  "numbers": [
+    "120"
+  ],
+  "oracle_id": 3739,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3739-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:35.566654+00:00",
+  "sha256": "a84e33955e1462da0629efdb4b6d25dca72e17da8e79613b8155594ff718c01b",
+  "source_image_hash": "6a/c3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6a/c3/printing_3739_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/c3/printing_3739_1_",
+  "width": 750
+}

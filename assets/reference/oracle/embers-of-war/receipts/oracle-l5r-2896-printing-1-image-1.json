@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750262,
+  "card_id": "oracle-l5r-2896",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2896-printing-1-image-1",
+  "image_index": 1,
+  "name": "Greasing the Wheels",
+  "numbers": [
+    "115"
+  ],
+  "oracle_id": 2896,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-2896-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:11.037488+00:00",
+  "sha256": "d6a21e7e4bfbd7f8d5efc37ae26a325c17580c89f9d09af9a6b41426e45ea89d",
+  "source_image_hash": "16/e6",
+  "source_url": "https://images.oracleofthevoid.com/l5r/16/e6/printing_2896_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/16/e6/printing_2896_1_",
+  "width": 750
+}

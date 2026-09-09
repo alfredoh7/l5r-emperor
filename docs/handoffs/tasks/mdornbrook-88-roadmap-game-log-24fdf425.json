@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add a game-log roadmap entry to docs/ROADMAP.md, tracked as issue #88 (UI/QoL, not built here). Shared because docs/ROADMAP.md is not mapped to either lane.",
+  "validation": "Documentation only; no code touched",
+  "remaining": "None; ready for review. Not building the feature -- roadmap entry only.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/88",
+  "branch": "mdornbrook/88-roadmap-game-log",
+  "updated": "2026-09-09T10:18:50.793222+00:00"
+}

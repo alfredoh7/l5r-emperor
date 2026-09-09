@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 925884,
+  "card_id": "oracle-l5r-9841",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9841-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shiba Shirou",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 9841,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9841-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:06.821616+00:00",
+  "sha256": "87b4ac2cc31ce1eefee8cf6702ce290afbbd60cee6edb23fad3e9173394541b7",
+  "source_image_hash": "b3/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b3/ca/printing_9841_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b3/ca/printing_9841_1_",
+  "width": 750
+}

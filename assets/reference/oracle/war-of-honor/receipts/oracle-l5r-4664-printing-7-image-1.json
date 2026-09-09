@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 263169,
+  "card_id": "oracle-l5r-4664",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4664-printing-7-image-1",
+  "image_index": 1,
+  "name": "Large Farm",
+  "numbers": [
+    "20"
+  ],
+  "oracle_id": 4664,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4664-printing-7-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "7",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:41.019421+00:00",
+  "sha256": "72c81203eadf02b62e1ba5592bf4dd00a38294913a2da93f8e7eac6c45f19e9f",
+  "source_image_hash": "aa/00",
+  "source_url": "https://images.oracleofthevoid.com/l5r/aa/00/printing_4664_7_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/00/printing_4664_7_",
+  "width": 750
+}

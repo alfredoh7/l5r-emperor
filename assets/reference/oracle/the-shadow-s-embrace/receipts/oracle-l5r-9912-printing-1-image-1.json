@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 741396,
+  "card_id": "oracle-l5r-9912",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9912-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsuki Methods",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 9912,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9912-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:53:18.059244+00:00",
+  "sha256": "d448ce8e8dfd2441303779432e8f18f24493a23c2523b86f3233636e7b814750",
+  "source_image_hash": "3c/28",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/28/printing_9912_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/28/printing_9912_1_",
+  "width": 750
+}

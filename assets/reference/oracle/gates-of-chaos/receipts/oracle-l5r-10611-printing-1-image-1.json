@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 822907,
+  "card_id": "oracle-l5r-10611",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10611-printing-1-image-1",
+  "image_index": 1,
+  "name": "Slave Pits",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 10611,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10611-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:46.996246+00:00",
+  "sha256": "66c5926499e2d1a0dff117937445d38fe61a630d6d97137292b2955aac3dd0d6",
+  "source_image_hash": "53/3b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/53/3b/printing_10611_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/53/3b/printing_10611_1_",
+  "width": 750
+}

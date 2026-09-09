@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 799895,
+  "card_id": "oracle-l5r-10687",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10687-printing-1-image-1",
+  "image_index": 1,
+  "name": "Aulus",
+  "numbers": [
+    "76"
+  ],
+  "oracle_id": 10687,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10687-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:54.971071+00:00",
+  "sha256": "f1717c5cdaa001be474c87c3437c8c798b34b6a65c9711c3c7ee15ef84f3171a",
+  "source_image_hash": "34/5a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/34/5a/printing_10687_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/34/5a/printing_10687_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 847369,
+  "card_id": "oracle-l5r-10378",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10378-printing-1-image-1",
+  "image_index": 1,
+  "name": "Imperial Deployment",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 10378,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10378-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:46.984555+00:00",
+  "sha256": "ecbf565853f0be93629df3dfaa9c47c223e7203606607748818e36d421f1a9b7",
+  "source_image_hash": "b6/f0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b6/f0/printing_10378_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b6/f0/printing_10378_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 725097,
+  "card_id": "oracle-l5r-10733",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10733-printing-1-image-1",
+  "image_index": 1,
+  "name": "Holding Cells",
+  "numbers": [
+    "122"
+  ],
+  "oracle_id": 10733,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10733-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:37.795488+00:00",
+  "sha256": "617c68912e64652fce640b4274544d1ae85ffe42c5f30efe56256d88a16faf0e",
+  "source_image_hash": "af/48",
+  "source_url": "https://images.oracleofthevoid.com/l5r/af/48/printing_10733_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/af/48/printing_10733_1_",
+  "width": 750
+}

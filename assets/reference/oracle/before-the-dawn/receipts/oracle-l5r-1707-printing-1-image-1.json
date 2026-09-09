@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399499,
+  "card_id": "oracle-l5r-1707",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1707-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Bukaro",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 1707,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1707-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:12.407632+00:00",
+  "sha256": "638f63766034e97039e66acac92ff95ce5ea1e66a36538508838209c4fe6e098",
+  "source_image_hash": "2f/03",
+  "source_url": "https://images.oracleofthevoid.com/l5r/2f/03/printing_1707_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/2f/03/printing_1707_1_",
+  "width": 750
+}

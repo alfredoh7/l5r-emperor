@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 389914,
+  "card_id": "oracle-l5r-70",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-70-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Quiet Transaction",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 70,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-70-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:35.483630+00:00",
+  "sha256": "c61eb3a96e895e85b223cb7cb65a2034219c758ffe2dbb43d126924e218f2558",
+  "source_image_hash": "cb/bc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cb/bc/printing_70_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cb/bc/printing_70_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1054906,
+  "card_id": "oracle-l5r-10545",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10545-printing-1-image-2",
+  "image_index": 2,
+  "name": "Delicate Gamble",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 10545,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10545-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:28.800006+00:00",
+  "sha256": "911860b199a7d08516864fd9d55b1b408e6bfe0a1471d066d7f23ed8ddd52c31",
+  "source_image_hash": "fa/73",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fa/73/printing_10545_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fa/73/printing_10545_1_",
+  "width": 750
+}

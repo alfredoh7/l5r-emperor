@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 712685,
+  "card_id": "oracle-l5r-9449",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9449-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Makoto",
+  "numbers": [
+    "18"
+  ],
+  "oracle_id": 9449,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9449-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:31.464503+00:00",
+  "sha256": "495fa3e56966f1f64b2f3c0a3b2048e7881279dafdb8b78548ab2d7d960d98bb",
+  "source_image_hash": "e7/e3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/e3/printing_9449_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/e3/printing_9449_1_",
+  "width": 750
+}

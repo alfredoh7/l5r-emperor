@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 738378,
+  "card_id": "oracle-l5r-10963",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10963-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unholy Strike",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 10963,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10963-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:20.914176+00:00",
+  "sha256": "3d32257788b893827183a330a066d7bfb349d25bbfe6f31ae1caf20726268318",
+  "source_image_hash": "ec/3e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ec/3e/printing_10963_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ec/3e/printing_10963_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 720889,
+  "card_id": "oracle-l5r-10117",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10117-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ki-Uso",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 10117,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10117-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:32.593126+00:00",
+  "sha256": "f592bf4264f24bf5797053404edde130c793c70f077d09b35b8d33f29affd2e3",
+  "source_image_hash": "b4/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/75/printing_10117_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/75/printing_10117_1_",
+  "width": 750
+}

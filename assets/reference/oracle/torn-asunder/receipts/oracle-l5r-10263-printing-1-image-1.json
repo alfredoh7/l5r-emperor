@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 697964,
+  "card_id": "oracle-l5r-10263",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10263-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unseasonable Weather",
+  "numbers": [
+    "7"
+  ],
+  "oracle_id": 10263,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10263-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:19.941271+00:00",
+  "sha256": "7cf927a93aac8d74212e10dc7bcdb85865e0faf33829606926c0a0b125089187",
+  "source_image_hash": "57/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/57/75/printing_10263_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/57/75/printing_10263_1_",
+  "width": 750
+}

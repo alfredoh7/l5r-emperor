@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 254949,
+  "card_id": "oracle-l5r-3013",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3013-printing-1-image-1",
+  "image_index": 1,
+  "name": "Heart of Darkness",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 3013,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-3013-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:57.817297+00:00",
+  "sha256": "eb2f0faa4c9a1b75923f7dfa96060a22fb7c7b3b4ae23c9254687808aeef5556",
+  "source_image_hash": "11/0a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/0a/printing_3013_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/0a/printing_3013_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 829058,
+  "card_id": "oracle-l5r-10749",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10749-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Final Lesson",
+  "numbers": [
+    "145"
+  ],
+  "oracle_id": 10749,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10749-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:05.837180+00:00",
+  "sha256": "557f4fd6f1120a886ff886da7ad3715bfeba8c3380da38c0028aed7f2359b2e0",
+  "source_image_hash": "5a/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5a/f7/printing_10749_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5a/f7/printing_10749_1_",
+  "width": 750
+}

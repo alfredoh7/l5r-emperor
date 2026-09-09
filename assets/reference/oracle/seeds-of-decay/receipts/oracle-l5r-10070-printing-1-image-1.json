@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 831381,
+  "card_id": "oracle-l5r-10070",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10070-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Akukiho",
+  "numbers": [
+    "44"
+  ],
+  "oracle_id": 10070,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10070-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:21.375856+00:00",
+  "sha256": "9088f690b42f2fc9ad3c3aed6f8b68fccb3cd2fec26120f92bb67d88a2aab2d9",
+  "source_image_hash": "ab/4e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ab/4e/printing_10070_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ab/4e/printing_10070_1_",
+  "width": 750
+}

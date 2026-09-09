@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build the Cavalry Maneuvers Segment of the Attack Phase. Two new phases, CavalryDeclaration/CavalryDefense, follow AttackDeclaration/DefenseAssignment (Infantry Maneuvers) in the same attacker-then-defender order -- DeclareAttack/AssignDefense/Assign are now phase-aware. IsCavalryUnit treats a unit (Personality + attached Followers) as Cavalry only if the Personality AND every attached Follower carry the Cavalry keyword; anything missing Cavalry anywhere defaults to Infantry and must assign, if at all, during Infantry Maneuvers. Training fixtures (training-cavalry, training-cavalry-follower) prove the segment split and the mixed-unit rule ahead of any published Cavalry card. Shared-file change: docs/ROADMAP.md is the cross-lane living checklist by design; all code changes are rules-lane engine-only, no client files touched.",
+  "validation": "bash tools/check.sh --skip-client: 78/78 core tests (1 new: CavalryManeuversSegment; Priority updated for the two new phase steps), 33/33 published, 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "No published card carries Cavalry yet; QueryActions offers Cavalry assignment actions but no client UI distinguishes the two Maneuvers segments visually yet.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/107",
+  "branch": "mdornbrook/107-cavalry-maneuvers-segment",
+  "updated": "2026-09-09T14:14:34.272903+00:00"
+}

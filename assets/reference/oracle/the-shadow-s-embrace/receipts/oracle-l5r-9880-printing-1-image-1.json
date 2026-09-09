@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 708569,
+  "card_id": "oracle-l5r-9880",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9880-printing-1-image-1",
+  "image_index": 1,
+  "name": "The String of the Colonies",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 9880,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9880-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:34.096592+00:00",
+  "sha256": "7c36be63622273064abb35373888a3c97388b0c3e0fa65f80e6093beb619bb54",
+  "source_image_hash": "80/9d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/80/9d/printing_9880_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/80/9d/printing_9880_1_",
+  "width": 750
+}

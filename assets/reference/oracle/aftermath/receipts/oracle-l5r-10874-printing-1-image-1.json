@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 804215,
+  "card_id": "oracle-l5r-10874",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10874-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Chiboshi",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 10874,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10874-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:09.927298+00:00",
+  "sha256": "4fdc3682bf3e6b3dd645728a7a53db9506b8aa0df98eb04a3111a195bdfaaec8",
+  "source_image_hash": "42/95",
+  "source_url": "https://images.oracleofthevoid.com/l5r/42/95/printing_10874_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/42/95/printing_10874_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 398940,
+  "card_id": "oracle-l5r-29",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-29-printing-1-image-1",
+  "image_index": 1,
+  "name": "A Gentle Word",
+  "numbers": [
+    "102"
+  ],
+  "oracle_id": 29,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-29-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:43.478448+00:00",
+  "sha256": "4c68aa5f544e98cb433f3c9851f9ba52c5df2c925f21849a8d5e717092c923b0",
+  "source_image_hash": "ea/9a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ea/9a/printing_29_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ea/9a/printing_29_1_",
+  "width": 750
+}

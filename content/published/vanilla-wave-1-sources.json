@@ -547,5 +547,23 @@
     "source_url": "https://oracleofthevoid.com/#cardid=9864",
     "image_path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9864-printing-1-image-1.jpg",
     "image_sha256": "fdf471e3def831a4feb20e48dd438ab439752531e9d5ae765831b2553634c760"
+  },
+  {
+    "card_id": "oracle-l5r-10851",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10851",
+    "image_path": "assets/reference/oracle/lion-crane-v1/oracle-l5r-10851-printing-1-image-1.jpg",
+    "image_sha256": "204804777c86751520f9efc4e870d08f9a6cb110f296271b7c96370cfd1914f5"
+  },
+  {
+    "card_id": "oracle-l5r-2166",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2166",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2166-printing-1-image-1.jpg",
+    "image_sha256": "d60c50a1f83c3b43a61e6b534ba7e5297a6f588e3b04cba48aa583ce4ff09e4e"
   }
 ]

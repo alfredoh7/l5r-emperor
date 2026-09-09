@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 776822,
+  "card_id": "oracle-l5r-10827",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10827-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nexus of Lies",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 10827,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10827-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:27.933925+00:00",
+  "sha256": "e1fd432b584461e0e7e84d263328b8633879b7b9f5eeee4c8b8fa8a286d57309",
+  "source_image_hash": "9a/6b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9a/6b/printing_10827_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9a/6b/printing_10827_1_",
+  "width": 750
+}

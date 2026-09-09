@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 406197,
+  "card_id": "oracle-l5r-6691",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6691-printing-2-image-1",
+  "image_index": 1,
+  "name": "Shamate Keep",
+  "numbers": [
+    "155"
+  ],
+  "oracle_id": 6691,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-6691-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:35.912601+00:00",
+  "sha256": "f95569d24947aa4f3a884d582d5845d513f75cfa18d55485640603c9ea1f8342",
+  "source_image_hash": "f3/26",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f3/26/printing_6691_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f3/26/printing_6691_2_",
+  "width": 750
+}

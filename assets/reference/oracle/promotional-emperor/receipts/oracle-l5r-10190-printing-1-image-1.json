@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 776262,
+  "card_id": "oracle-l5r-10190",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10190-printing-1-image-1",
+  "image_index": 1,
+  "name": "Enigma",
+  "numbers": [
+    "164"
+  ],
+  "oracle_id": 10190,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10190-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:26:59.851057+00:00",
+  "sha256": "4efff7ebb80b657f8914f3a8939ca4882c8fe2fe0e627d7126ff241fa00bf762",
+  "source_image_hash": "68/c1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/c1/printing_10190_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/c1/printing_10190_1_",
+  "width": 750
+}

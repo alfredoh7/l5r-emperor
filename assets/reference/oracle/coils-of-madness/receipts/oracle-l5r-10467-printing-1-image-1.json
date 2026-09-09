@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1126319,
+  "card_id": "oracle-l5r-10467",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10467-printing-1-image-1",
+  "image_index": 1,
+  "name": "Okazaki, Breaker of Wills",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 10467,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10467-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:08.729389+00:00",
+  "sha256": "83cef2892c97e1d9a55a96c5951e0a837d6c84dae08d4b06db90f91a6947c3ca",
+  "source_image_hash": "13/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/84/printing_10467_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/84/printing_10467_1_",
+  "width": 750
+}

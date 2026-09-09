@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 760065,
+  "card_id": "oracle-l5r-10355",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10355-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Thunderer's Protection",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 10355,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10355-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:10.385284+00:00",
+  "sha256": "be9646506f7b3cbb8b47684f1dd52bf90c96400d060474cbbe749c03a36d7b0e",
+  "source_image_hash": "c8/b3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c8/b3/printing_10355_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c8/b3/printing_10355_1_",
+  "width": 750
+}

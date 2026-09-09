@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 380211,
+  "card_id": "oracle-l5r-2719",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2719-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fubatsu Plate",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 2719,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2719-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:20.133771+00:00",
+  "sha256": "9f6cd0bb15536c3f5b95188c0bb8eb0ae5a3a01b3632120a1455b441d2987164",
+  "source_image_hash": "ae/e2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ae/e2/printing_2719_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ae/e2/printing_2719_1_",
+  "width": 750
+}

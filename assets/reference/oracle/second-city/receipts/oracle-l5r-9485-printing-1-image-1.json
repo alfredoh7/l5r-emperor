@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 395595,
+  "card_id": "oracle-l5r-9485",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9485-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yogo Adi",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 9485,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9485-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:16.995270+00:00",
+  "sha256": "bc3ddcc3bd923b090f3f55576f050c073dc62c92be0bf3e51d8f68e5e6b99f32",
+  "source_image_hash": "00/d5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/00/d5/printing_9485_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/00/d5/printing_9485_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 268347,
+  "card_id": "oracle-l5r-872",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-872-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Saka",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 872,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-872-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:54.896853+00:00",
+  "sha256": "8b8b73735c896d979bb77d5c8c5b74c78db48e5b47f1455207b494e2d9802a9c",
+  "source_image_hash": "60/46",
+  "source_url": "https://images.oracleofthevoid.com/l5r/60/46/printing_872_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/60/46/printing_872_2_",
+  "width": 750
+}

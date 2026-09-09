@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382567,
+  "card_id": "oracle-l5r-2978",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2978-printing-1-image-1",
+  "image_index": 1,
+  "name": "Harsh Choices",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 2978,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2978-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:25.321982+00:00",
+  "sha256": "3ebabc424e4ecbc7ca0fc5d9f7deb68803ce9c52cba983070a08feb82b36f3cf",
+  "source_image_hash": "ed/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ed/cc/printing_2978_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ed/cc/printing_2978_1_",
+  "width": 750
+}

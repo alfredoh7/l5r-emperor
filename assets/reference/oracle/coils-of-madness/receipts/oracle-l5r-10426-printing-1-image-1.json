@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1010712,
+  "card_id": "oracle-l5r-10426",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10426-printing-1-image-1",
+  "image_index": 1,
+  "name": "An Empire of Madness",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 10426,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10426-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:46.962891+00:00",
+  "sha256": "437d20591917b3c09398865b06f6d2ad7e66842489792a4863e48c4af02645ba",
+  "source_image_hash": "a4/d2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a4/d2/printing_10426_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/d2/printing_10426_1_",
+  "width": 750
+}

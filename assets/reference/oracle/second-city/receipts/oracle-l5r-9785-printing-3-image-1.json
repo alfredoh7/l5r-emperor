@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 366362,
+  "card_id": "oracle-l5r-9785",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9785-printing-3-image-1",
+  "image_index": 1,
+  "name": "Lion Ancestor",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 9785,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-9785-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:55.464810+00:00",
+  "sha256": "da4bea629ff516fb2906682a60341010e1268af8056c4bbe2534a9ca7c3fb084",
+  "source_image_hash": "48/78",
+  "source_url": "https://images.oracleofthevoid.com/l5r/48/78/printing_9785_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/48/78/printing_9785_3_",
+  "width": 750
+}

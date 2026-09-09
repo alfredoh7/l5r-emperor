@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 238311,
+  "card_id": "oracle-l5r-4958",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4958-printing-2-image-1",
+  "image_index": 1,
+  "name": "Matsu Miyahara",
+  "numbers": [
+    "45"
+  ],
+  "oracle_id": 4958,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-4958-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:44.937605+00:00",
+  "sha256": "e6cef1167948f3aed05bcd5bce3fdd2d150483886024e781ef180c8f315e66c2",
+  "source_image_hash": "44/8f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/44/8f/printing_4958_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/44/8f/printing_4958_2_",
+  "width": 750
+}

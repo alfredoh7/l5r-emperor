@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 419841,
+  "card_id": "oracle-l5r-8371",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8371-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Tapestry Perceived",
+  "numbers": [
+    "99"
+  ],
+  "oracle_id": 8371,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8371-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:09.977390+00:00",
+  "sha256": "640f911dff4765980790821ea7537e52a5317c78e84b92296300edd9cebbf0cc",
+  "source_image_hash": "ce/24",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ce/24/printing_8371_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ce/24/printing_8371_1_",
+  "width": 750
+}

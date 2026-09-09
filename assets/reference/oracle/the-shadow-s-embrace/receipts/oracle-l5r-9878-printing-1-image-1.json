@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 853616,
+  "card_id": "oracle-l5r-9878",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9878-printing-1-image-1",
+  "image_index": 1,
+  "name": "Celestial Sword of the Phoenix",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 9878,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9878-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:27.322905+00:00",
+  "sha256": "b0a197a80072de9b4db1c7dcaab29bcf1132f4809df679624db16a157528f84d",
+  "source_image_hash": "dc/87",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/87/printing_9878_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/87/printing_9878_1_",
+  "width": 750
+}

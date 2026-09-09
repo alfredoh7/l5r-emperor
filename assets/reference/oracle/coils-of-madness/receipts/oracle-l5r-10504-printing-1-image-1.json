@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 937088,
+  "card_id": "oracle-l5r-10504",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10504-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asp Skirmisher",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 10504,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10504-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:55.785718+00:00",
+  "sha256": "429f3fb4351f02dc516b5f3c1c21f5ef6d9056f9523b49617fbe1abe928a6a95",
+  "source_image_hash": "04/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/04/55/printing_10504_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/04/55/printing_10504_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 427129,
+  "card_id": "oracle-l5r-3813",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3813-printing-1-image-1",
+  "image_index": 1,
+  "name": "Iron Will",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 3813,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-3813-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:50.010474+00:00",
+  "sha256": "06f5c7f53b33f19fd577a46bcdddb68fed942123796d0c2244288c84ceb102f9",
+  "source_image_hash": "a4/9e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a4/9e/printing_3813_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/9e/printing_3813_1_",
+  "width": 750
+}

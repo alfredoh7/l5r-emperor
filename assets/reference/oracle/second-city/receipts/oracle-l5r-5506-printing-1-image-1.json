@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 394200,
+  "card_id": "oracle-l5r-5506",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5506-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nakanu Technique",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 5506,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-5506-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:04.281379+00:00",
+  "sha256": "9287b02055b7246378029943fa1d391426f5357b98a4af24460a3d5c4475f668",
+  "source_image_hash": "9b/41",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9b/41/printing_5506_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9b/41/printing_5506_1_",
+  "width": 750
+}

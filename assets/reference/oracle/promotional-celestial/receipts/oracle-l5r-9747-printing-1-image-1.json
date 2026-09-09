@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 274310,
+  "card_id": "oracle-l5r-9747",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9747-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hideshi's Guardian",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 9747,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9747-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:33:09.955824+00:00",
+  "sha256": "bfec54317d06d1b7d69ee985b56d4f54129793eb9ee24f2a0241cbc0c3ae0551",
+  "source_image_hash": "17/4a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/17/4a/printing_9747_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/17/4a/printing_9747_1_",
+  "width": 750
+}

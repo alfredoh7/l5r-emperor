@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 279423,
+  "card_id": "oracle-l5r-302",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-302-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Tsudoken",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 302,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-302-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:26.873375+00:00",
+  "sha256": "4291ab609df1995ab8ebca2c6f5ea23d921b285fd2f71e5d396ab36386465b3a",
+  "source_image_hash": "77/bc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/77/bc/printing_302_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/77/bc/printing_302_1_",
+  "width": 750
+}

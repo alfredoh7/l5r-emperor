@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 305352,
+  "card_id": "oracle-l5r-9745",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9745-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disposable Troops",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 9745,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9745-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:32:43.314203+00:00",
+  "sha256": "16ba58d2cbb6632ba36ed5d348aeb39b0c429fe5a964ce89bfce7f6f1973c6b3",
+  "source_image_hash": "85/94",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/94/printing_9745_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/94/printing_9745_1_",
+  "width": 750
+}

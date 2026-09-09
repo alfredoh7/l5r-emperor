@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 772702,
+  "card_id": "oracle-l5r-10330",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10330-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Suying",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 10330,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10330-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:22.324631+00:00",
+  "sha256": "e899d89a0287b3e223450a2c72814238c28aa7e1ac05b5ccf38888b65717eb9f",
+  "source_image_hash": "1b/90",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1b/90/printing_10330_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/90/printing_10330_1_",
+  "width": 750
+}

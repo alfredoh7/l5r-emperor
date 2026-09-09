@@ -1,0 +1,152 @@
+{
+  "Profile": "personality-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1736",
+      "Name": "Daigotsu Kendo",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(A Conqueror's unit doesn't bow after battle.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1736.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Commander",
+        "Samurai",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5138",
+      "Name": "Mirumoto Reiyu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: Give it a Force penalty equal to Reiyu's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5138.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Poet",
+        "Samurai",
+        "Soul of Mirumoto Tsubasa"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "reiyu-force-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6885",
+      "Name": "Shinjo Horibe",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If Horibe is opposed, target a Personality: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6885.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Commander",
+        "Samurai",
+        "Soul of Shinjo Hwarang",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "horibe-bow",
+        "horibe-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7943",
+      "Name": "Tetsuo",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an attachment: Destroy it.\nBattle: Target an enemy Personality with fewer Weapons: Destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7943.jpg",
+      "Keywords": [
+        "Kensai",
+        "Unique",
+        "Experienced",
+        "Monk",
+        "Order of the Spider",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tetsuo-destroy-attachment",
+        "tetsuo-destroy-weaker-weaponed"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5371",
+      "Name": "Moto Shunsuke",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Shunsuke has a Force bonus equal to the highest number of dead Personalities in any one discard pile. \nLimited: Target another player's discarded Personality. He becomes honorably dead.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5371.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Death Priest",
+        "Shugenja",
+        "Soul of Moto Akikazu",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shunsuke-make-dead"
+      ],
+      "Effect": "force-max-dead-pile"
+    }
+  ],
+  "Decks": []
+}

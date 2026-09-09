@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 792972,
+  "card_id": "oracle-l5r-10138",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10138-printing-1-image-1",
+  "image_index": 1,
+  "name": "Brotherhood Schism",
+  "numbers": [
+    "112"
+  ],
+  "oracle_id": 10138,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10138-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:34.668213+00:00",
+  "sha256": "2d95a706a68f9abec5858b0f432ee5676d8edd73f8ee91c1366c237d010c35d5",
+  "source_image_hash": "54/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/54/32/printing_10138_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/54/32/printing_10138_1_",
+  "width": 750
+}

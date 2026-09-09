@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 226493,
+  "card_id": "oracle-l5r-8200",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8200-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Lion's Charge",
+  "numbers": [
+    "118"
+  ],
+  "oracle_id": 8200,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8200-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:00.115237+00:00",
+  "sha256": "76019197966142a84feab597da8849291c788193889bd96c2f60ba5d719f1e91",
+  "source_image_hash": "4a/8e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4a/8e/printing_8200_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/8e/printing_8200_1_",
+  "width": 750
+}

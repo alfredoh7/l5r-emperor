@@ -23,6 +23,10 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);
+    // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
+    // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
+    // never silently change what this exercises.
+    public static MatchEngine CreatePublishedTestMatch(ulong seed = 20260906) => Create(seed, PublishedContent.TestScenario);
     internal static MatchEngine FromTestState(MatchState state) => new(Copy(state), 1, "test-only");
 
     public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray());
@@ -40,7 +44,8 @@ public sealed partial class MatchEngine
 
     private static MatchEngine Create(ulong seed, string scenario)
     {
-        if (scenario == PublishedContent.Scenario) return CreatePublished(seed);
+        if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
+        if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
         if (scenario is not ("starter" or "economy")) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
@@ -129,6 +134,7 @@ public sealed partial class MatchEngine
         {
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
+            if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -147,6 +153,15 @@ public sealed partial class MatchEngine
                 // Reaction and was not itself Proclaim-eligible (e.g. bought with Clan Discount).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the entry reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
+            if (_state.PendingChoice.Type=="attackReaction")
+            {
+                // Open to either side (unlike the entry-reaction windows above) -- the top-level
+                // priority check already enforces whose turn it is to act or pass.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending attack first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
                 return;
             }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
@@ -209,8 +224,8 @@ public sealed partial class MatchEngine
         Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
         Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
         // Honorable before destruction: this is what spares the controller the dishonorable-death
-        // Honor penalty applied generally in DestroyUnits.
-        card.Dishonorable=false;
+        // Honor penalty applied generally in MarkDead.
+        Rehonor(card);
         DestroyUnits([card]);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
     }
@@ -316,8 +331,16 @@ public sealed partial class MatchEngine
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
-            case Phase.AttackDeclaration: SetPhase(Phase.Dynasty,_state.ActivePlayerId); break;
-            case Phase.DefenseAssignment: AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
+            // Declining to assign any Infantry is not a decision to skip the whole Attack Phase --
+            // Cavalry Maneuvers is a separate step that must still get its own opportunity, exactly
+            // as an empty Cavalry declaration below only declines further Cavalry, not the Battle
+            // Phase that follows it.
+            case Phase.AttackDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
+            case Phase.DefenseAssignment:
+            case Phase.CavalryDefense:
+                AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[]));
+                break;
+            case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
@@ -340,33 +363,50 @@ public sealed partial class MatchEngine
         SetPhase(Phase.DynastyDiscard,command.PlayerId);
     }
 
+    // Infantry Maneuvers (AttackDeclaration/DefenseAssignment) always runs first; Cavalry Maneuvers
+    // (CavalryDeclaration/CavalryDefense) follows, adding to the same battlefields Infantry
+    // Maneuvers already opened -- only provinces where the attacker actually placed a unit,
+    // recomputed after each of the two attacker steps so a Cavalry-only or Infantry-only
+    // declaration is just as capable of putting a province up for battle as a mixed one.
     private void DeclareAttack(GameCommand command)
     {
-        Require(_state.Phase==Phase.AttackDeclaration,"Declare an attack after the Action Phase.");
+        Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
+        var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
-        Assign(command,targets);
-        _state.UnresolvedBattlefields=targets.Order().ToList();
-        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack.",command.PlayerId);
-        SetPhase(Phase.DefenseAssignment,1-command.PlayerId);
+        Assign(command,targets,cavalry);
+        _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
+            .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
+        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
+        SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,1-command.PlayerId);
     }
     private void AssignDefense(GameCommand command)
     {
-        Require(_state.Phase==Phase.DefenseAssignment,"Defenders assign after the attacking army.");
-        Assign(command,_state.UnresolvedBattlefields.ToHashSet());
-        SetPhase(Phase.BattleSelection,_state.ActivePlayerId);
+        Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
+        var cavalry=_state.Phase==Phase.CavalryDefense;
+        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry);
+        // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
+        // battlefield-selection/resolution phases outright rather than stall with zero choices.
+        SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
-    private void Assign(GameCommand command,HashSet<int> provinces)
+    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry)
     {
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
             Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
+            Require(IsCavalryUnit(card)==cavalry,cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
         }
     }
+    // Cavalry (core rules Attack Phase): a unit is Cavalry only if the Personality AND every attached
+    // Follower carry the Cavalry keyword -- there is no printed "Infantry" keyword, so any unit
+    // missing Cavalry anywhere in it defaults to Infantry and must assign, if at all, during Infantry
+    // Maneuvers, regardless of how many of its other cards are Cavalry.
+    private bool IsCavalryUnit(CardInstance personality) => Keyword(personality,"Cavalry") &&
+        Attachments(personality.Id).Where(c=>Definition(c).Type==CardType.Follower).All(f=>Keyword(f,"Cavalry"));
     private void SelectBattle(GameCommand command)
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
@@ -382,7 +422,11 @@ public sealed partial class MatchEngine
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
         var af=a.Sum(BattleForce); var df=d.Sum(BattleForce);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
-        if(af>df)
+        // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
+        // regardless of the outcome -- the only trigger that clears it.
+        Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
+        var attackerWon=af>df;
+        if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
             GainHonor(attacker,destroyedDefenders*2,"Battle victory");
@@ -398,7 +442,40 @@ public sealed partial class MatchEngine
             GainHonor(attacker,destroyedD,"Tied battle"); GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
         }
-        foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield)) ReturnHome(card,true);
+        // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
+        // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
+        // here are still accurate even if the choice must be deferred to the attacker.
+        var conquerorCandidates=attackerWon ? a.Where(c=>c.Zone==Zone.Battlefield && Keyword(c,"Conqueror")).Select(c=>c.Id).ToArray() : [];
+        if(conquerorCandidates.Length>1)
+        {
+            _state.PendingConqueror=new PendingConqueror { PlayerId=attacker, ProvinceIndex=provinceIndex, CandidateIds=conquerorCandidates };
+            _state.PendingChoice=new("conqueror",attacker,null,"Choose a Conqueror personality to straighten instead of returning home bowed.");
+            _state.PriorityPlayerId=attacker;
+            Emit("conquerorChoice","Choose a Conqueror personality to straighten.",attacker);
+            return; // FinishBattleResolution runs once the attacker picks (ResolveConqueror).
+        }
+        FinishBattleResolution(attacker,provinceIndex,a,conquerorCandidates.Length==1?conquerorCandidates[0]:null);
+    }
+    private void ResolveConqueror(GameCommand command)
+    {
+        var pending=_state.PendingConqueror!;
+        Require(command.Type=="chooseConqueror" && command.PlayerId==pending.PlayerId && command.TargetId is not null && pending.CandidateIds.Contains(command.TargetId),
+            "Choose one of the eligible Conqueror personalities.");
+        var chosenId=command.TargetId!;
+        var a=Army(pending.PlayerId,pending.ProvinceIndex).ToArray();
+        _state.PendingChoice=null; _state.PendingConqueror=null;
+        FinishBattleResolution(pending.PlayerId,pending.ProvinceIndex,a,chosenId);
+    }
+    // Common tail of battle resolution: attacking units return home (bowed, except the Conqueror
+    // choice, if any), then the battlefield closes out. Split out so a deferred Conqueror choice can
+    // reach the same completion as the immediate (0 or 1 candidate) path.
+    private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
+    {
+        foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
+        {
+            ReturnHome(card,card.Id!=conquerorUnbowedId);
+            if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
+        }
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
@@ -426,7 +503,7 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
         Require(target.OwnerId==command.PlayerId && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,"Choose your Personality at home.");
         Require(def.Type!=CardType.Follower || def.HonorRequirement is null || Definition(target).PersonalHonor>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
-        Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and one Weapon.");
+        Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
@@ -453,9 +530,34 @@ public sealed partial class MatchEngine
 
     private void NextAction(int playerId) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=1-playerId; }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
-    private bool AttachmentAllowed(CardInstance attachment,CardInstance target) => new[] {"Armor","Weapon"}.All(keyword=>!Keyword(attachment,keyword) || !Attachments(target.Id).Any(c=>Keyword(c,keyword)));
+    // By default a Personality carries at most one Armor and one Weapon. Kensai (printed or granted --
+    // Keyword() already checks both) raises the Weapon cap to two. Kama independently raises it to two
+    // without granting Kensai, but the two do not stack: a Kensai wielding a Kama is still capped at
+    // two Weapons, not three.
+    private bool AttachmentAllowed(CardInstance attachment,CardInstance target)
+    {
+        if(Keyword(attachment,"Armor")) return !Attachments(target.Id).Any(c=>Keyword(c,"Armor"));
+        if(Keyword(attachment,"Weapon"))
+        {
+            var existingWeapons=Attachments(target.Id).Where(c=>Keyword(c,"Weapon")).ToArray();
+            // Two-Handed overrides Kensai and Kama entirely: whenever a Two-Handed Weapon is involved
+            // (already attached, or the one being attached), at most one Weapon total is ever allowed.
+            if(Keyword(attachment,"Two-Handed") || existingWeapons.Any(c=>Keyword(c,"Two-Handed"))) return existingWeapons.Length==0;
+            var weaponCap=Keyword(target,"Kensai") || Keyword(attachment,"Kama") || existingWeapons.Any(c=>Keyword(c,"Kama")) ? 2 : 1;
+            return existingWeapons.Length<weaponCap;
+        }
+        return true;
+    }
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force));
+    // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
+    // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
+    // attacking-two/attacking-four Effects above.
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force)
+        +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
+        +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
+        // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
+        // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
+        +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0));
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
@@ -466,16 +568,36 @@ public sealed partial class MatchEngine
             .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
             .Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
     }
+    // "Dead / Destroy" (core rules Glossary): entering the Dead zone, distinct from merely being
+    // discarded. A Personality who is still Dishonorable at this moment costs its controller Honor
+    // equal to his base Personal Honor -- Seppuku (and any future rehonor-before-death effect) spares
+    // this by clearing Dishonorable first (see Rehonor). This is the one shared entry point every
+    // path to "becoming dead" -- combat destruction or otherwise -- must go through.
+    private void MarkDead(CardInstance card)
+    {
+        card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
+        if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
+    }
+    private void Rehonor(CardInstance card) => card.Dishonorable=false;
+    // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
+    // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
+    // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
+    private void MakeDead(CardInstance card, bool honorable)
+    {
+        if(honorable) Rehonor(card);
+        MarkDead(card);
+        Emit("becameDead",$"{Definition(card).Name} became {(honorable?"honorably ":"")}dead.",card.OwnerId,card.Id);
+    }
     private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
     {
         var count=0;
         foreach(var card in cards)
         {
             foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++; }
-            card.Zone=Zone.Dead; card.ProvinceIndex=null; card.FaceUp=true; card.Tokens.Clear(); count++;
+            card.ProvinceIndex=null;
+            MarkDead(card);
+            count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
-            // Seppuku clears Dishonorable before calling DestroyUnits, so it never pays this.
-            if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death");
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
         }
         return count;

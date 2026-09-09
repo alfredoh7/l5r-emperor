@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 422641,
+  "card_id": "oracle-l5r-1356",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1356-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chuda Kiuchi",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 1356,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1356-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:07.073622+00:00",
+  "sha256": "f269c5ce3d444429c8f637b928f3d842203aa1b850f90184ba08d3d64e4f4aba",
+  "source_image_hash": "80/ec",
+  "source_url": "https://images.oracleofthevoid.com/l5r/80/ec/printing_1356_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/80/ec/printing_1356_1_",
+  "width": 750
+}

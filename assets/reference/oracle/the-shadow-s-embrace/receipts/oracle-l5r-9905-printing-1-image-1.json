@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 894783,
+  "card_id": "oracle-l5r-9905",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9905-printing-1-image-1",
+  "image_index": 1,
+  "name": "Easy Persuasion",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 9905,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9905-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:48.564288+00:00",
+  "sha256": "37f2d06d265f75e1fcba9646ae8d54bdb2081cd1fbfde12cb00501af86de0f6c",
+  "source_image_hash": "f8/0d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/0d/printing_9905_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/0d/printing_9905_1_",
+  "width": 750
+}

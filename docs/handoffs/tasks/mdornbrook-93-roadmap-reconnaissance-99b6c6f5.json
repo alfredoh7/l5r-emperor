@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add Reconnaissance to the roadmap as a tracked not-yet-implemented mechanic. Shared-lane doc: docs/ROADMAP.md is a cross-lane living checklist by design, not a rules- or UI-only file.",
+  "validation": "Documentation only; no code changed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/93",
+  "branch": "mdornbrook/93-roadmap-reconnaissance",
+  "updated": "2026-09-09T11:09:50.726078+00:00"
+}

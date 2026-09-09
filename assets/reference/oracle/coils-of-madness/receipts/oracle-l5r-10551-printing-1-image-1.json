@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1000376,
+  "card_id": "oracle-l5r-10551",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10551-printing-1-image-1",
+  "image_index": 1,
+  "name": "Looming Danger",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 10551,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10551-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:44.446997+00:00",
+  "sha256": "c83ecac3823b0e00d04225dfad19bd9e65090cb2ac39f9cedfcb6ae96ea3e652",
+  "source_image_hash": "1a/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1a/45/printing_10551_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1a/45/printing_10551_1_",
+  "width": 750
+}

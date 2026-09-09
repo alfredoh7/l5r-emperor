@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 768569,
+  "card_id": "oracle-l5r-615",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-615-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ashigaru Guards",
+  "numbers": [
+    "79"
+  ],
+  "oracle_id": 615,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-615-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:34.918942+00:00",
+  "sha256": "4554b836c2cf899dcc09e156350842e7f05cdc82e4ef83ece9d83e6c7f341297",
+  "source_image_hash": "13/66",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/66/printing_615_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/66/printing_615_1_",
+  "width": 750
+}

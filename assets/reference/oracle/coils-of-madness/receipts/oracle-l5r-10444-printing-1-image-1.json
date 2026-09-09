@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1060267,
+  "card_id": "oracle-l5r-10444",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10444-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asukai, the Tireless",
+  "numbers": [
+    "28"
+  ],
+  "oracle_id": 10444,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10444-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:58.249220+00:00",
+  "sha256": "aa328d25872bf9d4d0dccab8324e73b4746441c977b3565d295cc3900a6ca077",
+  "source_image_hash": "bb/d8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/bb/d8/printing_10444_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/bb/d8/printing_10444_1_",
+  "width": 750
+}

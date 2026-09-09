@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 698820,
+  "card_id": "oracle-l5r-10120",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10120-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mining Apparatus",
+  "numbers": [
+    "94"
+  ],
+  "oracle_id": 10120,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10120-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:51.410457+00:00",
+  "sha256": "d2ef82915c5d929c63269a0a44dc08f65ffe0c5d1b44d0a853b7592a91b0c550",
+  "source_image_hash": "67/07",
+  "source_url": "https://images.oracleofthevoid.com/l5r/67/07/printing_10120_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/67/07/printing_10120_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 837948,
+  "card_id": "oracle-l5r-10618",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10618-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Tadama",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 10618,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10618-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:35.438556+00:00",
+  "sha256": "bf5c5b222dcfd66d273860a5dda143ebfef0b49f1bb2c2497bf8f7906be42b01",
+  "source_image_hash": "be/10",
+  "source_url": "https://images.oracleofthevoid.com/l5r/be/10/printing_10618_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/be/10/printing_10618_1_",
+  "width": 750
+}

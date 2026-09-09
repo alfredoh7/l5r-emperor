@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 638791,
+  "card_id": "oracle-l5r-10226",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10226-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Hawado",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 10226,
+  "path": "assets/reference/oracle/emperor-edition-gempukku/images/oracle-l5r-10226-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Emperor Edition Gempukku",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:25:20.874420+00:00",
+  "sha256": "7982e68f6d15bbe5f48167d78c25d1e95e89ded03488faa27cb4967a52ee6a2d",
+  "source_image_hash": "98/81",
+  "source_url": "https://images.oracleofthevoid.com/l5r/98/81/printing_10226_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/98/81/printing_10226_1_",
+  "width": 750
+}

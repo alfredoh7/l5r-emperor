@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 813541,
+  "card_id": "oracle-l5r-10885",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10885-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ide Mutsuken",
+  "numbers": [
+    "70"
+  ],
+  "oracle_id": 10885,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10885-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:41.256312+00:00",
+  "sha256": "443f3b47c07adadb856107ab9749c6a8a60c71ad88f4b16dfe440749d414fdbd",
+  "source_image_hash": "b7/dc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b7/dc/printing_10885_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b7/dc/printing_10885_1_",
+  "width": 750
+}

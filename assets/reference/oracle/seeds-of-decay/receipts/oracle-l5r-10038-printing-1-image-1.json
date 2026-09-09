@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 738071,
+  "card_id": "oracle-l5r-10038",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10038-printing-1-image-1",
+  "image_index": 1,
+  "name": "Small Library",
+  "numbers": [
+    "12"
+  ],
+  "oracle_id": 10038,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10038-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:34.283510+00:00",
+  "sha256": "8a58cdb38dd28e34a4d817812418da886f9de03d9be8ffa54b60d4fae25264ce",
+  "source_image_hash": "d9/ee",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d9/ee/printing_10038_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d9/ee/printing_10038_1_",
+  "width": 750
+}

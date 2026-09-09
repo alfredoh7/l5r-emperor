@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 392110,
+  "card_id": "oracle-l5r-7789",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7789-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tamori Ruya",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 7789,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7789-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:52.266666+00:00",
+  "sha256": "23fb6c8cee51f638e0b729cabe938b6f326b15008b2612f8cf0f7c18a135a122",
+  "source_image_hash": "7e/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7e/4d/printing_7789_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7e/4d/printing_7789_1_",
+  "width": 750
+}

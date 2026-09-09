@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 939311,
+  "card_id": "oracle-l5r-10588",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10588-printing-1-image-1",
+  "image_index": 1,
+  "name": "Horse",
+  "numbers": [
+    "173"
+  ],
+  "oracle_id": 10588,
+  "path": "assets/reference/oracle/promotional-emperor/images/oracle-l5r-10588-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Emperor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:27:48.413864+00:00",
+  "sha256": "219750c15ffcf2aff178b1b1b461944949af87d29ea44805333310dec17fe7e6",
+  "source_image_hash": "3d/f8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/f8/printing_10588_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/f8/printing_10588_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 805998,
+  "card_id": "oracle-l5r-9907",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9907-printing-1-image-1",
+  "image_index": 1,
+  "name": "Forge Your Soul",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 9907,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9907-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:53.391966+00:00",
+  "sha256": "829ea296f2e1e5284fded0a4cdf50aeb4148662ccae2d9be5e1c4a568175b111",
+  "source_image_hash": "61/1c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/1c/printing_9907_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/1c/printing_9907_1_",
+  "width": 750
+}

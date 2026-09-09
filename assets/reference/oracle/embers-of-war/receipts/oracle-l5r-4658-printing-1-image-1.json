@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 705750,
+  "card_id": "oracle-l5r-4658",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4658-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lady Matsu's Rage",
+  "numbers": [
+    "2"
+  ],
+  "oracle_id": 4658,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4658-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:53.151055+00:00",
+  "sha256": "8c76b057d980f2da2e51244779d189795b31c5c516ae4711084e44a69862d67d",
+  "source_image_hash": "c6/96",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c6/96/printing_4658_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c6/96/printing_4658_1_",
+  "width": 750
+}

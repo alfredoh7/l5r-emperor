@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 725557,
+  "card_id": "oracle-l5r-10958",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10958-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Legion's Might",
+  "numbers": [
+    "143"
+  ],
+  "oracle_id": 10958,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10958-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:05.326960+00:00",
+  "sha256": "4dc2c84b759483f632831d18dc7d301022cce48ffec4846433a6f446244efbd6",
+  "source_image_hash": "09/c5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/09/c5/printing_10958_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/09/c5/printing_10958_1_",
+  "width": 750
+}

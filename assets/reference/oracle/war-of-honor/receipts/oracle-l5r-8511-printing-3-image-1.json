@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 232240,
+  "card_id": "oracle-l5r-8511",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8511-printing-3-image-1",
+  "image_index": 1,
+  "name": "Togashi Akagi",
+  "numbers": [
+    "33"
+  ],
+  "oracle_id": 8511,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-8511-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:04.050548+00:00",
+  "sha256": "a24ea4e11a151a2aed8d3bdc975fb0e925d47db058a7a6efdb5ddf4490a4bd95",
+  "source_image_hash": "07/04",
+  "source_url": "https://images.oracleofthevoid.com/l5r/07/04/printing_8511_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/07/04/printing_8511_3_",
+  "width": 750
+}

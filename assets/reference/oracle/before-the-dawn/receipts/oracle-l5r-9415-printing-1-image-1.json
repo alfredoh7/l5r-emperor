@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 408793,
+  "card_id": "oracle-l5r-9415",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9415-printing-1-image-1",
+  "image_index": 1,
+  "name": "Xijkt",
+  "numbers": [
+    "30"
+  ],
+  "oracle_id": 9415,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9415-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:27.030506+00:00",
+  "sha256": "a5e151530e29f2f65efc771456e937728e4295825db5c56f9dcd0aa5fabd3d31",
+  "source_image_hash": "95/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/95/86/printing_9415_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/95/86/printing_9415_1_",
+  "width": 750
+}

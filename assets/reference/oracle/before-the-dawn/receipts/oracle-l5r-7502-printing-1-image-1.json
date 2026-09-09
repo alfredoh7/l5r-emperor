@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 414821,
+  "card_id": "oracle-l5r-7502",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7502-printing-1-image-1",
+  "image_index": 1,
+  "name": "Stone-Hewed Shrine",
+  "numbers": [
+    "77"
+  ],
+  "oracle_id": 7502,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7502-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:52.355565+00:00",
+  "sha256": "bfe9a20dff6e6f886b87edcccd234a499941c81af85896960459c83c9ba3e947",
+  "source_image_hash": "75/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/75/cc/printing_7502_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/75/cc/printing_7502_1_",
+  "width": 750
+}

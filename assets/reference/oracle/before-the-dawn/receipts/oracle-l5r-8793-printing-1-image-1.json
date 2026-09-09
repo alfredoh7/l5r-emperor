@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 414101,
+  "card_id": "oracle-l5r-8793",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8793-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsunami Tattoo",
+  "numbers": [
+    "151"
+  ],
+  "oracle_id": 8793,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8793-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:17.418451+00:00",
+  "sha256": "6590738b9c45b69961ad2db36edf8ae6f398679d71a5b9b9c5e138b9c45accc2",
+  "source_image_hash": "fc/7e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fc/7e/printing_8793_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fc/7e/printing_8793_1_",
+  "width": 750
+}

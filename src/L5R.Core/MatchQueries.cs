@@ -30,7 +30,7 @@ public sealed partial class MatchEngine
         }).ToArray();
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario==PublishedContent.Scenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId);
+            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId);
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -78,10 +78,29 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"attackReaction" })
+        {
+            // Open to either side -- list this player's own eligible before-attack-resolves Reactions.
+            foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && !c.Bowed)
+                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
+                .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
+            {
+                var used=card.AbilityUses.ContainsKey(reactionId);
+                Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                    new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                    used?"This reaction has already been used.":null,card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
             Add("chooseShinden","Allow opponent to gain 1 Honor",Command("chooseShinden") with {Choice="honor"});
+        }
+        else if(_state.PendingChoice is { Type:"conqueror" })
+        {
+            foreach(var id in _state.PendingConqueror!.CandidateIds)
+                Add("chooseConqueror",$"Straighten {Definition(Card(id)).Name} instead of returning home bowed",Command("chooseConqueror",target:id),cardId:id);
         }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {
@@ -115,15 +134,18 @@ public sealed partial class MatchEngine
                 break;
             case Phase.AttackDeclaration:
             case Phase.DefenseAssignment:
-                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality).Select(c=>c.Id).ToArray();
+            case Phase.CavalryDeclaration:
+            case Phase.CavalryDefense:
+                var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
+                var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
                 var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
-                var attack=_state.Phase==Phase.AttackDeclaration;
+                var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
-                    Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} units",
-                        Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?"No unbowed Personalities at home.":null,
+                    Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
+                        Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,
                         targets:units,provinces:provinces);
-                Add("pass",attack?"Skip attack":"Assign no defenders",Command("pass"));
+                Add("pass",attack?(cavalrySegment?"Skip Cavalry Maneuvers":"Skip attack"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"));
                 break;
             case Phase.BattleSelection:
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));

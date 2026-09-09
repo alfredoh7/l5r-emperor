@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 740754,
+  "card_id": "oracle-l5r-10141",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10141-printing-1-image-1",
+  "image_index": 1,
+  "name": "Debt to the Kaiu",
+  "numbers": [
+    "115"
+  ],
+  "oracle_id": 10141,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10141-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:50.084479+00:00",
+  "sha256": "cdb3e98d2647bc3184f087f6fdbc7484e6335db5b70adc59bf5d1f0fcc7dfd8d",
+  "source_image_hash": "7e/eb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7e/eb/printing_10141_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7e/eb/printing_10141_1_",
+  "width": 750
+}

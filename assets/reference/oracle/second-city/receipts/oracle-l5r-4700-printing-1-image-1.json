@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403055,
+  "card_id": "oracle-l5r-4700",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4700-printing-1-image-1",
+  "image_index": 1,
+  "name": "Legion of the Bat",
+  "numbers": [
+    "82"
+  ],
+  "oracle_id": 4700,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4700-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:54.437868+00:00",
+  "sha256": "98264561c1b0cb45d0a255ec577a1dcadd9ba22462af24e2cf3ac1ccb015e05b",
+  "source_image_hash": "44/14",
+  "source_url": "https://images.oracleofthevoid.com/l5r/44/14/printing_4700_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/44/14/printing_4700_1_",
+  "width": 750
+}

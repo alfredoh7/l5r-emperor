@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 820800,
+  "card_id": "oracle-l5r-10669",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10669-printing-1-image-1",
+  "image_index": 1,
+  "name": "Boyoh Mercenary",
+  "numbers": [
+    "65"
+  ],
+  "oracle_id": 10669,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10669-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:01.287943+00:00",
+  "sha256": "345e3feff4040da8411d8dd2241c32e7e43231d8dae889d081a36282860682cb",
+  "source_image_hash": "f8/a5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f8/a5/printing_10669_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/a5/printing_10669_1_",
+  "width": 750
+}

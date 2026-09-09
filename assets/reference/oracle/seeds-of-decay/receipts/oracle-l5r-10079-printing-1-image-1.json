@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785728,
+  "card_id": "oracle-l5r-10079",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10079-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Mugoshi",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 10079,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10079-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:29.934574+00:00",
+  "sha256": "add8d2e55b74edb92395026d12cbb024c44ad314056f7989bd44a6c7d34b215c",
+  "source_image_hash": "6a/78",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6a/78/printing_10079_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/78/printing_10079_1_",
+  "width": 750
+}

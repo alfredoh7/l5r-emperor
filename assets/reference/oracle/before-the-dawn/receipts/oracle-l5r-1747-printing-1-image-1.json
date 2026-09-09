@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 423552,
+  "card_id": "oracle-l5r-1747",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1747-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Miki",
+  "numbers": [
+    "61"
+  ],
+  "oracle_id": 1747,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1747-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:13.554556+00:00",
+  "sha256": "2c15687fbd3a44c31b376cd649877d41b3b546642d03b55b5b82526d087ec7f8",
+  "source_image_hash": "e1/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/5c/printing_1747_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/5c/printing_1747_1_",
+  "width": 750
+}

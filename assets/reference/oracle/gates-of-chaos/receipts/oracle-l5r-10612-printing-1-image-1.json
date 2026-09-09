@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 785242,
+  "card_id": "oracle-l5r-10612",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10612-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Tower of Vigilance",
+  "numbers": [
+    "15"
+  ],
+  "oracle_id": 10612,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10612-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:11.923888+00:00",
+  "sha256": "c60a4fc6acd1e9b43a31f6c9e8f340a5eece3d28e985cff35941304c22767a37",
+  "source_image_hash": "60/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/60/80/printing_10612_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/60/80/printing_10612_1_",
+  "width": 750
+}

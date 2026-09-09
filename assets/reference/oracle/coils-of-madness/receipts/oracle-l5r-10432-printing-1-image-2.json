@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 937824,
+  "card_id": "oracle-l5r-10432",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10432-printing-1-image-2",
+  "image_index": 2,
+  "name": "Colonial Dojo",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 10432,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10432-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:12.174129+00:00",
+  "sha256": "8b1cf08a277ebb15d19abe9b2b608a5b6f703c98d8e2bf96b757ef0f24a906c9",
+  "source_image_hash": "df/47",
+  "source_url": "https://images.oracleofthevoid.com/l5r/df/47/printing_10432_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/df/47/printing_10432_1_",
+  "width": 750
+}

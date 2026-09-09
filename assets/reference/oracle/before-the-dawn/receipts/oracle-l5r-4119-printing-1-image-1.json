@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 397341,
+  "card_id": "oracle-l5r-4119",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4119-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Iemasa",
+  "numbers": [
+    "13"
+  ],
+  "oracle_id": 4119,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4119-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:55.354110+00:00",
+  "sha256": "d1dbec8ffbf54ddd2e3f6ce3d71e4d80e6d054c2b5d828af1b87347166c4c0b7",
+  "source_image_hash": "b6/9e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b6/9e/printing_4119_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b6/9e/printing_4119_1_",
+  "width": 750
+}

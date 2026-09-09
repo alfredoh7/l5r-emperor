@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 876601,
+  "card_id": "oracle-l5r-10675",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10675-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Tselu",
+  "numbers": [
+    "73"
+  ],
+  "oracle_id": 10675,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10675-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:43.218233+00:00",
+  "sha256": "dc89cd9639749ff075fe30f82b9b88e4221931fb2dce0933bf27aedfcefc69c2",
+  "source_image_hash": "93/bb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/bb/printing_10675_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/bb/printing_10675_1_",
+  "width": 750
+}

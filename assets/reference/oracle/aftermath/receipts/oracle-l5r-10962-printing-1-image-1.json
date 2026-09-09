@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 761205,
+  "card_id": "oracle-l5r-10962",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10962-printing-1-image-1",
+  "image_index": 1,
+  "name": "Unchecked Fury",
+  "numbers": [
+    "147"
+  ],
+  "oracle_id": 10962,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10962-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:19.807130+00:00",
+  "sha256": "bb9355e2215f498c1398d01ce037e5480359816673501db5b46be5f95b68b275",
+  "source_image_hash": "b6/7c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b6/7c/printing_10962_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b6/7c/printing_10962_1_",
+  "width": 750
+}

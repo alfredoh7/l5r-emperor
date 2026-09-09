@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 815272,
+  "card_id": "oracle-l5r-10824",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10824-printing-1-image-1",
+  "image_index": 1,
+  "name": "Exotic Market",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10824,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10824-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:23.309712+00:00",
+  "sha256": "6678b9e477151bcec2eb6b34ad096791e31caef0c0514e27eb2309aebfb10aff",
+  "source_image_hash": "0e/29",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/29/printing_10824_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/29/printing_10824_1_",
+  "width": 750
+}

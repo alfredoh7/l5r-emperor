@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 988142,
+  "card_id": "oracle-l5r-10460",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10460-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Natsu",
+  "numbers": [
+    "42"
+  ],
+  "oracle_id": 10460,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10460-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:06.706195+00:00",
+  "sha256": "5396db5c4ca98e3f179e515c2e252dd88e05ebeaad15ade5a3cfa3be30e58865",
+  "source_image_hash": "ed/93",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ed/93/printing_10460_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ed/93/printing_10460_1_",
+  "width": 750
+}

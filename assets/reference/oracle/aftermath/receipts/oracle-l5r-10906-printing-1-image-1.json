@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 920018,
+  "card_id": "oracle-l5r-10906",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10906-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ningen's 'Treatise on the Nezumi'",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 10906,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10906-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:29.186304+00:00",
+  "sha256": "6e98b1e03d964e080ac7ffb140fa1a6884ae5a100748cc47a4ded477a677ed4c",
+  "source_image_hash": "39/71",
+  "source_url": "https://images.oracleofthevoid.com/l5r/39/71/printing_10906_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/39/71/printing_10906_1_",
+  "width": 750
+}

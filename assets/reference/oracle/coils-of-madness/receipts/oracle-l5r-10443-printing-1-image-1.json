@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1041043,
+  "card_id": "oracle-l5r-10443",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10443-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Tono",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 10443,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10443-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:29.144196+00:00",
+  "sha256": "1b7af2d8c6e43a23dffa70796ff46b9665842457752cf58d31c81b1198c5b1e1",
+  "source_image_hash": "43/ad",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/ad/printing_10443_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/ad/printing_10443_1_",
+  "width": 750
+}

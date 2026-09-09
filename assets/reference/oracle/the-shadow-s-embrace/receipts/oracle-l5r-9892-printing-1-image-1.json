@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 790175,
+  "card_id": "oracle-l5r-9892",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9892-printing-1-image-1",
+  "image_index": 1,
+  "name": "Touch the Emptiness",
+  "numbers": [
+    "104"
+  ],
+  "oracle_id": 9892,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9892-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:44.633678+00:00",
+  "sha256": "e7e8e61dc4e3da8aa44f84021a73a25bd4312d2fbf26e00c0c3ef1f1e1f909bd",
+  "source_image_hash": "f4/21",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f4/21/printing_9892_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f4/21/printing_9892_1_",
+  "width": 750
+}

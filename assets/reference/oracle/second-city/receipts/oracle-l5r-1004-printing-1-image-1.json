@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 380991,
+  "card_id": "oracle-l5r-1004",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1004-printing-1-image-1",
+  "image_index": 1,
+  "name": "Blade of Champions",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 1004,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1004-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:49.645470+00:00",
+  "sha256": "ad6b9febd7282a16966fda481bad9c133a66a191f0fc7d2f483068962f793afc",
+  "source_image_hash": "ed/33",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ed/33/printing_1004_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ed/33/printing_1004_1_",
+  "width": 750
+}

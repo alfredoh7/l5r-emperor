@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1005782,
+  "card_id": "oracle-l5r-10423",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10423-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Empire's Foe Exposed",
+  "numbers": [
+    "10"
+  ],
+  "oracle_id": 10423,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10423-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:01.278785+00:00",
+  "sha256": "67a18a60f6a0327b38b19614c53a5f046e30250a11ecb4d258385d35cfab29a1",
+  "source_image_hash": "00/ac",
+  "source_url": "https://images.oracleofthevoid.com/l5r/00/ac/printing_10423_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/00/ac/printing_10423_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 812934,
+  "card_id": "oracle-l5r-3413",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3413-printing-1-image-1",
+  "image_index": 1,
+  "name": "Home Guard",
+  "numbers": [
+    "83"
+  ],
+  "oracle_id": 3413,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3413-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:20.433043+00:00",
+  "sha256": "4923c766f1348a2094a6658d0b850dca397cd22e79f4c8f963410f19c1b917ec",
+  "source_image_hash": "59/f8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/59/f8/printing_3413_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/59/f8/printing_3413_1_",
+  "width": 750
+}

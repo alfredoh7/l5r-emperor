@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 700417,
+  "card_id": "oracle-l5r-10385",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10385-printing-1-image-1",
+  "image_index": 1,
+  "name": "Nocturnal Attack",
+  "numbers": [
+    "129"
+  ],
+  "oracle_id": 10385,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10385-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:25.269714+00:00",
+  "sha256": "3c7527a9c856db318451f55ea08eeb759e74c21f876e129db7297d74373c6827",
+  "source_image_hash": "7c/86",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7c/86/printing_10385_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7c/86/printing_10385_1_",
+  "width": 750
+}

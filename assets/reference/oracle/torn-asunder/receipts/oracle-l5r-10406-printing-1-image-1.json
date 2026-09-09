@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 698767,
+  "card_id": "oracle-l5r-10406",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10406-printing-1-image-1",
+  "image_index": 1,
+  "name": "Journey's End Keep",
+  "numbers": [
+    "150"
+  ],
+  "oracle_id": 10406,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10406-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:54.526293+00:00",
+  "sha256": "f5212c14b9e8c39634f5fc4ac0c3b06e0443e72fdf444798033f60be328b6815",
+  "source_image_hash": "5d/f3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5d/f3/printing_10406_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5d/f3/printing_10406_1_",
+  "width": 750
+}

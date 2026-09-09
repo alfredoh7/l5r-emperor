@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 719217,
+  "card_id": "oracle-l5r-10834",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10834-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kaiu Esumi",
+  "numbers": [
+    "19"
+  ],
+  "oracle_id": 10834,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10834-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:53.182263+00:00",
+  "sha256": "b738dad6970265cb7c7b0675a9b8927c93d138707f69c70aac8cd01c0bf32af2",
+  "source_image_hash": "76/5b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/5b/printing_10834_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/5b/printing_10834_1_",
+  "width": 750
+}

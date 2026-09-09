@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 411600,
+  "card_id": "oracle-l5r-7197",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7197-printing-1-image-1",
+  "image_index": 1,
+  "name": "Show of Restraint",
+  "numbers": [
+    "135"
+  ],
+  "oracle_id": 7197,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7197-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:42.780359+00:00",
+  "sha256": "a99aa86a1653dec64458d293d79b5a4be2e77b9a203c08d16ac5bfe94e5f73df",
+  "source_image_hash": "8d/2e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8d/2e/printing_7197_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8d/2e/printing_7197_1_",
+  "width": 750
+}

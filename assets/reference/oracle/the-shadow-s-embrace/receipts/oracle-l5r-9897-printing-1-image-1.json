@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 779604,
+  "card_id": "oracle-l5r-9897",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9897-printing-1-image-1",
+  "image_index": 1,
+  "name": "Captured Convict",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 9897,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9897-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:23.741290+00:00",
+  "sha256": "42d4f08df24f2ff0e18fa54c9cc9d7acaf169ecf4223d7de6b3d4663463c6c99",
+  "source_image_hash": "38/91",
+  "source_url": "https://images.oracleofthevoid.com/l5r/38/91/printing_9897_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/38/91/printing_9897_1_",
+  "width": 750
+}

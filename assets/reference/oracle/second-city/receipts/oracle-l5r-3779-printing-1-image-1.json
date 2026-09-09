@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 382949,
+  "card_id": "oracle-l5r-3779",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3779-printing-1-image-1",
+  "image_index": 1,
+  "name": "Insulting Gesture",
+  "numbers": [
+    "123"
+  ],
+  "oracle_id": 3779,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-3779-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:33.693659+00:00",
+  "sha256": "64d71337a3ca0308e62447d2fcfb0973a7f7df7f3152a5cce78747fc42865eb9",
+  "source_image_hash": "ce/87",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ce/87/printing_3779_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ce/87/printing_3779_1_",
+  "width": 750
+}

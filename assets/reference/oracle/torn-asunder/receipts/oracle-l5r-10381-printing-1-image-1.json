@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 727474,
+  "card_id": "oracle-l5r-10381",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10381-printing-1-image-1",
+  "image_index": 1,
+  "name": "In the Right",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 10381,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10381-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:50.678492+00:00",
+  "sha256": "ee556839d1ec475eb7f62828857125a78e7f02a233a450dbe1fe9e9c44b5d39d",
+  "source_image_hash": "1b/2c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/1b/2c/printing_10381_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/2c/printing_10381_1_",
+  "width": 750
+}

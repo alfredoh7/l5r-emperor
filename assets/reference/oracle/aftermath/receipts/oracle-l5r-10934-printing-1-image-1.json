@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 843822,
+  "card_id": "oracle-l5r-10934",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10934-printing-1-image-1",
+  "image_index": 1,
+  "name": "Desire",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 10934,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10934-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:14.698208+00:00",
+  "sha256": "42d5ddbe41fe6346ca190b8216d90de981cc9624cad0c56592478c137588f5d6",
+  "source_image_hash": "dc/97",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/97/printing_10934_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/97/printing_10934_1_",
+  "width": 750
+}

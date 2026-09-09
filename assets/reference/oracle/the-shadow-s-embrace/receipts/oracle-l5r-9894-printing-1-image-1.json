@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 725077,
+  "card_id": "oracle-l5r-9894",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9894-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yari of Air",
+  "numbers": [
+    "106"
+  ],
+  "oracle_id": 9894,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9894-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:05.005932+00:00",
+  "sha256": "0925ed2210de0df90515732dc34e936993b0ae63022bac7c937a7fb7fd01afec",
+  "source_image_hash": "82/2e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/82/2e/printing_9894_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/82/2e/printing_9894_1_",
+  "width": 750
+}

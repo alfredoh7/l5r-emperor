@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774880,
+  "card_id": "oracle-l5r-5565",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5565-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ninja Guards",
+  "numbers": [
+    "85"
+  ],
+  "oracle_id": 5565,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-5565-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:07.210779+00:00",
+  "sha256": "5104512bc3095fefbd2faea3732173179c5c327574244008e4e3779b69d62fc3",
+  "source_image_hash": "89/0a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/89/0a/printing_5565_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/89/0a/printing_5565_1_",
+  "width": 750
+}

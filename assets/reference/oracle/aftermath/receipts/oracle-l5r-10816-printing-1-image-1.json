@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 710895,
+  "card_id": "oracle-l5r-10816",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10816-printing-1-image-1",
+  "image_index": 1,
+  "name": "Chagatai's Wrath",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10816,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10816-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:59.144843+00:00",
+  "sha256": "f8e125b35deedaf9a02fce08c5251383271bec228ed1d1d16790f73778051b19",
+  "source_image_hash": "56/23",
+  "source_url": "https://images.oracleofthevoid.com/l5r/56/23/printing_10816_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/56/23/printing_10816_1_",
+  "width": 750
+}

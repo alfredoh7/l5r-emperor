@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 410618,
+  "card_id": "oracle-l5r-4934",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4934-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Kaido",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 4934,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-4934-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:06.039639+00:00",
+  "sha256": "6e6b4c047e2e171b67a4b3aa6be00c4a06b6f21fe53327c1bf058ed428b02e1d",
+  "source_image_hash": "dc/3e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/3e/printing_4934_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/3e/printing_4934_1_",
+  "width": 750
+}

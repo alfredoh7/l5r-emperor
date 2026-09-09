@@ -264,6 +264,20 @@ public partial class Main
             if (tile is not null && _provinceButtons.TryGetValue((1 - View.ActivePlayerId, province), out var target) && TileVisible(tile))
                 yield return new(ScreenCenter(tile), WorldToScreen(_battlePlacements.GetValueOrDefault(id, ScreenToWorld(ScreenCenter(target))) + new Vector2(70, 100)), Palette.Gold, true, clip);
         }
+        // Cavalry Maneuvers adds units on top of already-committed Infantry attackers/defenders;
+        // without a persistent reminder of who is already assigned where, the new declaration has
+        // to be made blind. _assignments above only covers the still-being-drafted unit; this covers
+        // every unit already locked into a battlefield (both sides), straight from the committed View.
+        if (View.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense)
+        {
+            foreach (var unit in View.Players.SelectMany(p => p.Army))
+            {
+                if (unit.ProvinceIndex is not int province) continue;
+                var tile = _tiles.FirstOrDefault(t => t.Card.Id == unit.Id);
+                if (tile is not null && _provinceButtons.TryGetValue((1 - View.ActivePlayerId, province), out var target) && TileVisible(tile))
+                    yield return new(ScreenCenter(tile), ScreenCenter(target), Palette.Crane, true, clip);
+            }
+        }
         if (_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));

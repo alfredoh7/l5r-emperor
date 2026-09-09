@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1013113,
+  "card_id": "oracle-l5r-10445",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10445-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Hakuseki",
+  "numbers": [
+    "29"
+  ],
+  "oracle_id": 10445,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10445-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:30.046869+00:00",
+  "sha256": "d2eb3ad01af976cf65f2f6591c09936682becbaab328a5410d797c48b3a6b5ee",
+  "source_image_hash": "40/33",
+  "source_url": "https://images.oracleofthevoid.com/l5r/40/33/printing_10445_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/40/33/printing_10445_1_",
+  "width": 750
+}

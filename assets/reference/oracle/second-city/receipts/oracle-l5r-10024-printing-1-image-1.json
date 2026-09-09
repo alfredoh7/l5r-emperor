@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 369708,
+  "card_id": "oracle-l5r-10024",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10024-printing-1-image-1",
+  "image_index": 1,
+  "name": "Questionable Resources",
+  "numbers": [
+    "1"
+  ],
+  "oracle_id": 10024,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-10024-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:11.655172+00:00",
+  "sha256": "f3bad00a6e6511767d770d427757c80f519172a16a28bbbd3910e355e3106380",
+  "source_image_hash": "fd/0e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fd/0e/printing_10024_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/0e/printing_10024_1_",
+  "width": 750
+}

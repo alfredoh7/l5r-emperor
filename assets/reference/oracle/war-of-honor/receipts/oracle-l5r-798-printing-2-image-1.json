@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 240808,
+  "card_id": "oracle-l5r-798",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-798-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Jutsushi",
+  "numbers": [
+    "59"
+  ],
+  "oracle_id": 798,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-798-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:52.937577+00:00",
+  "sha256": "7a33cb849019a022599f6157035d90f59d2898e4e61c86080177b93b7a41da52",
+  "source_image_hash": "0c/da",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/da/printing_798_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/da/printing_798_2_",
+  "width": 750
+}

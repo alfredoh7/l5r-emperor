@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 229741,
+  "card_id": "oracle-l5r-6247",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6247-printing-3-image-1",
+  "image_index": 1,
+  "name": "Relentless Conviction",
+  "numbers": [
+    "109"
+  ],
+  "oracle_id": 6247,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6247-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:54.742619+00:00",
+  "sha256": "f58ec9336107164b060a03c8db2d4646592bda0b7ff3a9ae1996368ee4be693a",
+  "source_image_hash": "4c/f3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4c/f3/printing_6247_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4c/f3/printing_6247_3_",
+  "width": 750
+}

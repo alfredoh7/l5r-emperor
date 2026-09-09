@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 801525,
+  "card_id": "oracle-l5r-1734",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1734-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Kazuko",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 1734,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-1734-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:58:49.116710+00:00",
+  "sha256": "5b1b42cacefcddbdcedd29cc74a563dc72a3c53538d06d1436accf954d50db2b",
+  "source_image_hash": "f2/ce",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f2/ce/printing_1734_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f2/ce/printing_1734_1_",
+  "width": 750
+}

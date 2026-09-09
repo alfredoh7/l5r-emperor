@@ -5,7 +5,9 @@ namespace L5R.Core;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item, Spell, Event, Celestial, Region, Ring }
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
+// AttackDeclaration/DefenseAssignment is the Infantry Maneuvers segment; CavalryDeclaration/
+// CavalryDefense is the Cavalry Maneuvers segment that follows it (core rules Attack Phase, step C).
+public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, CavalryDeclaration, CavalryDefense, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached }
 
@@ -55,6 +57,10 @@ public sealed class ProvinceState
     public int Strength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
+    // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
+    // by player id, defaulted to false. No ability removes it directly; it resets to false for both
+    // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
+    public bool[] Reconnaissance { get; set; } = new bool[2];
 }
 
 public sealed class PlayerState
@@ -77,6 +83,34 @@ public sealed class PlayerState
 public sealed record PendingChoice(string Type, int PlayerId, string? CardId, string Prompt, int? ActingPlayerId = null);
 public sealed record GameEvent(long Sequence, string Type, string Message, int? PlayerId = null, string? CardId = null, int? Amount = null);
 
+/// <summary>A Ranged/Melee Attack awaiting resolution, open to reaction (core rules: "players must
+/// have an opportunity to react"). Strength is deliberately mutable state, not a one-shot value --
+/// either player's Reaction may raise, lower, or (by driving it to 0 or below) negate it before
+/// Kind/Strength are compared against the target's current Force at actual resolution time.</summary>
+public sealed class PendingAttack
+{
+    public string AbilityId { get; set; } = "";
+    public int PlayerId { get; set; }
+    // The card that made the attack, when a card-specific post-attack effect (e.g. Tsuruchi Isas'
+    // "Move Isas home") needs the exact instance rather than just its controller.
+    public string? SourceId { get; set; }
+    public string? TargetId { get; set; }
+    public int Strength { get; set; }
+    public string Kind { get; set; } = "";
+}
+
+/// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
+/// their attacking Personalities carries the Conqueror keyword -- a real choice for the attacker.
+/// (Exactly one candidate resolves immediately, with no pending state, since there is nothing to
+/// choose.) ProvinceIndex is enough to recompute the untouched attacking army once the choice lands;
+/// nothing about it can change while this is the only legal next command (see ResolveConqueror).</summary>
+public sealed class PendingConqueror
+{
+    public int PlayerId { get; set; }
+    public int ProvinceIndex { get; set; }
+    public string[] CandidateIds { get; set; } = [];
+}
+
 public sealed class MatchState
 {
     public long Version { get; set; }
@@ -88,6 +122,8 @@ public sealed class MatchState
     public Phase Phase { get; set; }
     public int ConsecutivePasses { get; set; }
     public PendingChoice? PendingChoice { get; set; }
+    public PendingAttack? PendingAttack { get; set; }
+    public PendingConqueror? PendingConqueror { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     public int? WinnerId { get; set; }

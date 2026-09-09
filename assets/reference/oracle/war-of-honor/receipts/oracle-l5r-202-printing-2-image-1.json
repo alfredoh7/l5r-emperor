@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 235340,
+  "card_id": "oracle-l5r-202",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-202-printing-2-image-1",
+  "image_index": 1,
+  "name": "Akodo Dosei",
+  "numbers": [
+    "41"
+  ],
+  "oracle_id": 202,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-202-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:43.905670+00:00",
+  "sha256": "9a37397231216cdc6d259836aa72976b360f81610085112a6a37a8cb054d167c",
+  "source_image_hash": "74/26",
+  "source_url": "https://images.oracleofthevoid.com/l5r/74/26/printing_202_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/74/26/printing_202_2_",
+  "width": 750
+}

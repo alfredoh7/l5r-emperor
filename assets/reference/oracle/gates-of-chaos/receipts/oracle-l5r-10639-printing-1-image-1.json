@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 813454,
+  "card_id": "oracle-l5r-10639",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10639-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Jeiku",
+  "numbers": [
+    "38"
+  ],
+  "oracle_id": 10639,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10639-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:02:45.063176+00:00",
+  "sha256": "5040b4a046d7735474d78712359d53d1f6954504f00434fcf3cae1c563700a26",
+  "source_image_hash": "11/5c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/11/5c/printing_10639_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/11/5c/printing_10639_1_",
+  "width": 750
+}

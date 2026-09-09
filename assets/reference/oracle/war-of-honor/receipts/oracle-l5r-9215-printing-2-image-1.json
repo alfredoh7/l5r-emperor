@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 248025,
+  "card_id": "oracle-l5r-9215",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9215-printing-2-image-1",
+  "image_index": 1,
+  "name": "War Encampment",
+  "numbers": [
+    "32"
+  ],
+  "oracle_id": 9215,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-9215-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:51:18.091625+00:00",
+  "sha256": "46e10377435bfef87d14122c9335df6f60747620842db194b6bda0b4b46e590c",
+  "source_image_hash": "92/6f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/92/6f/printing_9215_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/92/6f/printing_9215_2_",
+  "width": 750
+}

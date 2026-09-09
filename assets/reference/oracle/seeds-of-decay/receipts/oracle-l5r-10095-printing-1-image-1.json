@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 805767,
+  "card_id": "oracle-l5r-10095",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10095-printing-1-image-1",
+  "image_index": 1,
+  "name": "Seppun Nagi",
+  "numbers": [
+    "69"
+  ],
+  "oracle_id": 10095,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10095-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:57:26.062998+00:00",
+  "sha256": "2f2faf9235eb449f9d1613afd07980bab96ea46f2f415580d6ff483284e25edc",
+  "source_image_hash": "9c/aa",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9c/aa/printing_10095_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9c/aa/printing_10095_1_",
+  "width": 750
+}

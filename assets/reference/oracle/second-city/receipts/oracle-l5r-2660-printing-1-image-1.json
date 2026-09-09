@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 399865,
+  "card_id": "oracle-l5r-2660",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2660-printing-1-image-1",
+  "image_index": 1,
+  "name": "Formal Apology",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 2660,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2660-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:19.049538+00:00",
+  "sha256": "6f8e6ac63572c6856891a7f45ad7cc3093ad8e86cdbbd756543e7b15a33611f9",
+  "source_image_hash": "b9/81",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b9/81/printing_2660_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/81/printing_2660_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 473697,
+  "card_id": "oracle-l5r-612",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-612-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ashigaru Elite",
+  "numbers": [
+    "79"
+  ],
+  "oracle_id": 612,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-612-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:56.434629+00:00",
+  "sha256": "2e175ec7da7910c2d7a537aab9b790435a83b80c7144a1dca1b9a0bb384d2efc",
+  "source_image_hash": "76/a8",
+  "source_url": "https://images.oracleofthevoid.com/l5r/76/a8/printing_612_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/76/a8/printing_612_1_",
+  "width": 750
+}

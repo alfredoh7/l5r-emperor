@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 390709,
+  "card_id": "oracle-l5r-2020",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2020-printing-1-image-1",
+  "image_index": 1,
+  "name": "Disgraceful Conduct",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 2020,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-2020-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:20.014970+00:00",
+  "sha256": "0e05978f3af99f2386199e44ad4e9e321a5293eef669d637df6e14b9e8754270",
+  "source_image_hash": "b7/a5",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b7/a5/printing_2020_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b7/a5/printing_2020_1_",
+  "width": 750
+}

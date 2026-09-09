@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 756642,
+  "card_id": "oracle-l5r-10836",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10836-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yasuki Jiro",
+  "numbers": [
+    "21"
+  ],
+  "oracle_id": 10836,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10836-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:29.115429+00:00",
+  "sha256": "39f38517ac569dbc9f257beb2a037c6296ca800f9555f02d29b10fe7d25df105",
+  "source_image_hash": "8c/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8c/4d/printing_10836_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8c/4d/printing_10836_1_",
+  "width": 750
+}

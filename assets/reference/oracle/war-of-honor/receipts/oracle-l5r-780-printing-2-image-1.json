@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 262868,
+  "card_id": "oracle-l5r-780",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-780-printing-2-image-1",
+  "image_index": 1,
+  "name": "Bayushi Hirose",
+  "numbers": [
+    "58"
+  ],
+  "oracle_id": 780,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-780-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:48:51.927340+00:00",
+  "sha256": "4d6f4c59e30dfe76dd106c034ced4b02aa5db8bbbfc390fc97b6f66c1683a7af",
+  "source_image_hash": "c9/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c9/e9/printing_780_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c9/e9/printing_780_2_",
+  "width": 750
+}

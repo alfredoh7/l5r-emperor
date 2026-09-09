@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1037683,
+  "card_id": "oracle-l5r-10468",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10468-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tochiko, the Jagged Tusk of Death",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 10468,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10468-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:13.607994+00:00",
+  "sha256": "7a5d15d6e2d0bf3f58028ba5e5e6f3308f7e5b6095e390fd3c24890d844870bd",
+  "source_image_hash": "62/72",
+  "source_url": "https://images.oracleofthevoid.com/l5r/62/72/printing_10468_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/62/72/printing_10468_1_",
+  "width": 750
+}

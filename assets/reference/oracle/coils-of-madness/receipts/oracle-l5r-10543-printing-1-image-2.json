@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1001255,
+  "card_id": "oracle-l5r-10543",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10543-printing-1-image-2",
+  "image_index": 2,
+  "name": "Typhoon Surge",
+  "numbers": [
+    "119"
+  ],
+  "oracle_id": 10543,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10543-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:25.280232+00:00",
+  "sha256": "248b6f9193f8a771f80182ee4222c4efed6dbde73beca6fe93d450b5128af30b",
+  "source_image_hash": "c8/35",
+  "source_url": "https://images.oracleofthevoid.com/l5r/c8/35/printing_10543_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/c8/35/printing_10543_1_",
+  "width": 750
+}

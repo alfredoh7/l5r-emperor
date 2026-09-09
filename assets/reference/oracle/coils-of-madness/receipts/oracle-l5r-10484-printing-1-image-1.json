@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1054719,
+  "card_id": "oracle-l5r-10484",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10484-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Kameyoi",
+  "numbers": [
+    "62"
+  ],
+  "oracle_id": 10484,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10484-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:35.363114+00:00",
+  "sha256": "2d4d0e5795bce5a1741c6281211d59c0ded0e2f065922d05485c6ab8a5ee8cc7",
+  "source_image_hash": "3c/c7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/c7/printing_10484_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/c7/printing_10484_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1004327,
+  "card_id": "oracle-l5r-10427",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10427-printing-1-image-2",
+  "image_index": 2,
+  "name": "Fudoist Advisor",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 10427,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10427-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:49.153021+00:00",
+  "sha256": "3ac013025e8f564baa2f6928c8629e76869d3cf66009f2ec97797c3605ad9ecd",
+  "source_image_hash": "da/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/da/84/printing_10427_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/da/84/printing_10427_1_",
+  "width": 750
+}

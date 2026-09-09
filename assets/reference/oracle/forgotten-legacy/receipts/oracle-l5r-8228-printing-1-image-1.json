@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 279212,
+  "card_id": "oracle-l5r-8228",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8228-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Mountain's Power",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 8228,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8228-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:36.972963+00:00",
+  "sha256": "e65ffd0097b80ec0f06a2ac8b68f942826a3670fdd3a679ea64d51c166a78d2e",
+  "source_image_hash": "35/73",
+  "source_url": "https://images.oracleofthevoid.com/l5r/35/73/printing_8228_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/35/73/printing_8228_1_",
+  "width": 750
+}

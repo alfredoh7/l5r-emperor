@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 730394,
+  "card_id": "oracle-l5r-3165",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3165-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Osote",
+  "numbers": [
+    "14"
+  ],
+  "oracle_id": 3165,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-3165-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:17.808385+00:00",
+  "sha256": "cc3609626a050be5e8f841b9a0813d2e08be5b7485a7f02e2650b050fb0261fb",
+  "source_image_hash": "aa/98",
+  "source_url": "https://images.oracleofthevoid.com/l5r/aa/98/printing_3165_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/98/printing_3165_1_",
+  "width": 750
+}

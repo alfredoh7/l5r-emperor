@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 935870,
+  "card_id": "oracle-l5r-10482",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10482-printing-1-image-2",
+  "image_index": 2,
+  "name": "Yogo Katsuta",
+  "numbers": [
+    "145"
+  ],
+  "oracle_id": 10482,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10482-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:31.769097+00:00",
+  "sha256": "46ead4c6e45161b912d21b8b0da65aa2c4cd77421b2630f5cef5f70d528bd8ea",
+  "source_image_hash": "65/bc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/65/bc/printing_10482_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/65/bc/printing_10482_1_",
+  "width": 750
+}

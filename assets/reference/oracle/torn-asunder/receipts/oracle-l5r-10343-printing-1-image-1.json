@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 733421,
+  "card_id": "oracle-l5r-10343",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10343-printing-1-image-1",
+  "image_index": 1,
+  "name": "Renyu's Wrath",
+  "numbers": [
+    "87"
+  ],
+  "oracle_id": 10343,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10343-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:39.267891+00:00",
+  "sha256": "11973c3e6daadf552b3b00a6d11e3d123bc9e3e968b79cd52cd108bb0605de20",
+  "source_image_hash": "19/b1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/19/b1/printing_10343_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/19/b1/printing_10343_1_",
+  "width": 750
+}

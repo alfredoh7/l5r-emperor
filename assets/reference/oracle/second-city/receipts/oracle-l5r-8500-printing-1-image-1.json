@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 390046,
+  "card_id": "oracle-l5r-8500",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8500-printing-1-image-1",
+  "image_index": 1,
+  "name": "To First Blood",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 8500,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-8500-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:59.773865+00:00",
+  "sha256": "fabf5eefed19a5709553dbe584eaef624cfe7b6a4d34b1a93890a95cb13849ea",
+  "source_image_hash": "7f/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7f/7a/printing_8500_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7f/7a/printing_8500_1_",
+  "width": 750
+}

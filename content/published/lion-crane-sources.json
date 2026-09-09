@@ -2469,316 +2469,6 @@
     "image_sha256": "23e8bceb6d514b21115ba5a6e669fbf3793aed5e337ae7131e07d8cb02d31aec"
   },
   {
-    "card_id": "oracle-l5r-2166",
-    "source": {
-      "updatelog": [
-        {
-          "newdata": {
-            "image": [
-              {
-                "details": "Onyx_099_details.png",
-                "select": "Onyx_099_select.png",
-                "master": "Onyx_099_master.png"
-              }
-            ],
-            "printingid": "3",
-            "art": [
-              "art\\onyx\\tatsuki.png"
-            ],
-            "set": [
-              "Onyx Edition"
-            ],
-            "cost": [
-              "6"
-            ],
-            "keywords": [
-              "Courtier",
-              "Samurai"
-            ],
-            "artist": [
-              "Edwin David"
-            ],
-            "chi": [
-              "4"
-            ],
-            "honor": [
-              "10"
-            ],
-            "formattedtitle": "Doji Tatsuki, Soul of Doji Ayano",
-            "title": [
-              "Doji Tatsuki, Soul of Doji Ayano"
-            ],
-            "publisherurl": [
-              "https://sites.google.com/view/the-onyx-lives-project/home"
-            ],
-            "flavor": [
-              "<i>\"Lord Makoto still grieves the death of his wife and his sister. I will remain behind, Natsuyo, and try to guide him. We must do what we can, and trust to fate.\"</i>"
-            ],
-            "number": [
-              "99"
-            ],
-            "legality": [
-              "War&nbsp;of&nbsp;the&nbsp;Seals&nbsp;(Onyx&nbsp;Edition)"
-            ],
-            "ph": [
-              "4"
-            ],
-            "clan": [
-              "Crane"
-            ],
-            "imagehash": "Onyx",
-            "publisher": [
-              "Onyx Lives"
-            ],
-            "force": [
-              "2"
-            ],
-            "text": [
-              ""
-            ],
-            "rarity": [
-              "Fixed"
-            ]
-          },
-          "op": "newinstance",
-          "uid": 21069,
-          "uname": "Don Eisele",
-          "timestamp": 1752098521051
-        },
-        {
-          "newdata": {
-            "alttitle": [
-              "Doji Tatsuki, Soul of Doji Ayano"
-            ]
-          },
-          "op": "update",
-          "uid": 21069,
-          "uname": "Don Eisele",
-          "timestamp": 1757096393084
-        }
-      ],
-      "chi": [
-        "4"
-      ],
-      "printing": [
-        {
-          "flavor": [
-            "<i>\"The students of Doji Ayano fill the courts like pests. Elegant, brilliant pests. I would damn her for it, but truthfully I find intelligent opponents far less tedious than stupid ones.\" - Bayushi Nitoshi</i>"
-          ],
-          "printingid": "1",
-          "number": [
-            "82"
-          ],
-          "artnumber": [
-            "10040084"
-          ],
-          "set": [
-            "Emperor Edition"
-          ],
-          "artist": [
-            "Edwin David"
-          ],
-          "printimagehash": [
-            "02/1b"
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        },
-        {
-          "printingid": "2",
-          "set": [
-            "Emperor Edition Demo Decks"
-          ],
-          "cost": [
-            "6"
-          ],
-          "keywords": [
-            "Courtier",
-            "Crane Clan",
-            "Samurai",
-            "Soul of Doji Ayano"
-          ],
-          "artist": [
-            "Edwin David"
-          ],
-          "chi": [
-            "4"
-          ],
-          "printimagehash": [
-            "a9/0d"
-          ],
-          "honor": [
-            "10"
-          ],
-          "personalhonor": [
-            "4"
-          ],
-          "title": [
-            "Doji Tatsuki"
-          ],
-          "type": [
-            "Personality"
-          ],
-          "number": [
-            "27"
-          ],
-          "artnumber": [
-            "10040084"
-          ],
-          "clan": [
-            "Crane"
-          ],
-          "force": [
-            "2"
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        },
-        {
-          "image": [
-            {
-              "details": "Onyx_099_details.png",
-              "select": "Onyx_099_select.png",
-              "master": "Onyx_099_master.png"
-            }
-          ],
-          "printingid": "3",
-          "art": [
-            "art\\onyx\\tatsuki.png"
-          ],
-          "set": [
-            "Onyx Edition"
-          ],
-          "cost": [
-            "6"
-          ],
-          "keywords": [
-            "Courtier",
-            "Samurai"
-          ],
-          "artist": [
-            "Edwin David"
-          ],
-          "chi": [
-            "4"
-          ],
-          "honor": [
-            "10"
-          ],
-          "formattedtitle": "Doji Tatsuki, Soul of Doji Ayano",
-          "title": [
-            "Doji Tatsuki, Soul of Doji Ayano"
-          ],
-          "publisherurl": [
-            "https://sites.google.com/view/the-onyx-lives-project/home"
-          ],
-          "flavor": [
-            "<i>\"Lord Makoto still grieves the death of his wife and his sister. I will remain behind, Natsuyo, and try to guide him. We must do what we can, and trust to fate.\"</i>"
-          ],
-          "number": [
-            "99"
-          ],
-          "legality": [
-            "War&nbsp;of&nbsp;the&nbsp;Seals&nbsp;(Onyx&nbsp;Edition)"
-          ],
-          "ph": [
-            "4"
-          ],
-          "clan": [
-            "Crane"
-          ],
-          "imagehash": "Onyx",
-          "publisher": [
-            "Onyx Lives"
-          ],
-          "force": [
-            "2"
-          ],
-          "text": [
-            ""
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        }
-      ],
-      "printingprimary": "1",
-      "clan": [
-        "Crane"
-      ],
-      "honor": [
-        "10"
-      ],
-      "force": [
-        "2"
-      ],
-      "formattedtitle": "Doji Tatsuki",
-      "alttitle": [
-        "Doji Tatsuki, Soul of Doji Ayano"
-      ],
-      "cardid": 2166,
-      "cost": [
-        "6"
-      ],
-      "imagehash": "02/1b",
-      "legality": [
-        "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-        "Legacy",
-        "Modern",
-        "War&nbsp;of&nbsp;the&nbsp;Seals&nbsp;(Onyx&nbsp;Edition)"
-      ],
-      "deck": [
-        "Dynasty"
-      ],
-      "keywords": [
-        "Courtier",
-        "Crane Clan",
-        "Samurai",
-        "Soul of Doji Ayano"
-      ],
-      "ph": [
-        "4"
-      ],
-      "title": [
-        "Doji Tatsuki"
-      ],
-      "type": [
-        "Personality"
-      ],
-      "@timestamp": "2026-06-06T14:37:06.966299",
-      "@SequenceNumber": "0000"
-    },
-    "selected_printing": {
-      "flavor": [
-        "<i>\"The students of Doji Ayano fill the courts like pests. Elegant, brilliant pests. I would damn her for it, but truthfully I find intelligent opponents far less tedious than stupid ones.\" - Bayushi Nitoshi</i>"
-      ],
-      "printingid": "1",
-      "number": [
-        "82"
-      ],
-      "artnumber": [
-        "10040084"
-      ],
-      "set": [
-        "Emperor Edition"
-      ],
-      "artist": [
-        "Edwin David"
-      ],
-      "printimagehash": [
-        "02/1b"
-      ],
-      "rarity": [
-        "Fixed"
-      ]
-    },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2166-printing-1-image-1.jpg",
-    "image_url": "https://images.oracleofthevoid.com/l5r/02/1b/printing_2166_1_master.jpg",
-    "image_sha256": "d60c50a1f83c3b43a61e6b534ba7e5297a6f588e3b04cba48aa583ce4ff09e4e"
-  },
-  {
     "card_id": "oracle-l5r-2619",
     "source": {
       "focus": [
@@ -3700,413 +3390,6 @@
     "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2949-printing-1-image-1.jpg",
     "image_url": "https://images.oracleofthevoid.com/l5r/05/20/printing_2949_1_master.jpg",
     "image_sha256": "d9ed1159ceff2914fac7e26d63aafa440f78de40b39193aeb8c37d3eb9d6b971"
-  },
-  {
-    "card_id": "oracle-l5r-3636",
-    "source": {
-      "updatelog": [
-        {
-          "newdata": {
-            "image": [
-              {
-                "details": "ShE_120_details.png",
-                "select": "ShE_120_select.png",
-                "master": "ShE_120_master.png"
-              }
-            ],
-            "printingid": "5",
-            "art": [
-              "art\\onyx\\shika.png"
-            ],
-            "set": [
-              "Shattered Empire"
-            ],
-            "cost": [
-              "2"
-            ],
-            "keywords": [
-              "Samurai",
-              "Scout"
-            ],
-            "artist": [
-              "Sergio Camarena"
-            ],
-            "chi": [
-              "2"
-            ],
-            "honor": [
-              "4"
-            ],
-            "formattedtitle": "Ikoma Shika",
-            "title": [
-              "Ikoma Shika"
-            ],
-            "publisherurl": [
-              "https://sites.google.com/view/the-onyx-lives-project/home"
-            ],
-            "flavor": [
-              "<i>\"Lord Atsutane has us patrolling closer and closer to the Empire's borders. He will not say, but I suspect he thinks war may be inevitable.\"</i>"
-            ],
-            "number": [
-              "120"
-            ],
-            "legality": [
-              "Shattered&nbsp;Empire"
-            ],
-            "ph": [
-              "2"
-            ],
-            "clan": [
-              "Lion"
-            ],
-            "imagehash": "ShE",
-            "publisher": [
-              "Onyx Lives"
-            ],
-            "force": [
-              "2"
-            ],
-            "text": [
-              ""
-            ],
-            "rarity": [
-              "Fixed"
-            ]
-          },
-          "op": "newinstance",
-          "uid": 21069,
-          "uname": "Don Eisele",
-          "timestamp": 1752161783368
-        }
-      ],
-      "chi": [
-        "2"
-      ],
-      "mrp": [
-        "Costs 2 less Gold."
-      ],
-      "printing": [
-        {
-          "flavor": [
-            "<i>Shika took to the forest like a Kitsune. Well before her gempukku, some saw in her a wildness that could not hope to be tamed, only nurtured and utilized.</i>"
-          ],
-          "printingid": "1",
-          "number": [
-            "108"
-          ],
-          "artnumber": [
-            "10040118"
-          ],
-          "set": [
-            "Emperor Edition"
-          ],
-          "artist": [
-            "Sergio Camarena"
-          ],
-          "printimagehash": [
-            "0a/f6"
-          ],
-          "rarity": [
-            "Common"
-          ]
-        },
-        {
-          "printingid": "2",
-          "set": [
-            "Ivory Edition"
-          ],
-          "cost": [
-            "2"
-          ],
-          "keywords": [
-            "Lion Clan",
-            "Samurai",
-            "Scout"
-          ],
-          "artist": [
-            "Sergio Camarena"
-          ],
-          "chi": [
-            "2"
-          ],
-          "printimagehash": [
-            "86/6d"
-          ],
-          "honor": [
-            "4"
-          ],
-          "personalhonor": [
-            "2"
-          ],
-          "title": [
-            "Ikoma Shika"
-          ],
-          "type": [
-            "Personality"
-          ],
-          "flavor": [
-            "\"Her time among the Colonies and hunting the Yodotai have only added deadly experience to her prodigious talent. I would not trade her for any number of the Hiruma or Tsuruchi's vaunted scouts.\"  - Akodo Dairuko"
-          ],
-          "number": [
-            "100"
-          ],
-          "artnumber": [
-            "17000521"
-          ],
-          "clan": [
-            "Lion"
-          ],
-          "force": [
-            "2"
-          ],
-          "rarity": [
-            "Common"
-          ]
-        },
-        {
-          "printingid": "3",
-          "set": [
-            "A Matter of Honor"
-          ],
-          "cost": [
-            "2"
-          ],
-          "keywords": [
-            "Lion Clan",
-            "Samurai",
-            "Scout"
-          ],
-          "artist": [
-            "Sergio Camarena"
-          ],
-          "chi": [
-            "2"
-          ],
-          "printimagehash": [
-            "3d/a3",
-            "ac/53",
-            "fd/24"
-          ],
-          "honor": [
-            "4"
-          ],
-          "personalhonor": [
-            "2"
-          ],
-          "title": [
-            "Ikoma Shika"
-          ],
-          "type": [
-            "Personality"
-          ],
-          "flavor": [
-            "\"There are troubling reports of Naga activity in the Crab ranks,\" Dairuko said. \"What is the report of the scout company?\" <br>Shika bowed deeply. \"I have seen the serpent men myself, my Champion. The reports are true.\""
-          ],
-          "number": [
-            "23"
-          ],
-          "artnumber": [
-            "17000521"
-          ],
-          "clan": [
-            "Lion"
-          ],
-          "force": [
-            "2"
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        },
-        {
-          "printingid": "4",
-          "set": [
-            "Emperor Edition Demo Decks"
-          ],
-          "cost": [
-            "4"
-          ],
-          "keywords": [
-            "Lion Clan",
-            "Samurai",
-            "Scout"
-          ],
-          "artist": [
-            "Sergio Camarena"
-          ],
-          "chi": [
-            "2"
-          ],
-          "printimagehash": [
-            "0d/30"
-          ],
-          "honor": [
-            "4"
-          ],
-          "personalhonor": [
-            "2"
-          ],
-          "title": [
-            "Ikoma Shika"
-          ],
-          "type": [
-            "Personality"
-          ],
-          "number": [
-            "33"
-          ],
-          "artnumber": [
-            "10040118"
-          ],
-          "clan": [
-            "Lion"
-          ],
-          "force": [
-            "2"
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        },
-        {
-          "image": [
-            {
-              "details": "ShE_120_details.png",
-              "select": "ShE_120_select.png",
-              "master": "ShE_120_master.png"
-            }
-          ],
-          "printingid": "5",
-          "art": [
-            "art\\onyx\\shika.png"
-          ],
-          "set": [
-            "Shattered Empire"
-          ],
-          "cost": [
-            "2"
-          ],
-          "keywords": [
-            "Samurai",
-            "Scout"
-          ],
-          "artist": [
-            "Sergio Camarena"
-          ],
-          "chi": [
-            "2"
-          ],
-          "honor": [
-            "4"
-          ],
-          "formattedtitle": "Ikoma Shika",
-          "title": [
-            "Ikoma Shika"
-          ],
-          "publisherurl": [
-            "https://sites.google.com/view/the-onyx-lives-project/home"
-          ],
-          "flavor": [
-            "<i>\"Lord Atsutane has us patrolling closer and closer to the Empire's borders. He will not say, but I suspect he thinks war may be inevitable.\"</i>"
-          ],
-          "number": [
-            "120"
-          ],
-          "legality": [
-            "Shattered&nbsp;Empire"
-          ],
-          "ph": [
-            "2"
-          ],
-          "clan": [
-            "Lion"
-          ],
-          "imagehash": "ShE",
-          "publisher": [
-            "Onyx Lives"
-          ],
-          "force": [
-            "2"
-          ],
-          "text": [
-            ""
-          ],
-          "rarity": [
-            "Fixed"
-          ]
-        }
-      ],
-      "printingprimary": "2",
-      "clan": [
-        "Lion"
-      ],
-      "honor": [
-        "4"
-      ],
-      "force": [
-        "2"
-      ],
-      "formattedtitle": "Ikoma Shika",
-      "cardid": 3636,
-      "cost": [
-        "2"
-      ],
-      "imagehash": "cd/ef",
-      "legality": [
-        "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
-        "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Twenty&nbsp;Festivals)",
-        "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
-        "Legacy",
-        "Modern",
-        "Shattered&nbsp;Empire"
-      ],
-      "deck": [
-        "Dynasty"
-      ],
-      "keywords": [
-        "Lion Clan",
-        "Samurai",
-        "Scout"
-      ],
-      "ph": [
-        "2"
-      ],
-      "title": [
-        "Ikoma Shika"
-      ],
-      "type": [
-        "Personality"
-      ],
-      "@timestamp": "2026-06-06T14:35:50.205346",
-      "@SequenceNumber": "0000"
-    },
-    "selected_printing": {
-      "flavor": [
-        "<i>Shika took to the forest like a Kitsune. Well before her gempukku, some saw in her a wildness that could not hope to be tamed, only nurtured and utilized.</i>"
-      ],
-      "printingid": "1",
-      "number": [
-        "108"
-      ],
-      "artnumber": [
-        "10040118"
-      ],
-      "set": [
-        "Emperor Edition"
-      ],
-      "artist": [
-        "Sergio Camarena"
-      ],
-      "printimagehash": [
-        "0a/f6"
-      ],
-      "rarity": [
-        "Common"
-      ]
-    },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3636-printing-1-image-1.jpg",
-    "image_url": "https://images.oracleofthevoid.com/l5r/0a/f6/printing_3636_1_master.jpg",
-    "image_sha256": "adbe0926ab656b966b6bdbedb27a2ad45d8789a9869fc2932c41cdb0e86b0d49"
   },
   {
     "card_id": "oracle-l5r-3640",
@@ -8202,43 +7485,317 @@
     "image_sha256": "87533c9edbb604f36141b0aa81955cf9dcea73f0c057b5675d134dcf77cea614"
   },
   {
-    "card_id": "oracle-l5r-10851",
+    "card_id": "oracle-l5r-3623",
     "source": {
+      "@SequenceNumber": "0000",
+      "@timestamp": "2026-06-06T14:33:21.385826",
+      "cardid": 3623,
       "chi": [
+        "2"
+      ],
+      "clan": [
+        "Lion"
+      ],
+      "cost": [
+        "5"
+      ],
+      "deck": [
+        "Dynasty"
+      ],
+      "force": [
         "3"
       ],
-      "playtestname": [
-        "Ikoma Scout"
+      "formattedtitle": "Ikoma Natsu",
+      "honor": [
+        "8"
+      ],
+      "imagehash": "ea/e5",
+      "keywords": [
+        "<b>Cavalry</b>",
+        "Lion Clan",
+        "Samurai",
+        "Soul of Ikoma Otemi"
+      ],
+      "legality": [
+        "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "ph": [
+        "2"
+      ],
+      "printing": [
+        {
+          "artist": [
+            "Mark Evans"
+          ],
+          "artnumber": [
+            "10040113"
+          ],
+          "flavor": [
+            "<i>\"I have studied my namesake and learned much about our former enemy. If the Unicorn ever march on Rokugan again, I will be ready.\"</i>"
+          ],
+          "number": [
+            "107"
+          ],
+          "printimagehash": [
+            "ea/e5"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Uncommon"
+          ],
+          "set": [
+            "Emperor Edition"
+          ]
+        }
+      ],
+      "printingprimary": "1",
+      "text": [
+        "Natsu will not be controlled by a Unicorn Clan player."
+      ],
+      "title": [
+        "Ikoma Natsu"
+      ],
+      "type": [
+        "Personality"
+      ]
+    },
+    "selected_printing": {
+      "artist": [
+        "Mark Evans"
+      ],
+      "artnumber": [
+        "10040113"
+      ],
+      "flavor": [
+        "<i>\"I have studied my namesake and learned much about our former enemy. If the Unicorn ever march on Rokugan again, I will be ready.\"</i>"
+      ],
+      "number": [
+        "107"
+      ],
+      "printimagehash": [
+        "ea/e5"
+      ],
+      "printingid": "1",
+      "rarity": [
+        "Uncommon"
+      ],
+      "set": [
+        "Emperor Edition"
+      ]
+    },
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3623-printing-1-image-1.jpg",
+    "image_sha256": "d3f6fc19470c281767ccad388e069e2c64500c7bfb64c9aa38c6a95243b376a9"
+  },
+  {
+    "card_id": "oracle-l5r-2060",
+    "source": {
+      "@SequenceNumber": "0000",
+      "@timestamp": "2026-06-06T14:36:57.948360",
+      "cardid": 2060,
+      "chi": [
+        "4"
+      ],
+      "clan": [
+        "Crane"
+      ],
+      "cost": [
+        "8"
+      ],
+      "deck": [
+        "Dynasty"
+      ],
+      "force": [
+        "3"
+      ],
+      "formattedtitle": "Doji Atsumichi",
+      "honor": [
+        "4"
+      ],
+      "imagehash": "db/f8",
+      "keywords": [
+        "<b>Cavalry</b>",
+        "Crane Clan",
+        "Samurai",
+        "Soul of Doji Tadanori"
+      ],
+      "legality": [
+        "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
+        "Legacy",
+        "Modern"
+      ],
+      "ph": [
+        "4"
+      ],
+      "printing": [
+        {
+          "artist": [
+            "Albert Tavira"
+          ],
+          "artnumber": [
+            "10040088"
+          ],
+          "flavor": [
+            "<i>\"The Empire is full of samurai who have been trained for a war that may never come in their lifetime. It is fortunate we have the Colonies to draw their attention and give them the challenge they crave.\"</i>"
+          ],
+          "number": [
+            "78"
+          ],
+          "printimagehash": [
+            "db/f8"
+          ],
+          "printingid": "1",
+          "rarity": [
+            "Uncommon"
+          ],
+          "set": [
+            "Emperor Edition"
+          ]
+        }
+      ],
+      "printingprimary": "1",
+      "text": [
+        "<b>Battle:</b> Target a Personality with lower Personal Honor: Bow or straighten him."
+      ],
+      "title": [
+        "Doji Atsumichi"
+      ],
+      "type": [
+        "Personality"
+      ]
+    },
+    "selected_printing": {
+      "artist": [
+        "Albert Tavira"
+      ],
+      "artnumber": [
+        "10040088"
+      ],
+      "flavor": [
+        "<i>\"The Empire is full of samurai who have been trained for a war that may never come in their lifetime. It is fortunate we have the Colonies to draw their attention and give them the challenge they crave.\"</i>"
+      ],
+      "number": [
+        "78"
+      ],
+      "printimagehash": [
+        "db/f8"
+      ],
+      "printingid": "1",
+      "rarity": [
+        "Uncommon"
+      ],
+      "set": [
+        "Emperor Edition"
+      ]
+    },
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2060-printing-1-image-1.jpg",
+    "image_sha256": "3514834d6dd352c76870257231521adc9f096ed4fb6ade34a1a44b826bb614d1"
+  },
+  {
+    "card_id": "oracle-l5r-3636",
+    "source": {
+      "updatelog": [
+        {
+          "newdata": {
+            "image": [
+              {
+                "details": "ShE_120_details.png",
+                "select": "ShE_120_select.png",
+                "master": "ShE_120_master.png"
+              }
+            ],
+            "printingid": "5",
+            "art": [
+              "art\\onyx\\shika.png"
+            ],
+            "set": [
+              "Shattered Empire"
+            ],
+            "cost": [
+              "2"
+            ],
+            "keywords": [
+              "Samurai",
+              "Scout"
+            ],
+            "artist": [
+              "Sergio Camarena"
+            ],
+            "chi": [
+              "2"
+            ],
+            "honor": [
+              "4"
+            ],
+            "formattedtitle": "Ikoma Shika",
+            "title": [
+              "Ikoma Shika"
+            ],
+            "publisherurl": [
+              "https://sites.google.com/view/the-onyx-lives-project/home"
+            ],
+            "flavor": [
+              "<i>\"Lord Atsutane has us patrolling closer and closer to the Empire's borders. He will not say, but I suspect he thinks war may be inevitable.\"</i>"
+            ],
+            "number": [
+              "120"
+            ],
+            "legality": [
+              "Shattered&nbsp;Empire"
+            ],
+            "ph": [
+              "2"
+            ],
+            "clan": [
+              "Lion"
+            ],
+            "imagehash": "ShE",
+            "publisher": [
+              "Onyx Lives"
+            ],
+            "force": [
+              "2"
+            ],
+            "text": [
+              ""
+            ],
+            "rarity": [
+              "Fixed"
+            ]
+          },
+          "op": "newinstance",
+          "uid": 21069,
+          "uname": "Don Eisele",
+          "timestamp": 1752161783368
+        }
+      ],
+      "chi": [
+        "2"
+      ],
+      "mrp": [
+        "Costs 2 less Gold."
       ],
       "printing": [
         {
           "flavor": [
-            "<i>Dairuko drew her generals and scouts to her. \"The fate of the Empire rests with us. We must slow our enemy and deceive him, or the war will come to our Empire anew. I will not allow that.\"</i>"
-          ],
-          "number": [
-            "36"
+            "<i>Shika took to the forest like a Kitsune. Well before her gempukku, some saw in her a wildness that could not hope to be tamed, only nurtured and utilized.</i>"
           ],
           "printingid": "1",
+          "number": [
+            "108"
+          ],
           "artnumber": [
-            "10150036"
+            "10040118"
           ],
           "set": [
-            "Aftermath"
+            "Emperor Edition"
           ],
           "artist": [
-            "Brent Chumley"
-          ],
-          "use": [
-            "Non-unique Lion Scout"
+            "Sergio Camarena"
           ],
           "printimagehash": [
-            "61/15"
-          ],
-          "designer": [
-            "Bryan"
-          ],
-          "designernotes": [
-            "Art Note: generic Lion Scout"
+            "0a/f6"
           ],
           "rarity": [
             "Common"
@@ -8246,11 +7803,11 @@
         },
         {
           "printingid": "2",
-          "cost": [
-            "4"
-          ],
           "set": [
-            "A Matter of Honor"
+            "Ivory Edition"
+          ],
+          "cost": [
+            "2"
           ],
           "keywords": [
             "Lion Clan",
@@ -8258,58 +7815,219 @@
             "Scout"
           ],
           "artist": [
-            "Brent Chumley"
+            "Sergio Camarena"
           ],
           "chi": [
-            "3"
+            "2"
           ],
-          "use": [
-            "Non-unique Lion Scout"
+          "printimagehash": [
+            "86/6d"
           ],
           "honor": [
             "4"
-          ],
-          "printimagehash": [
-            "c4/bc",
-            "d3/a3",
-            "fb/cb"
-          ],
-          "designer": [
-            "Bryan"
           ],
           "personalhonor": [
             "2"
           ],
           "title": [
-            "Ikoma Takakura"
+            "Ikoma Shika"
           ],
           "type": [
             "Personality"
           ],
           "flavor": [
-            "The Akodo are known for their brilliance, the Matsu for their ferocity, and the Kitsu for their purity. But the Ikoma are known for their cunning, their practicality, and their willingness to do whatever they must to achieve victory."
+            "\"Her time among the Colonies and hunting the Yodotai have only added deadly experience to her prodigious talent. I would not trade her for any number of the Hiruma or Tsuruchi's vaunted scouts.\"  - Akodo Dairuko"
           ],
           "number": [
-            "24"
+            "100"
           ],
           "artnumber": [
-            "10150036"
+            "17000521"
           ],
           "clan": [
             "Lion"
           ],
           "force": [
-            "3"
+            "2"
           ],
-          "designernotes": [
-            "Art Note: generic Lion Scout"
+          "rarity": [
+            "Common"
+          ]
+        },
+        {
+          "printingid": "3",
+          "set": [
+            "A Matter of Honor"
+          ],
+          "cost": [
+            "2"
+          ],
+          "keywords": [
+            "Lion Clan",
+            "Samurai",
+            "Scout"
+          ],
+          "artist": [
+            "Sergio Camarena"
+          ],
+          "chi": [
+            "2"
+          ],
+          "printimagehash": [
+            "3d/a3",
+            "ac/53",
+            "fd/24"
+          ],
+          "honor": [
+            "4"
+          ],
+          "personalhonor": [
+            "2"
+          ],
+          "title": [
+            "Ikoma Shika"
+          ],
+          "type": [
+            "Personality"
+          ],
+          "flavor": [
+            "\"There are troubling reports of Naga activity in the Crab ranks,\" Dairuko said. \"What is the report of the scout company?\" <br>Shika bowed deeply. \"I have seen the serpent men myself, my Champion. The reports are true.\""
+          ],
+          "number": [
+            "23"
+          ],
+          "artnumber": [
+            "17000521"
+          ],
+          "clan": [
+            "Lion"
+          ],
+          "force": [
+            "2"
+          ],
+          "rarity": [
+            "Fixed"
+          ]
+        },
+        {
+          "printingid": "4",
+          "set": [
+            "Emperor Edition Demo Decks"
+          ],
+          "cost": [
+            "4"
+          ],
+          "keywords": [
+            "Lion Clan",
+            "Samurai",
+            "Scout"
+          ],
+          "artist": [
+            "Sergio Camarena"
+          ],
+          "chi": [
+            "2"
+          ],
+          "printimagehash": [
+            "0d/30"
+          ],
+          "honor": [
+            "4"
+          ],
+          "personalhonor": [
+            "2"
+          ],
+          "title": [
+            "Ikoma Shika"
+          ],
+          "type": [
+            "Personality"
+          ],
+          "number": [
+            "33"
+          ],
+          "artnumber": [
+            "10040118"
+          ],
+          "clan": [
+            "Lion"
+          ],
+          "force": [
+            "2"
+          ],
+          "rarity": [
+            "Fixed"
+          ]
+        },
+        {
+          "image": [
+            {
+              "details": "ShE_120_details.png",
+              "select": "ShE_120_select.png",
+              "master": "ShE_120_master.png"
+            }
+          ],
+          "printingid": "5",
+          "art": [
+            "art\\onyx\\shika.png"
+          ],
+          "set": [
+            "Shattered Empire"
+          ],
+          "cost": [
+            "2"
+          ],
+          "keywords": [
+            "Samurai",
+            "Scout"
+          ],
+          "artist": [
+            "Sergio Camarena"
+          ],
+          "chi": [
+            "2"
+          ],
+          "honor": [
+            "4"
+          ],
+          "formattedtitle": "Ikoma Shika",
+          "title": [
+            "Ikoma Shika"
+          ],
+          "publisherurl": [
+            "https://sites.google.com/view/the-onyx-lives-project/home"
+          ],
+          "flavor": [
+            "<i>\"Lord Atsutane has us patrolling closer and closer to the Empire's borders. He will not say, but I suspect he thinks war may be inevitable.\"</i>"
+          ],
+          "number": [
+            "120"
+          ],
+          "legality": [
+            "Shattered&nbsp;Empire"
+          ],
+          "ph": [
+            "2"
+          ],
+          "clan": [
+            "Lion"
+          ],
+          "imagehash": "ShE",
+          "publisher": [
+            "Onyx Lives"
+          ],
+          "force": [
+            "2"
+          ],
+          "text": [
+            ""
           ],
           "rarity": [
             "Fixed"
           ]
         }
       ],
-      "printingprimary": "1",
+      "printingprimary": "2",
       "clan": [
         "Lion"
       ],
@@ -8317,19 +8035,21 @@
         "4"
       ],
       "force": [
-        "3"
+        "2"
       ],
-      "formattedtitle": "Ikoma Takakura",
-      "cardid": 10851,
+      "formattedtitle": "Ikoma Shika",
+      "cardid": 3636,
       "cost": [
-        "4"
+        "2"
       ],
-      "imagehash": "61/15",
+      "imagehash": "cd/ef",
       "legality": [
         "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Ivory&nbsp;Edition)",
+        "A&nbsp;Brother's&nbsp;Destiny&nbsp;(Twenty&nbsp;Festivals)",
         "Age&nbsp;of&nbsp;Conquest&nbsp;(Emperor)",
         "Legacy",
-        "Modern"
+        "Modern",
+        "Shattered&nbsp;Empire"
       ],
       "deck": [
         "Dynasty"
@@ -8343,49 +8063,40 @@
         "2"
       ],
       "title": [
-        "Ikoma Takakura"
+        "Ikoma Shika"
       ],
       "type": [
         "Personality"
       ],
-      "@timestamp": "2026-06-06T14:35:14.465880",
+      "@timestamp": "2026-06-06T14:35:50.205346",
       "@SequenceNumber": "0000"
     },
     "selected_printing": {
       "flavor": [
-        "<i>Dairuko drew her generals and scouts to her. \"The fate of the Empire rests with us. We must slow our enemy and deceive him, or the war will come to our Empire anew. I will not allow that.\"</i>"
-      ],
-      "number": [
-        "36"
+        "<i>Shika took to the forest like a Kitsune. Well before her gempukku, some saw in her a wildness that could not hope to be tamed, only nurtured and utilized.</i>"
       ],
       "printingid": "1",
+      "number": [
+        "108"
+      ],
       "artnumber": [
-        "10150036"
+        "10040118"
       ],
       "set": [
-        "Aftermath"
+        "Emperor Edition"
       ],
       "artist": [
-        "Brent Chumley"
-      ],
-      "use": [
-        "Non-unique Lion Scout"
+        "Sergio Camarena"
       ],
       "printimagehash": [
-        "61/15"
-      ],
-      "designer": [
-        "Bryan"
-      ],
-      "designernotes": [
-        "Art Note: generic Lion Scout"
+        "0a/f6"
       ],
       "rarity": [
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/lion-crane-v1/oracle-l5r-10851-printing-1-image-1.jpg",
-    "image_url": "https://images.oracleofthevoid.com/l5r/61/15/printing_10851_1_master.jpg",
-    "image_sha256": "204804777c86751520f9efc4e870d08f9a6cb110f296271b7c96370cfd1914f5"
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3636-printing-1-image-1.jpg",
+    "image_url": "https://images.oracleofthevoid.com/l5r/0a/f6/printing_3636_1_master.jpg",
+    "image_sha256": "adbe0926ab656b966b6bdbedb27a2ad45d8789a9869fc2932c41cdb0e86b0d49"
   }
 ]

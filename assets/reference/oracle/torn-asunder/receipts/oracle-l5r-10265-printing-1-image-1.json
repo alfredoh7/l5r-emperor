@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 797185,
+  "card_id": "oracle-l5r-10265",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10265-printing-1-image-1",
+  "image_index": 1,
+  "name": "Green Lake Dojo",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 10265,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10265-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:34.923799+00:00",
+  "sha256": "56dcdf438e07d90e3bbc2de94bf685d8d57d0c2035f85e2637e81e3e435075ad",
+  "source_image_hash": "68/7f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/68/7f/printing_10265_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/68/7f/printing_10265_1_",
+  "width": 750
+}

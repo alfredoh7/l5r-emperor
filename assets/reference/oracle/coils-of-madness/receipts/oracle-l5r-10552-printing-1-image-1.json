@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1114479,
+  "card_id": "oracle-l5r-10552",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10552-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fires of Turmoil",
+  "numbers": [
+    "124"
+  ],
+  "oracle_id": 10552,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10552-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:38.823441+00:00",
+  "sha256": "16ae47826202e103725ce3b5a9bce3ed11a61070788b85355f23e2c6431a228c",
+  "source_image_hash": "78/e3",
+  "source_url": "https://images.oracleofthevoid.com/l5r/78/e3/printing_10552_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/78/e3/printing_10552_1_",
+  "width": 750
+}

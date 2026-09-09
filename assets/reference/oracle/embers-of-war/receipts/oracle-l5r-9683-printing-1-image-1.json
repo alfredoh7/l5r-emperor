@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 763216,
+  "card_id": "oracle-l5r-9683",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9683-printing-1-image-1",
+  "image_index": 1,
+  "name": "You Are Unworthy",
+  "numbers": [
+    "156"
+  ],
+  "oracle_id": 9683,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-9683-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:34.854477+00:00",
+  "sha256": "053fc5600570f84d53771646f65563b2681ee06b2a994914a29329e2e228fd4c",
+  "source_image_hash": "32/41",
+  "source_url": "https://images.oracleofthevoid.com/l5r/32/41/printing_9683_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/32/41/printing_9683_1_",
+  "width": 750
+}

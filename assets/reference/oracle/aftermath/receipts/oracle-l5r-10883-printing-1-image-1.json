@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 766627,
+  "card_id": "oracle-l5r-10883",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10883-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kitsune Kichi",
+  "numbers": [
+    "68"
+  ],
+  "oracle_id": 10883,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10883-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:00.281828+00:00",
+  "sha256": "02ef0712e8aa1ef6c878c1543899e8f08010d73eae523a901f05b5b823aa627c",
+  "source_image_hash": "22/a9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/22/a9/printing_10883_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/22/a9/printing_10883_1_",
+  "width": 750
+}

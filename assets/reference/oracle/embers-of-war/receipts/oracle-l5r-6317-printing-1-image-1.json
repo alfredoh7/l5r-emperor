@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 812953,
+  "card_id": "oracle-l5r-6317",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6317-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ride the Breeze",
+  "numbers": [
+    "135"
+  ],
+  "oracle_id": 6317,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6317-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:25.881349+00:00",
+  "sha256": "a0ed4112fcef4929f839030e64bd1b6a056af4dca9329cf32e333bcfcd43cadc",
+  "source_image_hash": "51/af",
+  "source_url": "https://images.oracleofthevoid.com/l5r/51/af/printing_6317_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/51/af/printing_6317_1_",
+  "width": 750
+}

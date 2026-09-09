@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 214916,
+  "card_id": "oracle-l5r-2313",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2313-printing-1-image-1",
+  "image_index": 1,
+  "name": "Embracing Virtue",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 2313,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2313-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:18.818220+00:00",
+  "sha256": "cb0a5977c81622c01e86321a46164dd8935a77135874cd626abb2386b5e665d1",
+  "source_image_hash": "ee/8e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ee/8e/printing_2313_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ee/8e/printing_2313_1_",
+  "width": 750
+}

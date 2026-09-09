@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 805134,
+  "card_id": "oracle-l5r-10370",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10370-printing-1-image-1",
+  "image_index": 1,
+  "name": "Duty Over All Things",
+  "numbers": [
+    "114"
+  ],
+  "oracle_id": 10370,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10370-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:24.312071+00:00",
+  "sha256": "893504b52808958abbc1b06e87899dc88d36e12e431260070fae936f3812556a",
+  "source_image_hash": "d9/fe",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d9/fe/printing_10370_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d9/fe/printing_10370_1_",
+  "width": 750
+}

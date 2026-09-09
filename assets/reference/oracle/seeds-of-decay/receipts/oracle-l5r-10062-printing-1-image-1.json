@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 792300,
+  "card_id": "oracle-l5r-10062",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10062-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ikoma Masumi",
+  "numbers": [
+    "36"
+  ],
+  "oracle_id": 10062,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10062-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:19.584477+00:00",
+  "sha256": "6c6fb8dd96637f2b7c1b60ce8f64a4a96c67d2540f65fa280205c38d93d0ebd4",
+  "source_image_hash": "8b/cc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/8b/cc/printing_10062_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/8b/cc/printing_10062_1_",
+  "width": 750
+}

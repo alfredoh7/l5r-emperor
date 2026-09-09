@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 959208,
+  "card_id": "oracle-l5r-10538",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10538-printing-1-image-1",
+  "image_index": 1,
+  "name": "Soul of Earth",
+  "numbers": [
+    "117"
+  ],
+  "oracle_id": 10538,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10538-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:36.578270+00:00",
+  "sha256": "c02853f9870697286eb385c4d97540fec904c7f5a96bf7d6f7e1745e0ea6ffcc",
+  "source_image_hash": "87/32",
+  "source_url": "https://images.oracleofthevoid.com/l5r/87/32/printing_10538_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/87/32/printing_10538_1_",
+  "width": 750
+}

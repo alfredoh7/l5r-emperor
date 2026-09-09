@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 401717,
+  "card_id": "oracle-l5r-7179",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7179-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shosuro Tsuji",
+  "numbers": [
+    "56"
+  ],
+  "oracle_id": 7179,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-7179-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:41.688115+00:00",
+  "sha256": "5d90de16f4f6dca0582e0623593bba62574a2523c9b473524fa7b8bc33b7dc69",
+  "source_image_hash": "0e/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0e/2b/printing_7179_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/2b/printing_7179_1_",
+  "width": 750
+}

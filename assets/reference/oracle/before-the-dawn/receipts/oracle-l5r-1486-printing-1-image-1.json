@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 385200,
+  "card_id": "oracle-l5r-1486",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1486-printing-1-image-1",
+  "image_index": 1,
+  "name": "Control the Board",
+  "numbers": [
+    "110"
+  ],
+  "oracle_id": 1486,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-1486-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:09.196552+00:00",
+  "sha256": "a96d6d59ba35d5a148d1207dd79886e1a8ad8e443ee903a9fd54aa6d3ac19ed0",
+  "source_image_hash": "6d/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6d/f7/printing_1486_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6d/f7/printing_1486_1_",
+  "width": 750
+}

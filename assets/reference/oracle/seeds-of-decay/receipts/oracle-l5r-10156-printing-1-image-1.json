@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 774857,
+  "card_id": "oracle-l5r-10156",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10156-printing-1-image-1",
+  "image_index": 1,
+  "name": "Manipulate Energies",
+  "numbers": [
+    "130"
+  ],
+  "oracle_id": 10156,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10156-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:39.690056+00:00",
+  "sha256": "aa70f9aeae993efea36ac37cc934a834c8fe97d1e3ffa326b403dee20b0699a5",
+  "source_image_hash": "fd/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fd/2b/printing_10156_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/2b/printing_10156_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 798921,
+  "card_id": "oracle-l5r-9932",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9932-printing-1-image-1",
+  "image_index": 1,
+  "name": "Subtle Games",
+  "numbers": [
+    "144"
+  ],
+  "oracle_id": 9932,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9932-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:54:24.631215+00:00",
+  "sha256": "14b184ec5e32d41e73a1d1f5f552489e9eacb440c056f1792a15040407d7238a",
+  "source_image_hash": "ba/56",
+  "source_url": "https://images.oracleofthevoid.com/l5r/ba/56/printing_9932_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/ba/56/printing_9932_1_",
+  "width": 750
+}

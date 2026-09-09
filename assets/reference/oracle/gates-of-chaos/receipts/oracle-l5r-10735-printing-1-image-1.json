@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746032,
+  "card_id": "oracle-l5r-10735",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10735-printing-1-image-1",
+  "image_index": 1,
+  "name": "Lakeside Retreat",
+  "numbers": [
+    "127"
+  ],
+  "oracle_id": 10735,
+  "path": "assets/reference/oracle/gates-of-chaos/images/oracle-l5r-10735-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Gates of Chaos",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:03:02.537777+00:00",
+  "sha256": "bbe84614d18112f4ed028f06984eaefe0c88a8aca1e5cf28819d5bfec7967dcc",
+  "source_image_hash": "cc/dc",
+  "source_url": "https://images.oracleofthevoid.com/l5r/cc/dc/printing_10735_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/cc/dc/printing_10735_1_",
+  "width": 750
+}

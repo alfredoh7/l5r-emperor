@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 269517,
+  "card_id": "oracle-l5r-8303",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8303-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Second City",
+  "numbers": [
+    "48"
+  ],
+  "oracle_id": 8303,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8303-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:38.988489+00:00",
+  "sha256": "776b2f2bf3a8d14e5dea2404879697ac53ad61eeb5da6c875cf7904a0a042039",
+  "source_image_hash": "0c/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0c/2b/printing_8303_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0c/2b/printing_8303_1_",
+  "width": 750
+}

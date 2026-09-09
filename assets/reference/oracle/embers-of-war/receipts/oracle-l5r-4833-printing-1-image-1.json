@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 790173,
+  "card_id": "oracle-l5r-4833",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4833-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mara's Touch",
+  "numbers": [
+    "103"
+  ],
+  "oracle_id": 4833,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-4833-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:59:57.860709+00:00",
+  "sha256": "07040babae8bef8690d48e7a27a7ea0d95033acfb1ffd27b44b5f48f1c2a20b2",
+  "source_image_hash": "77/7d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/77/7d/printing_4833_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/77/7d/printing_4833_1_",
+  "width": 750
+}

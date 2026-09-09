@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 875697,
+  "card_id": "oracle-l5r-10492",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10492-printing-1-image-2",
+  "image_index": 2,
+  "name": "Takujin",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 10492,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10492-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:13:48.883826+00:00",
+  "sha256": "3e66508dbcb112df6bb4b94863e3b66853668a19b52e72e336b1edfa7612d064",
+  "source_image_hash": "d7/80",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d7/80/printing_10492_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/80/printing_10492_1_",
+  "width": 750
+}

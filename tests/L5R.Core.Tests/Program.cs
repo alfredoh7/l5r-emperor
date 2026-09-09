@@ -6,7 +6,7 @@ var tests = new (string Name, Action Run)[]
 {
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
-    ("Bowed Takakura suppresses two Native Guides in the view and actual resolution", BowedTakakuraResolution),
+    ("A bowed Personality suppresses two Native Guides in the view and actual resolution", BowedPersonalityResolution),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
     ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
     ("Unit view counts Items once and matches battle resolution", UnitViewResolution),
@@ -69,9 +69,28 @@ var tests = new (string Name, Action Run)[]
     ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
+    ("A discarded dishonorable Personality can become honorably dead: rehonored, no Honor-loss penalty", MakeDeadFromDiscard),
     ("Meiyu's entering-play reaction composes with Proclaim, each usable once, before the window closes", MeiyuEntersPlayReaction),
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
-    ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack)
+    ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
+    ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow),
+    ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
+    ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome),
+    ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
+    ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
+    ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
+    ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution),
+    ("Tactical Advantage requires a performing Tactician, is usable any number of times per turn, and gives Force equal to the discarded card's Focus Value", TacticalAdvantage),
+    ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
+    ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
+    ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
+    ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama),
+    ("Daigotsu Kendo's Conqueror keeps him unbowed after a win; Ikoma Natsu's Cavalry assigns during Cavalry Maneuvers", DaigotsuKendoConquerorAndIkomaNatsuCavalry),
+    ("Mirumoto Reiyu gives an enemy Force/Follower a Force penalty equal to her own current Force", MirumotoReiyuForcePenalty),
+    ("Shinjo Horibe may bow or straighten any Personality, but only while opposed", ShinjoHoribeBowOrStraighten),
+    ("Doji Atsumichi may bow or straighten a Personality with lower Personal Honor than himself", DojiAtsumichiBowOrStraighten),
+    ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
+    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead)
 };
 var failed=0;
 foreach(var test in tests)
@@ -240,9 +259,14 @@ static void Priority()
 {
     var e=MatchEngine.CreateStarterMatch(); Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.Action); Equal(e.State.PriorityPlayerId,1);
     Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.AttackDeclaration);
-    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1);
-    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0);
-    Accept(e,Cmd(e,"selectBattle",province:0)); Equal(e.State.PriorityPlayerId,1);
+    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.DefenseAssignment);
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.CavalryDeclaration);
+    // Infantry Maneuvers committed above; Cavalry Maneuvers follows the same attacker-then-defender order.
+    Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.CavalryDefense);
+    // Nobody ever placed a unit anywhere, Infantry or Cavalry: no battlefield is unresolved, so
+    // there is nothing to select and the turn moves straight to the Dynasty Phase.
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.Phase,Phase.Dynasty);
+    Equal(e.State.UnresolvedBattlefields.Count,0);
 }
 static void Bamboo()
 {
@@ -643,6 +667,28 @@ static void LawOfDarknessDojo()
         Equal(e.State.Players[1].Honor,before-3,"2 Honor from the training ability plus 1 more from Law of Darkness Dojo's passive");
     }
 }
+static void MakeDeadFromDiscard()
+{
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var discarded=Add(s,"training-dishonored-samurai",0,Zone.DynastyDiscard); discarded.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:discarded.Id,AbilityId:"training-make-dead"));
+        Equal(e.State.Cards[discarded.Id].Zone,Zone.Dead);
+        Check(!e.State.Cards[discarded.Id].Dishonorable,"Becomes honorably dead: rehonored first");
+        Equal(e.State.Players[0].Honor,honorBefore,"No Honor loss -- he was rehonored before becoming dead");
+    }
+    {
+        // A Personality still in play (not yet discarded) is not a legal target.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var master=Add(s,"training-token-master",0,Zone.Home);
+        var inPlay=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:master.Id,TargetId:inPlay.Id,AbilityId:"training-make-dead"));
+    }
+}
 static void TokenPrimitives()
 {
     {
@@ -827,6 +873,446 @@ static void TorazuFireTokensAndAttack()
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
     }
 }
+static void AttackReactionWindow()
+{
+    {
+        // A reaction is available (the fixture reactor, anywhere in play -- Reaction timing has no
+        // Battle-presence/location requirement of its own): the window opens instead of resolving
+        // immediately. Negating drives strength to 0; the cost already paid stays paid regardless.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var reactor=Add(s,"training-attack-reactor",1,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, legal target
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction","A reaction is available, so the window opens instead of resolving immediately");
+        Equal(e.State.PendingAttack?.Strength,5);
+        Check(e.State.Cards[castle.Id].Bowed,"The cost is paid immediately, before the window even opens");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+        Equal(e.State.PendingAttack?.Strength,0);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.PendingChoice is null && e.State.PendingAttack is null,"Window closed and the attack resolved");
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"Negated: the target survives");
+    }
+    {
+        // Boosting raises strength; a target already legal at announce time is still destroyed, and
+        // the per-ability hit bonus (Carpenter Castle's +2 Honor) still fires on the deferred hit.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var reactor=Add(s,"training-attack-reactor",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Accept(e,new GameCommand("declineReaction",1,e.Version)); // the opponent has nothing to react with
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reactor.Id,AbilityId:"training-attack-boost"));
+        Equal(e.State.PendingAttack?.Strength,7,"5 base + 2 from the boost");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Carpenter Castle's hit bonus still applies to a deferred resolution");
+    }
+}
+static void UnconditionalAttackImportWave()
+{
+    // Shinjo Eun-Sahng (Ranged 4), Shosuro Konishi (Ranged 5), Tsuruchi Kosoko (Ranged 5) and Stalking
+    // Tiger (Melee 6): each card is its own performer with no cost and no condition -- proves the
+    // shared Attack primitive needs nothing beyond a catalog entry plus a UseAbility case per card.
+    foreach(var (cardId,abilityId,strength) in new[]
+    {
+        ("oracle-l5r-6872","shinjo-eun-sahng-attack",4),
+        ("oracle-l5r-7121","shosuro-konishi-attack",5),
+        ("oracle-l5r-8852","tsuruchi-kosoko-attack",5),
+        ("oracle-l5r-7450","stalking-tiger-attack",6),
+    })
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        // Stalking Tiger is a Follower: it needs a friendly Personality unit to attach to before it
+        // (or anything else) counts as "a unit at the current battlefield" (Army() is Personality-only).
+        var isFollower=CardCatalog.Get(cardId).Type==CardType.Follower;
+        var host=isFollower?Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0):null;
+        var performer=Add(s,cardId,0,isFollower?Zone.Attached:Zone.Battlefield,province:0,attachedTo:host?.Id);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        if(strength<5) Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:strength>=5?target.Id:null,AbilityId:abilityId));
+        Equal(e.State.Cards[target.Id].Zone,strength>=5?Zone.Dead:Zone.Battlefield,$"{cardId}: hit expectation at strength {strength} vs Force 5");
+    }
+}
+static void TsuruchiIsasAttackAndMoveHome()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var isas=Add(s,"oracle-l5r-8840",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:isas.Id,TargetId:target.Id,AbilityId:"tsuruchi-isas-attack"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Ranged 3 hits a Force-3 target");
+    Check(e.State.Cards[isas.Id].Bowed,"Bowing Isas is the cost, paid up front");
+    Equal(e.State.Cards[isas.Id].Zone,Zone.Home,"Isas moves home after the Attack resolves");
+    Equal(e.State.Cards[isas.Id].ProvinceIndex,null,"Home is not associated with a province");
+}
+static void BayushiKahokuAttack()
+{
+    // No enemy Dishonorable Personality yet: no passive Force bonus, base strength 3 can't reach a
+    // Force-5 target.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var kahoku=Add(s,"oracle-l5r-806",0,Zone.Battlefield,province:0);
+    var honorable=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, not dishonorable
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku.Id).Force,3,"No enemy is dishonorable: base Force 3");
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kahoku.Id,TargetId:honorable.Id,AbilityId:"bayushi-kahoku-attack"));
+
+    // A dishonorable enemy Personality both raises Kahoku's own Force (+2, always-on) and the Attack's
+    // strength against that specific target (+2, target-dependent) -- two separate conditionals that
+    // happen to share the same Dishonorable flag.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var kahoku2=Add(s2,"oracle-l5r-806",0,Zone.Battlefield,province:0);
+    var dishonorable=Add(s2,"training-crane-veteran",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true; // Force 5
+    var e2=MatchEngine.FromTestState(s2);
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku2.Id).Force,5,"An enemy dishonorable Personality raises Kahoku's own Force by 2");
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kahoku2.Id,TargetId:dishonorable.Id,AbilityId:"bayushi-kahoku-attack"));
+    Equal(e2.State.Cards[dishonorable.Id].Zone,Zone.Dead,"Strength 3+2=5 destroys the dishonorable Force-5 target");
+}
+static void AsakoUmeAttack()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var ume=Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 2
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ume.Id).Force,3,"No Spell attached: base Force 3");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ume.Id,TargetId:target.Id,AbilityId:"asako-ume-attack"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Ranged 4 Attack is unconditional regardless of the Spell check");
+
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var ume2=Add(s2,"oracle-l5r-592",0,Zone.Battlefield,province:0);
+    Add(s2,"training-spell",0,Zone.Attached,attachedTo:ume2.Id,province:0);
+    var e2=MatchEngine.FromTestState(s2);
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==ume2.Id).Force,4,"A Spell attached raises her own Force by 1; the Attack's strength is unaffected");
+}
+static void Reconnaissance()
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var scout=Add(s,"training-scout",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    Check(!e.State.Players[1].Provinces[0].Reconnaissance[0],"Defaults to false");
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:4)); // out of range
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:0));
+    Check(e.State.Players[1].Provinces[0].Reconnaissance[0],"Granted for player 0 in player 1's province 0");
+    Check(!e.State.Players[1].Provinces[1].Reconnaissance[0],"Not granted at a different province");
+    Check(!e.State.Players[1].Provinces[0].Reconnaissance[1],"Not granted to the other player");
+    Check(!e.State.Players[0].Provinces[0].Reconnaissance[0],"Not granted in the granting player's own province");
+
+    // Move the same, now-Reconnaissance-carrying state into a battle and exercise the gated effect:
+    // with Reconnaissance in the target's province, the strike's Honor-loss portion proceeds.
+    var battle=e.State; battle.Phase=Phase.Battle; battle.CurrentBattleProvince=0; battle.UnresolvedBattlefields=[0]; battle.PriorityPlayerId=0;
+    Add(battle,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+    var scoutAtBattle=Add(battle,"training-scout",0,Zone.Battlefield,province:0);
+    var withRecon=Add(battle,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var eb=MatchEngine.FromTestState(battle);
+    var honorBefore=eb.State.Players[1].Honor;
+    Accept(eb,new GameCommand("useAbility",0,eb.Version,CardId:scoutAtBattle.Id,TargetId:withRecon.Id,AbilityId:"training-reconnaissance-strike"));
+    Equal(eb.State.Players[1].Honor,honorBefore-2,"Reconnaissance is present in this province: the Honor-loss portion proceeds");
+
+    // Without Reconnaissance, the same ability still succeeds -- its gated portion just does nothing.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Battle; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0]; s2.PriorityPlayerId=0;
+    Add(s2,"training-lion-samurai",0,Zone.Battlefield,province:0);
+    var scoutNoRecon=Add(s2,"training-scout",0,Zone.Battlefield,province:0);
+    var withoutRecon=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var en=MatchEngine.FromTestState(s2);
+    var honorBefore2=en.State.Players[1].Honor;
+    Accept(en,new GameCommand("useAbility",0,en.Version,CardId:scoutNoRecon.Id,TargetId:withoutRecon.Id,AbilityId:"training-reconnaissance-strike"));
+    Equal(en.State.Players[1].Honor,honorBefore2,"No Reconnaissance in this province: the action succeeds but its gated portion does nothing");
+}
+static void ReconnaissanceOnlyClearsOnBattleResolution()
+{
+    // Refilling a province with a new, unseen card does NOT clear Reconnaissance on its own --
+    // resolving a battle there is the only thing that does.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+    var scout=Add(s,"training-scout",1,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    var id=ProvinceCard(e,2);
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:scout.Id,AbilityId:"training-gain-reconnaissance",Province:2));
+    Check(e.State.Players[0].Provinces[2].Reconnaissance[1],"Granted before the province refills");
+    var dynasty=e.State; dynasty.Phase=Phase.Dynasty; dynasty.PriorityPlayerId=0; dynasty.ActivePlayerId=0;
+    e=MatchEngine.FromTestState(dynasty);
+    Accept(e,Cmd(e,"purchase",id:id,sources:e.QuotePurchase(0,id).Payments[0].SourceIds));
+    Check(e.State.Players[0].Provinces[2].Reconnaissance[1],"Still granted after the province refills -- only a battle resolving there clears it");
+
+    // A tied battle resolves without destroying the province -- Reconnaissance still resets to No.
+    var e2=Battle(3,3);
+    e2.State.Players[1].Provinces[0].Reconnaissance[0]=true;
+    Resolve(e2);
+    Check(!e2.State.Players[1].Provinces[0].Destroyed,"Sanity: a tied battle does not destroy the province");
+    Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance resets to No once the battle resolves, whether or not the province survives");
+
+    // Destroying a province via battle also clears it (same precedent values as ProvinceThreshold).
+    var e3=Battle(9,2,6);
+    e3.State.Players[1].Provinces[0].Reconnaissance[0]=true;
+    Resolve(e3);
+    Check(e3.State.Players[1].Provinces[0].Destroyed,"Sanity: the province was actually destroyed");
+    Check(!e3.State.Players[1].Provinces[0].Reconnaissance[0],"Reconnaissance clears when its province's battle resolves, including when destroyed");
+}
+static void TacticalAdvantage()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var tactician=Add(s,"training-tactician",0,Zone.Battlefield,province:0);
+    var notTactician=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+    var focus1=Add(s,"training-focus-strategy",0,Zone.Hand);
+    var focus2=Add(s,"training-focus-strategy",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,PerformerId:notTactician.Id,TargetId:focus1.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,2,"Base Force 2, no bonus yet");
+    Accept(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus1.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,5,"Base 2 + discarded card's Focus Value 3");
+    Equal(e.State.Cards[focus1.Id].Zone,Zone.FateDiscard,"The discarded card moves to the Fate discard pile");
+    // Any number of times per turn: a second use in the same turn is not blocked by the normal
+    // once-per-turn dedupe -- only its own cost (discarding another card) limits it. Priority passed
+    // to the opponent after the first use (like any action), so they must act (or pass) before it
+    // returns to player 0 for the second use.
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Accept(e,new GameCommand("useAbility",0,e.Version,PerformerId:tactician.Id,TargetId:focus2.Id,AbilityId:"tactical-advantage"));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==tactician.Id).Force,8,"Two uses stack: base 2 + 3 + 3");
+}
+static void ConquerorStraightensAfterVictory()
+{
+    // A single eligible Conqueror resolves immediately: no choice to make.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var conqueror=Add(s,"training-conqueror",0,Zone.Battlefield,province:0); // Force 2
+    var other=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Force 4, no Conqueror
+    var weak=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, attacker wins 6-3
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e);
+    Check(e.State.PendingChoice is null,"No choice needed with only one Conqueror candidate");
+    Equal(e.State.Cards[conqueror.Id].Zone,Zone.Home); Check(!e.State.Cards[conqueror.Id].Bowed,"The sole Conqueror candidate returns home unbowed");
+    Equal(e.State.Cards[other.Id].Zone,Zone.Home); Check(e.State.Cards[other.Id].Bowed,"A non-Conqueror attacking unit still returns home bowed");
+
+    // Two eligible Conquerors: the attacker must choose which one straightens.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var c1=Add(s2,"training-conqueror",0,Zone.Battlefield,province:0);
+    var c2=Add(s2,"training-conqueror",0,Zone.Battlefield,province:0);
+    var weak2=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, attacker wins 4-3
+    var e2=MatchEngine.FromTestState(s2);
+    Resolve(e2);
+    Equal(e2.State.PendingChoice?.Type,"conqueror","Two eligible Conquerors: a real choice is required");
+    Check(e2.State.Cards[c1.Id].Zone==Zone.Battlefield && e2.State.Cards[c2.Id].Zone==Zone.Battlefield,"Resolution defers until the choice is made");
+    Reject(e2,new GameCommand("chooseConqueror",0,e2.Version,TargetId:weak2.Id)); // not an eligible candidate
+    Accept(e2,new GameCommand("chooseConqueror",0,e2.Version,TargetId:c1.Id));
+    Check(e2.State.PendingChoice is null && e2.State.Cards[c1.Id].Zone==Zone.Home && !e2.State.Cards[c1.Id].Bowed,"Chosen Conqueror returns home unbowed");
+    Check(e2.State.Cards[c2.Id].Zone==Zone.Home && e2.State.Cards[c2.Id].Bowed,"The other eligible Conqueror still returns home bowed");
+}
+static void KensaiAndKamaWeaponCap()
+{
+    // A Kensai may attach two Weapons but not a third.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var kensai=Add(s,"training-kensai",0,Zone.Home);
+    var w1=Add(s,"training-weapon",0,Zone.Hand);
+    var w2=Add(s,"training-weapon",0,Zone.Hand);
+    var w3=Add(s,"training-weapon",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    // Equip is a Limited action: it passes priority to the opponent (like any action), so they must
+    // act (or pass) before it returns to player 0 for a second equip.
+    Accept(e,Cmd(e,"equip",player:0,id:w1.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Accept(e,Cmd(e,"pass",player:1));
+    Accept(e,Cmd(e,"equip",player:0,id:w2.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Equal(e.State.Cards.Values.Count(c=>c.AttachedTo==kensai.Id),2,"Kensai carries two Weapons");
+    Accept(e,Cmd(e,"pass",player:1));
+    Reject(e,Cmd(e,"equip",player:0,id:w3.Id,target:kensai.Id));
+
+    // A non-Kensai personality with a Kama may attach a second Weapon, but still not a third.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var plain=Add(s2,"training-crane-samurai",0,Zone.Home);
+    var kama=Add(s2,"training-kama",0,Zone.Hand);
+    var pw1=Add(s2,"training-weapon",0,Zone.Hand);
+    var pw2=Add(s2,"training-weapon",0,Zone.Hand);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,Cmd(e2,"equip",player:0,id:pw1.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:plain.Id));
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Accept(e2,Cmd(e2,"equip",player:0,id:kama.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:plain.Id));
+    Equal(e2.State.Cards.Values.Count(c=>c.AttachedTo==plain.Id),2,"A plain Weapon plus a Kama: two Weapons total");
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Reject(e2,Cmd(e2,"equip",player:0,id:pw2.Id,target:plain.Id));
+
+    // A Kensai wielding a Kama is still capped at two Weapons -- the two allowances do not stack.
+    var s3=MatchEngine.CreateEconomyScenario().State;
+    s3.Phase=Phase.Action; s3.PriorityPlayerId=0; s3.ActivePlayerId=0;
+    var kensai2=Add(s3,"training-kensai",0,Zone.Home);
+    var kama2=Add(s3,"training-kama",0,Zone.Hand);
+    var kw1=Add(s3,"training-weapon",0,Zone.Hand);
+    var kw2=Add(s3,"training-weapon",0,Zone.Hand);
+    var e3=MatchEngine.FromTestState(s3);
+    Accept(e3,Cmd(e3,"equip",player:0,id:kama2.Id,sources:e3.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Accept(e3,Cmd(e3,"pass",player:1));
+    Accept(e3,Cmd(e3,"equip",player:0,id:kw1.Id,sources:e3.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Equal(e3.State.Cards.Values.Count(c=>c.AttachedTo==kensai2.Id),2,"Kensai + Kama: still two Weapons total");
+    Accept(e3,Cmd(e3,"pass",player:1));
+    Reject(e3,Cmd(e3,"equip",player:0,id:kw2.Id,target:kensai2.Id));
+}
+static void CavalryManeuversSegment()
+{
+    var s=MatchEngine.CreateStarterMatch().State; s.Phase=Phase.AttackDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var infantry=Add(s,"training-crane-samurai",0,Zone.Home); // no Cavalry keyword: Infantry
+    var soloCavalry=Add(s,"training-cavalry",0,Zone.Home); // Cavalry keyword, no Followers: Cavalry
+    var mixedUnit=Add(s,"training-cavalry",0,Zone.Home); // Cavalry Personality...
+    Add(s,"training-follower",0,Zone.Attached,attachedTo:mixedUnit.Id); // ...+ a non-Cavalry Follower: still Infantry
+    var pureCavalryUnit=Add(s,"training-cavalry",0,Zone.Home); // Cavalry Personality...
+    Add(s,"training-cavalry-follower",0,Zone.Attached,attachedTo:pureCavalryUnit.Id); // ...+ a Cavalry Follower: Cavalry
+    var e=MatchEngine.FromTestState(s);
+
+    // Infantry Maneuvers: only the two Infantry units (plain, and the mixed Cavalry+non-Cavalry-Follower one).
+    Reject(e,Cmd(e,"attack",player:0,assignments:new(){[soloCavalry.Id]=0}));
+    Reject(e,Cmd(e,"attack",player:0,assignments:new(){[pureCavalryUnit.Id]=0}));
+    Accept(e,Cmd(e,"attack",player:0,assignments:new(){[infantry.Id]=0,[mixedUnit.Id]=1}));
+    Equal(e.State.Cards[infantry.Id].Zone,Zone.Battlefield);
+    Equal(e.State.Cards[mixedUnit.Id].Zone,Zone.Battlefield,"A Cavalry Personality with a non-Cavalry Follower assigns as Infantry");
+    Equal(e.State.Phase,Phase.DefenseAssignment);
+
+    Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
+    Equal(e.State.Phase,Phase.CavalryDeclaration,"Cavalry Maneuvers follows Infantry Maneuvers");
+
+    // Cavalry Maneuvers: only the two genuine Cavalry units (both members of the unit carry Cavalry).
+    Accept(e,Cmd(e,"attack",player:0,assignments:new(){[soloCavalry.Id]=0,[pureCavalryUnit.Id]=1}));
+    Equal(e.State.Cards[soloCavalry.Id].Zone,Zone.Battlefield);
+    Equal(e.State.Cards[pureCavalryUnit.Id].Zone,Zone.Battlefield,"A Cavalry Personality with a Cavalry Follower assigns as Cavalry");
+    Equal(e.State.Phase,Phase.CavalryDefense);
+
+    Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
+    Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
+}
+static void TwoHandedWeaponOverridesKensaiAndKama()
+{
+    // A Kensai may attach a Two-Handed Weapon as their only Weapon...
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var kensai=Add(s,"training-kensai",0,Zone.Home);
+    var twoHanded=Add(s,"training-two-handed-weapon",0,Zone.Hand);
+    var plain=Add(s,"training-weapon",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,Cmd(e,"equip",player:0,id:twoHanded.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:kensai.Id));
+    Equal(e.State.Cards.Values.Count(c=>c.AttachedTo==kensai.Id),1);
+    // ...but it then blocks any further Weapon, even for a Kensai -- Two-Handed overrides the cap.
+    Accept(e,Cmd(e,"pass",player:1));
+    Reject(e,Cmd(e,"equip",player:0,id:plain.Id,target:kensai.Id));
+
+    // A Kensai with a plain Weapon already attached cannot then attach a Two-Handed one either.
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var kensai2=Add(s2,"training-kensai",0,Zone.Home);
+    var plain2=Add(s2,"training-weapon",0,Zone.Hand);
+    var twoHanded2=Add(s2,"training-two-handed-weapon",0,Zone.Hand);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,Cmd(e2,"equip",player:0,id:plain2.Id,sources:e2.PaymentOptions(0,1).First().SourceIds,target:kensai2.Id));
+    Accept(e2,Cmd(e2,"pass",player:1));
+    Reject(e2,Cmd(e2,"equip",player:0,id:twoHanded2.Id,target:kensai2.Id));
+}
+static void DaigotsuKendoConquerorAndIkomaNatsuCavalry()
+{
+    // Daigotsu Kendo carries Conqueror: winning a battle straightens him instead of bowing him.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var kendo=Add(s,"oracle-l5r-1736",0,Zone.Battlefield,province:0); // Force 3, no defenders present
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e);
+    Check(!e.State.Cards[kendo.Id].Bowed,"Conqueror: Kendo returns home unbowed after winning");
+    Equal(e.State.Cards[kendo.Id].Zone,Zone.Home);
+
+    // Ikoma Natsu carries Cavalry: assigns during Cavalry Maneuvers, not Infantry Maneuvers.
+    var s2=MatchEngine.CreateStarterMatch().State; s2.Phase=Phase.AttackDeclaration; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var natsu=Add(s2,"oracle-l5r-3623",0,Zone.Home);
+    var e2=MatchEngine.FromTestState(s2);
+    Reject(e2,Cmd(e2,"attack",player:0,assignments:new(){[natsu.Id]=0}));
+    Accept(e2,Cmd(e2,"attack",player:0,assignments:[]));
+    Accept(e2,Cmd(e2,"assignDefense",player:1,assignments:[]));
+    Equal(e2.State.Phase,Phase.CavalryDeclaration);
+    Accept(e2,Cmd(e2,"attack",player:0,assignments:new(){[natsu.Id]=0}));
+    Equal(e2.State.Cards[natsu.Id].Zone,Zone.Battlefield,"Cavalry-keyword Natsu assigns during Cavalry Maneuvers");
+}
+static void MirumotoReiyuForcePenalty()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var reiyu=Add(s,"oracle-l5r-5138",0,Zone.Battlefield,province:0); // Force 4
+    var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reiyu.Id,TargetId:target.Id,AbilityId:"reiyu-force-penalty"));
+    Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,1,"Force 5 - 4 (Reiyu's current Force) = 1");
+}
+static void ShinjoHoribeBowOrStraighten()
+{
+    // Not opposed: rejected.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var horibe=Add(s,"oracle-l5r-6885",0,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:horibe.Id,TargetId:horibe.Id,AbilityId:"horibe-bow"));
+
+    // Opposed: may bow or straighten any Personality, including an enemy's.
+    var s2=StrongholdBattle("oracle-l5r-1218");
+    var horibe2=Add(s2,"oracle-l5r-6885",0,Zone.Battlefield,province:0);
+    var enemy=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:horibe2.Id,TargetId:enemy.Id,AbilityId:"horibe-bow"));
+    Check(e2.State.Cards[enemy.Id].Bowed,"Bows the target enemy Personality");
+    // Bow and straighten are the same single printed ability's two effects, not two independent
+    // once-per-turn abilities: having just bowed, straightening (even a different target) is spent too.
+    Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:horibe2.Id,TargetId:horibe2.Id,AbilityId:"horibe-straighten"));
+}
+static void DojiAtsumichiBowOrStraighten()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var atsumichi=Add(s,"oracle-l5r-2060",0,Zone.Battlefield,province:0); // Personal Honor 4
+    var lowerHonor=Add(s,"training-crane-samurai",1,Zone.Battlefield,bowed:true,province:0); // PH 2
+    var equalHonor=Add(s,"training-lion-dignitary",1,Zone.Battlefield,province:0); // PH 4: not lower
+    var another=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // a second eligible lower-Honor target
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:equalHonor.Id,AbilityId:"atsumichi-bow"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:lowerHonor.Id,AbilityId:"atsumichi-straighten"));
+    Check(!e.State.Cards[lowerHonor.Id].Bowed,"Straightens the lower-Honor target");
+    // Bow and straighten are the same single printed ability's two effects, not two independent
+    // once-per-turn abilities: having just straightened, bowing (even a different target) is spent too.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:atsumichi.Id,TargetId:another.Id,AbilityId:"atsumichi-bow"));
+}
+static void TetsuoDestroyAttachmentAndWeakerWeaponed()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var tetsuo=Add(s,"oracle-l5r-7943",0,Zone.Battlefield,province:0);
+    Add(s,"training-weapon",0,Zone.Attached,attachedTo:tetsuo.Id,province:0); // Tetsuo carries 1 Weapon
+    var fewerWeapons=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // 0 Weapons
+    var notFewerWeapons=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+    Add(s,"training-weapon",1,Zone.Attached,attachedTo:notFewerWeapons.Id,province:0); // 1 Weapon: not fewer
+    var attachment=Add(s,"training-item",1,Zone.Attached,attachedTo:notFewerWeapons.Id,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:notFewerWeapons.Id,AbilityId:"tetsuo-destroy-weaker-weaponed"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:fewerWeapons.Id,AbilityId:"tetsuo-destroy-weaker-weaponed"));
+    Equal(e.State.Cards[fewerWeapons.Id].Zone,Zone.Dead);
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tetsuo.Id,TargetId:attachment.Id,AbilityId:"tetsuo-destroy-attachment"));
+    Equal(e.State.Cards[attachment.Id].Zone,Zone.FateDiscard);
+}
+static void MotoShunsukeForceBonusAndMakeDead()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var shunsuke=Add(s,"oracle-l5r-5371",0,Zone.Battlefield,province:0); // base Force 3
+    Add(s,"training-crane-samurai",1,Zone.Dead); // player 1's dead pile: 2
+    Add(s,"training-crane-samurai",1,Zone.Dead);
+    Add(s,"training-lion-samurai",0,Zone.Dead); // player 0's (Shunsuke's own) dead pile: 1
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shunsuke.Id).Force,5,"Base 3 + the largest single dead pile (2)");
+
+    var s2=MatchEngine.CreateEconomyScenario().State;
+    s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+    var shunsuke2=Add(s2,"oracle-l5r-5371",0,Zone.Home);
+    var discardedEnemy=Add(s2,"training-crane-samurai",1,Zone.DynastyDiscard);
+    var ownDiscarded=Add(s2,"training-lion-samurai",0,Zone.DynastyDiscard);
+    var e2=MatchEngine.FromTestState(s2);
+    Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:ownDiscarded.Id,AbilityId:"shunsuke-make-dead"));
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:discardedEnemy.Id,AbilityId:"shunsuke-make-dead"));
+    Equal(e2.State.Cards[discardedEnemy.Id].Zone,Zone.Dead,"Becomes honorably dead");
+}
 static void CarpenterCastleAttack()
 {
     {
@@ -965,15 +1451,15 @@ static void UnitViewPrivacy()
     payload.Remove("UnitForce"); Equal(JsonSerializer.Deserialize<CardView>(payload.ToJsonString())!.UnitForce,null);
 }
 
-static void BowedTakakuraResolution()
+static void BowedPersonalityResolution()
 {
     foreach(var owner in new[]{0,1})
     {
         var s=Battle(1,1,6).State;
         var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
-        p.DefinitionId=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Ikoma Takakura").Id;
+        p.DefinitionId=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
         p.Modifiers.Clear(); p.Bowed=true;
-        var guide=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
+        var guide=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
         Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
         Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
         var e=MatchEngine.FromTestState(s);

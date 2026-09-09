@@ -117,10 +117,10 @@
           "historical_text_status": "needs_era_review"
         },
         {
-          "card_id": "oracle-l5r-2166",
-          "name": "Doji Tatsuki",
+          "card_id": "oracle-l5r-2060",
+          "name": "Doji Atsumichi",
           "quantity": 3,
-          "source_url": "https://oracleofthevoid.com/#cardid=2166",
+          "source_url": "https://oracleofthevoid.com/#cardid=2060",
           "automation_status": "unsupported",
           "historical_text_status": "needs_era_review"
         },
@@ -360,10 +360,10 @@
           "historical_text_status": "needs_era_review"
         },
         {
-          "card_id": "oracle-l5r-3636",
-          "name": "Ikoma Shika",
+          "card_id": "oracle-l5r-3623",
+          "name": "Ikoma Natsu",
           "quantity": 3,
-          "source_url": "https://oracleofthevoid.com/#cardid=3636",
+          "source_url": "https://oracleofthevoid.com/#cardid=3623",
           "automation_status": "unsupported",
           "historical_text_status": "needs_era_review"
         },
@@ -376,10 +376,10 @@
           "historical_text_status": "needs_era_review"
         },
         {
-          "card_id": "oracle-l5r-10851",
-          "name": "Ikoma Takakura",
+          "card_id": "oracle-l5r-3636",
+          "name": "Ikoma Shika",
           "quantity": 3,
-          "source_url": "https://oracleofthevoid.com/#cardid=10851",
+          "source_url": "https://oracleofthevoid.com/#cardid=3636",
           "automation_status": "unsupported",
           "historical_text_status": "needs_era_review"
         },

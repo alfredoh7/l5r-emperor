@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 817171,
+  "card_id": "oracle-l5r-10936",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10936-printing-1-image-1",
+  "image_index": 1,
+  "name": "Dying Remonstration",
+  "numbers": [
+    "121"
+  ],
+  "oracle_id": 10936,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10936-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:22.090528+00:00",
+  "sha256": "5ba9b2bf896de6c605354242ce19cb91e5c798b15d84694e479643420d94be33",
+  "source_image_hash": "71/f1",
+  "source_url": "https://images.oracleofthevoid.com/l5r/71/f1/printing_10936_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/71/f1/printing_10936_1_",
+  "width": 750
+}

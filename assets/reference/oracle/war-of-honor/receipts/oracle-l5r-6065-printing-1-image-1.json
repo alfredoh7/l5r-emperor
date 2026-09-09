@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 236664,
+  "card_id": "oracle-l5r-6065",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6065-printing-1-image-1",
+  "image_index": 1,
+  "name": "Prideful Allies",
+  "numbers": [
+    "107"
+  ],
+  "oracle_id": 6065,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6065-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:52.793282+00:00",
+  "sha256": "b98335eee9ee3b83a7fb0cd360a3f53399612f2ae5083af9d858849f6181b22e",
+  "source_image_hash": "65/55",
+  "source_url": "https://images.oracleofthevoid.com/l5r/65/55/printing_6065_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/65/55/printing_6065_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 729153,
+  "card_id": "oracle-l5r-7444",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7444-printing-1-image-1",
+  "image_index": 1,
+  "name": "Staging Grounds",
+  "numbers": [
+    "8"
+  ],
+  "oracle_id": 7444,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-7444-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:47.469819+00:00",
+  "sha256": "cb4f7b94f993e6ed668cfa7feb3e2867778bb4a85596274471bb4db33de68faa",
+  "source_image_hash": "85/bf",
+  "source_url": "https://images.oracleofthevoid.com/l5r/85/bf/printing_7444_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/85/bf/printing_7444_1_",
+  "width": 750
+}

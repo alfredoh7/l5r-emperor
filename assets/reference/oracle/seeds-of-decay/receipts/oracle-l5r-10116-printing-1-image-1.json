@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 868303,
+  "card_id": "oracle-l5r-10116",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10116-printing-1-image-1",
+  "image_index": 1,
+  "name": "Kama",
+  "numbers": [
+    "90"
+  ],
+  "oracle_id": 10116,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10116-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:31.403866+00:00",
+  "sha256": "ce06d3c1059c76fa112d67c8041e6df5cff192d2257281d431e6eddc7e46f10f",
+  "source_image_hash": "3d/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3d/c2/printing_10116_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3d/c2/printing_10116_1_",
+  "width": 750
+}

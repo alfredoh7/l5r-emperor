@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 403791,
+  "card_id": "oracle-l5r-2070",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2070-printing-1-image-1",
+  "image_index": 1,
+  "name": "Doji Dainagon",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 2070,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-2070-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:08.504438+00:00",
+  "sha256": "91531a4166d2f1858b8dd4a10aab282af90fcbe64e82cc1bb8cc3da5f8687762",
+  "source_image_hash": "96/47",
+  "source_url": "https://images.oracleofthevoid.com/l5r/96/47/printing_2070_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/96/47/printing_2070_1_",
+  "width": 750
+}

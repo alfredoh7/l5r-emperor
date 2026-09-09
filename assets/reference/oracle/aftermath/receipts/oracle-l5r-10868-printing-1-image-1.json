@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 777093,
+  "card_id": "oracle-l5r-10868",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10868-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bayushi Jin-e",
+  "numbers": [
+    "53"
+  ],
+  "oracle_id": 10868,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10868-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:50.912658+00:00",
+  "sha256": "47825b4bd9306181f1d6ac9bfbe41cbe6003699972a088adc4d40c4df8751cf6",
+  "source_image_hash": "9e/0f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9e/0f/printing_10868_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9e/0f/printing_10868_1_",
+  "width": 750
+}

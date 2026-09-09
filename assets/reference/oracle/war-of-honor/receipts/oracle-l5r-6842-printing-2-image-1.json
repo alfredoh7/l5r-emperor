@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 265570,
+  "card_id": "oracle-l5r-6842",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6842-printing-2-image-1",
+  "image_index": 1,
+  "name": "Shielded by Tempest",
+  "numbers": [
+    "82"
+  ],
+  "oracle_id": 6842,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6842-printing-2-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "2",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:50:44.401845+00:00",
+  "sha256": "ccb4c4585915f3e47e33e3eab19390f8407be17a92c4c5a16bf938a279548ebf",
+  "source_image_hash": "d0/c7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d0/c7/printing_6842_2_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d0/c7/printing_6842_2_",
+  "width": 750
+}

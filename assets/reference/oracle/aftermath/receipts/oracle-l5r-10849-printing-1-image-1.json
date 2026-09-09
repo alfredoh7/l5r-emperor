@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 844538,
+  "card_id": "oracle-l5r-10849",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10849-printing-1-image-1",
+  "image_index": 1,
+  "name": "Akodo Kano",
+  "numbers": [
+    "34"
+  ],
+  "oracle_id": 10849,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10849-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:07:41.254071+00:00",
+  "sha256": "6b17ba294223125fd07b8036db43c6c7522019ffdebe6e52e6f23e6d79e1c32e",
+  "source_image_hash": "44/f7",
+  "source_url": "https://images.oracleofthevoid.com/l5r/44/f7/printing_10849_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/44/f7/printing_10849_1_",
+  "width": 750
+}

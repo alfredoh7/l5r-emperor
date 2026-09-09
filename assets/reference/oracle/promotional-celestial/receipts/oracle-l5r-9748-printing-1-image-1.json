@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 277845,
+  "card_id": "oracle-l5r-9748",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9748-printing-1-image-1",
+  "image_index": 1,
+  "name": "Phoenix Yojimbo",
+  "numbers": [
+    "4"
+  ],
+  "oracle_id": 9748,
+  "path": "assets/reference/oracle/promotional-celestial/images/oracle-l5r-9748-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Promotional–Celestial",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:34:01.318035+00:00",
+  "sha256": "568708348a9cf6c6b379d8696b978d10750e4954ca1fcb12bec130af2a90d2cb",
+  "source_image_hash": "13/9d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/13/9d/printing_9748_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/13/9d/printing_9748_1_",
+  "width": 750
+}

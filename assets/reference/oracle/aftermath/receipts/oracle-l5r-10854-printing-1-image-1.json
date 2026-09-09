@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 757575,
+  "card_id": "oracle-l5r-10854",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10854-printing-1-image-1",
+  "image_index": 1,
+  "name": "Matsu Ryohei",
+  "numbers": [
+    "39"
+  ],
+  "oracle_id": 10854,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10854-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:15.796947+00:00",
+  "sha256": "1b79919944a1affc82bf94acca62283bc3d1098c2eecdf328a8e1cdde258b0f1",
+  "source_image_hash": "61/04",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/04/printing_10854_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/04/printing_10854_1_",
+  "width": 750
+}

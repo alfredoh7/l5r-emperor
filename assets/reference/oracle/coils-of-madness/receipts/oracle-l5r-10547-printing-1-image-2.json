@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1039275,
+  "card_id": "oracle-l5r-10547",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10547-printing-1-image-2",
+  "image_index": 2,
+  "name": "Invocation",
+  "numbers": [
+    "125"
+  ],
+  "oracle_id": 10547,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10547-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:10.540827+00:00",
+  "sha256": "d3a2265826a610fd3ed4448f10435396212fa288c6194cd13332aa43ad879f06",
+  "source_image_hash": "e7/2b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e7/2b/printing_10547_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/2b/printing_10547_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750522,
+  "card_id": "oracle-l5r-8141",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8141-printing-1-image-1",
+  "image_index": 1,
+  "name": "The Host's Advantage",
+  "numbers": [
+    "148"
+  ],
+  "oracle_id": 8141,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-8141-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:01:08.299540+00:00",
+  "sha256": "1789e269e6d111e361499e9daa3df292e89b8d421d1366da986ea9870737b68d",
+  "source_image_hash": "62/82",
+  "source_url": "https://images.oracleofthevoid.com/l5r/62/82/printing_8141_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/62/82/printing_8141_1_",
+  "width": 750
+}

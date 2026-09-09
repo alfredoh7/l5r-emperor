@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 1075150,
+  "card_id": "oracle-l5r-10521",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10521-printing-1-image-1",
+  "image_index": 1,
+  "name": "Blood of the Preserver",
+  "numbers": [
+    "98"
+  ],
+  "oracle_id": 10521,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10521-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:11:08.389923+00:00",
+  "sha256": "1dd115128b64685f100e60459bbb6c4c0869ec959af67a037677276c9e9319a7",
+  "source_image_hash": "3f/2d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3f/2d/printing_10521_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/2d/printing_10521_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746835,
+  "card_id": "oracle-l5r-10954",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10954-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sleight of Hand",
+  "numbers": [
+    "139"
+  ],
+  "oracle_id": 10954,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10954-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:49.800974+00:00",
+  "sha256": "917a9889143de113cb00322032f8db7e62bab9c39ef394c2c81ddec95cb5b1c8",
+  "source_image_hash": "b4/fd",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b4/fd/printing_10954_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b4/fd/printing_10954_1_",
+  "width": 750
+}

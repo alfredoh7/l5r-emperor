@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 244902,
+  "card_id": "oracle-l5r-1392",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1392-printing-3-image-1",
+  "image_index": 1,
+  "name": "City of Tears (GotE)",
+  "numbers": [
+    "126"
+  ],
+  "oracle_id": 1392,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1392-printing-3-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "3",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:08.808433+00:00",
+  "sha256": "5c1f1e806deb744c41bd25127624124b19d86ecb193b671e2e4a6b38c9b7a6cd",
+  "source_image_hash": "93/62",
+  "source_url": "https://images.oracleofthevoid.com/l5r/93/62/printing_1392_3_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/93/62/printing_1392_3_",
+  "width": 750
+}

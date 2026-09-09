@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 732428,
+  "card_id": "oracle-l5r-10086",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10086-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daigotsu Yutaka",
+  "numbers": [
+    "60"
+  ],
+  "oracle_id": 10086,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10086-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:55:46.572101+00:00",
+  "sha256": "43c72389d33c7eb5a21aae388ee9aaf1c1964bee20b3529f60e570a69716d556",
+  "source_image_hash": "19/69",
+  "source_url": "https://images.oracleofthevoid.com/l5r/19/69/printing_10086_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/19/69/printing_10086_1_",
+  "width": 750
+}

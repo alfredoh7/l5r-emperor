@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 375873,
+  "card_id": "oracle-l5r-7741",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-7741-printing-1-image-1",
+  "image_index": 1,
+  "name": "Takasho",
+  "numbers": [
+    "75"
+  ],
+  "oracle_id": 7741,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-7741-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:19:49.125474+00:00",
+  "sha256": "c90a8a788245330fe33bae87d3dbacb3cfb681579aa405186bae56d94c54129e",
+  "source_image_hash": "de/fd",
+  "source_url": "https://images.oracleofthevoid.com/l5r/de/fd/printing_7741_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/de/fd/printing_7741_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 750892,
+  "card_id": "oracle-l5r-10387",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10387-printing-1-image-1",
+  "image_index": 1,
+  "name": "Overpower",
+  "numbers": [
+    "131"
+  ],
+  "oracle_id": 10387,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10387-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:06:29.902984+00:00",
+  "sha256": "e225cdd36334e9ad4144a750144fa2096ec9d85828a0cfd2754746471e367de8",
+  "source_image_hash": "0d/c2",
+  "source_url": "https://images.oracleofthevoid.com/l5r/0d/c2/printing_10387_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/0d/c2/printing_10387_1_",
+  "width": 750
+}

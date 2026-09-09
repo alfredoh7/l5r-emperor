@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 378535,
+  "card_id": "oracle-l5r-1522",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1522-printing-1-image-1",
+  "image_index": 1,
+  "name": "Costly Opportunity",
+  "numbers": [
+    "111"
+  ],
+  "oracle_id": 1522,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-1522-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:17:58.109415+00:00",
+  "sha256": "2b8cd284a11f405e24b2143bb072ec472f3fde49eee3ad7bff19cbf9e7a4c11e",
+  "source_image_hash": "fb/45",
+  "source_url": "https://images.oracleofthevoid.com/l5r/fb/45/printing_1522_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/45/printing_1522_1_",
+  "width": 750
+}

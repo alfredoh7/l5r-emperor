@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 794614,
+  "card_id": "oracle-l5r-10920",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10920-printing-1-image-1",
+  "image_index": 1,
+  "name": "Sailor's Warning",
+  "numbers": [
+    "105"
+  ],
+  "oracle_id": 10920,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10920-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:39.164135+00:00",
+  "sha256": "d8ffe4cfdb690921984f7b5b2550933f79d0b6fc0e9368cdeb4598de71863247",
+  "source_image_hash": "7a/84",
+  "source_url": "https://images.oracleofthevoid.com/l5r/7a/84/printing_10920_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/7a/84/printing_10920_1_",
+  "width": 750
+}

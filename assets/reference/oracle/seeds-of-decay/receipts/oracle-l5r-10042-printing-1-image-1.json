@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 803457,
+  "card_id": "oracle-l5r-10042",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10042-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Sawai",
+  "numbers": [
+    "16"
+  ],
+  "oracle_id": 10042,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10042-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:15.944189+00:00",
+  "sha256": "35b94b7aca906634c76da0150b603981a7f748cf4f794c973db35f9561438b6f",
+  "source_image_hash": "d5/4f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d5/4f/printing_10042_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d5/4f/printing_10042_1_",
+  "width": 750
+}

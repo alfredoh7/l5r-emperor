@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 999680,
+  "card_id": "oracle-l5r-10470",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10470-printing-1-image-1",
+  "image_index": 1,
+  "name": "Yoritomo Kanaye",
+  "numbers": [
+    "50"
+  ],
+  "oracle_id": 10470,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10470-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:14:33.034546+00:00",
+  "sha256": "8f4f706c9f45376ba08b0048c4fddafeead5ba46f886bdd5ef6adb3e6044e3ed",
+  "source_image_hash": "e1/cb",
+  "source_url": "https://images.oracleofthevoid.com/l5r/e1/cb/printing_10470_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/e1/cb/printing_10470_1_",
+  "width": 750
+}

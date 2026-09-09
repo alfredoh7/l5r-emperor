@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 268536,
+  "card_id": "oracle-l5r-6299",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6299-printing-1-image-1",
+  "image_index": 1,
+  "name": "Returning Home",
+  "numbers": [
+    "81"
+  ],
+  "oracle_id": 6299,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-6299-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:20.930439+00:00",
+  "sha256": "22f87211492ba431da13bbec61b430de35f617e4d7476a310fb0083edb977f9a",
+  "source_image_hash": "f0/ab",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f0/ab/printing_6299_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/ab/printing_6299_1_",
+  "width": 750
+}

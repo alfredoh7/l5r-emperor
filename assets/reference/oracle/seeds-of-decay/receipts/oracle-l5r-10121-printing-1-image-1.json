@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 746606,
+  "card_id": "oracle-l5r-10121",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10121-printing-1-image-1",
+  "image_index": 1,
+  "name": "Moksha Patam",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 10121,
+  "path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10121-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Seeds of Decay",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:56:54.851359+00:00",
+  "sha256": "a1c0706789833d455d893d90ef2123e1a82e58fa62c294caedd414668129868e",
+  "source_image_hash": "64/3f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/64/3f/printing_10121_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/64/3f/printing_10121_1_",
+  "width": 750
+}

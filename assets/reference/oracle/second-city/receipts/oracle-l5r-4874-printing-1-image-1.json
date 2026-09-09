@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 386962,
+  "card_id": "oracle-l5r-4874",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-4874-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mastering the Elements",
+  "numbers": [
+    "95"
+  ],
+  "oracle_id": 4874,
+  "path": "assets/reference/oracle/second-city/images/oracle-l5r-4874-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Second City",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:18:56.525312+00:00",
+  "sha256": "68f8253f43aff63def4a91e778476337acdd0f7a630816c0dd00b3a7a1de78b2",
+  "source_image_hash": "b0/9f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/b0/9f/printing_4874_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/b0/9f/printing_4874_1_",
+  "width": 750
+}

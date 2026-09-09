@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 810286,
+  "card_id": "oracle-l5r-10907",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10907-printing-1-image-1",
+  "image_index": 1,
+  "name": "Ominous Armor",
+  "numbers": [
+    "92"
+  ],
+  "oracle_id": 10907,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10907-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:09:30.718990+00:00",
+  "sha256": "4e1b5dae0167059cbd58309cc81c96a8513f632084d090da1b5bc063d9e7db21",
+  "source_image_hash": "a9/04",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/04/printing_10907_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/04/printing_10907_1_",
+  "width": 750
+}

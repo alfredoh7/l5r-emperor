@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 713683,
+  "card_id": "oracle-l5r-10364",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10364-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bonds of Hospitality",
+  "numbers": [
+    "108"
+  ],
+  "oracle_id": 10364,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10364-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:56.938634+00:00",
+  "sha256": "35d28e38a24112bddda0ce3584ba0f098b42e0b6f96b0492f7e52b02cd4c1981",
+  "source_image_hash": "d4/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/d4/75/printing_10364_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/75/printing_10364_1_",
+  "width": 750
+}

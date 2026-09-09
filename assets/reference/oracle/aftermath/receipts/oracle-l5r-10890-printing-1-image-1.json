@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 768471,
+  "card_id": "oracle-l5r-10890",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10890-printing-1-image-1",
+  "image_index": 1,
+  "name": "Utaku Sakiko",
+  "numbers": [
+    "75"
+  ],
+  "oracle_id": 10890,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10890-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:10:25.565294+00:00",
+  "sha256": "ce095c20aba1a7cdd8d7ce3bf0fb6448fbeef312b0fdb0497c50b019626aa261",
+  "source_image_hash": "dc/e9",
+  "source_url": "https://images.oracleofthevoid.com/l5r/dc/e9/printing_10890_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/dc/e9/printing_10890_1_",
+  "width": 750
+}

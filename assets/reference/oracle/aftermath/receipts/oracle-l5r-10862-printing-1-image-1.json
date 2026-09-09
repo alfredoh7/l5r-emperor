@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 822043,
+  "card_id": "oracle-l5r-10862",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10862-printing-1-image-1",
+  "image_index": 1,
+  "name": "Isawa Ikariya",
+  "numbers": [
+    "47"
+  ],
+  "oracle_id": 10862,
+  "path": "assets/reference/oracle/aftermath/images/oracle-l5r-10862-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Aftermath",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:08:44.762645+00:00",
+  "sha256": "267cb825e8f5a230a71941fa289496e27a131756ddde0f54fb905b4924d960f7",
+  "source_image_hash": "43/ca",
+  "source_url": "https://images.oracleofthevoid.com/l5r/43/ca/printing_10862_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/43/ca/printing_10862_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 270291,
+  "card_id": "oracle-l5r-3091",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-3091-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hida Fubatsu",
+  "numbers": [
+    "9"
+  ],
+  "oracle_id": 3091,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-3091-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:20:58.832776+00:00",
+  "sha256": "82f00cca743ea164344673190f3cf1bfff61c1926ad40e677beb1925daa2333d",
+  "source_image_hash": "5b/8c",
+  "source_url": "https://images.oracleofthevoid.com/l5r/5b/8c/printing_3091_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/8c/printing_3091_1_",
+  "width": 750
+}

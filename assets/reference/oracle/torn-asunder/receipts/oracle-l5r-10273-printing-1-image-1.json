@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 814708,
+  "card_id": "oracle-l5r-10273",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10273-printing-1-image-1",
+  "image_index": 1,
+  "name": "Hiruma Ikeuchi",
+  "numbers": [
+    "17"
+  ],
+  "oracle_id": 10273,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10273-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:43.380381+00:00",
+  "sha256": "437488822cc0d4a1ce62d4804d2d9d967c1d741b189432c9ead82401ebcf84a7",
+  "source_image_hash": "97/e0",
+  "source_url": "https://images.oracleofthevoid.com/l5r/97/e0/printing_10273_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/97/e0/printing_10273_1_",
+  "width": 750
+}

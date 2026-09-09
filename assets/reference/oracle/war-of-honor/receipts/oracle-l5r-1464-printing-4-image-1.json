@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 242755,
+  "card_id": "oracle-l5r-1464",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-1464-printing-4-image-1",
+  "image_index": 1,
+  "name": "Consumed by Five Fires",
+  "numbers": [
+    "78"
+  ],
+  "oracle_id": 1464,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1464-printing-4-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "4",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:10.764042+00:00",
+  "sha256": "9b8d3f9123b3649cf42024e317737c9e780e127f5cd4b39cb158e8d2a2f79dd0",
+  "source_image_hash": "3c/7a",
+  "source_url": "https://images.oracleofthevoid.com/l5r/3c/7a/printing_1464_4_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/3c/7a/printing_1464_4_",
+  "width": 750
+}

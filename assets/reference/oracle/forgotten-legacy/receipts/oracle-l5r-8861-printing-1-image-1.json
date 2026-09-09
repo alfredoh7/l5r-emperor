@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 243072,
+  "card_id": "oracle-l5r-8861",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-8861-printing-1-image-1",
+  "image_index": 1,
+  "name": "Tsuruchi Nobukatsu",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 8861,
+  "path": "assets/reference/oracle/forgotten-legacy/images/oracle-l5r-8861-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Forgotten Legacy",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:21:46.072709+00:00",
+  "sha256": "1ff2189a2ee2bef5c4a689496e7f4edd25cb8b5b9088c1182ac366b60d005dda",
+  "source_image_hash": "4b/75",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4b/75/printing_8861_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4b/75/printing_8861_1_",
+  "width": 750
+}

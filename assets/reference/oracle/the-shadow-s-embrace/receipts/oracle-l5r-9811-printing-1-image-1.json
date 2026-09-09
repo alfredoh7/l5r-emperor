@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 827111,
+  "card_id": "oracle-l5r-9811",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9811-printing-1-image-1",
+  "image_index": 1,
+  "name": "Daidoji Sosuke",
+  "numbers": [
+    "23"
+  ],
+  "oracle_id": 9811,
+  "path": "assets/reference/oracle/the-shadow-s-embrace/images/oracle-l5r-9811-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "The Shadow's Embrace",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:52:36.802608+00:00",
+  "sha256": "089c93b0f814e2f3670398dac330310199a2fd52f974b1b84bd856aeb5bd3cee",
+  "source_image_hash": "4e/ba",
+  "source_url": "https://images.oracleofthevoid.com/l5r/4e/ba/printing_9811_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/4e/ba/printing_9811_1_",
+  "width": 750
+}

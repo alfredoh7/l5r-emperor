@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 242487,
+  "card_id": "oracle-l5r-2677",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-2677-printing-1-image-1",
+  "image_index": 1,
+  "name": "Fortuitous Alliance",
+  "numbers": [
+    "100"
+  ],
+  "oracle_id": 2677,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-2677-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:25.144967+00:00",
+  "sha256": "96178c95e98e14401e15a4865e7881ab0202f4e3c0ccf10c75bb0a188d026333",
+  "source_image_hash": "f9/1b",
+  "source_url": "https://images.oracleofthevoid.com/l5r/f9/1b/printing_2677_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/1b/printing_2677_1_",
+  "width": 750
+}

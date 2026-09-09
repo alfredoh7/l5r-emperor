@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 776696,
+  "card_id": "oracle-l5r-10336",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10336-printing-1-image-1",
+  "image_index": 1,
+  "name": "Goju Kaxt",
+  "numbers": [
+    "80"
+  ],
+  "oracle_id": 10336,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10336-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:05:33.704359+00:00",
+  "sha256": "b602c08ee0df2df55bd17fcbe02099116dad985d69951de6cd0f8cfd7df9b99d",
+  "source_image_hash": "a9/17",
+  "source_url": "https://images.oracleofthevoid.com/l5r/a9/17/printing_10336_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/a9/17/printing_10336_1_",
+  "width": 750
+}

@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 288943,
+  "card_id": "oracle-l5r-6334",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6334-printing-18-image-1",
+  "image_index": 1,
+  "name": "Ring of Earth",
+  "numbers": [
+    "74"
+  ],
+  "oracle_id": 6334,
+  "path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-6334-printing-18-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "18",
+  "printing_set": "War of Honor",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T15:49:58.737558+00:00",
+  "sha256": "990183b4fb43deb44b90fc7ca5892d1525568059e3fbaa30c9fc081b5a5cb787",
+  "source_image_hash": "9e/70",
+  "source_url": "https://images.oracleofthevoid.com/l5r/9e/70/printing_6334_18_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/9e/70/printing_6334_18_",
+  "width": 750
+}

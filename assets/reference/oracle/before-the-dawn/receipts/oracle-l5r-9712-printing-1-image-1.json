@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 416031,
+  "card_id": "oracle-l5r-9712",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-9712-printing-1-image-1",
+  "image_index": 1,
+  "name": "Bird of Prey",
+  "numbers": [
+    "3"
+  ],
+  "oracle_id": 9712,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-9712-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:15:03.901741+00:00",
+  "sha256": "2be836d28e70110914902118328b1445c3f33139e40d46352b38a7d8d859cfab",
+  "source_image_hash": "6d/9e",
+  "source_url": "https://images.oracleofthevoid.com/l5r/6d/9e/printing_9712_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/6d/9e/printing_9712_1_",
+  "width": 750
+}

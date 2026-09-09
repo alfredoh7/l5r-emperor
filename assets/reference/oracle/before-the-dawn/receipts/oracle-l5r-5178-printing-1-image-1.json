@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 410419,
+  "card_id": "oracle-l5r-5178",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-5178-printing-1-image-1",
+  "image_index": 1,
+  "name": "Mirumoto Yozo",
+  "numbers": [
+    "27"
+  ],
+  "oracle_id": 5178,
+  "path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-5178-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Before the Dawn",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:16:10.240142+00:00",
+  "sha256": "d582d51082261881042343c25d1147ef76e8d542f185fad73501e3b76069c9c4",
+  "source_image_hash": "63/5f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/63/5f/printing_5178_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/63/5f/printing_5178_1_",
+  "width": 750
+}

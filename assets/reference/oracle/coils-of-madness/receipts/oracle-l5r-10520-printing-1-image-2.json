@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 977360,
+  "card_id": "oracle-l5r-10520",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10520-printing-1-image-2",
+  "image_index": 2,
+  "name": "Lone Sentry",
+  "numbers": [
+    "91"
+  ],
+  "oracle_id": 10520,
+  "path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10520-printing-1-image-2.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Coils of Madness",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:12:43.086135+00:00",
+  "sha256": "bea01aaf8a8d4dfa13f7261aa0f86fbe968913d11848fce9480d8cb6b315cb49",
+  "source_image_hash": "79/4d",
+  "source_url": "https://images.oracleofthevoid.com/l5r/79/4d/printing_10520_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/79/4d/printing_10520_1_",
+  "width": 750
+}

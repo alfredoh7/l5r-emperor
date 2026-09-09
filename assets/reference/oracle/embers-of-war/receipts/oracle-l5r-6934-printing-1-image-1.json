@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 849434,
+  "card_id": "oracle-l5r-6934",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6934-printing-1-image-1",
+  "image_index": 1,
+  "name": "Shinjo Sarang",
+  "numbers": [
+    "75"
+  ],
+  "oracle_id": 6934,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6934-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:41.203379+00:00",
+  "sha256": "fd8494bcfb2eac1963b5e11197137772d234bed8f06828cd9e8b84763ab60aba",
+  "source_image_hash": "61/25",
+  "source_url": "https://images.oracleofthevoid.com/l5r/61/25/printing_6934_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/61/25/printing_6934_1_",
+  "width": 750
+}

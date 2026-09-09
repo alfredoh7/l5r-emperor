@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 944596,
+  "card_id": "oracle-l5r-10302",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-10302-printing-1-image-1",
+  "image_index": 1,
+  "name": "Asako Izuna",
+  "numbers": [
+    "46"
+  ],
+  "oracle_id": 10302,
+  "path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10302-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Torn Asunder",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:04:44.949555+00:00",
+  "sha256": "3fe4b9078d99398086b6121975bc037cb771f455d54a87fb4ac98dc967d9dde8",
+  "source_image_hash": "be/df",
+  "source_url": "https://images.oracleofthevoid.com/l5r/be/df/printing_10302_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/be/df/printing_10302_1_",
+  "width": 750
+}

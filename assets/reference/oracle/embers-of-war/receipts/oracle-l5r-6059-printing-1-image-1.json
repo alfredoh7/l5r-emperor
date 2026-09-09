@@ -1,0 +1,27 @@
+{
+  "attempts": [],
+  "bytes": 789676,
+  "card_id": "oracle-l5r-6059",
+  "content_type": "image/jpeg",
+  "format": "JPEG",
+  "height": 1050,
+  "id": "oracle-l5r-6059-printing-1-image-1",
+  "image_index": 1,
+  "name": "Preserving Forces",
+  "numbers": [
+    "130"
+  ],
+  "oracle_id": 6059,
+  "path": "assets/reference/oracle/embers-of-war/images/oracle-l5r-6059-printing-1-image-1.jpg",
+  "playable": false,
+  "printing_association": "explicit_oracle_printing_id_and_set",
+  "printing_id": "1",
+  "printing_set": "Embers of War",
+  "quality": "master",
+  "retrieved_at": "2026-09-09T16:00:18.881768+00:00",
+  "sha256": "2719591b78237ff0b04fd2c25676ba73bd47843812ae24934d6ea6b5de0512ef",
+  "source_image_hash": "70/5f",
+  "source_url": "https://images.oracleofthevoid.com/l5r/70/5f/printing_6059_1_master.jpg",
+  "url_prefix": "https://images.oracleofthevoid.com/l5r/70/5f/printing_6059_1_",
+  "width": 750
+}
