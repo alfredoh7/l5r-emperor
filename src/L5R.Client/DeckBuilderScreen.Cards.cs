@@ -27,17 +27,19 @@ public partial class DeckBuilderScreen
         {
             var selected=Draft.Count(card.Name)==1;var select=CatalogueArt.Button(selected?"Selected":"Select",()=>{
                 Draft.SelectSetup(card.Name);Dirty=true;HideHover();BuildSetupStrip();BuildSetupChoices();UpdateStatus();
-            });select.AccessibilityName="Select "+card.Name;select.Disabled=selected;item.AddChild(select);
-            item.Resized+=()=>{var w=item.Size.X;Place(face,0,0,w,w*1.4f+8);Place(note,0,w*1.4f+9,w,18);Place(select,12,w*1.4f+30,w-24,36);};
+            });select.AccessibilityName="Select "+card.Name;select.Disabled=selected;select.Icon=DeckSkin.Icon(selected?"selected":"radio");select.AddThemeConstantOverride("h_separation",12);
+            foreach(var state in new[]{"normal","disabled","hover"})select.AddThemeStyleboxOverride(state,new StyleBoxEmpty());
+            select.AddThemeColorOverride("font_disabled_color",new Color("edca79"));select.AddThemeColorOverride("icon_disabled_color",Colors.White);select.AddThemeFontSizeOverride("font_size",22);item.AddChild(select);
+            item.Resized+=()=>{var w=item.Size.X;Place(face,0,0,w,w*1.4f+8);Place(note,0,w*1.4f+9,w,18);Place(select,w/2-75,w*1.4f+30,150,36);};
         }
         else
         {
             var minus=CatalogueArt.Button("−",()=>Adjust(card,-1));minus.AccessibilityName="Remove "+card.Name;item.AddChild(minus);
             var count=CatalogueArt.Label(Draft.Count(card.Name).ToString(),22);count.HorizontalAlignment=HorizontalAlignment.Center;if(Draft.Review().OverLimit.Contains(card.Name))count.AddThemeColorOverride("font_color",new Color("f37c64"));item.AddChild(count);
             var plus=CatalogueArt.Button("+",()=>Adjust(card,1));plus.AccessibilityName="Add "+card.Name;item.AddChild(plus);
-            var check=new CheckBox{Text=_compare.Contains(card.Id)?"☑ Compare":"☐ Compare",ButtonPressed=_compare.Contains(card.Id)};foreach(var state in new[]{"normal","hover","pressed","hover_pressed","focus"})check.AddThemeStyleboxOverride(state,new StyleBoxEmpty());check.AddThemeFontSizeOverride("font_size",15);check.Toggled+=value=>{
-                check.Text=value?"☑ Compare":"☐ Compare";
-                if(value&&_compare.Count>=3){check.SetPressedNoSignal(false);check.Text="☐ Compare";Notice("Compare up to three cards at a time. Remove a selection to compare another.");return;}
+            var check=new CheckBox{Text="Compare",ButtonPressed=_compare.Contains(card.Id)};foreach(var state in new[]{"normal","hover","pressed","hover_pressed","focus"})check.AddThemeStyleboxOverride(state,new StyleBoxEmpty());check.AddThemeFontSizeOverride("font_size",15);check.Toggled+=value=>{
+
+                if(value&&_compare.Count>=3){check.SetPressedNoSignal(false);Notice("Compare up to three cards at a time. Remove a selection to compare another.");return;}
                 if(value)_compare.Add(card.Id);else _compare.Remove(card.Id);face.Selected=value;face.QueueRedraw();UpdateStatus();
             };check.AccessibilityName="Compare "+card.Name;item.AddChild(check);
             item.Resized+=()=>{var w=item.Size.X;var y=w*1.4f+12;Place(face,0,0,w,w*1.4f+8);Place(note,0,y-4,w,18);Place(minus,w/2-59,y+13,32,29);Place(count,w/2-23,y+13,46,29);Place(plus,w/2+27,y+13,32,29);Place(check,Math.Max(0,w/2-53),y+44,110,26);};
@@ -49,7 +51,7 @@ public partial class DeckBuilderScreen
         var ticket=++_hoverTicket;await ToSignal(GetTree().CreateTimer(.5),SceneTreeTimer.SignalName.Timeout);
         if(!IsInstanceValid(this)||!IsInsideTree()||ticket!=_hoverTicket||_overlay.Visible||!IsInstanceValid(target)||!target.IsInsideTree())return;
         Palette.Clear(_hover);var w=290f;var h=465f;
-        var panel=new Panel();panel.AddThemeStyleboxOverride("panel",CatalogueArt.Frame(12));panel.MouseFilter=MouseFilterEnum.Ignore;Put(_hover,panel,0,0,w,h);
+        var panel=new Panel();panel.AddThemeStyleboxOverride("panel",new DeckPanelStyle());panel.MouseFilter=MouseFilterEnum.Ignore;Put(_hover,panel,0,0,w,h);
         var face=new DeckFace(card,Scans){MouseFilter=MouseFilterEnum.Ignore};Put(panel,face,16,12,258,370);
         var label=Palette.Wrapped(card.Name+"\n"+(card.Playable?"Game printing":"Reference · not implemented")+"\nClick to inspect",16,CatalogueArt.Ivory);label.MouseFilter=MouseFilterEnum.Ignore;Put(panel,label,16,386,258,68);
         var r=target.GetGlobalRect();var p=(r.End/_canvas.Scale.X);var x=p.X+12;if(x+w>_w-16)x=r.Position.X/_canvas.Scale.X-w-12;
@@ -61,7 +63,7 @@ public partial class DeckBuilderScreen
     {
         HideHover();Palette.Clear(_overlay);_overlay.Show();
         var shade=new ColorRect{Color=new Color(0,0,0,.72f)};Put(_overlay,shade,0,0,_w,_h);
-        var panel=new Panel();panel.AddThemeStyleboxOverride("panel",CatalogueArt.Frame(18));Put(_overlay,panel,52,40,_w-104,_h-80);
+        var panel=new Panel();panel.AddThemeStyleboxOverride("panel",new DeckPanelStyle());Put(_overlay,panel,52,40,_w-104,_h-80);
         Put(panel,CatalogueArt.Label(title,35,true),26,16,panel.Size.X-120,45);Put(panel,CatalogueArt.Button("×",CloseOverlay),panel.Size.X-66,17,40,38);
         return panel;
     }

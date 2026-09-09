@@ -71,7 +71,13 @@ public partial class TitleMenu : Control
         Entry("Deck Builder", DeckBuilder);
         Entry("Options", ShowOptions);
         Entry("Quit", ShowQuit);
-        foreach(var button in Entries.GetChildren().OfType<Button>()){button.CustomMinimumSize=new Vector2(0,72);button.AddThemeFontSizeOverride("font_size",66);}
+        foreach(var button in Entries.GetChildren().OfType<Button>())
+        {
+            button.CustomMinimumSize=new Vector2(0,72);
+            var size=66;
+            while(size>20&&(Palette.Title.GetHeight(size)>72||Palette.Title.GetStringSize(button.Text,fontSize:size).X>490))size--;
+            button.AddThemeFontSizeOverride("font_size",size);
+        }
         if (CanResume()) _message.Text = IsOnline() ? "Your private table continues online. Play → Return to table." : "Your practice is paused. Play → Return to table.";
         FocusFirst();
     }

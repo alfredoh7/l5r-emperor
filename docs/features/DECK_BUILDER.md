@@ -12,7 +12,7 @@ Save draft accepts incomplete and over-limit lists. Core reports setup/count/usu
 
 Decks use the existing `Legality: Emperor` name-based `.txt` format, with Experienced suffixes retained as distinct choices. There is no cosmetic printing dropdown. Game-supported cards retain pinned printing/rules provenance; reference text is explicitly labeled. Scans come from the local mandatory WebP pack.
 
-Files live in Godot `user://decks`; **Open deck folder** opens the actual platform location. **My decks** opens or duplicates drafts, imports text files and exports shareable text. **Save a copy** creates another named draft. No account is involved.
+Files live in Godot `user://decks`; **Open deck folder** opens the actual platform location. **My decks** opens or duplicates drafts, imports text files and exports shareable text. **More deck actions → Save a copy** creates another named draft; the same menu exports the open draft. No account is involved.
 
 Saving uses a temporary file followed by atomic replacement. Existing unrelated names and externally modified files prompt before replacement. Failed imports validate before replacing the open draft; errors leave edits intact. Leaving an unsaved draft offers Save / Discard changes / Cancel. Ordinary application/process termination is not autosave.
 
@@ -23,3 +23,7 @@ Approved sources: `assets/ui/deck-builder/H-quantity-toolbar.png` and `I-setup-c
 Actual full card scans replace illustrative generated cards. WeatheredQuill uppercase remains the approved application heading font. Different card text, type counts and portrait proportions necessarily differ from illustrative cards; do not distort scans to imitate them.
 
 Run `bash tools/check-deck-builder.sh` on a native graphical desktop. It isolates test decks from user storage and exercises actual keyboard/mouse events, plus storage fault cases. Review setup, mat, comparison, saved-deck and compact-window captures against sources. Run `bash tools/check.sh --skip-client` for Core/content/AI/server/transport checks. Native Mac evidence does not establish Windows graphical acceptance or expert rules acceptance.
+
+## Material refinement pass
+
+The UI lead rejected the first implementation's flat controls. The second pass uses generated lacquer/brass materials in `DeckSkin`, with nine-slice framing, explicit selected tabs, thumbnail setup rows, live radio/checkbox markers, stronger body lettering, and proportionally sampled cloth behind inspection/dialogs. Full source prompts are in `assets/ui/deck-builder/material-pass-prompts.json`. These materials are imported at their intended UI scale; the original generator output remains committed. The working layout and draft semantics are preserved. Final visual acceptance remains with Alfredo; screenshots are evidence, not a claim of pixel-identical approval.

@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved visual deck builder with setup categories, local plain-text drafts, mat/list density, filters and comparison; retain catalogue/WebP dependency PR124.",
-  "validation": "Full tools/check.sh --skip-client passed. Client builds with zero warnings/errors. Native Mac check-deck-builder.sh passed setup replacement, input, comparison, corrupted import, exact save/load, unsaved cancel, external overwrite cancel/confirm, 1280/1672/1920 layouts and real menu entry. Source-to-game captures reviewed and committed under docs/screenshots/deck-builder.",
-  "remaining": "Ready for Alfredo visual review and mdornbrook review of basic draft checks. PR124 dependency remains open. CI pending final push; no native Windows graphical test. Custom draft match launching stays in issue29.",
+  "summary": "Approved deck builder workflow implemented; revised the rejected flat UI with image-generated lacquer/brass control materials, framed panels/cards, selected states, setup thumbnails and coherent dialogs. Main-menu font fitting preserves six entries with prior WeatheredQuill UI.",
+  "validation": "Core/content/AI/server/transport checks passed, including 8 draft regressions. Revised client compiled with zero warnings/errors. Native Mac deck-builder probe passed setup replacement, keyboard/mouse editing, comparison, corrupt import, exact save/load, unsaved and external overwrite cancel/confirm, dropdown capture, viewport density and six-entry real menu. Native screenshots reviewed against approved sources; combined-preview verification in progress. Combined preview native checks passed with previous battle/UI branches retained; deterministic combined-preview checks passed. Compact save-copy/export menu verified; corrected unsupported ellipsis with an SVG icon.",
+  "remaining": "Awaiting Alfredo visual acceptance of the material pass and mdornbrook shared rules review. PR134 remains draft; final CI pending push. Catalogue dependency PR124 remains open. Custom match launch is issue29; native Windows graphical acceptance not performed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/25",
   "branch": "codex/25-deck-builder",
-  "updated": "2026-09-09T20:27:36.705464+00:00"
+  "updated": "2026-09-09T20:50:49.166112+00:00"
 }

@@ -45,8 +45,7 @@ public partial class DeckBuilderScreen : Control
     public override void _Ready()
     {
         _previousEmbed=GetViewport().GuiEmbedSubwindows;GetViewport().GuiEmbedSubwindows=true;
-        Theme=CatalogueArt.Theme();
-        foreach(var type in new[]{"Button","OptionButton"})foreach(var state in new[]{"normal","hover","pressed","disabled","focus"}){var box=(StyleBox)Theme.GetStylebox(state,type).Duplicate();box.ContentMarginTop=4;box.ContentMarginBottom=4;box.ContentMarginLeft=8;box.ContentMarginRight=8;Theme.SetStylebox(state,type,box);}
+        Theme=DeckSkin.Theme();
         MouseFilter=MouseFilterEnum.Stop;
         _byId=Data.Cards.ToDictionary(c=>c.Id);Draft=NewDraft();
         Store=new DeckFileStore(StorageDirectory??ProjectSettings.GlobalizePath("user://decks"));
@@ -75,8 +74,10 @@ public partial class DeckBuilderScreen : Control
         _name.TextChanged+=_=>{if(!_building){Dirty=true;UpdateStatus();}};
         _dirtyLabel=CatalogueArt.Label("",16);_header.AddChild(_dirtyLabel);
         _save=CatalogueArt.Button("Save draft",()=>SaveDraft());_header.AddChild(_save);
-        foreach(var state in new[]{"normal","hover","pressed"}){_save.AddThemeStyleboxOverride(state,Palette.Box(new Color(state=="normal"?"ad8950":"c9a763"),new Color("e2bc76"),6,2));_save.AddThemeColorOverride("font_"+(state=="normal"?"color":state+"_color"),new Color("17140f"));}
-        var copy=CatalogueArt.Button("Save a copy",SaveCopy);copy.Name="Copy";_header.AddChild(copy);
+        DeckSkin.Primary(_save);
+        var copy=new MenuButton{Name="Copy",Text="",Icon=DeckSkin.Icon("more"),IconAlignment=HorizontalAlignment.Center,Flat=false,TooltipText="More deck actions",AccessibilityName="More deck actions"};copy.AddThemeFontSizeOverride("font_size",25);_header.AddChild(copy);
+        var menu=copy.GetPopup();menu.AddItem("Save a copy…",0);menu.AddItem("Export draft…",1);menu.IdPressed+=id=>{if(id==0)SaveCopy();else ExportFile(Draft.ToDeck(),_name.Text);};
+        var brand=CatalogueArt.Label("LEGEND OF THE FIVE RINGS\nEMPEROR EDITION",14);brand.Name="Brand";brand.HorizontalAlignment=HorizontalAlignment.Right;brand.AddThemeColorOverride("font_color",DeckSkin.Gold);_header.AddChild(brand);
     }
     private void BuildCollectionControls()
     {
@@ -95,8 +96,8 @@ public partial class DeckBuilderScreen : Control
     {
         _group=Option(new[]{"Group: Type","Group: Gold","Group: None"},()=>RefreshMat());_sort=Option(new[]{"Name A–Z","Gold cost","Force","Chi"},()=>{ApplyFilters();RefreshMat();});
         Put(_toolbar,_group,8,8,162,38);Put(_toolbar,_sort,180,8,154,38);
-        Put(_toolbar,CatalogueArt.Button("Mat",()=>{_list=false;RefreshMat();}),356,8,80,38);
-        Put(_toolbar,CatalogueArt.Button("List",()=>{_list=true;RefreshMat();}),440,8,80,38);
+        var mat=CatalogueArt.Button("Mat",()=>{_list=false;RefreshMat();});mat.Name="MatTab";Put(_toolbar,mat,356,8,80,38);
+        var list=CatalogueArt.Button("List",()=>{_list=true;RefreshMat();});list.Name="ListTab";Put(_toolbar,list,440,8,80,38);
         _compareButton=CatalogueArt.Button("Compare (0)",()=>ShowComparison(_compare.Select(id=>_byId[id]).ToArray()));Put(_toolbar,_compareButton,540,8,156,38);
         var label=CatalogueArt.Label("Card size",16);label.Name="SizeLabel";_toolbar.AddChild(label);
         var slider=new HSlider{Name="CardSize",MinValue=110,MaxValue=270,Step=2,Value=176,TooltipText="Resize card faces; controls remain readable."};slider.ValueChanged+=v=>{Mat.CardWidth=(float)v;HideHover();RefreshMat();};_toolbar.AddChild(slider);
@@ -108,7 +109,8 @@ public partial class DeckBuilderScreen : Control
         Place(_header,0,0,_w,70);Place(_setupStrip,14,74,_w-28,76);Place(_left,16,164,326,278);
         Place(Collection,28,442,310,_h-492);Place(_toolbar,362,158,_w-380,58);Place(Mat,362,216,_w-380,_h-269);
         Place(_empty,392,360,_w-440,100);Place(_status,378,_h-43,_w-600,28);Place(_count,24,_h-40,325,25);
-        Place(_dirtyLabel,_w-520,22,176,30);Place(_save,_w-330,15,145,42);Place(_header.GetNode<Control>("Copy"),_w-175,15,150,42);
+        Place(_name,560,16,Math.Clamp(_w-1280,240,390),42);
+        Place(_dirtyLabel,_w-700,22,160,30);Place(_save,_w-530,15,180,42);Place(_header.GetNode<Control>("Copy"),_w-342,15,38,42);Place(_header.GetNode<Control>("Brand"),_w-290,16,264,40);
         Place(_toolbar.GetNode<Control>("SizeLabel"),_toolbar.Size.X-280,16,85,25);Place(_toolbar.GetNode<Control>("CardSize"),_toolbar.Size.X-187,14,172,32);
         Place(_setupTools,362,158,_w-380,58);Place(_library,22,84,_w-44,_h-104);_overlay.Size=_canvas.Size;
         if(IsInsideTree()){BuildSetupStrip();if(Page=="decks")BuildDeckList();else if(_setupSlot.Length>0)BuildSetupChoices();}
@@ -118,21 +120,29 @@ public partial class DeckBuilderScreen : Control
     {
         if(_canvas.Scale.X<=0)return;var s=_canvas.Scale.X;
         foreach(var y in new[]{70f,154f,_h-50})_lines.DrawLine(new Vector2(18,y)*s,new Vector2(_w-18,y)*s,new Color(.64f,.49f,.26f,.65f),1);
-        if(Page!="decks")_lines.DrawLine(new Vector2(348,160)*s,new Vector2(348,_h-54)*s,new Color(.64f,.49f,.26f,.6f),1);
+        if(Page!="decks")
+        {
+            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2(13*s,155*s,337*s,(_h-205)*s));
+            DeckSkin.Frame().Draw(_lines.GetCanvasItem(),new Rect2(352*s,155*s,(_w-366)*s,(_h-205)*s));
+        }
     }
     private void BuildSetupStrip()
     {
         Palette.Clear(_setupStrip);if(Draft is null)return;
-        var x=10f;foreach(var slot in DeckWorkshop.SetupSlots)
+        var stronghold=Draft.Cards.FirstOrDefault(c=>c.SetupSlot=="Stronghold");var clan=stronghold is null?_setupClan:_byId[stronghold.Id].Clans.FirstOrDefault()??"Unaligned";
+        Put(_setupStrip,CatalogueArt.Clan(clan),9,8,58,58);
+        var x=78f;foreach(var slot in DeckWorkshop.SetupSlots)
         {
             var info=Draft.Cards.FirstOrDefault(c=>c.SetupSlot==slot);var card=info is null?null:_byId[info.Id];
             if(card is not null)Put(_setupStrip,new DeckThumbnail(card,Scans),x,9,45,55);
             var b=CatalogueArt.Button(slot+"\n"+(card?.Name??"Select…"),()=>SetSetup(slot));b.Alignment=HorizontalAlignment.Left;b.AddThemeFontSizeOverride("font_size",16);b.AddThemeStyleboxOverride("normal",new StyleBoxEmpty());
-            Put(_setupStrip,b,x+53,6,200,61);x+=259;
+            b.ClipText=true;Put(_setupStrip,b,x+53,6,163,61);x+=221;
         }
         Put(_setupStrip,CatalogueArt.Button("Change setup",()=>SetSetup("Stronghold")),x,15,145,44);
         _dynasty=CatalogueArt.Button("",()=>SetFamily("Dynasty"));_fate=CatalogueArt.Button("",()=>SetFamily("Fate"));
-        var tabW=Math.Max(185,(_w-985)/2);Put(_setupStrip,_dynasty,_w-2*tabW-42,7,tabW-8,62);Put(_setupStrip,_fate,_w-tabW-34,7,tabW-8,62);UpdateStatus();
+        var tabW=Math.Max(185,(_w-985)/2);Put(_setupStrip,_dynasty,_w-2*tabW-42,7,tabW-8,62);Put(_setupStrip,_fate,_w-tabW-34,7,tabW-8,62);
+        foreach(var tab in new[]{_dynasty,_fate}){var icon=CatalogueArt.Clan(clan);Put(tab,icon,12,11,40,40);tab.AddThemeFontSizeOverride("font_size",20);}
+        UpdateStatus();
     }
     public void SetFamily(string family){Family=family;SetSetup("");ApplyFilters();RefreshMat(true);}
     public void SetSetup(string slot)
@@ -140,21 +150,25 @@ public partial class DeckBuilderScreen : Control
         _setupSlot=slot;HideHover();Palette.Clear(_left);BuildCollectionControls();
         _toolbar.Visible=slot.Length==0;_setupTools.Visible=slot.Length>0;Collection.Visible=slot.Length==0;
         if(slot.Length>0)BuildSetupChoices();else {ApplyFilters();RefreshMat(true);}
-        _collectionTab.Modulate=slot.Length==0?Colors.White:CatalogueArt.Muted;_setupTab.Modulate=slot.Length>0?Colors.White:CatalogueArt.Muted;UpdateStatus();
+        if(slot.Length==0){DeckSkin.Selected(_collectionTab,true);DeckSkin.Selected(_setupTab,false);}UpdateStatus();
     }
     private void BuildSetupChoices()
     {
         Palette.Clear(_left);
-        Put(_left,CatalogueArt.Button("Collection",()=>SetSetup("")),12,6,148,40);Put(_left,CatalogueArt.Button("Setup",()=>{}),166,6,148,40);
+        Put(_left,CatalogueArt.Button("Collection",()=>SetSetup("")),12,6,148,40);var setupTab=CatalogueArt.Button("Setup",()=>{});DeckSkin.Selected(setupTab,true);Put(_left,setupTab,166,6,148,40);
         var clans=Option(new[]{"Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"},()=>{});
         clans.Select(Array.IndexOf(new[]{"Crab","Crane","Dragon","Lion","Mantis","Phoenix","Scorpion","Spider","Unicorn","Unaligned"},_setupClan));
         clans.ItemSelected+=i=>{_setupClan=clans.GetItemText((int)i);BuildSetupChoices();};Put(_left,clans,12,62,300,42);
         var y=124f;foreach(var slot in DeckWorkshop.SetupSlots)
         {
-            var info=Draft.Cards.FirstOrDefault(c=>c.SetupSlot==slot);var b=CatalogueArt.Button(slot+(info is null?"":"  ✓"),()=>SetSetup(slot));b.Alignment=HorizontalAlignment.Left;
-            Put(_left,b,12,y,300,60);y+=76;
+            var info=Draft.Cards.FirstOrDefault(c=>c.SetupSlot==slot);var b=CatalogueArt.Button(slot+"\n"+(info?.Name??"Select a card"),()=>SetSetup(slot));b.Alignment=HorizontalAlignment.Left;
+            var style=DeckSkin.Plate(slot==_setupSlot?1:0);style.ContentMarginLeft=88;style.ContentMarginRight=26;b.AddThemeStyleboxOverride("normal",style);
+            foreach(var state in new[]{"hover","pressed"}){var h=DeckSkin.Plate(1);h.ContentMarginLeft=88;h.ContentMarginRight=26;b.AddThemeStyleboxOverride(state,h);}
+            b.AccessibilityName="Choose "+slot;b.AddThemeFontSizeOverride("font_size",18);b.ClipText=true;Put(_left,b,12,y,300,84);
+            if(info is not null)Put(b,new DeckThumbnail(_byId[info.Id],Scans),8,8,68,68);
+            var mark=new TextureRect{Texture=DeckSkin.Icon(info is null?"radio":"selected"),MouseFilter=MouseFilterEnum.Ignore};Put(b,mark,272,32,20,20);y+=96;
         }
-        Put(_left,Palette.Wrapped("Choose one of each.\nKept outside both decks.\n\nBorder Keep starts in play.\n\nBamboo Harvesters starts bowed for the second player only.",19,CatalogueArt.Ivory),16,y+20,285,250);
+        Put(_left,Palette.Wrapped("Choose one of each.\nKept outside both decks.\n\nBorder Keep starts in play.\nBamboo Harvesters starts bowed for the second player only.",18,CatalogueArt.Ivory),16,y+20,285,225);
         Palette.Clear(_setupTools);_setupTools.Visible=true;_toolbar.Visible=false;Put(_setupTools,CatalogueArt.Label("Choose your "+_setupSlot,32,true),14,6,_toolbar.Size.X-190,48);
         Put(_setupTools,CatalogueArt.Button("Back to deck",()=>SetSetup("")),_toolbar.Size.X-170,8,150,38);
         var infos=Data.Cards.Where(c=>new DeckCardInfo(c.Id,c.Name,c.Types,c.DeckTypes,c.Keywords,c.Playable).SetupSlot==_setupSlot);
@@ -174,6 +188,7 @@ public partial class DeckBuilderScreen : Control
         if(Page=="decks"||_setupSlot.Length>0)return;
         var ids=Draft.Cards.Where(c=>c.SetupSlot.Length==0&&c.Families.Contains(Family)).Select(c=>c.Id).ToHashSet();
         var cards=Data.Filter(sort:_sort.Text).Where(c=>ids.Contains(c.Id)).ToArray();
+        DeckSkin.Selected(_toolbar.GetNode<Button>("MatTab"),!_list);DeckSkin.Selected(_toolbar.GetNode<Button>("ListTab"),_list);
         Mat.Setup=false;Mat.Rows=_list;Mat.Group=_group.Selected switch{1=>"Gold",2=>"None",_=>"Type"};Mat.Reset(cards,reset);
         _empty.Visible=cards.Length==0;_empty.Text="Your "+Family+" mat is empty.\nAdd cards from the collection to begin.";
     }
@@ -182,7 +197,12 @@ public partial class DeckBuilderScreen : Control
     private void UpdateStatus()
     {
         if(_status is null||Draft is null)return;var r=Draft.Review();
-        if(_dynasty is not null){_dynasty.Text=$"DYNASTY  {r.Dynasty}\n40 minimum";_fate.Text=$"FATE  {r.Fate}\n40 minimum";_dynasty.Modulate=Family=="Dynasty"?Colors.White:CatalogueArt.Muted;_fate.Modulate=Colors.White;_dynasty.AddThemeStyleboxOverride("normal",Palette.Box(new Color(Family=="Dynasty"?"372c1b":"0c1113"),CatalogueArt.Gold,6,2));_fate.AddThemeStyleboxOverride("normal",Palette.Box(new Color(Family=="Fate"?"203c2c":"10251f"),CatalogueArt.Gold,6,2));}
+        if(_dynasty is not null)
+        {
+            _dynasty.Text=$"DYNASTY  {r.Dynasty}\n40 minimum";_fate.Text=$"FATE  {r.Fate}\n40 minimum";
+            DeckSkin.Selected(_dynasty,Family=="Dynasty");if(Family=="Dynasty"){var brass=DeckSkin.Plate(2);brass.ModulateColor=new Color(.58f,.5f,.38f,1);_dynasty.AddThemeStyleboxOverride("normal",brass);}_fate.AddThemeStyleboxOverride("normal",DeckSkin.Plate(3));
+            _fate.AddThemeColorOverride("font_color",Family=="Fate"?new Color("ffebae"):DeckSkin.Text);
+        }
         _status.Text=r.Warnings.Length>0?$"{r.Warnings.Length} deck checks to review  ·  Draft can still be saved":"Basic checks passed  ·  Draft can be saved";
         _status.TooltipText=string.Join("\n",r.Warnings);_status.MouseFilter=MouseFilterEnum.Stop;
         _dirtyLabel.Text=Dirty?"Unsaved changes":"Saved locally";_compareButton.Text=$"Compare ({_compare.Count})";_compareButton.Disabled=_compare.Count==0;

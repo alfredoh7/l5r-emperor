@@ -18,13 +18,15 @@ public partial class DeckBuilderProbe : Node
             Check(_screen.Draft.Count("Border Keep")==1&&_screen.Draft.Count("Bamboo Harvesters")==1,"default setup chosen outside deck totals");
             Check(_screen.Draft.Review().Dynasty==0&&_screen.Draft.Review().Fate==0,"setup excluded from counts");
             var select=Walk(_screen).OfType<Button>().First(b=>b.Text=="Select"&&b.IsVisibleInTree());Click(select);await Wait(.5);Check(_screen.Draft.Cards.Count(c=>c.SetupSlot=="Stronghold")==1,"native single stronghold selection");await Capture("setup-selected");
-            Click(Button("Border Keep  ✓"));await Wait(.4);var alternatives=Walk(_screen).OfType<Button>().Where(b=>b.Text=="Select"&&b.IsVisibleInTree()).ToArray();
+            Click(Walk(_screen).OfType<Button>().Single(b=>b.AccessibilityName=="Choose Border Keep"&&b.IsVisibleInTree()));await Wait(.4);var alternatives=Walk(_screen).OfType<Button>().Where(b=>b.Text=="Select"&&b.IsVisibleInTree()).ToArray();
             if(alternatives.Length>0){Click(alternatives[0]);await Wait(.3);Check(_screen.Draft.Cards.Count(c=>c.SetupSlot=="Border Keep")==1,"setup variant replaces previous starting card");}
             Check(!Walk(_screen).OfType<OptionButton>().Any(o=>o.GetItemText(0).StartsWith("Emperor Edition")),"no redundant printing dropdown");
             var source=PublishedContent.Snapshot.Decks.First(d=>d.Clan=="Crane");
             var all=new[]{source.StrongholdId,"oracle-l5r-1106","oracle-l5r-679"}.Concat(source.Dynasty).Concat(source.Fate);
             var entries=all.GroupBy(id=>id).Select(g=>new DeckEntry(_screen.Data.Cards.Single(c=>c.Id==g.Key).Name,g.Count())).ToArray();
             var path=_screen.Store.Save("Crane — Court and Steel",new Deck("Emperor",entries));Check(_screen.OpenFile(path),"published deck loads into builder");await Wait(5);await Capture("mat");
+            var more=Walk(_screen).OfType<MenuButton>().Single();Click(more);await Wait(.3);Check(more.GetPopup().ItemCount==2,"compact save-copy and export actions available");await Capture("deck-actions");KeyPress(Key.Escape);await Wait(.3);
+            Click(Walk(_screen).OfType<OptionButton>().First(o=>o.Text=="All clans"&&o.IsVisibleInTree()));await Wait(.3);await Capture("filter-menu");KeyPress(Key.Escape);await Wait(.3);
             var before=_screen.Draft.Review();Check(before.Dynasty==source.Dynasty.Length&&before.Fate==source.Fate.Length,"authoritative source totals");
             var card=_screen.Data.Cards.First(c=>c.Name=="Daidoji Kenshi");
             Search(card.Name);await Wait(.6);var plus=Walk(_screen.Collection).OfType<Button>().Single(b=>b.AccessibilityName=="Add "+card.Name);Click(plus);await Wait(.5);Check(_screen.Dirty,"native quantity edit marks draft dirty");
@@ -46,7 +48,7 @@ public partial class DeckBuilderProbe : Node
             Check(_screen.Mat.GetGlobalRect().End.X<=1280,"mat within compact viewport");
             GetWindow().Size=new Vector2I(1920,1080);await Wait(.5);await Capture("wide-window");
             _screen.QueueFree();await Wait(.3);var main=GD.Load<PackedScene>("res://Main.tscn").Instantiate();AddChild(main);await Wait(2);await Capture("main-menu");
-            var menu=Walk(main).OfType<TitleMenu>().Single();var entry=Walk(menu).OfType<Button>().Single(b=>b.Text=="Deck Builder"&&b.IsVisibleInTree());Click(entry);await Wait(2);
+            var menu=Walk(main).OfType<TitleMenu>().Single();Check(menu.Entries.GetChildren().OfType<Button>().All(b=>b.GetGlobalRect().End.Y<=GetViewport().GetVisibleRect().Size.Y),"all six menu entries fit in viewport");var entry=Walk(menu).OfType<Button>().Single(b=>string.Equals(b.Text,"Deck Builder",StringComparison.OrdinalIgnoreCase)&&b.IsVisibleInTree());Click(entry);await Wait(2);
             Check(GetTree().Root.GetNodeOrNull("DeckBuilderLayer") is not null,"main menu opens deck builder");await Capture("menu-deck-builder");
             GD.Print("DECK BUILDER PASS: native setup, quantity, search, warnings, comparison, save/load, corrupt import, unsaved cancel, density, responsive captures");
             if(!OS.GetCmdlineUserArgs().Contains("--stay"))GetTree().Quit();

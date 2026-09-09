@@ -25,7 +25,7 @@ public partial class DeckBuilderScreen
         }
         foreach(var path in files)
         {
-            var item=new PanelContainer{CustomMinimumSize=new Vector2(450,285),SizeFlagsHorizontal=SizeFlags.ExpandFill};item.AddThemeStyleboxOverride("panel",CatalogueArt.Frame(18));grid.AddChild(item);
+            var item=new PanelContainer{CustomMinimumSize=new Vector2(450,285),SizeFlagsHorizontal=SizeFlags.ExpandFill};item.AddThemeStyleboxOverride("panel",new DeckPanelStyle());grid.AddChild(item);
             var box=new VBoxContainer();box.AddThemeConstantOverride("separation",12);item.AddChild(box);var name=Path.GetFileNameWithoutExtension(path);box.AddChild(CatalogueArt.Label(name,26));
             try
             {

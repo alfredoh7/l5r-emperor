@@ -20,11 +20,16 @@ public partial class DeckFace : Button
     {
         var face=new Rect2(3,2,Size.X-6,Size.Y-10);
         for(var i=Math.Min(Copies-1,5);i>0;i--){DrawRect(new Rect2(face.Position+new Vector2(i*.5f,i*1.3f),face.Size),new Color("b7a47c"));DrawRect(new Rect2(face.Position+new Vector2(i*.5f,i*1.3f),face.Size),new Color("24201b"),false,1);}
+        if(IsHovered()||HasFocus()||Selected)
+        {
+            var glow=new StyleBoxFlat{BgColor=Colors.Transparent,ShadowColor=new Color(.95f,.64f,.2f,.5f),ShadowSize=12,CornerRadiusTopLeft=4,CornerRadiusTopRight=4,CornerRadiusBottomLeft=4,CornerRadiusBottomRight=4};glow.Draw(GetCanvasItem(),face.Grow(3));
+        }
         DrawRect(face.Grow(2),new Color("8a7045"));DrawRect(face,new Color("070b0e"));
         var tex=_scans.Get(Card.Printings.FirstOrDefault());
         if(tex is not null){var k=Math.Min(face.Size.X/tex.GetWidth(),face.Size.Y/tex.GetHeight());var size=tex.GetSize()*k;DrawTextureRect(tex,new Rect2(face.Position+(face.Size-size)/2,size),false);}
         else {DrawString(Palette.Body,new Vector2(8,face.Size.Y*.45f),Card.Name,HorizontalAlignment.Center,Size.X-16,16,CatalogueArt.Ivory);DrawString(Palette.Body,new Vector2(8,face.Size.Y*.55f),"Loading scan…",HorizontalAlignment.Center,Size.X-16,14,CatalogueArt.Muted);}
-        if(IsHovered()||HasFocus()||Selected){for(var i=5;i>0;i--)DrawRect(face.Grow(i),new Color(.95f,.69f,.30f,.16f),false,2);}
+        DeckSkin.Frame().Draw(GetCanvasItem(),face.Grow(2));
+        if(IsHovered()||HasFocus()||Selected)DrawRect(face.Grow(2),new Color("e4ba66"),false,1);
     }
 }
 
@@ -46,7 +51,7 @@ public partial class DeckThumbnail : Control
 /// <summary>Virtualized collection rows and grouped draft tiles share the same bounded layout.</summary>
 public partial class DeckSurface : ScrollContainer
 {
-    private sealed record Entry(CatalogueData.Card? Card,string Heading,Rect2 Rect);
+    private sealed record Entry(CatalogueData.Card? Card,string Heading,Rect2 Rect,int Count=0);
     private readonly Control _sheet=new();
     private List<Entry> _entries=[];
     private readonly Dictionary<int,Control> _visible=[];
@@ -80,7 +85,7 @@ public partial class DeckSurface : ScrollContainer
             string Key(CatalogueData.Card c)=>Setup?"":Group=="Gold"?"GOLD "+(c.Numeric("cost")==double.MaxValue?"—":c.Numeric("cost").ToString()):Group=="None"?"CARDS":string.Join(" / ",c.Types.Select(t=>t=="Personality"?"Personalities":t=="Strategy"?"Strategies":t+"s")).ToUpperInvariant();
             foreach(var group in Cards.GroupBy(Key))
             {
-                if(group.Key.Length>0){_entries.Add(new(null,group.Key,new Rect2(8,y,w-16,30)));y+=34;}
+                if(group.Key.Length>0){_entries.Add(new(null,group.Key,new Rect2(8,y,w-16,30),group.Count()));y+=34;}
                 var i=0;foreach(var card in group){_entries.Add(new(card,"",new Rect2(i%columns*cell+(cell-width)/2,y+i/columns*height,width,height-10)));i++;}
                 y+=(float)Math.Ceiling((double)i/columns)*height+12;
             }
@@ -95,8 +100,19 @@ public partial class DeckSurface : ScrollContainer
         foreach(var i in indices)
         {
             var entry=_entries[i];if(!_visible.TryGetValue(i,out var item))
-            {item=entry.Card is null?CatalogueArt.Label(entry.Heading,23,true):MakeCard(entry.Card);_sheet.AddChild(item);_visible[i]=item;}
+            {item=entry.Card is null?new DeckSectionTitle(entry.Heading,entry.Count):MakeCard(entry.Card);_sheet.AddChild(item);_visible[i]=item;}
             item.Position=entry.Rect.Position;item.Size=entry.Rect.Size;
         }
+    }
+}
+
+public partial class DeckSectionTitle(string title,int count) : Control
+{
+    public override void _Draw()
+    {
+        var font=CatalogueArt.Heading(23);var width=font.GetStringSize(title,fontSize:23).X;
+        DrawString(font,new Vector2(0,22),title,HorizontalAlignment.Left,-1,23,DeckSkin.Text);
+        DrawString(Palette.Body,new Vector2(width+16,22),$"({count} shown)",HorizontalAlignment.Left,-1,17,new Color("c8bb99"));
+        DrawLine(new Vector2(0,29),new Vector2(Size.X,29),new Color(.6f,.44f,.22f,.6f),1);
     }
 }
