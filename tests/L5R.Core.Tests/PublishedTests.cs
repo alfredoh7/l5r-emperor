@@ -280,6 +280,12 @@ internal static class PublishedTests
     {
         var s=State();var lobby=Add(s,521);var shunya=Add(s,2158);var e=MatchEngine.FromTestState(s);Reject(e,Use(e,shunya.Id,"shunya-honor"));Accept(e,Use(e,null,"lobby",lobby.Id));Eq(e.State.FavorPlayerId,0);Check(Card(e,lobby.Id).Bowed);Pass(e);Accept(e,Use(e,shunya.Id,"shunya-honor"));Eq(e.State.Players[0].Honor,12);Eq(e.State.FavorPlayerId,null);Check(!Card(e,shunya.Id).Bowed);Pass(e);Reject(e,Use(e,null,"lobby",shunya.Id));
         s=State();s.Players[0].Honor=7;lobby=Add(s,521);e=MatchEngine.FromTestState(s);Reject(e,Use(e,null,"lobby",lobby.Id));
+        // Spending Favor (a Limited ability) does not consume the separate once-per-turn Lobby
+        // limit -- they are tracked by distinct AbilityUses keys. Once the opponent's action
+        // opportunity passes back, the same active player may Lobby again the same turn.
+        s=State();s.FavorPlayerId=0;var discard=Add(s,2619,zone:Zone.Hand);var relobby=Add(s,521);e=MatchEngine.FromTestState(s);
+        Accept(e,Use(e,null,"favor-cycle",discard.Id));Eq(e.State.FavorPlayerId,null);Pass(e);
+        Accept(e,Use(e,null,"lobby",relobby.Id,actor:0));Eq(e.State.FavorPlayerId,0);
     }
     private static void FavorCycle()
     {
