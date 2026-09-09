@@ -42,6 +42,20 @@ public partial class Main
                 foreach (var unit in CourtUnits(player, index))
                     InkRequire(court.Encloses(new Rect2(_battlePlacements[unit.Id], new Vector2(UnitWidth(unit, player), StackHeight(unit, player)))), "Stack does not fit its court.");
             }
+            foreach (var player in View.Players)
+            {
+                var home = _homeBounds[player.Id];
+                var provinceY = ProvinceRowY(player);
+                InkRequire(player.Id == Self.Id ? home.End.Y <= provinceY - MatHeader : home.Position.Y >= provinceY + PlaneHeight(CardHeight),
+                    "Home Personalities crossed to the wrong side of their provinces.");
+            }
+            if (_captureMode.Contains("compact", StringComparison.Ordinal))
+            {
+                InkRequire(!BattleActive && _battleCourts.Count == 0 && _battleHeight == 0,
+                    "A non-battle board kept empty battlefield space.");
+                InkRequire(_laneWidths.All(w => Math.Abs(w - 218) < .01f), "Provinces retained battle-expanded lane widths.");
+                GD.Print("COMPACT_BOARD_PASS: original 218-unit province pitch, no retained court band, Home on table-facing side from both seats.");
+            }
             GD.Print($"BATTLE_COURT_PASS: {_battleCourts.Count} connected courts; both seats nearest their provinces; real stacks fit disjoint bounds.");
             if (_assignments.Count > 0)
             {

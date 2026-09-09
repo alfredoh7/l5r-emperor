@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Approved battle presentation plus follow-up: shorten all ink lifecycle timings by 35%, preserving card-first gating; integrate main through token primitives PR80.",
-  "validation": "Timing follow-up: client compilation/import passed; native 1920x1080 mat checks passed (actual hover, selection, tray, icon, expansion/contraction, retarget and reduced motion); real 120-frame purchase film passed and inspected. Prior battle-pass validation remains recorded in docs/screenshots/battle-presentation/README.md. Initial native attempts failed to acquire macOS focus; foregrounding the window fixed it. Existing fade test updated for the shorter duration.",
-  "remaining": "Updated GitHub CI and Mendon review before PR76 merges; no native Windows play or expert acceptance claimed.",
+  "summary": "Restore compact province spacing and table-facing Home rows; preserve approved battle passes and faster ink; rebuild B court connector from source pixels and establish permanent approved-art workflow.",
+  "validation": "Client build passed; 273 deterministic tests passed after integrating main through PR85; six native battle/layout fixtures passed; native ink lifecycle, selection and attachment-tray checks passed; ultrawide camera/HUD input checks passed; final source comparison and court capture visually reviewed; git diff --check passed.",
+  "remaining": "GitHub CI and Mendon shared review before merge. No native Windows graphical playtesting or expert rules acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/75",
   "branch": "codex/75-battle-presentation",
-  "updated": "2026-09-08T22:42:09.171680+00:00"
+  "updated": "2026-09-09T00:28:07.572416+00:00"
 }

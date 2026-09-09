@@ -74,13 +74,10 @@ public partial class Main
             var province = _matTargets.FirstOrDefault(s => s.Id == $"province:{defender.Id}:{index}");
             if (province is null) continue;
             var above = province.Bounds.GetCenter().Y < court.GetCenter().Y;
-            var center = court.GetCenter().X;
-            var start = new Vector2(center, above ? province.Bounds.End.Y : province.Bounds.Position.Y);
-            var end = new Vector2(center, above ? court.Position.Y : court.End.Y);
+            var edge = new Vector2(court.GetCenter().X, above ? court.Position.Y : court.End.Y);
             var active = View.CurrentBattleProvince == index;
             var reveal = _matSections.RevealProgress($"battle:{defender.Id}:{index}");
-            foreach (var dx in new[] { -19f, 19f })
-                BattleInkArt.Stroke(canvas, start + new Vector2(dx, 0), end + new Vector2(dx, 0), new Color(1.35f, 1.22f, 1, reveal));
+            BattleInkArt.Neck(canvas, edge, above, new Color(active ? .76f : 1, active ? 1.18f : 1, active ? 1.3f : 1, reveal));
 
         }
         foreach (var (id, province) in _assignments)

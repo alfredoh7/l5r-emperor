@@ -48,10 +48,10 @@ public static class ProvinceThresholdArt
         return Plates[key] = ImageTexture.CreateFromImage(image);
     }
 
-    public static Rect2 IconBounds(Rect2 bounds, string label)
+    public static Rect2 IconBounds(Rect2 bounds, string label, bool connectionAbove = false)
     {
         // A's icons interrupt the top stroke, near its left corner. No header row.
-        if (label.StartsWith("Province ", StringComparison.Ordinal)) return new Rect2(bounds.GetCenter().X - 24, bounds.Position.Y - 24, 48, 48);
+        if (label.StartsWith("Province ", StringComparison.Ordinal)) return new Rect2(bounds.GetCenter().X - 24, (connectionAbove ? bounds.End.Y - 20 : bounds.Position.Y - 26), 48, 48);
         var local = label == "Holdings" ? new Rect2(77 * .55f, 0, 56 * .55f, 75 * .55f)
             : new Rect2(71 * .55f, 0, 121 * .55f, 69 * .55f);
         return new Rect2(bounds.Position + local.Position, local.Size);
@@ -59,10 +59,10 @@ public static class ProvinceThresholdArt
 
     public static Rect2 ThresholdBounds(Rect2 bounds) => new(bounds.Position.X, bounds.End.Y - Footer, bounds.Size.X, Footer);
 
-    public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0)
+    public static void Draw(Control canvas, Vector2 size, string label, int? province, float active = 0, bool connectionAbove = false, bool connected = false)
     {
         if (province is null && label.StartsWith("Province ", StringComparison.Ordinal))
-        { BattleInkArt.Court(canvas, size, active); return; }
+        { BattleInkArt.Court(canvas, size, active, connectionAbove); return; }
         var art = Plate(label, province);
         var source = art.GetSize();
         var isProvince = province is not null;
@@ -92,9 +92,20 @@ public static class ProvinceThresholdArt
             for (var x = 0; x < 3; x++)
             {
                 if (x == 1 && y == 1) continue; // transparent card space
-                canvas.DrawTextureRectRegion(art,
-                    new Rect2(destX[x], destY[y], destX[x + 1] - destX[x], destY[y + 1] - destY[y]),
-                    new Rect2(sourceX[x], sourceY[y], sourceX[x + 1] - sourceX[x], sourceY[y + 1] - sourceY[y]), tint);
+                var dest = new Rect2(destX[x], destY[y], destX[x + 1] - destX[x], destY[y + 1] - destY[y]);
+                var src = new Rect2(sourceX[x], sourceY[y], sourceX[x + 1] - sourceX[x], sourceY[y + 1] - sourceY[y]);
+                if (isProvince && connected && connectionAbove && x == 1 && y == 0)
+                {
+                    // Open the top stroke where the concept's flared neck joins.
+                    var left = size.X / 2 - 20 - dest.Position.X;
+                    var rightStart = size.X / 2 + 20;
+                    var ratio = src.Size.X / dest.Size.X;
+                    canvas.DrawTextureRectRegion(art, new Rect2(dest.Position, new Vector2(left, dest.Size.Y)),
+                        new Rect2(src.Position, new Vector2(left * ratio, src.Size.Y)), tint);
+                    canvas.DrawTextureRectRegion(art, new Rect2(rightStart, dest.Position.Y, dest.End.X - rightStart, dest.Size.Y),
+                        new Rect2(src.Position.X + (rightStart - dest.Position.X) * ratio, src.Position.Y, (dest.End.X - rightStart) * ratio, src.Size.Y), tint);
+                }
+                else canvas.DrawTextureRectRegion(art, dest, src, tint);
             }
         }
     }

@@ -3,7 +3,7 @@ using Godot;
 namespace L5R.Client;
 
 /// <summary>Public layout facts only. Bounds and icon identities are in the unprojected table plane.</summary>
-public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool Active = false, int? ProvinceNumber = null);
+public sealed record InkMatSection(string Id, string Label, Rect2 Bounds, bool Active = false, int? ProvinceNumber = null, bool ConnectionAbove = false, bool Connected = false);
 
 /// <summary>
 /// Persistent ink under the playable cards. Layout submits resting footprints; pointer
@@ -189,6 +189,7 @@ public partial class InkMatSections : Control
     {
         state.Stroke.Position = state.Current.Position;
         state.Stroke.Size = state.Current.Size;
+        state.Stroke.ConnectionAbove = state.Target.ConnectionAbove; state.Stroke.Connected = state.Target.Connected;
         state.Stroke.Label = state.Target.Label; state.Stroke.ProvinceNumber = state.Target.ProvinceNumber;
         state.Stroke.Present(state.Current.Size, state.Active, state.Reveal,
             state.Removing ? state.RemoveProgress : 0, 1);
@@ -197,6 +198,7 @@ public partial class InkMatSections : Control
         {
             state.Ghost.Position = state.GhostBounds.Position;
             state.Ghost.Size = state.GhostBounds.Size;
+            state.Ghost.ConnectionAbove = state.Target.ConnectionAbove; state.Ghost.Connected = state.Target.Connected;
             state.Ghost.Label = state.GhostLabel; state.Ghost.ProvinceNumber = state.Target.ProvinceNumber;
             state.Ghost.Present(state.GhostBounds.Size, state.Active, state.GhostReveal, state.GhostProgress,
                 1 - Ease(state.GhostProgress));
@@ -237,10 +239,10 @@ public partial class InkMatSections : Control
             TextureFilter = TextureFilterEnum.LinearWithMipmaps;
             owner.QueueRedraw();
         }
-        private Rect2 IconRect(Rect2 bounds, string label, bool province)
+        private Rect2 IconRect(Rect2 bounds, string label, bool province, bool connectionAbove)
         {
             var inverse = GetGlobalTransform().AffineInverse();
-            var rect = province ? ProvinceThresholdArt.ThresholdBounds(bounds) : ProvinceThresholdArt.IconBounds(bounds, label);
+            var rect = province ? ProvinceThresholdArt.ThresholdBounds(bounds) : ProvinceThresholdArt.IconBounds(bounds, label, connectionAbove);
             var points = new[] { rect.Position, new Vector2(rect.End.X, rect.Position.Y), rect.End, new Vector2(rect.Position.X, rect.End.Y) }
                 .Select(p => inverse * project(p)).ToArray();
             var minimum = new Vector2(points.Min(p => p.X), points.Min(p => p.Y));
@@ -272,7 +274,7 @@ public partial class InkMatSections : Control
                     hit.SetMeta("province_marker", target.Id);
                     hit.SetMeta("flat_tooltip", target.Label + " · Surviving province");
                 }
-                var rect = IconRect(target.Bounds, target.Label, target.ProvinceNumber is not null);
+                var rect = IconRect(target.Bounds, target.Label, target.ProvinceNumber is not null, target.ConnectionAbove);
                 hit.Position = rect.Position; hit.Size = rect.Size;
                 hit.Visible = owner.IsVisibleInTree() && owner.RevealProgress(target.Id) > .85f;
             }
@@ -289,6 +291,7 @@ public partial class InkMatSections : Control
         public string Label = "Home";
         public int? ProvinceNumber;
         private float _active;
+        public bool ConnectionAbove, Connected;
         public InkStroke()
         {
             MouseFilter = MouseFilterEnum.Ignore; FocusMode = FocusModeEnum.None;
@@ -309,7 +312,7 @@ public partial class InkMatSections : Control
 
         public override void _Draw()
         {
-            ProvinceThresholdArt.Draw(this, Size, Label, ProvinceNumber, _active);
+            ProvinceThresholdArt.Draw(this, Size, Label, ProvinceNumber, _active, ConnectionAbove, Connected);
         }
 
     }

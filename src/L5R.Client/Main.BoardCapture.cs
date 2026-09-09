@@ -10,6 +10,7 @@ public partial class Main
     private void PrepareBoardCapture()
     {
         _boardFixtureAttempts++;
+        var compactMode = _captureMode.Contains("courts-compact", StringComparison.Ordinal);
         var defenseMode = _captureMode.Contains("defense", StringComparison.Ordinal);
         var assignmentMode = defenseMode || _captureMode.Contains("assignment", StringComparison.Ordinal);
         var assignmentType = defenseMode ? "assignDefense" : "attack";
@@ -30,7 +31,8 @@ public partial class Main
                     + View.Players.Single(p => p.Id != View.ActivePlayerId).Provinces.Single(p => p.Index == active).Strength;
             var attachmentReady = !_captureMode.Contains("ink", StringComparison.Ordinal) ||
                 View.Players.Any(p => p.Home.Concat(p.Army).Any(c => c.AttachedTo is not null));
-            if ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady) break;
+            var compactReady = View.Phase == Phase.Dynasty && View.TurnNumber >= 3 && View.Players.All(p => p.Home.Any(c => c.Definition?.Type == CardType.Personality));
+            if (compactMode ? compactReady : ((assignmentMode && assignment is not null || targetMode && View.Phase == Phase.Battle && targeted is not null || !assignmentMode && !targetMode && View.Phase == Phase.Battle && View.Players.Sum(p => p.Army.Count(c => c.AttachedTo is null)) >= 2) && ClarityFixtureReady() && attachmentReady && fallReady)) break;
             var command = TrainingOpponent.Choose(View, Actions).Command ?? throw new InvalidOperationException("Board capture has no action.");
             var version = View.Version;
             _session.Submit(command).GetAwaiter().GetResult();
@@ -132,7 +134,7 @@ public partial class Main
             }
             ProbeUnitStandardInput();
         }
-        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { FocusBattle(); ProbeBattleCourts(); }
+        if (_captureMode.Contains("courts", StringComparison.Ordinal)) { if (!compactMode) FocusBattle(); ProbeBattleCourts(); }
         if (_captureMode.Contains("ink", StringComparison.Ordinal)) { if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusMySide(); ProbeInkMat(); }
         if (_captureMode.Contains("deselect", StringComparison.Ordinal)) ProbeDeselection();
         if (_captureMode.Contains("clarity", StringComparison.Ordinal)) PrepareClarityCapture();
