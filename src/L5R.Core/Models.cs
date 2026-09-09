@@ -55,6 +55,10 @@ public sealed class ProvinceState
     public int Strength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
+    // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
+    // by player id, defaulted to false. No ability removes it directly; it resets to false for both
+    // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
+    public bool[] Reconnaissance { get; set; } = new bool[2];
 }
 
 public sealed class PlayerState
