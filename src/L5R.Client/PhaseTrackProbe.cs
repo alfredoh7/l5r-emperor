@@ -8,7 +8,7 @@ public partial class PhaseTrackProbe : Control
     private PhaseTrack _track=null!;
     private MatchView _view=null!;
     private string _output="/tmp/six-phases";
-    private int _stage,_phase,_passes;
+    private int _stage,_phase;
     private float _clock;
     private byte[]? _still;
     private static readonly Phase[] Ordered=[Phase.Straighten,Phase.Events,Phase.Action,Phase.AttackDeclaration,Phase.Dynasty,Phase.End];
@@ -22,7 +22,7 @@ public partial class PhaseTrackProbe : Control
         var label=Palette.Text("Approved A artwork · Native six-phase rail",26,Palette.Gold);label.Position=new Vector2(40,25);AddChild(label);
         var width=Math.Min(screen.X-80,1294);
         AddChild(new PhaseReferencePlate{Position=new Vector2((screen.X-width)/2,85),Size=new Vector2(width-34,(width-34)*154/1774),MouseFilter=MouseFilterEnum.Ignore});
-        _track=new PhaseTrack{Position=new Vector2((screen.X-width)/2,270),Size=new Vector2(width,150),ReducedMotion=true,PassRequested=()=>_passes++};AddChild(_track);
+        _track=new PhaseTrack{Position=new Vector2((screen.X-width)/2,270),Size=new Vector2(width,150),ReducedMotion=true};AddChild(_track);
         if(OS.GetCmdlineUserArgs().Contains("--scaled")) { _track.Scale=Vector2.One*.66f; _track.Size=new Vector2(width/.66f,150); }
         _view=MatchEngine.CreateStarterMatch().GetView(0);
         _track.Present(_view with{Phase=Ordered[0]});_track.PresentActions(_view,[],false);
@@ -57,7 +57,7 @@ public partial class PhaseTrackProbe : Control
             }
             if(_stage==3)
             {
-                if(_track.HelpVisible||_passes!=0)throw new Exception("Dismissal failed or phase help invoked Pass");
+                if(_track.HelpVisible)throw new Exception("Help dismissal failed");
                 _track.Present(_view with{Phase=Ordered[_phase]});_track.PresentLight(0,false);_stage++;return;
             }
             if(_stage==4)

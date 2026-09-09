@@ -44,6 +44,7 @@ public partial class PhaseTrack
         var pixelScale=Math.Max(.01f,GetGlobalTransformWithCanvas().Scale.X);
         var textScale=Math.Max(1,1/pixelScale);
         _helpTitle.AddThemeFontSizeOverride("font_size",(int)(22*textScale));
+        _helpTitle.AddThemeFontOverride("font",Palette.HeadingLabel((int)(22*textScale)));
         _helpBody.AddThemeFontSizeOverride("font_size",(int)(17*textScale));
         _helpContext.AddThemeFontSizeOverride("font_size",(int)(13*textScale));
         var width=Math.Min(_plate.Size.X,Math.Min(440*textScale,GetViewportRect().Size.X/pixelScale-20));

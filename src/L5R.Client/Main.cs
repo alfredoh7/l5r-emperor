@@ -254,7 +254,7 @@ public partial class Main : Node
         // Root controls use an explicit scale, so rasterize system fonts at the
         // matching density instead of magnifying their 1080p glyph textures.
         ((FontFile)Palette.Body).Oversampling = Math.Max(1, scale);
-        ((FontFile)Palette.Title).Oversampling = Math.Max(1, scale);
+        Palette.HeadingFace.Oversampling = Math.Max(1, scale);
         _layoutWidth = available.X / Math.Max(.1f, scale);
         _root.Size = DesignSize;
         _root.Scale = Vector2.One * scale;
@@ -378,7 +378,6 @@ public partial class Main : Node
     private void RenderTimeline()
     {
         _timeline.Present(View);
-        _timeline.PassRequested = PassOpportunity;
         _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
     }
 

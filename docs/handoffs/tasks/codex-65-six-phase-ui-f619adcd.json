@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement A six-phase bitmap rail with live Musashi labels and C compact hover/focus help. Map Straighten, Events, Action, Attack sub-states, Dynasty and End explicitly; Finished unlit. Preserve priority/Pass and engine timing. Fix Straighten/Events help fallback.",
-  "validation": "279 regression checks passed; client build zero warnings/errors; Godot import passed. Six native phase states at 1672 and scaled1280, hover content, keyboard arrows/Escape, no Pass dispatch, static reduced-motion pixels and real-board1920/1280 passed. Source comparison, compact help and board captures visually reviewed. Launcher generated and shell syntax checked.",
-  "remaining": "CI and mdornbrook semantic-help review pending before merge; no Windows graphical playtest. Phase transitions are unchanged; held phase captures are presentation fixtures.",
+  "summary": "A six-phase art with C help, refined to uppercase Weathered Quill and compact glyph spacing. Remove phase label stripes and phase-bar Pass; keep action-sidebar Pass. Normalize heading line metrics and fit menus/plaques. Ribbon refinement is separately in PR92.",
+  "validation": "Final client build passed; native phase/input/reduced-motion checks at 1672 and scaled1280, actual board1920/1280, native menus and entry-bounds/uppercase checks at three aspect ratios, player/keyword/name and stat-inlay fixtures passed. Reviewed source comparisons and plaque/menu typography. Combined preview retains earlier battle/token UI; integrated rules suite281 passed.",
+  "remaining": "CI and mdornbrook semantic-help/shared review pending; main unchanged. No native Windows graphical playtest. Combined preview evidence includes unmerged PR76/92 visuals.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/65",
   "branch": "codex/65-six-phase-ui",
-  "updated": "2026-09-09T12:30:14.142512+00:00"
+  "updated": "2026-09-09T13:23:30.297381+00:00"
 }

@@ -10,15 +10,11 @@ public partial class PhaseTrack : Control
     private readonly float[] _weights = new float[6];
     private int _active = -1;
     private float _time;
-    public Action PassRequested = () => { };
-    public Button PassButton { get; private set; } = null!;
     public Label PriorityLabel { get; private set; } = null!;
     private Color _priorityColor = Palette.Crane;
     public void PresentActions(MatchView view, ActionOption[] actions, bool available)
     {
         var pass = actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
-        PassButton.Disabled = !available || view.WinnerId is not null || view.PriorityPlayerId != view.ViewerId || pass is null;
-        PassButton.TooltipText = PassButton.Disabled ? "Pass is unavailable while waiting, disconnected, or when a required choice must be completed." : pass!.Label + " · Pass this opportunity without playing a card.";
         var actor = view.Players.Single(p => p.Id == view.PriorityPlayerId);
         var own = view.PriorityPlayerId == view.ViewerId;
         PriorityLabel.Text = view.WinnerId is not null ? "Match complete" : own ? (pass is null ? "Your decision" : "You may act or pass") : $"{actor.Name} · Opponent may act";
@@ -45,6 +41,7 @@ public partial class PhaseTrack : Control
     {
         MouseFilter = MouseFilterEnum.Ignore;
         _art = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/phase-art.gdshader") };
+        _art.SetShaderParameter("blank_lacquer", GD.Load<Texture2D>("res://Art/lacquer-phase-plate.png"));
 
         _plate = new TextureRect
         {
@@ -55,7 +52,6 @@ public partial class PhaseTrack : Control
         AddChild(_plate);
         PriorityLabel = Palette.Text("", 19, Palette.Paper); PriorityLabel.HorizontalAlignment=HorizontalAlignment.Center;
         PriorityLabel.TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis; PriorityLabel.MouseFilter=MouseFilterEnum.Stop; AddChild(PriorityLabel);
-        PassButton = Palette.Button("Pass", () => PassRequested()); PassButton.AddThemeFontOverride("font",Palette.Title); PassButton.AddThemeFontSizeOverride("font_size",22); AddChild(PassButton);
         AddChild(TurnCue); TurnCue.Hide(); // Turn information is presented in the player plaques.
         CreateHelp();
         Resized += FitArtwork;
@@ -75,9 +71,7 @@ public partial class PhaseTrack : Control
             _areas[i].Size = new Vector2((right-left)*width,Math.Min(_plate.Size.Y,94));
         }
         PriorityLabel.Position = new Vector2(_plate.Position.X + 20, _plate.Size.Y + 3);
-        PriorityLabel.Size = new Vector2(Math.Max(100,width-145),32);
-        PassButton.Position = new Vector2(_plate.Position.X+width-110,_plate.Size.Y);
-        PassButton.Size = new Vector2(96,36);
+        PriorityLabel.Size = new Vector2(Math.Max(100,width-40),32);
         TurnCue.Position = new Vector2(320, 94);
         TurnCue.Size = new Vector2(Math.Max(360, Size.X - 320), 40);
         HelpButton.Position=new Vector2(_plate.Position.X+width+3,Math.Max(0,_plate.Size.Y/2-14));
@@ -151,7 +145,7 @@ public partial class PhaseTrack : Control
     {
         if (_plate is null) return;
         foreach(var area in _areas.Where(a=>a.HasFocus()))DrawRect(new Rect2(area.Position+Vector2.One*3,area.Size-Vector2.One*6),Palette.Gold with{A=.6f},false,1);
-        var fontSize = Math.Clamp((int)(_plate.Size.X/45),12,28);
+        var fontSize = Math.Clamp((int)(_plate.Size.X/57),12,22);
         while(fontSize>8 && _names.Any(n=>Palette.Title.GetStringSize(n,fontSize:fontSize).X>_plate.Size.X*.14f))fontSize--;
         var baseline = _plate.Size.Y*.48f;
         for (var i=0;i<6;i++)

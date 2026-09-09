@@ -89,6 +89,7 @@ public partial class BattleTracker : Control
     private string ProvinceTitle => Snapshot.CurrentBattleProvince is int p ? $"Province {p + 1}" : ResolutionMessage is not null ? "Battle resolved" : "Battle";
     private void TextAt(string text, Rect2 box, int size, Color color, bool heading)
     {
+        if (heading) text = text.ToUpperInvariant();
         var font = heading ? Palette.Title : Palette.Body;
         while (size > 9 && font.GetStringSize(text, fontSize: size).X > box.Size.X) size--;
         var baseline = box.Position.Y + (box.Size.Y + font.GetAscent(size) - font.GetDescent(size)) / 2;
