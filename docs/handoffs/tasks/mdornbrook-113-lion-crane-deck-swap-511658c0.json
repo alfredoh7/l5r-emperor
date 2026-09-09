@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Swap Ikoma Natsu (Lion, Cavalry) and Doji Atsumichi (Crane, bow-or-straighten) into the pinned lion-crane-v1 decks to validate their abilities in real play. Both decks stay hard-fixed at exactly 40 Dynasty cards, so an existing Personality slot had to be cut in each: Ikoma Takakura (Lion) and Doji Tatsuki (Crane), both ability-free vanilla Personalities, per the user's direction to cut rather than grow past 40. Ikoma Shika was the first candidate considered for the Lion cut but turned out to be load-bearing test infrastructure (used as a generic enemy-Personality stand-in across ~15 unrelated PublishedTests.cs scenarios); caught this via a full test run and picked Takakura instead. One further test (BowedTakakuraResolution, now BowedPersonalityResolution) looked up Takakura by name for her Force/Chi stats specifically; retargeted it to Akodo Kisho (same Force 3/Chi 3, otherwise untouched by this swap). Regenerated via the existing package_published.py pipeline (candidate deck list + lion-crane-sources.json receipts), not hand-edited, so future regenerations stay in sync. personality-wave-5 shrinks from 7 to 5 cards since Natsu/Atsumichi moved from that wave into the pinned Snapshot. Removed the two cut cards' now-orphaned artwork files.",
+  "validation": "bash tools/check.sh --skip-client: 85/85 core tests (1 retargeted), 33/33 published tests (updated counts), 8/8 deck-format, plus AI/server/client-transport checks -- all pass.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/113",
+  "branch": "mdornbrook/113-lion-crane-deck-swap",
+  "updated": "2026-09-09T15:12:53.852958+00:00"
+}

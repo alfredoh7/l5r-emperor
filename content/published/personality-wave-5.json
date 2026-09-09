@@ -29,32 +29,6 @@
       "Effect": "none"
     },
     {
-      "Id": "oracle-l5r-3623",
-      "Name": "Ikoma Natsu",
-      "Type": "Personality",
-      "Clan": "Lion",
-      "GoldCost": 5,
-      "GoldProduction": 0,
-      "Force": 3,
-      "Chi": 2,
-      "PersonalHonor": 2,
-      "HonorRequirement": 8,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Natsu will not be controlled by a Unicorn Clan player.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-3623.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Lion Clan",
-        "Samurai",
-        "Soul of Ikoma Otemi"
-      ],
-      "Focus": 0,
-      "Abilities": [],
-      "Effect": "none"
-    },
-    {
       "Id": "oracle-l5r-5138",
       "Name": "Mirumoto Reiyu",
       "Type": "Personality",
@@ -110,35 +84,6 @@
       "Abilities": [
         "horibe-bow",
         "horibe-straighten"
-      ],
-      "Effect": "none"
-    },
-    {
-      "Id": "oracle-l5r-2060",
-      "Name": "Doji Atsumichi",
-      "Type": "Personality",
-      "Clan": "Crane",
-      "GoldCost": 8,
-      "GoldProduction": 0,
-      "Force": 3,
-      "Chi": 4,
-      "PersonalHonor": 4,
-      "HonorRequirement": 4,
-      "ProvinceStrength": 0,
-      "StartingHonor": 0,
-      "Text": "Battle: Target a Personality with lower Personal Honor: Bow or straighten him.",
-      "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-2060.jpg",
-      "Keywords": [
-        "Cavalry",
-        "Crane Clan",
-        "Samurai",
-        "Soul of Doji Tadanori"
-      ],
-      "Focus": 0,
-      "Abilities": [
-        "atsumichi-bow",
-        "atsumichi-straighten"
       ],
       "Effect": "none"
     },

@@ -174,13 +174,15 @@ public static class PublishedContent
     }
 
     /// <summary>Wave 5 of ability-bearing Personalities: import wave (issue #111) -- Cavalry, Conqueror
-    /// and Tactician-adjacent cards needing only small extensions of already-proven patterns.</summary>
+    /// and Tactician-adjacent cards needing only small extensions of already-proven patterns. Ikoma
+    /// Natsu and Doji Atsumichi shipped here originally but moved into the pinned Snapshot (issue
+    /// #113), so this wave now holds the other five.</summary>
     public static PublishedSnapshot PersonalityWave5 { get; } = LoadPersonalityWave5();
 
     private static PublishedSnapshot LoadPersonalityWave5()
     {
         var snapshot = Load("L5R.Published.PersonalityWave5.json", "personality-wave-5", requireDecks: false);
-        if(snapshot.Cards.Length != 7)
+        if(snapshot.Cards.Length != 5)
             throw new InvalidOperationException("Unexpected personality-wave-5 card count.");
         foreach(var card in snapshot.Cards)
             if(card.Type != CardType.Personality || card.Text.Length == 0)
