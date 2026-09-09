@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Built approved catalogue gallery and mandatory complete WebP85 artwork delivery; no runtime Oracle downloads or offline opt-in",
+  "validation": "116 content tests and existing full regression suites pass; native catalogue, complete printing coverage, WebP decode, corruption rejection, selective JPEG cache migration and interaction checks pass. Empty installation downloaded the pinned private pack and reused it offline. Mac and Windows exports pass; exported Mac gallery and inspector clicked and visually verified. Pack 2486 images / 325 MiB, about 82 percent smaller. Windows native graphical playtest not performed.",
+  "remaining": "CI and Mendon review of catalogue data integration; Alfredo visual acceptance. No rules authority changed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/120",
+  "branch": "codex/120-catalogue-viewer",
+  "updated": "2026-09-09T19:04:40.210598+00:00"
+}
