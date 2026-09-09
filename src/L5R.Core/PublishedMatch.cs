@@ -2,7 +2,10 @@ namespace L5R.Core;
 
 public sealed partial class MatchEngine
 {
-    private static MatchEngine CreatePublished(ulong seed)
+    // Shared by the live app scenario (PublishedContent.Snapshot) and the frozen test scenario
+    // (PublishedContent.TestSnapshot) -- only which deck lists to draw from differs; card behavior for
+    // any given id always resolves through the one shared CardCatalog either way.
+    private static MatchEngine CreatePublished(ulong seed, string scenario, PublishedSnapshot snapshot)
     {
         var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane" }, new() { Id = 1, Name = "Lion", Clan = "Lion" }] };
         var random = new StableRandom(seed); var nextId = 0;
@@ -14,7 +17,7 @@ public sealed partial class MatchEngine
         }
         foreach (var player in state.Players)
         {
-            var deck = PublishedContent.Snapshot.Decks.Single(d => d.Clan == player.Clan);
+            var deck = snapshot.Decks.Single(d => d.Clan == player.Clan);
             var stronghold = CardCatalog.Get(deck.StrongholdId);
             player.Honor = stronghold.StartingHonor;
             player.StrongholdId = Add(player.Id, stronghold.Id, Zone.Stronghold, true).Id;
@@ -26,7 +29,7 @@ public sealed partial class MatchEngine
         }
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
         Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
-        var engine = new MatchEngine(state, seed, PublishedContent.Scenario);
+        var engine = new MatchEngine(state, seed, scenario);
         foreach (var player in state.Players)
         {
             foreach (var province in player.Provinces) engine.Refill(player, province);

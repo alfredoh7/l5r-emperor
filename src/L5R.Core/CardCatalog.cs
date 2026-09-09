@@ -53,6 +53,11 @@ public static class CardCatalog
             new("training-cavalry", "Training cavalry", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: carries the Cavalry keyword. Never included in a playable deck."),
             new("training-cavalry-follower", "Training cavalry follower", CardType.Follower, GoldCost:2, Force:2, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: a Follower carrying the Cavalry keyword. Never included in a playable deck.")
         ];
+        // Deliberately does NOT concat PublishedContent.TestSnapshot.Cards: that frozen scenario only
+        // pins which ids make up the test suite's Lion/Crane decks, not a second copy of their
+        // definitions. Every id it references already exists via Snapshot/the waves below (and stays
+        // there per policy -- cards are never removed except by explicit direction), so adding it here
+        // would only risk a duplicate-key conflict, never add real coverage.
         return cards.Concat(PublishedContent.Snapshot.Cards).Concat(PublishedContent.VanillaWave1.Cards).Concat(PublishedContent.StrongholdWave1.Cards).Concat(PublishedContent.StrongholdWave2.Cards).Concat(PublishedContent.StrongholdWave3.Cards).Concat(PublishedContent.PersonalityWave1.Cards).Concat(PublishedContent.PersonalityWave2.Cards).Concat(PublishedContent.PersonalityWave3.Cards).Concat(PublishedContent.FollowerWave1.Cards).Concat(PublishedContent.PersonalityWave4.Cards).Concat(PublishedContent.PersonalityWave5.Cards).ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
 }

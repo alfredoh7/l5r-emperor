@@ -1423,9 +1423,9 @@ static void BowedPersonalityResolution()
     {
         var s=Battle(1,1,6).State;
         var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
-        p.DefinitionId=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
+        p.DefinitionId=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
         p.Modifiers.Clear(); p.Bowed=true;
-        var guide=PublishedContent.Snapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
+        var guide=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
         Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
         Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
         var e=MatchEngine.FromTestState(s);
