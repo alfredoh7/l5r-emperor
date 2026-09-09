@@ -1,0 +1,7 @@
+# Pass 3 review correction
+
+The first generated storyboard incorrectly retained a tall enclosure on the destroyed province and used home/holdings icons on discard piles. The final edit removes those ambiguities. Static sheets illustrate motion; they do not validate real animation, game rules or runtime appearance.
+
+Built-in image_gen edit prompt:
+
+Use case: precise-object-edit. Edit this existing PASS 3 concept sheet with two exact corrections ONLY. Preserve layout, typography, colors, texture, all other contents and beautiful lower two seal options exactly. In the top RIGHT storyboard panel labelled "3 · Board settles", province 2 (second bay from left) must have NO tall rectangular enclosure at all: erase its top horizontal border and both tall vertical side borders, restoring uninterrupted navy cloth there. Keep ONLY its low bottom gold roof and dark numbered circular 2 seal, visibly cracked. Adjacent surviving province 1,3,4 remain fully enclosed at original positions, do not shift or renumber. The top-middle panel may retain its frame since it is mid-resolution. Second correction: the two discard piles in top-middle panel currently have a house and rice icon, which wrongly denote other zones. Remove these symbols from the card backs; use plain dark charcoal for the Dynasty pile and plain very dark forest green for the Fate pile, keeping their existing small captions unchanged. No other changes. This is still a concept storyboard.

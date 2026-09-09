@@ -1,0 +1,25 @@
+{
+  "mode": "Built-in image_gen tool",
+  "derivations": [
+    {
+      "id": "crimson-clean",
+      "refs": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-presentation/src/L5R.Client/Art/crimson-court.png"
+      ],
+      "prompt": "Use case: background-extraction. Edit ONLY the checkerboard background to perfectly solid black #000000 both inside and outside the frame. Preserve all court border geometry, four ornamental corners, red glow, scattered dried and wet blood, and bottom neck exactly. No checkerboard anywhere. Do not add anything. Opaque black is intentional for a runtime pigment extraction shader. Keep all color and fine blood edge textures.",
+      "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-235eb522-180a-4af7-8bc0-41f88f50e1f9.png",
+      "used": false
+    },
+    {
+      "id": "battle-detail-atlas",
+      "refs": [
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-concepts-2026-09-09/04a-broad-ink-arrow.png",
+        "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-concepts-2026-09-09/05a-named-defeat.png"
+      ],
+      "prompt": "Use case: style-transfer. Production game sprite sheet derived faithfully from these approved UI concepts. Solid uniform navy #101D27 background, no checkerboard. Exactly three isolated assets separated by large empty margins on a landscape canvas. Upper left: one broad gold-pigment brush arrow pointing EXACTLY horizontally right, symmetrical tip axis, warm gold grain and frayed brush edges just like reference 1. Upper right: one horizontal oval ink stepping stone from reference1, rough worn gold pigment. Across lower half: one wide empty BLACK brush-stroke announcement banner matching reference2 with a very faint dried-crimson underbrush at edges. Banner width about 1100 and height about230, no writing or symbols anywhere. Entire sheet orthographic front on no perspective. No cards, table, UI screenshots, captions, lettering, numbers or extra elements. This is reusable production art, not a scene. Preserve the natural ink textures from both references.",
+      "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-316be465-8aca-4d4a-81f6-5de5dbddcef1.png",
+      "used": true
+    }
+  ],
+  "rejected": "Crimson transparent derivations contained checkerboard artifacts. Runtime uses actual approved 3A reference pigment instead."
+}
