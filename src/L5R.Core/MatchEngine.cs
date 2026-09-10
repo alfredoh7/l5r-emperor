@@ -220,9 +220,17 @@ public sealed partial class MatchEngine
     // priority once the window fully closes (both sides passed) -- see PassReaction.
     private bool OpenEntryReactionWindow(int playerId, CardInstance card, int? closesTo = null)
     {
+        // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
+        // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
+        // rather than through the Reaction window below. Every entry point (Purchase, Equip, a played
+        // Terrain, equip-battle's Spell attach) already funnels through this one shared function.
+        if(Keyword(card,"Destined")) Draw(Player(playerId));
         var reactionId = EntryReactionAbility(card);
-        if (reactionId is null) return false;
-        card.AbilityUses.Remove(reactionId);
+        // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
+        // not the entering card's own reaction -- only relevant when a Personality is what entered.
+        var watchingReactionAvailable = Definition(card).Type==CardType.Personality && AnyPersonalityEntryReactionAvailable(playerId);
+        if (reactionId is null && !watchingReactionAvailable) return false;
+        if (reactionId is not null) card.AbilityUses.Remove(reactionId);
         _state.PendingChoice = new("entryReaction", playerId, card.Id, "After entry: use this card's own reaction, or pass.", closesTo);
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
@@ -814,12 +822,14 @@ public sealed partial class MatchEngine
             {
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
+                ExpendableDraw(attachment);
             }
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
             DestroyedDuringBattleBonus(card);
+            ExpendableDraw(card);
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
         }
         return count;
@@ -831,6 +841,15 @@ public sealed partial class MatchEngine
     private void DestroyedDuringBattleBonus(CardInstance card)
     {
         if(_state.Phase==Phase.Battle && Definition(card).Effect is "gain-honor-if-destroyed" or "force-while-defending-honor-if-destroyed") GainHonor(card.OwnerId,1,$"{Definition(card).Name} destroyed during battle");
+    }
+    // Expendable keyword (core rules): a mandatory Fate-deck draw whenever a card carrying it is
+    // destroyed by any effect -- distinct from merely being discarded (core rules Glossary: Destroyed
+    // vs. Discarded). Checked at every real "destroy" path -- here, and DestroyAttachment's own
+    // single-attachment path -- never at a plain discard (DiscardFate, hand discards, etc.), since
+    // those never call these functions. Keyword-keyed, not Effect-keyed: any card type can carry it.
+    private void ExpendableDraw(CardInstance card)
+    {
+        if(Keyword(card,"Expendable")) Draw(Player(card.OwnerId));
     }
     private void DestroyProvince(int owner,ProvinceState province)
     {

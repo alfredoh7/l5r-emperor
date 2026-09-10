@@ -103,6 +103,8 @@ var tests = new (string Name, Action Run)[]
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
     ("'Boost other Followers in the unit' primitive (Senior Infantry Legion's shape): a static +1F to every OTHER Follower attached to the same Personality, never to itself, and never leaking into a different unit; two boosters in one unit grant each other but not themselves", UnitForceBoostPrimitive),
     ("Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm to give +1F to every Ashigaru-keyword card the performer controls at the current battlefield, army-scoped (not just one unit); unaffected: a non-Ashigaru card, and the enemy's own Ashigaru card; the per-battle counter resets once the battle resolves", AshigaruEliteBoostPrimitive),
+    ("Expendable/Destined/Kharmic keyword mechanisms: a mandatory Fate-deck draw on destruction (not a plain discard) for Expendable; a mandatory Fate-deck draw on entering play (Purchase or Equip alike) for Destined; a repeatable pay-2-Gold-and-discard action for Kharmic, refilling a Dynasty province face up or drawing an extra Fate card", KeywordMechanics),
+    ("Passive Attack-strength defense (Destrier/Singh Remnants' shape, Scope Self/Unit/Wielder, kind-specific) and a new 'any Personality enters play' Reaction letting a card in hand or a discard pile attach itself (Singh Remnants' shape), following Equip's own restrictions including Personal Honor", PassiveAttackDefenseAndEntryWatch),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -2216,6 +2218,190 @@ static void FollowerWave3Cards()
         var e=MatchEngine.FromTestState(s);
         Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==legionnaire.Id).Force,2,"Base 1 + 1 from Aulus's unit-scoped boost");
         Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==aulus.Id).Force,3,"Aulus itself is not a Legionnaire -- unaffected");
+    }
+}
+static void KeywordMechanics()
+{
+    {
+        // Expendable: a mandatory Fate-deck draw when destroyed by any effect -- not merely discarded.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var expendable=Add(s,"training-expendable-follower",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:expendable.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e.State.Cards[expendable.Id].Zone,Zone.Dead,"Destroyed via DestroyUnits' own top-level path");
+        Equal(e.State.Players[1].Hand.Count,handBefore+1,"Mandatory Fate-deck draw on destruction");
+    }
+    {
+        // Expendable does NOT trigger on a plain discard (the discardHand path never calls
+        // DestroyUnits/DestroyAttachment) -- proving the Destroyed-vs-Discarded distinction. Needs a
+        // hand of exactly 9 (one over the limit) so discardHand's own count check accepts discarding
+        // just the one Expendable card.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        while(s.Players[0].Hand.Count<8) Add(s,"training-item",0,Zone.Hand);
+        var expendable=Add(s,"training-expendable-follower",0,Zone.Hand);
+        Equal(s.Players[0].Hand.Count,9,"Test setup: exactly one over the eight-card hand limit");
+        s.PendingChoice=new("discardHand",0,null,"Discard 1 card(s) to return to eight.");
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("discardHand",0,e.Version,CardIds:[expendable.Id]));
+        Equal(e.State.Cards[expendable.Id].Zone,Zone.FateDiscard,"Discarded");
+        Equal(e.State.Players[0].Hand.Count,handBefore-1,"No extra draw -- a plain discard, not a destroy");
+    }
+    {
+        // Destined: a mandatory Fate-deck draw every time it enters play -- exercised via Purchase
+        // (from a province) and separately via Equip (a Follower attaching).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-destined-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1,"Purchase (from a province): mandatory draw");
+
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var destinedFollower=Add(s2,"training-destined-follower",0,Zone.Hand);
+        var wielder=Add(s2,"training-crane-samurai",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s2);
+        var handBefore2=e2.State.Players[0].Hand.Count;
+        Accept(e2,Cmd(e2,"equip",id:destinedFollower.Id,sources:e2.PaymentOptions(0,2).First().SourceIds,target:wielder.Id));
+        Equal(e2.State.Players[0].Hand.Count,handBefore2,"Hand lost the Follower itself, then gained the Destined draw -- net unchanged");
+    }
+    {
+        // Kharmic: pay 2 Gold, discard a Kharmic Dynasty card from a province -- immediately refilled
+        // face up (unlike a normal end-of-turn refill, which stays face down). Player abilities need a
+        // published (non-ScenarioOnly) Stronghold, same requirement Tactical Advantage's own test meets.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        s.Cards[s.Players[0].StrongholdId].DefinitionId="oracle-l5r-1218";
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-kharmic-dynasty"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var deckBefore=e.State.Players[0].DynastyDeck.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,TargetId:cardId,AbilityId:"kharmic-discard",SourceIds:e.PaymentOptions(0,2).First().SourceIds));
+        Equal(e.State.Cards[cardId].Zone,Zone.DynastyDiscard,"The Kharmic card is discarded");
+        var newId=e.State.Players[0].Provinces[0].CardId;
+        Check(newId is not null && newId != cardId,"The province is refilled with a different card");
+        Check(e.State.Cards[newId!].FaceUp,"Immediately face up, unlike a normal end-of-turn refill");
+        Equal(e.State.Players[0].DynastyDeck.Count,deckBefore-1,"One card left the Dynasty deck to refill the province");
+    }
+    {
+        // Kharmic: pay 2 Gold, discard a Kharmic Fate card from hand -- an extra draw follows.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        s.Cards[s.Players[0].StrongholdId].DefinitionId="oracle-l5r-1218";
+        var kharmicFate=Add(s,"training-kharmic-fate",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,TargetId:kharmicFate.Id,AbilityId:"kharmic-discard",SourceIds:e.PaymentOptions(0,2).First().SourceIds));
+        Equal(e.State.Cards[kharmicFate.Id].Zone,Zone.FateDiscard,"Discarded from hand");
+        Equal(e.State.Players[0].Hand.Count,handBefore,"Hand lost the discarded card, then gained an extra draw -- net unchanged");
+    }
+    {
+        // Invest (Clay Kshatriya's shape): a separate, optional, standalone payment as the card
+        // enters play, reusing the same own-enters-play Reaction window every entry effect shares --
+        // genuinely optional, so declining it is legal too. Clay Kshatriya is a Follower, entering via
+        // Equip (not Purchase, which is Personality/Holding-only).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var invest=Add(s,"training-invest-follower",0,Zone.Hand);
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:invest.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:host.Id));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:invest.Id,AbilityId:"training-invest",SourceIds:[])); // 0 Gold offered, needs 3
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:invest.Id,AbilityId:"training-invest",SourceIds:e.PaymentOptions(0,3).First().SourceIds));
+        Equal(e.State.Cards[invest.Id].Tokens.Count(t=>t.Type=="Invest"),1,"Invest paid: one +1F token");
+
+        // Declining is equally legal: no tokens, no Gold spent.
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var invest2=Add(s2,"training-invest-follower",0,Zone.Hand);
+        var host2=Add(s2,"training-crane-samurai",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,Cmd(e2,"equip",id:invest2.Id,sources:e2.PaymentOptions(0,2).First().SourceIds,target:host2.Id));
+        Accept(e2,new GameCommand("declineReaction",0,e2.Version));
+        Accept(e2,new GameCommand("declineReaction",1,e2.Version));
+        Equal(e2.State.Cards[invest2.Id].Tokens.Count,0,"Declined -- no Invest tokens");
+    }
+}
+static void PassiveAttackDefenseAndEntryWatch()
+{
+    {
+        // Destrier's shape: Scope "Self" -- protects only the card itself, both Attack kinds.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attackerHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-3456",0,Zone.Attached,province:0,attachedTo:attackerHost.Id); // Horse Archers: Ranged 4, unconditional
+        var defenderHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var defended=Add(s,"training-attack-defense-self",1,Zone.Attached,province:0,attachedTo:defenderHost.Id); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:defended.Id,AbilityId:"horse-archers-attack")); // effective 4-3=1 < Force 2
+    }
+    {
+        // Singh Remnants' shape: Scope "Unit", Ranged only -- protects every card in the unit, but a
+        // Melee Attack against the same target is unaffected.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attackerHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var rangedAttacker=Add(s,"oracle-l5r-3456",0,Zone.Attached,province:0,attachedTo:attackerHost.Id); // Ranged 4
+        var meleeAttackerHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var meleeAttacker=Add(s,"oracle-l5r-10333",0,Zone.Attached,province:0,attachedTo:meleeAttackerHost.Id); // Cavalry Flankers: Melee 2, Attacker-only, bows self
+        var defenderHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var guard=Add(s,"training-attack-defense-unit",1,Zone.Attached,province:0,attachedTo:defenderHost.Id);
+        var otherFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:defenderHost.Id); // Force 2, different card, same unit
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:rangedAttacker.Id,TargetId:otherFollower.Id,AbilityId:"horse-archers-attack")); // Ranged: effective 4-3=1 < Force 2, protects the WHOLE unit
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:meleeAttacker.Id,TargetId:otherFollower.Id,AbilityId:"cavalry-flankers-attack")); // Melee: unaffected, strength 2 = Force 2
+        Equal(e.State.Cards[otherFollower.Id].Zone,Zone.FateDiscard,"Melee Attacks are not reduced -- Singh Remnants' shape only names Ranged (a destroyed Follower attachment lands in the Fate discard pile)");
+    }
+    {
+        // An Item's own default scope (no "unit" language) conveys to its wielder, not the Item itself.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attackerHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-10333",0,Zone.Attached,province:0,attachedTo:attackerHost.Id); // Cavalry Flankers: Melee 2
+        var wielder=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        wielder.Modifiers=[new("test","test","Force",-1)]; // Force 2, matching the Melee 2 strength exactly
+        Add(s,"training-attack-defense-wielder",1,Zone.Attached,province:0,attachedTo:wielder.Id); // -2 Melee, Scope Wielder
+        var otherFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:wielder.Id); // Force 2, same unit but not the wielder
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:wielder.Id,AbilityId:"cavalry-flankers-attack")); // effective 2-2=0 < Force 2 -- protects the wielder
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:otherFollower.Id,AbilityId:"cavalry-flankers-attack")); // the OTHER Follower in the same unit is unaffected
+        Equal(e.State.Cards[otherFollower.Id].Zone,Zone.FateDiscard,"Wielder scope does not protect the rest of the unit");
+    }
+    {
+        // Singh Remnants' shape: from hand, attach to a Personality as it enters play (via Purchase),
+        // following Equip's own restrictions (Personal Honor Requirement included).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var lowHonorId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[lowHonorId].DefinitionId="training-crane-clan-low-honor"; s.Cards[lowHonorId].FaceUp=true; // PH 1 -- fails the Requirement
+        var watcher=Add(s,"training-personality-entry-watcher",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:lowHonorId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"proclaim","In-Clan recruit: the Proclaim-eligible window doubles as this entry's reaction window");
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:watcher.Id,AbilityId:"training-personality-entry-watch",SourceIds:e.PaymentOptions(0,2).First().SourceIds)); // PH 1 < Requirement 3
+
+        var s2=MatchEngine.CreateEconomyScenario().State;
+        var highHonorId=s2.Players[0].Provinces[0].CardId!;
+        s2.Cards[highHonorId].DefinitionId="training-crane-clan-samurai"; s2.Cards[highHonorId].FaceUp=true; // PH 3 -- meets the Requirement
+        var watcher2=Add(s2,"training-personality-entry-watcher",0,Zone.Hand);
+        var e2=MatchEngine.FromTestState(s2);
+        var honorBefore=e2.State.Players[0].Honor;
+        var payment2=e2.PaymentOptions(0,5).First(); // training-crane-clan-samurai costs 5
+        Accept(e2,new GameCommand("purchase",0,e2.Version,CardId:highHonorId,SourceIds:payment2.SourceIds));
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:watcher2.Id,AbilityId:"training-personality-entry-watch",SourceIds:e2.PaymentOptions(0,2).First().SourceIds));
+        Equal(e2.State.Cards[watcher2.Id].Zone,Zone.Attached,"Attached to the just-entered Personality");
+        Equal(e2.State.Cards[watcher2.Id].AttachedTo,highHonorId);
+        Equal(e2.State.Players[0].Honor,honorBefore+1,"Gains 1 Honor");
+    }
+    {
+        // The same reaction also fires from a discard pile, not only from hand.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var highHonorId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[highHonorId].DefinitionId="training-crane-clan-samurai"; s.Cards[highHonorId].FaceUp=true;
+        var watcher=Add(s,"training-personality-entry-watcher",0,Zone.FateDiscard);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:highHonorId,SourceIds:e.PaymentOptions(0,5).First().SourceIds)); // training-crane-clan-samurai costs 5
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:watcher.Id,AbilityId:"training-personality-entry-watch",SourceIds:e.PaymentOptions(0,2).First().SourceIds));
+        Equal(e.State.Cards[watcher.Id].Zone,Zone.Attached,"Attaches from a discard pile too, not only from hand");
     }
 }
 static void GeneralizedEntryReactionWindow()

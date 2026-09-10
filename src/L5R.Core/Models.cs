@@ -28,7 +28,18 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // keyword for as long as it stays attached -- reuses the existing GrantedKeyword("Attachment")
     // lifecycle (already cleaned up on detach/destroy; see DestroyAttachment), just never exercised by
     // a published card until now.
-    string? AttachGrantsKeyword = null);
+    string? AttachGrantsKeyword = null,
+    // Passive Ranged/Melee Attack-strength modifier applied to an incoming Attack TARGETING the
+    // scoped card(s) -- Destrier's shape ("Melee and Ranged Attacks targeting this Follower have
+    // -3 strength"), generalized. AttackDefenseKind is "Melee", "Ranged", or "Both" (null: grants
+    // none); AttackDefenseAmount is signed (negative protects, matching every printed card seen so
+    // far, but nothing here assumes it can't be positive, e.g. a card that makes attacks easier to
+    // land against it). AttackDefenseScope is "Self" (only this card itself, Destrier's own shape),
+    // "Wielder" (an Item's default when its text does not say "unit" -- conveys to the Personality
+    // wielding it, not the Item itself), or "Unit" (every card in the unit -- Singh Remnants'/
+    // Elephant Cavalry's shape). Which scope applies is decided per card when it is wired, from its
+    // own printed text -- the engine does not infer it from Type.
+    string? AttackDefenseKind = null, int AttackDefenseAmount = 0, string AttackDefenseScope = "Self");
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>

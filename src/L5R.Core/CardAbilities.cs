@@ -203,6 +203,21 @@ public static class AbilityCatalog
         ["asahina-straighten"] = new("BattleOrOpen", "Target your bowed Personality: straighten him and gain 1 Honor", "own-bowed"),
         // The real Ashigaru Elite, sharing the exact mechanism the training fixture demonstrated.
         ["ashigaru-elite-boost"] = new("Battle", "Bow an unbowed Farm you control: each Ashigaru Personality/Follower you control at this battlefield gains +1F for the remainder of the battle", "own-unbowed-farm"),
+        // Kharmic keyword's own repeatable action (not tied to any specific card): pay 2 Gold, discard
+        // a Kharmic card you control. A Dynasty card is replaced with a fresh, immediately face-up
+        // Dynasty card (see the execution case); a Fate card's discard is followed by an extra draw.
+        ["kharmic-discard"] = new("Limited", "Pay 2 Gold, discard a Kharmic card you control: a Dynasty card is replaced face-up; a Fate card is followed by an extra draw", "own-kharmic-card", PlayerAbility: true),
+        // Singh Remnants' own Reaction: unlike "own-enters-play" (the entering card's own ability),
+        // this fires when a DIFFERENT card the player controls (a Personality) enters play, letting
+        // Singh Remnants -- sitting in hand or a discard pile -- attach itself. Target "none": the
+        // Personality is implicit (the entryReaction window's own CardId), not separately chosen.
+        ["singh-remnants-attach"] = new("Reaction", "After your Personality enters play, if this card is in your hand or discard pile: attach it to him, paying all costs. Gain 1 Honor.", "none", Trigger: "any-personality-enters-play"),
+        ["training-personality-entry-watch"] = new("Reaction", "Training: after a Personality enters play, attach this card to it, gain 1 Honor", "none", Trigger: "any-personality-enters-play"),
+        // Clay Kshatriya's Invest: reuses the same own-enters-play Reaction/entryReaction window every
+        // other "after entering play" ability already shares -- genuinely optional (the player may
+        // decline), unlike a mandatory entry effect, so no new window shape is needed.
+        ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play"),
+        ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play"),
         ["aulus-entry-honor-loss"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
         ["panku-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
         ["thunderous-legion-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
@@ -265,6 +280,29 @@ public sealed partial class MatchEngine
         "horseback-warriors-attack" => 4 + (target is not null && !Keyword(target, "Cavalry") ? 1 : 0),
         _ => 0
     };
+    // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
+    // Singh Remnants/Elephant Cavalry's shape -- see CardDefinition.AttackDefenseKind). Used at both
+    // declare-time validation and the strength baked into PendingAttack, so a Reaction's own further
+    // adjustment always stacks on top of this, never bypasses it.
+    private int EffectiveAttackStrength(string abilityId, PlayerState player, CardInstance? target) =>
+        AttackStrength(abilityId, player, target) + (target is null ? 0 : AttackDefenseModifier(target, AttackKind(abilityId)));
+    // Sums every card in `target`'s own unit (its parent Personality, plus every attachment) granting
+    // a passive Attack-strength modifier of this `kind` that reaches `target` specifically: Scope
+    // "Self" (protects only the granter itself), "Wielder" (an Item's default -- conveys to the
+    // Personality it's attached to, not the Item itself), or "Unit" (reaches every card in the unit,
+    // including the granter).
+    private int AttackDefenseModifier(CardInstance target, string kind)
+    {
+        var parent = target.Zone == Zone.Attached ? Card(target.AttachedTo!) : target;
+        return new[] { parent }.Concat(Attachments(parent.Id)).Sum(granter =>
+        {
+            var def = Definition(granter);
+            if (def.AttackDefenseKind is null || def.AttackDefenseKind != "Both" && def.AttackDefenseKind != kind) return 0;
+            if (def.AttackDefenseScope == "Unit") return def.AttackDefenseAmount;
+            var grantedTo = def.AttackDefenseScope == "Wielder" && granter.Zone == Zone.Attached ? Card(granter.AttachedTo!) : granter;
+            return grantedTo.Id == target.Id ? def.AttackDefenseAmount : 0;
+        });
+    }
     // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
     // share the same resolution pathway (core rules Glossary — Ranged Attack/Melee Attack).
     private static string AttackKind(string abilityId) => abilityId switch
@@ -278,11 +316,33 @@ public sealed partial class MatchEngine
         "horseback-warriors-attack" => "Melee",
         _ => ""
     };
-    // Whether opening a reaction window before resolving an attack could possibly matter right now.
-    // No kind-restricted Reaction exists yet (see AttackKind); once one does, filter by attack.Kind here.
-    private bool AnyAttackReactionAvailable() => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
-        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-attack-resolves" &&
+    // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
+    // (recruited or attached -- Personality, Item, Follower, Spell, Holding, Region, Ring, Celestial
+    // alike, whichever InPlay's own Zone check already covers) and unbowed to ever matter. There is
+    // no need to evaluate a trigger's own (possibly elaborate) condition, or pause play offering it,
+    // when the card carrying it isn't even in play -- this cheap existence check comes first and
+    // gates whether a reaction window needs to open at all. `before-attack-resolves` is the first
+    // caller; every future in-play trigger (e.g. Legion of the Bat's own "after an action moves an
+    // enemy Infantry Personality to this card's battlefield," once that move-resolved hook exists)
+    // reuses this directly instead of a bespoke AnyXReactionAvailable check.
+    private bool AnyInPlayReactionAvailable(string trigger) => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
+        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger &&
             (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber)));
+    // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
+    // attack.Kind here rather than inside AnyInPlayReactionAvailable itself.
+    private bool AnyAttackReactionAvailable() => AnyInPlayReactionAvailable("before-attack-resolves");
+    // General "out of play" Reaction primitive: some printed Reactions are played FROM outside play
+    // (hand or a discard pile) to interrupt something -- Singh Remnants attaching itself as a
+    // Personality enters play is the first case; Effortless Counterattack negating an action taken
+    // as part of an additional action (Again!, or Equip (Battle)'s immediate Spell follow-up) is a
+    // future one. Unlike an in-play Reaction, there is no "is the card even in play" shortcut to take
+    // first -- whether one applies always needs checking when the specific triggering event occurs;
+    // callers open a window whenever their own trigger condition occurs, gated by this existence
+    // check (not per-card AbilityUses, since a played reaction leaves hand/discard and can't recur).
+    private bool AnyOutOfPlayReactionAvailable(int playerId, string trigger) => _state.Cards.Values.Any(c =>
+        c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard &&
+        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger));
+    private bool AnyPersonalityEntryReactionAvailable(int playerId) => AnyOutOfPlayReactionAvailable(playerId, "any-personality-enters-play");
     // Steps F-G of a Ranged/Melee Attack (core rules): compare strength to the target's *current*
     // Force -- re-evaluated here, not at announce time, since a Reaction may have changed either --
     // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
@@ -309,7 +369,7 @@ public sealed partial class MatchEngine
     // find the exact performing instance again once a deferred reaction window closes.
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null)
     {
-        var strength = AttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId));
+        var strength = EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId));
         if (!AnyAttackReactionAvailable())
         {
             ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId);
@@ -382,6 +442,11 @@ public sealed partial class MatchEngine
             {
                 "own-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Singh Remnants' shape: the reacting card is NOT the one that entered (no CardId
+                // match), just watching for any of the player's own Personalities entering play --
+                // "proclaim" combines this same window with a Proclaim-eligible recruit's own reaction.
+                "any-personality-enters-play" => _state.PendingChoice.Type is "proclaim" or "entryReaction" && command.PlayerId == _state.PendingChoice.PlayerId
+                    && Definition(Card(_state.PendingChoice.CardId!)).Type == CardType.Personality,
                 "before-attack-resolves" => _state.PendingChoice.Type == "attackReaction",
                 _ => false
             },
@@ -403,8 +468,11 @@ public sealed partial class MatchEngine
             Require(source.OwnerId == player.Id && (def.Abilities ?? []).Contains(id), "This card does not provide that ability to you.");
             // A Strategy source is normally used straight from hand (the usual one-shot pattern), but
             // a Terrain stays in play afterward (Zone.Battlefield) -- its own abilities, including an
-            // entering-play Reaction, must still be usable from there.
-            Require(def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source), "The ability's source is not in the required zone.");
+            // entering-play Reaction, must still be usable from there. Singh Remnants' shape is the
+            // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
+            Require(ability.Trigger == "any-personality-enters-play" ? source.Zone is Zone.Hand or Zone.FateDiscard
+                : def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
+                "The ability's source is not in the required zone.");
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -413,7 +481,7 @@ public sealed partial class MatchEngine
         // exempt from the once-per-turn dedupe entirely -- each one's own cost/requirements (a
         // different unbowed Farm each time, for Ashigaru Elite) are the only real limit.
         var usageKey = ability.UsageKey ?? id;
-        Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" or "ashigaru-elite-boost" or "elite-sentry-straighten"
+        Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" or "ashigaru-elite-boost" or "elite-sentry-straighten" or "kharmic-discard"
             || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
@@ -437,6 +505,20 @@ public sealed partial class MatchEngine
         if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
+        // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
+        // CardId), following the same restrictions Equip() enforces -- Honor Requirement included.
+        if (ability.Trigger == "any-personality-enters-play")
+        {
+            var enteredPersonality = Card(_state.PendingChoice!.CardId!);
+            var attachDef = Definition(source!);
+            Require(attachDef.AttachRequiresKeyword is null || KeywordOrHuman(enteredPersonality, attachDef.AttachRequiresKeyword), $"Will only attach to a {attachDef.AttachRequiresKeyword} Personality.");
+            Require(attachDef.AttachExcludesKeyword is null || !KeywordOrHuman(enteredPersonality, attachDef.AttachExcludesKeyword), $"Will not attach to a {attachDef.AttachExcludesKeyword} Personality.");
+            Require(attachDef.AttachRequiresName is null || Definition(enteredPersonality).Name == attachDef.AttachRequiresName, $"Only attaches to {attachDef.AttachRequiresName}.");
+            Require(attachDef.HonorRequirement is null || CardPersonalHonor(enteredPersonality) >= attachDef.HonorRequirement, "The Personality does not meet this Follower's Personal Honor Requirement.");
+            Require(AttachmentAllowed(source!, enteredPersonality), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
+            // Gold cost (attachDef.GoldCost) is validated once, generically, in the shared cost
+            // computation below -- not duplicated here.
+        }
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -509,7 +591,7 @@ public sealed partial class MatchEngine
                     // Keywords -- this is a synthetic marker for the card's own unique text, not a
                     // printed keyword other cards could reference.
                     Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
-                    Require(CardForce(target) <= AttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
+                    Require(CardForce(target) <= EffectiveAttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
                 }
             }
             // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
@@ -530,6 +612,14 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell, "Choose a Spell from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This Spell will not attach to that Shugenja.");
                 }
+                // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
+                // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
+                // zone is "in play", so this needs its own branch, same shape as "hand" above. Face-up
+                // matches DiscardProvince's own existing rule for discarding a province card at all.
+                else if (ability.Target == "own-kharmic-card")
+                    Require(target.OwnerId == player.Id && Keyword(target, "Kharmic")
+                        && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp),
+                        "Discard a Kharmic card you control, from your hand or a face-up province.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -599,7 +689,18 @@ public sealed partial class MatchEngine
         // Equip (Battle) has no source card of its own -- its cost is the targeted Spell's, paid on
         // attachment, not a Strategy's own GoldCost.
         var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
-            : ability.Target == "spell-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost : 0;
+            : ability.Target == "spell-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
+            // Singh Remnants' shape: attaching itself, paying all costs -- its own GoldCost, already
+            // separately validated above against the just-entered Personality's own restrictions.
+            : ability.Trigger == "any-personality-enters-play" ? Definition(source!).GoldCost
+            : id == "kharmic-discard" ? 2
+            // Invest (core rules): a separate, optional, standalone payment made only as the card
+            // enters play (already enforced by reusing the own-enters-play Reaction/entryReaction
+            // window, which only stays open for that one entry) -- never rolled over from the
+            // card's own recruit/attach cost. Each Invest card's own amount is hardcoded per ability
+            // id here, same convention as Kharmic's fixed 2 Gold.
+            : id == "clay-kshatriya-invest" ? 5
+            : id == "training-invest" ? 3 : 0;
         ValidatePayment(player.Id, cost, command.SourceIds);
     }
 
@@ -809,6 +910,47 @@ public sealed partial class MatchEngine
                 Straighten(target!);
                 GainHonor(player.Id, 1, "Asahina House Guard", source);
                 break;
+            case "singh-remnants-attach": case "training-personality-entry-watch":
+            {
+                var enteredPersonality = Card(_state.PendingChoice!.CardId!);
+                var attachDef = Definition(source!);
+                Pay(player.Id, source!, attachDef.GoldCost, command.SourceIds);
+                if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
+                source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
+                if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
+                GainHonor(player.Id, 1, attachDef.Name, source);
+                Emit("equipped", $"{attachDef.Name} attached to {Definition(enteredPersonality).Name}.", player.Id, source.Id);
+                break;
+            }
+            case "clay-kshatriya-invest":
+                Pay(player.Id, source!, 5, command.SourceIds);
+                CreateToken(source!, "Invest", id, "Force", 1);
+                CreateToken(source!, "Invest", id, "Force", 1);
+                break;
+            case "training-invest":
+                Pay(player.Id, source!, 3, command.SourceIds);
+                CreateToken(source!, "Invest", id, "Force", 1);
+                break;
+            case "kharmic-discard":
+            {
+                Pay(player.Id, target!, 2, command.SourceIds);
+                if (target!.Zone == Zone.Hand)
+                {
+                    player.Hand.Remove(target.Id); target.Zone = Zone.FateDiscard; target.FaceUp = true;
+                    Draw(player);
+                }
+                else
+                {
+                    var province = player.Provinces.Single(p => p.CardId == target.Id);
+                    target.Zone = Zone.DynastyDiscard; target.FaceUp = true; target.ProvinceIndex = null;
+                    province.CardId = null;
+                    Refill(player, province);
+                    // Unlike a normal end-of-turn refill (stays face down until the next Events Phase),
+                    // Kharmic's own replacement is immediately face up.
+                    if (province.CardId is string newId) Card(newId).FaceUp = true;
+                }
+                break;
+            }
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -891,6 +1033,7 @@ public sealed partial class MatchEngine
         parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
         card.Tokens.Clear();
         DestroyedDuringBattleBonus(card);
+        ExpendableDraw(card);
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }
