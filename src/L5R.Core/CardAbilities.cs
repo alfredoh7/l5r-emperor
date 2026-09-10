@@ -53,6 +53,10 @@ public static class AbilityCatalog
         ["training-destroy-token"] = new("Open", "Training: destroy a token on target", "own-personality-with-token"),
         ["monastery-fire-token"] = new("Limited", "Target your Tattooed Personality · +1F Fire token", "own-tattooed-personality"),
         ["monastery-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 5 Attack", "attack", Performer: "own-personality-with-fire-token-at-battle"),
+        // Training-only: exercises the Honor-loss-immunity primitive's "enters play, lose Honor"
+        // shape (e.g. a card reading "After [X] enters play: lose N Honor") ahead of any published
+        // card needing it.
+        ["training-honor-loss-entry"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
@@ -78,6 +82,10 @@ public static class AbilityCatalog
         // Import wave 2 (issue #97): the Attack primitive's first target-dependent strength.
         ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack"),
         ["asako-ume-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        // Training-only: exercises the Honor-loss-immunity primitive's "pay Honor to use a Battle
+        // ability" shape (e.g. "Battle: Lose N Honor: [Attack]") ahead of any published card needing
+        // it. Played from hand like Tactical Advantage -- a Strategy card providing its own ability.
+        ["training-honor-cost-attack"] = new("Battle", "Lose 2 Honor · Ranged 3 Attack", "attack"),
         // Training-only: exercises the Reconnaissance primitive (issue #93) ahead of any published
         // card needing it -- a per-player, per-province boolean that gates only part of an effect.
         ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
@@ -158,6 +166,7 @@ public sealed partial class MatchEngine
         "tsuruchi-isas-attack" => 3,
         "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
         "asako-ume-attack" => 4,
+        "training-honor-cost-attack" => 3,
         _ => 0
     };
     // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
@@ -166,7 +175,7 @@ public sealed partial class MatchEngine
     {
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
         "shiro-shiba-melee" or "stalking-tiger-attack" => "Melee",
-        "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" => "Ranged",
+        "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         _ => ""
     };
     // Whether opening a reaction window before resolving an attack could possibly matter right now.
@@ -458,7 +467,7 @@ public sealed partial class MatchEngine
             case "journeys-end-move": MoveHome(target!, false); break;
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
-            case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike"); break;
+            case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
             case "training-destroy-terrain": DiscardTerrain(target!); break;
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
@@ -476,6 +485,7 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             }
+            case "training-honor-loss-entry": GainHonor(player.Id, -2, "Training entry Honor loss", source); break;
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
                 CreateToken(source!, "Fire", id, "Force", 1);
                 CreateToken(source!, "Fire", id, "Force", 1);
@@ -495,9 +505,15 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
+            case "training-honor-cost-attack":
+                // The Honor cost is paid up front, like the Gold cost at the top of UseAbility --
+                // not contingent on the Attack actually resolving or hitting.
+                GainHonor(player.Id, -2, "Training Honor-cost Attack", source);
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
             case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
             case "training-reconnaissance-strike":
-                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike");
+                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike", source);
                 break;
             case "tactical-advantage":
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
@@ -539,7 +555,9 @@ public sealed partial class MatchEngine
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
-            GainHonor(target.OwnerId, -1, "Law of Darkness Dojo");
+            // The source is the acting player's own Stronghold, never the losing player's -- "cards
+            // you own" in a Honor-loss-immunity passive could never reach it regardless.
+            GainHonor(target.OwnerId, -1, "Law of Darkness Dojo", Card(player.StrongholdId));
         if (source is not null && Definition(source).Type == CardType.Strategy) DiscardFate(player, source);
         NextAction(player.Id);
     }
