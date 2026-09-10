@@ -1,0 +1,100 @@
+{
+  "Profile": "strategy-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3671",
+      "Name": "Immovable Object",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing Berserker: Straighten him.\nBattle: Choose your performing unbowed Berserker and target an enemy Personality or Follower with lower Force: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3671.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "immovable-object-straighten",
+        "immovable-object-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1044",
+      "Name": "Blind Rage",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Berserker: Give him +5F. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1044.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "blind-rage"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1336",
+      "Name": "Chokehold",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Monk and target an enemy Personality with equal or lower Chi: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1336.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "chokehold"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8999",
+      "Name": "Unorthodox Attack",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Samurai and target an enemy card: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8999.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "unorthodox-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -95,7 +95,8 @@ var tests = new (string Name, Action Run)[]
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
-    ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction)
+    ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
+    ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1743,5 +1744,60 @@ static void KeywordSatisfaction()
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-force-boost",PerformerId:other.Id));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-force-boost",PerformerId:berserker.Id));
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==berserker.Id).Force,4,"Base Force 2 + 2 from the boost");
+    }
+}
+static void StrategyWave1KeywordCards()
+{
+    {
+        // Immovable Object's first ability, the keyword-satisfaction primitive's own worked example:
+        // usable via the Open route (dual Battle/Open timing) with no battle in progress at all.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0;
+        var io=Add(s,"oracle-l5r-3671",0,Zone.Hand);
+        var berserker=Add(s,"training-berserker",0,Zone.Home,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:io.Id,TargetId:berserker.Id,AbilityId:"immovable-object-straighten"));
+        Check(!e.State.Cards[berserker.Id].Bowed,"Straightened via the Open route, with no battle in progress");
+    }
+    {
+        // Immovable Object's second ability: Battle-timing, bows an enemy card with lower Force.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var io=Add(s,"oracle-l5r-3671",0,Zone.Hand);
+        var berserker=Add(s,"training-berserker",0,Zone.Battlefield,province:0); // Force 2
+        var weak=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); weak.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 1
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:io.Id,PerformerId:berserker.Id,TargetId:weak.Id,AbilityId:"immovable-object-bow"));
+        Check(e.State.Cards[weak.Id].Bowed,"Lower-Force enemy is bowed");
+    }
+    {
+        // Blind Rage: +5F to the performing unbowed Berserker, Lose 2 Honor.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var blindRage=Add(s,"oracle-l5r-1044",0,Zone.Hand);
+        var berserker=Add(s,"training-berserker",0,Zone.Battlefield,province:0); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:blindRage.Id,PerformerId:berserker.Id,AbilityId:"blind-rage"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==berserker.Id).Force,7,"Base Force 2 + 5");
+        Equal(e.State.Players[0].Honor,honorBefore-2);
+    }
+    {
+        // Chokehold: performing unbowed Monk bows an enemy Personality with equal or lower Chi.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var chokehold=Add(s,"oracle-l5r-1336",0,Zone.Hand);
+        var monk=Add(s,"training-monk",0,Zone.Battlefield,province:0); // Chi 2
+        var target=Add(s,"training-dishonored-samurai",1,Zone.Battlefield,province:0); // Chi 2
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:chokehold.Id,PerformerId:monk.Id,TargetId:target.Id,AbilityId:"chokehold"));
+        Check(e.State.Cards[target.Id].Bowed,"Equal Chi satisfies 'equal or lower'");
+    }
+    {
+        // Unorthodox Attack: reuses the pre-existing Samurai Performer and enemy-force Target
+        // categories entirely -- no new engine pieces at all.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var unorthodox=Add(s,"oracle-l5r-8999",0,Zone.Hand);
+        var samurai=Add(s,"training-samurai",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:unorthodox.Id,PerformerId:samurai.Id,TargetId:enemy.Id,AbilityId:"unorthodox-attack"));
+        Check(e.State.Cards[enemy.Id].Bowed);
     }
 }

@@ -136,6 +136,17 @@ public static class AbilityCatalog
         // "Target another player's discarded Personality" is an owner restriction on the existing
         // discarded-personality category, checked inline where that category is validated.
         ["shunsuke-make-dead"] = new("Limited", "Target another player's discarded Personality · he becomes honorably dead", "discarded-personality"),
+        // Import wave: keyword-satisfaction primitive (issue #144's own worked example plus three more
+        // Strategy cards needing nothing beyond it, the generic Performer/Target keyword gate, and one
+        // new one-off comparison category each).
+        ["blind-rage"] = new("Battle", "Choose your performing unbowed Berserker: +5F. Lose 2 Honor.", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
+        ["unorthodox-attack"] = new("Battle", "Choose your performing unbowed Samurai and target an enemy card: Bow it.", "enemy-force", Performer: "own-unbowed-samurai-at-battle"),
+        ["chokehold"] = new("Battle", "Choose your performing unbowed Monk and target an enemy Personality with equal or lower Chi: Bow him.", "enemy-personality-chi-lte-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Monk"),
+        // Immovable Object's two printed abilities are independent (separate once-per-turn uses), not
+        // a shared choice -- no UsageKey needed. The first is the card the user's own worked example
+        // ("Choose your performing Berserker: Straighten him") is drawn from directly.
+        ["immovable-object-straighten"] = new("BattleOrOpen", "Choose your performing Berserker: Straighten him.", "own-personality-with-keyword", RequiredKeyword: "Berserker"),
+        ["immovable-object-bow"] = new("Battle", "Choose your performing unbowed Berserker and target an enemy Personality or Follower with lower Force: Bow it.", "enemy-force-lower-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
     });
 }
 
@@ -272,6 +283,11 @@ public sealed partial class MatchEngine
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
             "Battle" => _state.Phase == Phase.Battle,
+            // Printed "Battle/Open" text (e.g. Immovable Object): usable in either phase. The
+            // blanket Battle-only checks below (army presence, target/performer at-battle) key off
+            // the literal "Battle" string, so a BattleOrOpen ability gets neither -- correct, since
+            // its own printed text carries no battlefield-presence requirement of its own.
+            "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle,
             // Legal only inside the matching reaction window: entering-play reactions are gated to
             // the exact card and its own controller (only they may ever act there); an attack
             // reaction is open to either side, already enforced by the top-level priority check.
@@ -435,6 +451,10 @@ public sealed partial class MatchEngine
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
+                        // Compared against the chosen Performer (a separately-selected card), unlike
+                        // "-than-self" categories above which compare against the ability's own source.
+                        "enemy-personality-chi-lte-performer" => personality && !own && Definition(target).Chi <= Definition(Card(command.PerformerId!)).Chi,
+                        "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -476,8 +496,9 @@ public sealed partial class MatchEngine
                     $"{Definition(target).Name} ({target.Id}): bow and prevent straightening for this turn, or let {player.Name} gain 1 Honor.", player.Id);
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
-            case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": Straighten(target!); break;
-            case "paid-bow": target!.Bowed = true; break;
+            case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": Straighten(target!); break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": target!.Bowed = true; break;
+            case "blind-rage": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 5); GainHonor(player.Id, -2, "Blind Rage"); break;
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
             case "prepared-death": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
@@ -700,7 +721,8 @@ public sealed partial class MatchEngine
         foreach (var (source, id) in sources)
         {
             var ability = AbilityCatalog.All[id];
-            if (ability.Timing == "Battle" ? _state.Phase != Phase.Battle : _state.Phase != Phase.Action) continue;
+            var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
+            if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             string?[] performers = ability.Performer switch
             {
