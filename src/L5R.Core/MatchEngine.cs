@@ -667,7 +667,7 @@ public sealed partial class MatchEngine
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
         +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0)
-        +AshigaruBattleBoost(card));
+        +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
     // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
     // Item's bonus always targets the Personality, never itself.
@@ -684,7 +684,7 @@ public sealed partial class MatchEngine
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         _ => 0
-    })+UnitFollowerBoost(card)+AshigaruBattleBoost(card));
+    })+UnitFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -704,6 +704,20 @@ public sealed partial class MatchEngine
     // resolves -- see FinishBattleResolution), and gated by AtBattle so it never leaks to a card
     // sitting at a different or no-longer-current battlefield.
     private int AshigaruBattleBoost(CardInstance card) => AtBattle(card) && Keyword(card,"Ashigaru") ? _state.AshigaruBoost[card.OwnerId] : 0;
+    // Aggregate/group Force effects, third shape (Utaku Elite Guard): like UnitFollowerBoost, a static
+    // "boost others" bonus, but keyword-based (Battle Maiden) rather than type-based (Follower), and
+    // army-scoped -- every OTHER Battle-Maiden card the same owner controls in the same battlefield
+    // army (same province, both in Zone.Battlefield, following an attachment through to its parent
+    // Personality) -- rather than confined to one unit. Excludes itself, matching Senior Infantry
+    // Legion's "not to itself" rule: two Utaku Elite Guards in one army grant each other, not themselves.
+    private int ArmyBattleMaidenBoost(CardInstance card)
+    {
+        if (!Keyword(card,"Battle Maiden")) return 0;
+        var parent = card.Zone==Zone.Attached ? Card(card.AttachedTo!) : card;
+        if (parent.Zone!=Zone.Battlefield) return 0;
+        return _state.Cards.Values.Count(c=>c.Id!=card.Id && c.OwnerId==parent.OwnerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==parent.ProvinceIndex
+            && Definition(c).Type==CardType.Personality && Definition(c).Effect=="boost-battle-maidens-in-army");
+    }
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.

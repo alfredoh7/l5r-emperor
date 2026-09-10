@@ -102,6 +102,7 @@ var tests = new (string Name, Action Run)[]
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
     ("'Boost other Followers in the unit' primitive (Senior Infantry Legion's shape): a static +1F to every OTHER Follower attached to the same Personality, never to itself, and never leaking into a different unit; two boosters in one unit grant each other but not themselves", UnitForceBoostPrimitive),
     ("Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm to give +1F to every Ashigaru-keyword card the performer controls at the current battlefield, army-scoped (not just one unit); unaffected: a non-Ashigaru card, and the enemy's own Ashigaru card; the per-battle counter resets once the battle resolves", AshigaruEliteBoostPrimitive),
+    ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter)
 };
@@ -2082,6 +2083,34 @@ static void AshigaruEliteBoostPrimitive()
     // "For the remainder of the battle": once it resolves, the boost does not carry into the next one.
     Resolve(e);
     Equal(e.State.AshigaruBoost[0],0,"The per-battle counter resets once the battle resolves");
+}
+static void ArmyBattleMaidenBoostPrimitive()
+{
+    // Utaku Elite Guard's shape: like Senior Infantry Legion, a static "boost others" bonus -- but
+    // keyword-based (Battle Maiden) rather than type-based (Follower), and army-scoped (every OTHER
+    // Battle-Maiden card the owner controls at the same battlefield) rather than unit-scoped.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var guard=Add(s,"training-utaku-elite-guard",0,Zone.Battlefield,province:0); // Force 2, itself Battle Maiden
+    var maidenUnit=Add(s,"training-battle-maiden",0,Zone.Battlefield,province:0); // Force 2, a different unit
+    var otherUnit=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, no keyword
+    var maidenFollower=Add(s,"training-battle-maiden-follower",0,Zone.Attached,attachedTo:otherUnit.Id,province:0); // Force 1
+    var plainFollower=Add(s,"training-follower",0,Zone.Attached,attachedTo:otherUnit.Id,province:0); // Force 2, no keyword
+    var homeMaiden=Add(s,"training-battle-maiden",0,Zone.Home); // not at this battlefield
+    var enemyMaiden=Add(s,"training-battle-maiden",1,Zone.Battlefield,province:0); // enemy's own -- unaffected
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==guard.Id).Force,2,"The guard does not boost itself (no other booster present in the army)");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==maidenUnit.Id).Force,3,"Base 2 + 1 -- a Battle Maiden Personality in a DIFFERENT unit, same army");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==otherUnit.Id).Force,3,"No Battle Maiden keyword -- unaffected");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==maidenFollower.Id).Force,2,"Base 1 + 1 -- the boost also reaches a Battle Maiden Follower");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==plainFollower.Id).Force,2,"No Battle Maiden keyword -- unaffected");
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==homeMaiden.Id).Force,2,"Not at this battlefield -- army-scoped, so unaffected");
+    Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==enemyMaiden.Id).Force,2,"The enemy's own Battle Maiden is unaffected -- scoped to the performer's own army");
+
+    var guard2=Add(s,"training-utaku-elite-guard",0,Zone.Battlefield,province:0); // second guard, same army
+    var e2=MatchEngine.FromTestState(s);
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==guard.Id).Force,3,"Two guards in one army grant each other +1F, not themselves: base 2 + 1 from the other guard");
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==guard2.Id).Force,3,"Symmetric: the second guard also gets +1F from the first, not itself");
+    Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==maidenUnit.Id).Force,4,"maidenUnit now gets +1F from each of the two guards: 2 + 1 + 1");
 }
 static void AttachmentRestrictions()
 {
