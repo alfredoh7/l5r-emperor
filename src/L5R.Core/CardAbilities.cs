@@ -283,6 +283,15 @@ public sealed partial class MatchEngine
         NextAction(attack.PlayerId);
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
+    // "Defending": at the current battlefield and owned by the non-active player -- unlike IsAttacking
+    // above (which only ever needs the card's own Zone, since it's always called on a Personality),
+    // this resolves through an attachment's parent first, since a Follower's own Zone is Attached,
+    // never Battlefield.
+    private bool IsDefendingUnit(CardInstance card)
+    {
+        var unit = card.Zone == Zone.Attached ? Card(card.AttachedTo) : card;
+        return AtBattle(unit) && unit.OwnerId != _state.ActivePlayerId;
+    }
     // Modifiers are kept in application order (not folded into one running total) so a future card
     // can negate one specific prior effect, e.g. RemoveModifiers(target, m => m.Source == someCardId).
     // Tokens contribute here too: unlike Modifiers (cleared every FinishTurn), a token's stat bonus
@@ -296,7 +305,12 @@ public sealed partial class MatchEngine
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
     }
     private static void RemoveModifiers(CardInstance card, Func<AppliedModifier, bool> match) => card.Modifiers.RemoveAll(m => match(m));
-    private int CardForce(CardInstance card) => Definition(card).Type == CardType.Personality ? PersonalityForce(card) : Math.Max(0, Definition(card).Force + StatModifier(card, "Force"));
+    private int CardForce(CardInstance card) => Definition(card).Type switch
+    {
+        CardType.Personality => PersonalityForce(card),
+        CardType.Follower => FollowerForce(card),
+        _ => Math.Max(0, Definition(card).Force + StatModifier(card, "Force"))
+    };
     private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi);
 
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.

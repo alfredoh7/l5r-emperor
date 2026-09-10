@@ -98,7 +98,8 @@ var tests = new (string Name, Action Run)[]
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
-    ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow)
+    ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
+    ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1985,5 +1986,39 @@ static void GeneralizedEntryReactionWindow()
         Accept(e,new GameCommand("declineReaction",0,e.Version));
         Accept(e,new GameCommand("declineReaction",1,e.Version));
         Equal(e.State.PriorityPlayerId,0,"Priority cedes to the opponent (player 0) once the window closes");
+    }
+}
+static void FollowerAndItemStaticForceHooks()
+{
+    {
+        // A Follower's own static conditional Force ("+2F while defending") stays with the Follower
+        // itself and shows up in its own CardForce/view regardless of bow state...
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attacker=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var defender=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var defFollower=Add(s,"training-follower-force-effect",1,Zone.Attached,bowed:true,province:0,attachedTo:defender.Id); // Force 2+2=4
+        var atkFollower=Add(s,"training-follower-force-effect",0,Zone.Attached,province:0,attachedTo:attacker.Id); // attacking, no bonus: Force 2
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==defFollower.Id).Force,4,"Bowed defending Follower still shows its own +2F for targeting");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==atkFollower.Id).Force,2,"Attacking (not defending): the conditional bonus does not apply");
+        // ...but only joins the unit's BattleForce total when unbowed (or Elite) -- matching every
+        // other Follower's existing bowed-suppression rule.
+        Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==defender.Id).UnitForce,3,"Bowed: defender's own Force 3, the bowed Follower's +2F+2F does not join the unit total");
+        defFollower.Bowed=false;
+        var e2=MatchEngine.FromTestState(s);
+        Equal(e2.GetView(1).Players[1].Army.Single(c=>c.Id==defender.Id).UnitForce,7,"Unbowed: 3 (defender) + 4 (Follower's own Force 2 + its +2F while defending)");
+    }
+    {
+        // An Item's printed Force/Chi and its own conditional bonus to the wielder (Kensai's Blade's
+        // shape) always convey to the Personality, whether the Item itself is bowed or not.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0); // Force 2, Chi 2
+        var blade=Add(s,"training-item-force-effect",0,Zone.Attached,bowed:true,province:0,attachedTo:kensai.Id); // +2F/+1C printed, +1F conditional (Kensai)
+        var nonKensai=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var blade2=Add(s,"training-item-force-effect",1,Zone.Attached,province:0,attachedTo:nonKensai.Id);
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kensai.Id).Force,5,"Base 2 + printed 2 + conditional 1 (Kensai wielder), even though the Item is bowed");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kensai.Id).Chi,3,"Base Chi 2 + printed Chi 1, regardless of the Item's own bow state");
+        Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==nonKensai.Id).Force,5,"Base 3 + printed 2, no conditional bonus for a non-Kensai wielder");
     }
 }
