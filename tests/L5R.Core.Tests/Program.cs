@@ -101,6 +101,7 @@ var tests = new (string Name, Action Run)[]
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
     ("'Boost other Followers in the unit' primitive (Senior Infantry Legion's shape): a static +1F to every OTHER Follower attached to the same Personality, never to itself, and never leaking into a different unit; two boosters in one unit grant each other but not themselves", UnitForceBoostPrimitive),
+    ("Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm to give +1F to every Ashigaru-keyword card the performer controls at the current battlefield, army-scoped (not just one unit); unaffected: a non-Ashigaru card, and the enemy's own Ashigaru card; the per-battle counter resets once the battle resolves", AshigaruEliteBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
     ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency)
@@ -2047,6 +2048,41 @@ static void UnitForceBoostPrimitive()
     Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==booster.Id).Force,2,"Two boosters in one unit grant each other +1F, not themselves: printed 1 + 1 from the other booster");
     Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==booster2.Id).Force,2,"Symmetric: the second booster also gets +1F from the first, not itself");
     Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==plainFollower.Id).Force,4,"Plain Follower now gets +1F from each of the two boosters: 2 + 1 + 1");
+}
+static void AshigaruEliteBoostPrimitive()
+{
+    // Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm
+    // to give +1F, for the remainder of the battle, to every Ashigaru-keyword Personality/Follower the
+    // performer controls at the current battlefield. Distinct from Senior Infantry Legion's static
+    // unit-scoped boost: this is army-scoped (any of the performer's own units at this battlefield,
+    // not just one unit) and keyed off a keyword rather than a card type.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var booster=Add(s,"training-ashigaru-boost-source",0,Zone.Battlefield,province:0);
+    var ashigaruUnit=Add(s,"training-ashigaru-personality",0,Zone.Battlefield,province:0); // Force 2
+    var ashigaruFollower=Add(s,"training-ashigaru-follower",0,Zone.Attached,attachedTo:ashigaruUnit.Id,province:0); // Force 1
+    var plainUnit=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, no Ashigaru keyword
+    var enemyAshigaru=Add(s,"training-ashigaru-personality",1,Zone.Battlefield,province:0); // enemy's own Ashigaru
+    var farm1=Add(s,"training-farm",0,Zone.Home);
+    var farm2=Add(s,"training-farm",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    var use=new GameCommand("useAbility",0,e.Version,CardId:booster.Id,AbilityId:"training-ashigaru-boost",TargetId:farm1.Id);
+    Reject(e,use with {TargetId=plainUnit.Id}); // not an unbowed Farm
+    Accept(e,use);
+    Equal(e.State.Cards[farm1.Id].Bowed,true,"Bowing the Farm is the cost");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ashigaruUnit.Id).Force,3,"Base 2 + 1 from one use");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ashigaruFollower.Id).Force,2,"Base 1 + 1 from one use -- the boost also reaches an Ashigaru Follower");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==plainUnit.Id).Force,3,"No Ashigaru keyword -- unaffected");
+    Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==enemyAshigaru.Id).Force,2,"The enemy's own Ashigaru unit is unaffected -- scoped to the performer's own cards");
+    // Tireless and stacking: usable again in the same battle, bowing a second Farm. Priority passed to
+    // the opponent after the first use (like any action), so they must act (or pass) first.
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:booster.Id,AbilityId:"training-ashigaru-boost",TargetId:farm2.Id));
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ashigaruUnit.Id).Force,4,"Base 2 + 2 from two stacking uses");
+    Accept(e,new GameCommand("pass",1,e.Version));
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:booster.Id,AbilityId:"training-ashigaru-boost",TargetId:farm1.Id)); // already bowed
+    // "For the remainder of the battle": once it resolves, the boost does not carry into the next one.
+    Resolve(e);
+    Equal(e.State.AshigaruBoost[0],0,"The per-battle counter resets once the battle resolves");
 }
 static void AttachmentRestrictions()
 {

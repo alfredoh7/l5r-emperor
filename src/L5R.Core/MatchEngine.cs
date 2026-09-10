@@ -532,6 +532,9 @@ public sealed partial class MatchEngine
         foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain")).ToArray())
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
+        // Ashigaru Elite's boost is "for the remainder of the battle," not the turn -- a turn can
+        // contain more than one battle (Infantry/Cavalry Maneuvers), so it must not carry into the next.
+        _state.AshigaruBoost=new int[2];
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
         {
@@ -679,7 +682,8 @@ public sealed partial class MatchEngine
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
-        +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0));
+        +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0)
+        +AshigaruBattleBoost(card));
     // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
     // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
     // Item's bonus always targets the Personality, never itself.
@@ -696,7 +700,7 @@ public sealed partial class MatchEngine
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         _ => 0
-    })+UnitFollowerBoost(card));
+    })+UnitFollowerBoost(card)+AshigaruBattleBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
     // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
     // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
@@ -709,6 +713,13 @@ public sealed partial class MatchEngine
             "boost-followers-in-unit" => 1,
             _ => 0
         });
+    // Aggregate/group Force effects, second shape (Ashigaru Elite): unlike UnitFollowerBoost's static
+    // per-unit bonus, this is an activated, stacking, per-battle bonus that reaches every Ashigaru-
+    // keyword card the performer controls at the CURRENT battlefield -- not just its own unit. Read
+    // from MatchState.AshigaruBoost (incremented once per use, reset to zero whenever the battle
+    // resolves -- see FinishBattleResolution), and gated by AtBattle so it never leaks to a card
+    // sitting at a different or no-longer-current battlefield.
+    private int AshigaruBattleBoost(CardInstance card) => AtBattle(card) && Keyword(card,"Ashigaru") ? _state.AshigaruBoost[card.OwnerId] : 0;
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.

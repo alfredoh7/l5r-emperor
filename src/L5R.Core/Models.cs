@@ -134,6 +134,11 @@ public sealed class MatchState
     public PendingConqueror? PendingConqueror { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
+    // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
+    // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
+    // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
+    // "for the remainder of the battle," not the turn -- since a turn can contain more than one battle.
+    public int[] AshigaruBoost { get; set; } = new int[2];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
