@@ -101,7 +101,8 @@ var tests = new (string Name, Action Run)[]
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
-    ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter)
+    ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
+    ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency)
 };
 var failed=0;
 foreach(var test in tests)
@@ -2139,4 +2140,58 @@ static void NoAttachmentsFilter()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:enemyFollower.Id,AbilityId:"training-destroy-no-attachments"));
         Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"An attachment is always a legal 'without attachments' target");
     }
+}
+static void ProvinceAdjacency()
+{
+    // Provinces sit in a line, 0-1-2-3 (the user's "Province 1..4"). A destroyed province is skipped
+    // -- its former neighbors become directly adjacent instead, compounding across destructions --
+    // derived on demand from Destroyed, not tracked as separate routed state ("provinces slide
+    // together"). IsLegal(currentProvince, destroyed, targetProvince) checks whether a Personality at
+    // targetProvince is a legal target for an ability sourced at currentProvince.
+    bool IsLegal(int currentProvince,int[] destroyed,int targetProvince)
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0;
+        foreach(var d in destroyed) s.Players[0].Provinces[d].Destroyed=true;
+        var source=Add(s,"training-adjacent-booster",0,Zone.Battlefield,province:currentProvince);
+        var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:targetProvince);
+        var e=MatchEngine.FromTestState(s);
+        return e.Execute(new GameCommand("useAbility",0,e.Version,CardId:source.Id,TargetId:target.Id,AbilityId:"training-adjacent-boost")).Accepted;
+    }
+    // Baseline: 0-1, 1-2, 2-3 only. Not transitively adjacent (0 and 2 are not adjacent).
+    Check(IsLegal(0,[],1),"0 adjacent to 1"); Check(IsLegal(1,[],0),"1 adjacent to 0 (symmetric)");
+    Check(IsLegal(1,[],2),"1 adjacent to 2"); Check(IsLegal(2,[],3),"2 adjacent to 3");
+    Check(!IsLegal(0,[],2),"0 not adjacent to 2 with nothing destroyed");
+    // Province 2 (index 1) destroyed: 0 and 2 become adjacent; 2-3 is untouched.
+    Check(IsLegal(0,[1],2),"0 adjacent to 2 once province 1 (index 1) is destroyed");
+    Check(IsLegal(2,[1],0),"...symmetric");
+    Check(IsLegal(2,[1],3),"2 still adjacent to 3 (unaffected by index 1's destruction)");
+    Check(!IsLegal(0,[1],3),"0 still not adjacent to 3");
+    // Province 3 (index 2) destroyed: 1 and 3 become adjacent.
+    Check(IsLegal(1,[2],3),"1 adjacent to 3 once province 2 (index 2) is destroyed");
+    Check(IsLegal(3,[2],1),"...symmetric");
+    // Both middle provinces (index 1 and 2) destroyed: the two ends become adjacent.
+    Check(IsLegal(0,[1,2],3),"0 adjacent to 3 once both middle provinces are destroyed");
+    Check(IsLegal(3,[1,2],0),"...symmetric");
+    // The user's own closing example: index 1 and index 3 destroyed -- only 0 and 2 remain adjacent.
+    Check(IsLegal(0,[1,3],2),"0 adjacent to 2 when index 1 and index 3 are both destroyed");
+    Check(IsLegal(2,[1,3],0),"...symmetric");
+
+    // Not hardcoded to 4 provinces: AdjacentProvinces scans however many entries Provinces actually
+    // has, so a player with more than the usual 4 (some Stronghold effect, say) is handled exactly
+    // the same way, with no changes needed. Proven directly here with 6.
+    bool IsLegalWithProvinces(int provinceCount,int currentProvince,int[] destroyed,int targetProvince)
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        while(s.Players[0].Provinces.Count<provinceCount) s.Players[0].Provinces.Add(new(){Index=s.Players[0].Provinces.Count,Strength=6});
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0;
+        foreach(var d in destroyed) s.Players[0].Provinces[d].Destroyed=true;
+        var source=Add(s,"training-adjacent-booster",0,Zone.Battlefield,province:currentProvince);
+        var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:targetProvince);
+        var e=MatchEngine.FromTestState(s);
+        return e.Execute(new GameCommand("useAbility",0,e.Version,CardId:source.Id,TargetId:target.Id,AbilityId:"training-adjacent-boost")).Accepted;
+    }
+    Check(IsLegalWithProvinces(6,4,[],5),"index 4 adjacent to index 5 with 6 provinces");
+    Check(!IsLegalWithProvinces(6,0,[],5),"index 0 still not adjacent to index 5 (not transitive)");
+    Check(IsLegalWithProvinces(6,3,[4],5),"index 3 adjacent to index 5 once index 4 (a middle province) is destroyed, with 6 provinces");
 }
