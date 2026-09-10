@@ -625,12 +625,34 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)+Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force)
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)
+        // An Item's printed "+F" box (and any conditional bonus it grants the wielder, e.g. Kensai's
+        // Blade's "+1F to a Personality with Kensai") always conveys to the wielder, whether the Item
+        // is bowed or not -- unlike a Follower's own Force, which stays with the Follower itself (see
+        // FollowerForce) and only joins the unit total in BattleForce when unbowed or Elite.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force+ItemForceToWielder(c,card))
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
         +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0));
+    // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
+    // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
+    // Item's bonus always targets the Personality, never itself.
+    private int ItemForceToWielder(CardInstance item,CardInstance wielder) => Definition(item).Effect switch
+    {
+        "force-to-kensai-wielder" => Keyword(wielder,"Kensai") ? 1 : 0,
+        _ => 0
+    };
+    // A Follower's own standalone Force, including any static conditional bonus it grants itself
+    // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
+    // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
+    // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(Definition(card).Effect switch
+    {
+        "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
+        _ => 0
+    }));
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
@@ -639,7 +661,7 @@ public sealed partial class MatchEngine
         if(card.Bowed && !Keyword(card,"Elite")) return 0;
         return PersonalityForce(card)+Attachments(card.Id)
             .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
-            .Sum(c=>Math.Max(0,Definition(c).Force+StatModifier(c,"Force")));
+            .Sum(FollowerForce);
     }
     // "Dead / Destroy" (core rules Glossary): entering the Dead zone, distinct from merely being
     // discarded. A Personality who is still Dishonorable at this moment costs its controller Honor
