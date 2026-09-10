@@ -17,7 +17,13 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     bool ScenarioOnly = true, string? ArtworkKey = null, string[]? Keywords = null,
     string[]? Abilities = null, int Focus = 0,
     // Overrides Clan for a Personality aligned with more than one Clan; null means "just Clan".
-    string[]? Clans = null);
+    string[]? Clans = null,
+    // An attachment's own "Will only/not attach to X" restriction (Item/Follower/Spell alike).
+    // AttachRequiresKeyword/AttachExcludesKeyword usually name a printed keyword, checked against the
+    // target Personality -- "Human" is a special case (core rules Glossary: no keyword is ever
+    // printed for it, so it means "does not have Nonhuman"). AttachRequiresName is the rarer
+    // named-Personality restriction (e.g. "Attaches to Yotsu Ueda").
+    string? AttachRequiresKeyword = null, string? AttachExcludesKeyword = null, string? AttachRequiresName = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>

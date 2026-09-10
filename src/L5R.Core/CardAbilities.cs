@@ -461,7 +461,11 @@ public sealed partial class MatchEngine
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
                 if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
-                else if (ability.Target == "spell-in-hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell, "Choose a Spell from your hand.");
+                else if (ability.Target == "spell-in-hand")
+                {
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell, "Choose a Spell from your hand.");
+                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This Spell will not attach to that Shugenja.");
+                }
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -486,13 +490,13 @@ public sealed partial class MatchEngine
                         "enemy-attacking" => personality && !own && target.OwnerId == _state.ActivePlayerId,
                         "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
-                        "lobby" => personality && own && !target.Bowed && Definition(target).PersonalHonor >= 1,
+                        "lobby" => personality && own && !target.Bowed && CardPersonalHonor(target) >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
-                        "lower-or-equal-honor-than-performer" => personality && Definition(target).PersonalHonor <= Definition(Card(command.PerformerId!)).PersonalHonor,
+                        "lower-or-equal-honor-than-performer" => personality && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
-                        "personality-lower-honor-than-self" => personality && Definition(target).PersonalHonor < Definition(source!).PersonalHonor,
+                        "personality-lower-honor-than-self" => personality && CardPersonalHonor(target) < CardPersonalHonor(source!),
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
