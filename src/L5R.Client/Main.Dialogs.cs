@@ -160,7 +160,7 @@ public partial class Main
     {
         if (_session.Snapshot is null) { SetNotice("Connect to a match to see its history."); return; }
         var (_, body) = Dialog("Match history", 760, 620);
-        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(720, 540), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; body.AddChild(scroll);
+        var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(0, 400), SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; body.AddChild(scroll);
         var rows = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; scroll.AddChild(rows);
         var events = (_session.Snapshot?.View.Events ?? View.Events).ToArray();
         for (var i = events.Length - 1; i >= 0;)

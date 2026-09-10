@@ -177,6 +177,7 @@ public partial class Main : Node
                 if (_captureMode == "published-lacquer-menu") ShowTableMenu();
                 if (_captureMode == "published-lacquer-practice") ShowPractice();
                 if (_captureMode == "published-lacquer-private") ShowOnline();
+                if (_captureMode == "published-lacquer-coverage") ShowCoverage();
                 if (_captureMode == "published-lacquer-history") ShowHistory();
                 if (_captureMode == "published-lacquer-pile") ShowPile(View.ViewerId, Zone.Dead);
                 if (_captureMode == "published-lacquer-confirm") Confirm("Leave this table?", "Return to the main menu? Your current practice will end.", () => { });

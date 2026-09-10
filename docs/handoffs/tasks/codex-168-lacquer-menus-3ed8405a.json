@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Extend approved lacquer/Caudex design to table menu, guide, dialogs, reference browser, card previews and tooltips; no command or rules changes. Stacked on PR165.",
-  "validation": "Client build: zero warnings/errors. Native 1672x941 visual captures plus five 1280x800 menu checks passed: guide tab navigation, menu return, confirmation cancel, practice/private dismissal; match version unchanged and content clears Close.",
-  "remaining": "Combined-preview launcher verification and final screenshot evidence in progress; review required.",
+  "summary": "Approved lacquer menu rollout complete locally: guide, table menu, practice/private match, confirmation, history, coverage, pile, legacy library, card hover and tooltips. Stacked on PR165; no rules changes.",
+  "validation": "Zero-warning client build. Native source comparison gallery docs/screenshots/lacquer-menus. Five compact-window dialog checks plus integrated history/coverage/pile checks passed. Exact combined-preview Play Latest.command passed with local WebP catalogue. Reproduced and fixed history/Close overlap.",
+  "remaining": "Review and CI before merge; GitHub jobs blocked by billing/spending-limit message. Windows graphical validation not performed. PR124 renames legacy browser; combined preview resolves this explicitly.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/168",
   "branch": "codex/168-lacquer-menus",
-  "updated": "2026-09-10T17:44:58.535542+00:00"
+  "updated": "2026-09-10T17:50:03.593136+00:00"
 }

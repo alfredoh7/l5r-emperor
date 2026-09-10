@@ -67,7 +67,7 @@ public static class LibraryDialog
                 }
             };
             var panel = new PanelContainer { ClipContents = true };
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(Palette.Ink, Palette.Gold, 20));
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
             dialog.AddChild(panel);
             panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
             // A plain Control keeps transient text minimum sizes from expanding the
