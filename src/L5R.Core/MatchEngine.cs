@@ -696,7 +696,19 @@ public sealed partial class MatchEngine
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         _ => 0
-    }));
+    })+UnitFollowerBoost(card));
+    // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
+    // self-referential conditional bonuses above, this is a card that grants a static Force bonus to
+    // every OTHER Follower attached to the same Personality (a unit is a Personality and all of its
+    // attachments -- core rules Glossary). Excludes itself, so two copies of the same booster in one
+    // unit grant each other the bonus but never themselves. Always-on and static, so it belongs here
+    // in FollowerForce rather than behind an activated ability.
+    private int UnitFollowerBoost(CardInstance follower) =>
+        follower.AttachedTo is null ? 0 : Attachments(follower.AttachedTo).Where(c=>c.Id!=follower.Id).Sum(c=>Definition(c).Effect switch
+        {
+            "boost-followers-in-unit" => 1,
+            _ => 0
+        });
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
