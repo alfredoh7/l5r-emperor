@@ -568,6 +568,7 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
+        if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
         Emit("equipped",$"{def.Name} attached to {Definition(target).Name}.",command.PlayerId,card.Id);
         if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
         NextAction(command.PlayerId);
@@ -699,6 +700,30 @@ public sealed partial class MatchEngine
     private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
+        // Disciples of Ganesh: "+2F while defending" -- shares FollowerForce's existing case, plus a
+        // separate destruction-triggered Honor gain (see DestroyedDuringBattleBonus, keyed by the same
+        // Effect string) -- one card, two engine hooks, since Effect is a single field per card.
+        "force-while-defending-honor-if-destroyed" => IsDefendingUnit(card) ? 2 : 0,
+        // Family Sensei / Merchant Guard (core rules): self-referential, even though the condition
+        // counts/checks other cards -- the same shape PersonalityForce's conditional bonuses already
+        // cover, not the "boost OTHER cards" aggregate primitives below.
+        "force-with-dojo" => ControlsKeyword(card.OwnerId,"Dojo") ? 1 : 0,
+        "force-with-market" => ControlsKeyword(card.OwnerId,"Market") ? 1 : 0,
+        // Ashigaru Guards: "+1F for every two Farms you control" -- a controlled-card COUNT, still
+        // self-referential (the bonus lands on this card), same shape as PersonalityForce's
+        // force-max-dead-pile.
+        "force-per-two-farms" => _state.Cards.Values.Count(c=>c.OwnerId==card.OwnerId && InPlay(c) && Keyword(c,"Farm"))/2,
+        // Brothers of the Great Lake: "+1F for each OTHER [same name] in this army" -- counts sibling
+        // copies at the same battlefield, excluding itself. A Follower's own Zone is Attached, not
+        // Battlefield, so this resolves through its parent Personality first (same as ArmyBattleMaidenBoost).
+        "force-per-other-same-name-in-army" => BattlefieldParent(card) is {} parent
+            ? _state.Cards.Values.Count(c=>c.Id!=card.Id && Definition(c).Name==Definition(card).Name
+                && BattlefieldParent(c) is {} otherParent && otherParent.OwnerId==parent.OwnerId && otherParent.ProvinceIndex==parent.ProvinceIndex)
+            : 0,
+        // Ninja Guards: "Force bonus equal to its Personality's printed Force" -- reads the WIELDER's
+        // own printed stat, the opposite data-flow direction from ItemForceToWielder (which conveys an
+        // Item's bonus TO the wielder); here the Follower's own Force is keyed off the wielder instead.
+        "force-equals-wielder-printed-force" => card.AttachedTo is null ? 0 : Definition(Card(card.AttachedTo)).Force,
         _ => 0
     })+UnitFollowerBoost(card)+AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // "Boost other cards in the unit" primitive (Senior Infantry Legion's shape): distinct from the
@@ -711,6 +736,11 @@ public sealed partial class MatchEngine
         follower.AttachedTo is null ? 0 : Attachments(follower.AttachedTo).Where(c=>c.Id!=follower.Id).Sum(c=>Definition(c).Effect switch
         {
             "boost-followers-in-unit" => 1,
+            // Aulus's shape: keyword-based rather than type-based, still unit-scoped -- "Legionnaires
+            // in this unit have +1F" reuses the exact same unit-scoping as Senior Infantry Legion, just
+            // gated by a keyword instead of the Follower type (already implicit, since UnitFollowerBoost
+            // only ever feeds FollowerForce).
+            "boost-legionnaires-in-unit" => Keyword(follower,"Legionnaire") ? 1 : 0,
             _ => 0
         });
     // Aggregate/group Force effects, second shape (Ashigaru Elite): unlike UnitFollowerBoost's static
@@ -726,13 +756,24 @@ public sealed partial class MatchEngine
     // army (same province, both in Zone.Battlefield, following an attachment through to its parent
     // Personality) -- rather than confined to one unit. Excludes itself, matching Senior Infantry
     // Legion's "not to itself" rule: two Utaku Elite Guards in one army grant each other, not themselves.
+    // The real card's own text ("...have +1F while attacking") additionally gates on IsAttacking --
+    // reusing the same helper PersonalityForce's attacking-two/attacking-four Effects already use.
     private int ArmyBattleMaidenBoost(CardInstance card)
     {
         if (!Keyword(card,"Battle Maiden")) return 0;
-        var parent = card.Zone==Zone.Attached ? Card(card.AttachedTo!) : card;
-        if (parent.Zone!=Zone.Battlefield) return 0;
+        var parent = BattlefieldParent(card);
+        if (parent is null || !IsAttacking(parent)) return 0;
         return _state.Cards.Values.Count(c=>c.Id!=card.Id && c.OwnerId==parent.OwnerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==parent.ProvinceIndex
             && Definition(c).Type==CardType.Personality && Definition(c).Effect=="boost-battle-maidens-in-army");
+    }
+    // Shared by both army-scoped aggregate effects above: a card's own Personality "unit" at the
+    // battlefield -- itself, if it's the Personality directly on the battlefield, or (for an attached
+    // Follower, whose own Zone is Attached, never Battlefield) its wielder, if THAT is on the
+    // battlefield. Null when neither the card nor its wielder is actually at a battlefield.
+    private CardInstance? BattlefieldParent(CardInstance card)
+    {
+        var parent = card.Zone==Zone.Attached ? Card(card.AttachedTo!) : card;
+        return parent.Zone==Zone.Battlefield ? parent : null;
     }
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
@@ -769,14 +810,27 @@ public sealed partial class MatchEngine
         var count=0;
         foreach(var card in cards)
         {
-            foreach(var attachment in Attachments(card.Id).ToArray()) { attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++; }
+            foreach(var attachment in Attachments(card.Id).ToArray())
+            {
+                attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
+                DestroyedDuringBattleBonus(attachment);
+            }
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
+            DestroyedDuringBattleBonus(card);
             Emit("unitDestroyed",$"{Definition(card).Name} and its attachments were destroyed.",card.OwnerId,card.Id);
         }
         return count;
+    }
+    // Disciples of Ganesh's shape: "After this Follower is destroyed during battle, gain 1 Honor" --
+    // a static Effect checked at every destruction path (the sweep above, and DestroyAttachment's own
+    // single-card path), gated on the Battle phase rather than combatDestruction specifically, since the
+    // printed condition is "during battle" (the phase), not "as a result of battle resolution."
+    private void DestroyedDuringBattleBonus(CardInstance card)
+    {
+        if(_state.Phase==Phase.Battle && Definition(card).Effect is "gain-honor-if-destroyed" or "force-while-defending-honor-if-destroyed") GainHonor(card.OwnerId,1,$"{Definition(card).Name} destroyed during battle");
     }
     private void DestroyProvince(int owner,ProvinceState province)
     {

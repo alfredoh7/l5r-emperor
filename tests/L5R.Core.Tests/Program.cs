@@ -98,6 +98,7 @@ var tests = new (string Name, Action Run)[]
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
+    ("Follower wave 3: 28 cards, including the three real cards behind this session's aggregate/group Force effects (Senior Infantry Legion, Ashigaru Elite, Utaku Elite Guard) and province adjacency's first consumer (Moto Gunso); AttachGrantsKeyword's first published use; several new small primitives (Force-swap, destruction-triggered Honor, wielder-keyed Follower Force, Melee-only immunity, compound OR/controller-scoped targets)", FollowerWave3Cards),
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
     ("'Boost other Followers in the unit' primitive (Senior Infantry Legion's shape): a static +1F to every OTHER Follower attached to the same Personality, never to itself, and never leaking into a different unit; two boosters in one unit grant each other but not themselves", UnitForceBoostPrimitive),
@@ -1938,6 +1939,283 @@ static void FollowerWave2Cards()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,TargetId:hand.Id,AbilityId:"akodo-regulars-boost"));
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==regulars.Id).Force,5,"Base Force 2 + 3");
+    }
+}
+static void FollowerWave3Cards()
+{
+    {
+        // Commander's Steed: AttachGrantsKeyword's first published use -- Conqueror. Cleanup on detach
+        // is already covered generically by "Destroying an attachment clears the Attachment-duration
+        // keyword it granted", so this only needs to prove the grant itself.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var steed=Add(s,"oracle-l5r-10893",0,Zone.Hand);
+        var human=Add(s,"training-crane-samurai",0,Zone.Home);
+        var nonhuman=Add(s,"training-nonhuman-personality",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:steed.Id,sources:e.PaymentOptions(0,4).First().SourceIds,target:nonhuman.Id));
+        Accept(e,Cmd(e,"equip",id:steed.Id,sources:e.PaymentOptions(0,4).First().SourceIds,target:human.Id));
+        Check(e.State.Cards[human.Id].GrantedKeywords.Any(g=>g.Keyword=="Conqueror"),"Attaching grants Conqueror to the wielder");
+    }
+    {
+        // Seppun Heavy Elite: grants Elite to the wielder -- a bowed wielder still contributes Force.
+        // Added directly to a raw (not-yet-engine-owned) MatchState, so the GrantedKeyword is applied
+        // by hand here, exactly as the real Equip() command would apply it (already proven for
+        // Commander's Steed above) -- this block is about BattleForce's own bowed-Elite exception.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true); // Force 3, bowed
+        var elite=Add(s,"oracle-l5r-6596",0,Zone.Attached,province:0,attachedTo:host.Id);
+        host.GrantedKeywords.Add(new GrantedKeyword("Elite",elite.Id,"Attachment"));
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==host.Id).UnitForce,5,"Bowed, but Elite-by-grant still contributes to BattleForce: host's 3 + Seppun's own unbowed 2");
+    }
+    {
+        // Family Sensei / Merchant Guard: self-referential, ControlsKeyword reuse.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var sensei=Add(s,"oracle-l5r-10592",0,Zone.Attached,attachedTo:host.Id); // Force 2
+        var guard=Add(s,"oracle-l5r-10589",0,Zone.Attached,attachedTo:host.Id); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==sensei.Id).Force,2,"No Dojo controlled -- base Force only");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==guard.Id).Force,2,"No Market controlled -- base Force only");
+        Add(s,"training-dojo",0,Zone.Home); Add(s,"training-market-holding",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s);
+        Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==sensei.Id).Force,3,"Controls a Dojo -- +1F");
+        Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==guard.Id).Force,3,"Controls a Market -- +1F");
+    }
+    {
+        // Ashigaru Guards: +1F for every two Farms controlled.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var guards=Add(s,"oracle-l5r-615",0,Zone.Home); // Force 0
+        var e0=MatchEngine.FromTestState(s);
+        Equal(e0.GetView(0).Players[0].Home.Single(c=>c.Id==guards.Id).Force,0,"No Farms -- no bonus");
+        Add(s,"training-farm",0,Zone.Home); Add(s,"training-farm",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s);
+        Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==guards.Id).Force,1,"Two Farms -- +1F");
+        Add(s,"training-farm",0,Zone.Home);
+        var e3=MatchEngine.FromTestState(s);
+        Equal(e3.GetView(0).Players[0].Home.Single(c=>c.Id==guards.Id).Force,1,"Three Farms -- still +1F (integer division)");
+    }
+    {
+        // Brothers of the Great Lake: self-count of same-named cards in the SAME ARMY, plus its own bow ability.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var lake1=Add(s,"oracle-l5r-10332",0,Zone.Attached,province:0,attachedTo:host.Id); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==lake1.Id).Force,3,"Alone -- no bonus");
+        var lake2=Add(s,"oracle-l5r-10332",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e2=MatchEngine.FromTestState(s);
+        Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==lake1.Id).Force,4,"One other same-named card in the army -- +1F");
+        var enemyTarget=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e3=MatchEngine.FromTestState(s);
+        Accept(e3,new GameCommand("useAbility",0,e3.Version,CardId:lake1.Id,TargetId:enemyTarget.Id,AbilityId:"brothers-great-lake-bow"));
+        Check(e3.State.Cards[enemyTarget.Id].Bowed,"Bows the target enemy card");
+    }
+    {
+        // Ninja Guards: Force bonus equal to its wielder's own PRINTED Force.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-lion-veteran",0,Zone.Home); // printed Force 6
+        var guards=Add(s,"oracle-l5r-5565",0,Zone.Attached,attachedTo:host.Id); // base Force 0
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==guards.Id).Force,6,"Base 0 + wielder's printed Force 6");
+    }
+    {
+        // Disciples of Ganesh: "+2F while defending" (self, existing shape) plus a destruction-triggered
+        // Honor gain (new shape) -- one card, two engine hooks off the same Effect string.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; // player 0 defends
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var ganesh=Add(s,"oracle-l5r-10895",0,Zone.Attached,province:0,attachedTo:host.Id); // Force 1
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ganesh.Id).Force,3,"Base 1 + 2 while defending");
+        var destroyer=Add(s,"training-no-attachments-destroyer",1,Zone.Battlefield,province:0);
+        s.PriorityPlayerId=1;
+        var e2=MatchEngine.FromTestState(s);
+        var honorBefore=e2.State.Players[0].Honor;
+        Accept(e2,new GameCommand("useAbility",1,e2.Version,CardId:destroyer.Id,TargetId:ganesh.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e2.State.Cards[ganesh.Id].Zone,Zone.Dead,"Destroyed during battle");
+        Equal(e2.State.Players[0].Honor,honorBefore+1,"Its own controller gains 1 Honor from the destruction");
+    }
+    {
+        // Daifuke: swaps its own Force with the target's, symmetrically.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.Phase=Phase.Action; s.PriorityPlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var daifuke=Add(s,"oracle-l5r-10235",0,Zone.Attached,attachedTo:host.Id); // Force 3
+        var enemyHost=Add(s,"training-lion-veteran",1,Zone.Home); // Force 6
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:daifuke.Id,TargetId:enemyHost.Id,AbilityId:"daifuke-swap-force"));
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==daifuke.Id).Force,6,"Daifuke now has the enemy's old Force");
+        Equal(e.GetView(1).Players[1].Home.Single(c=>c.Id==enemyHost.Id).Force,3,"The enemy now has Daifuke's old Force");
+    }
+    {
+        // Moto Gunso: +1F to every OTHER Follower at the current battlefield AND each adjacent one.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var gunso=Add(s,"oracle-l5r-5320",0,Zone.Attached,province:0,attachedTo:host.Id); // Force 2
+        var sameBattlefield=Add(s,"training-follower",0,Zone.Attached,province:0,attachedTo:host.Id); // Force 2
+        var adjacentHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:1);
+        var adjacent=Add(s,"training-follower",0,Zone.Attached,province:1,attachedTo:adjacentHost.Id); // Force 2, province 1 (adjacent to 0)
+        var farHost=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:3);
+        var far=Add(s,"training-follower",0,Zone.Attached,province:3,attachedTo:farHost.Id); // Force 2, province 3 (NOT adjacent to 0)
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:gunso.Id,AbilityId:"moto-gunso-boost"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==gunso.Id).Force,2,"Not boosted -- 'other' Followers only");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==sameBattlefield.Id).Force,3,"Same battlefield -- +1F");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==adjacent.Id).Force,3,"Adjacent battlefield -- +1F");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==far.Id).Force,2,"Not adjacent -- unaffected");
+    }
+    {
+        // Elite Sentry: "destroy without attachments" (existing #158 shape) and a Tireless straighten of
+        // its own unit (wielder plus every attachment).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true);
+        var sentry=Add(s,"oracle-l5r-2304",0,Zone.Attached,province:0,attachedTo:host.Id); // unbowed -- its own ability needs to use it
+        var otherFollower=Add(s,"training-follower",0,Zone.Attached,province:0,attachedTo:host.Id,bowed:true);
+        var enemyNaked=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sentry.Id,TargetId:enemyNaked.Id,AbilityId:"elite-sentry-destroy"));
+        Equal(e.State.Cards[enemyNaked.Id].Zone,Zone.Dead,"Destroys the unattached enemy card");
+        Accept(e,new GameCommand("pass",1,e.Version));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sentry.Id,AbilityId:"elite-sentry-straighten"));
+        Check(!e.State.Cards[host.Id].Bowed && !e.State.Cards[otherFollower.Id].Bowed,"Straightens the whole unit: wielder and every attachment");
+    }
+    {
+        // Furugaro: destroys itself and gives the target Fudo two Charging tokens.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var furugaro=Add(s,"oracle-l5r-10236",0,Zone.Attached,attachedTo:host.Id);
+        var fudo=Add(s,"training-fudo-personality",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:furugaro.Id,TargetId:fudo.Id,AbilityId:"furugaro-charge"));
+        Equal(e.State.Cards[furugaro.Id].Zone,Zone.Dead,"Destroys itself");
+        Equal(e.State.Cards[fudo.Id].Tokens.Count(t=>t.Type=="Charging"),2,"Gives the target Fudo two Charging tokens");
+    }
+    {
+        // P'an Ku Cultist: entry Honor loss (own amount, -1) and a Limited ability giving a Madness token.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var hand=Add(s,"oracle-l5r-10590",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,Cmd(e,"equip",id:hand.Id,sources:e.PaymentOptions(0,3).First().SourceIds,target:host.Id));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hand.Id,AbilityId:"panku-entry-honor-loss"));
+        Equal(e.State.Players[0].Honor,honorBefore-1,"Entering play costs 1 Honor");
+        // panku-madness is a separate Limited ability, tested independently of the entry-reaction window.
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var cultist=Add(s2,"oracle-l5r-10590",0,Zone.Home);
+        var target=Add(s2,"training-crane-samurai",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:cultist.Id,TargetId:target.Id,AbilityId:"panku-madness"));
+        Check(e2.State.Cards[target.Id].Tokens.Any(t=>t.Type=="Madness"),"Gives the target a Madness token");
+    }
+    {
+        // Soshi House Guard: conditional bow (only during a Combat Segment) plus a dishonorable-conditional
+        // Honor loss.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var guard=Add(s,"oracle-l5r-7347",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var dishonorable=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:guard.Id,TargetId:dishonorable.Id,AbilityId:"soshi-conditional-bow"));
+        Check(e.State.Cards[dishonorable.Id].Bowed,"Bows the target during the Battle phase");
+        Equal(e.State.Players[1].Honor,honorBefore-1,"Dishonorable target's controller loses 1 Honor");
+    }
+    {
+        // Unseen Assassins: bows itself, destroys a target Follower, then destroys itself and loses 2 Honor.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var assassin=Add(s,"oracle-l5r-10410",0,Zone.Attached,attachedTo:host.Id);
+        var enemyHost=Add(s,"training-lion-samurai",1,Zone.Home);
+        var enemyFollower=Add(s,"training-follower",1,Zone.Attached,attachedTo:enemyHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:assassin.Id,TargetId:enemyFollower.Id,AbilityId:"unseen-assassin-strike"));
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"Destroys the target Follower");
+        Equal(e.State.Cards[assassin.Id].Zone,Zone.Dead,"Destroys itself");
+        Equal(e.State.Players[0].Honor,honorBefore-2,"Loses 2 Honor");
+    }
+    {
+        // Asahina House Guard: straighten a target bowed Personality, gain 1 Honor.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-clan-samurai",0,Zone.Battlefield,province:0); // Crane Clan keyword
+        var guard=Add(s,"oracle-l5r-494",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var bowedAlly=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:guard.Id,TargetId:bowedAlly.Id,AbilityId:"asahina-straighten"));
+        Check(!e.State.Cards[bowedAlly.Id].Bowed,"Straightens the target");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Gains 1 Honor");
+    }
+    {
+        // Bounty Hunter: bows a target attachment OR a target dishonorable Personality.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var hunter=Add(s,"oracle-l5r-1119",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemyHost=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var enemyAttachment=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:hunter.Id,TargetId:enemyHost.Id,AbilityId:"bounty-hunter-bow")); // honorable Personality, not an attachment
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hunter.Id,TargetId:enemyAttachment.Id,AbilityId:"bounty-hunter-bow"));
+        Check(e.State.Cards[enemyAttachment.Id].Bowed,"Bows the target attachment");
+    }
+    {
+        // Rumormonger: bows itself, targets a Personality whose controller controls a dishonorable
+        // Personality (not necessarily the target itself), Force penalty equal to the target's own base PH.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+        var rumormonger=Add(s,"oracle-l5r-6404",1,Zone.Home);
+        var dishonorableAlly=Add(s,"training-crane-clan-samurai",0,Zone.Home); dishonorableAlly.Dishonorable=true; // PH 3, current 0
+        var otherAlly=Add(s,"training-crane-clan-low-honor",0,Zone.Home); // Force 2, PH 1
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:rumormonger.Id,TargetId:otherAlly.Id,AbilityId:"rumormonger-penalty"));
+        Check(e.State.Cards[rumormonger.Id].Bowed,"Bows itself as part of the cost");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==otherAlly.Id).Force,1,"Force penalty equal to the target's own base Personal Honor (1): base 2 - 1");
+    }
+    {
+        // Seasoned Ashigaru: immune to Melee Attacks specifically (not Ranged).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-10106",0,Zone.Attached,province:0,attachedTo:host.Id); // Horseback Warriors, Melee
+        var seasoned=Add(s,"oracle-l5r-10901",1,Zone.Battlefield,province:0); // Force 1, melee-immune
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:seasoned.Id,AbilityId:"horseback-warriors-attack"));
+    }
+    {
+        // Horseback Warriors: Melee 4, or 5 against a target without the Cavalry keyword ("Infantry").
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var warriors=Add(s,"oracle-l5r-10106",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var infantry=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); infantry.Modifiers=[new("test","test","Force",1)]; // Force 5
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:warriors.Id,TargetId:infantry.Id,AbilityId:"horseback-warriors-attack"));
+        Equal(e.State.Cards[infantry.Id].Zone,Zone.Dead,"Melee 5 (target is Infantry -- no Cavalry keyword) destroys Force 5");
+    }
+    {
+        // Khol Regulars: Ranged 4 Attack, and its own Reaction raises a pending attack's strength by 2
+        // while it is at the current battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var regulars=Add(s,"oracle-l5r-4338",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, within base Ranged 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,TargetId:target.Id,AbilityId:"khol-regulars-attack"));
+        Equal(e.State.PendingAttack?.Strength,4,"Base Ranged 4");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,AbilityId:"khol-regulars-reaction"));
+        Equal(e.State.PendingAttack?.Strength,6,"4 base + 2 from its own Reaction");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead);
+    }
+    {
+        // Aulus: entry Honor loss (own amount, -2) and a keyword-based unit-scoped boost ("Legionnaires
+        // in this unit have +1F") -- reuses UnitFollowerBoost's existing switch with a new case.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var aulus=Add(s,"oracle-l5r-10687",0,Zone.Attached,attachedTo:host.Id);
+        var legionnaire=Add(s,"training-legionnaire-follower",0,Zone.Attached,attachedTo:host.Id); // Force 1
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==legionnaire.Id).Force,2,"Base 1 + 1 from Aulus's unit-scoped boost");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==aulus.Id).Force,3,"Aulus itself is not a Legionnaire -- unaffected");
     }
 }
 static void GeneralizedEntryReactionWindow()

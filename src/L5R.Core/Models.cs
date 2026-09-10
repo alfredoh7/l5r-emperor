@@ -23,7 +23,12 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // target Personality -- "Human" is a special case (core rules Glossary: no keyword is ever
     // printed for it, so it means "does not have Nonhuman"). AttachRequiresName is the rarer
     // named-Personality restriction (e.g. "Attaches to Yotsu Ueda").
-    string? AttachRequiresKeyword = null, string? AttachExcludesKeyword = null, string? AttachRequiresName = null);
+    string? AttachRequiresKeyword = null, string? AttachExcludesKeyword = null, string? AttachRequiresName = null,
+    // "This Personality has X" (Commander's Steed's shape): an attachment that grants its wielder a
+    // keyword for as long as it stays attached -- reuses the existing GrantedKeyword("Attachment")
+    // lifecycle (already cleaned up on detach/destroy; see DestroyAttachment), just never exercised by
+    // a published card until now.
+    string? AttachGrantsKeyword = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
