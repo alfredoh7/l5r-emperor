@@ -182,6 +182,31 @@ public static class AbilityCatalog
         ["hiruma-sniper-attack"] = new("Battle", "If you have Reconnaissance: Ranged 4 Attack", "attack"),
         ["heavy-chargers-boost"] = new("Battle", "If this card is opposed, discard a card: Give this card +3F", "hand"),
         ["spitting-llama-force"] = new("Battle", "Give a target enemy Personality or Follower -3F", "enemy-force"),
+        ["spawn-of-vritra-attack"] = new("Battle", "Ranged 6 Attack", "attack"),
+        ["horseback-warriors-attack"] = new("Battle", "Melee 4 Attack, or Melee 5 Attack if the target is Infantry", "attack"),
+        ["khol-regulars-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        ["khol-regulars-reaction"] = new("Reaction", "If this card is at the current battlefield, after a Ranged Attack is targeted: +2 strength", "none", Trigger: "before-attack-resolves"),
+        ["bounty-hunter-bow"] = new("Battle", "Bow a target attachment or a target dishonorable Personality", "attachment-or-dishonorable-personality"),
+        ["rumormonger-penalty"] = new("Open", "Bow this card and target a Personality controlled by a player who controls a dishonorable Personality: Force penalty equal to his base Personal Honor", "personality-controller-controls-dishonorable"),
+        ["daifuke-swap-force"] = new("Open", "Target another player's Follower or Personality: switch the target's and this Follower's Force", "enemy-force"),
+        // Moto Gunso's shape: not a single-target ability at all -- every qualifying Follower gets the
+        // bonus at once (see the execution case), reusing province adjacency (AdjacentProvinces).
+        ["moto-gunso-boost"] = new("Battle", "Give each of your other Followers at the current battlefield and at each adjacent battlefield +1F", "none"),
+        ["elite-sentry-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
+        // Tireless (see the usage-dedupe exemption): straightens the Follower's OWN unit (its wielder
+        // and every attachment), not a separately-chosen target -- Target "none", resolved from source.
+        ["elite-sentry-straighten"] = new("BattleOrOpen", "Straighten this Follower's unit", "none"),
+        ["furugaro-charge"] = new("Limited", "Destroy this Follower to target a Fudo Personality: give him two Charging tokens", "own-personality-with-keyword", RequiredKeyword: "Fudo"),
+        ["panku-madness"] = new("Limited", "Give a target card a Madness token", "any-card"),
+        ["soshi-conditional-bow"] = new("BattleOrOpen", "Target a Personality: if it is a Combat Segment, bow him; if he is dishonorable, his controller loses 1 Honor", "personality"),
+        ["unseen-assassin-strike"] = new("Limited", "Bow this Follower to destroy a target Follower; destroy this Follower and lose 2 Honor", "enemy-follower"),
+        ["asahina-straighten"] = new("BattleOrOpen", "Target your bowed Personality: straighten him and gain 1 Honor", "own-bowed"),
+        // The real Ashigaru Elite, sharing the exact mechanism the training fixture demonstrated.
+        ["ashigaru-elite-boost"] = new("Battle", "Bow an unbowed Farm you control: each Ashigaru Personality/Follower you control at this battlefield gains +1F for the remainder of the battle", "own-unbowed-farm"),
+        ["aulus-entry-honor-loss"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
+        ["panku-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
+        ["thunderous-legion-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
+        ["brothers-great-lake-bow"] = new("Battle", "Bow a target enemy card", "enemy-force"),
     });
 }
 
@@ -233,6 +258,11 @@ public sealed partial class MatchEngine
         "dark-naga-scouts-attack" => 3,
         "murderous-thieves-attack" => 3,
         "horse-archers-attack" or "hiruma-sniper-attack" => 4,
+        "spawn-of-vritra-attack" => 6,
+        "khol-regulars-attack" => 4,
+        // Horseback Warriors: Melee 4, or 5 against a target without the Cavalry keyword -- "Infantry"
+        // has no printed keyword of its own (core rules Glossary), it just means not Cavalry.
+        "horseback-warriors-attack" => 4 + (target is not null && !Keyword(target, "Cavalry") ? 1 : 0),
         _ => 0
     };
     // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
@@ -244,6 +274,8 @@ public sealed partial class MatchEngine
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
+        "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
+        "horseback-warriors-attack" => "Melee",
         _ => ""
     };
     // Whether opening a reaction window before resolving an attack could possibly matter right now.
@@ -377,11 +409,12 @@ public sealed partial class MatchEngine
             uses = source.AbilityUses;
         }
         // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
-        // Elite -- explicitly stacks with other uses of the action): exempt from the once-per-turn
-        // dedupe entirely -- each one's own cost/requirements (a different unbowed Farm each time) are
-        // the only real limit.
+        // Elite -- explicitly stacks with other uses of the action -- and Elite Sentry's straighten):
+        // exempt from the once-per-turn dedupe entirely -- each one's own cost/requirements (a
+        // different unbowed Farm each time, for Ashigaru Elite) are the only real limit.
         var usageKey = ability.UsageKey ?? id;
-        Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" or "ashigaru-elite-boost" or "elite-sentry-straighten"
+            || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -398,6 +431,10 @@ public sealed partial class MatchEngine
         if (id is "horibe-bow" or "horibe-straighten")
             Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
         if (id is "heavy-chargers-boost") Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Heavy Chargers must be opposed to use this ability.");
+        // Khol Regulars: "If this card is at the current battlefield, after a Ranged Attack is
+        // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
+        // with every other attack-boosting Reaction.
+        if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         if (ability.Performer is not null)
@@ -467,6 +504,11 @@ public sealed partial class MatchEngine
                     // no such exception is wired up yet, since no imported Attack needs one.
                     Require(type == CardType.Follower || type == CardType.Personality && !HasAttachments(target),
                         "Attack a Follower or a Personality without attachments.");
+                    // Seasoned Ashigaru's shape: an immunity to one specific Attack kind only, checked
+                    // against the ability's own AttackKind (already tracked per ability id). Effect, not
+                    // Keywords -- this is a synthetic marker for the card's own unique text, not a
+                    // printed keyword other cards could reference.
+                    Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
                     Require(CardForce(target) <= AttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
                 }
             }
@@ -515,6 +557,8 @@ public sealed partial class MatchEngine
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
                         "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
+                        "enemy-follower" => !own && type == CardType.Follower,
+                        "any-card" => true,
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
                         "enemy-attacking" => personality && !own && target.OwnerId == _state.ActivePlayerId,
@@ -539,6 +583,14 @@ public sealed partial class MatchEngine
                         // "-than-self" categories above which compare against the ability's own source.
                         "enemy-personality-chi-lte-performer" => personality && !own && Definition(target).Chi <= Definition(Card(command.PerformerId!)).Chi,
                         "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
+                        // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
+                        // an OR of two otherwise-unrelated existing categories.
+                        "attachment-or-dishonorable-personality" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell
+                            || personality && target.Dishonorable,
+                        // Rumormonger: any Personality controlled by a player who controls at least one
+                        // Dishonorable Personality (not necessarily this target itself).
+                        "personality-controller-controls-dishonorable" => personality &&
+                            _state.Cards.Values.Any(c => c.OwnerId == target.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -622,6 +674,8 @@ public sealed partial class MatchEngine
                 break;
             }
             case "training-honor-loss-entry": GainHonor(player.Id, -2, "Training entry Honor loss", source); break;
+            case "aulus-entry-honor-loss": GainHonor(player.Id, -2, $"{Definition(source!).Name} entering play", source); break;
+            case "panku-entry-honor-loss": GainHonor(player.Id, -1, $"{Definition(source!).Name} entering play", source); break;
             case "training-item-entry-reaction": case "training-terrain-entry-reaction": GainHonor(player.Id, 1, "Training entry reaction", source); break;
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
                 CreateToken(source!, "Fire", id, "Force", 1);
@@ -641,8 +695,10 @@ public sealed partial class MatchEngine
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
+            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
+            case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
@@ -696,11 +752,63 @@ public sealed partial class MatchEngine
             case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
             // Bowing the target Farm IS the cost; the effect is the counter increment, not applied to
             // the Farm itself. Consumed by PersonalityForce/FollowerForce (Keyword "Ashigaru" + AtBattle).
-            case "training-ashigaru-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
+            case "training-ashigaru-boost": case "ashigaru-elite-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
             case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
             case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
+            case "bounty-hunter-bow": target!.Bowed = true; break;
+            case "rumormonger-penalty":
+                source!.Bowed = true;
+                ApplyModifier(target!, source.Id, id, "Force", -CardPersonalHonor(target!));
+                break;
+            case "daifuke-swap-force":
+            {
+                var sourceForce = CardForce(source!); var targetForce = CardForce(target!);
+                ApplyModifier(target!, source!.Id, id, "Force", sourceForce - targetForce);
+                ApplyModifier(source, target!.Id, id, "Force", targetForce - sourceForce);
+                break;
+            }
+            case "moto-gunso-boost":
+            {
+                var battlefields = new List<int> { _state.CurrentBattleProvince!.Value };
+                battlefields.AddRange(AdjacentProvinces(player.Id, _state.CurrentBattleProvince!.Value));
+                foreach (var province in battlefields.Distinct())
+                    foreach (var personality in Army(player.Id, province))
+                        foreach (var follower in Attachments(personality.Id).Where(c => c.Id != source!.Id && Definition(c).Type == CardType.Follower))
+                            ApplyModifier(follower, source!.Id, id, "Force", 1);
+                break;
+            }
+            case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true); break;
+            case "brothers-great-lake-bow": target!.Bowed = true; break;
+            case "elite-sentry-straighten":
+            {
+                var personality = Card(source!.AttachedTo!);
+                Straighten(personality);
+                foreach (var attachment in Attachments(personality.Id)) Straighten(attachment);
+                break;
+            }
+            case "furugaro-charge":
+                DestroyUnits([source!], false);
+                CreateToken(target!, "Charging", id);
+                CreateToken(target!, "Charging", id);
+                break;
+            case "panku-madness": CreateToken(target!, "Madness", id); break;
+            case "soshi-conditional-bow":
+                if (_state.Phase == Phase.Battle) target!.Bowed = true;
+                if (target!.Dishonorable) GainHonor(target.OwnerId, -1, "Soshi House Guard", source);
+                break;
+            case "unseen-assassin-strike":
+                // Limited (Action phase), not battle -- combatDestruction stays false for both.
+                source!.Bowed = true;
+                DestroyUnits([target!], false);
+                DestroyUnits([source], false);
+                GainHonor(player.Id, -2, "Unseen Assassins", source);
+                break;
+            case "asahina-straighten":
+                Straighten(target!);
+                GainHonor(player.Id, 1, "Asahina House Guard", source);
+                break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
@@ -782,6 +890,7 @@ public sealed partial class MatchEngine
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
         parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
         card.Tokens.Clear();
+        DestroyedDuringBattleBonus(card);
         Emit("attachmentDestroyed", $"{Definition(card).Name} was destroyed.", card.OwnerId, card.Id);
         if (PersonalityChi(parent) <= 0) DestroyUnits([parent], true);
     }

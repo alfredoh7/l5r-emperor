@@ -249,6 +249,27 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 3 of ability-bearing Followers: found by auditing every not-yet-imported
+    /// Follower in the reference catalogue against the primitives available as of issue #170 (the
+    /// aggregate/group Force effects -- Senior Infantry Legion, Ashigaru Elite, Utaku Elite Guard --
+    /// and province adjacency). Three of these are the real cards those primitives were built for.
+    /// First published use of AttachGrantsKeyword (an attachment granting its wielder a keyword).</summary>
+    public static PublishedSnapshot FollowerWave3 { get; } = LoadFollowerWave3();
+
+    private static PublishedSnapshot LoadFollowerWave3()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave3.json", "follower-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 28)
+            throw new InvalidOperationException("Unexpected follower-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-3 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-3 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
