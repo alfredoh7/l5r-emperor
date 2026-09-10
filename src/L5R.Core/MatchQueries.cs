@@ -92,6 +92,13 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"spellFollowUp" } spellFollowUp)
+        {
+            // Only the equipping player has anything to decide here; the opponent just waits (the
+            // top-level playerId!=PriorityPlayerId branch above already covers that).
+            if(spellFollowUp.PlayerId==playerId) result.AddRange(AbilityActions(playerId,spellFollowUp.CardId));
+            Add("declineReaction","Decline the Spell's Battle ability",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
@@ -154,6 +161,14 @@ public sealed partial class MatchEngine
                 foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && Definition(c).ScenarioOnly))
                 {
                     var def=Definition(card);
+                    if(Keyword(card,"Terrain"))
+                    {
+                        var blocked=_state.Cards.Values.Any(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==_state.CurrentBattleProvince && Keyword(c,"Terrain"));
+                        var terrainReason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield."
+                            :blocked?"This battlefield already has a Terrain in play.":null;
+                        Add("playStrategy",$"Play {def.Name}",terrainReason is null?Command("playStrategy",card.Id):null,terrainReason,card.Id,[]);
+                        continue;
+                    }
                     var targets=_state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==_state.CurrentBattleProvince && Definition(c).Type==CardType.Personality &&
                         (def.Effect=="force-three"?c.OwnerId==playerId:c.OwnerId!=playerId && PersonalityForce(c)<=3)).Select(c=>c.Id).ToArray();
                     var reason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield.":targets.Length==0?"No legal target at this battlefield.":null;
