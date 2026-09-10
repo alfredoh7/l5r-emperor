@@ -100,7 +100,8 @@ var tests = new (string Name, Action Run)[]
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
-    ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions)
+    ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
+    ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter)
 };
 var failed=0;
 foreach(var test in tests)
@@ -2087,5 +2088,55 @@ static void AttachmentRestrictions()
         var e=MatchEngine.FromTestState(s);
         Reject(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:other.Id));
         Accept(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:named.Id));
+    }
+}
+static void NoAttachmentsFilter()
+{
+    {
+        // A Ranged/Melee Attack target must have no attachments at all -- not just no Follower, the
+        // previous (too-narrow) check. An attached Item blocks targeting just as a Follower would.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var withItem=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:withItem.Id);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withItem.Id,AbilityId:"dark-naga-scouts-attack"));
+    }
+    {
+        // A Follower/Weapon/Armor *token* (no card attachment at all) also counts as an attachment...
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var withToken=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); withToken.Tokens=[new("t1","Follower","test-fixture")];
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withToken.Id,AbilityId:"dark-naga-scouts-attack"));
+    }
+    {
+        // ...but an ordinary stat/status token (Fire) does not -- still a legal target.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var attacker=Add(s,"oracle-l5r-1839",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var withFireToken=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); withFireToken.Tokens=[new("t1","Fire","test-fixture")];
+        withFireToken.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 4-2=2, within Ranged 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:attacker.Id,TargetId:withFireToken.Id,AbilityId:"dark-naga-scouts-attack"));
+        Equal(e.State.Cards[withFireToken.Id].Zone,Zone.Dead);
+    }
+    {
+        // The generic RequireNoAttachments flag, layered onto an existing category ("enemy-force"):
+        // matches "Target an enemy card without attachments" verbatim. A Personality with an
+        // attachment is rejected; a clean one is destroyed; an enemy Follower (an attachment itself)
+        // is always a legal target, since an attachment can never itself have attachments.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var withItem=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:withItem.Id);
+        var clean=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var enemyFollower=Add(s,"training-cavalry-follower",1,Zone.Attached,province:0,attachedTo:clean.Id);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:withItem.Id,AbilityId:"training-destroy-no-attachments"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:enemyFollower.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"An attachment is always a legal 'without attachments' target");
     }
 }
