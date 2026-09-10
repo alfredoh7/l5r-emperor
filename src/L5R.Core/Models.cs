@@ -29,6 +29,12 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // lifecycle (already cleaned up on detach/destroy; see DestroyAttachment), just never exercised by
     // a published card until now.
     string? AttachGrantsKeyword = null,
+    // Seppun Heavy Elite's shape: grants its wielder the EFFECT Elite has (Force still counts while
+    // bowed, see BattleForce's EliteEffect() check) without actually granting the Elite keyword
+    // itself -- a real keyword grant would satisfy any future ability that checks specifically for
+    // the printed Elite keyword (the same printed-vs-granted distinction Justice of the Crane's own
+    // text draws for Magistrate). Deliberately not folded into AttachGrantsKeyword/GrantedKeywords.
+    bool AttachGrantsEliteEffect = false,
     // Passive Ranged/Melee Attack-strength modifier applied to an incoming Attack TARGETING the
     // scoped card(s) -- Destrier's shape ("Melee and Ranged Attacks targeting this Follower have
     // -3 strength"), generalized. AttackDefenseKind is "Melee", "Ranged", or "Both" (null: grants

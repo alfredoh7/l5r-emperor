@@ -1,0 +1,33 @@
+{
+  "Profile": "follower-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6501",
+      "Name": "Scourge of the Sea",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6501.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Nonhuman",
+        "Orochi"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Naval"
+    }
+  ],
+  "Decks": []
+}

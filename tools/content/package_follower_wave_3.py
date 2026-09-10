@@ -64,7 +64,11 @@ ATTACH_EXCLUDES_KEYWORD: dict[int, str] = {
 }
 ATTACH_GRANTS_KEYWORD: dict[int, str] = {
     10893: "Conqueror",  # Commander's Steed
-    6596: "Elite",       # Seppun Heavy Elite
+}
+# Grants only Elite's effect (Force still counts while bowed), not the Elite keyword itself -- see
+# AttachGrantsEliteEffect and issue #179's correction of this card's original (wrong) wiring.
+ATTACH_GRANTS_ELITE_EFFECT: dict[int, bool] = {
+    6596: True,  # Seppun Heavy Elite
 }
 # The fetched record duplicated, reordered, or otherwise garbled text for these; corrected
 # against each card's own scanned image.
@@ -90,6 +94,8 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
             fields["AttachExcludesKeyword"] = ATTACH_EXCLUDES_KEYWORD[oracle_id]
         if oracle_id in ATTACH_GRANTS_KEYWORD:
             fields["AttachGrantsKeyword"] = ATTACH_GRANTS_KEYWORD[oracle_id]
+        if oracle_id in ATTACH_GRANTS_ELITE_EFFECT:
+            fields["AttachGrantsEliteEffect"] = ATTACH_GRANTS_ELITE_EFFECT[oracle_id]
         definitions.append(fields)
         sources.append(source)
     assert len(definitions) == len(card_ids) == len({c["Id"] for c in definitions}), "Duplicate or missing card"

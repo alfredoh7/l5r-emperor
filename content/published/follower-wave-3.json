@@ -217,7 +217,7 @@
       "Focus": 3,
       "Abilities": [],
       "Effect": "none",
-      "AttachGrantsKeyword": "Elite"
+      "AttachGrantsEliteEffect": true
     },
     {
       "Id": "oracle-l5r-10515",
