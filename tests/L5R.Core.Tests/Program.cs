@@ -99,7 +99,8 @@ var tests = new (string Name, Action Run)[]
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
-    ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks)
+    ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
+    ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions)
 };
 var failed=0;
 foreach(var test in tests)
@@ -2020,5 +2021,71 @@ static void FollowerAndItemStaticForceHooks()
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kensai.Id).Force,5,"Base 2 + printed 2 + conditional 1 (Kensai wielder), even though the Item is bowed");
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kensai.Id).Chi,3,"Base Chi 2 + printed Chi 1, regardless of the Item's own bow state");
         Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==nonKensai.Id).Force,5,"Base 3 + printed 2, no conditional bonus for a non-Kensai wielder");
+    }
+}
+static void AttachmentRestrictions()
+{
+    {
+        // Asahina House Guard's own shape: will only attach to a Crane Clan Personality with Personal
+        // Honor 2+. A Crane Clan target with sufficient Honor succeeds; one without the keyword, or
+        // with insufficient Honor, is rejected -- and rejected outright even by the offered-action
+        // query (not just at Accept), since AttachmentLegalTarget gates both the same way.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var guard=Add(s,"training-follower-crane-guard",0,Zone.Hand);
+        var craneTarget=Add(s,"training-crane-clan-samurai",0,Zone.Home); // Crane Clan, PH 3
+        var lionTarget=Add(s,"training-lion-samurai",0,Zone.Home); // no Crane Clan keyword
+        var e=MatchEngine.FromTestState(s);
+        var equipOption=e.QueryActions(0).Single(a=>a.Type=="equip" && a.CardId==guard.Id);
+        Check(equipOption.TargetIds!.SequenceEqual([craneTarget.Id]),"Only the Crane Clan target is offered as legal");
+        Reject(e,Cmd(e,"equip",id:guard.Id,sources:e.PaymentOptions(0,4).First().SourceIds,target:lionTarget.Id));
+        Accept(e,Cmd(e,"equip",id:guard.Id,sources:e.PaymentOptions(0,4).First().SourceIds,target:craneTarget.Id));
+        Equal(e.State.Cards[guard.Id].Zone,Zone.Attached);
+    }
+    {
+        // Current Personal Honor, not printed: Dishonorable fixes it at 0 (blocking the Honor
+        // Requirement despite printed Personal Honor 3); a Personal-Honor-boosting token still applies
+        // once honorable, even against a low printed value, and keeps applying rather than being
+        // consumed -- the same token is present, unconsumed, in both scenarios below.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var guard=Add(s,"training-follower-crane-guard",0,Zone.Hand);
+        var dishonored=Add(s,"training-crane-clan-samurai",0,Zone.Home); dishonored.Dishonorable=true; // printed PH 3, current 0
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:guard.Id,sources:e.PaymentOptions(0,4).First().SourceIds,target:dishonored.Id));
+
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var guard2=Add(s2,"training-follower-crane-guard",0,Zone.Hand);
+        var lowHonor=Add(s2,"training-crane-clan-low-honor",0,Zone.Home); // printed PH 1, below the requirement of 2
+        lowHonor.Modifiers=[new("test-fixture","test-fixture","PersonalHonor",2)]; // current 1+2=3
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,Cmd(e2,"equip",id:guard2.Id,sources:e2.PaymentOptions(0,4).First().SourceIds,target:lowHonor.Id));
+    }
+    {
+        // "Will not attach to a Water Personality" (Spawn of Vritra's shape).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower-not-water",0,Zone.Hand);
+        var water=Add(s,"training-water-personality",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:water.Id));
+    }
+    {
+        // "Will only attach to a Human" -- no keyword is ever printed for it; it means "does not have
+        // Nonhuman" (core rules Glossary).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower-human-only",0,Zone.Hand);
+        var nonhuman=Add(s,"training-nonhuman-personality",0,Zone.Home);
+        var human=Add(s,"training-crane-samurai",0,Zone.Home); // no Nonhuman keyword: Human by default
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:nonhuman.Id));
+        Accept(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:human.Id));
+    }
+    {
+        // A named-Personality restriction (e.g. "Attaches to Yotsu Ueda").
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower-named",0,Zone.Hand);
+        var named=Add(s,"training-crane-veteran",0,Zone.Home); // Name: "Crane training veteran"
+        var other=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:other.Id));
+        Accept(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:named.Id));
     }
 }

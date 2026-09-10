@@ -130,7 +130,7 @@ public sealed partial class MatchEngine
                     foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type is CardType.Item or CardType.Follower))
                     {
                         var def=Definition(card);
-                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && (def.Type!=CardType.Follower || def.HonorRequirement is null || Definition(t).PersonalHonor>=def.HonorRequirement)).Select(t=>t.Id).ToArray();
+                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).Select(t=>t.Id).ToArray();
                         var payment=PaymentOptions(playerId,def.GoldCost).FirstOrDefault();
                         var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":payment is null?"Insufficient unbowed Gold production.":null;
                         Add("equip",$"Equip {def.Name} · {def.GoldCost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:legalTargets[0]):null,

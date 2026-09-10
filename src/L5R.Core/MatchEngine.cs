@@ -557,7 +557,10 @@ public sealed partial class MatchEngine
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
         Require(target.OwnerId==command.PlayerId && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,"Choose your Personality at home.");
-        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || Definition(target).PersonalHonor>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
+        Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
+        Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
+        Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
+        Require(def.Type!=CardType.Follower || def.HonorRequirement is null || CardPersonalHonor(target)>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
         Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
         Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
@@ -622,6 +625,23 @@ public sealed partial class MatchEngine
         return true;
     }
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
+    // "Human" is never printed as a keyword -- a Personality/Follower without "Nonhuman" printed is
+    // Human by default (core rules Glossary).
+    private static bool KeywordOrHuman(CardInstance card,string keyword) => keyword=="Human" ? !Keyword(card,"Nonhuman") : Keyword(card,keyword);
+    // An attachment's own "Will only/not attach to X" restriction and Follower Honor Requirement,
+    // checked together wherever a legal target is decided (Equip's own Require and the offered-action
+    // legal-targets filter both call this, so they can never disagree).
+    private bool AttachmentLegalTarget(CardDefinition attachmentDef,CardInstance target) =>
+        (attachmentDef.AttachRequiresKeyword is null || KeywordOrHuman(target,attachmentDef.AttachRequiresKeyword)) &&
+        (attachmentDef.AttachExcludesKeyword is null || !KeywordOrHuman(target,attachmentDef.AttachExcludesKeyword)) &&
+        (attachmentDef.AttachRequiresName is null || Definition(target).Name==attachmentDef.AttachRequiresName) &&
+        (attachmentDef.Type!=CardType.Follower || attachmentDef.HonorRequirement is null || CardPersonalHonor(target)>=attachmentDef.HonorRequirement);
+    // "Current" Personal Honor (core rules Glossary): a Dishonorable Personality's is fixed at 0 until
+    // Rehonor restores them -- fixed at 0, not merely reduced, so a persistent modifier (e.g. a token)
+    // is not removed by this and resumes applying once honorable again. The handful of rules that
+    // deliberately key off the *printed* value regardless of current status (Dishonorable death's
+    // Honor penalty, Proclaim's grant) intentionally do not use this helper.
+    private int CardPersonalHonor(CardInstance card) => card.Dishonorable ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor");
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
