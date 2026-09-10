@@ -10,7 +10,12 @@ namespace L5R.Core;
 // (e.g. "bow or straighten him") share a single once-per-turn use, instead of each half getting
 // its own independent use by virtue of being a separate dictionary key; defaults to the entry's
 // own id, which is every other ability's actual behavior.
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null);
+// RequiredKeyword narrows a keyword-agnostic Target/Performer category (e.g. "own-personality") to
+// only cards carrying that printed or granted keyword -- the generic shape behind "Choose your
+// performing/target [Keyword] Personality" (core rules: a keyword with no mechanical rule of its own
+// still satisfies this kind of condition on another card, in addition to any mechanical ability it
+// does carry). See "own-personality-with-keyword" below.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string? RequiredKeyword = null);
 
 public static class AbilityCatalog
 {
@@ -20,6 +25,13 @@ public static class AbilityCatalog
         ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces"),
         ["shinden-choice"] = new("Open", "Offer bowing or 1 Honor", "shinden", Performer: "shugenja"),
         ["air-straighten"] = new("Open", "Straighten an Air Personality", "air"),
+        // Training fixture for the generic keyword-satisfaction primitive (Immovable Object: "Battle/
+        // Open: Choose your performing Berserker: Straighten him"). Open-only here -- this engine has
+        // no dual-timing ability shape yet, and demonstrating the keyword gate needs only one.
+        ["training-keyword-conditional-straighten"] = new("Open", "Choose your performing Berserker: Straighten him", "own-personality-with-keyword", RequiredKeyword: "Berserker"),
+        // Training fixture for the generic Performer-side keyword gate (mirrors Tactical Advantage's
+        // Performer shape, but for any keyword instead of one hardcoded to Tactician).
+        ["training-keyword-conditional-force-boost"] = new("Battle", "Choose your performing Berserker at the current battlefield: +2 Force", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
         ["shunya-honor"] = new("Limited", "Discard Favor · gain 2 Honor", "none"),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality"),
         ["prepared-death"] = new("Limited", "Perform · +2 Force", "own-personality"),
@@ -317,6 +329,11 @@ public sealed partial class MatchEngine
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
+                // Generic "Choose your performing [Keyword] Personality" at battle -- for a future
+                // card naming any of the keywords with no mechanical rule of its own, without adding
+                // a new hardcoded Performer category each time. See AbilityDefinition.RequiredKeyword.
+                "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
+                    ability.RequiredKeyword is not null && Keyword(performer, ability.RequiredKeyword),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
@@ -395,6 +412,10 @@ public sealed partial class MatchEngine
                         "air" => personality && Keyword(target, "Air"),
                         "personality" => personality,
                         "own-personality" => personality && own,
+                        // Generic "Choose your performing/target [Keyword] Personality" -- for a
+                        // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
+                        // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeyword.
+                        "own-personality-with-keyword" => personality && own && ability.RequiredKeyword is not null && Keyword(target, ability.RequiredKeyword),
                         "enemy-personality" => personality && !own,
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
@@ -455,7 +476,7 @@ public sealed partial class MatchEngine
                     $"{Definition(target).Name} ({target.Id}): bow and prevent straightening for this turn, or let {player.Name} gain 1 Honor.", player.Id);
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
-            case "air-straighten": case "paid-straighten": Straighten(target!); break;
+            case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": Straighten(target!); break;
             case "paid-bow": target!.Bowed = true; break;
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
@@ -523,6 +544,7 @@ public sealed partial class MatchEngine
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
                 DiscardFate(player, target!);
                 break;
+            case "training-keyword-conditional-force-boost": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 2); break;
             case "equip-battle":
             {
                 var performer = Card(command.PerformerId!);
@@ -685,6 +707,8 @@ public sealed partial class MatchEngine
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-at-battle-with-keyword" => ability.RequiredKeyword is not { } requiredKeyword ? [] :
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, requiredKeyword)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),

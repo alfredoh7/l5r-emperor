@@ -94,7 +94,8 @@ var tests = new (string Name, Action Run)[]
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
-    ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword)
+    ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
+    ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1713,5 +1714,34 @@ static void LoyalKeyword()
         var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-multi-clan";
         e=MatchEngine.FromTestState(s);
         Check(e.QuotePurchase(0,cardId).Error is null,"A Crane/Lion dual-aligned Loyal Personality recruits normally for a Crane player");
+    }
+}
+static void KeywordSatisfaction()
+{
+    {
+        // Target-side: "Choose your performing Berserker" -- a Personality carrying the Berserker
+        // keyword (with no mechanical ability of its own) can be chosen and straightened; one without
+        // it cannot, even though nothing else about it differs.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0;
+        var satisfier=Add(s,"training-keyword-satisfier",0,Zone.Home);
+        var berserker=Add(s,"training-berserker",0,Zone.Home,bowed:true);
+        var other=Add(s,"training-crane-samurai",0,Zone.Home,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-straighten",TargetId:other.Id));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-straighten",TargetId:berserker.Id));
+        Check(!e.State.Cards[berserker.Id].Bowed,"The chosen Berserker is straightened");
+    }
+    {
+        // Performer-side: "Choose your performing Berserker at the current battlefield" -- the same
+        // gate, mirrored onto Performer selection instead of Target selection.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var satisfier=Add(s,"training-keyword-satisfier",0,Zone.Battlefield,province:0);
+        var berserker=Add(s,"training-berserker",0,Zone.Battlefield,province:0);
+        var other=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-force-boost",PerformerId:other.Id));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:satisfier.Id,AbilityId:"training-keyword-conditional-force-boost",PerformerId:berserker.Id));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==berserker.Id).Force,4,"Base Force 2 + 2 from the boost");
     }
 }
