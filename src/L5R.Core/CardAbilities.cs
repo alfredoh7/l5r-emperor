@@ -88,6 +88,17 @@ public static class AbilityCatalog
         // Battle-timing by default; a card that grants an Action-segment variant would need its own
         // catalog entry reusing the same UseAbility case, not a change to this one.
         ["tactical-advantage"] = new("Battle", "Tactical Advantage: discard a card · performing Tactician +Force = its Focus Value", "hand", PlayerAbility: true, Performer: "own-tactician-at-battle"),
+        // Every player always has this ability (core rules): "any number of times per turn" (see the
+        // ValidateAbility exemption below), same shape as Tactical Advantage. Only a Shugenja can
+        // ever hold a Spell attachment -- Follower Shugenja are excluded (own-unbowed-shugenja-
+        // opposed-at-battle checks Type==Personality). The immediate optional follow-up action is a
+        // separate PendingChoice ("spellFollowUp"; see Apply/QueryActions), not part of this
+        // definition -- it opens after UseAbility's own case below, restricted to the just-attached
+        // Spell's own Battle abilities, closing after exactly one use or a decline.
+        ["equip-battle"] = new("Battle", "Equip (Battle): Attach a Spell to your opposed unbowed Shugenja, paying all costs", "spell-in-hand", PlayerAbility: true, Performer: "own-unbowed-shugenja-opposed-at-battle"),
+        // Training-only: a Spell's own Battle ability, exercised only through the "equip-battle"
+        // follow-up window above -- proves a just-attached Spell can immediately act.
+        ["training-spell-force-boost"] = new("Battle", "Target your Personality at the current battlefield: +2 Force", "own-personality"),
         // Import wave (issue #111): Cavalry/Conqueror/Tactician-adjacent cards needing only small,
         // already-precedented extensions of existing target categories and primitives.
         ["reiyu-force-penalty"] = new("Battle", "Target enemy Force/Follower · Force penalty = Reiyu's Force", "enemy-force"),
@@ -266,10 +277,10 @@ public sealed partial class MatchEngine
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        // "Any number of times per turn" (Tactical Advantage): exempt from the once-per-turn dedupe
-        // entirely -- its own cost (discarding a card) is the only real limit on repeated use.
+        // "Any number of times per turn" (Tactical Advantage, Equip (Battle)): exempt from the
+        // once-per-turn dedupe entirely -- each one's own cost/requirements are the only real limit.
         var usageKey = ability.UsageKey ?? id;
-        Require(id == "tactical-advantage" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        Require(id is "tactical-advantage" or "equip-battle" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -297,6 +308,10 @@ public sealed partial class MatchEngine
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
+                // Equip (Battle): only a Shugenja Personality may ever hold a Spell -- a Follower with
+                // the Shugenja trait is excluded by the Type check, matching the printed restriction.
+                "own-unbowed-shugenja-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
+                    Keyword(performer, "Shugenja") && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
@@ -355,6 +370,7 @@ public sealed partial class MatchEngine
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
                 if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
+                else if (ability.Target == "spell-in-hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell, "Choose a Spell from your hand.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -373,8 +389,8 @@ public sealed partial class MatchEngine
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
                         "enemy-attacking" => personality && !own && target.OwnerId == _state.ActivePlayerId,
-                        "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item,
-                        "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item,
+                        "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                        "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         "lobby" => personality && own && !target.Bowed && Definition(target).PersonalHonor >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
@@ -390,7 +406,10 @@ public sealed partial class MatchEngine
                 }
             }
         }
-        var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost : 0;
+        // Equip (Battle) has no source card of its own -- its cost is the targeted Spell's, paid on
+        // attachment, not a Strategy's own GoldCost.
+        var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
+            : ability.Target == "spell-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost : 0;
         ValidatePayment(player.Id, cost, command.SourceIds);
     }
 
@@ -484,7 +503,29 @@ public sealed partial class MatchEngine
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
                 DiscardFate(player, target!);
                 break;
+            case "equip-battle":
+            {
+                var performer = Card(command.PerformerId!);
+                var spell = target!;
+                Pay(player.Id, spell, Definition(spell).GoldCost, command.SourceIds);
+                player.Hand.Remove(spell.Id);
+                spell.Zone = Zone.Attached; spell.AttachedTo = performer.Id; spell.FaceUp = true; spell.ProvinceIndex = performer.ProvinceIndex;
+                Emit("equipped", $"{Definition(spell).Name} attached to {Definition(performer).Name}.", player.Id, spell.Id);
+                // "You may take an additional action to use a battle ability on that spell" -- a
+                // single, bounded, same-player decision (act once, or decline), not a back-and-forth
+                // reaction window. Skipping the trailing NextAction below keeps priority with the
+                // same player; Apply()'s "spellFollowUp" branch closes the window after exactly one
+                // useAbility or decline. Nothing to offer if the Spell has no Battle ability at all.
+                if ((Definition(spell).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var spellAbility) && spellAbility.Timing == "Battle"))
+                {
+                    _state.PendingChoice = new("spellFollowUp", player.Id, spell.Id, "You may immediately use a Battle ability on the attached Spell, or decline.");
+                    Emit("reactionWindow", "Spell follow-up window opened.", player.Id, spell.Id);
+                    return;
+                }
+                break;
+            }
             case "reiyu-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(source)); break;
+            case "training-spell-force-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "horibe-bow": target!.Bowed = true; break;
             case "horibe-straighten": Straighten(target!); break;
             case "atsumichi-bow": target!.Bowed = true; break;
@@ -600,12 +641,16 @@ public sealed partial class MatchEngine
     private static int TokenCount(CardInstance card, string type) => card.Tokens.Count(t => t.Type == type);
     private static bool HasToken(CardInstance card, string type) => card.Tokens.Any(t => t.Type == type);
 
-    private IEnumerable<ActionOption> AbilityActions(int playerId)
+    // onlyCardId restricts to exactly one card's own abilities -- used only for the spellFollowUp
+    // window (Equip (Battle)'s immediate optional follow-up), which is not a normal Phase.Battle
+    // offer and must not include every other card's abilities or the standing player abilities.
+    private IEnumerable<ActionOption> AbilityActions(int playerId, string? onlyCardId = null)
     {
         var player = Player(playerId);
         var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand))
             .SelectMany(c => (Definition(c).Abilities ?? []).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
-        if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
+        if (onlyCardId is not null) sources = sources.Where(s => s.Card?.Id == onlyCardId).ToList();
+        else if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
         var inPlay = _state.Cards.Values.Where(InPlay).Select(c => c.Id).ToArray();
         foreach (var (source, id) in sources)
@@ -622,8 +667,15 @@ public sealed partial class MatchEngine
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
+            // Unlike every other Performer-based ability (still offered, disabled, with no eligible
+            // performer -- see the generic fallback below), Equip (Battle) is not offered at all
+            // without an eligible Shugenja or a Spell in hand: it is a standing player ability with
+            // no source card of its own to anchor a disabled entry to.
+            if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell))) continue;
             if (performers.Length == 0) performers = [null];
             foreach (var performer in performers)
             {
@@ -632,13 +684,19 @@ public sealed partial class MatchEngine
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(), "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
+                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
+                    "spell-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell).Cast<string?>().ToArray(),
+                    "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {
-                    var command = prototype with { TargetId = target };
+                    // Equip (Battle)'s cost is the targeted Spell's own GoldCost, not a fixed
+                    // per-performer cost -- each candidate needs its own payment recomputed.
+                    var command = ability.Target == "spell-in-hand" && target is not null
+                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
+                        : prototype with { TargetId = target };
                     try { ValidateAbility(command); legal.Add(command); }
                     catch (RuleViolation e) { error ??= e.Message; }
                 }

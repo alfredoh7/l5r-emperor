@@ -164,6 +164,29 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
                 return;
             }
+            if (_state.PendingChoice.Type=="spellFollowUp")
+            {
+                // A single bounded decision (act once, or decline), not a back-and-forth window --
+                // closes immediately either way, unlike proclaim/entryReaction/attackReaction above,
+                // which stay open until both sides pass. Restricted to the just-attached Spell's own
+                // Battle abilities; nothing else may be used while this is pending.
+                Require(command.PlayerId==_state.PendingChoice.PlayerId,"Only the equipping player may act in this window.");
+                Require(command.Type is "useAbility" or "declineReaction","Resolve the Spell follow-up action first.");
+                var spellId=_state.PendingChoice.CardId; var actingPlayerId=_state.PendingChoice.PlayerId;
+                if(command.Type=="useAbility")
+                {
+                    Require(command.CardId==spellId,"You may only use a Battle ability on the Spell you just attached.");
+                    _state.PendingChoice=null;
+                    UseAbility(command); // its own NextAction(player.Id) call hands priority onward
+                }
+                else
+                {
+                    _state.PendingChoice=null;
+                    Emit("declinedSpellFollowUp","Declined the Spell's immediate Battle ability.",actingPlayerId,spellId);
+                    NextAction(actingPlayerId);
+                }
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;
@@ -310,6 +333,7 @@ public sealed partial class MatchEngine
     }
     private void PassReaction()
     {
+        Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
         _state.ConsecutivePasses++;
         if(_state.ConsecutivePasses==2)
         {
@@ -323,6 +347,7 @@ public sealed partial class MatchEngine
 
     private void Pass()
     {
+        Emit("passed", $"{Player(_state.PriorityPlayerId).Name} passed.", _state.PriorityPlayerId);
         switch(_state.Phase)
         {
             case Phase.Action:

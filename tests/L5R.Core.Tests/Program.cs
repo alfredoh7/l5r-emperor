@@ -1,8 +1,11 @@
 using System.Text.Json;
 using L5R.Core;
+using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
+    ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("A bowed Personality suppresses two Native Guides in the view and actual resolution", BowedPersonalityResolution),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
     ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
@@ -88,7 +91,8 @@ var tests = new (string Name, Action Run)[]
     ("Shinjo Horibe may bow or straighten any Personality, but only while opposed", ShinjoHoribeBowOrStraighten),
     ("Doji Atsumichi may bow or straighten a Personality with lower Personal Honor than himself", DojiAtsumichiBowOrStraighten),
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
-    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead)
+    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
+    ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja)
 };
 var failed=0;
 foreach(var test in tests)
@@ -130,6 +134,28 @@ static MatchEngine Battle(int attackForce=5,int defenseForce=2,int provinceStren
     return MatchEngine.FromTestState(s);
 }
 static void Resolve(MatchEngine e) { Accept(e,Cmd(e,"pass")); Accept(e,Cmd(e,"pass")); }
+
+static void PublicPassEvents()
+{
+    var e=Battle();
+    var before=e.State.Events.Count;
+    Reject(e,new("pass",0,e.Version));
+    Equal(e.State.Events.Count,before);
+    Accept(e,Cmd(e,"pass"));
+    var first=e.GetView(0).Events.Last(); Equal(first.Type,"passed"); Equal(first.PlayerId,1);
+    Accept(e,Cmd(e,"pass"));
+    var events=e.GetView(1).Events.Skip(before).ToArray();
+    Equal(events.Count(x=>x.Type=="passed"),2);
+    Check(events.Single(x=>x.Type=="passed" && x.PlayerId==0).Sequence < events.Single(x=>x.Type=="battleResolved").Sequence);
+    var reaction=MatchEngine.CreateEconomyScenario();
+    var id=ProvinceCard(reaction); var quote=reaction.QuotePurchase(0,id);
+    Accept(reaction,Cmd(reaction,"purchase",id:id,sources:quote.Payments[0].SourceIds));
+    Check(reaction.State.PendingChoice is not null);
+    var actor=reaction.State.PriorityPlayerId;
+    Accept(reaction,Cmd(reaction,"declineReaction"));
+    var pass=reaction.GetView(1).Events.Last(x=>x.Type=="reactionPassed"); Equal(pass.PlayerId,actor);
+    Check(pass.CardId is null,"Passing must not reveal a hidden card.");
+}
 
 static void Setup()
 {
@@ -1480,5 +1506,124 @@ static void BowedPersonalityResolution()
         Equal(ready.Force,3); Equal(ready.Chi,3); Equal(ready.UnitForce,13);
         if(owner==0 && Environment.GetEnvironmentVariable("L5R_UNIT_VIEW_FIXTURE") is { Length: >0 } output)
             File.WriteAllText(output,Json(new[]{bowedCards,MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army}));
+    }
+}
+
+static void BattleJournalProjection()
+{
+    var state=MatchEngine.CreateEconomyScenario().State;
+    state.Phase=Phase.Battle; state.CurrentBattleProvince=0; state.UnresolvedBattlefields=[0]; state.PriorityPlayerId=1;
+    state.Cards.Add("public-attacker",new CardInstance{Id="public-attacker",DefinitionId="training-crane-veteran",OwnerId=0,Zone=Zone.Battlefield,ProvinceIndex=0,FaceUp=true});
+    state.Cards.Add("public-defender",new CardInstance{Id="public-defender",DefinitionId="training-lion-veteran",OwnerId=1,Zone=Zone.Battlefield,ProvinceIndex=0,FaceUp=true,Modifiers=[new("fixture","fixture","Force",-5)]});
+    var engine=MatchEngine.FromTestState(state); var journal=new BattleJournal(); var before=engine.GetView(0);
+    journal.Observe(before,null); var revision=journal.Revision;
+    journal.Observe(before,before); Check(journal.Revision==revision,"Rerender reinserted events.");
+    Check(engine.Execute(new("pass",1,engine.Version)).Accepted,"First pass rejected.");
+    var intermediate=engine.GetView(0); journal.Observe(intermediate,before);
+    Check(engine.Execute(new("pass",0,engine.Version)).Accepted,"Second pass rejected.");
+    var after=engine.GetView(0); journal.Observe(after,intermediate);
+    Check(journal.Exchanges.Count(e=>e.Events[0].Type=="passed")==2,"Lost either player's pass.");
+    var resolution=journal.Exchanges.Single(e=>e.Events[0].Type=="battleResolved");
+    Check(resolution.Events.Any(e=>e.Type=="unitDestroyed"),"Destruction separated from its resolution cause.");
+    Check(journal.Aftermath.Any(r=>r.Destination=="Dead") && journal.Aftermath.Any(r=>r.Destination=="Home · bowed"),"Aftermath lost actual destinations.");
+    var count=journal.Exchanges.Count; journal.Observe(after,after); Check(count==journal.Exchanges.Count,"Duplicate outcome on rerender.");
+    var restored=new BattleJournal(); restored.Observe(after,null);
+    Check(restored.Aftermath.Count==0,"Reconnect invented historical movement destinations.");
+    Check(restored.Exchanges.SelectMany(x=>x.Events).All(e=>after.Events.Contains(e)),"Journal invented a public event.");
+    restored.Reset(); Check(restored.Exchanges.Count==0 && restored.LastSequence==-1,"New match retained previous history.");
+}
+static void SpellsAndShugenja()
+{
+    {
+        // Not offered at all (not merely disabled) without a Spell in hand, even with an eligible Shugenja.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.QueryActions(0).Any(a=>a.Command?.AbilityId=="equip-battle"),"No Spell in hand: Equip (Battle) should not be offered");
+    }
+    {
+        // Not offered without an opposed unbowed Shugenja, even with a Spell in hand.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.QueryActions(0).Any(a=>a.Command?.AbilityId=="equip-battle"),"No opposed unbowed Shugenja: Equip (Battle) should not be offered");
+    }
+    {
+        // A successful equip attaches the Spell (paying its cost) and opens the immediate follow-up window,
+        // keeping priority with the equipping player throughout.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Any(a=>a.Command?.AbilityId=="equip-battle"),"Eligible Shugenja and Spell: Equip (Battle) should be offered");
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
+        Equal(e.State.Cards[spell.Id].Zone,Zone.Attached); Equal(e.State.Cards[spell.Id].AttachedTo,shugenja.Id);
+        Equal(e.State.Cards[spell.Id].ProvinceIndex,0);
+        Check(!e.State.Players[0].Hand.Contains(spell.Id),"Spell removed from hand");
+        Equal(e.State.PendingChoice?.Type,"spellFollowUp");
+        Equal(e.State.PriorityPlayerId,0,"Priority stays with the equipping player during the follow-up window");
+    }
+    {
+        // Using the Spell's own Battle ability during the follow-up window succeeds, closes the window,
+        // and hands priority onward once resolved.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,AbilityId:"training-spell-force-boost",TargetId:shugenja.Id));
+        Check(e.State.PendingChoice is null,"Window closes after the follow-up ability resolves");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shugenja.Id).Force,3,"+2 Force applied on top of base Force 1");
+        Equal(e.State.PriorityPlayerId,1,"Priority hands onward once the window closes");
+    }
+    {
+        // Declining the follow-up also closes the window and hands priority onward.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.PendingChoice is null); Equal(e.State.PriorityPlayerId,1);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shugenja.Id).Force,1,"Declined: no Force bonus applied");
+    }
+    {
+        // Only the just-attached Spell's own ability may be used in the follow-up window -- a useAbility
+        // naming any other card is rejected outright, regardless of that card's own ability.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var other=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:other.Id,AbilityId:"training-spell-force-boost",TargetId:other.Id));
+    }
+    {
+        // Tireless: any number of times per turn. A second Equip (Battle) succeeds the same turn, right
+        // after the first follow-up closes and the opponent hands priority back with a pass.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var spell1=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var spell2=Add(s,"training-spell-with-ability",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment1=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell1.Id,SourceIds:payment1.SourceIds));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Equal(e.State.PriorityPlayerId,1);
+        Accept(e,new GameCommand("pass",1,e.Version));
+        var payment2=e.PaymentOptions(0,1).First();
+        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell2.Id,SourceIds:payment2.SourceIds));
+        Equal(e.State.Cards[spell2.Id].Zone,Zone.Attached,"Tireless: usable again the same turn");
     }
 }

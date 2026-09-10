@@ -43,6 +43,9 @@ public partial class Main
     {
         _motionView = View;
         if(before is null) return;
+        foreach (var player in View.Players)
+        foreach (var province in player.Provinces.Where(p => p.Destroyed && !before.View.Players.Single(v => v.Id == player.Id).Provinces.Single(v => v.Index == p.Index).Destroyed))
+            _fallTimes[(player.Id, province.Index)] = _battlePresentationStage == 2 ? -1 : _battleVisualTime;
         var old = VisibleCards(before.View).GroupBy(c=>c.Id).ToDictionary(g=>g.Key,g=>g.First());
         var next = VisibleCards(View).GroupBy(c=>c.Id).ToDictionary(g=>g.Key,g=>g.First());
         foreach(var pile in TablePiles)
@@ -62,6 +65,13 @@ public partial class Main
             tile.CreateTween().TweenProperty(tile,"position",destination,.32).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
         }
         var stagger = 0;
+        var unitDelays = new Dictionary<string, double>();
+        double TransferDelay(CardView card)
+        {
+            var root = card.AttachedTo ?? old.GetValueOrDefault(card.Id)?.AttachedTo ?? card.Id;
+            if (!unitDelays.TryGetValue(root, out var delay)) unitDelays[root] = delay = Math.Min(.6, unitDelays.Count * .075);
+            return delay;
+        }
         // A visible province card that disappears without entering another public zone
         // was returned to the Dynasty deck (Border Keep). Its known face may travel
         // back, but the deck never supplies an identity or an ordering to this layer.
@@ -78,10 +88,18 @@ public partial class Main
         {
             old.TryGetValue(card.Id,out var previous);
             var moved = previous is not null && (previous.Zone != card.Zone || previous.ProvinceIndex != card.ProvinceIndex || previous.AttachedTo != card.AttachedTo);
+            // An attaching card never gets the flight treatment below: CardFlight always travels
+            // through the board's top-level overlay layer, which would draw it over its
+            // Personality's face for the flight's whole duration. It already has a live,
+            // correctly stacked (and z-ordered beneath its Personality) resting tile from this
+            // same render pass (UnitStack), so it only ever needs an in-plane reflow -- or, lacking
+            // a prior table position (e.g. straight from hand), it simply appears there already
+            // settled, never briefly overlaying.
+            var attaching = card.AttachedTo is not null;
             var draw = previous is null && card.Zone is Zone.Hand or Zone.Province;
             var publicDiscard = previous is null && card.Zone==Zone.FateDiscard && card.OwnerId!=View.ViewerId;
             var restingTile = _tiles.FirstOrDefault(t => t.Card.Id == card.Id && _world.IsAncestorOf(t));
-            if (!moved && !draw && previous is not null && restingTile is not null &&
+            if ((!moved || attaching) && !draw && previous is not null && restingTile is not null &&
                 before.TableOrigins.TryGetValue(card.Id, out var oldOrigin))
             {
                 // Resting control origins exclude hover growth and bow geometry.
@@ -91,6 +109,7 @@ public partial class Main
                 if (start.DistanceTo(restingTile.Position) > .5f)
                     restingTile.AddChild(new TableCardReflow { Card = restingTile, From = start, To = restingTile.Position, ReducedMotion = () => _reducedMotion });
             }
+            if (attaching) continue;
             if(!moved && !draw && !publicDiscard) continue;
             Vector2[]? from = before.Cards.GetValueOrDefault(card.Id);
             if(draw && card.Zone==Zone.Province)
@@ -108,14 +127,17 @@ public partial class Main
             if(from is null) continue;
             var tile = _tiles.FirstOrDefault(t=>t.Card.Id==card.Id);
             var pile = TablePiles.FirstOrDefault(p=>p.OwnerId==card.OwnerId && p.PileZone==card.Zone);
-            if(tile is null && pile is null) continue;
+            var fallen = card.Zone == Zone.Dead;
+            if(tile is null && pile is null && !fallen) continue;
             var texture = card.Definition is {} def ? CardTile.Artwork(def) : null;
             var back = GD.Load<Texture2D>(card.Zone==Zone.Hand || fromZone==Zone.FateDeck ? "res://Art/original-fate-back.png" : "res://Art/original-dynasty-back.png");
             texture ??= back;
             if(tile is not null) tile.SelfModulate = new Color(1,1,1,0);
-            Func<Vector2[]> destination = tile is not null ? ()=>tile.FaceCornersOnViewport().Select(p=>p/_root.Scale.X).ToArray() : ()=>PileCorners(pile!);
+            Func<Vector2[]> destination = tile is not null ? ()=>tile.FaceCornersOnViewport().Select(p=>p/_root.Scale.X).ToArray()
+                : fallen ? () => { var center = new Vector2(150, card.OwnerId == View.ViewerId ? 997 : 73); return new[] { center + new Vector2(-22, -32), center + new Vector2(22, -32), center + new Vector2(22, 32), center + new Vector2(-22, 32) }; }
+                : ()=>PileCorners(pile!);
             var flight = new CardFlight { From=from, Destination=destination, Face=texture, Back=draw && card.Definition is not null ? back : null,
-                Delay=stagger++*.075, Landed=()=>{if(tile is not null && IsInstanceValid(tile)) tile.SelfModulate=Colors.White;} };
+                Delay=TransferDelay(card), Duration=fallen ? 1.05 : .65, FadeOnArrival=fallen, Landed=()=>{if(tile is not null && IsInstanceValid(tile)) tile.SelfModulate=Colors.White;} };
             _root.AddChild(flight); _flights.Add(flight);
         }
         // Opponent draws are represented using only public counts and the green back.

@@ -53,8 +53,8 @@ public partial class Main : Node
     /// so they can be hand-edited or dropped into another player's local install.</summary>
     private string DecksDirectory => ProjectSettings.GlobalizePath("user://Decks");
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web) { WriteIndented = true };
-    private MatchView View => _session.Snapshot!.View;
-    private ActionOption[] Actions => _session.Snapshot!.Actions;
+    private MatchView View => (_presentationSnapshot ?? _session.Snapshot)!.View;
+    private ActionOption[] Actions => PresentationBusy ? [] : _session.Snapshot!.Actions;
     private PlayerView Self => View.Players.Single(p => p.Id == View.ViewerId);
 
     public override void _Ready()
@@ -71,6 +71,12 @@ public partial class Main : Node
         }
         GetWindow().Mode = _captureMode.Contains("fullscreen", StringComparison.Ordinal) ? Window.ModeEnum.Fullscreen : Window.ModeEnum.Windowed;
         if (_capturePath is not null) GetWindow().GrabFocus();
+        if (_captureMode == "battle-reference" && _capturePath is not null)
+        { SetProcessInput(false); AddChild(new BattleArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode == "battle-escalation-reference" && _capturePath is not null)
+        { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode == "threshold-reference" && _capturePath is not null)
+        { SetProcessInput(false); SetProcessUnhandledInput(false); SetProcessUnhandledKeyInput(false); AddChild(new ThresholdArtReview(_capturePath)); SetProcess(false); return; }
         LoadSeat();
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
@@ -87,13 +93,15 @@ public partial class Main : Node
         while (_uiQueue.TryDequeue(out var update)) update();
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MenuVisible) return;
+        ProcessBattlePresentation(delta);
+        if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
         foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
-        if (_autoOpponent && !_session.Online && _capturePath is null)
+        if (_autoOpponent && !PresentationBusy && !_session.Online && _capturePath is null)
         {
             _opponentClock += delta;
             if (_opponentClock > (_reducedMotion ? .12 : .7))
@@ -219,7 +227,7 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            if (_capturePrepared && (!_captureMode.Contains("courts", StringComparison.Ordinal) || _battleProbeDone) && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -298,6 +306,7 @@ public partial class Main : Node
         _menu.AddChild(new TableIconButton(TableGlyph.Rules, ShowRules, "Rules and reference"));
         _matSections = new InkMatSections { MotionSettled = TableMotionsSettled }; _world.AddChild(_matSections);
         _tableViewport.AddChild(_matSections.CreateIconOverlay(WorldToScreen));
+        _battleDecor = new TableBattleInk { Paint = DrawBattleInk }; _world.AddChild(_battleDecor);
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
@@ -318,6 +327,7 @@ public partial class Main : Node
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildCameraControls();
+        BuildBattleFeedback();
         BuildFullscreenGate();
         GetViewport().SizeChanged += FitPresentation; FitPresentation();
     }
@@ -359,6 +369,10 @@ public partial class Main : Node
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
             return;
         }
+        ObserveBattleJournal();
+        PrepareBattlePresentation();
+        RenderBattleFeedback();
+        FitTableViewport();
         ObserveBattleResolution();
         if (_displayedVersion != View.Version)
         {
@@ -372,7 +386,8 @@ public partial class Main : Node
         _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
         if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
-        RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
+        RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
+        RenderBattleFeedback();
     }
 
     private void RenderTimeline()
@@ -380,11 +395,18 @@ public partial class Main : Node
         _timeline.Present(View);
         _timeline.PassRequested = PassOpportunity;
         _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
+        if (PresentationBusy)
+        {
+            _timeline.PriorityLabel.Text = _battleOutcomeText;
+            _timeline.PriorityLabel.TooltipText = _battleOutcomeText;
+            _timeline.PriorityLabel.Modulate = Palette.Gold;
+        }
     }
 
     private CardTile Tile(CardView card, bool compact, float width, float height)
     {
         var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At Province {card.ProvinceIndex + 1}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
         {
@@ -398,7 +420,7 @@ public partial class Main : Node
 
     private void SelectCard(CardView card)
     {
-        if (_session.Busy) return;
+        if (_session.Busy || PresentationBusy) return;
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
         {
             if (assignment.TargetIds?.Contains(card.Id) == true) { _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
@@ -427,9 +449,15 @@ public partial class Main : Node
 
     private void Highlight()
     {
+        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == _selected?.Id && _selected is not null)
+            .Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault();
+        var rootId = _selected?.AttachedTo ?? _assignmentUnit ?? _selected?.Id;
+        var selectedUnit = rootId is null ? null : FindCard(rootId);
+        var provinceIndex = rootId is not null && _assignments.TryGetValue(rootId, out var draftProvince) ? draftProvince : selectedUnit?.ProvinceIndex;
+        _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         foreach (var tile in _tiles)
         {
-            tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id);
+            tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
             tile.LegalTarget = _chosen?.TargetIds?.Contains(tile.Card.Id) == true;
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
@@ -451,17 +479,18 @@ public partial class Main : Node
 
     private void Choose(ActionOption option)
     {
-        if (!option.Enabled || _session.Busy) return;
+        if (!option.Enabled || _session.Busy || PresentationBusy) return;
         if (option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
             option = option with { Command = command with { TargetId = target } };
         _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
         if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();
-        RenderInspector(); RenderPhaseActions(); Highlight();
+        RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
     }
 
     private async void Submit(GameCommand command)
     {
+        if (PresentationBusy) return;
         if (_session.Online && (_session.Snapshot?.PlayersConnected?.Any(p => !p) ?? false))
         {
             SetNotice("Both players need to be connected before continuing."); return;

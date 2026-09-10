@@ -92,6 +92,13 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"spellFollowUp" } spellFollowUp)
+        {
+            // Only the equipping player has anything to decide here; the opponent just waits (the
+            // top-level playerId!=PriorityPlayerId branch above already covers that).
+            if(spellFollowUp.PlayerId==playerId) result.AddRange(AbilityActions(playerId,spellFollowUp.CardId));
+            Add("declineReaction","Decline the Spell's Battle ability",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});

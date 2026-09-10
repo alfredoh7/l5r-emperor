@@ -25,6 +25,7 @@ public partial class Main
         Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
+        _matSections.Emphasize(null, hover:true);
         MeasureTableLayout();
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
@@ -71,7 +72,7 @@ public partial class Main
     private readonly Dictionary<int, float> _armyHeights = [];
     private readonly Dictionary<int, CardView[][]> _homeRows = [];
     private float PlaneHeight(float side) => side - 4;
-    private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : MatPadding + MatHeader;
+    private float ProvinceRowY(PlayerView player) => player.Id == View.ViewerId ? _selfProvinceY : _enemyProvinceY;
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
@@ -79,16 +80,27 @@ public partial class Main
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
+    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasTokens(c));
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
-        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0);
-    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
-    private int ArmyColumns(int province) => View.Players.Max(p => p.Army.Count(c => c.AttachedTo is null && c.ProvinceIndex == province)) > 2 ? 2 : 1;
+        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0) + TokenAttachmentCount(card, owner) * CardTokenRail.Width;
+    private float TokenBottomPadding(CardView card, PlayerView owner)
+    {
+        var attachments=owner.Home.Concat(owner.Army).Where(c=>c.AttachedTo==card.Id).ToArray();
+        var padding=card.Bowed&&CardTokenRail.HasTokens(card)?CardTokenRail.Width:0f;
+        for(var i=0;i<attachments.Length;i++)
+            if(attachments[i].Bowed&&CardTokenRail.HasTokens(attachments[i]))
+                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasTokens))*CardTokenRail.Width*1.02f);
+        return padding;
+    }
+    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0) + TokenBottomPadding(card,owner);
+    private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        if (card.Bowed) return height;
+        var rail = CardTokenRail.HasTokens(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();
-        return (height - 12) * ratio + 16;
+        return (height - 12) * ratio + 16 + rail;
     }
 
     private void AddHome(PlayerView player) => AddMatCards(player, _homeRows[player.Id], _homeBounds[player.Id], false);
@@ -145,11 +157,11 @@ public partial class Main
         }
         // Expose a usable strip of each attachment. A spread opens the entire card.
         var step = expanded ? side * .80f : 24f;
-        var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max());
+        var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max()) + (expanded ? 0 : TokenAttachmentCount(personality, owner) * CardTokenRail.Width * side / CardHeight);
         var bannerWidth = personality.UnitForce.HasValue ? UnitStandard.ReservedWidth * side / CardHeight : 0;
         var width = (expanded && attachments.Length > 0 ? faceWidth * 2 + Math.Max(0, attachments.Length - 1) * step : faceWidth) + bannerWidth;
         var tileHeight = detail ? side : PlaneHeight(side);
-        var height = tileHeight + (expanded ? 0 : attachments.Length * step);
+        var height = tileHeight + (expanded ? 0 : attachments.Length * step) + TokenBottomPadding(personality,owner)*side/CardHeight;
         var group = new VBoxContainer { CustomMinimumSize = new Vector2(width, 0) };
         group.AddThemeConstantOverride("separation", 0);
         var stack = new Control { CustomMinimumSize = new Vector2(width, height + 4), MouseFilter = Control.MouseFilterEnum.Pass };
@@ -157,12 +169,16 @@ public partial class Main
         for (var i = attachments.Length - 1; i >= 0; i--)
         {
             var child = Tile(attachments[i], true, faceWidth, side);
+            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasTokens)) * CardTokenRail.Width * (side-12)/198f;
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
             Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }
         var front = Tile(personality, true, faceWidth, side);
         if (detail) { front.ProjectToScreen = null; front.CustomMinimumSize = new Vector2(faceWidth, side); }
         Place(stack, front, 0, expanded ? 0 : attachments.Length * step, faceWidth, tileHeight);
+        var railPeers=stack.GetChildren().OfType<CardTile>().ToArray();
+        foreach(var tile in railPeers)
+            tile.TokenRailCompanions=railPeers;
         if (personality.UnitForce.HasValue)
         {
             var standard = new UnitStandard
@@ -183,7 +199,7 @@ public partial class Main
         {
             var expand = new Button { Text = $"{(expanded ? "−" : "+")} {attachments.Length}", Flat = true, CustomMinimumSize = new Vector2(32, 19), TooltipText = $"{(expanded ? "Fold" : "Spread")} {attachments.Length} attachment(s) belonging to {ShortName(personality)}. Each card keeps its own bowed state." };
             CompactButton(expand); expand.AddThemeFontSizeOverride("font_size", 12);
-            expand.Pressed += () => { var open = !_expandedUnits.Contains(personality.Id); _expandedUnits.Clear(); if (open) _expandedUnits.Add(personality.Id); RenderBoard(); };
+            expand.Pressed += () => { if (PresentationBusy) return; var open = !_expandedUnits.Contains(personality.Id); _expandedUnits.Clear(); if (open) _expandedUnits.Add(personality.Id); RenderBoard(); };
             footer.AddChild(expand);
         }
         return group;
@@ -193,7 +209,14 @@ public partial class Main
     {
         foreach (var province in owner.Provinces)
         {
-            if (province.Destroyed) continue;
+            if (province.Destroyed)
+            {
+                var marker = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Pass,
+                    TooltipText = $"{owner.Clan} · Province {province.Index + 1} has fallen. This location is no longer available for assignments." },
+                    SlotX(owner, 2 + province.Index), ProvinceRowY(owner) + PlaneHeight(CardHeight) + MatPadding, CardHeight, 64);
+                marker.SetMeta("fallen_marker", true);
+                continue;
+            }
             // Province positions remain stable after destruction: an absent province
             // must never renumber or shift another battlefield's physical destination.
             var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(owner, 2 + province.Index), ProvinceRowY(owner), CardHeight, PlaneHeight(CardHeight));
@@ -201,9 +224,12 @@ public partial class Main
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
             Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
-            if (province.Card is { } card) Place(area, Tile(card, true, CardHeight, CardHeight), 0, 0, CardHeight, PlaneHeight(CardHeight));
-            _statTokenLayer!.AddChild(new ProvinceMarker { ProvinceAnchor=area,Projection=_tableSurface.ProjectCanvas,ProvinceIndex=province.Index,
-                Allowed=()=>_expandedUnits.Count==0 });
+            if (province.Card is { } card)
+            {
+                var tile = Tile(card, true, CardHeight, CardHeight);
+                Place(area, tile, 0, 0, CardHeight, PlaneHeight(CardHeight));
+            }
+
         }
     }
 
@@ -211,44 +237,31 @@ public partial class Main
     {
         if (!BattleActive) return;
         var defender = View.Players.Single(p => p.Id != View.ActivePlayerId);
-        var enemy = View.Players.Single(p => p.Id != View.ViewerId);
-        foreach (var province in defender.Provinces)
+        foreach (var (index, bounds) in _battleCourts)
         {
-            if (province.Destroyed) continue;
-            var laneWidth = _laneWidths[province.Index];
-            var lane = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(defender, 2 + province.Index) - (laneWidth - CardHeight) / 2, _battleY, laneWidth, _battleHeight);
-            lane.SetMeta("battle_province", province.Index);
-
-            var target = new Button { Text = "", Flat = true, TooltipText = $"Province {province.Index + 1} battlefield" };
-            CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, province.Index);
-            Place(lane, target, 0, 0, laneWidth - 8, MatHeader); _laneSummaries[province.Index] = target;
-            foreach (var player in new[] { enemy, Self })
+            var court = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, bounds.Position.X, bounds.Position.Y, bounds.Size.X, bounds.Size.Y);
+            court.SetMeta("battle_province", index);
+            var target = new Button { Text = "", Flat = true, TooltipText = $"Province {index + 1} battlefield" };
+            CompactButton(target); target.Pressed += () => SelectProvince(defender.Id, index);
+            Place(court, target, 0, 0, bounds.Size.X, MatHeader); _laneSummaries[index] = target;
+            foreach (var player in View.Players)
+            foreach (var unit in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == index))
             {
-                var y = MatHeader + (player.Id == enemy.Id ? 0 : _armyHeights[enemy.Id] + RowGap);
-                foreach (var row in player.Army.Where(c => c.AttachedTo is null && c.ProvinceIndex == province.Index).Chunk(ArmyColumns(province.Index)))
-                {
-                    var rowHeight = row.Max(c => StackHeight(c, player));
-                    var x = MatPadding;
-                    foreach (var unit in row)
-                    {
-                        var width = UnitWidth(unit, player);
-                        Place(lane, UnitStack(unit, player, CardHeight), x, y, width, StackHeight(unit, player));
-                        x += width + CardGap;
-                    }
-                    y += rowHeight + RowGap;
-                }
+                var position = _battlePlacements[unit.Id] - bounds.Position;
+                Place(court, UnitStack(unit, player, CardHeight), position.X, position.Y, UnitWidth(unit, player), StackHeight(unit, player));
             }
         }
     }
 
     private void SelectProvince(int owner, int province)
     {
+        if (PresentationBusy) return;
         if (_chosen is { Type: "attack" or "assignDefense" } action)
         {
             if (owner != 1 - View.ActivePlayerId || action.Provinces?.Contains(province) != true || _assignmentUnit is null) return;
             _assignments[_assignmentUnit] = province;
             SetNotice($"{ShortName(FindCard(_assignmentUnit)!)} → Province {province + 1}. Confirm assignments when ready.");
-            RenderInspector(); Highlight(); return;
+            RenderBoard(); RenderInspector(); Highlight(); return;
         }
         if (_chosen is not null) return;
         var battle = Actions.FirstOrDefault(a => a.Enabled && a.Type == "selectBattle" && a.Command?.Province == province);
@@ -264,7 +277,7 @@ public partial class Main
         {
             var tile = _tiles.FirstOrDefault(t => t.Card.Id == id);
             if (tile is not null && _provinceButtons.TryGetValue((1 - View.ActivePlayerId, province), out var target) && TileVisible(tile))
-                yield return new(ScreenCenter(tile), ScreenCenter(target), Palette.Crane, true, clip);
+                yield return new(ScreenCenter(tile), WorldToScreen(_battlePlacements.GetValueOrDefault(id, ScreenToWorld(ScreenCenter(target))) + new Vector2(70, 100)), Palette.Gold, true, clip);
         }
         // Cavalry Maneuvers adds units on top of already-committed Infantry attackers/defenders;
         // without a persistent reminder of who is already assigned where, the new declaration has

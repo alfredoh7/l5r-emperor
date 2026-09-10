@@ -1,0 +1,23 @@
+[
+  {
+    "id": "daisho",
+    "reference": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-concepts-2026-09-09/02b-daisho-seal.png",
+    "prompt": "Create a production GAME SPRITE derived faithfully from the reference's approved Daisho seal. One centered perfectly circular low-relief blackened-bronze medallion with recessed worn pale-gold long katana and shorter wakizashi crossed, gently curved single-edged Japanese blades, round tsuba, wrapped grips. Match reference engraving, patina, scratched charcoal metal, understated thin brass rim EXACTLY. Orthographic straight-on front view, perfectly ROUND not elliptical, no perspective, no floor, no scenery, no text, no inset. Transparent background outside actual medallion including no cast shadow outside. Medallion fills 85% square 1024x1024. Keep fine details legible at 50px UI display. This is asset derivation, not a new aesthetic.",
+    "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-e325d8fe-ec9e-48ff-8ce5-04f851e05b45.png",
+    "used": true
+  },
+  {
+    "id": "crimson-court",
+    "reference": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-concepts-2026-09-09/03a-crimson-breathing-ink.png",
+    "prompt": "Derive a production raster frame sprite from this EXACT approved crimson breathing ink court. Pure orthographic top-down, ONE empty broad rectangular court with ornate small brass/ink corner curls, thin red ink breathing halo, short narrow flared connector at bottom center ending in two separated flared lips; NO province bay (separate game component). NO medallion on top (separate sprite). Absolutely NO cards, words, numbers, inset panels, mat weave, scenery or background. TRANSPARENT center and transparent exterior. Match original gold runs/red outline/painterly gore-free blood drops and feathered soft crimson aura. Blood ONLY around outside corners, not interior; increase blood coverage about25percent over reference, preserving subtle original scale, no wounds/body gore. Keep all four corners and red bloom fully inside canvas with100px transparent margin. Whole asset rectangle 1000x650 approx within1536x1024canvas, sides perfectly horizontal/vertical, all ornaments same scale. The narrow bottom connector has rounded shoulders and flared lips just as reference; center passage remains transparent and open. Intended9slice sprite: straight runs stretch, corners remain fixed. No electric filaments/flames/laser effect.",
+    "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-32fa3c36-8835-45f4-b5d2-7cd80039eef7.png",
+    "used": false
+  },
+  {
+    "id": "war-journal",
+    "reference": "/Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/battle-concepts-2026-09-09/06b-battle-exchanges.png",
+    "prompt": "Derive the approved right-side black lacquer journal FRAME as a production game sprite, modified per user to look more WARLIKE and battle-worn. One isolated tall rectangular panel, FRONT ON ORTHOGRAPHIC, transparent outside, opaque subtly mottled midnight-charcoal lacquer inside. The thin dark-brass filigree rim is nicked, chipped, scraped by sword strikes, ragged at decorative tips, dark oxblood ink stains and tiny dry blood flecks at outer corners. Add small crossed Japanese katana engraving centered in top header, not oversized, frame brackets subtly shaped like sword furniture. No flowers/fans/formal courtly crests. Warlike elegance, aged Japanese metal and lacquer, not fantasy skulls/chains/spikes. Preserve original subdued gold ornament materials and quality, make less formal. Empty dark center70percent for LIVE text; EMPTY header area below small sword mark for live title; no internal rows/dividers/buttons. ABSOLUTELY NO LETTERS/NUMBERS/CARDS/WORDS, no surrounding table. Whole slim portrait panel plus40px transparent margin,1024x1536canvas. Keep left/right vertical edges straight, all framefullyvisible. Will be9sliced in game on LEFT of screen.",
+    "source": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-4d12f3e4-4afe-4926-920b-26f27124e723.png",
+    "used": true
+  }
+]
