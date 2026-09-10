@@ -52,7 +52,9 @@ public static class CardCatalog
             new("training-two-handed-weapon", "Training two-handed weapon", CardType.Item, GoldCost:1, Force:1, Keywords:["Weapon","Two-Handed"], Text:"Synthetic Two-Handed fixture: overrides Kensai/Kama entirely, capping its wielder at one Weapon. Never included in a playable deck."),
             new("training-focus-strategy", "Training focus strategy", CardType.Strategy, Focus:3, Text:"Synthetic Tactical Advantage fixture: a hand card with a nonzero Focus Value to discard. Never included in a playable deck."),
             new("training-cavalry", "Training cavalry", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: carries the Cavalry keyword. Never included in a playable deck."),
-            new("training-cavalry-follower", "Training cavalry follower", CardType.Follower, GoldCost:2, Force:2, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: a Follower carrying the Cavalry keyword. Never included in a playable deck.")
+            new("training-cavalry-follower", "Training cavalry follower", CardType.Follower, GoldCost:2, Force:2, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: a Follower carrying the Cavalry keyword. Never included in a playable deck."),
+            new("training-terrain", "Training terrain", CardType.Strategy, Effect:"play-terrain", Keywords:["Terrain"], Text:"Training fixture. Battle: Play this Strategy as Terrain at the current battlefield; at most one Terrain may be in play per battlefield until the old one is destroyed."),
+            new("training-terrain-destroyer", "Training terrain destroyer", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-destroy-terrain"], Text:"Synthetic Terrain-targeting fixture: destroys the Terrain in play at the current battlefield. Never included in a playable deck.")
         ];
         // Deliberately does NOT concat PublishedContent.TestSnapshot.Cards: that frozen scenario only
         // pins which ids make up the test suite's Lion/Crane decks, not a second copy of their
