@@ -270,6 +270,26 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 4: three cards wired for their own new engine primitives -- Destrier (passive
+    /// Attack-strength defense, Scope Self), Singh Remnants (the same primitive, Scope Unit, Ranged
+    /// only, plus the new "any Personality enters play" Reaction letting a card in hand or a discard
+    /// pile attach itself), and Clay Kshatriya (the Invest keyword mechanism).</summary>
+    public static PublishedSnapshot FollowerWave4 { get; } = LoadFollowerWave4();
+
+    private static PublishedSnapshot LoadFollowerWave4()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave4.json", "follower-wave-4", requireDecks: false);
+        if(snapshot.Cards.Length != 3)
+            throw new InvalidOperationException("Unexpected follower-wave-4 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-4 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-4 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

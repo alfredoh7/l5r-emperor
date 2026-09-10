@@ -75,6 +75,15 @@ public sealed partial class MatchEngine
                         new("useAbility",playerId,_state.Version,CardId:enteringCard.Id,AbilityId:reactionId),
                         used?"This reaction has already been used.":null,enteringCard.Id);
                 }
+                // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
+                // only relevant once a Personality is what entered.
+                if(Definition(enteringCard).Type==CardType.Personality)
+                    foreach(var (card,watchId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone is Zone.Hand or Zone.FateDiscard)
+                        .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
+                        .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="any-personality-enters-play"))
+                        Add("useAbility",AbilityCatalog.All[watchId].Label,
+                            new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:watchId),
+                            cardId:card.Id);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
