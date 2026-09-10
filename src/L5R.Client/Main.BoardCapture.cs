@@ -104,7 +104,7 @@ public partial class Main
             {
                 _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text.StartsWith("Confirm action", StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
-                if (View.Version != version + 1) throw new InvalidOperationException("Targeted action confirmation failed.");
+                if (View.Version != version + 1) throw new InvalidOperationException($"Targeted action confirmation failed: before={version}, after={View.Version}, busy={PresentationBusy}, ability={action.Command?.AbilityId}, notice={_notice.Text}.");
             }
             GD.Print("UI_SMOKE_PASS: direct card target preserves ability/performer and waits for confirmation.");
         }
@@ -332,7 +332,7 @@ public partial class Main
         foreach (var player in View.Players)
             foreach (var province in player.Provinces.Where(p => p.Destroyed))
                 if (_provinceButtons.ContainsKey((player.Id, province.Index))) throw new InvalidOperationException("A destroyed province still occupies a board control.");
-        if (_inspectorPanel.Size.X != 300) throw new InvalidOperationException("Compact inspector width regressed.");
+        if (_inspectorPanel.Size.X != SidebarWidth) throw new InvalidOperationException("Sidebar width differs from the approved layout.");
         GD.Print("UI_SMOKE_PASS: two clan resource plaques, eight physical piles, compact inspector; removed board summaries and destroyed-province controls remain absent.");
     }
 

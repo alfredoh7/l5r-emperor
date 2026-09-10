@@ -16,7 +16,20 @@ public static class Palette
     public static Color Cloth => Direction switch { 1 => new("b9b39f"), 2 => new("253640"), _ => new("34493e") };
     public static Color Background => new("11140f");
     public static Font Body { get; } = GD.Load<FontFile>("res://Art/Fonts/Caudex-Regular.ttf");
-    public static Font Title { get; } = GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf");
+    public static FontFile HeadingFace { get; } = GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf");
+    public static Font Title { get; } = new FontVariation { BaseFont = HeadingFace, SpacingGlyph = -1 };
+
+    private static readonly Dictionary<int, Font> HeadingLabels = [];
+    // The supplied face includes unusually tall line-box padding. Trim that
+    // padding for labels; retain its outlines and kerning at the requested size.
+    public static Font HeadingLabel(int size)
+    {
+        if (!HeadingLabels.TryGetValue(size, out var font))
+            HeadingLabels[size] = font = new FontVariation { BaseFont = HeadingFace, SpacingGlyph = -1,
+                SpacingTop = -(int)Math.Round(size * .55), SpacingBottom = -(int)Math.Round(size * .4) };
+        return font;
+    }
+
 
     public static StyleBoxFlat Box(Color background, Color? border = null, int padding = 12, int radius = 3)
     {
@@ -83,7 +96,7 @@ public static class Palette
         var l = new TooltipLabel { Text = title ? text.ToUpperInvariant() : text, MouseFilter = Control.MouseFilterEnum.Ignore };
         l.AddThemeColorOverride("font_color", color ?? Paper);
         l.AddThemeFontSizeOverride("font_size", title ? (int)(size * 1.25f) : size);
-        l.AddThemeFontOverride("font", title ? Title : Body);
+        l.AddThemeFontOverride("font", title ? HeadingLabel((int)(size * 1.25f)) : Body);
         return l;
     }
 

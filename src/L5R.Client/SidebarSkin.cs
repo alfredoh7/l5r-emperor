@@ -31,6 +31,15 @@ public static class SidebarSkin
         box.AxisStretchVertical = StyleBoxTexture.AxisStretchMode.Stretch;
         return box;
     }
+    public static StyleBoxTexture Inset()
+    {
+        var box = Surface();
+        box.Texture = new AtlasTexture { Atlas = Atlas, Region = new Rect2(360,305,387,160) };
+        foreach (var side in new[] { Side.Left, Side.Top, Side.Right, Side.Bottom }) box.SetTextureMargin(side, 16);
+        box.ContentMarginLeft = box.ContentMarginRight = 14;
+        box.ContentMarginTop = box.ContentMarginBottom = 14;
+        return box;
+    }
     public static Theme Theme()
     {
         var t = Palette.MakeTheme();

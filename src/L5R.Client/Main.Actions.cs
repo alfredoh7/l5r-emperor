@@ -41,21 +41,23 @@ public partial class Main
         }
         if (_selected?.Definition is { } def)
         {
-            AddInspectionCaption(def.Type.ToString().ToUpperInvariant() + " · " + def.Clan.ToUpperInvariant());
-            var name = Palette.Wrapped(def.Name, 24); name.AddThemeFontOverride("font", SidebarSkin.Bold); _inspector.AddChild(name);
+            var panel = new PanelContainer(); panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
+            var details = new VBoxContainer(); details.AddThemeConstantOverride("separation", 12); panel.AddChild(details); _inspector.AddChild(panel);
+            AddInspectionCaption("Card details", details);
+            var name = Palette.Wrapped(def.Name, 24); name.AddThemeFontOverride("font", SidebarSkin.Bold); details.AddChild(name);
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
-                var preview = CardPreview.Face(_selected, def.ScenarioOnly ? 190 : 270);
-                _inspector.AddChild(preview);
+                var preview = CardPreview.Face(_selected, def.ScenarioOnly ? 190 : 360);
+                details.AddChild(preview);
             }
-            if (_selected.Dishonorable) _inspector.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
+            if (_selected.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
             foreach (var grant in _selected.GrantedKeywords ?? [])
-                _inspector.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
-            if (_selected.StraightenBlocked) _inspector.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
-            if (!string.IsNullOrWhiteSpace(def.Text)) _inspector.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
-            if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) _inspector.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
-            if (_selected.AttachedTo is { } parent) _inspector.AddChild(Palette.Wrapped("Attached to " + (FindCard(parent)?.Definition?.Name ?? parent), 13, Palette.Crane));
+                details.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
+            if (_selected.StraightenBlocked) details.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
+            if (!string.IsNullOrWhiteSpace(def.Text)) details.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
+            if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) details.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
+            if (_selected.AttachedTo is { } parent) details.AddChild(Palette.Wrapped("Attached to " + (FindCard(parent)?.Definition?.Name ?? parent), 13, Palette.Crane));
         }
         else if (_selected is not null)
         {

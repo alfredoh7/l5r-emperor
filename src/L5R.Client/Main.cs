@@ -249,7 +249,7 @@ public partial class Main : Node
     private Vector2 DesignSize => new(_layoutWidth, 1080);
     private float _layoutWidth = 1920;
     private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
-    private const float SidebarWidth = 300;
+    private const float SidebarWidth = 400;
     private const float HandCardSide = 284;
     private HBoxContainer _menu = null!;
     private Control _inspectorPanel = null!, _fullscreenGate = null!;
@@ -262,7 +262,7 @@ public partial class Main : Node
         // Root controls use an explicit scale, so rasterize system fonts at the
         // matching density instead of magnifying their 1080p glyph textures.
         ((FontFile)Palette.Body).Oversampling = Math.Max(1, scale);
-        ((FontFile)Palette.Title).Oversampling = Math.Max(1, scale);
+        Palette.HeadingFace.Oversampling = Math.Max(1, scale);
         _layoutWidth = available.X / Math.Max(.1f, scale);
         _root.Size = DesignSize;
         _root.Scale = Vector2.One * scale;
@@ -273,7 +273,7 @@ public partial class Main : Node
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         _status.Visible = false;
-        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - 660, 100);
+        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 360, 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
         _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
         _unitDetail.Size = DesignSize;
