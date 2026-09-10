@@ -15,8 +15,8 @@ public static class Palette
     public static Color Error => new("e9a79b");
     public static Color Cloth => Direction switch { 1 => new("b9b39f"), 2 => new("253640"), _ => new("34493e") };
     public static Color Background => new("11140f");
-    public static Font Body { get; } = GD.Load<FontFile>("res://Art/Fonts/Alegreya.ttf");
-    public static Font Title { get; } = GD.Load<FontFile>("res://Art/Fonts/MusashiBrush.otf");
+    public static Font Body { get; } = GD.Load<FontFile>("res://Art/Fonts/Caudex-Regular.ttf");
+    public static Font Title { get; } = GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf");
 
     public static StyleBoxFlat Box(Color background, Color? border = null, int padding = 12, int radius = 3)
     {
@@ -45,6 +45,9 @@ public static class Palette
     {
         var t = new Theme { DefaultFont = Body, DefaultFontSize = 16 };
         t.SetColor("font_color", "Label", Paper);
+        t.SetFont("bold_font", "RichTextLabel", GD.Load<FontFile>("res://Art/Fonts/Caudex-Bold.ttf"));
+        t.SetFont("italics_font", "RichTextLabel", GD.Load<FontFile>("res://Art/Fonts/Caudex-Italic.ttf"));
+        t.SetFont("bold_italics_font", "RichTextLabel", GD.Load<FontFile>("res://Art/Fonts/Caudex-BoldItalic.ttf"));
         t.SetColor("default_color", "RichTextLabel", Paper);
         t.SetConstant("separation", "VBoxContainer", 8);
         t.SetConstant("separation", "HBoxContainer", 12);
@@ -77,7 +80,7 @@ public static class Palette
 
     public static Label Text(string text, int size = 16, Color? color = null, bool title = false)
     {
-        var l = new TooltipLabel { Text = text, MouseFilter = Control.MouseFilterEnum.Ignore };
+        var l = new TooltipLabel { Text = title ? text.ToUpperInvariant() : text, MouseFilter = Control.MouseFilterEnum.Ignore };
         l.AddThemeColorOverride("font_color", color ?? Paper);
         l.AddThemeFontSizeOverride("font_size", title ? (int)(size * 1.25f) : size);
         l.AddThemeFontOverride("font", title ? Title : Body);

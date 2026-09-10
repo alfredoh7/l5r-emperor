@@ -98,7 +98,7 @@ public partial class Main : Node
         ProcessTableCamera(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
-        foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
+        foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
         if (_autoOpponent && !PresentationBusy && !_session.Online && _capturePath is null)
@@ -289,6 +289,8 @@ public partial class Main : Node
         return child;
     }
 
+    private VBoxContainer _sidebarHeader = null!;
+
     private void BuildShell()
     {
         var canvas = new CanvasLayer(); AddChild(canvas);
@@ -310,11 +312,12 @@ public partial class Main : Node
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
-        var inspectorPanel = Place(_root, new LacquerPanel(), 1488, 94, SidebarWidth, 960);
+        var inspectorPanel = Place(_root, new PanelContainer { Theme = SidebarSkin.Theme() }, 1488, 94, SidebarWidth, 960);
         _inspectorPanel = inspectorPanel;
-        inspectorPanel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.045f, .043f, .033f, .96f), new Color("766341"), 18));
+        inspectorPanel.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
         var side = new VBoxContainer(); side.AddThemeConstantOverride("separation", 10); inspectorPanel.AddChild(side);
         _seatLabel = Palette.Text("", 13, Palette.Gold); _seatLabel.Visible = false; side.AddChild(_seatLabel);
+        _sidebarHeader = new VBoxContainer(); side.AddChild(_sidebarHeader);
         var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; side.AddChild(scroll);
         _inspector = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _inspector.AddThemeConstantOverride("separation", 10); scroll.AddChild(_inspector);
         side.AddChild(new HSeparator());

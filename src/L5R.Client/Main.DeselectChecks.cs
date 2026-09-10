@@ -61,7 +61,7 @@ public partial class Main
             GetViewport().PushInput(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }, true);
             await SettleInspection();
             if (_selected is not null || View.Version != version) throw new Exception("Close did not deselect without issuing a game command.");
-            var tracker = _inspector.GetChildren().OfType<BattleTracker>().Single();
+            var tracker = _sidebarHeader.GetChildren().OfType<BattleTracker>().Single();
             if (tracker.Compact || tracker.Size.Y < 490 || !_inspectorPanel.GetGlobalRect().Encloses(tracker.GetGlobalRect()))
                 throw new Exception("Full battle tracker was not restored visibly.");
             GetViewport().PushInput(new InputEventMouseMotion { Position = new Vector2(15,140), GlobalPosition = new Vector2(15,140) }, true);
