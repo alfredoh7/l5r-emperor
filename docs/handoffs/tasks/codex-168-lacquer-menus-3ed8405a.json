@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Roll out approved lacquer system across shared in-game dialog, hover and tooltip presentation. Depends on PR165; no rules or command changes.",
-  "validation": "Client compile passed; native menu family captures in progress.",
-  "remaining": "Visual refinement, compact-window/input checks, combined preview and actual-launcher verification.",
+  "summary": "Extend approved lacquer/Caudex design to table menu, guide, dialogs, reference browser, card previews and tooltips; no command or rules changes. Stacked on PR165.",
+  "validation": "Client build: zero warnings/errors. Native 1672x941 visual captures plus five 1280x800 menu checks passed: guide tab navigation, menu return, confirmation cancel, practice/private dismissal; match version unchanged and content clears Close.",
+  "remaining": "Combined-preview launcher verification and final screenshot evidence in progress; review required.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/168",
   "branch": "codex/168-lacquer-menus",
-  "updated": "2026-09-10T17:38:13.706065+00:00"
+  "updated": "2026-09-10T17:44:58.535542+00:00"
 }

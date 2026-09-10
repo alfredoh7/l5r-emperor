@@ -37,7 +37,7 @@ public partial class Main
 
     private void ShowPractice()
     {
-        var (dialog, body) = Dialog("Practice table", 610, 490);
+        var (dialog, body) = Dialog("Practice table", 610, 640);
         body.AddChild(Palette.Text("Choose your match", 29, title: true));
         body.AddChild(Palette.Wrapped("Play the published 40/40 Lion and Crane decks with every card ability automated, or use the training scenarios to learn the flow.", 16, Palette.PaperDim));
         void Start(bool economy, bool published = false, int seat = 0)
@@ -58,7 +58,7 @@ public partial class Main
 
     private void ShowOnline()
     {
-        var (dialog, body) = Dialog("Private match", 590, 500);
+        var (dialog, body) = Dialog("Private match", 650, 740);
         body.AddChild(Palette.Text("Meet across the table", 28, title: true));
         body.AddChild(Palette.Wrapped("Create a room, then give its code to your opponent. Both players must connect to the same server.", 16, Palette.PaperDim));
         body.AddChild(Palette.Text("Server address", 13, Palette.Gold));

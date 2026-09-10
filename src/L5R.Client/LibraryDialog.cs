@@ -31,7 +31,7 @@ public static class LibraryDialog
             GD.PushError($"Library: {error.Message}");
             var dialog = new AcceptDialog
             {
-                Title = "Library unavailable", Theme = Palette.MakeTheme(),
+                Title = "Library unavailable", Theme = SidebarSkin.Theme(),
                 DialogText = "The packaged reference library could not be loaded. Rebuild the content bundle and open the library again.",
                 DialogAutowrap = true, Size = new Vector2I(520, 180)
             };
@@ -488,16 +488,9 @@ public static class LibraryDialog
 
     private static Theme LibraryTheme()
     {
-        var theme = Palette.MakeTheme();
-        theme.SetStylebox("panel", "AcceptDialog", Palette.Box(Palette.Ink, Palette.Gold, 20));
-        theme.SetStylebox("panel", "TabContainer", Palette.Box(Palette.Ink, null, 18));
-        theme.SetStylebox("tab_selected", "TabContainer", Palette.Box(new Color("364b3b"), Palette.Gold, 14));
-        theme.SetStylebox("tab_unselected", "TabContainer", Palette.Box(new Color("22362c"), null, 14));
-        theme.SetColor("font_selected_color", "TabContainer", Palette.Paper);
-        theme.SetColor("font_unselected_color", "TabContainer", Palette.PaperDim);
-        theme.SetStylebox("panel", "ItemList", Palette.Box(new Color("17281f"), new Color("405344"), 10));
-        theme.SetStylebox("selected", "ItemList", Palette.Box(new Color("3b503f"), Palette.Gold, 6));
-        theme.SetStylebox("selected_focus", "ItemList", Palette.Box(new Color("3b503f"), Palette.Gold, 6));
+        var theme = SidebarSkin.Theme();
+        theme.SetStylebox("selected", "ItemList", SidebarSkin.Surface(true));
+        theme.SetStylebox("selected_focus", "ItemList", SidebarSkin.Surface(true));
         theme.SetColor("font_color", "ItemList", Palette.PaperDim);
         theme.SetColor("font_selected_color", "ItemList", Palette.Paper);
         return theme;

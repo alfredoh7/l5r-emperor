@@ -175,13 +175,15 @@ public partial class Main : Node
                 if (_captureMode == "library") LibraryDialog.Show(this);
                 if (_captureMode == "published-rules") ShowRules();
                 if (_captureMode == "published-lacquer-menu") ShowTableMenu();
+                if (_captureMode == "published-lacquer-practice") ShowPractice();
+                if (_captureMode == "published-lacquer-private") ShowOnline();
                 if (_captureMode == "published-lacquer-history") ShowHistory();
                 if (_captureMode == "published-lacquer-pile") ShowPile(View.ViewerId, Zone.Dead);
                 if (_captureMode == "published-lacquer-confirm") Confirm("Leave this table?", "Return to the main menu? Your current practice will end.", () => { });
                 if (_captureMode == "published-lacquer-tooltip")
                     Place(_root, ReadingTooltip.Create(this, "Bowed / unbowed\nA sideways card is bowed. Each attachment keeps its own bowed state."), 600, 260, 460, 180);
-                if (_captureMode == "published-lacquer-hover")
-                    Place(_root, CardPreview.Create(Self.Hand.First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
+                if (_captureMode == "published-lacquer-card")
+                    Place(_root, CardPreview.Create(View.Players.SelectMany(p=>p.Home.Concat(p.Provinces.Where(x=>x.Card is not null).Select(x=>x.Card!))).First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
                 if (_captureMode is "payment" or "purchase")
                 {
                     var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });
@@ -247,6 +249,8 @@ public partial class Main : Node
                 RenderingServer.ForceDraw(false);
                 RenderingServer.ForceSync();
                 var error = GetViewport().GetTexture().GetImage().SavePng(_capturePath);
+                try { ValidateLacquerMenus(); }
+                catch (Exception e) { GD.PushError(e.Message); error = Error.Failed; }
                 GD.Print($"CAPTURE_RESULT: {error} {_capturePath}");
                 GetTree().Quit(error == Error.Ok ? 0 : 1);
                 _capturePath = null;

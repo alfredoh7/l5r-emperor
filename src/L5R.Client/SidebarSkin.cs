@@ -54,6 +54,9 @@ public static class SidebarSkin
         t.SetStylebox("hover", "OptionButton", Surface(true));
         t.SetStylebox("panel", "PopupMenu", Surface());
         foreach (var kind in new[] { "AcceptDialog", "ConfirmationDialog", "PopupPanel" }) t.SetStylebox("panel", kind, Surface());
+        t.SetConstant("buttons_min_height", "AcceptDialog", 60);
+        t.SetConstant("buttons_min_width", "AcceptDialog", 140);
+        t.SetConstant("buttons_separation", "AcceptDialog", 16);
         var border = Palette.Box(new Color("11100e"), new Color("79643f"), 0, 0);
         border.BorderWidthTop = 28; t.SetStylebox("embedded_border", "Window", border);
         t.SetColor("title_color", "Window", Palette.PaperDim); t.SetFont("title_font", "Window", Palette.Body);

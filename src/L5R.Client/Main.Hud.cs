@@ -47,7 +47,7 @@ public partial class Main
     }
     private void ShowTableMenu()
     {
-        var (dialog,body)=Dialog("The table",560,900);
+        var (dialog,body)=Dialog("The table",560,720);
         dialog.GetOkButton().Hide();
         body.AddThemeConstantOverride("separation", 9);
         body.AddChild(Palette.Text("Emperor",32,Palette.Gold,true));
