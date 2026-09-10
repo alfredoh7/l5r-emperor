@@ -83,6 +83,8 @@ public static class AbilityCatalog
         // (here "enemy-force") rather than needing its own -- matches Thunderous Legion/Elite
         // Sentry's exact printed shape ("Target an enemy card without attachments: Destroy it").
         ["training-destroy-no-attachments"] = new("Battle", "Target an enemy card without attachments: Destroy it", "enemy-force", RequireNoAttachments: true),
+        // Province adjacency training fixture (Moto Gunso's shape, simplified to one target).
+        ["training-adjacent-boost"] = new("Battle", "Target a Personality at an adjacent battlefield: +2F", "personality-at-adjacent-battlefield"),
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
@@ -482,7 +484,10 @@ public sealed partial class MatchEngine
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
-                    if (ability.Timing == "Battle") Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                    // "personality-at-adjacent-battlefield" is the one deliberate exception: its whole
+                    // point is a target away from the current battlefield (an adjacent one), unlike
+                    // every other Battle-timing category here.
+                    if (ability.Timing == "Battle" && ability.Target != "personality-at-adjacent-battlefield") Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
@@ -513,6 +518,11 @@ public sealed partial class MatchEngine
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
+                        // Province adjacency (Moto Gunso's shape: "...at the current battlefield and
+                        // at each adjacent battlefield"): the target's own province, not the current
+                        // one, must be adjacent to it. See AdjacentProvinces.
+                        "personality-at-adjacent-battlefield" => personality && target.Zone == Zone.Battlefield &&
+                            AdjacentProvinces(target.OwnerId, _state.CurrentBattleProvince!.Value).Contains(target.ProvinceIndex ?? -1),
                         // Compared against the chosen Performer (a separately-selected card), unlike
                         // "-than-self" categories above which compare against the ability's own source.
                         "enemy-personality-chi-lte-performer" => personality && !own && Definition(target).Chi <= Definition(Card(command.PerformerId!)).Chi,
@@ -565,6 +575,7 @@ public sealed partial class MatchEngine
             case "akodo-regulars-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
             case "heavy-chargers-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", 3); break;
             case "spitting-llama-force": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
+            case "training-adjacent-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "blind-rage": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 5); GainHonor(player.Id, -2, "Blind Rage"); break;
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;

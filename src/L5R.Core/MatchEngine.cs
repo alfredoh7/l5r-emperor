@@ -606,6 +606,22 @@ public sealed partial class MatchEngine
 
     private void NextAction(int playerId) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=1-playerId; }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
+    // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
+    // province is skipped entirely -- its former neighbors become directly adjacent to each other,
+    // compounding across multiple destructions (destroy both middle provinces and the two ends become
+    // adjacent to each other). Equivalent to the "provinces slide together" mental model, and derived
+    // on demand from each ProvinceState's own Destroyed flag rather than tracked as separate routed
+    // state -- no renumbering, no adjacency table to keep in sync as provinces are destroyed/refilled.
+    // Not hardcoded to 4: the loop bound is Provinces.Count, so this also covers a match with more
+    // provinces (a 5th/6th added by a game effect: fate and dynasty decks shift one card-space apart
+    // and a new face-down dynasty card is placed in the new space, numbered 5/6) with no code change --
+    // that's simply a new ProvinceState appended to the list; adjacency for it falls out unchanged.
+    private IEnumerable<int> AdjacentProvinces(int playerId,int index)
+    {
+        var provinces=Player(playerId).Provinces;
+        for(var i=index-1;i>=0;i--) if(!provinces[i].Destroyed) { yield return i; break; }
+        for(var i=index+1;i<provinces.Count;i++) if(!provinces[i].Destroyed) { yield return i; break; }
+    }
     // By default a Personality carries at most one Armor and one Weapon. Kensai (printed or granted --
     // Keyword() already checks both) raises the Weapon cap to two. Kama independently raises it to two
     // without granting Kensai, but the two do not stack: a Kensai wielding a Kama is still capped at
