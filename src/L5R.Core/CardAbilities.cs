@@ -69,6 +69,11 @@ public static class AbilityCatalog
         // shape (e.g. a card reading "After [X] enters play: lose N Honor") ahead of any published
         // card needing it.
         ["training-honor-loss-entry"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
+        // Generalized entry-reaction fixtures (issue #148's Equip-time entry hook): unlike the
+        // Personality-only fixture above (only ever exercised via Purchase), these prove the same
+        // "own-enters-play" trigger now fires from Equip and from a Terrain entering play too.
+        ["training-item-entry-reaction"] = new("Reaction", "After entering play, gain 1 Honor", "none", Trigger: "own-enters-play"),
+        ["training-terrain-entry-reaction"] = new("Reaction", "After entering play, gain 1 Honor", "none", Trigger: "own-enters-play"),
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
@@ -334,7 +339,10 @@ public sealed partial class MatchEngine
             source = Card(command.CardId);
             var def = Definition(source);
             Require(source.OwnerId == player.Id && (def.Abilities ?? []).Contains(id), "This card does not provide that ability to you.");
-            Require(def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) : InPlay(source), "The ability's source is not in the required zone.");
+            // A Strategy source is normally used straight from hand (the usual one-shot pattern), but
+            // a Terrain stays in play afterward (Zone.Battlefield) -- its own abilities, including an
+            // entering-play Reaction, must still be usable from there.
+            Require(def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source), "The ability's source is not in the required zone.");
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
@@ -560,6 +568,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "training-honor-loss-entry": GainHonor(player.Id, -2, "Training entry Honor loss", source); break;
+            case "training-item-entry-reaction": case "training-terrain-entry-reaction": GainHonor(player.Id, 1, "Training entry reaction", source); break;
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
                 CreateToken(source!, "Fire", id, "Force", 1);
                 CreateToken(source!, "Fire", id, "Force", 1);
@@ -607,6 +616,9 @@ public sealed partial class MatchEngine
                 player.Hand.Remove(spell.Id);
                 spell.Zone = Zone.Attached; spell.AttachedTo = performer.Id; spell.FaceUp = true; spell.ProvinceIndex = performer.ProvinceIndex;
                 Emit("equipped", $"{Definition(spell).Name} attached to {Definition(performer).Name}.", player.Id, spell.Id);
+                // A Spell's own "after entering play" Reaction (if any) takes priority over the
+                // Battle-ability follow-up below; no published Spell needs both yet.
+                if (OpenEntryReactionWindow(player.Id, spell, 1 - player.Id)) return;
                 // "You may take an additional action to use a battle ability on that spell" -- a
                 // single, bounded, same-player decision (act once, or decline), not a back-and-forth
                 // reaction window. Skipping the trailing NextAction below keeps priority with the
@@ -638,7 +650,9 @@ public sealed partial class MatchEngine
             // The source is the acting player's own Stronghold, never the losing player's -- "cards
             // you own" in a Honor-loss-immunity passive could never reach it regardless.
             GainHonor(target.OwnerId, -1, "Law of Darkness Dojo", Card(player.StrongholdId));
-        if (source is not null && Definition(source).Type == CardType.Strategy) DiscardFate(player, source);
+        // A Terrain's own ability (e.g. an entering-play Reaction) runs from Zone.Battlefield, where
+        // it stays -- only the normal one-shot, played-from-hand Strategy case discards afterward.
+        if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
         NextAction(player.Id);
     }
 
