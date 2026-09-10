@@ -85,6 +85,11 @@ public static class AbilityCatalog
         ["training-destroy-no-attachments"] = new("Battle", "Target an enemy card without attachments: Destroy it", "enemy-force", RequireNoAttachments: true),
         // Province adjacency training fixture (Moto Gunso's shape, simplified to one target).
         ["training-adjacent-boost"] = new("Battle", "Target a Personality at an adjacent battlefield: +2F", "personality-at-adjacent-battlefield"),
+        // Ashigaru Elite's shape: tireless (see the usage-dedupe exemption below) and stacking --
+        // each use bows a different unbowed Farm and increments a per-battle counter (MatchState.AshigaruBoost)
+        // read by PersonalityForce/FollowerForce for any Ashigaru-keyword card the performer controls
+        // at this battlefield.
+        ["training-ashigaru-boost"] = new("Battle", "Bow an unbowed Farm you control: each Ashigaru Personality/Follower you control at this battlefield gains +1F for the remainder of the battle", "own-unbowed-farm"),
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
@@ -371,10 +376,12 @@ public sealed partial class MatchEngine
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        // "Any number of times per turn" (Tactical Advantage, Equip (Battle)): exempt from the
-        // once-per-turn dedupe entirely -- each one's own cost/requirements are the only real limit.
+        // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
+        // Elite -- explicitly stacks with other uses of the action): exempt from the once-per-turn
+        // dedupe entirely -- each one's own cost/requirements (a different unbowed Farm each time) are
+        // the only real limit.
         var usageKey = ability.UsageKey ?? id;
-        Require(id is "tactical-advantage" or "equip-battle" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
+        Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
@@ -484,16 +491,21 @@ public sealed partial class MatchEngine
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
-                    // "personality-at-adjacent-battlefield" is the one deliberate exception: its whole
-                    // point is a target away from the current battlefield (an adjacent one), unlike
-                    // every other Battle-timing category here.
-                    if (ability.Timing == "Battle" && ability.Target != "personality-at-adjacent-battlefield") Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                    // Two deliberate exceptions to "every Battle-timing target must be at the current
+                    // battlefield": "personality-at-adjacent-battlefield" (Moto Gunso's shape -- the
+                    // whole point is a target away from the current battlefield) and "own-unbowed-farm"
+                    // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home).
+                    if (ability.Timing == "Battle" && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
                         "shinden" => personality && !own && !target.Bowed,
                         "air" => personality && Keyword(target, "Air"),
                         "personality" => personality,
+                        // Ashigaru Elite's cost-target: an unbowed Farm-keyword Holding the performer
+                        // controls. Bowing it (in the execution switch) pays the cost; the effect
+                        // itself is a counter increment, not applied to this target at all.
+                        "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
                         "own-personality" => personality && own,
                         // Generic "Choose your performing/target [Keyword] Personality" -- for a
                         // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
@@ -682,6 +694,9 @@ public sealed partial class MatchEngine
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
             case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
+            // Bowing the target Farm IS the cost; the effect is the counter increment, not applied to
+            // the Farm itself. Consumed by PersonalityForce/FollowerForce (Keyword "Ashigaru" + AtBattle).
+            case "training-ashigaru-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
             case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
