@@ -15,7 +15,9 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
     int ProvinceStrength = 0, int StartingHonor = 0, string Effect = "none", string Text = "",
     bool ScenarioOnly = true, string? ArtworkKey = null, string[]? Keywords = null,
-    string[]? Abilities = null, int Focus = 0);
+    string[]? Abilities = null, int Focus = 0,
+    // Overrides Clan for a Personality aligned with more than one Clan; null means "just Clan".
+    string[]? Clans = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>

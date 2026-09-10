@@ -260,9 +260,13 @@ public sealed partial class MatchEngine
         if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
             return new(cardId,0,clanDiscount,clanAllegiance,false,"Choose your face-up province card.",[]);
         string? error=null;
-        var inClan=def.Type==CardType.Personality && def.Clan==player.Clan;
+        var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
         if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp) error="Choose your face-up province card.";
         else if(def.Type is not (CardType.Personality or CardType.Holding)) error="This card cannot be purchased.";
+        // Loyal (core rules Glossary): recruitable only by a Stronghold whose Clan matches one of the
+        // Personality's own alignments -- a Clan-locked deck never exercises this today, only a custom
+        // deck mixing an off-Clan Loyal Personality into a player's own provinces would.
+        else if(def.Type==CardType.Personality && Keyword(card,"Loyal") && !inClan) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
