@@ -207,6 +207,27 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 1 of ability-bearing Strategy cards: found while searching the reference
+    /// catalogue for cards blocked only by the generic keyword-satisfaction primitive (issue #144).
+    /// Immovable Object is that primitive's own worked example; the other three needed only the
+    /// already-built keyword-gated Performer/Target categories plus one small precedented
+    /// one-off comparison (Chi/Force against the chosen Performer) each.</summary>
+    public static PublishedSnapshot StrategyWave1 { get; } = LoadStrategyWave1();
+
+    private static PublishedSnapshot LoadStrategyWave1()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave1.json", "strategy-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected strategy-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-1 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
