@@ -131,6 +131,10 @@ public sealed partial class MatchEngine
 {
     private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
     private static bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+    // Most Personalities have one printed Clan (the CardDefinition.Clan field); a few carry more than
+    // one alignment (Clans overrides it when present). Loyal restricts recruitment to a Stronghold
+    // whose Clan is among these.
+    private static string[] ClanAlignments(CardInstance card) => Definition(card).Clans ?? [Definition(card).Clan];
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.

@@ -93,7 +93,8 @@ var tests = new (string Name, Action Run)[]
     ("Doji Atsumichi may bow or straighten a Personality with lower Personal Honor than himself", DojiAtsumichiBowOrStraighten),
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
-    ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja)
+    ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
+    ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1680,5 +1681,37 @@ static void SpellsAndShugenja()
         var payment2=e.PaymentOptions(0,1).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell2.Id,SourceIds:payment2.SourceIds));
         Equal(e.State.Cards[spell2.Id].Zone,Zone.Attached,"Tireless: usable again the same turn");
+    }
+}
+static void LoyalKeyword()
+{
+    {
+        // A Loyal Personality recruits normally for a matching Clan.
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-crane";
+        e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is null,"A Loyal Crane Personality recruits normally for a Crane player");
+    }
+    {
+        // A Loyal Personality is not recruitable by a Clan it is not aligned with.
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        s.Players[0].Clan="Lion"; var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-crane";
+        e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is not null,"A Crane-Loyal Personality should not be recruitable by a Lion player");
+        Reject(e,Cmd(e,"purchase",id:cardId,sources:[]));
+    }
+    {
+        // A Personality aligned with more than one Clan (Clans overrides the single Clan field) may be
+        // recruited by either -- Loyal restricts to "a Clan it is aligned with," not only the first.
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        s.Players[0].Clan="Lion"; var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-multi-clan";
+        e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is null,"A Crane/Lion dual-aligned Loyal Personality recruits normally for a Lion player");
+    }
+    {
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-multi-clan";
+        e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is null,"A Crane/Lion dual-aligned Loyal Personality recruits normally for a Crane player");
     }
 }
