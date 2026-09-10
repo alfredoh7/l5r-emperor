@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Addresses the 'no generic without attachments filter' gap (issue #158), per the user's detailed spec. New HasAttachments(card) is a boolean check (any attached Follower/Item/Spell, or a Follower/Weapon/Armor-designated token; an ordinary stat token does not count) -- new AbilityDefinition.RequireNoAttachments layers it onto whichever existing Target category is chosen instead of a new category per combination, matching Thunderous Legion/Elite Sentry's printed shape. Fixed a real pre-existing bug: the Attack primitive's own targeting check only ever looked for an attached Follower, so a Personality with an Item/Spell attached (or a qualifying token) was incorrectly still a legal Attack target -- now uses HasAttachments directly. Shared-file note: all changed files are within L5R.Core (rules engine) and its test suite, plus docs/ROADMAP.md -- a single rules-lane primitive change; no UI/client files touched.",
+  "validation": "New NoAttachmentsFilter test (4 scenarios): an attached Item blocks an Attack target (the bug-fix case), a Follower-type token blocks a target with no card attachment, an ordinary Fire token does not block a target, and the generic RequireNoAttachments flag correctly rejects an attached Personality while accepting a clean one and an enemy Follower directly (an attachment is always a legal 'without attachments' target). Full suite: 98/98 core + 34/34 published + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "The printed 'exception' case where a specific Attack overrides the no-attachments rule (Elephant Caravan/Strategic Strike's Reconnaissance-gated exception) is not built -- no imported card needs it yet, noted in issue #158.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/158",
+  "branch": "mdornbrook/158-no-attachments-filter",
+  "updated": "2026-09-10T13:21:16.763734+00:00"
+}

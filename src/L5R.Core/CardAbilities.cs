@@ -15,7 +15,12 @@ namespace L5R.Core;
 // performing/target [Keyword] Personality" (core rules: a keyword with no mechanical rule of its own
 // still satisfies this kind of condition on another card, in addition to any mechanical ability it
 // does carry). See "own-personality-with-keyword" below.
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string? RequiredKeyword = null);
+// RequireNoAttachments layers "without attachments" (core rules: a boolean, not a count -- see
+// HasAttachments) onto whichever Target category is chosen, instead of a separate category per
+// combination (e.g. "enemy-force" + RequireNoAttachments, rather than a new "enemy-force-no-
+// attachments" string) -- reusable across every existing category a printed "without attachments"
+// card might otherwise need.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string? RequiredKeyword = null, bool RequireNoAttachments = false);
 
 public static class AbilityCatalog
 {
@@ -74,6 +79,10 @@ public static class AbilityCatalog
         // "own-enters-play" trigger now fires from Equip and from a Terrain entering play too.
         ["training-item-entry-reaction"] = new("Reaction", "After entering play, gain 1 Honor", "none", Trigger: "own-enters-play"),
         ["training-terrain-entry-reaction"] = new("Reaction", "After entering play, gain 1 Honor", "none", Trigger: "own-enters-play"),
+        // Generic "without attachments" filter (issue #148): layers onto an existing category
+        // (here "enemy-force") rather than needing its own -- matches Thunderous Legion/Elite
+        // Sentry's exact printed shape ("Target an enemy card without attachments: Destroy it").
+        ["training-destroy-no-attachments"] = new("Battle", "Target an enemy card without attachments: Destroy it", "enemy-force", RequireNoAttachments: true),
         ["meiyu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-tokens"] = new("Reaction", "After entering play, gain three +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["torazu-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 3 Attack", "attack"),
@@ -443,8 +452,12 @@ public sealed partial class MatchEngine
                     var target = Card(command.TargetId);
                     Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
                     var type = Definition(target).Type;
-                    Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
-                        "Attack a Follower or a Personality without Followers.");
+                    // Core rules: a Personality with any attachment (not just a Follower) is immune to
+                    // a Ranged/Melee Attack, unless a specific card prints an exception (e.g. "which
+                    // may target a Personality with attached Followers if you have Reconnaissance") --
+                    // no such exception is wired up yet, since no imported Attack needs one.
+                    Require(type == CardType.Follower || type == CardType.Personality && !HasAttachments(target),
+                        "Attack a Follower or a Personality without attachments.");
                     Require(CardForce(target) <= AttackStrength(id, player, target), "That card's Force is above the Attack's strength.");
                 }
             }
@@ -472,7 +485,7 @@ public sealed partial class MatchEngine
                     if (ability.Timing == "Battle") Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
-                    Require(ability.Target switch {
+                    Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
                         "shinden" => personality && !own && !target.Bowed,
                         "air" => personality && Keyword(target, "Air"),
                         "personality" => personality,
@@ -657,7 +670,7 @@ public sealed partial class MatchEngine
             case "atsumichi-bow": target!.Bowed = true; break;
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
-            case "tetsuo-destroy-weaker-weaponed": DestroyUnits([target!], true); break;
+            case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
             case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;

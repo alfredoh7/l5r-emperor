@@ -625,6 +625,14 @@ public sealed partial class MatchEngine
         return true;
     }
     private IEnumerable<CardInstance> Attachments(string id) => _state.Cards.Values.Where(c=>c.Zone==Zone.Attached && c.AttachedTo==id);
+    // "Without attachments" (core rules): a boolean condition, not a count -- Followers/Items/Spells
+    // always qualify as attachments; so do tokens specifically designated as one (a Follower token, a
+    // Weapon token, an Armor token), unlike an ordinary stat/status token (Fire, Poison, Madness...).
+    // An attachment can never itself have attachments, so this is always false for one -- no special
+    // case needed, since nothing in this engine attaches to an attachment or grants it one of these
+    // token types.
+    private static readonly string[] AttachmentTokenTypes = ["Follower","Weapon","Armor"];
+    private bool HasAttachments(CardInstance card) => Attachments(card.Id).Any() || card.Tokens.Any(t=>AttachmentTokenTypes.Contains(t.Type));
     // "Human" is never printed as a keyword -- a Personality/Follower without "Nonhuman" printed is
     // Human by default (core rules Glossary).
     private static bool KeywordOrHuman(CardInstance card,string keyword) => keyword=="Human" ? !Keyword(card,"Nonhuman") : Keyword(card,keyword);
