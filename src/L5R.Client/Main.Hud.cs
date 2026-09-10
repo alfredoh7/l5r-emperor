@@ -47,12 +47,19 @@ public partial class Main
     }
     private void ShowTableMenu()
     {
-        var (dialog,body)=Dialog("The table",500,780);
+        var (dialog,body)=Dialog("The table",560,900);
+        dialog.GetOkButton().Hide();
+        body.AddThemeConstantOverride("separation", 9);
         body.AddChild(Palette.Text("Emperor",32,Palette.Gold,true));
         body.AddChild(Palette.Wrapped(_status.Text,16,Palette.PaperDim));
         foreach(var (text,action) in new (string,Action)[]{("Practice",ShowPractice),("Private match",ShowOnline),("Card library",()=>LibraryDialog.Show(this)),("Match history",ShowHistory),("Settings",ShowSettings),("Main menu",ShowMainMenu),("Export practice replay",ExportReplay),("Rules coverage",ShowCoverage),("Concede…",ShowConcede)})
-            body.AddChild(Palette.Button(text,()=>{dialog.QueueFree(); action();}));
-        body.AddChild(Palette.Button("Return to game",dialog.QueueFree));
+            {
+            var button = SidebarSkin.Button(text,()=>{dialog.QueueFree(); action();});
+            button.CustomMinimumSize = new Vector2(0,48);
+            foreach(var state in new[]{"normal","hover","pressed"}) { var skin = SidebarSkin.Surface(true); skin.ContentMarginTop=skin.ContentMarginBottom=8; button.AddThemeStyleboxOverride(state,skin); }
+            body.AddChild(button);
+        }
+        body.AddChild(SidebarSkin.Button("Return to game",dialog.QueueFree,true));
     }
     private void ShowPile(int owner, Zone zone)
     {

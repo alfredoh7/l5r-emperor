@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Roll out approved lacquer system across shared in-game dialog, hover and tooltip presentation. Depends on PR165; no rules or command changes.",
+  "validation": "Client compile passed; native menu family captures in progress.",
+  "remaining": "Visual refinement, compact-window/input checks, combined preview and actual-launcher verification.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/168",
+  "branch": "codex/168-lacquer-menus",
+  "updated": "2026-09-10T17:38:13.706065+00:00"
+}

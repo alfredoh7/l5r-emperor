@@ -174,6 +174,14 @@ public partial class Main : Node
                 }
                 if (_captureMode == "library") LibraryDialog.Show(this);
                 if (_captureMode == "published-rules") ShowRules();
+                if (_captureMode == "published-lacquer-menu") ShowTableMenu();
+                if (_captureMode == "published-lacquer-history") ShowHistory();
+                if (_captureMode == "published-lacquer-pile") ShowPile(View.ViewerId, Zone.Dead);
+                if (_captureMode == "published-lacquer-confirm") Confirm("Leave this table?", "Return to the main menu? Your current practice will end.", () => { });
+                if (_captureMode == "published-lacquer-tooltip")
+                    Place(_root, ReadingTooltip.Create(this, "Bowed / unbowed\nA sideways card is bowed. Each attachment keeps its own bowed state."), 600, 260, 460, 180);
+                if (_captureMode == "published-lacquer-hover")
+                    Place(_root, CardPreview.Create(Self.Hand.First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
                 if (_captureMode is "payment" or "purchase")
                 {
                     var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });

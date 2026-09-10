@@ -53,6 +53,22 @@ public static class SidebarSkin
         t.SetStylebox("normal", "OptionButton", Surface(true));
         t.SetStylebox("hover", "OptionButton", Surface(true));
         t.SetStylebox("panel", "PopupMenu", Surface());
+        foreach (var kind in new[] { "AcceptDialog", "ConfirmationDialog", "PopupPanel" }) t.SetStylebox("panel", kind, Surface());
+        var border = Palette.Box(new Color("11100e"), new Color("79643f"), 0, 0);
+        border.BorderWidthTop = 28; t.SetStylebox("embedded_border", "Window", border);
+        t.SetColor("title_color", "Window", Palette.PaperDim); t.SetFont("title_font", "Window", Palette.Body);
+        t.SetStylebox("panel", "TabContainer", Inset());
+        foreach (var type in new[] { "TabContainer", "TabBar" })
+        {
+            var selected = Surface(true,true); selected.ContentMarginTop = selected.ContentMarginBottom = 9;
+            var normal = Surface(true); normal.ContentMarginTop = normal.ContentMarginBottom = 9;
+            t.SetStylebox("tab_selected", type, selected); t.SetStylebox("tab_unselected", type, normal);
+            t.SetStylebox("tab_hovered", type, normal); t.SetColor("font_selected_color", type, new Color("18140d"));
+            t.SetColor("font_unselected_color", type, Palette.PaperDim); t.SetFont("font", type, Bold);
+        }
+        foreach(var kind in new[] { "LineEdit", "TextEdit", "ItemList" })
+        { t.SetStylebox("normal", kind, Inset()); t.SetStylebox("panel",kind,Inset()); t.SetStylebox("focus",kind,Palette.Box(Colors.Transparent,Palette.Gold,0)); }
+        t.SetStylebox("panel", "TooltipPanel", Inset());
         return t;
     }
     public static Button Button(string text, Action action, bool primary = false)

@@ -7,9 +7,11 @@ public partial class Main
 {
     private (AcceptDialog Dialog, VBoxContainer Body) Dialog(string title, int width = 550, int height = 420)
     {
-        var dialog = new AcceptDialog { Title = title, Theme = Palette.MakeTheme(), Exclusive = true, Transient = true, WrapControls = false, MinSize = new Vector2I(width, height) };
+        var dialog = new AcceptDialog { Title = title, Theme = SidebarSkin.Theme(), Exclusive = true, Transient = true, WrapControls = false, MinSize = new Vector2I(width, height) };
         AddChild(dialog);
         var body = new VBoxContainer(); body.AddThemeConstantOverride("separation", 14); dialog.AddChild(body);
+        dialog.GetOkButton().Text = "Close";
+        dialog.GetOkButton().CustomMinimumSize = new Vector2(140,48);
         dialog.CloseRequested += dialog.QueueFree; dialog.Confirmed += dialog.QueueFree;
         PresentDialog(dialog, width, height); return (dialog, body);
     }
@@ -28,7 +30,7 @@ public partial class Main
 
     private void Confirm(string title, string message, Action yes)
     {
-        var dialog = new ConfirmationDialog { Title = title, DialogText = message, Theme = Palette.MakeTheme(), Exclusive = true, Transient = true };
+        var dialog = new ConfirmationDialog { Title = title, DialogText = message, Theme = SidebarSkin.Theme(), Exclusive = true, Transient = true };
         AddChild(dialog); dialog.Confirmed += () => { yes(); dialog.QueueFree(); }; dialog.Canceled += dialog.QueueFree;
         dialog.CloseRequested += dialog.QueueFree; PresentDialog(dialog, 540, 170);
     }
@@ -44,10 +46,10 @@ public partial class Main
             if (_session.Online || _session.Snapshot?.View.Version > 0) Confirm("Start a new practice?", "This leaves the current table. Export a practice replay first if you want to keep it.", Begin);
             else Begin();
         }
-        body.AddChild(Palette.Button("Play Crane · Shinden Asahina", () => Start(false, true, 0), true));
-        body.AddChild(Palette.Button("Play Lion · Halls of Memory", () => Start(false, true, 1)));
-        body.AddChild(Palette.Button("Economy lab · Gold, Clan options & Proclaim", () => Start(true), true));
-        body.AddChild(Palette.Button("Full training match · Crane vs Lion", () => Start(false)));
+        body.AddChild(SidebarSkin.Button("Play Crane · Shinden Asahina", () => Start(false, true, 0), true));
+        body.AddChild(SidebarSkin.Button("Play Lion · Halls of Memory", () => Start(false, true, 1)));
+        body.AddChild(SidebarSkin.Button("Economy lab · Gold, Clan options & Proclaim", () => Start(true), true));
+        body.AddChild(SidebarSkin.Button("Full training match · Crane vs Lion", () => Start(false)));
         var ai = new CheckBox { Text = "Practice opponent", ButtonPressed = _autoOpponent }; ai.Toggled += enabled => { _autoOpponent = enabled; RenderPhaseActions(); }; body.AddChild(ai);
         body.AddChild(Palette.Wrapped("The practice opponent uses the published abilities and sees only its own permitted information. Lion starts; Crane receives Bamboo Harvesters.", 13, Palette.Muted));
     }
@@ -66,7 +68,7 @@ public partial class Main
         var published = new CheckBox { Text = "Create with published Lion / Crane decks", ButtonPressed = true }; body.AddChild(published);
         var status = Palette.Wrapped(_session.Online ? $"Current room: {_session.Seat?.RoomCode}" : "For local testing, start the server with tools/run-server.sh.", 14, Palette.Muted); body.AddChild(status);
         Button connect = null!;
-        connect = Palette.Button("Enter private match", async () =>
+        connect = SidebarSkin.Button("Enter private match", async () =>
         {
             connect.Disabled = true; status.Text = "Connecting…";
             try
@@ -77,7 +79,7 @@ public partial class Main
             }
             catch (Exception e) { status.Text = e.Message; connect.Disabled = false; }
         }, true); body.AddChild(connect);
-        if (_savedSeat is not null) body.AddChild(Palette.Button($"Reconnect to {_savedSeat.RoomCode}", async () => { if (await Reconnect()) dialog.QueueFree(); }));
+        if (_savedSeat is not null) body.AddChild(SidebarSkin.Button($"Reconnect to {_savedSeat.RoomCode}", async () => { if (await Reconnect()) dialog.QueueFree(); }));
         body.AddChild(Palette.Wrapped("Your player seat is saved locally for reconnecting. Remote play requires an HTTPS server; hosting is not provisioned by this prototype.", 13, Palette.Muted));
     }
 
@@ -134,7 +136,7 @@ public partial class Main
             Render(); _root.Visible = true;
         };
         body.AddChild(Palette.Wrapped("Hand the device to the other player before revealing their private hand.", 21));
-        body.AddChild(Palette.Button("I'm ready · reveal my hand", () => { _selected = null; _chosen = null; switched = true; _session.SwitchPracticeSeat(); dialog.QueueFree(); }, true));
+        body.AddChild(SidebarSkin.Button("I'm ready · reveal my hand", () => { _selected = null; _chosen = null; switched = true; _session.SwitchPracticeSeat(); dialog.QueueFree(); }, true));
     }
 
     private void OpenDecksLocation()
@@ -169,7 +171,7 @@ public partial class Main
             {
                 var details = new VBoxContainer { Visible = false }; var excerpt = events[battle..(end + 1)];
                 var caption = excerpt.FirstOrDefault(e => e.Type == "provinceDestroyed")?.Message ?? events[battle].Message;
-                rows.AddChild(Palette.Button(caption + " · Details", () => details.Visible = !details.Visible));
+                rows.AddChild(SidebarSkin.Button(caption + " · Details", () => details.Visible = !details.Visible));
                 foreach (var e in excerpt) details.AddChild(Palette.Wrapped(e.Message, 15, Palette.PaperDim));
                 rows.AddChild(details); i = battle - 1;
             }

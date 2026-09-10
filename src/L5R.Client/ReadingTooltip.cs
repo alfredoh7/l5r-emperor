@@ -24,8 +24,8 @@ public static class ReadingTooltip
         var design=new Vector2(444,Math.Max(56,lines.Count*25+32));
         var scale=owner.GetTree().Root.GetVisibleRect().Size.Y/1080f;
         var shell=new Control { CustomMinimumSize=design*scale,MouseFilter=Control.MouseFilterEnum.Ignore };
-        var panel=new PanelContainer { Size=design,Scale=Vector2.One*scale,Theme=Palette.MakeTheme(),MouseFilter=Control.MouseFilterEnum.Ignore };
-        panel.AddThemeStyleboxOverride("panel",Palette.Box(new Color("171a16"),Palette.Gold,16));
+        var panel=new PanelContainer { Size=design,Scale=Vector2.One*scale,Theme=SidebarSkin.Theme(),MouseFilter=Control.MouseFilterEnum.Ignore };
+        panel.AddThemeStyleboxOverride("panel",SidebarSkin.Inset());
         shell.AddChild(panel); panel.AddChild(Palette.Text(string.Join("\n",lines),18,Palette.Paper));
         return shell;
     }
