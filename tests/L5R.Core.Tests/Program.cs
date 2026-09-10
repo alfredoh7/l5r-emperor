@@ -96,7 +96,8 @@ var tests = new (string Name, Action Run)[]
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
-    ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards)
+    ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
+    ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1799,5 +1800,135 @@ static void StrategyWave1KeywordCards()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:unorthodox.Id,PerformerId:samurai.Id,TargetId:enemy.Id,AbilityId:"unorthodox-attack"));
         Check(e.State.Cards[enemy.Id].Bowed);
+    }
+}
+static void FollowerWave2Cards()
+{
+    {
+        // Plain Ranged/Melee Attack Followers: no cost, no condition, matching UnconditionalAttackImportWave.
+        foreach(var (cardId,abilityId,strength) in new[] { ("oracle-l5r-1839","dark-naga-scouts-attack",3), ("oracle-l5r-3456","horse-archers-attack",4) })
+        {
+            var s=StrongholdBattle("oracle-l5r-1218");
+            var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+            var performer=Add(s,cardId,0,Zone.Attached,province:0,attachedTo:host.Id);
+            var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+            var e=MatchEngine.FromTestState(s);
+            Reject(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,TargetId:target.Id,AbilityId:abilityId));
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:performer.Id,AbilityId:abilityId));
+            Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,$"{cardId}: strength {strength} misses Force 5");
+        }
+    }
+    {
+        // Cavalry Flankers: only the Attacker may use it, and it bows itself as part of the attack.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var flankers=Add(s,"oracle-l5r-10333",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); target.Modifiers=[new("test-fixture","test-fixture","Force",-1)]; // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:flankers.Id,TargetId:target.Id,AbilityId:"cavalry-flankers-attack"));
+        Check(e.State.Cards[flankers.Id].Bowed,"Bows itself as part of the attack");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Melee 2 destroys Force 2");
+        var s2=StrongholdBattle("oracle-l5r-1218"); s2.ActivePlayerId=1; s2.PriorityPlayerId=0;
+        var host2=Add(s2,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var flankers2=Add(s2,"oracle-l5r-10333",0,Zone.Attached,province:0,attachedTo:host2.Id);
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:flankers2.Id,AbilityId:"cavalry-flankers-attack"));
+    }
+    {
+        // Murderous Thieves: bows itself, no other condition.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var thieves=Add(s,"oracle-l5r-5445",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:thieves.Id,AbilityId:"murderous-thieves-attack"));
+        Check(e.State.Cards[thieves.Id].Bowed);
+    }
+    {
+        // Veteran Advisor: draws a card, no cost.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var advisor=Add(s,"oracle-l5r-9144",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:advisor.Id,AbilityId:"veteran-advisor-draw"));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1);
+    }
+    {
+        // Hired Legion: bows itself, draws a card.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var legion=Add(s,"oracle-l5r-3277",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:legion.Id,AbilityId:"hired-legion-draw"));
+        Check(e.State.Cards[legion.Id].Bowed); Equal(e.State.Players[0].Hand.Count,handBefore+1);
+    }
+    {
+        // Naga Remnants: bows a target enemy attachment.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var remnants=Add(s,"oracle-l5r-10513",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var enemyItem=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:remnants.Id,TargetId:enemyItem.Id,AbilityId:"naga-remnants-bow"));
+        Check(e.State.Cards[enemyItem.Id].Bowed);
+    }
+    {
+        // Hiruma Sniper: only usable with Reconnaissance at the current battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var sniper=Add(s,"oracle-l5r-3325",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:sniper.Id,TargetId:target.Id,AbilityId:"hiruma-sniper-attack"));
+
+        var s2=StrongholdBattle("oracle-l5r-1218");
+        s2.Players[1].Provinces[0].Reconnaissance[0]=true;
+        var host2=Add(s2,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var sniper2=Add(s2,"oracle-l5r-3325",0,Zone.Attached,province:0,attachedTo:host2.Id);
+        var target2=Add(s2,"training-lion-samurai",1,Zone.Battlefield,province:0); target2.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 2
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:sniper2.Id,TargetId:target2.Id,AbilityId:"hiruma-sniper-attack"));
+        Equal(e2.State.Cards[target2.Id].Zone,Zone.Dead,"Ranged 4 destroys Force 2 with Reconnaissance");
+    }
+    {
+        // Heavy Chargers: only usable while opposed.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var chargers=Add(s,"oracle-l5r-9869",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var hand=Add(s,"training-focus-strategy",0,Zone.Hand); // Focus 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:chargers.Id,TargetId:hand.Id,AbilityId:"heavy-chargers-boost"));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var chargers=Add(s,"oracle-l5r-9869",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var hand=Add(s,"training-focus-strategy",0,Zone.Hand); // Focus 3
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:chargers.Id,TargetId:hand.Id,AbilityId:"heavy-chargers-boost"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==chargers.Id).Force,6,"Base Force 3 + 3");
+    }
+    {
+        // Spitting Llama: -3F to a target enemy Personality or Follower.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var llama=Add(s,"oracle-l5r-10686",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:llama.Id,TargetId:target.Id,AbilityId:"spitting-llama-force"));
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,3,"Base Force 6 - 3");
+    }
+    {
+        // Akodo Regulars: discards a card, boosts its own Force by the discard's Focus Value.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var regulars=Add(s,"oracle-l5r-262",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var hand=Add(s,"training-focus-strategy",0,Zone.Hand); // Focus 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,TargetId:hand.Id,AbilityId:"akodo-regulars-boost"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==regulars.Id).Force,5,"Base Force 2 + 3");
     }
 }

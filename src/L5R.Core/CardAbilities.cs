@@ -147,6 +147,20 @@ public static class AbilityCatalog
         // ("Choose your performing Berserker: Straighten him") is drawn from directly.
         ["immovable-object-straighten"] = new("BattleOrOpen", "Choose your performing Berserker: Straighten him.", "own-personality-with-keyword", RequiredKeyword: "Berserker"),
         ["immovable-object-bow"] = new("Battle", "Choose your performing unbowed Berserker and target an enemy Personality or Follower with lower Force: Bow it.", "enemy-force-lower-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
+        // Follower wave: cards audited against every currently-imported Follower for ones needing
+        // nothing beyond already-built categories/helpers (issue #148). Each reuses an existing
+        // Target category, Attack strength/kind pattern, or Force/Draw/bow helper verbatim.
+        ["akodo-regulars-boost"] = new("Battle", "Discard a card: Give this card a Force bonus equal to the discarded card's Focus Value (until the turn ends)", "hand"),
+        ["cavalry-flankers-attack"] = new("Battle", "If you are the Attacker: Bow this card: Melee 2 Attack", "attack"),
+        ["dark-naga-scouts-attack"] = new("Battle", "Ranged 3 Attack", "attack"),
+        ["horse-archers-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        ["murderous-thieves-attack"] = new("Battle", "Bow this card: Melee 3 Attack", "attack"),
+        ["veteran-advisor-draw"] = new("Battle", "Draw a card", "none"),
+        ["hired-legion-draw"] = new("Battle", "Bow this card: Draw a card", "none"),
+        ["naga-remnants-bow"] = new("Battle", "Bow a target enemy attachment", "enemy-attachment"),
+        ["hiruma-sniper-attack"] = new("Battle", "If you have Reconnaissance: Ranged 4 Attack", "attack"),
+        ["heavy-chargers-boost"] = new("Battle", "If this card is opposed, discard a card: Give this card +3F", "hand"),
+        ["spitting-llama-force"] = new("Battle", "Give a target enemy Personality or Follower -3F", "enemy-force"),
     });
 }
 
@@ -194,6 +208,10 @@ public sealed partial class MatchEngine
         "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
         "asako-ume-attack" => 4,
         "training-honor-cost-attack" => 3,
+        "cavalry-flankers-attack" => 2,
+        "dark-naga-scouts-attack" => 3,
+        "murderous-thieves-attack" => 3,
+        "horse-archers-attack" or "hiruma-sniper-attack" => 4,
         _ => 0
     };
     // Cards that affect only Ranged Attacks (or only Melee) reference this; the two kinds otherwise
@@ -203,6 +221,8 @@ public sealed partial class MatchEngine
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
         "shiro-shiba-melee" or "stalking-tiger-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
+        "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
+        "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
         _ => ""
     };
     // Whether opening a reaction window before resolving an attack could possibly matter right now.
@@ -337,6 +357,9 @@ public sealed partial class MatchEngine
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
         if (id is "horibe-bow" or "horibe-straighten")
             Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
+        if (id is "heavy-chargers-boost") Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Heavy Chargers must be opposed to use this ability.");
+        if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
+        if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         if (ability.Performer is not null)
         {
             var performer = command.PerformerId is null ? throw new RuleViolation("Choose a performing card.") : Card(command.PerformerId);
@@ -497,7 +520,12 @@ public sealed partial class MatchEngine
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": target!.Bowed = true; break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": target!.Bowed = true; break;
+            case "veteran-advisor-draw": Draw(player); break;
+            case "hired-legion-draw": source!.Bowed = true; Draw(player); break;
+            case "akodo-regulars-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
+            case "heavy-chargers-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", 3); break;
+            case "spitting-llama-force": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
             case "blind-rage": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 5); GainHonor(player.Id, -2, "Blind Rage"); break;
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
@@ -549,6 +577,11 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, source.Id)) return;
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
+            case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id)) return;
+                break;
+            case "cavalry-flankers-attack": case "murderous-thieves-attack":
+                source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             case "training-honor-cost-attack":

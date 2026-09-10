@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Ships Follower Wave 2 (issue #148): 11 Followers found by auditing all 116 not-yet-imported Follower-type cards for ones needing nothing beyond already-built engine pieces. Most reuse the Ranged/Melee Attack primitive verbatim (Dark Naga Scouts, Horse Archers, Cavalry Flankers, Murderous Thieves, Hiruma Sniper); the rest reuse existing Target categories (enemy-attachment, enemy-force, hand, none) and helpers (Draw, DiscardFate, ApplyModifier) with at most one new one-off Require condition each (an 'opposed' check reusing Horibe's Army() pattern, an Attacker-only check reusing ActivePlayerId, a Reconnaissance check reusing the existing primitive). New tools/content/package_follower_wave_2.py; two cards' fetched catalogue text was duplicated or clause-reordered, corrected against the actual scanned image. Also documents, in issue #148, why the other 105 audited Followers are blocked, ranked by how many cards each missing primitive would unblock (no Equip-time entry hook is the largest single gap). Shared-file note: all changed files are within L5R.Core (rules engine), its test suite, docs/ROADMAP.md, the client's packaged card art, and content/ data files -- a single rules-lane content-import concern; no UI/client code touched (only data/art assets).",
+  "validation": "New FollowerWave2Cards test covers all 11 cards. Full suite: 94/94 core + 34/34 published (count updated 128->139) + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "105 of 116 audited Followers remain blocked on a real engine gap; ranked by card-count impact in issue #148. No Equip-time entry hook is the highest-leverage next primitive (unblocks roughly a dozen Followers outright).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/148",
+  "branch": "mdornbrook/148-follower-wave-2",
+  "updated": "2026-09-10T11:34:11.556096+00:00"
+}

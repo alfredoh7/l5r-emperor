@@ -228,6 +228,27 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 2 of ability-bearing Followers: found by auditing every not-yet-imported
+    /// Follower in the reference catalogue for ones needing nothing beyond already-built engine
+    /// pieces (issue #148) -- most reuse the Ranged/Melee Attack primitive verbatim (like Stalking
+    /// Tiger); the rest reuse existing Target categories and helpers with at most one new one-off
+    /// Require condition each.</summary>
+    public static PublishedSnapshot FollowerWave2 { get; } = LoadFollowerWave2();
+
+    private static PublishedSnapshot LoadFollowerWave2()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave2.json", "follower-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 11)
+            throw new InvalidOperationException("Unexpected follower-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-2 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
