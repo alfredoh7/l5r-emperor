@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implements the 'boost other Followers in the unit' primitive (issue #162), the first of the aggregate/group Force effects requested alongside Senior Infantry Legion, Ashigaru Elite and Utaku Elite Guard. New UnitFollowerBoost(follower) sums +1 for every OTHER attachment in the same unit (same AttachedTo Personality) with Effect=='boost-followers-in-unit', excluding the card itself -- two boosters in one unit grant each other but never themselves, per the exact spec. Plugged into FollowerForce since this is static and always-on, checked wherever a Follower's Force is evaluated. Shared-file note: all changed files are within L5R.Core (rules engine) and its test suite, plus docs/ROADMAP.md -- a single rules-lane primitive change; no UI/client files touched.",
+  "validation": "New UnitForceBoostPrimitive test: a booster grants +1F to a plain Follower in the same unit but not itself; a Follower in a different unit is unaffected (no cross-unit leakage); two boosters in one unit grant each other +1F but never themselves. Full suite: 99/99 core + 34/34 published + 8/8 deck format pass. bash tools/check.sh --skip-client passes (13/13 AI, 5/5 server integration, 4/4 client transport integration).",
+  "remaining": "Infrastructure only -- no published card needs this yet (Senior Infantry Legion is not imported). Ashigaru Elite and Utaku Elite Guard are next, per the user's own sequencing, each a different scope (keyword-based instead of type-based; army-scoped instead of unit-scoped; activated instead of static).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/162",
+  "branch": "mdornbrook/162-unit-force-boost",
+  "updated": "2026-09-10T14:45:09.265167+00:00"
+}

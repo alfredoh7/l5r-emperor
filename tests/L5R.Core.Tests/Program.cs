@@ -100,6 +100,7 @@ var tests = new (string Name, Action Run)[]
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
     ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow),
     ("A Follower's own static conditional Force stays with the Follower (visible for targeting even bowed, joins the unit total only unbowed/Elite); an Item's printed and conditional Force/Chi always convey to its wielder regardless of the Item's own bow state", FollowerAndItemStaticForceHooks),
+    ("'Boost other Followers in the unit' primitive (Senior Infantry Legion's shape): a static +1F to every OTHER Follower attached to the same Personality, never to itself, and never leaking into a different unit; two boosters in one unit grant each other but not themselves", UnitForceBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter)
 };
@@ -2023,6 +2024,28 @@ static void FollowerAndItemStaticForceHooks()
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kensai.Id).Chi,3,"Base Chi 2 + printed Chi 1, regardless of the Item's own bow state");
         Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==nonKensai.Id).Force,5,"Base 3 + printed 2, no conditional bonus for a non-Kensai wielder");
     }
+}
+static void UnitForceBoostPrimitive()
+{
+    // Senior Infantry Legion's shape: a card that grants a static +1F to every OTHER Follower in its
+    // own unit (a Personality and all of its attachments), never to itself, and never leaking to a
+    // different unit.
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var unitA=Add(s,"training-crane-samurai",0,Zone.Home);
+    var plainFollower=Add(s,"training-follower",0,Zone.Attached,attachedTo:unitA.Id); // Force 2
+    var booster=Add(s,"training-follower-booster",0,Zone.Attached,attachedTo:unitA.Id); // Force 1, boosts other unit Followers
+    var unitB=Add(s,"training-crane-samurai",0,Zone.Home);
+    var otherUnitFollower=Add(s,"training-follower",0,Zone.Attached,attachedTo:unitB.Id); // different unit -- no boost
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==plainFollower.Id).Force,3,"Plain Follower gets +1F from the booster in the same unit");
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==booster.Id).Force,1,"The booster itself is not boosted (no other booster present in the unit)");
+    Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==otherUnitFollower.Id).Force,2,"A Follower in a different unit is unaffected");
+
+    var booster2=Add(s,"training-follower-booster",0,Zone.Attached,attachedTo:unitA.Id); // second booster, same unit
+    var e2=MatchEngine.FromTestState(s);
+    Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==booster.Id).Force,2,"Two boosters in one unit grant each other +1F, not themselves: printed 1 + 1 from the other booster");
+    Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==booster2.Id).Force,2,"Symmetric: the second booster also gets +1F from the first, not itself");
+    Equal(e2.GetView(0).Players[0].Home.Single(c=>c.Id==plainFollower.Id).Force,4,"Plain Follower now gets +1F from each of the two boosters: 2 + 1 + 1");
 }
 static void AttachmentRestrictions()
 {
