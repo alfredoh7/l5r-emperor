@@ -12,7 +12,6 @@ public partial class BattleTracker : Control
     public bool PresentationInProgress { get; set; }
     public bool ActionOutcome { get; set; }
     public string? ResolutionMessage { get; set; }
-    private double _clock;
     public int Stage => ActionOutcome ? 1 : ResolutionMessage is not null ? 2 : Snapshot.Phase == Phase.Battle ? 1 : 0;
     public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
     public override void _Ready()
@@ -26,9 +25,7 @@ public partial class BattleTracker : Control
             : "Assign units to provinces. The highlighted player has the next decision.");
     }
     public override Control _MakeCustomTooltip(string text) => ReadingTooltip.Create(this, text);
-    public override void _Process(double delta) { if (!ReducedMotion) { _clock += delta; QueueRedraw(); } }
     public string Status => PresentationInProgress ? (ActionOutcome ? "Applying battle action" : "Resolving battle") : ResolutionMessage is not null ? "Resolved" : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? (Snapshot.PendingChoice is null && Snapshot.Phase == Phase.Battle ? "You may act or pass" : "Your decision") : "Opponent may act";
-    private Color Highlight => ResolutionMessage is not null ? Palette.Gold : Snapshot.PriorityPlayerId == Snapshot.ViewerId ? new Color("8bc9ee") : new Color("efb967");
     public override void _Draw()
     {
         var title = Stage == 2 ? "RESOLUTION" : Stage == 1 ? "BATTLE ACTIONS" : "ASSIGNMENT";

@@ -93,7 +93,7 @@ public static class Palette
 
     public static Label Text(string text, int size = 16, Color? color = null, bool title = false)
     {
-        var l = new TooltipLabel { Text = title ? text.ToUpperInvariant() : text, MouseFilter = Control.MouseFilterEnum.Ignore };
+        var l = new TooltipLabel { Text = text, Uppercase = title, MouseFilter = Control.MouseFilterEnum.Ignore };
         l.AddThemeColorOverride("font_color", color ?? Paper);
         l.AddThemeFontSizeOverride("font_size", title ? (int)(size * 1.25f) : size);
         l.AddThemeFontOverride("font", title ? HeadingLabel((int)(size * 1.25f)) : Body);
