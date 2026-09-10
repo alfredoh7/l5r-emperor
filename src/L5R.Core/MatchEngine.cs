@@ -207,6 +207,28 @@ public sealed partial class MatchEngine
         }
     }
 
+    // "After this X enters play" (core rules): a card's own Reaction fires every time it is placed
+    // into a player's home, either standalone or as an attachment -- from a province, a hand, or (once
+    // a card returns cards from there) a discard pile. Only "removed from the game" is permanent.
+    private static string? EntryReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-enters-play");
+
+    // Opens the entering card's own "after entering play" Reaction, if it has one; every entry point
+    // (Purchase, Equip, a played Terrain) calls this. Repeatable each time the card enters play, not
+    // just once ever: clears any earlier use so a card that left and is entering again gets a fresh
+    // window, per the printed trigger firing anew on each entry. closesTo controls who regains
+    // priority once the window fully closes (both sides passed) -- see PassReaction.
+    private bool OpenEntryReactionWindow(int playerId, CardInstance card, int? closesTo = null)
+    {
+        var reactionId = EntryReactionAbility(card);
+        if (reactionId is null) return false;
+        card.AbilityUses.Remove(reactionId);
+        _state.PendingChoice = new("entryReaction", playerId, card.Id, "After entry: use this card's own reaction, or pass.", closesTo);
+        _state.ConsecutivePasses = 0;
+        Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
+        return true;
+    }
+
     private void Purchase(GameCommand command)
     {
         Require(_state.Phase==Phase.Dynasty,"Purchases are only allowed before province discarding in the Dynasty Phase.");
@@ -223,19 +245,15 @@ public sealed partial class MatchEngine
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
-        var hasEntryReaction=(Definition(card).Abilities??[]).Any(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play");
+        var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
-            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(hasEntryReaction?", use this card's own reaction,":"")+" or pass. Each may be used once.");
+            if(reactionId is not null) card.AbilityUses.Remove(reactionId);
+            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
-        else if (hasEntryReaction)
-        {
-            _state.PendingChoice=new("entryReaction",command.PlayerId,card.Id,"After entry: use this card's own reaction, or pass.");
-            _state.ConsecutivePasses=0;
-            Emit("reactionWindow","Entry reaction window opened.",command.PlayerId,card.Id);
-        }
+        else OpenEntryReactionWindow(command.PlayerId,card);
     }
 
     private void OrderSeppuku(GameCommand command)
@@ -337,13 +355,18 @@ public sealed partial class MatchEngine
     }
     private void PassReaction()
     {
+        var pending=_state.PendingChoice!;
         Emit("reactionPassed", $"{Player(_state.PriorityPlayerId).Name} passed the reaction opportunity.", _state.PriorityPlayerId);
         _state.ConsecutivePasses++;
         if(_state.ConsecutivePasses==2)
         {
             _state.PendingChoice=null;
             _state.ConsecutivePasses=0;
-            _state.PriorityPlayerId=_state.ActivePlayerId;
+            // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
+            // priority away from the active player on their own); an entry-reaction window opened by
+            // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
+            // opponent, so the normal "any action cedes priority" rule still holds once it closes.
+            _state.PriorityPlayerId=pending.ActingPlayerId ?? _state.ActivePlayerId;
             Emit("reactionClosed","Both players passed; the reaction window closed.");
         }
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
@@ -540,6 +563,7 @@ public sealed partial class MatchEngine
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         Emit("equipped",$"{def.Name} attached to {Definition(target).Name}.",command.PlayerId,card.Id);
+        if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
         NextAction(command.PlayerId);
     }
     private void PlayStrategy(GameCommand command)
@@ -560,6 +584,7 @@ public sealed partial class MatchEngine
             Player(command.PlayerId).Hand.Remove(card.Id);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
             NextAction(command.PlayerId);
             return;
         }

@@ -97,7 +97,8 @@ var tests = new (string Name, Action Run)[]
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
-    ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards)
+    ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
+    ("The 'after entering play' Reaction window now opens from Equip and a played Terrain too, not just Purchase; it is repeatable per entry, and correctly cedes priority to the opponent for Action-phase entries", GeneralizedEntryReactionWindow)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1930,5 +1931,59 @@ static void FollowerWave2Cards()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,TargetId:hand.Id,AbilityId:"akodo-regulars-boost"));
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==regulars.Id).Force,5,"Base Force 2 + 3");
+    }
+}
+static void GeneralizedEntryReactionWindow()
+{
+    {
+        // Equip now opens the same "own-enters-play" Reaction window Purchase always has -- and,
+        // unlike Purchase (which never cedes priority away from the active player), the window
+        // correctly hands priority to the *opponent* once closed, matching Equip's normal
+        // any-action-cedes-priority rule (ActingPlayerId set to the opponent when the window opens).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var item=Add(s,"training-item-entry-reaction",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,Cmd(e,"equip",id:item.Id,sources:payment.SourceIds,target:host.Id));
+        Equal(e.State.Cards[item.Id].Zone,Zone.Attached);
+        Equal(e.State.PendingChoice?.Type,"entryReaction","Equip opens the entering card's own Reaction window");
+        Equal(e.State.PriorityPlayerId,0,"Priority has not yet ceded -- the window is still open");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:item.Id,AbilityId:"training-item-entry-reaction"));
+        Equal(e.State.Players[0].Honor,honorBefore+1);
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.PriorityPlayerId,1,"Once closed, priority correctly cedes to the opponent, unlike Purchase's own-turn windows");
+    }
+    {
+        // Repeatable each time the card enters play: a stale usage record from an earlier entry
+        // (simulating "left play, then entered again") does not block this fresh window.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var item=Add(s,"training-item-entry-reaction",0,Zone.Hand); item.AbilityUses["training-item-entry-reaction"]=0;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        var payment=e.PaymentOptions(0,1).First();
+        Accept(e,Cmd(e,"equip",id:item.Id,sources:payment.SourceIds,target:host.Id));
+        Check(e.QueryActions(0).Any(a=>a.Command?.AbilityId=="training-item-entry-reaction" && a.Enabled),"Offered and enabled despite the stale earlier-entry usage record");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:item.Id,AbilityId:"training-item-entry-reaction"));
+        Equal(e.State.Players[0].Honor,honorBefore+1,"The reaction actually fires again, not just offered");
+    }
+    {
+        // PlayStrategy's Terrain path opens the same window too, with the same opponent-cede fix.
+        var s=Battle(5,2).State;
+        var terrain=Add(s,"training-terrain-entry-reaction",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,Cmd(e,"playStrategy",player:1,id:terrain.Id));
+        Equal(e.State.Cards[terrain.Id].Zone,Zone.Battlefield);
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:terrain.Id,AbilityId:"training-terrain-entry-reaction"));
+        Equal(e.State.Players[1].Honor,honorBefore+1);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Equal(e.State.PriorityPlayerId,0,"Priority cedes to the opponent (player 0) once the window closes");
     }
 }
