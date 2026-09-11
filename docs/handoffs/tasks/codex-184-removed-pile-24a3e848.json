@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved contextual removed pile UI using merged public removal zone.",
+  "validation": "Concept approved; implementation in progress.",
+  "remaining": "Implement, native visual checks and review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/184",
+  "branch": "codex/184-removed-pile",
+  "updated": "2026-09-11T12:06:08.838439+00:00"
+}
