@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved contextual removed pile UI using merged public removal zone.",
-  "validation": "Concept approved; implementation in progress.",
-  "remaining": "Implement, native visual checks and review.",
-  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/184",
+  "summary": "Implement approved contextual removed piles and read-only gallery using public engine zone.",
+  "validation": "Client builds clean; existing Core/AI/server/transport checks pass. Native board and gallery fixtures test two mixed piles, empty absence, stable layout, owner switching and unchanged session.",
+  "remaining": "Integrated preview and final compact validation in progress; rules-lead review pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/188",
   "branch": "codex/184-removed-pile",
-  "updated": "2026-09-11T12:06:08.838439+00:00"
+  "updated": "2026-09-11T12:12:52.141617+00:00"
 }

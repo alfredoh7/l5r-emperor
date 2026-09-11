@@ -152,6 +152,7 @@ public partial class Main
             GD.Print("BATTLE_FLOW_PASS: explicit pass changes priority; waiting controls are absent; public history opens/closes without changing state.");
         }
         RenderBoard(); ResetTableCamera();
+        if (_captureMode.Contains("removed", StringComparison.Ordinal)) PrepareRemovedCapture();
         if (_captureMode.Contains("standards", StringComparison.Ordinal))
         {
             if (_captureMode.Contains("focus", StringComparison.Ordinal)) FocusBattle();
@@ -359,7 +360,7 @@ public partial class Main
             if (forbidden.Any(word => text.Contains(word, StringComparison.Ordinal))) throw new InvalidOperationException("A removed board label returned: " + text);
             if (System.Text.RegularExpressions.Regex.IsMatch(text, @"\d+ F\s*·\s*#|\d+ / \d+|(?:Crane|Lion) P\d")) throw new InvalidOperationException("A unit summary or numeric page counter returned.");
         }
-        if (_clanHud.GetChildren().OfType<ClanPlaque>().Count() != 2 || _pileHud.GetChildren().OfType<TablePile>().Count() != 8) throw new InvalidOperationException("Clan plaques or physical piles are missing.");
+        if (_clanHud.GetChildren().OfType<ClanPlaque>().Count() != 2 || _pileHud.GetChildren().OfType<TablePile>().Count() != 8 + View.Players.Count(p=>p.RemovedFromGame.Length>0)) throw new InvalidOperationException("Clan plaques or physical piles are missing.");
         foreach (var player in View.Players)
             foreach (var province in player.Provinces.Where(p => p.Destroyed))
                 if (_provinceButtons.ContainsKey((player.Id, province.Index))) throw new InvalidOperationException("A destroyed province still occupies a board control.");

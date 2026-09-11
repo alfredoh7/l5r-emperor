@@ -44,6 +44,7 @@ public partial class Main
                 Place(_pileHud,new TablePile(player,zone,()=>ShowPile(player.Id,zone),_discardPreview.GetValueOrDefault(key)?.Definition),SlotX(player,slots[i])+31,y+2,142,PlaneHeight(CardHeight)-4);
             }
         }
+        RenderRemovedPiles();
     }
     private void ShowTableMenu()
     {

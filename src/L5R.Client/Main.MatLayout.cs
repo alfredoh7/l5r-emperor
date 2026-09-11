@@ -170,6 +170,8 @@ public partial class Main
             }
         }
 
+        MeasureRemovedPiles();
+
         // Keep a player's camera steady while ink and cards change positions.
         // Fit/Home remains explicit and always frames the complete new layout.
         if (_tableLayoutSeen && _cameraFitted && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
