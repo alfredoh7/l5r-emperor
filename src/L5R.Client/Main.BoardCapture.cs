@@ -104,7 +104,9 @@ public partial class Main
             {
                 _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text.StartsWith("Confirm action", StringComparison.Ordinal)).EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
-                if (View.Version != version + 1) throw new InvalidOperationException("Targeted action confirmation failed.");
+                // A destruction announcement intentionally holds the old presented View.
+                // Confirm against the authoritative session, not its animation snapshot.
+                if (_session.Snapshot!.View.Version != version + 1) throw new InvalidOperationException($"Targeted action confirmation failed: before={version}, after={_session.Snapshot.View.Version}, ability={action.Command?.AbilityId}, notice={_notice.Text}.");
             }
             GD.Print("UI_SMOKE_PASS: direct card target preserves ability/performer and waits for confirmation.");
         }
@@ -119,6 +121,35 @@ public partial class Main
             _tiles.Single(t => t.Card.Id == attachment.Id).EmitSignal(Button.SignalName.Pressed);
             if (_selected?.Id != attachment.Id || _selected.AttachedTo != attachment.AttachedTo) throw new InvalidOperationException("Expanded attachment could not be inspected independently.");
             GD.Print("UI_SMOKE_PASS: stack toggle spreads attachments; an individual attachment opens in the inspector with its parent preserved.");
+        }
+        if(_captureMode.Contains("board-flow",StringComparison.Ordinal))
+        {
+            if(_chosen is not null || _selected is not null) CancelChoice();
+            if(_captureMode.EndsWith("target",StringComparison.Ordinal)) {
+                var option=Actions.First(a=>a.Enabled && a.Type=="useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length>0);
+                var beforeAction=View.Version;
+                var button=_inspector.GetChildren().OfType<Button>().First(b=>b.Text.EndsWith(option.Label,StringComparison.Ordinal));
+                button.EmitSignal(Button.SignalName.Pressed);
+                if(_chosen?.Command?.AbilityId!=option.Command?.AbilityId || View.Version!=beforeAction)throw new InvalidOperationException("Direct battle action lost its ability or submitted before confirmation.");
+                CancelChoice();
+            }
+            if(_captureMode.EndsWith("waiting",StringComparison.Ordinal)) {
+                var version=View.Version; _phaseActions.GetChildren().OfType<Button>().First(b=>!b.Disabled && b.Text=="Pass battle action").EmitSignal(Button.SignalName.Pressed); _uiQueue.Clear(); Render();
+                if(View.Version!=version+1 || View.PriorityPlayerId==View.ViewerId) throw new InvalidOperationException("Battle pass did not hand priority to opponent.");
+            }
+            if(_captureMode.EndsWith("outcome",StringComparison.Ordinal)) {
+                _reducedMotion=true;
+                for(var i=0;i<2;i++) { _session.Submit(new GameCommand("pass",View.PriorityPlayerId,View.Version)).GetAwaiter().GetResult(); _uiQueue.Clear(); Render(); }
+                _uiQueue.Clear(); Render();
+            }
+            if(_captureMode.EndsWith("outcome",StringComparison.Ordinal) && _journal.Aftermath.Count==0)throw new InvalidOperationException("Resolution lost named destination receipts.");
+            var before=View.Version;
+            if(_phaseActions.GetChildren().OfType<Button>().Any(b=>!b.Disabled && b.Text=="Pass battle action") && View.PriorityPlayerId!=View.ViewerId)
+                throw new InvalidOperationException("Waiting player received a Pass button.");
+            ShowBattleHistory();
+            var history=GetChildren().OfType<AcceptDialog>().Last();history.EmitSignal(AcceptDialog.SignalName.Confirmed);
+            if(!history.IsQueuedForDeletion() || View.Version!=before) throw new InvalidOperationException("Reviewing battle changed the match or failed to close.");
+            GD.Print("BATTLE_FLOW_PASS: explicit pass changes priority; waiting controls are absent; public history opens/closes without changing state.");
         }
         RenderBoard(); ResetTableCamera();
         if (_captureMode.Contains("standards", StringComparison.Ordinal))
@@ -332,7 +363,7 @@ public partial class Main
         foreach (var player in View.Players)
             foreach (var province in player.Provinces.Where(p => p.Destroyed))
                 if (_provinceButtons.ContainsKey((player.Id, province.Index))) throw new InvalidOperationException("A destroyed province still occupies a board control.");
-        if (_inspectorPanel.Size.X != 300) throw new InvalidOperationException("Compact inspector width regressed.");
+        if (_inspectorPanel.Size.X != SidebarWidth) throw new InvalidOperationException("Sidebar width differs from the approved layout.");
         GD.Print("UI_SMOKE_PASS: two clan resource plaques, eight physical piles, compact inspector; removed board summaries and destroyed-province controls remain absent.");
     }
 

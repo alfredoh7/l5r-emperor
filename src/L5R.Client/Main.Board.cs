@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
     private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
-    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
@@ -136,8 +136,8 @@ public partial class Main
         {
             // Inspect the whole unit at useful size, instead of forcing six cards into
             // one narrow battlefield. These are the actual live tiles, not extra copies.
-            var panel = Place(_unitDetail, new LacquerPanel(), 238, 342, BoardWidth, 320);
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.04f, .037f, .025f, .98f), Palette.Gold, 16, 3));
+            var panel = Place(_unitDetail, new PanelContainer { Theme = SidebarSkin.Theme() }, 238, 342, BoardWidth, 320);
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             panel.SetMeta("battle_province", personality.ProvinceIndex ?? -1);
             panel.SetMeta("home_owner", personality.OwnerId);
             var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 6); panel.AddChild(content);
