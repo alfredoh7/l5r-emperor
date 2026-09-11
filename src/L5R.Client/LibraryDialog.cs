@@ -442,7 +442,8 @@ public static class LibraryDialog
     private static Label Title(string text)
     {
         var label = Palette.Wrapped(text, 27);
-        label.AddThemeFontOverride("font", Palette.Title);
+        label.Uppercase = true;
+        label.AddThemeFontOverride("font", Palette.HeadingLabel(27));
         return label;
     }
 
