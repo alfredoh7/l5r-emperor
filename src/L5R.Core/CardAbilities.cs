@@ -156,7 +156,12 @@ public static class AbilityCatalog
         // opposed-at-battle checks Type==Personality). The immediate optional follow-up action is an
         // Additional Action grant (issue #181) scoped to the just-attached Spell, opened in the
         // execution case below -- not the bespoke spellFollowUp PendingChoice this used to be.
-        ["equip-battle"] = new("Battle", "Equip (Battle): Attach a Spell to your opposed unbowed Shugenja, paying all costs", "spell-in-hand", PlayerAbility: true, Performer: "own-unbowed-shugenja-opposed-at-battle"),
+        // Reserve (core rules, issue #184): a Fate card with this keyword may ALSO be attached via
+        // Equip (Battle), following the exact same rules as a Spell (still only to an opposed unbowed
+        // Shugenja) -- Item/Follower/Spell alike, whichever the printed keyword happens to be on. The
+        // one difference (a non-Spell Reserve attachment never grants the bonus Additional Action for
+        // its own Battle ability) is applied in the execution case below, not here.
+        ["equip-battle"] = new("Battle", "Equip (Battle): Attach a Spell or a Reserve Fate card to your opposed unbowed Shugenja, paying all costs", "spell-or-reserve-in-hand", PlayerAbility: true, Performer: "own-unbowed-shugenja-opposed-at-battle"),
         // Training-only: a Spell's own Battle ability, exercised only through the "equip-battle"
         // follow-up window above -- proves a just-attached Spell can immediately act.
         ["training-spell-force-boost"] = new("Battle", "Target your Personality at the current battlefield: +2 Force", "own-personality"),
@@ -227,6 +232,17 @@ public static class AbilityCatalog
         // a Kharmic card you control. A Dynasty card is replaced with a fresh, immediately face-up
         // Dynasty card (see the execution case); a Fate card's discard is followed by an extra draw.
         ["kharmic-discard"] = new("Limited", "Pay 2 Gold, discard a Kharmic card you control: a Dynasty card is replaced face-up; a Fate card is followed by an extra draw", "own-kharmic-card", PlayerAbility: true),
+        // Training-only: exercises Discipline (issue #184) -- played from a discard pile, paying the
+        // card's own printed Gold cost, then removed from the game (see the generic Timing=="Discipline"
+        // handling: zone check, cost, and post-resolution removal all key off this one Timing value).
+        ["training-discipline-ability"] = new("Discipline", "Discipline: pay this card's Gold cost, gain 1 Honor, then remove it from the game", "none"),
+        // Training-only: exercises Stalwart (issue #184) -- a per-instance (not per-player) enemy-bow
+        // ability, so two separate source instances can each bow the same Stalwart target once this
+        // turn, isolating the keyword's own negation from the ordinary once-per-turn dedupe.
+        ["training-bow-enemy"] = new("Open", "Training: bow a target enemy Personality", "enemy-personality"),
+        // Training-only: exercises Stalwart's "never the card's own controller" exclusion -- "personality"
+        // allows either side, unlike training-bow-enemy above.
+        ["training-bow-any"] = new("Open", "Training: bow a target Personality, own or enemy", "personality"),
         // Singh Remnants' own Reaction: unlike "own-enters-play" (the entering card's own ability),
         // this fires when a DIFFERENT card the player controls (a Personality) enters play, letting
         // Singh Remnants -- sitting in hand or a discard pile -- attach itself. Target "none": the
@@ -253,6 +269,22 @@ public sealed partial class MatchEngine
     // distinction ("has the PRINTED Magistrate keyword"), since it also grants Magistrate itself and
     // would otherwise always satisfy a plain Keyword() check.
     private static bool PrintedKeyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Contains(keyword, StringComparer.Ordinal);
+    // Stalwart (core rules, issue #184): "the first time on a turn an enemy's effect would bow a card
+    // with this keyword, the bowing (and only the bowing) is negated" -- a targeted ability's OWN
+    // effects (Force penalties, Honor loss, and so on) still apply in full; only the .Bowed=true this
+    // call would have made is skipped. Never negates the card's own controller bowing it (a cost, or
+    // its own ability) -- that is never "an enemy's effect" to begin with. Reuses AbilityUses' own
+    // per-card, per-TurnNumber convention (a synthetic "stalwart-negate" key) rather than a new field:
+    // TurnNumber already increments at the end of EVERY player's own turn (FinishTurn), which is
+    // exactly "resets at each player's end phase, regardless of whose turn it is."
+    private bool StalwartNegatesBow(CardInstance card, int actingPlayerId)
+    {
+        if (card.OwnerId == actingPlayerId || !Keyword(card, "Stalwart")) return false;
+        if (card.AbilityUses.TryGetValue("stalwart-negate", out var used) && used == _state.TurnNumber) return false;
+        card.AbilityUses["stalwart-negate"] = _state.TurnNumber;
+        Emit("stalwartNegated", $"{Definition(card).Name}'s Stalwart negates the bow.", card.OwnerId, card.Id);
+        return true;
+    }
     // Most Personalities have one printed Clan (the CardDefinition.Clan field); a few carry more than
     // one alignment (Clans overrides it when present). Loyal restricts recruitment to a Stronghold
     // whose Clan is among these.
@@ -503,6 +535,11 @@ public sealed partial class MatchEngine
         Require(ability!.Timing switch {
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
+            // Discipline (core rules, issue #184): played from a discard pile, not in play -- see the
+            // source-zone check below (Zone.DynastyDiscard/FateDiscard, not InPlay). No printed timing
+            // restriction of its own beyond that, so both phases a card could plausibly reach a
+            // discard pile and still matter in are allowed, like BattleOrOpen.
+            "Discipline" => _state.Phase is Phase.Action or Phase.Battle,
             "Battle" => _state.Phase == Phase.Battle,
             // Printed "Battle/Open" text (e.g. Immovable Object): usable in either phase. The
             // blanket Battle-only checks below (army presence, target/performer at-battle) key off
@@ -546,6 +583,7 @@ public sealed partial class MatchEngine
             // entering-play Reaction, must still be usable from there. Singh Remnants' shape is the
             // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
             Require(ability.Trigger == "any-personality-enters-play" ? source.Zone is Zone.Hand or Zone.FateDiscard
+                : ability.Timing == "Discipline" ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
                 : def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
                 "The ability's source is not in the required zone.");
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
@@ -686,10 +724,11 @@ public sealed partial class MatchEngine
             {
                 var target = Card(command.TargetId); var type = Definition(target).Type;
                 if (ability.Target == "hand") Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && player.Hand.Contains(target.Id), "Discard a card from your hand.");
-                else if (ability.Target == "spell-in-hand")
+                else if (ability.Target == "spell-or-reserve-in-hand")
                 {
-                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type == CardType.Spell, "Choose a Spell from your hand.");
-                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This Spell will not attach to that Shugenja.");
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand.");
+                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Shugenja.");
+                    Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
                 }
                 // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
                 // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
@@ -768,10 +807,13 @@ public sealed partial class MatchEngine
         // Equip (Battle) has no source card of its own -- its cost is the targeted Spell's, paid on
         // attachment, not a Strategy's own GoldCost.
         var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
-            : ability.Target == "spell-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
+            : ability.Target == "spell-or-reserve-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
             // Singh Remnants' shape: attaching itself, paying all costs -- its own GoldCost, already
             // separately validated above against the just-entered Personality's own restrictions.
             : ability.Trigger == "any-personality-enters-play" ? Definition(source!).GoldCost
+            // Discipline (core rules, issue #184): "typically... a Gold cost" -- the card's own
+            // printed GoldCost, same convention as a Strategy card played from hand.
+            : ability.Timing == "Discipline" ? Definition(source!).GoldCost
             : id == "kharmic-discard" ? 2
             // Invest (core rules): a separate, optional, standalone payment made only as the card
             // enters play (already enforced by reusing the own-enters-play Reaction/entryReaction
@@ -838,7 +880,7 @@ public sealed partial class MatchEngine
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": target!.Bowed = true; break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "veteran-advisor-draw": Draw(player); break;
             case "hired-legion-draw": source!.Bowed = true; Draw(player); break;
             case "akodo-regulars-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
@@ -849,17 +891,17 @@ public sealed partial class MatchEngine
             case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
             case "prepared-death": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
-            case "costly-feud": ApplyModifier(target!, source!.Id, id, "Force", -3); if (CardForce(target!) == 0) target!.Bowed = true; break;
+            case "costly-feud": ApplyModifier(target!, source!.Id, id, "Force", -3); if (CardForce(target!) == 0 && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "defensive-stance": Straighten(target!); ApplyModifier(target!, source!.Id, id, "Force", 3); break;
             case "crushing-force": ApplyModifier(target!, source!.Id, id, "Force", 3); break;
             case "crushing-destroy": case "never-afraid": DestroyAttachment(target!); break;
             case "incapacitated": case "favor-battle": MoveHome(target!, false); break;
-            case "block-supply": MoveHome(target!, true); break;
+            case "block-supply": MoveHome(target!, !StalwartNegatesBow(target!, player.Id)); break;
             case "lobby": target!.Bowed = true; _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "favor-cycle": DiscardFate(player, target!); Draw(player); break;
             case "journeys-end-move": MoveHome(target!, false); break;
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
-            case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
+            case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable && !StalwartNegatesBow(target, player.Id)) target.Bowed = true; break;
             case "justice-of-crane-dishonor":
                 target!.Dishonorable = true;
                 if (PrintedKeyword(Card(source!.AttachedTo!), "Magistrate")) GrantAdditionalAction(player.Id, null);
@@ -888,6 +930,9 @@ public sealed partial class MatchEngine
                 break;
             }
             case "effortless-counterattack-negate": _state.PendingAdditionalAction = null; break;
+            case "training-discipline-ability": GainHonor(player.Id, 1, "Training Discipline"); break;
+            case "training-bow-enemy": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
             case "training-destroy-terrain": DiscardTerrain(target!); break;
@@ -955,30 +1000,36 @@ public sealed partial class MatchEngine
             case "equip-battle":
             {
                 var performer = Card(command.PerformerId!);
-                var spell = target!;
-                Pay(player.Id, spell, Definition(spell).GoldCost, command.SourceIds);
-                player.Hand.Remove(spell.Id);
-                spell.Zone = Zone.Attached; spell.AttachedTo = performer.Id; spell.FaceUp = true; spell.ProvinceIndex = performer.ProvinceIndex;
-                Emit("equipped", $"{Definition(spell).Name} attached to {Definition(performer).Name}.", player.Id, spell.Id);
+                var attachment = target!;
+                Pay(player.Id, attachment, Definition(attachment).GoldCost, command.SourceIds);
+                player.Hand.Remove(attachment.Id);
+                attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
+                // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
+                // Spell never has, so this was never needed before) -- same as the ordinary Equip().
+                if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
+                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name}.", player.Id, attachment.Id);
                 // A Spell's own "after entering play" Reaction (if any) takes priority over the
                 // Battle-ability follow-up below; no published Spell needs both yet.
-                if (OpenEntryReactionWindow(player.Id, spell, 1 - player.Id)) return;
+                if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
                 // "You may take an additional action to use a battle ability on that spell" -- Equip
                 // (Battle)'s own shape of Additional Action (issue #181), scoped to just the newly-
-                // attached Spell. This is the user's own running example of the mechanic: unlike the
+                // attached card. This is the user's own running example of the mechanic: unlike the
                 // old bespoke "act once or decline" window it replaces, it is now subject to the same
                 // before-additional-action-resolves Reaction (Effortless Counterattack) and the same
-                // Two-Hands-style "no new grants this battle" restriction as any other grant. Nothing
-                // to grant if the Spell has no Battle ability at all.
-                if ((Definition(spell).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var spellAbility) && spellAbility.Timing == "Battle"))
-                    GrantAdditionalAction(player.Id, [spell.Id]);
+                // Two-Hands-style "no new grants this battle" restriction as any other grant. Reserve
+                // (issue #184): a non-Spell Reserve attachment specifically does NOT get this bonus
+                // grant for its own Battle ability -- only Spells do (the Reserve keyword's own printed
+                // text draws this exact distinction). Nothing to grant if there is no Battle ability at
+                // all either.
+                if (Definition(attachment).Type == CardType.Spell && (Definition(attachment).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var attachAbility) && attachAbility.Timing == "Battle"))
+                    GrantAdditionalAction(player.Id, [attachment.Id]);
                 break;
             }
             case "reiyu-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(source)); break;
             case "training-spell-force-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
-            case "horibe-bow": target!.Bowed = true; break;
+            case "horibe-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "horibe-straighten": Straighten(target!); break;
-            case "atsumichi-bow": target!.Bowed = true; break;
+            case "atsumichi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
             case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
@@ -989,7 +1040,7 @@ public sealed partial class MatchEngine
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
             case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
-            case "bounty-hunter-bow": target!.Bowed = true; break;
+            case "bounty-hunter-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "rumormonger-penalty":
                 source!.Bowed = true;
                 ApplyModifier(target!, source.Id, id, "Force", -CardPersonalHonor(target!));
@@ -1012,7 +1063,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true); break;
-            case "brothers-great-lake-bow": target!.Bowed = true; break;
+            case "brothers-great-lake-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "elite-sentry-straighten":
             {
                 var personality = Card(source!.AttachedTo!);
@@ -1027,7 +1078,7 @@ public sealed partial class MatchEngine
                 break;
             case "panku-madness": CreateToken(target!, "Madness", id); break;
             case "soshi-conditional-bow":
-                if (_state.Phase == Phase.Battle) target!.Bowed = true;
+                if (_state.Phase == Phase.Battle && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (target!.Dishonorable) GainHonor(target.OwnerId, -1, "Soshi House Guard", source);
                 break;
             case "unseen-assassin-strike":
@@ -1091,6 +1142,9 @@ public sealed partial class MatchEngine
         // A Terrain's own ability (e.g. an entering-play Reaction) runs from Zone.Battlefield, where
         // it stays -- only the normal one-shot, played-from-hand Strategy case discards afterward.
         if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+        // Discipline (core rules, issue #184): "played and resolved and then removed from the game" --
+        // always, whether or not its own effect above did anything else with the card.
+        if (ability.Timing == "Discipline") RemoveFromGame(source!);
         // Additional Action (issue #181): an ordinary action that did not itself consume a grant
         // forfeits every one of this player's PRE-EXISTING grants outright (same as explicitly
         // passing, see MatchEngine.Pass) -- "resolve them to completion before resuming the normal
@@ -1149,6 +1203,17 @@ public sealed partial class MatchEngine
         player.Hand.Remove(card.Id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
         Emit("fateDiscarded", $"{player.Name} discarded {Definition(card).Name}.", player.Id, card.Id);
     }
+    // Removed from Game (core rules Glossary, issue #184): terminal and permanent -- unlike
+    // Dead/DynastyDiscard/FateDiscard, a card here can never be targeted or used again under any
+    // circumstance. Both Fate and Dynasty cards mix into this single zone. Discipline's own cost is
+    // paid separately, at the point of activation (see the generic cost-computation block) -- this is
+    // only the actual removal, run once the ability it triggered has fully resolved.
+    private void RemoveFromGame(CardInstance card)
+    {
+        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
+        Emit("removedFromGame", $"{Definition(card).Name} was removed from the game.", card.OwnerId, card.Id);
+    }
     // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by
     // an ability targeting it, or automatically once its printed effects have been applied during
     // battle resolution (FinishBattleResolution) -- both paths share this single removal.
@@ -1203,7 +1268,11 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {
         var player = Player(playerId);
-        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand))
+        // Discipline (issue #184): a discard-pile card is only a candidate source at all if it carries
+        // a Discipline-timed ability -- ValidateAbility's own zone check (called per candidate below)
+        // is still the real gatekeeper, this is just which cards get considered in the first place.
+        var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
+                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Discipline")))
             .SelectMany(c => (Definition(c).Abilities ?? []).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
@@ -1211,7 +1280,7 @@ public sealed partial class MatchEngine
         foreach (var (source, id) in sources)
         {
             var ability = AbilityCatalog.All[id];
-            var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
+            var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             string?[] performers = ability.Performer switch
@@ -1231,9 +1300,9 @@ public sealed partial class MatchEngine
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
             // performer -- see the generic fallback below), Equip (Battle) is not offered at all
-            // without an eligible Shugenja or a Spell in hand: it is a standing player ability with
-            // no source card of its own to anchor a disabled entry to.
-            if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell))) continue;
+            // without an eligible Shugenja or a Spell/Reserve card in hand: it is a standing player
+            // ability with no source card of its own to anchor a disabled entry to.
+            if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")))) continue;
             if (performers.Length == 0) performers = [null];
             foreach (var performer in performers)
             {
@@ -1243,16 +1312,16 @@ public sealed partial class MatchEngine
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
                 string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
-                    "spell-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell).Cast<string?>().ToArray(),
+                    "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
                     "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {
-                    // Equip (Battle)'s cost is the targeted Spell's own GoldCost, not a fixed
-                    // per-performer cost -- each candidate needs its own payment recomputed.
-                    var command = ability.Target == "spell-in-hand" && target is not null
+                    // Equip (Battle)'s cost is the targeted Spell/Reserve card's own GoldCost, not a
+                    // fixed per-performer cost -- each candidate needs its own payment recomputed.
+                    var command = ability.Target == "spell-or-reserve-in-hand" && target is not null
                         ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
                         : prototype with { TargetId = target };
                     try { ValidateAbility(command); legal.Add(command); }

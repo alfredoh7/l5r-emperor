@@ -9,7 +9,12 @@ public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Ite
 // CavalryDefense is the Cavalry Maneuvers segment that follows it (core rules Attack Phase, step C).
 public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, CavalryDeclaration, CavalryDefense, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached }
+// RemovedFromGame (issue #184 -- core rules Glossary): a card here can never be targeted or used
+// again under any circumstance, distinct from Dead/DynastyDiscard/FateDiscard -- both Fate and
+// Dynasty cards mix into this one zone, matching the single shared "Removed from Game" pile the
+// client will render (a Dead/DynastyDiscard/FateDiscard card is always specifically one or the
+// other; this one is neither, and both kinds of card can end up here).
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -211,7 +216,7 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
-    bool ProclaimUsedThisTurn, bool DishonorLossPending);
+    bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,

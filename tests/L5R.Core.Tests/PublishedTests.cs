@@ -79,7 +79,7 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,176);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,180);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}

@@ -60,7 +60,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-2437": "Needs \"Equip this Follower as a Battle action\" (not yet a general capability).",
     "oracle-l5r-2520": "Needs an attachment Transfer mechanic.",
     "oracle-l5r-2598": "Needs Dueling/Focus Effects (not started at all).",
-    "oracle-l5r-10896": "Needs \"Equip this Follower as a Battle action\" (Reserve keyword's own reminder).",
     "oracle-l5r-10897": "Needs an \"after a card with this keyword dies\" Reaction trigger (Expendable's own reminder).",
     "oracle-l5r-10681": "Needs Equip from the discard pile (explicitly known gap -- no mechanism returns a card to play from a discard pile yet).",
     "oracle-l5r-2722": "Needs a compound multi-keyword attach restriction (AttachRequiresKeyword only holds one today).",
@@ -72,7 +71,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3280": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-3413": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-10588": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
-    "oracle-l5r-3522": "Needs a \"removed from game\" zone plus discard-pile keyword search.",
+    "oracle-l5r-3522": "Needs discard-pile keyword search (the \"removed from game\" zone it also needs is now built, issue #184).",
     "oracle-l5r-3589": "Needs the Attack-vs-attachments override plus \"last attached to\" tracking after detachment.",
     "oracle-l5r-3611": "Needs a performer/wielder-keyed Attack-strength axis (already a known gap elsewhere).",
     "oracle-l5r-4118": "Needs a unit-Force-total comparison target (existing categories only compare individual card Force).",
@@ -111,6 +110,18 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-9255": "Needs a new Reaction trigger: \"after an Attack Phase ends.\"",
     "oracle-l5r-10688": "Not blocked; deferred for scope (existing entry-Honor-loss pattern; carries the Legionnaire keyword Aulus's boost needs).",
     "oracle-l5r-9681": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
+    # Reserve (issue #184): the primitive itself (Dynasty absent-battle recruit; Fate Equip (Battle)
+    # attachment, no bonus Additional Action for non-Spells) is built and demonstrated on Hida Kurabi,
+    # Matsu Ryohei, and Floating Reserve (all pure reminder text). These carry Reserve too, but each
+    # also needs something else first.
+    "oracle-l5r-10870": "Needs an \"Absent Interrupt\" mechanic (Bayushi Wateru's own printed ability, on top of Reserve).",
+    "oracle-l5r-10874": "Needs a Follower-Equip Battle ability with no Shugenja/opposed requirement (Daigotsu Chiboshi's own \"Equip a Follower to Chiboshi\"), plus tying its own Additional Action grant to a Reserve recruitment specifically.",
+    "oracle-l5r-10862": "Needs a \"count of Spells in this unit\" Attack-strength axis (Isawa Ikariya's own Ranged Attack).",
+    "oracle-l5r-10842": "Needs conditional Gold-cost reduction (Kakita Ujirou's own \"enters play for N less Gold if...\").",
+    "oracle-l5r-10846": "Needs conditional Gold-cost reduction (Tamori Shinji's own \"enters play for 4 less Gold if you are the Defender\").",
+    "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
+    "oracle-l5r-10857": "Needs clarification on \"Fire Battle:\" (a Ring-gated Timing, unclear whether it depends on the not-yet-built Rings primitive) before wiring Moshi Ikako's own Ranged Attack.",
+    "oracle-l5r-10300": "Needs an \"actions must target this card if legal\" redirect mechanic (Yoritomo Naoto's own Battle ability), on top of its own Additional Action grant.",
 }
 
 
