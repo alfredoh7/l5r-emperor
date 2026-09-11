@@ -195,6 +195,7 @@ public sealed partial class MatchEngine
             case "selectBattle": SelectBattle(command); break;
             case "equip": Equip(command); break;
             case "playStrategy": PlayStrategy(command); break;
+            case "recruitReserve": RecruitReserve(command); break;
             case "useAbility": UseAbility(command); break;
             default: throw new RuleViolation("Unsupported command.");
         }
@@ -255,6 +256,52 @@ public sealed partial class MatchEngine
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
         else OpenEntryReactionWindow(command.PlayerId,card);
+    }
+
+    // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
+    // "absent battle action" -- the recruiting player needs no presence of their own at this
+    // battlefield, unlike every other Battle action. Two conditions instead: the card is already
+    // face up in its province (a face-down Reserve card cannot be activated), there is a battlefield
+    // at that province (any currently unresolved one, not necessarily the one being resolved right
+    // now), and the ENEMY has presence there. Recruited directly to the battlefield, skipping the
+    // assignment step entirely -- no assignment-triggered Reaction exists in the engine yet, so there
+    // is nothing to actually skip today, but nothing here waits for one before this Personality is
+    // fully in play either. Deferred: Proclaim's own narrow exception for a Reserve recruit made
+    // possible by a defender's battlefield-creation ability at the attacker's own province -- that
+    // mechanic does not exist yet, so QuotePurchase's own ProclaimEligible (which already requires
+    // playerId==ActivePlayerId) is reused as-is and simply never overridden for this narrow case.
+    private void RecruitReserve(GameCommand command)
+    {
+        Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
+        var card=Card(command.CardId);
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && Keyword(card,"Reserve"),
+            "Choose your own face-up Reserve Personality in a province.");
+        var provinceIndex=card.ProvinceIndex!.Value;
+        Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
+        Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
+        var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
+        Require(quote.Error is null,quote.Error??"");
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
+        province.CardId=null;
+        card.Zone=Zone.Battlefield; card.FaceUp=true;
+        card.Bowed=Definition(card).Effect=="enters-bowed";
+        if(Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
+        Emit("reserveRecruited",$"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.",command.PlayerId,card.Id);
+        Refill(Player(command.PlayerId),province);
+        var reactionId=EntryReactionAbility(card);
+        if (quote.ProclaimEligible)
+        {
+            if(reactionId is not null) card.AbilityUses.Remove(reactionId);
+            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
+            _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
+        }
+        else if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        // An ordinary action (never itself an Additional Action) forfeits any of this player's own
+        // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        NextAction(command.PlayerId);
     }
 
     private void OrderSeppuku(GameCommand command)
@@ -609,7 +656,7 @@ public sealed partial class MatchEngine
         switch(def.Effect)
         {
             case "force-three": Require(target.OwnerId==command.PlayerId,"Training rally targets your Personality."); ApplyModifier(target,card.Id,def.Effect,"Force",3); break;
-            case "bow-small": Require(target.OwnerId!=command.PlayerId && PersonalityForce(target)<=3,"Training pressure targets an enemy Personality with 3 or less Force."); target.Bowed=true; break;
+            case "bow-small": Require(target.OwnerId!=command.PlayerId && PersonalityForce(target)<=3,"Training pressure targets an enemy Personality with 3 or less Force."); if(!StalwartNegatesBow(target,command.PlayerId)) target.Bowed=true; break;
             default: throw new RuleViolation("This card effect is not implemented.");
         }
         Player(command.PlayerId).Hand.Remove(card.Id); card.Zone=Zone.FateDiscard; card.FaceUp=true;

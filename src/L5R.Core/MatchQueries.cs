@@ -26,7 +26,8 @@ public sealed partial class MatchEngine
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
-                player.ProclaimUsedTurn==_state.TurnNumber,player.DishonorLossPending);
+                player.ProclaimUsedTurn==_state.TurnNumber,player.DishonorLossPending,
+                owned.Where(c=>c.Zone==Zone.RemovedFromGame).Select(c=>ViewCard(c)).ToArray());
         }).ToArray();
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
@@ -188,6 +189,26 @@ public sealed partial class MatchEngine
                         (def.Effect=="force-three"?c.OwnerId==playerId:c.OwnerId!=playerId && PersonalityForce(c)<=3)).Select(c=>c.Id).ToArray();
                     var reason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield.":targets.Length==0?"No legal target at this battlefield.":null;
                     Add("playStrategy",$"Play {def.Name}",reason is null?Command("playStrategy",card.Id,target:targets[0]):null,reason,card.Id,targets);
+                }
+                // Reserve (issue #184): an absent battle action -- no presence of the recruiting
+                // player's own required, only a battlefield at the card's own province with enemy
+                // presence there. Offered across every one of the player's own provinces, not just the
+                // currently-resolving battlefield.
+                foreach(var card in player.Provinces.Where(p=>p.CardId is not null).Select(p=>Card(p.CardId)).Where(c=>c.FaceUp && Definition(c).Type==CardType.Personality && Keyword(c,"Reserve")))
+                {
+                    var def=Definition(card);
+                    var provinceIndex=card.ProvinceIndex!.Value;
+                    var eligible=_state.UnresolvedBattlefields.Contains(provinceIndex) && Army(1-playerId,provinceIndex).Any();
+                    var modes=def.Clan==player.Clan ? new[] {(true,false),(false,false),(true,true),(false,true)} : [(false,false)];
+                    foreach(var (discount,allegiance) in modes)
+                    {
+                        var quote=QuotePurchase(playerId,card.Id,discount,allegiance);
+                        var payment=quote.Payments.FirstOrDefault();
+                        var reason=!eligible?"There is no battlefield here with enemy presence.":quote.Error??(payment is null?"Insufficient unbowed Gold production.":null);
+                        var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";
+                        Add("recruitReserve",$"Recruit {def.Name} from Reserve · {quote.Cost} Gold · {mode}",
+                            reason is null?Command("recruitReserve",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id);
+                    }
                 }
                 Add("pass","Pass battle action",Command("pass"));
                 break;
