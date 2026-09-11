@@ -28,6 +28,7 @@ public partial class Main
             PreferencesChanged = () => ApplyPreferences(true)
         };
         layer.AddChild(_titleMenu);
+        InitializeTurnBloom();
         GetTree().AutoAcceptQuit = false;
         GetWindow().CloseRequested += () => { ShowMainMenu(); _titleMenu.ShowQuit(); };
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) ShowMainMenu();
@@ -74,6 +75,8 @@ public partial class Main
     }
     private void StartFromMenu(int seat)
     {
+        _turnBloomGate.Reset();
+        _turnBloom.Cancel();
         ResetStatHistory();
         _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _cameraGlide = false;
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
