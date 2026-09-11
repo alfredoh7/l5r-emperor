@@ -112,6 +112,8 @@ var tests = new (string Name, Action Run)[]
     ("Discipline (issue #184): a card played from a discard pile, paying its own printed Gold cost, resolving its effect, then removed from the game (the new Zone.RemovedFromGame/PlayerView.RemovedFromGame) rather than left in the discard pile; unusable from hand; unaffected by an earlier, unrelated discard the same turn", DisciplineKeyword),
     ("Dishonor/Rehonor (issue #186): the Personal-Honor override (Utaku Chikako's shape), GainHonorFromPerformer negating a dishonorable performer's own Honor-granting ability and rehonoring them instead, and battle resolution rehonoring a dishonorable winner/tier and negating the full Honor gain (a tie's rehonoring happens before its own mutual destruction, so no double penalty)", DishonorRehonorMechanics),
     ("Utaku Chikako (issue #186): the real card's own Personal-Honor override, and her Limited ability (gain 2 Honor; may not declare an attack this turn, a broad restriction on the assignment itself that resets next turn)", UtakuChikako),
+    ("Goju House Guard and Aberrations (issue #192): the new deck-return primitive (top or bottom, controller's choice for Goju itself; unattached unit cards always to the bottom of their owner's appropriate deck, fully reset) and top-of-Fate-deck discard primitive (Force bonus equal to the discarded card's Focus Value)", GojuHouseGuardAndAberrations),
+    ("Focus-1 Battle-action wave (issue #192): Sankaku-Yari (target-keyword-conditional Attack strength, zero new primitives), Pearl of Embers (BattleOrOpen, zero new primitives), Ritual Preparation (the new own-unit-card Target category -- a Personality OR Follower, own, in play)", FocusOneBattleActionsWave),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -2871,6 +2873,101 @@ static void UtakuChikako()
         Accept(e,new GameCommand("pass",0,e.Version)); // Action Phase: two consecutive passes -> Attack Declaration
         Reject(e,new GameCommand("attack",0,e.Version,Assignments:new Dictionary<string,int>{[unit.Id]=0})); // declaring an attacker is rejected
         Accept(e,new GameCommand("attack",0,e.Version,Assignments:[])); // declining (empty assignment) is still legal
+    }
+}
+static void GojuHouseGuardAndAberrations()
+{
+    {
+        // Goju House Guard (issue #192): target with two attachments -- both individually "without
+        // attachments" (neither carries a further attachment of its own), so both return to the
+        // bottom of their owner's Fate deck; the target Personality herself HAS attachments at the
+        // snapshot moment, so she stays in play untouched. Goju's own cost requires an explicit
+        // DeckPosition and applies it to itself (Top here), separate from the target's own cards
+        // (which always go to the Bottom regardless of Goju's own choice).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var goju=Add(s,"oracle-l5r-2851",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var followerA=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemy.Id);
+        var followerB=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:enemy.Id);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:goju.Id,TargetId:enemy.Id,AbilityId:"goju-house-guard-return")); // no DeckPosition chosen
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:goju.Id,TargetId:enemy.Id,AbilityId:"goju-house-guard-return",DeckPosition:"Top"));
+        Equal(e.State.Cards[goju.Id].Zone,Zone.FateDeck,"Goju itself returns to its own owner's Fate deck");
+        Check(e.State.Players[0].FateDeck[0]==goju.Id,"Placed on top -- the controller's choice");
+        Equal(e.State.Cards[followerA.Id].Zone,Zone.FateDeck,"An unattached card in the unit returns to the bottom of its owner's Fate deck");
+        Equal(e.State.Cards[followerB.Id].Zone,Zone.FateDeck,"Likewise for the second one");
+        Check(new[]{followerA.Id,followerB.Id}.Contains(e.State.Players[1].FateDeck[^1]) && new[]{followerA.Id,followerB.Id}.Contains(e.State.Players[1].FateDeck[^2]),"Both placed at the bottom");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Battlefield,"The target Personality herself had attachments at the snapshot moment -- she stays in play");
+    }
+    {
+        // A bare target (no attachments at all): the Personality herself is "a card without
+        // attachments in his unit" -- she returns to the bottom of her own owner's Dynasty deck,
+        // fully reset (no longer bowed, no stale Modifiers).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var goju=Add(s,"oracle-l5r-2851",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:goju.Id,TargetId:enemy.Id,AbilityId:"goju-house-guard-return",DeckPosition:"Bottom"));
+        Check(e.State.Players[0].FateDeck[^1]==goju.Id,"Placed on bottom -- the controller's choice");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.DynastyDeck,"A bare Personality returns to the bottom of her own owner's Dynasty deck");
+        Check(!e.State.Cards[enemy.Id].Bowed,"Fully reset: no longer bowed");
+        Check(e.State.Players[1].DynastyDeck[^1]==enemy.Id);
+    }
+    {
+        // Aberrations: discards the forced top card of its OWN controller's Fate deck (no choice),
+        // gaining a Force bonus equal to that card's own printed Focus Value.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var aberrations=Add(s,"oracle-l5r-10516",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        var topId=e.State.Players[0].FateDeck[0];
+        var topFocus=CardCatalog.Get(e.State.Cards[topId].DefinitionId).Focus;
+        var deckCountBefore=e.State.Players[0].FateDeck.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:aberrations.Id,AbilityId:"aberrations-boost"));
+        Equal(e.State.Cards[topId].Zone,Zone.FateDiscard,"The top card of the Fate deck is discarded");
+        Equal(e.State.Players[0].FateDeck.Count,deckCountBefore-1);
+        Check(e.State.Cards[aberrations.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==topFocus),"Force bonus equal to the discarded card's Focus Value");
+    }
+}
+static void FocusOneBattleActionsWave()
+{
+    {
+        // Sankaku-Yari (issue #192): zero new primitives -- Horseback Warriors already established a
+        // target-keyword-conditional Attack strength; this is the mirror image (bonus FOR Cavalry).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var yari=Add(s,"oracle-l5r-6469",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var nonCavalry=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, no attachments, not Cavalry
+        var cavalry=Add(s,"training-cavalry",1,Zone.Battlefield,province:0); // Force 2, well within either strength
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:nonCavalry.Id,AbilityId:"sankaku-yari-attack")); // Melee 4 < Force 5, no Cavalry bonus
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:cavalry.Id,AbilityId:"sankaku-yari-attack"));
+        Equal(e.State.Cards[cavalry.Id].Zone,Zone.Dead,"Destroys the Cavalry target");
+    }
+    {
+        // Pearl of Embers (issue #192): zero new primitives -- bows itself as a cost, straightens its
+        // own wielder even though he was already bowed.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true);
+        var pearl=Add(s,"oracle-l5r-5902",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:pearl.Id,AbilityId:"pearl-of-embers-straighten"));
+        Check(e.State.Cards[pearl.Id].Bowed,"Bows itself as the cost");
+        Check(!e.State.Cards[host.Id].Bowed,"Straightens its wielder");
+    }
+    {
+        // Ritual Preparation (issue #192): "your target card in a unit" -- either a Personality or a
+        // Follower, own, in play; needed the one new own-unit-card Target category.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true);
+        var follower=Add(s,"training-follower",0,Zone.Attached,province:0,attachedTo:host.Id,bowed:true);
+        var ritual=Add(s,"oracle-l5r-10714",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ritual.Id,TargetId:follower.Id,AbilityId:"ritual-preparation-straighten"));
+        Check(!e.State.Cards[follower.Id].Bowed,"Straightens the targeted Follower");
+        Check(e.State.Cards[host.Id].Bowed,"The Personality herself is untouched -- a different card was targeted");
     }
 }
 static void GeneralizedEntryReactionWindow()

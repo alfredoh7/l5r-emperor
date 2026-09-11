@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Deck-return primitive (ToOwnerDeck, top or bottom, controller's choice for a cost, always-bottom for targets, full stat/keyword/bow reset since the card re-enters live play) and top-of-Fate-deck discard primitive (DiscardTopOfFateDeck). Wired Goju House Guard and Aberrations (Follower Wave 8) using them. Then audited all 91 unwired Focus-1 cards printing a Battle action: wired 3 more with zero/minimal new primitives (Sankaku-Yari, Pearl of Embers -- Item Wave 2; Ritual Preparation -- Strategy Wave 4, numbered 4 not 3 to avoid a filename collision with sibling in-flight PR #190's own strategy-wave-3), and added a specific blocker note for each of the remaining 88 to docs/CARD_INVENTORY.xlsx. Crosses into src/L5R.Client/Content/Published/ only for the new cards' own scanned artwork JPEGs (copied automatically by the package_*.py pipeline) -- no client code touched; standing autonomous cross-lane authority per AGENTS.md/.github/collaboration.json.",
+  "validation": "114/114 core tests, 34/34 published tests, 8/8 deck-format tests, full bash tools/check.sh --skip-client green (13/13 AI, 5/5 server integration, 4/4 client transport integration). New GojuHouseGuardAndAberrations and FocusOneBattleActionsWave tests.",
+  "remaining": "88 Focus-1 Battle-action candidates left unwired with per-card blocker notes in docs/CARD_INVENTORY.xlsx; several marked 'Not blocked; deferred for scope' are close but left for a future pass.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/192",
+  "branch": "mdornbrook/192-deck-return-goju-aberrations",
+  "updated": "2026-09-11T16:28:27.102870+00:00"
+}
