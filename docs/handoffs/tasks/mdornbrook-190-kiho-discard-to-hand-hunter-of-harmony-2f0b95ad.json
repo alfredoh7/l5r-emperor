@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rules-lane primitives (Kiho keyword, classification-only like Recon; a new discard-to-hand 'freshly drawn' primitive, ReturnToHand) plus two real published cards, Hunter of Harmony (Follower Wave 7) and Volcano Tattoo (Strategy Wave 3, tested via Togashi Meiyu as the Tattooed Monk performer). Crosses into src/L5R.Client/Content/Published/ only for the two new cards' own scanned artwork JPEGs (copied automatically by the existing package_*.py pipeline, same as every prior wave) -- no client code or UI logic touched; standing autonomous cross-lane authority per AGENTS.md/.github/collaboration.json.",
+  "validation": "113/113 core tests, 34/34 published tests, 8/8 deck-format tests, full bash tools/check.sh --skip-client green (13/13 AI, 5/5 server integration, 4/4 client transport integration). New KihoDiscardToHand test covers Volcano Tattoo's own ability (destroy + conditional Fire straighten) and Hunter of Harmony's discard-to-hand mechanic (AbilityUses cleared, replay allowed same turn).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/190",
+  "branch": "mdornbrook/190-kiho-discard-to-hand-hunter-of-harmony",
+  "updated": "2026-09-11T13:47:06.629925+00:00"
+}

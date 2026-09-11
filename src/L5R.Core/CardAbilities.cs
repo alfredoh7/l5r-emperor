@@ -92,6 +92,13 @@ public static class AbilityCatalog
         ["training-destroy-token"] = new("Open", "Training: destroy a token on target", "own-personality-with-token"),
         ["monastery-fire-token"] = new("Limited", "Target your Tattooed Personality · +1F Fire token", "own-tattooed-personality"),
         ["monastery-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 5 Attack", "attack", Performer: "own-personality-with-fire-token-at-battle"),
+        // Volcano Tattoo (issue #190): "Fire Kiho Battle" -- the printed "Kiho" is a plain
+        // classification word on this card (see ROADMAP's Kiho entry), not a distinct Timing; the
+        // engine's own "Battle" timing already gates it correctly. Bow the performing Tattooed Monk
+        // (cost) to target an unattached card in an enemy unit whose Personality's Chi is at or below
+        // the performer's; destroying a Follower counts as "destroyed an attachment" for the
+        // conditional Fire-keyword straighten (Followers are modeled as attachments throughout).
+        ["volcano-tattoo-destroy"] = new("Battle", "Bow your performing Tattooed Monk: target an unattached card in an enemy unit whose Personality has Chi at or below his. Destroy it. Straighten the performer if he is Fire and this destroyed an attachment.", "enemy-unattached-unit-card-chi-lte-performer", Performer: "own-unbowed-tattooed-monk-at-battle"),
         // Training-only: exercises the Honor-loss-immunity primitive's "enters play, lose Honor"
         // shape (e.g. a card reading "After [X] enters play: lose N Honor") ahead of any published
         // card needing it.
@@ -228,6 +235,11 @@ public static class AbilityCatalog
         // and every attachment), not a separately-chosen target -- Target "none", resolved from source.
         ["elite-sentry-straighten"] = new("BattleOrOpen", "Straighten this Follower's unit", "none"),
         ["furugaro-charge"] = new("Limited", "Destroy this Follower to target a Fudo Personality: give him two Charging tokens", "own-personality-with-keyword", RequiredKeyword: "Fudo"),
+        // Hunter of Harmony (issue #190): "remove this card from the game" as a Limited ability's own
+        // cost -- same shape as furugaro-charge's self-destruction above, just RemoveFromGame instead
+        // of DestroyUnits. The target, a Kiho Strategy in the player's own Fate discard pile, is put
+        // into hand "freshly drawn" (see ReturnToHand) rather than played directly.
+        ["hunter-of-harmony-return"] = new("Limited", "Remove this card from the game: choose a Kiho Strategy in your Fate discard pile. Put it into your hand.", "own-kiho-strategy-in-discard"),
         ["panku-madness"] = new("Limited", "Give a target card a Madness token", "any-card"),
         ["soshi-conditional-bow"] = new("BattleOrOpen", "Target a Personality: if it is a Combat Segment, bow him; if he is dishonorable, his controller loses 1 Honor", "personality"),
         ["unseen-assassin-strike"] = new("Limited", "Bow this Follower to destroy a target Follower; destroy this Follower and lose 2 Honor", "enemy-follower"),
@@ -659,6 +671,11 @@ public sealed partial class MatchEngine
                     ability.RequiredKeyword is not null && Keyword(performer, ability.RequiredKeyword),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
+                // Volcano Tattoo (issue #190): "Tattooed Monk" is a compound requirement (both
+                // keywords), not a single RequiredKeyword -- unlike the generic
+                // "...-with-keyword..." categories above, this one is hardcoded.
+                "own-unbowed-tattooed-monk-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
+                    Keyword(performer, "Monk") && Keyword(performer, "Tattooed"),
                 // Equip (Battle): only a Shugenja Personality may ever hold a Spell -- a Follower with
                 // the Shugenja trait is excluded by the Type check, matching the printed restriction.
                 "own-unbowed-shugenja-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
@@ -744,6 +761,12 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && Keyword(target, "Kharmic")
                         && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp),
                         "Discard a Kharmic card you control, from your hand or a face-up province.");
+                // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
+                // player's own Fate discard pile -- not in play, so this needs its own branch just like
+                // "own-kharmic-card" above.
+                else if (ability.Target == "own-kiho-strategy-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
+                        "Choose a Kiho Strategy card from your Fate discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -796,6 +819,13 @@ public sealed partial class MatchEngine
                         // Compared against the chosen Performer (a separately-selected card), unlike
                         // "-than-self" categories above which compare against the ability's own source.
                         "enemy-personality-chi-lte-performer" => personality && !own && Definition(target).Chi <= Definition(Card(command.PerformerId!)).Chi,
+                        // Volcano Tattoo (issue #190): "a card without attachments in his unit" -- the
+                        // same Follower-or-unattached-Personality shape the Ranged/Melee "attack" Target
+                        // already uses above, but compared against the unit's own Personality's Chi
+                        // (via PersonalityChi, which includes Item-attachment bonuses) rather than a
+                        // Force/strength check.
+                        "enemy-unattached-unit-card-chi-lte-performer" => !own && (type == CardType.Follower || personality && !HasAttachments(target)) &&
+                            PersonalityChi(type == CardType.Personality ? target : Card(target.AttachedTo!)) <= PersonalityChi(Card(command.PerformerId!)),
                         "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
                         // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
                         // an OR of two otherwise-unrelated existing categories.
@@ -1088,6 +1118,19 @@ public sealed partial class MatchEngine
                 CreateToken(target!, "Charging", id);
                 CreateToken(target!, "Charging", id);
                 break;
+            case "hunter-of-harmony-return":
+                RemoveFromGame(source!);
+                ReturnToHand(target!);
+                break;
+            case "volcano-tattoo-destroy":
+            {
+                var performer = Card(command.PerformerId!);
+                performer.Bowed = true;
+                var destroyedAttachment = Definition(target!).Type == CardType.Follower;
+                DestroyUnits([target!], false);
+                if (destroyedAttachment && Keyword(performer, "Fire")) Straighten(performer);
+                break;
+            }
             case "panku-madness": CreateToken(target!, "Madness", id); break;
             case "soshi-conditional-bow":
                 if (_state.Phase == Phase.Battle && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -1225,6 +1268,16 @@ public sealed partial class MatchEngine
         if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
         card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         Emit("removedFromGame", $"{Definition(card).Name} was removed from the game.", card.OwnerId, card.Id);
+    }
+    // A card moved from a discard pile back to hand (issue #190, e.g. Hunter of Harmony) is "treated
+    // as a freshly drawn card": any once-per-turn AbilityUses stamp from an earlier use this same turn
+    // is cleared, so its printed ability may be used again this turn -- unlike a card that merely stays
+    // in play or a discard pile, where the stamp persists.
+    private void ReturnToHand(CardInstance card)
+    {
+        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
+        Player(card.OwnerId).Hand.Add(card.Id);
+        Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
     }
     // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by
     // an ability targeting it, or automatically once its printed effects have been applied during
