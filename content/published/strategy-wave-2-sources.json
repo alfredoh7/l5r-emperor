@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-127",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=127",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-127-printing-1-image-1.jpg",
+    "image_sha256": "17ae25efa2be396bc91e1d2f69422c4ef3246a1ee28ab7f65ae0046a355b1a3c"
+  },
+  {
+    "card_id": "oracle-l5r-10175",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10175",
+    "image_path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10175-printing-1-image-1.jpg",
+    "image_sha256": "136d8afc502384b7a03bdc7f9c9c2909c2401a1401b962ae89a130b1afcf0049"
+  },
+  {
+    "card_id": "oracle-l5r-2283",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2283",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-2283-printing-1-image-1.jpg",
+    "image_sha256": "382dae692d96be8fa4c4bc1561ac07070e8614d88b8defa6910c5ca874a1326d"
+  }
+]

@@ -311,8 +311,8 @@ public static class PublishedContent
     /// <summary>Wave 1 of ability-bearing Item cards (all prior Item-type cards were ability-free,
     /// part of VanillaWave1): Justice of the Crane and Unparalleled Sword, both "This Personality has
     /// X" AttachGrantsKeyword grants (Magistrate, Kensai) -- issue #179. Justice of the Crane's
-    /// "additional action if the printed Magistrate keyword" bonus is deferred; only its base Dishonor
-    /// effect is wired.</summary>
+    /// "additional action if the printed Magistrate keyword" bonus is now wired too, once the
+    /// Additional Action primitive existed (issue #181).</summary>
     public static PublishedSnapshot ItemWave1 { get; } = LoadItemWave1();
 
     private static PublishedSnapshot LoadItemWave1()
@@ -326,6 +326,26 @@ public static class PublishedContent
         var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Select(c=>c.Id);
         if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
             throw new InvalidOperationException("item-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 2 of ability-bearing Strategy cards: the three cards behind the Additional
+    /// Action primitive (issue #181) -- Again! (an unscoped grant), Two Hands (a scoped grant plus
+    /// the "no new grants this battle" restriction), and Effortless Counterattack (the Reaction that
+    /// negates one before it resolves, plus an unrelated plain move-home Battle action).</summary>
+    public static PublishedSnapshot StrategyWave2 { get; } = LoadStrategyWave2();
+
+    private static PublishedSnapshot LoadStrategyWave2()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave2.json", "strategy-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 3)
+            throw new InvalidOperationException("Unexpected strategy-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-2 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-2 duplicates a card already published elsewhere.");
         return snapshot;
     }
 

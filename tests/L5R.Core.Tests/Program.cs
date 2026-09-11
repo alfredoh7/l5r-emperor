@@ -105,7 +105,8 @@ var tests = new (string Name, Action Run)[]
     ("Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm to give +1F to every Ashigaru-keyword card the performer controls at the current battlefield, army-scoped (not just one unit); unaffected: a non-Ashigaru card, and the enemy's own Ashigaru card; the per-battle counter resets once the battle resolves", AshigaruEliteBoostPrimitive),
     ("Expendable/Destined/Kharmic keyword mechanisms: a mandatory Fate-deck draw on destruction (not a plain discard) for Expendable; a mandatory Fate-deck draw on entering play (Purchase or Equip alike) for Destined; a repeatable pay-2-Gold-and-discard action for Kharmic, refilling a Dynasty province face up or drawing an extra Fate card", KeywordMechanics),
     ("Passive Attack-strength defense (Destrier/Singh Remnants' shape, Scope Self/Unit/Wielder, kind-specific) and a new 'any Personality enters play' Reaction letting a card in hand or a discard pile attach itself (Singh Remnants' shape), following Equip's own restrictions including Personal Honor", PassiveAttackDefenseAndEntryWatch),
-    ("Follower wave 5 / Item wave 1: Scourge of the Sea, Unparalleled Sword, and Justice of the Crane -- three more AttachGrantsKeyword carriers (Naval/Kensai/Magistrate), GrantKeyword's idempotency guard, and a new Battle Dishonor action", GrantsKeywordWave),
+    ("Follower wave 5 / Item wave 1: Scourge of the Sea, Unparalleled Sword, and Justice of the Crane -- three more AttachGrantsKeyword carriers (Naval/Kensai/Magistrate), GrantKeyword's idempotency guard, a new Battle Dishonor action, and (once Additional Actions exist) Justice of the Crane's own printed-Magistrate bonus", GrantsKeywordWave),
+    ("The Additional Action primitive (issue #181): Again!'s unscoped grant, Two Hands' unit-scoped grant and its 'no new grants this battle' restriction, Effortless Counterattack's negating Reaction and its own unrelated move-home Battle action, and Equip (Battle)'s bespoke follow-up window replaced by a genuine scoped grant", AdditionalActionPrimitive),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -1622,8 +1623,9 @@ static void SpellsAndShugenja()
         Check(!e.QueryActions(0).Any(a=>a.Command?.AbilityId=="equip-battle"),"No opposed unbowed Shugenja: Equip (Battle) should not be offered");
     }
     {
-        // A successful equip attaches the Spell (paying its cost) and opens the immediate follow-up window,
-        // keeping priority with the equipping player throughout.
+        // A successful equip attaches the Spell (paying its cost) and grants an Additional Action
+        // (issue #181) scoped to it, keeping priority with the equipping player. No Reaction is
+        // available in this scenario, so it resolves immediately without opening a window.
         var s=StrongholdBattle("oracle-l5r-1218");
         var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
         Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
@@ -1635,12 +1637,13 @@ static void SpellsAndShugenja()
         Equal(e.State.Cards[spell.Id].Zone,Zone.Attached); Equal(e.State.Cards[spell.Id].AttachedTo,shugenja.Id);
         Equal(e.State.Cards[spell.Id].ProvinceIndex,0);
         Check(!e.State.Players[0].Hand.Contains(spell.Id),"Spell removed from hand");
-        Equal(e.State.PendingChoice?.Type,"spellFollowUp");
-        Equal(e.State.PriorityPlayerId,0,"Priority stays with the equipping player during the follow-up window");
+        Check(e.State.PendingChoice is null,"No Reaction available to disrupt it -- resolves immediately");
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!.Contains(spell.Id)),"Grants an Additional Action scoped to the just-attached Spell");
+        Equal(e.State.PriorityPlayerId,0,"Priority stays with the equipping player -- the granted action is still available");
     }
     {
-        // Using the Spell's own Battle ability during the follow-up window succeeds, closes the window,
-        // and hands priority onward once resolved.
+        // Using the Spell's own Battle ability consumes the granted Additional Action and hands
+        // priority onward once it resolves.
         var s=StrongholdBattle("oracle-l5r-1218");
         var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
         Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
@@ -1649,12 +1652,13 @@ static void SpellsAndShugenja()
         var payment=e.PaymentOptions(0,1).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,AbilityId:"training-spell-force-boost",TargetId:shugenja.Id));
-        Check(e.State.PendingChoice is null,"Window closes after the follow-up ability resolves");
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Grant consumed");
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shugenja.Id).Force,3,"+2 Force applied on top of base Force 1");
-        Equal(e.State.PriorityPlayerId,1,"Priority hands onward once the window closes");
+        Equal(e.State.PriorityPlayerId,1,"Priority hands onward once the granted action is used up");
     }
     {
-        // Declining the follow-up also closes the window and hands priority onward.
+        // Additional Actions may be passed (issue #181): passing forfeits the grant rather than using
+        // it, same as an ordinary Battle-phase pass.
         var s=StrongholdBattle("oracle-l5r-1218");
         var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
         Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
@@ -1662,26 +1666,16 @@ static void SpellsAndShugenja()
         var e=MatchEngine.FromTestState(s);
         var payment=e.PaymentOptions(0,1).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
-        Accept(e,new GameCommand("declineReaction",0,e.Version));
-        Check(e.State.PendingChoice is null); Equal(e.State.PriorityPlayerId,1);
+        Accept(e,new GameCommand("pass",0,e.Version));
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Passing forfeits the granted Additional Action");
+        Equal(e.State.PriorityPlayerId,1);
         Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shugenja.Id).Force,1,"Declined: no Force bonus applied");
     }
     {
-        // Only the just-attached Spell's own ability may be used in the follow-up window -- a useAbility
-        // naming any other card is rejected outright, regardless of that card's own ability.
-        var s=StrongholdBattle("oracle-l5r-1218");
-        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
-        var other=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
-        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
-        var spell=Add(s,"training-spell-with-ability",0,Zone.Hand);
-        var e=MatchEngine.FromTestState(s);
-        var payment=e.PaymentOptions(0,1).First();
-        Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell.Id,SourceIds:payment.SourceIds));
-        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:other.Id,AbilityId:"training-spell-force-boost",TargetId:other.Id));
-    }
-    {
-        // Tireless: any number of times per turn. A second Equip (Battle) succeeds the same turn, right
-        // after the first follow-up closes and the opponent hands priority back with a pass.
+        // Tireless (any number of times per turn) and scoped to exactly the Spell it was granted for
+        // (issue #181): a second, independent Equip (Battle) succeeds immediately -- still holding
+        // priority, since it creates its own fresh grant -- but forfeits the first Spell's still-
+        // unused one as an unrelated action, rather than letting it linger.
         var s=StrongholdBattle("oracle-l5r-1218");
         var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
         Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
@@ -1690,12 +1684,12 @@ static void SpellsAndShugenja()
         var e=MatchEngine.FromTestState(s);
         var payment1=e.PaymentOptions(0,1).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell1.Id,SourceIds:payment1.SourceIds));
-        Accept(e,new GameCommand("declineReaction",0,e.Version));
-        Equal(e.State.PriorityPlayerId,1);
-        Accept(e,new GameCommand("pass",1,e.Version));
         var payment2=e.PaymentOptions(0,1).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja.Id,TargetId:spell2.Id,SourceIds:payment2.SourceIds));
-        Equal(e.State.Cards[spell2.Id].Zone,Zone.Attached,"Tireless: usable again the same turn");
+        Equal(e.State.Cards[spell2.Id].Zone,Zone.Attached,"Tireless: usable again the same turn, still holding priority");
+        Equal(e.State.PriorityPlayerId,0);
+        Check(!e.State.AdditionalActions.Any(g=>g.ScopeCardIds!.Contains(spell1.Id)),"Spell1's grant is forfeited, not carried over");
+        Check(e.State.AdditionalActions.Any(g=>g.ScopeCardIds!.Contains(spell2.Id)),"Spell2's own fresh grant is still there");
     }
 }
 static void LoyalKeyword()
@@ -2453,6 +2447,155 @@ static void GrantsKeywordWave()
         Check(!enemy.Dishonorable);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sword.Id,TargetId:enemy.Id,AbilityId:"justice-of-crane-dishonor"));
         Check(e.State.Cards[enemy.Id].Dishonorable,"Dishonors the target");
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Only granted Magistrate (not printed): no additional-action bonus (issue #181)");
+    }
+    {
+        // Justice of the Crane's own deferred bonus (#179/#180), now wired (#181): "if this Personality
+        // has the PRINTED Magistrate keyword" -- checked against training-magistrate-personality's own
+        // printed Keywords, distinct from the grant Justice of the Crane itself also applies.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-magistrate-personality",0,Zone.Battlefield,province:0);
+        var sword=Add(s,"oracle-l5r-10528",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sword.Id,TargetId:enemy.Id,AbilityId:"justice-of-crane-dishonor"));
+        Check(e.State.Cards[enemy.Id].Dishonorable,"Dishonors the target");
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds is null),"Printed Magistrate: grants an unscoped additional action");
+        Equal(e.State.PriorityPlayerId,0,"Priority stays with the wielder's controller");
+    }
+}
+static void AdditionalActionPrimitive()
+{
+    {
+        // Again! (issue #181): straightens a bowed Kensai and his Weapons, resets the Weapons' own
+        // Battle abilities so they may be used again this turn, and grants an unscoped Additional
+        // Action -- keeping priority with the same player.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0,bowed:true);
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id,bowed:true);
+        weapon.AbilityUses["training-weapon-attack"]=s.TurnNumber;
+        var enemy=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0).Id); // Force 2, matching the Weapon's Melee 2
+        var again=Add(s,"oracle-l5r-127",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:again.Id,PerformerId:kensai.Id,AbilityId:"again-boost"));
+        Check(!e.State.Cards[kensai.Id].Bowed,"Straightens the Kensai"); Check(!e.State.Cards[weapon.Id].Bowed,"Straightens his Weapons");
+        Check(!e.State.Cards[weapon.Id].AbilityUses.ContainsKey("training-weapon-attack"),"The Weapon's Battle ability may be used again this turn");
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds is null),"Grants an unscoped additional Battle action");
+        Equal(e.State.PriorityPlayerId,0,"Priority stays with the same player");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon.Id,TargetId:enemy.Id,AbilityId:"training-weapon-attack")); // Melee 2 = Force 2, consumes the grant
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Grant consumed");
+        Equal(e.State.PriorityPlayerId,1,"Priority hands onward once the granted action is used up");
+    }
+    {
+        // Two Hands' scoping (issue #181): the two granted actions are restricted to cards in the
+        // Kensai's own unit -- a card outside it is an ordinary action (and forfeits both grants).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0);
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id);
+        var outsider=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var outsiderWeapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:outsider.Id);
+        var enemyHost=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id); // Force 2, matching the Weapon's Melee 2
+        var twoHands=Add(s,"oracle-l5r-10175",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:twoHands.Id,PerformerId:kensai.Id,AbilityId:"two-hands-grant"));
+        Equal(e.State.AdditionalActions.Count(g=>g.PlayerId==0),2,"Grants two additional Battle actions");
+        Check(e.State.AdditionalActions.All(g=>g.ScopeCardIds!.Contains(kensai.Id) && g.ScopeCardIds.Contains(weapon.Id)),"Scoped to the Kensai and his Weapon");
+        // A card outside the unit is an ordinary action: succeeds, but is not scoped by the grant, so
+        // both of it forfeit rather than lingering.
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:outsiderWeapon.Id,TargetId:enemy.Id,AbilityId:"training-weapon-attack"));
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Outside the unit: forfeits both grants rather than consuming one");
+        Equal(e.State.PriorityPlayerId,1,"An ordinary action correctly cedes priority");
+    }
+    {
+        // Two Hands' own two grants ARE usable, one after another, by different cards in the unit.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0);
+        var weapon1=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id);
+        var weapon2=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id);
+        var enemyHost=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        var enemy1=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id); // Force 2, matching the Weapon's Melee 2
+        var enemy2=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id); // a second, separate target -- the first is destroyed by the first attack
+        var twoHands=Add(s,"oracle-l5r-10175",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:twoHands.Id,PerformerId:kensai.Id,AbilityId:"two-hands-grant"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon1.Id,TargetId:enemy1.Id,AbilityId:"training-weapon-attack"));
+        Equal(e.State.AdditionalActions.Count(g=>g.PlayerId==0),1,"One of the two grants remains");
+        Equal(e.State.PriorityPlayerId,0,"Still holding priority for the second one");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon2.Id,TargetId:enemy2.Id,AbilityId:"training-weapon-attack"));
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0));
+        Equal(e.State.PriorityPlayerId,1,"Both used up: priority cedes normally");
+    }
+    {
+        // Two Hands' restriction: "other actions will not give you new additional Battle actions this
+        // battle" -- Again!'s OTHER effects (straighten, reset Weapon usage) still fully apply, only
+        // its own grant is suppressed.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0); // Two Hands needs an unbowed performer
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id,bowed:true);
+        weapon.AbilityUses["training-weapon-attack"]=s.TurnNumber;
+        var twoHands=Add(s,"oracle-l5r-10175",0,Zone.Hand);
+        var again=Add(s,"oracle-l5r-127",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:twoHands.Id,PerformerId:kensai.Id,AbilityId:"two-hands-grant"));
+        Check(e.State.NoNewAdditionalActionsThisBattle);
+        // Again! is a different card, outside Two Hands' own scope -- an unrelated action, so it also
+        // forfeits Two Hands' still-unused grants (same rule proven above), on top of never adding one
+        // of its own. Its OTHER effects (the Weapon-ability reset here; the Kensai's own straighten is
+        // already proven above) still fully apply -- only the grant itself is suppressed.
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:again.Id,PerformerId:kensai.Id,AbilityId:"again-boost"));
+        Check(!e.State.Cards[weapon.Id].AbilityUses.ContainsKey("training-weapon-attack"),"Again!'s Weapon-ability reset still applies");
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Again!'s own grant is suppressed by Two Hands' restriction");
+    }
+    {
+        // Effortless Counterattack's Reaction (issue #181): negates a Battle action taken as an
+        // Additional Action before it resolves, opening the same before-additional-action-resolves
+        // window an out-of-play Reaction needs.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0,bowed:true);
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id,bowed:true);
+        var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id); // Force 2 -- would be destroyed by the Weapon's Melee 2
+        var again=Add(s,"oracle-l5r-127",0,Zone.Hand);
+        var counter=Add(s,"oracle-l5r-2283",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:again.Id,PerformerId:kensai.Id,AbilityId:"again-boost"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon.Id,TargetId:enemy.Id,AbilityId:"training-weapon-attack"));
+        Equal(e.State.PendingChoice?.Type,"additionalActionReaction","A Reaction is available to disrupt it -- deferred rather than resolving immediately");
+        Equal(e.State.PriorityPlayerId,1,"The opponent gets the opportunity to react");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:counter.Id,AbilityId:"effortless-counterattack-negate"));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.PendingChoice is null,"Window closed");
+        Check(e.State.PendingAdditionalAction is null);
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Attached,"Negated: the attack never actually resolved");
+        Check(!e.State.Players[1].Hand.Contains(counter.Id),"Effortless Counterattack discarded after use");
+    }
+    {
+        // Effortless Counterattack's own plain Battle ability: unrelated to the Reaction above.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var performer=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var counter=Add(s,"oracle-l5r-2283",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:counter.Id,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"effortless-counterattack-move"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Moved home");
+    }
+    {
+        // Battle-scoped: Two Hands' restriction survives a mere pass (unlike its own grants, forfeited
+        // immediately -- see the scoping test above) but not into a later battle, matching AshigaruBoost's
+        // own "for the remainder of the battle" precedent -- cleared at FinishBattleResolution.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0);
+        var twoHands=Add(s,"oracle-l5r-10175",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:twoHands.Id,PerformerId:kensai.Id,AbilityId:"two-hands-grant"));
+        Check(e.State.NoNewAdditionalActionsThisBattle);
+        Accept(e,new GameCommand("pass",0,e.Version)); // forfeits the still-unused grants; first of two consecutive passes
+        Check(!e.State.AdditionalActions.Any(),"A mere pass already forfeits the still-unused grants");
+        Check(e.State.NoNewAdditionalActionsThisBattle,"But the restriction itself survives a pass");
+        Accept(e,new GameCommand("pass",1,e.Version)); // second consecutive pass: resolves the battle
+        Check(!e.State.NoNewAdditionalActionsThisBattle,"Cleared once the battle actually resolves");
     }
 }
 static void GeneralizedEntryReactionWindow()
