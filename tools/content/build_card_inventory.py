@@ -75,7 +75,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3589": "Needs the Attack-vs-attachments override plus \"last attached to\" tracking after detachment.",
     "oracle-l5r-3611": "Needs a performer/wielder-keyed Attack-strength axis (already a known gap elsewhere).",
     "oracle-l5r-4118": "Needs a unit-Force-total comparison target (existing categories only compare individual card Force).",
-    "oracle-l5r-10683": "Needs a \"may not attack\" restriction flag (Dishonor-as-an-action is now built -- Justice of the Crane -- and directly reusable here).",
+    "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
     "oracle-l5r-4699": "Needs a targeting immunity keyed off the acting Personality's own Gold Cost.",
     "oracle-l5r-4700": "Needs a new Reaction trigger: \"after an action moves a card to this battlefield\" (the Mantis-discount half is separately wirable).",
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
