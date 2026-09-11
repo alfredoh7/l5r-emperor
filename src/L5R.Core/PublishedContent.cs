@@ -290,6 +290,45 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 5: Scourge of the Sea, a pure "This Personality has X" grant (AttachGrantsKeyword:
+    /// Naval) with no ability of its own -- issue #179.</summary>
+    public static PublishedSnapshot FollowerWave5 { get; } = LoadFollowerWave5();
+
+    private static PublishedSnapshot LoadFollowerWave5()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave5.json", "follower-wave-5", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-5 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-5 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-5 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 1 of ability-bearing Item cards (all prior Item-type cards were ability-free,
+    /// part of VanillaWave1): Justice of the Crane and Unparalleled Sword, both "This Personality has
+    /// X" AttachGrantsKeyword grants (Magistrate, Kensai) -- issue #179. Justice of the Crane's
+    /// "additional action if the printed Magistrate keyword" bonus is deferred; only its base Dishonor
+    /// effect is wired.</summary>
+    public static PublishedSnapshot ItemWave1 { get; } = LoadItemWave1();
+
+    private static PublishedSnapshot LoadItemWave1()
+    {
+        var snapshot = Load("L5R.Published.ItemWave1.json", "item-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected item-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Item || card.Text.Length == 0)
+                throw new InvalidOperationException($"item-wave-1 card is not a textful Item: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("item-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

@@ -55,10 +55,16 @@ public static class AbilityCatalog
         ["journeys-end-move"] = new("Battle", "Move home a Personality with no more Followers than the performer", "fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle"),
         ["shamate-move"] = new("Battle", "Move home a Personality with equal or lower Personal Honor", "lower-or-equal-honor-than-performer", Performer: "own-unbowed-personality-at-battle"),
         ["law-of-darkness-weaken"] = new("Battle", "Enemy Personality −4 Force · bow if dishonorable", "enemy-personality"),
+        // Justice of the Crane: "If this Personality has the printed Magistrate keyword, you may take
+        // an additional action" is deferred -- "additional action" is not yet a general engine
+        // capability (same gap noted against Effortless Counterattack in #177). Only the base
+        // Dishonor effect is wired here.
+        ["justice-of-crane-dishonor"] = new("Battle", "Dishonor a target enemy Personality", "enemy-personality"),
         // Ranged/Melee Attack (core rules Glossary): targeting a Follower or a Personality without
         // Followers, Force <= strength, is resolved at the moment the effect happens rather than
         // required up front -- the action stays legal to take with no eligible target in sight.
         ["carpenter-castle-siege"] = new("Battle", "Bow a Castle/Siege card · Ranged 5 Attack", "attack", Performer: "own-castle-or-siege"),
+        ["unparalleled-sword-attack"] = new("Battle", "Melee 4 Attack", "attack"),
         ["shiro-shiba-melee"] = new("Battle", "Perform · Melee 4 Attack (+2 if you control a Shugenja)", "attack", Performer: "own-unbowed-samurai-at-battle"),
         // Training-only: no published card yet reduces an opponent's Honor via a Battle action, so this
         // exercises Law of Darkness Dojo's "he loses 1 Honor" passive, which otherwise has no live trigger.
@@ -236,7 +242,10 @@ public sealed partial class MatchEngine
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.
-    private static void GrantKeyword(CardInstance card, string keyword, string source, string duration) => card.GrantedKeywords.Add(new(keyword, source, duration));
+    // A card already carrying a keyword (printed or previously granted) gains no redundant second
+    // grant of it -- membership is boolean, so a duplicate entry would only ever complicate cleanup
+    // (e.g. two Naval-granting attachments on the same Personality, one later detached) for no effect.
+    private static void GrantKeyword(CardInstance card, string keyword, string source, string duration) { if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration)); }
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
@@ -262,6 +271,7 @@ public sealed partial class MatchEngine
         "shiro-shiba-melee" => 4 + (ControlsKeyword(player.Id, "Shugenja") ? 2 : 0),
         "monastery-fire-attack" => 5,
         "torazu-fire-attack" => 3,
+        "unparalleled-sword-attack" => 4,
         "shinjo-eun-sahng-attack" => 4,
         "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" => 5,
         "stalking-tiger-attack" => 6,
@@ -308,7 +318,7 @@ public sealed partial class MatchEngine
     private static string AttackKind(string abilityId) => abilityId switch
     {
         "carpenter-castle-siege" or "monastery-fire-attack" or "torazu-fire-attack" => "Ranged",
-        "shiro-shiba-melee" or "stalking-tiger-attack" => "Melee",
+        "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
@@ -756,6 +766,7 @@ public sealed partial class MatchEngine
             case "journeys-end-move": MoveHome(target!, false); break;
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable) target.Bowed = true; break;
+            case "justice-of-crane-dishonor": target!.Dishonorable = true; break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
             case "training-destroy-terrain": DiscardTerrain(target!); break;
             case "carpenter-castle-siege":
@@ -796,7 +807,7 @@ public sealed partial class MatchEngine
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
-            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack":
+            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;

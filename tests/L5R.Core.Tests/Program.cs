@@ -105,6 +105,7 @@ var tests = new (string Name, Action Run)[]
     ("Ashigaru Elite's shape: an activated, tireless, stacking Battle ability -- bow an unbowed Farm to give +1F to every Ashigaru-keyword card the performer controls at the current battlefield, army-scoped (not just one unit); unaffected: a non-Ashigaru card, and the enemy's own Ashigaru card; the per-battle counter resets once the battle resolves", AshigaruEliteBoostPrimitive),
     ("Expendable/Destined/Kharmic keyword mechanisms: a mandatory Fate-deck draw on destruction (not a plain discard) for Expendable; a mandatory Fate-deck draw on entering play (Purchase or Equip alike) for Destined; a repeatable pay-2-Gold-and-discard action for Kharmic, refilling a Dynasty province face up or drawing an extra Fate card", KeywordMechanics),
     ("Passive Attack-strength defense (Destrier/Singh Remnants' shape, Scope Self/Unit/Wielder, kind-specific) and a new 'any Personality enters play' Reaction letting a card in hand or a discard pile attach itself (Singh Remnants' shape), following Equip's own restrictions including Personal Honor", PassiveAttackDefenseAndEntryWatch),
+    ("Follower wave 5 / Item wave 1: Scourge of the Sea, Unparalleled Sword, and Justice of the Crane -- three more AttachGrantsKeyword carriers (Naval/Kensai/Magistrate), GrantKeyword's idempotency guard, and a new Battle Dishonor action", GrantsKeywordWave),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -1959,16 +1960,16 @@ static void FollowerWave3Cards()
         Check(e.State.Cards[human.Id].GrantedKeywords.Any(g=>g.Keyword=="Conqueror"),"Attaching grants Conqueror to the wielder");
     }
     {
-        // Seppun Heavy Elite: grants Elite to the wielder -- a bowed wielder still contributes Force.
-        // Added directly to a raw (not-yet-engine-owned) MatchState, so the GrantedKeyword is applied
-        // by hand here, exactly as the real Equip() command would apply it (already proven for
-        // Commander's Steed above) -- this block is about BattleForce's own bowed-Elite exception.
+        // Seppun Heavy Elite (issue #179 correction): grants its wielder Elite's EFFECT (Force still
+        // counts while bowed) WITHOUT granting the Elite keyword itself -- unlike Commander's Steed's
+        // genuine keyword grant above, EliteEffect() reads AttachGrantsEliteEffect live off the
+        // attachment, so no GrantedKeywords entry is needed or expected here.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true); // Force 3, bowed
-        var elite=Add(s,"oracle-l5r-6596",0,Zone.Attached,province:0,attachedTo:host.Id);
-        host.GrantedKeywords.Add(new GrantedKeyword("Elite",elite.Id,"Attachment"));
+        Add(s,"oracle-l5r-6596",0,Zone.Attached,province:0,attachedTo:host.Id);
         var e=MatchEngine.FromTestState(s);
-        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==host.Id).UnitForce,5,"Bowed, but Elite-by-grant still contributes to BattleForce: host's 3 + Seppun's own unbowed 2");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==host.Id).UnitForce,5,"Bowed, but Seppun's granted Elite EFFECT still contributes to BattleForce: host's 3 + Seppun's own unbowed 2");
+        Check(!e.State.Cards[host.Id].GrantedKeywords.Any(g=>g.Keyword=="Elite"),"The wielder gains Elite's effect, not the Elite keyword itself");
     }
     {
         // Family Sensei / Merchant Guard: self-referential, ControlsKeyword reuse.
@@ -2402,6 +2403,56 @@ static void PassiveAttackDefenseAndEntryWatch()
         Accept(e,new GameCommand("purchase",0,e.Version,CardId:highHonorId,SourceIds:e.PaymentOptions(0,5).First().SourceIds)); // training-crane-clan-samurai costs 5
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:watcher.Id,AbilityId:"training-personality-entry-watch",SourceIds:e.PaymentOptions(0,2).First().SourceIds));
         Equal(e.State.Cards[watcher.Id].Zone,Zone.Attached,"Attaches from a discard pile too, not only from hand");
+    }
+}
+static void GrantsKeywordWave()
+{
+    {
+        // Scourge of the Sea (issue #179): a pure "This Personality has X" grant with no ability of
+        // its own -- AttachGrantsKeyword's second published carrier after Commander's Steed.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var scourge=Add(s,"oracle-l5r-6501",0,Zone.Hand);
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:scourge.Id,sources:e.PaymentOptions(0,9).First().SourceIds,target:host.Id)); // costs 9 -- every producer in the economy scenario, combined
+        Check(e.State.Cards[host.Id].GrantedKeywords.Any(g=>g.Keyword=="Naval"),"Attaching grants Naval to the wielder");
+    }
+    {
+        // Unparalleled Sword (issue #179): grants Kensai (unlocking the second Weapon slot) plus a
+        // printed Battle Melee 4 attack -- both reuse already-existing primitives. Added directly to a
+        // raw MatchState (not via the real Equip() command, already proven for Scourge of the Sea
+        // above), so the grant is applied by hand exactly as Equip() would.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var sword=Add(s,"oracle-l5r-10124",0,Zone.Attached,province:0,attachedTo:host.Id);
+        host.GrantedKeywords.Add(new GrantedKeyword("Kensai",sword.Id,"Attachment"));
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sword.Id,TargetId:enemy.Id,AbilityId:"unparalleled-sword-attack")); // Melee 4 >= Force 3
+    }
+    {
+        // GrantKeyword idempotency (issue #179): a Personality that already carries a keyword (printed
+        // here) does not gain a redundant second grant of the same keyword from an attachment.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var sword=Add(s,"oracle-l5r-10124",0,Zone.Hand);
+        var host=Add(s,"training-kensai",0,Zone.Home); // already has printed Kensai
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:sword.Id,sources:e.PaymentOptions(0,7).First().SourceIds,target:host.Id)); // costs 7
+        Check(!e.State.Cards[host.Id].GrantedKeywords.Any(g=>g.Keyword=="Kensai"),"Already has Kensai printed -- no redundant grant");
+    }
+    {
+        // Justice of the Crane (issue #179): grants Magistrate plus a Battle Dishonor action. The
+        // "additional action if the printed Magistrate keyword" bonus is deferred (no general
+        // "additional action" primitive yet, same gap as Effortless Counterattack in #177).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var sword=Add(s,"oracle-l5r-10528",0,Zone.Attached,province:0,attachedTo:host.Id);
+        host.GrantedKeywords.Add(new GrantedKeyword("Magistrate",sword.Id,"Attachment"));
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Check(!enemy.Dishonorable);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sword.Id,TargetId:enemy.Id,AbilityId:"justice-of-crane-dishonor"));
+        Check(e.State.Cards[enemy.Id].Dishonorable,"Dishonors the target");
     }
 }
 static void GeneralizedEntryReactionWindow()

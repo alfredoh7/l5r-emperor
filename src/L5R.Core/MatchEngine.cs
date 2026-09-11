@@ -786,11 +786,15 @@ public sealed partial class MatchEngine
     // A bowed ordinary Personality suppresses its entire unit at resolution.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
     // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
+    // EliteEffect: true for a card with the actual printed/granted Elite keyword, but also for a
+    // wielder carrying an attachment that grants only Elite's effect without the keyword itself
+    // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
+    private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect);
     private int BattleForce(CardInstance card)
     {
-        if(card.Bowed && !Keyword(card,"Elite")) return 0;
+        if(card.Bowed && !EliteEffect(card)) return 0;
         return PersonalityForce(card)+Attachments(card.Id)
-            .Where(c=>(!c.Bowed || Keyword(c,"Elite")) && Definition(c).Type==CardType.Follower)
+            .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
             .Sum(FollowerForce);
     }
     // "Dead / Destroy" (core rules Glossary): entering the Dead zone, distinct from merely being
