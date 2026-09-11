@@ -238,6 +238,39 @@ public static class AbilityCatalog
         // a Kharmic card you control. A Dynasty card is replaced with a fresh, immediately face-up
         // Dynasty card (see the execution case); a Fate card's discard is followed by an extra draw.
         ["kharmic-discard"] = new("Limited", "Pay 2 Gold, discard a Kharmic card you control: a Dynasty card is replaced face-up; a Fate card is followed by an extra draw", "own-kharmic-card", PlayerAbility: true),
+        // Rings (issue #194): each real Ring has two abilities -- its own recruit action (moves it
+        // from hand into play, gated by its printed entry condition) and its printed in-play action
+        // (also usable directly from hand, discarding the Ring instead of bowing it -- "you may
+        // discard this Ring from your hand to use its ability without cost"). Recruitment for the
+        // four Reaction-shaped Rings below is granted as an Additional Battle Action (GrantRingRecruit)
+        // rather than a forced mid-resolution interrupt -- the user's own simplification.
+        ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none"),
+        ["ring-of-air-straighten"] = new("BattleOrOpen", "Air Repeatable Battle/Open, bow: Straighten your target Personality or attachment", "personality-or-attachment"),
+        ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none"),
+        // Simplified from the printed "Absent Repeatable Battle" (issue #194): the no-presence-
+        // required ("Absent") half is not modeled this pass, and only the "move home" half of the
+        // dual move effect is wired -- the "or move him to the current battlefield if he would be
+        // opposed" half is deferred. See docs/ROADMAP.md.
+        ["ring-of-water-move-home"] = new("Battle", "Move your target Personality home", "own-personality"),
+        // Ring of the Void (issue #194): a Limited ability (not a granted Additional Action) -- see
+        // its own Require (two or fewer Rings in play) -- whose cost is discarding the player's
+        // entire hand (except the Void ring itself).
+        ["ring-of-void-recruit"] = new("Limited", "Play if you have two or fewer Rings in play. Discard your hand", "none"),
+        ["ring-of-void-draw"] = new("Limited", "Void Limited, bow: Draw a card. If you now have more cards in your hand than any other player, discard a card", "none"),
+        ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality"),
+        // Not a Reaction/grant at all (issue #194) -- a standing condition, usable any time it holds,
+        // like an ordinary Battle ability. Simplified from "Absent Battle" the same way as above.
+        ["false-ring-of-water-recruit"] = new("Battle", "If the current battlefield's Province Strength is 11 or greater, put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-water-attack"] = new("Battle", "Ranged 3 Attack", "attack"),
+        // Moshi Ikako (issue #194's own review of previously Ring-blocked cards): "Fire Battle" is a
+        // plain printed-keyword classification (same treatment as Kiho/Recon), not a Ring-gated
+        // Timing as an earlier blocker note speculated -- confirmed now that Rings are actually
+        // built. Zero new primitives: a plain Ranged 1 Attack.
+        ["moshi-ikako-attack"] = new("Battle", "Fire Battle: Ranged 1 Attack", "attack"),
+        // Scholarly Hermit (issue #194's own review): needed only a Ring-type check in a discard
+        // pile, now trivial. New Target "own-ring-in-discard".
+        ["scholarly-hermit-search"] = new("Limited", "Bow: Put a Ring from your discard pile into your hand. Destroy this Follower.", "own-ring-in-discard"),
         // Training-only: exercises Discipline (issue #184) -- played from a discard pile, paying the
         // card's own printed Gold cost, then removed from the game (see the generic Timing=="Discipline"
         // handling: zone check, cost, and post-resolution removal all key off this one Timing value).
@@ -338,6 +371,7 @@ public sealed partial class MatchEngine
         "training-weapon-attack" => 2,
         "cavalry-flankers-attack" => 2,
         "dark-naga-scouts-attack" => 3,
+        "moshi-ikako-attack" => 1,
         "murderous-thieves-attack" => 3,
         "horse-archers-attack" or "hiruma-sniper-attack" => 4,
         "spawn-of-vritra-attack" => 6,
@@ -345,6 +379,7 @@ public sealed partial class MatchEngine
         // Horseback Warriors: Melee 4, or 5 against a target without the Cavalry keyword -- "Infantry"
         // has no printed keyword of its own (core rules Glossary), it just means not Cavalry.
         "horseback-warriors-attack" => 4 + (target is not null && !Keyword(target, "Cavalry") ? 1 : 0),
+        "false-ring-of-water-attack" => 3,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -379,8 +414,10 @@ public sealed partial class MatchEngine
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
+        "moshi-ikako-attack" => "Ranged",
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
         "horseback-warriors-attack" => "Melee",
+        "false-ring-of-water-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -420,6 +457,25 @@ public sealed partial class MatchEngine
         _state.AdditionalActions.Add(new(playerId, scopeCardIds));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional Battle action.", playerId);
     }
+    // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
+    // condition grants an Additional Battle Action scoped to that specific Ring card in hand (the
+    // user's own simplification) -- consumed like any other Additional Action, including the same
+    // Reaction opportunity for something like Effortless Counterattack to negate it. Idempotent: a
+    // Ring already granted this battle is not granted again.
+    private void GrantRingRecruit(PlayerState player, bool condition, string recruitAbilityId)
+    {
+        if (!condition) return;
+        var ring = player.Hand.Select(Card).FirstOrDefault(c => (Definition(c).Abilities ?? []).Contains(recruitAbilityId));
+        if (ring is null) return;
+        if (!_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { } ids && ids.Contains(ring.Id)))
+            GrantAdditionalAction(player.Id, [ring.Id]);
+    }
+    // Ring of Water's own recruitment condition (issue #194): "played a Terrain, destroyed a
+    // Terrain, and destroyed any cards or provinces during resolution" -- the first two are this
+    // player's own battle-scoped flags; `destroyedSomething` is this specific resolution's own fact,
+    // passed in by the caller (no "win" requirement, unlike False Ring of Air).
+    private void CheckRingOfWaterRecruit(PlayerState player, bool destroyedSomething) =>
+        GrantRingRecruit(player, player.TerrainPlayedThisBattle && player.TerrainDestroyedThisBattle && destroyedSomething, "ring-of-water-recruit");
     // Removes and returns whether an available grant matches this specific use (unscoped, or scoped
     // to include cardId) -- the single check deciding whether a Battle-timed useAbility is an
     // ordinary action or one taken "out of order" as an Additional Action (see UseAbility).
@@ -590,7 +646,11 @@ public sealed partial class MatchEngine
             // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
             Require(ability.Trigger == "any-personality-enters-play" ? source.Zone is Zone.Hand or Zone.FateDiscard
                 : ability.Timing == "Discipline" ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
-                : def.Type == CardType.Strategy ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
+                // A Ring (issue #194) may use its printed action from hand too -- "you may discard
+                // this Ring from your hand to use its ability without cost" -- in addition to the
+                // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
+                // afterward when used this way, mirroring the Strategy case just below).
+                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
                 "The ability's source is not in the required zone.");
             Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
@@ -601,6 +661,9 @@ public sealed partial class MatchEngine
         // different unbowed Farm each time, for Ashigaru Elite) are the only real limit.
         var usageKey = ability.UsageKey ?? id;
         Require(id is "tactical-advantage" or "equip-battle" or "training-ashigaru-boost" or "ashigaru-elite-boost" or "elite-sentry-straighten" or "kharmic-discard"
+            // "Repeatable" (issue #194): Ring of Air/Water's own printed keyword on their in-play
+            // actions, same convention as Tactical Advantage/Equip (Battle) above.
+            or "ring-of-air-straighten" or "ring-of-water-move-home"
             || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
@@ -612,6 +675,26 @@ public sealed partial class MatchEngine
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        // Ring recruitment (issue #194): each of these three is only ever playable as the specific
+        // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
+        // ability -- since the underlying historical condition (Favor actions this turn, a Terrain
+        // played/destroyed this battle, an opposing unit ever present in a won battle) is not itself
+        // re-checked here. This also naturally makes the grant, not a separate flag, the single
+        // source of truth for "was this satisfied."
+        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit")
+            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
+                "This Ring's recruitment condition has not been granted yet.");
+        // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
+        // Additional Action), gated only by how many Rings this player already controls.
+        if (id == "ring-of-void-recruit")
+            Require(_state.Cards.Values.Count(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Type == CardType.Ring) <= 2,
+                "You may only play this Ring with two or fewer Rings in play.");
+        // False Ring of Water's own entry condition (issue #194): a standing check, not a Reaction --
+        // usable any time it holds, like an ordinary Battle ability. The current battlefield's own
+        // province always belongs to the Defender.
+        if (id == "false-ring-of-water-recruit")
+            Require(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength >= 11,
+                "The current battlefield's Province Strength must be 11 or greater.");
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
@@ -744,6 +827,11 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && Keyword(target, "Kharmic")
                         && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp),
                         "Discard a Kharmic card you control, from your hand or a face-up province.");
+                // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
+                // discard pile -- not in play, so this needs its own branch too.
+                else if (ability.Target == "own-ring-in-discard")
+                    Require(target.OwnerId == player.Id && Definition(target).Type == CardType.Ring && target.Zone == Zone.FateDiscard,
+                        "Choose a Ring from your Fate discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -763,6 +851,10 @@ public sealed partial class MatchEngine
                         // itself is a counter increment, not applied to this target at all.
                         "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
                         "own-personality" => personality && own,
+                        // Ring of Air (issue #194): "your target Personality or attachment" -- own
+                        // only, either half of a unit (unlike own-unit-card elsewhere, this also
+                        // includes Spells, since a Spell is straightenable just like any attachment).
+                        "personality-or-attachment" => own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
                         // Generic "Choose your performing/target [Keyword] Personality" -- for a
                         // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
                         // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeyword.
@@ -947,7 +1039,7 @@ public sealed partial class MatchEngine
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
-            case "training-destroy-terrain": DiscardTerrain(target!); break;
+            case "training-destroy-terrain": DiscardTerrain(target!); player.TerrainDestroyedThisBattle=true; break; // Ring of Water's own recruitment condition (issue #194)
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
@@ -984,9 +1076,13 @@ public sealed partial class MatchEngine
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant)) return;
                 break;
+            case "false-ring-of-water-attack":
+                if (source!.Zone != Zone.Hand) source.Bowed = true; // the discard-from-hand case is handled generically in the tail below
+                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant)) return;
+                break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
-            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack":
+            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
@@ -1089,6 +1185,37 @@ public sealed partial class MatchEngine
                 CreateToken(target!, "Charging", id);
                 break;
             case "panku-madness": CreateToken(target!, "Madness", id); break;
+            // Rings (issue #194): every recruit case shares the same shape -- leave hand, enter play
+            // face up. False Rings additionally lose 2 Honor (their own printed cost); the three
+            // real Rings do not.
+            case "ring-of-air-recruit": case "ring-of-water-recruit":
+                player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                break;
+            case "false-ring-of-air-recruit": case "false-ring-of-water-recruit":
+                player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                GainHonor(player.Id, -2, Definition(source).Name);
+                break;
+            case "ring-of-void-recruit":
+                foreach (var handId in player.Hand.Where(h => h != source!.Id).ToArray()) DiscardFate(player, Card(handId));
+                player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
+                break;
+            case "ring-of-air-straighten": Straighten(target!); if (source!.Zone != Zone.Hand) source.Bowed = true; break;
+            case "ring-of-water-move-home": MoveHome(target!, false); if (source!.Zone != Zone.Hand) source.Bowed = true; break;
+            case "false-ring-of-air-force": ApplyModifier(target!, source!.Id, id, "Force", -3); if (source.Zone != Zone.Hand) source.Bowed = true; break;
+            case "scholarly-hermit-search":
+                source!.Bowed = true;
+                player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
+                DestroyUnits([source], false);
+                break;
+            case "ring-of-void-draw":
+                if (source!.Zone != Zone.Hand) source.Bowed = true;
+                Draw(player);
+                // Two-player simplification (issue #194): "more cards in hand than any other player"
+                // is exactly "more than the one opponent" here. Which card to discard is the player's
+                // own choice in the printed text; auto-discarding the just-drawn card is a documented
+                // simplification rather than a new sub-choice mechanism.
+                if (player.Hand.Count > Player(1 - player.Id).Hand.Count) DiscardFate(player, Card(player.Hand[^1]));
+                break;
             case "soshi-conditional-bow":
                 if (_state.Phase == Phase.Battle && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 if (target!.Dishonorable) GainHonor(target.OwnerId, -1, "Soshi House Guard", source);
@@ -1147,13 +1274,25 @@ public sealed partial class MatchEngine
             }
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+        // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
+        // actions in one turn" -- every Favor-consuming ability shares this one shared Require
+        // (see above), so the counter and the grant-check are shared here too, rather than
+        // duplicated across each of the three execution cases.
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
+        {
+            player.FavorActionsThisTurn++;
+            GrantRingRecruit(player, player.FavorActionsThisTurn >= 2, "ring-of-air-recruit");
+        }
         if (opponentHonorBeforeBattleAction is int before && Player(target!.OwnerId).Honor < before && Definition(Card(player.StrongholdId)).Effect == "law-of-darkness-punish")
             // The source is the acting player's own Stronghold, never the losing player's -- "cards
             // you own" in a Honor-loss-immunity passive could never reach it regardless.
             GainHonor(target.OwnerId, -1, "Law of Darkness Dojo", Card(player.StrongholdId));
         // A Terrain's own ability (e.g. an entering-play Reaction) runs from Zone.Battlefield, where
         // it stays -- only the normal one-shot, played-from-hand Strategy case discards afterward.
-        if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+        // A Ring's own recruit ability already moves it out of Zone.Hand within its own execution
+        // case above, so it never falls into this branch -- only "discard from hand to use the
+        // printed action without cost" (issue #194) does.
+        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
         // Discipline (core rules, issue #184): "played and resolved and then removed from the game" --
         // always, whether or not its own effect above did anything else with the card.
         if (ability.Timing == "Discipline") RemoveFromGame(source!);
