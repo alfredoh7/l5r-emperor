@@ -387,6 +387,26 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 7 of ability-bearing Personalities: Utaku Chikako (issue #186) -- the first real
+    /// card exercising the Dishonor/Rehonor Personal-Honor override (her dishonorable Battle Maidens
+    /// keep their printed/base Personal Honor instead of 0), plus a straightforward Limited ability
+    /// (gain 2 Honor; may not declare an attack this turn).</summary>
+    public static PublishedSnapshot PersonalityWave7 { get; } = LoadPersonalityWave7();
+
+    private static PublishedSnapshot LoadPersonalityWave7()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave7.json", "personality-wave-7", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-7 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-7 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-7 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

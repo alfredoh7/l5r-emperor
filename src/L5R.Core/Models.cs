@@ -107,6 +107,10 @@ public sealed class PlayerState
     public int TurnsTaken { get; set; }
     public int ProclaimUsedTurn { get; set; } = -1;
     public bool DishonorLossPending { get; set; }
+    // Utaku Chikako's own Limited ability (issue #186): "You may not declare an attack this turn" --
+    // a broad restriction (not just her own printed card's interaction), so it blocks DeclareAttack
+    // outright regardless of what grants the assignment opportunity. Reset every StartTurn.
+    public bool MayNotAttackThisTurn { get; set; }
     public Dictionary<string, int> AbilityUses { get; set; } = [];
     public string StrongholdId { get; set; } = "";
     public List<string> DynastyDeck { get; set; } = [];

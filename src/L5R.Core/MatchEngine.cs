@@ -244,7 +244,7 @@ public sealed partial class MatchEngine
         // A Personality is straightened by default; entering bowed is only ever a direct
         // consequence of a printed effect, never a separate straighten-then-bow step.
         card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
-        if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
+        if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
@@ -286,7 +286,7 @@ public sealed partial class MatchEngine
         province.CardId=null;
         card.Zone=Zone.Battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
-        if(Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
+        if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("reserveRecruited",$"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.",command.PlayerId,card.Id);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
@@ -473,6 +473,12 @@ public sealed partial class MatchEngine
     private void DeclareAttack(GameCommand command)
     {
         Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
+        // Utaku Chikako's own restriction (issue #186): a broad "may not declare an attack this turn"
+        // -- blocks any non-empty attacker assignment outright, Infantry or Cavalry alike, regardless
+        // of what would otherwise grant the assignment opportunity (a future "Ambush"-style card
+        // included, since this checks the assignment itself, not a specific path to it). An empty
+        // assignment (declining to attack) is always still legal.
+        Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry);
@@ -531,17 +537,27 @@ public sealed partial class MatchEngine
         if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
-            GainHonor(attacker,destroyedDefenders*2,"Battle victory");
+            if(!RehonorWinners(a)) GainHonor(attacker,destroyedDefenders*2,"Battle victory");
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+province.Strength;
             if(destroyedProvince) DestroyProvince(defender,province);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
         }
-        else if(df>af) GainHonor(defender,DestroyUnits(a)*2,"Battle victory");
+        else if(df>af)
+        {
+            var destroyedAttackers=DestroyUnits(a);
+            if(!RehonorWinners(d)) GainHonor(defender,destroyedAttackers*2,"Battle victory");
+        }
         else if(a.Length>0 && d.Length>0)
         {
+            // Tie (issue #186): check and rehonor BEFORE destruction -- a dishonorable member about to
+            // be destroyed in the same tie must never also take its own dishonorable-death Honor
+            // penalty (MarkDead) on top of this battle's own gain negation.
+            var attackerHadDishonorable=RehonorWinners(a);
+            var defenderHadDishonorable=RehonorWinners(d);
             var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
-            GainHonor(attacker,destroyedD,"Tied battle"); GainHonor(defender,destroyedA,"Tied battle");
+            if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
+            if(!defenderHadDishonorable) GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
         }
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
@@ -608,6 +624,18 @@ public sealed partial class MatchEngine
         if(Definition(Card(Player(attacker).StrongholdId)).Effect!="plains-honor") return;
         var maidens=attackingArmy.Count(c=>c.Zone==Zone.Battlefield && Keyword(c,"Battle Maiden"));
         if(maidens>0) GainHonor(attacker,maidens,"Plains of the Maiden");
+    }
+    // Dishonor/Rehonor (core rules Glossary, issue #186): "if a dishonorable personality is in an
+    // army that wins or ties a battle and destroys cards in an opposing army, all of the dishonorable
+    // personalities in the winner's army are rehonored and the FULL honor gain from winning is
+    // negated." Called (and, for a tie, rehonoring applied) before that army's own units are
+    // destroyed, in case it is also on the losing end of a tie. Returns whether any rehonoring
+    // happened, so the caller knows whether to skip its own GainHonor entirely.
+    private bool RehonorWinners(CardInstance[] army)
+    {
+        var dishonorable=army.Where(c=>c.Zone==Zone.Battlefield && c.Dishonorable).ToArray();
+        foreach(var card in dishonorable) Rehonor(card);
+        return dishonorable.Length>0;
     }
 
     private void Equip(GameCommand command)
@@ -730,7 +758,13 @@ public sealed partial class MatchEngine
     // is not removed by this and resumes applying once honorable again. The handful of rules that
     // deliberately key off the *printed* value regardless of current status (Dishonorable death's
     // Honor penalty, Proclaim's grant) intentionally do not use this helper.
-    private int CardPersonalHonor(CardInstance card) => card.Dishonorable ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor");
+    private int CardPersonalHonor(CardInstance card) => card.Dishonorable && !DishonorablePersonalHonorOverridden(card) ? 0 : Definition(card).PersonalHonor+StatModifier(card,"PersonalHonor");
+    // Utaku Chikako's own passive (issue #186): "Your dishonorable Battle Maidens do not have a
+    // maximum Personal Honor of 0" -- a Personality's own passive (not a Stronghold's), so checked
+    // generically against any in-play Personality the SAME owner controls carrying this Effect,
+    // rather than fixed to one specific card.
+    private bool DishonorablePersonalHonorOverridden(CardInstance card) =>
+        Keyword(card,"Battle Maiden") && _state.Cards.Values.Any(c=>c.OwnerId==card.OwnerId && InPlay(c) && Definition(c).Effect=="battle-maiden-dishonor-immunity");
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
@@ -861,6 +895,11 @@ public sealed partial class MatchEngine
         if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
     }
     private void Rehonor(CardInstance card) => card.Dishonorable=false;
+    // Dishonor (core rules Glossary, issue #186): gives a Personality the Dishonorable status --
+    // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
+    // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
+    // state beyond it.
+    private void Dishonor(CardInstance card) => card.Dishonorable=true;
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
     // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
@@ -951,6 +990,7 @@ public sealed partial class MatchEngine
         _state.PriorityPlayerId=player.Id;
         if(player.Honor>=40) { Win(player.Id,"Honor victory at the start of the turn"); return; }
         player.TurnsTaken++;
+        player.MayNotAttackThisTurn=false;
         StraightenPhase(player);
     }
     private void StraightenPhase(PlayerState player)
@@ -1044,6 +1084,17 @@ public sealed partial class MatchEngine
         var player=Player(playerId); player.Honor+=amount;
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
+    }
+    // Dishonor/Rehonor (core rules Glossary, issue #186): "if one or more personalities are the
+    // performer of an action that would grant its controller Honor, the gain is negated and the
+    // performer is restored to honorable status" instead -- e.g. Doji Shunya's own ability, Shamate
+    // Keep's chosen performer. Distinct from a card's own explicit "rehonor him" text (e.g. No Time
+    // For Games), which just calls Rehonor directly; this is the generic derived version for an
+    // ability that does not spell it out itself.
+    private void GainHonorFromPerformer(CardInstance performer,int amount,string reason)
+    {
+        if(performer.Dishonorable) { Rehonor(performer); return; }
+        GainHonor(performer.OwnerId,amount,reason,performer);
     }
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
     private void SetPhase(Phase phase,int priority) { _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}."); }

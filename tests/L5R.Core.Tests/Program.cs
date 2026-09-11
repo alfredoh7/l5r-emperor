@@ -110,6 +110,8 @@ var tests = new (string Name, Action Run)[]
     ("Stalwart (issue #184): the first enemy-caused bow each turn is negated (and only the bow), a second succeeds, the card's own controller bowing it is never affected, and a stale marker from an earlier turn does not block this turn's negation", StalwartKeyword),
     ("Reserve (issue #184): a Dynasty Personality recruited as an absent battle action straight to the battlefield (no presence of the recruiter's own required, only enemy presence, face up only), and a non-Spell Fate card attached via Equip (Battle) the same way a Spell is, but without the bonus Additional Action", ReserveKeyword),
     ("Discipline (issue #184): a card played from a discard pile, paying its own printed Gold cost, resolving its effect, then removed from the game (the new Zone.RemovedFromGame/PlayerView.RemovedFromGame) rather than left in the discard pile; unusable from hand; unaffected by an earlier, unrelated discard the same turn", DisciplineKeyword),
+    ("Dishonor/Rehonor (issue #186): the Personal-Honor override (Utaku Chikako's shape), GainHonorFromPerformer negating a dishonorable performer's own Honor-granting ability and rehonoring them instead, and battle resolution rehonoring a dishonorable winner/tier and negating the full Honor gain (a tie's rehonoring happens before its own mutual destruction, so no double penalty)", DishonorRehonorMechanics),
+    ("Utaku Chikako (issue #186): the real card's own Personal-Honor override, and her Limited ability (gain 2 Honor; may not declare an attack this turn, a broad restriction on the assignment itself that resets next turn)", UtakuChikako),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -2771,6 +2773,104 @@ static void DisciplineKeyword()
         var payment=e.PaymentOptions(0,2).First();
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,AbilityId:"training-discipline-ability",SourceIds:payment.SourceIds));
         Equal(e.State.Cards[card.Id].Zone,Zone.RemovedFromGame,"Discipline still usable the same turn, unaffected by the earlier, unrelated discard");
+    }
+}
+static void DishonorRehonorMechanics()
+{
+    {
+        // Dishonor's own Personal-Honor override (issue #186, Utaku Chikako's shape): without the
+        // override, a dishonorable Battle Maiden's current Personal Honor reads 0 (blocking the
+        // Follower Honor Requirement, the same observable probe already used elsewhere); with it (an
+        // in-play Personality the same owner controls carrying the override Effect), it reads the
+        // printed/base value instead.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower",0,Zone.Hand); // HonorRequirement 1
+        var maiden=Add(s,"training-battle-maiden",0,Zone.Home); maiden.Dishonorable=true; // printed PH 1
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:maiden.Id));
+
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var follower2=Add(s2,"training-follower",0,Zone.Hand);
+        var maiden2=Add(s2,"training-battle-maiden",0,Zone.Home); maiden2.Dishonorable=true; // printed PH 1
+        Add(s2,"training-battle-maiden-honor-override",0,Zone.Home);
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,Cmd(e2,"equip",id:follower2.Id,sources:e2.PaymentOptions(0,2).First().SourceIds,target:maiden2.Id));
+    }
+    {
+        // GainHonorFromPerformer (issue #186): an honorable performer's own ability grants Honor
+        // normally; a dishonorable performer's gain is negated and the performer is rehonored instead.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        s.FavorPlayerId=0;
+        var honorable=Add(s,"training-honor-personality",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:honorable.Id,AbilityId:"shunya-honor"));
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Honorable performer: gains Honor normally");
+
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        s2.FavorPlayerId=0;
+        var dishonorable=Add(s2,"training-honor-personality",0,Zone.Home); dishonorable.Dishonorable=true;
+        var e2=MatchEngine.FromTestState(s2);
+        var honorBefore2=e2.State.Players[0].Honor;
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:dishonorable.Id,AbilityId:"shunya-honor"));
+        Equal(e2.State.Players[0].Honor,honorBefore2,"Dishonorable performer: gain negated");
+        Check(!e2.State.Cards[dishonorable.Id].Dishonorable,"...and rehonored instead");
+    }
+    {
+        // Battle resolution (issue #186): a dishonorable personality in the WINNING army negates the
+        // full Honor gain from that victory and is rehonored.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var attacker=Add(s,"training-lion-veteran",0,Zone.Battlefield,province:0); attacker.Dishonorable=true; // Force 6
+        var defender=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Resolve(e);
+        Check(!e.State.Cards[attacker.Id].Dishonorable,"Rehonored");
+        Equal(e.State.Players[0].Honor,honorBefore,"Honor gain from the victory negated entirely");
+        Equal(e.State.Cards[defender.Id].Zone,Zone.Dead,"The defeated defender is still destroyed normally");
+    }
+    {
+        // Tie (issue #186): rehonored BEFORE the tie's mutual destruction, so the dishonorable side
+        // takes neither the battle's own gain nor its own dishonorable-death Honor penalty; the other
+        // (honorable) side still gains Honor normally from what it destroyed.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var attacker=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); attacker.Dishonorable=true; // Force 3, printed PH 2
+        var defender=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, PH 2
+        var e=MatchEngine.FromTestState(s);
+        var attackerHonorBefore=e.State.Players[0].Honor; var defenderHonorBefore=e.State.Players[1].Honor;
+        Resolve(e);
+        Equal(e.State.Cards[attacker.Id].Zone,Zone.Dead,"Destroyed in the mutual tie");
+        Equal(e.State.Players[0].Honor,attackerHonorBefore,"Dishonorable side: no gain, and no dishonorable-death penalty either (rehonored first)");
+        Equal(e.State.Players[1].Honor,defenderHonorBefore+1,"Honorable side still gains Honor normally (1 destroyed, a tie does not double it)");
+    }
+}
+static void UtakuChikako()
+{
+    {
+        // Passive: the real card grants the override too, not just the training fixture.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower",0,Zone.Hand);
+        var maiden=Add(s,"training-battle-maiden",0,Zone.Home); maiden.Dishonorable=true; // printed PH 1
+        Add(s,"oracle-l5r-10102",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:follower.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:maiden.Id));
+    }
+    {
+        // Limited: gain 2 Honor, then may not declare an attack this turn -- a broad restriction on
+        // the assignment itself, not tied to any one specific path to it. An empty (declined)
+        // assignment is always still legal. Resets at the start of the next turn.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var chikako=Add(s,"oracle-l5r-10102",0,Zone.Home);
+        var unit=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:chikako.Id,AbilityId:"utaku-chikako-decline"));
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Gains 2 Honor");
+        Check(e.State.Players[0].MayNotAttackThisTurn,"Restricted for the rest of this turn");
+        Accept(e,new GameCommand("pass",1,e.Version));
+        Accept(e,new GameCommand("pass",0,e.Version)); // Action Phase: two consecutive passes -> Attack Declaration
+        Reject(e,new GameCommand("attack",0,e.Version,Assignments:new Dictionary<string,int>{[unit.Id]=0})); // declaring an attacker is rejected
+        Accept(e,new GameCommand("attack",0,e.Version,Assignments:[])); // declining (empty assignment) is still legal
     }
 }
 static void GeneralizedEntryReactionWindow()

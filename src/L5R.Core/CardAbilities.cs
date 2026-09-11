@@ -38,6 +38,12 @@ public static class AbilityCatalog
         // Performer shape, but for any keyword instead of one hardcoded to Tactician).
         ["training-keyword-conditional-force-boost"] = new("Battle", "Choose your performing Berserker at the current battlefield: +2 Force", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
         ["shunya-honor"] = new("Limited", "Discard Favor · gain 2 Honor", "none"),
+        // Utaku Chikako (issue #186): two independent effects -- the Honor gain and "may not declare
+        // an attack this turn" both apply regardless of the other (see the execution case). Limited
+        // is inherently restricted to the acting player's own active turn already, so the user's own
+        // "if used when it is not their turn" clause -- honor gain unaffected either way -- describes
+        // a case this engine's Limited timing already makes structurally unreachable.
+        ["utaku-chikako-decline"] = new("Limited", "Gain 2 Honor. You may not declare an attack this turn.", "none"),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality"),
         ["prepared-death"] = new("Limited", "Perform · +2 Force", "own-personality"),
         ["paid-bow"] = new("Open", "Pay 4 Gold · bow a Personality", "personality"),
@@ -888,7 +894,8 @@ public sealed partial class MatchEngine
             case "spitting-llama-force": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
             case "training-adjacent-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "blind-rage": ApplyModifier(Card(command.PerformerId!), id, id, "Force", 5); GainHonor(player.Id, -2, "Blind Rage"); break;
-            case "shunya-honor": GainHonor(player.Id, 2, "Doji Shunya"); break;
+            case "shunya-honor": GainHonorFromPerformer(source!, 2, "Doji Shunya"); break;
+            case "utaku-chikako-decline": GainHonorFromPerformer(source!, 2, "Utaku Chikako"); player.MayNotAttackThisTurn = true; break;
             case "kouki-force": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", -3); break;
             case "prepared-death": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "costly-feud": ApplyModifier(target!, source!.Id, id, "Force", -3); if (CardForce(target!) == 0 && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
@@ -900,10 +907,15 @@ public sealed partial class MatchEngine
             case "lobby": target!.Bowed = true; _state.FavorPlayerId = player.Id; Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id); break;
             case "favor-cycle": DiscardFate(player, target!); Draw(player); break;
             case "journeys-end-move": MoveHome(target!, false); break;
-            case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonor(player.Id, 2, "Shamate Keep"); break;
+            case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonorFromPerformer(Card(command.PerformerId!), 2, "Shamate Keep"); break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable && !StalwartNegatesBow(target, player.Id)) target.Bowed = true; break;
             case "justice-of-crane-dishonor":
-                target!.Dishonorable = true;
+                Dishonor(target!);
+                // "If this Personality has the printed Magistrate keyword" (issue #186): checked as
+                // though the wielder carried no attachments/permanent effects granting it -- exactly
+                // what PrintedKeyword already does (it reads only Definition.Keywords, never
+                // GrantedKeywords, so Justice of the Crane's own AttachGrantsKeyword grant of
+                // Magistrate to this same wielder never satisfies this check).
                 if (PrintedKeyword(Card(source!.AttachedTo!), "Magistrate")) GrantAdditionalAction(player.Id, null);
                 break;
             case "again-boost":
