@@ -98,7 +98,7 @@ public partial class Main : Node
         ProcessTableCamera(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
-        foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
+        foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
         if (_autoOpponent && !PresentationBusy && !_session.Online && _capturePath is null)
@@ -174,6 +174,17 @@ public partial class Main : Node
                 }
                 if (_captureMode == "library") LibraryDialog.Show(this);
                 if (_captureMode == "published-rules") ShowRules();
+                if (_captureMode == "published-lacquer-menu") ShowTableMenu();
+                if (_captureMode == "published-lacquer-practice") ShowPractice();
+                if (_captureMode == "published-lacquer-private") ShowOnline();
+                if (_captureMode == "published-lacquer-coverage") ShowCoverage();
+                if (_captureMode == "published-lacquer-history") ShowHistory();
+                if (_captureMode == "published-lacquer-pile") ShowPile(View.ViewerId, Zone.Dead);
+                if (_captureMode == "published-lacquer-confirm") Confirm("Leave this table?", "Return to the main menu? Your current practice will end.", () => { });
+                if (_captureMode == "published-lacquer-tooltip")
+                    Place(_root, ReadingTooltip.Create(this, "Bowed / unbowed\nA sideways card is bowed. Each attachment keeps its own bowed state."), 600, 260, 460, 180);
+                if (_captureMode == "published-lacquer-card")
+                    Place(_root, CardPreview.Create(View.Players.SelectMany(p=>p.Home.Concat(p.Provinces.Where(x=>x.Card is not null).Select(x=>x.Card!))).First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
                 if (_captureMode is "payment" or "purchase")
                 {
                     var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });
@@ -239,6 +250,8 @@ public partial class Main : Node
                 RenderingServer.ForceDraw(false);
                 RenderingServer.ForceSync();
                 var error = GetViewport().GetTexture().GetImage().SavePng(_capturePath);
+                try { ValidateLacquerMenus(); }
+                catch (Exception e) { GD.PushError(e.Message); error = Error.Failed; }
                 GD.Print($"CAPTURE_RESULT: {error} {_capturePath}");
                 GetTree().Quit(error == Error.Ok ? 0 : 1);
                 _capturePath = null;
@@ -249,7 +262,7 @@ public partial class Main : Node
     private Vector2 DesignSize => new(_layoutWidth, 1080);
     private float _layoutWidth = 1920;
     private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
-    private const float SidebarWidth = 300;
+    private const float SidebarWidth = 400;
     private const float HandCardSide = 284;
     private HBoxContainer _menu = null!;
     private Control _inspectorPanel = null!, _fullscreenGate = null!;
@@ -262,7 +275,7 @@ public partial class Main : Node
         // Root controls use an explicit scale, so rasterize system fonts at the
         // matching density instead of magnifying their 1080p glyph textures.
         ((FontFile)Palette.Body).Oversampling = Math.Max(1, scale);
-        ((FontFile)Palette.Title).Oversampling = Math.Max(1, scale);
+        Palette.HeadingFace.Oversampling = Math.Max(1, scale);
         _layoutWidth = available.X / Math.Max(.1f, scale);
         _root.Size = DesignSize;
         _root.Scale = Vector2.One * scale;
@@ -273,7 +286,7 @@ public partial class Main : Node
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         _status.Visible = false;
-        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - 660, 100);
+        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 360, 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
         _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
         _unitDetail.Size = DesignSize;
@@ -288,6 +301,8 @@ public partial class Main : Node
         child.Position = new Vector2(x, y); child.Size = new Vector2(width, height);
         return child;
     }
+
+    private VBoxContainer _sidebarHeader = null!;
 
     private void BuildShell()
     {
@@ -310,11 +325,12 @@ public partial class Main : Node
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
-        var inspectorPanel = Place(_root, new LacquerPanel(), 1488, 94, SidebarWidth, 960);
+        var inspectorPanel = Place(_root, new PanelContainer { Theme = SidebarSkin.Theme() }, 1488, 94, SidebarWidth, 960);
         _inspectorPanel = inspectorPanel;
-        inspectorPanel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.045f, .043f, .033f, .96f), new Color("766341"), 18));
+        inspectorPanel.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
         var side = new VBoxContainer(); side.AddThemeConstantOverride("separation", 10); inspectorPanel.AddChild(side);
         _seatLabel = Palette.Text("", 13, Palette.Gold); _seatLabel.Visible = false; side.AddChild(_seatLabel);
+        _sidebarHeader = new VBoxContainer(); side.AddChild(_sidebarHeader);
         var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; side.AddChild(scroll);
         _inspector = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _inspector.AddThemeConstantOverride("separation", 10); scroll.AddChild(_inspector);
         side.AddChild(new HSeparator());
