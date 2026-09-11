@@ -38,8 +38,12 @@ public partial class Main
     private void ShowRemovedGallery(int owner)
     {
         var (dialog,body)=Dialog("Removed from the Game",1220,880);
-        dialog.GetOkButton().Hide();
-        var heading=Palette.Text("Removed from the Game",30,Palette.Paper,true);heading.HorizontalAlignment=HorizontalAlignment.Center;body.AddChild(heading);
+        dialog.GetOkButton().Hide();dialog.Borderless=true;
+        var header=new HBoxContainer();body.AddChild(header);
+        var heading=Palette.Text("Removed from the Game",30,Palette.Paper,true);heading.HorizontalAlignment=HorizontalAlignment.Center;heading.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;header.AddChild(heading);
+        var close=SidebarSkin.Button("X",dialog.QueueFree);
+        foreach(var state in new[]{"normal","hover","pressed"}){var skin=SidebarSkin.Surface(true);skin.ContentMarginLeft=skin.ContentMarginRight=skin.ContentMarginTop=skin.ContentMarginBottom=4;close.AddThemeStyleboxOverride(state,skin);}
+        close.AddThemeFontSizeOverride("font_size",24);close.AccessibilityName="Close removed cards";close.CustomMinimumSize=new Vector2(44,44);header.AddChild(close);
         var tabs=new HBoxContainer();body.AddChild(tabs);
         var note=Palette.Wrapped("Cannot be targeted or returned",18,Palette.PaperDim);note.HorizontalAlignment=HorizontalAlignment.Center;body.AddChild(note);
         var scroll=new ScrollContainer {SizeFlagsVertical=Control.SizeFlags.ExpandFill,HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};body.AddChild(scroll);
