@@ -113,3 +113,7 @@ Suggested prompt for the next AI:
 ## Next sequence
 
 See `docs/NEXT_PHASE.md`: full human Lion/Crane matches and corrections; native Windows/external private multiplayer acceptance; scripted beginner tutorial using the real engine; then incremental additional decks and a deck builder. UI/QoL work continues in Alfredo’s lane while the mechanics review proceeds in parallel.
+
+## Project board
+
+The private project board and authenticated agent client are documented in `docs/PROJECT_BOARD.md`. GitHub remains authoritative for issues and PRs; the board adds scope snapshots, executor claims, dependencies, and human acceptance. `collab.py context` includes it when a token is configured. Production readiness is recorded in the board repository, not inferred from these instructions.
