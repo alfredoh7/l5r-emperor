@@ -1,0 +1,77 @@
+{
+  "Profile": "strategy-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-127",
+      "Name": "Again!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your performing Kensai. Straighten him and all his Weapons. Battle abilities on his Weapons may be used a second time this turn. You may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-127.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "again-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10175",
+      "Name": "Two Hands",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Kensai: You may take two additional Battle actions from cards in his unit. Other actions will not give you new additional Battle actions this battle.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10175.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "two-hands-grant"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2283",
+      "Name": "Effortless Counterattack",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Before the resolution of a Battle action that was taken as an additional action, negate its effects.\nBattle: Target your performing unbowed Personality to move home a target Personality without attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2283.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "effortless-counterattack-negate",
+        "effortless-counterattack-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

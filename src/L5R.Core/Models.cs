@@ -127,6 +127,12 @@ public sealed class PendingAttack
     public string? TargetId { get; set; }
     public int Strength { get; set; }
     public string Kind { get; set; } = "";
+    // Was this specific Attack itself taken as a consumed Additional Action grant (issue #181)? If so,
+    // ResolveAttack's own NextAction call must know to keep priority with the attacker (grants
+    // permitting), the same as any other Battle ability resolved as an additional action -- the
+    // immediate (non-deferred) resolution path already gets this for free via ExecuteAbilityEffects'
+    // own tail, so only the deferred/reaction-window path needs this carried across.
+    public bool Additional { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
@@ -140,6 +146,14 @@ public sealed class PendingConqueror
     public int ProvinceIndex { get; set; }
     public string[] CandidateIds { get; set; } = [];
 }
+
+/// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
+/// named player may take out of the normal back-and-forth alternation, without ceding priority to
+/// their opponent in between. ScopeCardIds null means any of the player's own cards (Again!'s
+/// shape); a specific set restricts it to those cards only (Two Hands' "from cards in his unit").
+/// Consumed one at a time by NextAction/ConsumeAdditionalActionGrant; battle-scoped -- cleared at
+/// FinishBattleResolution, never carried into a later battle or turn.</summary>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds);
 
 public sealed class MatchState
 {
@@ -161,6 +175,15 @@ public sealed class MatchState
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
     // "for the remainder of the battle," not the turn -- since a turn can contain more than one battle.
     public int[] AshigaruBoost { get; set; } = new int[2];
+    // Additional Action (issue #181): every currently-available grant across both players, and a
+    // command snapshot awaiting the "additionalActionReaction" window (Effortless Counterattack's
+    // shape) before it actually resolves. Two Hands' own restriction ("other actions will not give
+    // you NEW additional Battle actions this battle") is a separate flag -- it blocks future GRANTS,
+    // it does not touch grants already sitting in AdditionalActions. All battle-scoped: cleared at
+    // FinishBattleResolution, never carried into a later battle or turn.
+    public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
+    public GameCommand? PendingAdditionalAction { get; set; }
+    public bool NoNewAdditionalActionsThisBattle { get; set; }
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];

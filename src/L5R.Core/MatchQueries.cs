@@ -101,12 +101,18 @@ public sealed partial class MatchEngine
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
-        else if(_state.PendingChoice is { Type:"spellFollowUp" } spellFollowUp)
+        else if(_state.PendingChoice is { Type:"additionalActionReaction" })
         {
-            // Only the equipping player has anything to decide here; the opponent just waits (the
-            // top-level playerId!=PriorityPlayerId branch above already covers that).
-            if(spellFollowUp.PlayerId==playerId) result.AddRange(AbilityActions(playerId,spellFollowUp.CardId));
-            Add("declineReaction","Decline the Spell's Battle ability",Command("declineReaction"));
+            // Additional Action (issue #181): open to either side, same shape as attackReaction above
+            // -- list this player's own eligible before-additional-action-resolves Reactions, played
+            // from hand (Effortless Counterattack's shape), not in play.
+            foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Hand)
+                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
+                .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-additional-action-resolves"))
+                Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                    new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                    cardId:card.Id);
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
