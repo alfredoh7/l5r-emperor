@@ -16,7 +16,7 @@ public sealed class BattleJournal
     private bool _inBattle;
     public void Reset()
     { Exchanges.Clear(); Aftermath.Clear(); Outcome=""; LastSequence=-1; _inBattle=false; Revision++; }
-    public static bool BattlePhase(Phase p) => p is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    public static bool BattlePhase(Phase p) => p is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
     public void Observe(MatchView next, MatchView? previous)
     {
         var incoming=next.Events.Where(e=>e.Sequence>LastSequence).ToArray();

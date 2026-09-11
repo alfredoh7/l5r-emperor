@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implementing approved A progress track with B decision layout for battle sidebar, using existing authoritative states and legal choices.",
-  "validation": "Initial engine/interface review; native checks pending.",
-  "remaining": "UI implementation and visual validation; Engage/Naval authority remains issue15, no client simulation.",
+  "summary": "Implement approved compact battle progress and decision-focused lacquer sidebar, with public exchanges and named outcome receipts.",
+  "validation": "Godot client build passed with zero warnings/errors. Native captures at 1672x941 and 1280x800 passed. Direct ability selection/cancel, explicit pass priority, waiting controls, outcome receipts and history open/close checked against real engine state.",
+  "remaining": "Combined preview launch validation and CI/review pending. Engage/Naval windows remain authoritative engine dependencies (#15).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/20",
   "branch": "codex/20-battle-flow",
-  "updated": "2026-09-11T09:40:03.847761+00:00"
+  "updated": "2026-09-11T09:51:54.773492+00:00"
 }
