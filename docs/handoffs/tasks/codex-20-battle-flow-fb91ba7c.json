@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved compact battle progress and decision-focused lacquer sidebar, with public exchanges and named outcome receipts.",
-  "validation": "Godot client build passed with zero warnings/errors. Native captures at 1672x941 and 1280x800 passed. Direct ability selection/cancel, explicit pass priority, waiting controls, outcome receipts and history open/close checked against real engine state.",
-  "remaining": "Combined preview launch validation and CI/review pending. Engage/Naval windows remain authoritative engine dependencies (#15).",
+  "summary": "Approved A compact progress with B decision-focused lacquer battle sidebar, named outcomes and public exchange history.",
+  "validation": "Client builds pass. Native 1672x941 and 1280x800 captures pass: direct ability/cancel, visible Pass handoff, waiting controls, named resolution receipts, history open/close. Integrated preview exact Play Latest.command launches; complete 2486-image WebP85 pack rebuilt and verified.",
+  "remaining": "CI and rules-lead review pending. Engage/Naval initiative windows remain engine dependencies (#15); no simulated or hidden-information auto-passes. Windows graphical testing not performed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/20",
   "branch": "codex/20-battle-flow",
-  "updated": "2026-09-11T09:51:54.773492+00:00"
+  "updated": "2026-09-11T09:55:10.559964+00:00"
 }

@@ -134,7 +134,7 @@ public partial class Main
                 CancelChoice();
             }
             if(_captureMode.EndsWith("waiting",StringComparison.Ordinal)) {
-                var version=View.Version; PassOpportunity(); _uiQueue.Clear(); Render();
+                var version=View.Version; _phaseActions.GetChildren().OfType<Button>().First(b=>!b.Disabled && b.Text=="Pass battle action").EmitSignal(Button.SignalName.Pressed); _uiQueue.Clear(); Render();
                 if(View.Version!=version+1 || View.PriorityPlayerId==View.ViewerId) throw new InvalidOperationException("Battle pass did not hand priority to opponent.");
             }
             if(_captureMode.EndsWith("outcome",StringComparison.Ordinal)) {
