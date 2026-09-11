@@ -113,6 +113,7 @@ var tests = new (string Name, Action Run)[]
     ("Dishonor/Rehonor (issue #186): the Personal-Honor override (Utaku Chikako's shape), GainHonorFromPerformer negating a dishonorable performer's own Honor-granting ability and rehonoring them instead, and battle resolution rehonoring a dishonorable winner/tier and negating the full Honor gain (a tie's rehonoring happens before its own mutual destruction, so no double penalty)", DishonorRehonorMechanics),
     ("Utaku Chikako (issue #186): the real card's own Personal-Honor override, and her Limited ability (gain 2 Honor; may not declare an attack this turn, a broad restriction on the assignment itself that resets next turn)", UtakuChikako),
     ("Kiho keyword and discard-to-hand primitive (issue #190): Volcano Tattoo's own Fire Kiho Battle ability (Togashi Meiyu as the Tattooed Monk performer), and Hunter of Harmony returning it from the Fate discard pile 'freshly drawn' so it may be used again the same turn", KihoDiscardToHand),
+    ("Multi-keyword Target/Performer requirement (issue #190): a card may name any number of keywords, all independently required regardless of order (e.g. 'a Tattooed Monk') -- a card with only one of the two required keywords does not qualify", MultiKeywordRequirement),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -2925,6 +2926,22 @@ static void KihoDiscardToHand()
         Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy"));
         Equal(e2.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"May be used again this same turn, unlike a card that stayed in the discard pile");
     }
+}
+static void MultiKeywordRequirement()
+{
+    // "A Dragon Clan Kensai", "a Crane Clan Magistrate" (issue #190): any number of keywords, all
+    // independently required, order irrelevant. Volcano Tattoo's own "Tattooed Monk" Performer
+    // requirement is exactly this generic primitive (RequiredKeywords: ["Monk","Tattooed"]), not a
+    // hardcoded category -- a card with only one of the two keywords does not qualify.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var monkOnly=Add(s,"training-monk",0,Zone.Battlefield,province:0); // Monk, but not Tattooed
+    var meiyu=Add(s,"oracle-l5r-8550",0,Zone.Battlefield,province:0); // Monk and Tattooed (and Fire)
+    var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var enemyFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+    var volcano=Add(s,"oracle-l5r-9186",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:monkOnly.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy")); // only one of the two required keywords
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy")); // has both
 }
 static void GeneralizedEntryReactionWindow()
 {
