@@ -94,6 +94,7 @@ var tests = new (string Name, Action Run)[]
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
+    ("Unique/Singular (issue #202): both restrict simultaneous in-play copies of the same-named card to one per controller (Unique's own in-play restriction had no test before this), checked at all three entry-into-play paths -- Purchase, ordinary Equip (a real pre-existing gap for both keywords, fixed here), and Equip (Battle)", UniqueAndSingularInPlayRestriction),
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
@@ -112,6 +113,8 @@ var tests = new (string Name, Action Run)[]
     ("Discipline (issue #184): a card played from a discard pile, paying its own printed Gold cost, resolving its effect, then removed from the game (the new Zone.RemovedFromGame/PlayerView.RemovedFromGame) rather than left in the discard pile; unusable from hand; unaffected by an earlier, unrelated discard the same turn", DisciplineKeyword),
     ("Dishonor/Rehonor (issue #186): the Personal-Honor override (Utaku Chikako's shape), GainHonorFromPerformer negating a dishonorable performer's own Honor-granting ability and rehonoring them instead, and battle resolution rehonoring a dishonorable winner/tier and negating the full Honor gain (a tie's rehonoring happens before its own mutual destruction, so no double penalty)", DishonorRehonorMechanics),
     ("Utaku Chikako (issue #186): the real card's own Personal-Honor override, and her Limited ability (gain 2 Honor; may not declare an attack this turn, a broad restriction on the assignment itself that resets next turn)", UtakuChikako),
+    ("Kiho keyword and discard-to-hand primitive (issue #190): Volcano Tattoo's own Fire Kiho Battle ability (Togashi Meiyu as the Tattooed Monk performer), and Hunter of Harmony returning it from the Fate discard pile 'freshly drawn' so it may be used again the same turn", KihoDiscardToHand),
+    ("Multi-keyword Target/Performer requirement (issue #190): a card may name any number of keywords, all independently required regardless of order (e.g. 'a Tattooed Monk') -- a card with only one of the two required keywords does not qualify", MultiKeywordRequirement),
     ("Goju House Guard and Aberrations (issue #192): the new deck-return primitive (top or bottom, controller's choice for Goju itself; unattached unit cards always to the bottom of their owner's appropriate deck, fully reset) and top-of-Fate-deck discard primitive (Force bonus equal to the discarded card's Focus Value)", GojuHouseGuardAndAberrations),
     ("Focus-1 Battle-action wave (issue #192): Sankaku-Yari (target-keyword-conditional Attack strength, zero new primitives), Pearl of Embers (BattleOrOpen, zero new primitives), Ritual Preparation (the new own-unit-card Target category -- a Personality OR Follower, own, in play)", FocusOneBattleActionsWave),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
@@ -1700,6 +1703,88 @@ static void SpellsAndShugenja()
         Check(e.State.AdditionalActions.Any(g=>g.ScopeCardIds!.Contains(spell2.Id)),"Spell2's own fresh grant is still there");
     }
 }
+static void UniqueAndSingularInPlayRestriction()
+{
+    {
+        // Unique (issue #202): recruiting a second copy of an already-controlled Unique Personality
+        // is rejected -- Unique's own in-play restriction had no training fixture or test at all
+        // before this. A DIFFERENT card is unaffected.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-unique-personality",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-unique-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(!quote.ProclaimEligible,"Not eligible: already controls this Unique card");
+        Equal(quote.Error,"You already control this Unique card.");
+    }
+    {
+        // Singular (issue #202): the same in-play restriction, but -- unlike Unique -- with no
+        // deck-construction limit (DeckFormat.cs is unaffected by Singular; not exercised here).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-singular-personality",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-singular-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(!quote.ProclaimEligible,"Not eligible: already controls this Singular card");
+        Equal(quote.Error,"You already control this Singular card.");
+    }
+    {
+        // Once the in-play copy leaves play (here, simply never having entered it), recruiting is
+        // legal again -- the restriction is about a copy currently in play, not about having owned
+        // one ever.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-singular-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(quote.ProclaimEligible,"No copy in play yet: eligible");
+        Equal(quote.Error,null);
+    }
+    {
+        // Unique/Singular via the ordinary Equip() path (issue #202): a Follower already controlled
+        // in play cannot be attached a second time -- Equip had no such check at all before this fix.
+        var s=MatchEngine.CreateStarterMatch().State;
+        var host1=Add(s,"training-crane-samurai",0,Zone.Home);
+        var host2=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"training-unique-follower",0,Zone.Attached,attachedTo:host1.Id);
+        var second=Add(s,"training-unique-follower",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:second.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:host2.Id));
+    }
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        var host1=Add(s,"training-crane-samurai",0,Zone.Home);
+        var host2=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"training-singular-follower",0,Zone.Attached,attachedTo:host1.Id);
+        var second=Add(s,"training-singular-follower",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:second.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:host2.Id));
+    }
+    {
+        // Unique/Singular via Equip (Battle) (issue #202): a Spell already controlled in play cannot
+        // be attached a second time either -- equip-battle had no such check at all before this fix.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var shugenja1=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var shugenja2=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        Add(s,"training-singular-spell",0,Zone.Attached,province:0,attachedTo:shugenja1.Id);
+        var second=Add(s,"training-singular-spell",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja2.Id,TargetId:second.Id,SourceIds:e.PaymentOptions(0,1).First().SourceIds));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var shugenja1=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var shugenja2=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        Add(s,"training-unique-spell",0,Zone.Attached,province:0,attachedTo:shugenja1.Id);
+        var second=Add(s,"training-unique-spell",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja2.Id,TargetId:second.Id,SourceIds:e.PaymentOptions(0,1).First().SourceIds));
+    }
+}
 static void LoyalKeyword()
 {
     {
@@ -2875,6 +2960,74 @@ static void UtakuChikako()
         Reject(e,new GameCommand("attack",0,e.Version,Assignments:new Dictionary<string,int>{[unit.Id]=0})); // declaring an attacker is rejected
         Accept(e,new GameCommand("attack",0,e.Version,Assignments:[])); // declining (empty assignment) is still legal
     }
+}
+static void KihoDiscardToHand()
+{
+    {
+        // Volcano Tattoo (issue #190): a real "Fire Kiho Battle" card. Bows the performing Tattooed
+        // Monk (Togashi Meiyu: Fire, Monk, Tattooed, Chi 3) to destroy an unattached card in an enemy
+        // unit whose Personality's Chi is at or below hers, then straightens her again since the
+        // destroyed card (a Follower) counts as "an attachment" and she is Fire.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var meiyu=Add(s,"oracle-l5r-8550",0,Zone.Battlefield,province:0); // Fire/Monk/Tattooed, Chi 3
+        var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3 <= 3
+        var enemyFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+        var volcano=Add(s,"oracle-l5r-9186",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy"));
+        Check(e.State.Cards[meiyu.Id].Zone==Zone.Battlefield && !e.State.Cards[meiyu.Id].Bowed,"Fire performer is straightened again: the destroyed Follower counted as an attachment");
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"The unattached Follower is destroyed");
+        Equal(e.State.Cards[volcano.Id].Zone,Zone.FateDiscard,"Volcano Tattoo discards after resolving, like any other Strategy");
+        Check(e.State.Cards[volcano.Id].AbilityUses.ContainsKey("volcano-tattoo-destroy"),"Stamped used this turn");
+    }
+    {
+        // Hunter of Harmony (issue #190): "Remove this card from the game: choose a Kiho Strategy in
+        // your discard pile. Put it into your hand." Volcano Tattoo, already used once this turn
+        // (simulating an earlier play-then-discard), returns to hand "freshly drawn": its once-per-
+        // turn stamp is cleared, so it may be used again this same turn.
+        // Hunter of Harmony's own Limited ability requires Phase.Action (like every other Limited
+        // ability); Volcano Tattoo's own Battle ability requires Phase.Battle. A real match reaches
+        // both within the same turn via Action -> AttackDeclaration -> Battle. MatchEngine.State
+        // always returns a fresh copy (writes through it are no-ops), so the transition is modeled
+        // the same way every other test builds a starting MatchState: capture the post-return state,
+        // edit its Phase/PriorityPlayerId, and wrap a second engine around it -- same TurnNumber
+        // throughout, which is all the once-per-turn stamp comparison actually depends on.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.Phase=Phase.Action;
+        var meiyu=Add(s,"oracle-l5r-8550",0,Zone.Battlefield,province:0);
+        var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var enemyFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var hunter=Add(s,"oracle-l5r-3522",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var volcano=Add(s,"oracle-l5r-9186",0,Zone.FateDiscard);
+        volcano.AbilityUses["volcano-tattoo-destroy"]=s.TurnNumber;
+        var plainStrategy=Add(s,"training-rally",0,Zone.FateDiscard); // a Strategy, but not Kiho
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:hunter.Id,TargetId:plainStrategy.Id,AbilityId:"hunter-of-harmony-return")); // not Kiho
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hunter.Id,TargetId:volcano.Id,AbilityId:"hunter-of-harmony-return"));
+        Equal(e.State.Cards[hunter.Id].Zone,Zone.RemovedFromGame,"Hunter of Harmony pays its own cost: removed from the game");
+        Check(e.State.Cards[volcano.Id].Zone==Zone.Hand && e.State.Players[0].Hand.Contains(volcano.Id),"Volcano Tattoo returns to hand");
+        Check(e.State.Cards[volcano.Id].AbilityUses.Count==0,"Treated as freshly drawn: its earlier stamp is cleared");
+        var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0];
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy"));
+        Equal(e2.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"May be used again this same turn, unlike a card that stayed in the discard pile");
+    }
+}
+static void MultiKeywordRequirement()
+{
+    // "A Dragon Clan Kensai", "a Crane Clan Magistrate" (issue #190): any number of keywords, all
+    // independently required, order irrelevant. Volcano Tattoo's own "Tattooed Monk" Performer
+    // requirement is exactly this generic primitive (RequiredKeywords: ["Monk","Tattooed"]), not a
+    // hardcoded category -- a card with only one of the two keywords does not qualify.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var monkOnly=Add(s,"training-monk",0,Zone.Battlefield,province:0); // Monk, but not Tattooed
+    var meiyu=Add(s,"oracle-l5r-8550",0,Zone.Battlefield,province:0); // Monk and Tattooed (and Fire)
+    var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var enemyFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+    var volcano=Add(s,"oracle-l5r-9186",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:monkOnly.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy")); // only one of the two required keywords
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy")); // has both
 }
 static void GojuHouseGuardAndAberrations()
 {

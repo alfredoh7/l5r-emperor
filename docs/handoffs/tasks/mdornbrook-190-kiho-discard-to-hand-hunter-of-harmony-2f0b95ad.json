@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Resolves the merge conflict between PR #191 (issue #190: Kiho keyword, discard-to-hand primitive, Volcano Tattoo/Hunter of Harmony) and current main (now including issue #198's Personality wave 8 and issue #200's WebP pipeline). Conflicts were purely additive collisions at the same insertion points (L5R.Core.csproj's EmbeddedResource list, PublishedContent.cs's snapshot loaders and duplicate-id chain, CardCatalog.cs's final Concat chain, tests/Program.cs's test-function block, PublishedTests.cs's hardcoded published count) -- resolved by keeping both sides' additions and recomputing the cumulative published count (183 + 198's own additions -> 200, since main's own 198 already included the 17 Lion Clan wave-8 cards). docs/CARD_INVENTORY.xlsx (a generated binary) was regenerated fresh via tools/content/build_card_inventory.py rather than hand-merged.",
+  "validation": "dotnet build (0 warnings/errors); dotnet run --project tests/L5R.Core.Tests -> 115/115 core + 34/34 published + 8/8 deck-format; python3 -m unittest discover -s tools/content -> 121/121; python3 -m unittest discover -s tools/collaboration -> 43/43.",
+  "remaining": "None; ready to push and update PR #191.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/190",
+  "branch": "mdornbrook/190-kiho-discard-to-hand-hunter-of-harmony",
+  "updated": "2026-09-12T11:16:19.289701+00:00"
+}
