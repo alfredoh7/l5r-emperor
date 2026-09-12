@@ -23,5 +23,18 @@
   "source_image_hash": "f8/8d",
   "source_url": "https://images.oracleofthevoid.com/l5r/f8/8d/printing_7494_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/f8/8d/printing_7494_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 131550,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-7494-printing-1-image-1.webp",
+    "sha256": "9598fef344e6220e58f23414a5cabebf0405e264fcca9dcc1652263e1fc42d90",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

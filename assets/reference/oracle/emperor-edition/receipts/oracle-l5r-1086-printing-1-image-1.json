@@ -23,5 +23,18 @@
   "source_image_hash": "fb/b8",
   "source_url": "https://images.oracleofthevoid.com/l5r/fb/b8/printing_1086_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/fb/b8/printing_1086_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 179328,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1086-printing-1-image-1.webp",
+    "sha256": "5dce3873fef03bc38c25f82ac87f6bdd60513ceed872ecbfdb761a0333301090",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

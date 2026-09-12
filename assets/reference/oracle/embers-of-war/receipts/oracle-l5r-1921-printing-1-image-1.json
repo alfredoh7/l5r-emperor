@@ -23,5 +23,18 @@
   "source_image_hash": "d2/e9",
   "source_url": "https://images.oracleofthevoid.com/l5r/d2/e9/printing_1921_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d2/e9/printing_1921_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 164892,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-1921-printing-1-image-1.webp",
+    "sha256": "233069b6f5c2c2655d93f446098d42d5b826477b1b265f158df65d6698aad328",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

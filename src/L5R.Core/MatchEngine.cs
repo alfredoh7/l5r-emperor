@@ -787,7 +787,14 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+        // Matsu Yoshito (issue #198): "+1F while attacking, or +2F if the Defender is Dragon Clan" --
+        // the Defender is always the other player while this card is attacking.
+        Definition(card).Effect=="attacking-vs-dragon-bonus"?(Player(1-card.OwnerId).Clan=="Dragon"?2:1):0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)
+        // Pride of the Hand (issue #198): "+1F while you control a Terrain at its battlefield" --
+        // unlike the attacking-only cases above, this applies whenever the card is at a battlefield
+        // (attacking or defending) that also has one of its own controller's Terrains in play.
+        +(Definition(card).Effect=="force-with-own-terrain-at-battlefield"&&AtBattle(card)&&_state.Cards.Values.Any(c=>c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Keyword(c,"Terrain"))?1:0)
         // An Item's printed "+F" box (and any conditional bonus it grants the wielder, e.g. Kensai's
         // Blade's "+1F to a Personality with Kensai") always conveys to the wielder, whether the Item
         // is bowed or not -- unlike a Follower's own Force, which stays with the Follower itself (see

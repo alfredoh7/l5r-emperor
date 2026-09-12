@@ -23,5 +23,18 @@
   "source_image_hash": "32/dd",
   "source_url": "https://images.oracleofthevoid.com/l5r/32/dd/printing_3242_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/32/dd/printing_3242_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 130202,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3242-printing-1-image-1.webp",
+    "sha256": "72330856489d4d15beaf23611912437377aac4b0fc6586b6b20f447f22ac0242",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

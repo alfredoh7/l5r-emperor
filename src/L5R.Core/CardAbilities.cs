@@ -271,6 +271,46 @@ public static class AbilityCatalog
         // Scholarly Hermit (issue #194's own review): needed only a Ring-type check in a discard
         // pile, now trivial. New Target "own-ring-in-discard".
         ["scholarly-hermit-search"] = new("Limited", "Bow: Put a Ring from your discard pile into your hand. Destroy this Follower.", "own-ring-in-discard"),
+        // Lion Clan Personality review (issue #198): every ability below reuses only primitives
+        // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
+        // onto the existing Open/Battle/Limited/BattleOrOpen values verbatim (confirmed precedent,
+        // issue #174's own audit of Rumormonger/Soshi House Guard's "Political Open"/"Political
+        // Battle/Open" -- the SAME reasoning applies to "Tactical Open"/"Tactical Limited" here).
+        ["dairuko-exp-bow"] = new("Battle", "Bow a target enemy Personality with lower Personal Honor. Destroy him if he is Unaligned.", "enemy-personality-lower-honor-than-self"),
+        ["furu-bow"] = new("Battle", "Bow a target Personality with equal or lower Chi", "personality-chi-lte-self", UsageKey: "furu-bow-straighten"),
+        ["furu-straighten"] = new("Battle", "Straighten a target Personality with equal or lower Chi", "personality-chi-lte-self", UsageKey: "furu-bow-straighten"),
+        ["kamina-exp-attack"] = new("Battle", "Ranged 3 Attack, or Ranged 4 Attack if the target is Lion Clan or Unaligned", "attack"),
+        ["kano-token"] = new("Limited", "Give Kano a Master token", "none"),
+        ["kano-destroy-token"] = new("Battle", "Bow: Destroy a Master token on Kano to take two additional Battle actions", "none"),
+        ["michitsu-destroy"] = new("Battle", "Destroy a target enemy attachment", "enemy-attachment"),
+        // Simplified from the printed "You may discard a card to ignore the cost of bowing Kamina"
+        // (issue #198) -- the discard-instead-of-bow cost alternative is not modeled this pass.
+        ["kamina-boost"] = new("Open", "Bow: Give a target Personality +4F", "personality"),
+        // "Tireless" (issue #198, Akodo Tsudoken's own reminder): usable even while bowed -- see the
+        // bowed-exemption list below. The self-straighten happens regardless of which target choice
+        // is taken, matching the printed "Even if bowed: Straighten him" applying to both halves.
+        ["tsudoken-exp-bow"] = new("Battle", "Even if bowed: Straighten Tsudoken. Bow a target Personality.", "personality", UsageKey: "tsudoken-exp-bow-straighten"),
+        ["tsudoken-exp-straighten"] = new("Battle", "Even if bowed: Straighten Tsudoken. Straighten a target Personality.", "personality", UsageKey: "tsudoken-exp-bow-straighten"),
+        ["tsudoken-exp2-entry"] = new("Reaction", "After Tsudoken enters play, lose 3 Honor", "none", Trigger: "own-enters-play"),
+        // Simplified from "Destroy Nojima if he is ever in an army with a Personality with 3+ PH"
+        // (issue #198) -- a continuous army-composition check with no existing analogue (every
+        // existing check is event-triggered, not continuously re-evaluated); not modeled this pass.
+        ["tsudoken-exp2-straighten"] = new("BattleOrOpen", "Tireless: Straighten your target Lion Clan or Fallen Personality", "own-lion-or-fallen-personality"),
+        ["nojima-entry"] = new("Reaction", "After Nojima enters play, lose 1 Honor", "none", Trigger: "own-enters-play"),
+        ["aimi-exp-discard"] = new("Limited", "Bow: Discard a card. Gain Honor equal to its Focus Value, plus 1 if Shiba Iaimiko is in play.", "hand"),
+        ["ayumi-entry"] = new("Reaction", "After Ayumi enters play, lose 2 Honor", "none", Trigger: "own-enters-play"),
+        ["masumi-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments"),
+        // Simplified from "You may discard a Terrain from your hand or destroy a Terrain in play; if
+        // you did either, draw a card" (issue #198) -- the optional Terrain-discard-for-a-draw half
+        // is not modeled this pass; the printed strength/conditional-bonus half is unaffected.
+        ["shuji-attack"] = new("Battle", "Ranged 4 Attack, with +1 strength if it targeted a Spider Clan Personality", "attack"),
+        // Simplified from "a card in a unit" (issue #198) to an enemy unit specifically, matching the
+        // scoping convention every other bow/straighten-a-unit-card ability in this catalog already
+        // uses (own-unit-card is the one existing own-side exception, and it names no conditional
+        // attachment waiver).
+        ["tsukasa-bow"] = new("Battle", "Target an enemy card in a unit (without attachments, unless you control a Terrain): Bow it", "enemy-unit-card-terrain-conditional", UsageKey: "tsukasa-bow-straighten"),
+        ["tsukasa-straighten"] = new("Battle", "Target an enemy card in a unit (without attachments, unless you control a Terrain): Straighten it", "enemy-unit-card-terrain-conditional", UsageKey: "tsukasa-bow-straighten"),
+        ["arata-force-penalty"] = new("Battle", "Target an enemy Personality or Follower: Force penalty equal to Arata's Personal Honor. Gain 1 Honor.", "enemy-force"),
         // Training-only: exercises Discipline (issue #184) -- played from a discard pile, paying the
         // card's own printed Gold cost, then removed from the game (see the generic Timing=="Discipline"
         // handling: zone check, cost, and post-resolution removal all key off this one Timing value).
@@ -372,6 +412,8 @@ public sealed partial class MatchEngine
         "cavalry-flankers-attack" => 2,
         "dark-naga-scouts-attack" => 3,
         "moshi-ikako-attack" => 1,
+        "kamina-exp-attack" => 3 + (target is not null && (Definition(target).Clan == "Lion" || Definition(target).Clan == "Unaligned") ? 1 : 0),
+        "shuji-attack" => 4 + (target is not null && Definition(target).Clan == "Spider" ? 1 : 0),
         "murderous-thieves-attack" => 3,
         "horse-archers-attack" or "hiruma-sniper-attack" => 4,
         "spawn-of-vritra-attack" => 6,
@@ -415,6 +457,7 @@ public sealed partial class MatchEngine
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
         "moshi-ikako-attack" => "Ranged",
+        "kamina-exp-attack" or "shuji-attack" => "Ranged",
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
         "horseback-warriors-attack" => "Melee",
         "false-ring-of-water-attack" => "Ranged",
@@ -652,7 +695,8 @@ public sealed partial class MatchEngine
                 // afterward when used this way, mirroring the Strategy case just below).
                 : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
                 "The ability's source is not in the required zone.");
-            Require(!source.Bowed || id == "shinden-choice", "Abilities on bowed cards cannot be used.");
+            // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
+            Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
@@ -695,6 +739,7 @@ public sealed partial class MatchEngine
         if (id == "false-ring-of-water-recruit")
             Require(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength >= 11,
                 "The current battlefield's Province Strength must be 11 or greater.");
+        if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
@@ -877,6 +922,27 @@ public sealed partial class MatchEngine
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
                         "own-tattooed-personality" => personality && own && Keyword(target, "Tattooed"),
                         "personality-lower-honor-than-self" => personality && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                        // Akodo Dairuko (issue #198): the same shape as -than-self above, restricted
+                        // to an enemy.
+                        "enemy-personality-lower-honor-than-self" => personality && !own && CardPersonalHonor(target) < CardPersonalHonor(source!),
+                        // Akodo Furu (issue #198): a bare Chi comparison against the source itself
+                        // (not a separately-chosen Performer, unlike enemy-personality-chi-lte-performer),
+                        // and not restricted to an enemy.
+                        "personality-chi-lte-self" => personality && PersonalityChi(target) <= PersonalityChi(source!),
+                        // Akodo Michitsu (issue #198) reuses the existing "enemy-attachment" category
+                        // above verbatim -- no new Target needed.
+                        // Akodo Tsudoken's own second Experienced printing (issue #198): own Personality,
+                        // Lion Clan OR carrying the Fallen keyword.
+                        "own-lion-or-fallen-personality" => own && personality && (Definition(target).Clan == "Lion" || Keyword(target, "Fallen")),
+                        // Ikoma Masumi (issue #198): the same Follower-or-unattached-Personality shape
+                        // the Ranged/Melee "attack" Target already uses, as a bare enemy-card check
+                        // (no Attack strength/kind involved here, just "without attachments").
+                        "enemy-card-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target)),
+                        // Ikoma Tsukasa (issue #198): the same shape as above, but the "without
+                        // attachments" restriction is waived entirely while the performer's controller
+                        // controls any Terrain.
+                        "enemy-unit-card-terrain-conditional" => !own && (type == CardType.Follower || personality) &&
+                            (ControlsKeyword(player.Id, "Terrain") || !HasAttachments(target)),
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
@@ -1082,7 +1148,7 @@ public sealed partial class MatchEngine
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
-            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack":
+            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
@@ -1137,6 +1203,40 @@ public sealed partial class MatchEngine
             case "training-spell-force-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "horibe-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "horibe-straighten": Straighten(target!); break;
+            // Lion Clan Personality review (issue #198):
+            case "dairuko-exp-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (Definition(target!).Clan == "Unaligned") DestroyUnits([target!], false);
+                break;
+            case "furu-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "furu-straighten": Straighten(target!); break;
+            case "kano-token": CreateToken(source!, "Master", id); break;
+            case "kano-destroy-token":
+                source!.Bowed = true;
+                DestroyToken(source, source.Tokens.First(t => t.Type == "Master"));
+                GrantAdditionalAction(player.Id, null); GrantAdditionalAction(player.Id, null);
+                break;
+            case "michitsu-destroy": DestroyAttachment(target!); break;
+            case "kamina-boost": source!.Bowed = true; ApplyModifier(target!, source.Id, id, "Force", 4); break;
+            case "tsudoken-exp-bow": Straighten(source!); if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "tsudoken-exp-straighten": Straighten(source!); Straighten(target!); break;
+            case "tsudoken-exp2-entry": GainHonor(player.Id, -3, "Akodo Tsudoken", source); break;
+            case "tsudoken-exp2-straighten": Straighten(target!); break;
+            case "nojima-entry": GainHonor(player.Id, -1, "Akodo Nojima", source); break;
+            case "aimi-exp-discard":
+            {
+                source!.Bowed = true;
+                var focus = Definition(target!).Focus;
+                DiscardFate(player, target!);
+                var shibaIaimikoBonus = _state.Cards.Values.Any(c => Definition(c).Name == "Shiba Iaimiko" && InPlay(c)) ? 1 : 0;
+                GainHonor(player.Id, focus + shibaIaimikoBonus, "Ikoma Aimi");
+                break;
+            }
+            case "ayumi-entry": GainHonor(player.Id, -2, "Ikoma Ayumi", source); break;
+            case "masumi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "tsukasa-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "tsukasa-straighten": Straighten(target!); break;
+            case "arata-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(source)); GainHonor(player.Id, 1, "Matsu Arata"); break;
             case "atsumichi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;

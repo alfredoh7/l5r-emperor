@@ -7,7 +7,7 @@ import unittest
 from PIL import Image
 from io import BytesIO
 
-from package_vanilla_wave import build_definition, find_source, package, plain
+from package_vanilla_wave import build_definition, build_definition_fields, find_source, package, plain
 
 
 class PackageVanillaWaveTests(unittest.TestCase):
@@ -95,6 +95,60 @@ class PackageVanillaWaveTests(unittest.TestCase):
             (catalogue_dir / "catalogue.json").write_text(json.dumps({"cards": [card]}), encoding="utf-8")
             with self.assertRaises(ValueError):
                 find_source(root, "oracle-l5r-6")
+
+    def test_working_copy_is_preferred_over_the_original_when_present(self):
+        # Issue #200: a receipt's own path/sha256 keep naming the true original master untouched;
+        # a sibling working_copy (a WebP artifact, here re-encoded to nothing special -- Pillow can
+        # save WEBP directly) is what actually gets copied into Content/Published when present.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root, "oracle-l5r-7")
+            receipt_path = root / "assets/reference/oracle/test-set/receipts/oracle-l5r-7-printing-1-image-1.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+
+            webp_bytes = BytesIO()
+            Image.new("RGB", (750, 1050), color=(1, 2, 3)).save(webp_bytes, "WEBP", quality=85)
+            webp_bytes = webp_bytes.getvalue()
+            webp_relative = Path("assets/reference/oracle/test-set/webp/oracle-l5r-7-printing-1-image-1.webp")
+            (root / webp_relative).parent.mkdir(parents=True)
+            (root / webp_relative).write_bytes(webp_bytes)
+            receipt["working_copy"] = {"format": "WEBP", "path": webp_relative.as_posix(),
+                                        "sha256": hashlib.sha256(webp_bytes).hexdigest()}
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+
+            fields, source = build_definition_fields(root, "oracle-l5r-7")
+            self.assertEqual(source["image_path"], webp_relative.as_posix())
+            self.assertEqual(source["image_sha256"], hashlib.sha256(webp_bytes).hexdigest())
+            published = root / "src/L5R.Client/Content/Published/oracle-l5r-7.jpg"
+            self.assertTrue(published.exists())
+            with Image.open(published) as img:
+                self.assertEqual(img.format, "JPEG")
+                self.assertEqual(img.size, (750, 1050))
+
+    def test_working_copy_falls_back_to_the_original_when_absent(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root, "oracle-l5r-8")
+            receipt_path = root / "assets/reference/oracle/test-set/receipts/oracle-l5r-8-printing-1-image-1.json"
+            original_receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            fields, source = build_definition_fields(root, "oracle-l5r-8")
+            self.assertEqual(source["image_path"], original_receipt["path"])
+            self.assertEqual(source["image_sha256"], original_receipt["sha256"])
+
+    def test_tampered_working_copy_is_rejected(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            self.fixture(root, "oracle-l5r-9")
+            receipt_path = root / "assets/reference/oracle/test-set/receipts/oracle-l5r-9-printing-1-image-1.json"
+            receipt = json.loads(receipt_path.read_text(encoding="utf-8"))
+            webp_relative = Path("assets/reference/oracle/test-set/webp/oracle-l5r-9-printing-1-image-1.webp")
+            (root / webp_relative).parent.mkdir(parents=True)
+            (root / webp_relative).write_bytes(b"tampered webp bytes")
+            receipt["working_copy"] = {"format": "WEBP", "path": webp_relative.as_posix(),
+                                        "sha256": "0" * 64}
+            receipt_path.write_text(json.dumps(receipt), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                build_definition_fields(root, "oracle-l5r-9")
 
     def test_package_writes_disjoint_definitions_and_sources(self):
         with tempfile.TemporaryDirectory() as tmp:

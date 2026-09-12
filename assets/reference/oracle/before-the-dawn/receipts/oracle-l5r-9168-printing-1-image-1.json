@@ -23,5 +23,18 @@
   "source_image_hash": "f0/86",
   "source_url": "https://images.oracleofthevoid.com/l5r/f0/86/printing_9168_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/f0/86/printing_9168_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 146172,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9168-printing-1-image-1.webp",
+    "sha256": "3698155109251f1e5802db4b73e3ba1a6cdf7b620d0cc3d078cfcd285d4d27d2",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

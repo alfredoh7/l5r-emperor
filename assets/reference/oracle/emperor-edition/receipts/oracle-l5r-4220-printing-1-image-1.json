@@ -23,5 +23,18 @@
   "source_image_hash": "a4/d3",
   "source_url": "https://images.oracleofthevoid.com/l5r/a4/d3/printing_4220_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/a4/d3/printing_4220_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 157338,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4220-printing-1-image-1.webp",
+    "sha256": "f1d1925186578562c3ebcae9e10a56cedb407a80ec3adc6838ba6fde30d8bd54",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

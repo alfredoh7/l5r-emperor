@@ -21,5 +21,18 @@
   "source_image_hash": "cb/de",
   "source_url": "https://images.oracleofthevoid.com/l5r/cb/de/printing_7780_2_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/cb/de/printing_7780_2_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 128746,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-7780-printing-2-image-2.webp",
+    "sha256": "3f2a8a64652c403881ac54330c17f0fa8a4071f07467c3e2aed16c3320ac79d6",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

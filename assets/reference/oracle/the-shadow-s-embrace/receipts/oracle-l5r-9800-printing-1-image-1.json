@@ -23,5 +23,18 @@
   "source_image_hash": "46/9f",
   "source_url": "https://images.oracleofthevoid.com/l5r/46/9f/printing_9800_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/46/9f/printing_9800_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 130570,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9800-printing-1-image-1.webp",
+    "sha256": "d4304958cc0cd9f39a8b66fa1a886432eb84a0242485535b5cde3be407345610",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

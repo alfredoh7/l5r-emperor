@@ -23,5 +23,18 @@
   "source_image_hash": "59/c3",
   "source_url": "https://images.oracleofthevoid.com/l5r/59/c3/printing_10900_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/59/c3/printing_10900_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 111902,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10900-printing-1-image-1.webp",
+    "sha256": "fca2e1bc5fc3801b9192422766132251465ceee04e50b6521ed4c64a82659122",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

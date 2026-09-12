@@ -23,5 +23,18 @@
   "source_image_hash": "73/fe",
   "source_url": "https://images.oracleofthevoid.com/l5r/73/fe/printing_3790_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/73/fe/printing_3790_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 124818,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-3790-printing-1-image-1.webp",
+    "sha256": "cf5f70ab724a72256285e25a8161f0216f53e87491da0fa735034957137e6b6d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

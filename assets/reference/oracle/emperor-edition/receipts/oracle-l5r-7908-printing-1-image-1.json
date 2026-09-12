@@ -23,5 +23,18 @@
   "source_image_hash": "19/53",
   "source_url": "https://images.oracleofthevoid.com/l5r/19/53/printing_7908_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/19/53/printing_7908_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 153790,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7908-printing-1-image-1.webp",
+    "sha256": "fe0b6e4ab6db175895af82aed5c471c91372a721d6e174676f77aabb75244925",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

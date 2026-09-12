@@ -23,5 +23,18 @@
   "source_image_hash": "4a/d7",
   "source_url": "https://images.oracleofthevoid.com/l5r/4a/d7/printing_910_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/d7/printing_910_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 150476,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-910-printing-1-image-1.webp",
+    "sha256": "70f41023a94d2f81195d36b7b5d1d526fb2326d08d19eaef49c409f8aa9dcd0b",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

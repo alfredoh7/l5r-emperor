@@ -23,5 +23,18 @@
   "source_image_hash": "75/6d",
   "source_url": "https://images.oracleofthevoid.com/l5r/75/6d/printing_2608_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/75/6d/printing_2608_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 136850,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-2608-printing-1-image-1.webp",
+    "sha256": "efc824a7617ca6c0d7275a371a539e191e1ad4cc8116b32c6a977d83336855c3",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

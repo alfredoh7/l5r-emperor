@@ -23,5 +23,18 @@
   "source_image_hash": "32/28",
   "source_url": "https://images.oracleofthevoid.com/l5r/32/28/printing_6804_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/32/28/printing_6804_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 129248,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-6804-printing-1-image-1.webp",
+    "sha256": "ef3854922948f2a3d1db5156843c2aa2187a0b352c0b181048d0fafee417bbf2",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }
