@@ -82,6 +82,19 @@ public static class AbilityCatalog
         // AttachGrantsKeyword:"Magistrate" would otherwise make the condition trivially always true.
         // Deferred when first wired (#179/#180), before the Additional Action primitive existed (#181).
         ["justice-of-crane-dishonor"] = new("Battle", "Dishonor a target enemy Personality", "enemy-personality"),
+        // Goju House Guard (issue #192): "Ninja Battle" -- "Ninja" is a plain printed-keyword
+        // classification (same treatment as Recon/Kiho), not a distinct engine Timing; the ordinary
+        // "Battle" timing already gates it correctly. The cost (top or bottom of its own owner's
+        // Fate deck, DeckPosition) is paid in the execution switch, not the generic cost-computation
+        // block, since it is never a Gold amount.
+        ["goju-house-guard-return"] = new("Battle", "Put this card on the top or bottom of your Fate deck to target an enemy Personality. Put all cards without attachments in his unit on the bottom of their owner's appropriate deck.", "enemy-personality"),
+        // Pearl of Embers (issue #192): zero new primitives -- bow itself as a cost, straighten its
+        // own wielder. "Battle/Open" is the existing BattleOrOpen Timing verbatim.
+        ["pearl-of-embers-straighten"] = new("BattleOrOpen", "Bow this card: Straighten this Personality", "none"),
+        // Ritual Preparation (issue #192): "your target card in a unit" -- a own Personality OR
+        // Follower, unlike every existing Target category naming only one of the two. New Target
+        // "own-unit-card" (see the generic switch below), the only new piece this needed.
+        ["ritual-preparation-straighten"] = new("Battle", "Straighten your target card in a unit", "own-unit-card"),
         ["again-boost"] = new("Battle", "Again!: Straighten your performing Kensai and his Weapons; their Battle abilities may be used again this turn; you may take an additional Battle action",
             "none", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Kensai"]),
         // "From cards in his unit" -- unlike Again!'s unscoped grant, these two are only usable by the
@@ -229,6 +242,10 @@ public static class AbilityCatalog
         // nothing beyond already-built categories/helpers (issue #148). Each reuses an existing
         // Target category, Attack strength/kind pattern, or Force/Draw/bow helper verbatim.
         ["akodo-regulars-boost"] = new("Battle", "Discard a card: Give this card a Force bonus equal to the discarded card's Focus Value (until the turn ends)", "hand"),
+        // Aberrations (issue #192): same Force-from-Focus shape as Akodo Regulars above, but the
+        // discarded card is the forced top card of your own Fate deck (DiscardTopOfFateDeck), not a
+        // chosen card from hand -- Target "none" since no Target selection is made at all.
+        ["aberrations-boost"] = new("Battle", "Discard the top card of your Fate deck: this Follower gains a Force bonus equal to its Focus Value (until the turn ends)", "none"),
         ["cavalry-flankers-attack"] = new("Battle", "If you are the Attacker: Bow this card: Melee 2 Attack", "attack"),
         ["dark-naga-scouts-attack"] = new("Battle", "Ranged 3 Attack", "attack"),
         ["horse-archers-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
@@ -241,6 +258,9 @@ public static class AbilityCatalog
         ["spitting-llama-force"] = new("Battle", "Give a target enemy Personality or Follower -3F", "enemy-force"),
         ["spawn-of-vritra-attack"] = new("Battle", "Ranged 6 Attack", "attack"),
         ["horseback-warriors-attack"] = new("Battle", "Melee 4 Attack, or Melee 5 Attack if the target is Infantry", "attack"),
+        // Sankaku-Yari (issue #192): zero new primitives -- Horseback Warriors above already
+        // established a target-keyword-conditional Attack strength.
+        ["sankaku-yari-attack"] = new("Battle", "Melee 4 Attack, or Melee 5 Attack if the target is Cavalry", "attack"),
         ["khol-regulars-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
         ["khol-regulars-reaction"] = new("Reaction", "If this card is at the current battlefield, after a Ranged Attack is targeted: +2 strength", "none", Trigger: "before-attack-resolves"),
         ["bounty-hunter-bow"] = new("Battle", "Bow a target attachment or a target dishonorable Personality", "attachment-or-dishonorable-personality"),
@@ -446,6 +466,9 @@ public sealed partial class MatchEngine
         // Horseback Warriors: Melee 4, or 5 against a target without the Cavalry keyword -- "Infantry"
         // has no printed keyword of its own (core rules Glossary), it just means not Cavalry.
         "horseback-warriors-attack" => 4 + (target is not null && !Keyword(target, "Cavalry") ? 1 : 0),
+        // Sankaku-Yari (issue #192): the mirror image of Horseback Warriors above -- bonus FOR
+        // Cavalry rather than against non-Cavalry.
+        "sankaku-yari-attack" => 4 + (target is not null && Keyword(target, "Cavalry") ? 1 : 0),
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -482,7 +505,7 @@ public sealed partial class MatchEngine
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
         "kamina-exp-attack" or "shuji-attack" => "Ranged",
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
-        "horseback-warriors-attack" => "Melee",
+        "horseback-warriors-attack" or "sankaku-yari-attack" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -785,6 +808,10 @@ public sealed partial class MatchEngine
         }
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
         Require(command.Choice is null, "Choices are resolved by a separate decision command.");
+        // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
+        // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
+        Require(id == "goju-house-guard-return" ? command.DeckPosition is "Top" or "Bottom" : command.DeckPosition is null,
+            id == "goju-house-guard-return" ? "Choose Top or Bottom for your Fate deck." : "Unexpected deck position.");
         if (ability.Target == "provinces")
         {
             Require(command.TargetId is null, "Select province cards together.");
@@ -887,6 +914,11 @@ public sealed partial class MatchEngine
                         // itself is a counter increment, not applied to this target at all.
                         "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
                         "own-personality" => personality && own,
+                        // Ritual Preparation (issue #192): "your target card in a unit" -- either
+                        // half of a unit (the Personality herself, or an attached Follower), own,
+                        // in play. Items/Spells are never described as "in a unit" (core rules:
+                        // that phrase is reserved for Personality/Follower combat participants).
+                        "own-unit-card" => own && (personality || type == CardType.Follower),
                         // Generic "Choose your performing/target [Keyword(s)] Personality" -- for a
                         // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
                         // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeywords.
@@ -1053,6 +1085,7 @@ public sealed partial class MatchEngine
             case "veteran-advisor-draw": Draw(player); break;
             case "hired-legion-draw": source!.Bowed = true; Draw(player); break;
             case "akodo-regulars-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
+            case "aberrations-boost": if (DiscardTopOfFateDeck(player) is int focus) ApplyModifier(source!, source!.Id, id, "Force", focus); break;
             case "heavy-chargers-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", 3); break;
             case "spitting-llama-force": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
             case "training-adjacent-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
@@ -1081,6 +1114,19 @@ public sealed partial class MatchEngine
                 // Magistrate to this same wielder never satisfies this check).
                 if (PrintedKeyword(Card(source!.AttachedTo!), "Magistrate")) GrantAdditionalAction(player.Id, null);
                 break;
+            case "goju-house-guard-return":
+            {
+                // Cost: Goju itself to the top or bottom of its own owner's Fate deck (controller's
+                // choice). A snapshot of the target's whole unit is taken BEFORE any of it moves, so
+                // "cards without attachments" is evaluated once, simultaneously -- a Personality with
+                // two Followers is excluded even though removing both leaves her with none by the end.
+                ToOwnerDeck(source!, command.DeckPosition!);
+                var unit = Attachments(target!.Id).Append(target).ToArray();
+                foreach (var card in unit.Where(c => !HasAttachments(c)).ToArray()) ToOwnerDeck(card, "Bottom");
+                break;
+            }
+            case "pearl-of-embers-straighten": source!.Bowed = true; Straighten(Card(source.AttachedTo!)); break;
+            case "ritual-preparation-straighten": Straighten(target!); break;
             case "again-boost":
             {
                 var kensai = Card(command.PerformerId!);
@@ -1149,7 +1195,7 @@ public sealed partial class MatchEngine
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
-            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "kamina-exp-attack": case "shuji-attack":
+            case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "sankaku-yari-attack": case "kamina-exp-attack": case "shuji-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
@@ -1227,10 +1273,10 @@ public sealed partial class MatchEngine
             case "aimi-exp-discard":
             {
                 source!.Bowed = true;
-                var focus = Definition(target!).Focus;
+                var discardFocus = Definition(target!).Focus;
                 DiscardFate(player, target!);
                 var shibaIaimikoBonus = _state.Cards.Values.Any(c => Definition(c).Name == "Shiba Iaimiko" && InPlay(c)) ? 1 : 0;
-                GainHonor(player.Id, focus + shibaIaimikoBonus, "Ikoma Aimi");
+                GainHonor(player.Id, discardFocus + shibaIaimikoBonus, "Ikoma Aimi");
                 break;
             }
             case "ayumi-entry": GainHonor(player.Id, -2, "Ikoma Ayumi", source); break;
@@ -1445,6 +1491,41 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
         Player(card.OwnerId).Hand.Add(card.Id);
         Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
+    }
+    // Goju House Guard (issue #192): a card sent to "the top or bottom of its owner's appropriate
+    // deck" re-enters that deck as a wholly fresh instance -- unlike RemoveFromGame/MarkDead (both
+    // terminal, so stale Modifiers/GrantedKeywords/Bowed/AbilityUses never matter again), this card
+    // WILL be drawn/refilled and re-enter play, so every one of those must be cleared here or a
+    // phantom Force boost, keyword grant, bowed state, or once-per-turn stamp would silently
+    // resurface later. "Appropriate deck": a Personality goes to the Dynasty deck; a Follower/Item/
+    // Spell (the only other types that can appear in a Personality's "unit") goes to the Fate deck.
+    private void ToOwnerDeck(CardInstance card, string position)
+    {
+        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        var owner = Player(card.OwnerId);
+        var dynasty = Definition(card).Type == CardType.Personality;
+        card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
+        card.Tokens.Clear(); card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.AbilityUses.Clear();
+        card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
+        var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
+        if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);
+        Emit("toDeck", $"{Definition(card).Name} was placed on the {position.ToLowerInvariant()} of {owner.Name}'s {(dynasty ? "Dynasty" : "Fate")} deck.", card.OwnerId, card.Id);
+    }
+    // Aberrations (issue #192): "Discard the top card of a Fate deck" -- unlike Draw() (top card to
+    // hand), this removes it straight to the discard pile (a public zone, so no hidden-identity
+    // concern the way Draw()'s own Emit has) and returns its Focus Value for the caller to apply as
+    // whatever bonus the card's own text describes. Empty deck: no card, no bonus, same "nothing
+    // happens" shape as Draw()'s own empty-deck branch. Interpreted as the controller's OWN Fate
+    // deck -- no explicit target/enemy qualifier is printed, matching how an unqualified "a card"
+    // effect defaults to the actor's own resources elsewhere in this ruleset (Border Keep's own
+    // provinces, discarding from hand).
+    private int? DiscardTopOfFateDeck(PlayerState player)
+    {
+        if (player.FateDeck.Count == 0) { Emit("deckEmpty", $"{player.Name}'s Fate deck is empty; no card discarded.", player.Id); return null; }
+        var id = player.FateDeck[0]; player.FateDeck.RemoveAt(0);
+        var card = Card(id); card.Zone = Zone.FateDiscard; card.FaceUp = true;
+        Emit("cardDiscarded", $"{player.Name} discarded {Definition(card).Name}, the top card of the Fate deck.", player.Id, id);
+        return Definition(card).Focus;
     }
     // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by
     // an ability targeting it, or automatically once its printed effects have been applied during
