@@ -180,10 +180,21 @@ public sealed partial class MatchEngine
                 }
                 return;
             }
+            if (_state.PendingChoice.Type=="duelReaction")
+            {
+                // Dueling (issue #204): "a reaction to being challenged or entering a duel," offered
+                // after the challenge is accepted but before focusing starts -- open to either side,
+                // same shape as attackReaction/additionalActionReaction above.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;
         }
+        if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
         switch(command.Type)
         {
             case "pass": Pass(); break;

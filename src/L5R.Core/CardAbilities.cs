@@ -26,7 +26,16 @@ namespace L5R.Core;
 // combination (e.g. "enemy-force" + RequireNoAttachments, rather than a new "enemy-force-no-
 // attachments" string) -- reusable across every existing category a printed "without attachments"
 // card might otherwise need.
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false);
+// Dueling (issue #204): IssuesDuel marks an ability whose own Target/Performer selection (the
+// challenged and the challenger) issues a duel challenge instead of resolving inline -- generic
+// setup happens once, in UseAbility, before the per-id execution switch; the SAME ability's own id
+// is invoked again later, with a known winner/loser, to apply its own printed win/loss outcome
+// (ApplyDuelOutcome). DuelStat names the printed duel stat ("Chi"/"Force"/"PersonalHonor"); the
+// core rules default (Chi) needs no override. DuelRefusable opens an AwaitingAccept decision for the
+// challenged player first; "Your performer duels the target" (no refusal language at all) leaves it
+// false, matching every unrefusable duel-issuing card's own printed phrasing.
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
+    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false);
 
 public static class AbilityCatalog
 {
@@ -379,6 +388,23 @@ public static class AbilityCatalog
         ["panku-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
         ["thunderous-legion-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
         ["brothers-great-lake-bow"] = new("Battle", "Bow a target enemy card", "enemy-force"),
+        // Dueling (issue #204): "Your performer duels the target" (unrefusable -- no printed language
+        // ever describes refusing it, unlike a card that says "issues an unrefusable duel" as a
+        // stronger and equivalent statement). No duel stat is named, so it defaults to Chi. IssuesDuel
+        // routes this through IssueChallenge instead of an ordinary execution case; ApplyDuelOutcome
+        // is invoked with this same id, once the duel actually resolves, to destroy the loser(s).
+        ["steel-on-steel-duel"] = new("Battle", "Choose your performing unbowed Personality and target an enemy Personality: Your performer duels the target. Destroy the duel's loser.", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
+        // The Courtesy of the Crane (issue #204): only its own "As a Focus Effect" half is wired this
+        // pass -- the printed Political Open half ("Choose another player. He may draw a card. Draw
+        // two cards.") needs a new "choose a player" targeting primitive that doesn't exist yet, and
+        // is a separate, later concern from Dueling itself. A FocusEffect-Timing ability is never
+        // "played" -- ValidateAbility's own Timing switch never legalizes it through UseAbility at
+        // all; it only ever runs through ResolveFocusEffect, in the active player's chosen order.
+        ["courtesy-of-the-crane-focus"] = new("FocusEffect", "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.", "none"),
+        // Training-only: a refusable challenge with no printed win/loss text of its own -- see
+        // ApplyDuelOutcome's own generic -1F case, used only so a test can observe the loser(s)
+        // without needing a real card's own outcome.
+        ["training-duel-challenge"] = new("Battle", "Training: choose your performing unbowed Personality and target an enemy Personality: duel (refusable)", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelRefusable: true),
     });
 }
 
@@ -721,6 +747,9 @@ public sealed partial class MatchEngine
                     && Definition(Card(_state.PendingChoice.CardId!)).Type == CardType.Personality,
                 "before-attack-resolves" => _state.PendingChoice.Type == "attackReaction",
                 "before-additional-action-resolves" => _state.PendingChoice.Type == "additionalActionReaction",
+                // Dueling (issue #204): "a reaction to being challenged or entering a duel" -- open
+                // to either side, same shape as before-attack-resolves.
+                "before-duel-begins" => _state.PendingChoice.Type == "duelReaction",
                 _ => false
             },
             _ => false
@@ -853,6 +882,10 @@ public sealed partial class MatchEngine
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
                 "own-personality" => Definition(performer).Type == CardType.Personality,
+                // Steel on Steel (issue #204): no AtBattle qualifier of its own -- Dueling's own
+                // Timing (Battle, here) already gates the SOURCE card's own presence; the performer's
+                // only extra restriction beyond own-personality is "unbowed".
+                "own-unbowed-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed,
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -1119,6 +1152,17 @@ public sealed partial class MatchEngine
         // (Again!/Two Hands/equip-battle) must never accidentally spare an unrelated PRE-EXISTING
         // grant from forfeiture below just because the total count happens to end up higher.
         var preExistingGrants = _state.AdditionalActions.Where(g => g.PlayerId == player.Id).ToList();
+        // Dueling (issue #204): a challenge-issuing ability resolves generically, not through the
+        // per-id switch below -- "playing" the card (paying its cost, discarding a hand-played
+        // Strategy immediately) is the only part that happens right away; the printed EFFECT (the
+        // duel itself) is deferred to IssueChallenge, which pauses here without ceding priority the
+        // same way ResolveOrDeferAttack does, until the whole duel resolves.
+        if (ability.IssuesDuel)
+        {
+            if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+            IssueChallenge(id, player.Id, command.PerformerId!, target!.Id, ability.DuelStat, ability.DuelRefusable);
+            return;
+        }
         switch (id)
         {
             case "border-first": case "border-game": CycleProvinces(player, command.CardIds!); break;

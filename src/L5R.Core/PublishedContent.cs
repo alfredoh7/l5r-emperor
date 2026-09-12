@@ -520,6 +520,26 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 5 of ability-bearing Strategy cards (issue #204; numbered 5 to avoid a filename
+    /// collision with two sibling in-flight PRs, issues #190/#192, already claiming strategy-wave-3/
+    /// strategy-wave-4): Steel on Steel and The Courtesy of the Crane, the two cards driving the
+    /// Dueling primitive.</summary>
+    public static PublishedSnapshot StrategyWave5 { get; } = LoadStrategyWave5();
+
+    private static PublishedSnapshot LoadStrategyWave5()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave5.json", "strategy-wave-5", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected strategy-wave-5 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-5 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-5 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
