@@ -346,6 +346,12 @@ public sealed partial class MatchEngine
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
+    // Unique/Singular (issue #202): both restrict simultaneous in-play copies of the SAME-NAMED card
+    // (any printing -- an Experienced overlay counts as the same card as its base) to one per
+    // controller. Unique additionally restricts deck construction (DeckFormat.cs, unaffected here);
+    // Singular does not. Checked at every entry-into-play path (Purchase, Equip) that names a card by
+    // Name, not DefinitionId, matching the existing Unique convention this generalizes.
+    private bool ControlsCopyOf(int owner, string name) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Definition(c).Name == name);
     // Reconnaissance (core rules Glossary): a per-player boolean at a specific province, defaulted to
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
@@ -780,6 +786,11 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && (type == CardType.Spell || Keyword(target, "Reserve")), "Choose a Spell, or a Reserve Fate card, from your hand.");
                     Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Shugenja.");
                     Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
+                    // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
+                    // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
+                    // needed this check.
+                    Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
+                        $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
                 }
                 // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
                 // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
