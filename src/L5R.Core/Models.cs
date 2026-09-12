@@ -14,7 +14,12 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssign
 // Dynasty cards mix into this one zone, matching the single shared "Removed from Game" pile the
 // client will render (a Dead/DynastyDiscard/FateDiscard card is always specifically one or the
 // other; this one is neither, and both kinds of card can end up here).
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame }
+// Focused (issue #204 -- Dueling): a Fate card played face-down next to a dueling Personality. Not
+// "played" in the ordinary sense (no ability on it resolves except a "Focus Effect" one, later, in
+// the duel's own resolution order) -- visible to its own owner immediately, to both players once the
+// duel's own Struck reveal happens (PendingDuel.Struck), same shape as a private Hand card that
+// becomes public.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -164,6 +169,44 @@ public sealed class PendingConqueror
 /// FinishBattleResolution, never carried into a later battle or turn.</summary>
 public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds);
 
+/// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
+/// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
+/// same shape as PendingAttack) until it resolves, then hands priority back exactly where the
+/// pausing ability's own NextAction call would have. Stage drives which commands are legal next:
+/// "AwaitingAccept" (Refusable only) -> "Reaction" (a real PendingChoice("duelReaction",...) window,
+/// same machinery as attackReaction) -> "Focusing" (challenged goes first; either side may Strike,
+/// ending it for both; a player who has focused four times must Strike on their turn) ->
+/// "DuelistRefocus" (each Duelist-controlling side, in DuelistRefocusOrder, may discard one focused
+/// card and focus once more) -> "OrderingEffects" (the OUTER game's ActivePlayerId orders any
+/// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
+public sealed class PendingDuel
+{
+    public string AbilityId { get; set; } = "";
+    // The player who issued the challenge -- NextAction is called with this once the duel fully
+    // resolves, so priority returns exactly where it would have without the interjecting duel.
+    public int ChallengerPlayerId { get; set; }
+    public int ChallengedPlayerId { get; set; }
+    public string ChallengerId { get; set; } = "";
+    public string ChallengedId { get; set; } = "";
+    // "Chi" (default), "Force", or "PersonalHonor" -- the ability's own printed duel stat, or Chi if
+    // none is named.
+    public string Stat { get; set; } = "Chi";
+    public bool Refusable { get; set; }
+    public string Stage { get; set; } = "AwaitingAccept";
+    // Whose turn to Focus or Strike, alternating, starting with ChallengedPlayerId.
+    public int TurnPlayerId { get; set; }
+    public bool Struck { get; set; }
+    public List<string> ChallengerFocused { get; set; } = [];
+    public List<string> ChallengedFocused { get; set; } = [];
+    // Player ids still owed a Duelist discard-and-refocus decision, in the order they decide (the
+    // OUTER game's ActivePlayerId first if both sides have Duelist) -- popped one at a time.
+    public List<int> PendingDuelistDecisions { get; set; } = [];
+    // The active player's own chosen resolution order for every focused card carrying a
+    // Timing=="FocusEffect" ability, set once (by ResolveDuelFocusEffectsInOrder) just before
+    // ResolveDuel actually applies them.
+    public List<string> OrderedFocusEffects { get; set; } = [];
+}
+
 public sealed class MatchState
 {
     public long Version { get; set; }
@@ -177,6 +220,7 @@ public sealed class MatchState
     public PendingChoice? PendingChoice { get; set; }
     public PendingAttack? PendingAttack { get; set; }
     public PendingConqueror? PendingConqueror { get; set; }
+    public PendingDuel? PendingDuel { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
@@ -220,9 +264,16 @@ public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardV
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
-    bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame);
+    bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
+    CardView[]? Focused = null);
+/// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
+/// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
+/// through PlayerView.Focused's own per-viewer visibility.</summary>
+public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, string ChallengerId,
+    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
-    PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null);
+    PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null,
+    DuelView? PendingDuel = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

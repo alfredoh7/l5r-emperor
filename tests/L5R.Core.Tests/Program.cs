@@ -117,7 +117,8 @@ var tests = new (string Name, Action Run)[]
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
     ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency),
-    ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview)
+    ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview),
+    ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling)
 };
 var failed=0;
 foreach(var test in tests)
@@ -3508,4 +3509,124 @@ static void ProvinceAdjacency()
     Check(IsLegalWithProvinces(6,4,[],5),"index 4 adjacent to index 5 with 6 provinces");
     Check(!IsLegalWithProvinces(6,0,[],5),"index 0 still not adjacent to index 5 (not transitive)");
     Check(IsLegalWithProvinces(6,3,[4],5),"index 3 adjacent to index 5 once index 4 (a middle province) is destroyed, with 6 provinces");
+}
+static void Dueling()
+{
+    // Steel on Steel / The Courtesy of the Crane: reproduces the user's own worked example end to
+    // end -- Doji Tatsuki (Chi 4) focuses Courtesy of the Crane (FV 4) for a total of 8; Matsu Hachiro
+    // (Chi 3) focuses Paid Off (FV 4) for a total of 7 -- including hidden-until-Struck focused-card
+    // visibility, Courtesy's own Focus Effect, and priority returning to exactly where the challenge
+    // was issued (the Lion player's Battle action) once the duel resolves.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.ActivePlayerId=0; s.PriorityPlayerId=1;
+        var matsu=Add(s,"oracle-l5r-4915",0,Zone.Battlefield,province:0); // Matsu Hachiro: Chi 3
+        var tatsuki=Add(s,"oracle-l5r-2166",1,Zone.Battlefield,province:0); // Doji Tatsuki: Chi 4
+        var steelOnSteel=Add(s,"oracle-l5r-7483",1,Zone.Hand);
+        var courtesy=Add(s,"oracle-l5r-7996",1,Zone.Hand);
+        var paidOff=Add(s,"oracle-l5r-5861",0,Zone.FateDeck); // Focus Value 4
+        s.Players[0].FateDeck.Insert(0,paidOff.Id);
+        var craneProvincesBefore=s.Players[1].Provinces.Select(p=>p.Strength).ToArray();
+        var e=MatchEngine.FromTestState(s);
+
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:steelOnSteel.Id,PerformerId:tatsuki.Id,TargetId:matsu.Id,AbilityId:"steel-on-steel-duel"));
+        Equal(e.State.Cards[steelOnSteel.Id].Zone,Zone.FateDiscard,"Steel on Steel discards immediately, like any Strategy played from hand");
+        Check(e.State.PendingDuel is {Stage:"Focusing",ChallengerPlayerId:1,ChallengedPlayerId:0,TurnPlayerId:0},"The challenged player (Matsu Hachiro's controller) gets the first Focus-or-Strike option");
+        Equal(e.State.PriorityPlayerId,0);
+
+        // Focusing from the top of the deck: the card cannot be inspected first (Choice:"deck" alone).
+        Accept(e,new GameCommand("focus",0,e.Version,Choice:"deck"));
+        Equal(e.State.Cards[paidOff.Id].Zone,Zone.Focused);
+        Check(e.GetView(0).Players[0].Focused!.Any(c=>c.Id==paidOff.Id),"A player can always inspect their own focused cards");
+        Check(!e.GetView(1).Players[0].Focused!.Any(c=>c.Id==paidOff.Id),"An opponent cannot see a focused card before a Strike");
+
+        Accept(e,new GameCommand("focus",1,e.Version,CardId:courtesy.Id));
+        Equal(e.State.Cards[courtesy.Id].Zone,Zone.Focused);
+        Equal(e.State.PendingDuel!.TurnPlayerId,0);
+
+        Accept(e,new GameCommand("strike",0,e.Version));
+
+        Equal(e.State.Cards[matsu.Id].Zone,Zone.Dead,"Matsu Hachiro loses the duel (7) and is destroyed, per Steel on Steel");
+        Equal(e.State.Cards[tatsuki.Id].Zone,Zone.Battlefield,"Doji Tatsuki wins the duel (8) and is untouched");
+        Equal(e.State.Cards[courtesy.Id].Zone,Zone.FateDiscard,"Focused cards move to the Fate discard pile once the duel resolves");
+        Equal(e.State.Cards[paidOff.Id].Zone,Zone.FateDiscard);
+        // "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2
+        // strength" -- Doji Tatsuki's controller (Crane, player 1) won, so only their provinces gain.
+        var craneProvincesAfter=e.State.Players[1].Provinces.Select(p=>p.Strength).ToArray();
+        for(var i=0;i<craneProvincesBefore.Length;i++) Equal(craneProvincesAfter[i],craneProvincesBefore[i]+2,$"Province {i} should gain +2 strength");
+        Check(e.State.PendingDuel is null,"The duel is fully resolved");
+        // The game returns to exactly the state it was in when the challenge was issued (the Crane
+        // player's Battle action), so priority now returns to the Lion player, to act or pass.
+        Equal(e.State.PriorityPlayerId,0);
+    }
+    // A refusable challenge (the training-duel-challenge fixture) may simply be declined: the duel
+    // never begins, and priority cedes to the challenger's opponent, exactly like any other action.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        var target=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var performer=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"training-duel-challenge"));
+        Check(e.State.PendingDuel is {Stage:"AwaitingAccept",Refusable:true});
+        Accept(e,new GameCommand("declineDuel",0,e.Version));
+        Check(e.State.PendingDuel is null,"A declined duel simply ends");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"A refused duel has no other effect on either personality");
+        Equal(e.State.PriorityPlayerId,0,"Priority cedes to the challenger's opponent, same as any other action");
+    }
+    // The four-focus cap: a player who has already focused four times must Strike -- a fifth attempt
+    // is rejected atomically.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        var target=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var performer=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Check(e.State.PendingDuel is {Stage:"Focusing",TurnPlayerId:0});
+        for(var i=0;i<4;i++)
+        {
+            Accept(e,new GameCommand("focus",0,e.Version,Choice:"deck"));
+            Accept(e,new GameCommand("focus",1,e.Version,Choice:"deck"));
+        }
+        Equal(e.State.PendingDuel!.TurnPlayerId,0);
+        Reject(e,new GameCommand("focus",0,e.Version,Choice:"deck"));
+    }
+    // Duelist tie-break, first case: a lone Duelist wins a tied duel outright (both Chi 3, nothing
+    // focused on either side -- an immediate double Strike).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        var challenged=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var challenger=Add(s,"training-duelist-personality",1,Zone.Battlefield,province:0); // Chi 3, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:challenger.Id,TargetId:challenged.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        // The lone Duelist gets an optional discard-and-refocus before resolution; nothing to
+        // discard here, so they decline (CardId:null).
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        Check(e.State.Cards[challenged.Id].Modifiers.Any(m=>m.Effect=="training-duel-challenge" && m.Stat=="Force" && m.Amount==-1),"The tie's loser (the non-Duelist) takes the fixture's loss penalty");
+        Check(!e.State.Cards[challenger.Id].Modifiers.Any(m=>m.Amount==-1),"The lone Duelist wins the tie outright and is untouched");
+        Check(e.State.PendingDuel is null);
+    }
+    // Duelist tie-break, second case: neither side has Duelist -- a tie means both personalities lose.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        var challenged=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var challenger=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:challenger.Id,TargetId:challenged.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Check(e.State.Cards[challenged.Id].Modifiers.Any(m=>m.Amount==-1),"Both sides lose a Duelist-less tie");
+        Check(e.State.Cards[challenger.Id].Modifiers.Any(m=>m.Amount==-1),"Both sides lose a Duelist-less tie");
+        Check(e.State.PendingDuel is null);
+    }
 }
