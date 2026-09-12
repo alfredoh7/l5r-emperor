@@ -23,5 +23,18 @@
   "source_image_hash": "b5/c8",
   "source_url": "https://images.oracleofthevoid.com/l5r/b5/c8/printing_4150_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/b5/c8/printing_4150_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 123848,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-4150-printing-1-image-1.webp",
+    "sha256": "d94073f979ec7104f3584ae64037ec7b7065134d1163b958daf25e48c730e098",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

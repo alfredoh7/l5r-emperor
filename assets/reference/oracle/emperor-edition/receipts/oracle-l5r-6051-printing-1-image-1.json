@@ -23,5 +23,18 @@
   "source_image_hash": "0e/b8",
   "source_url": "https://images.oracleofthevoid.com/l5r/0e/b8/printing_6051_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/0e/b8/printing_6051_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 140012,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6051-printing-1-image-1.webp",
+    "sha256": "b1622bbd7378c75aaa4c87e8699d9b10608a6a1fa44ca6b239050953e7654ec1",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

@@ -23,5 +23,18 @@
   "source_image_hash": "61/75",
   "source_url": "https://images.oracleofthevoid.com/l5r/61/75/printing_6396_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/61/75/printing_6396_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 151530,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6396-printing-1-image-1.webp",
+    "sha256": "2f18075c95e7a7f79b5518b8e81b272276d2f6ecca872268b95221c0a8149b18",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

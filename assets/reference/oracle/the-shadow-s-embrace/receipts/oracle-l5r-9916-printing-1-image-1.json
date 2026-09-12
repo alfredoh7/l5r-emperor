@@ -23,5 +23,18 @@
   "source_image_hash": "5e/7e",
   "source_url": "https://images.oracleofthevoid.com/l5r/5e/7e/printing_9916_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/5e/7e/printing_9916_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 128248,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9916-printing-1-image-1.webp",
+    "sha256": "5faa6b85a6f402180743b2bbd0688fc2c49a49b8ae283c1ad7af050ee545af9e",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

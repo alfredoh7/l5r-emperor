@@ -14,12 +14,25 @@
   "playable": false,
   "printing_association": "explicit_oracle_printing_id_and_set",
   "printing_id": "1",
-  "printing_set": "Promotional–Celestial",
+  "printing_set": "Promotional\u2013Celestial",
   "quality": "master",
   "retrieved_at": "2026-09-09T16:32:19.518216+00:00",
   "sha256": "2a92f91dcea6cd4abe64e8598b604d5c35a08d5965849af2441a5868260a2185",
   "source_image_hash": "6a/16",
   "source_url": "https://images.oracleofthevoid.com/l5r/6a/16/printing_1081_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/6a/16/printing_1081_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 167570,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-1081-printing-1-image-1.webp",
+    "sha256": "c5f8db99591119c65415a6537de0bf4c32febd37ef6c983191add5152167dc63",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

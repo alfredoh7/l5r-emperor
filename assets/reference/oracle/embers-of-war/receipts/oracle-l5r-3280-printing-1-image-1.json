@@ -23,5 +23,18 @@
   "source_image_hash": "d7/3e",
   "source_url": "https://images.oracleofthevoid.com/l5r/d7/3e/printing_3280_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d7/3e/printing_3280_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 162284,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3280-printing-1-image-1.webp",
+    "sha256": "25379249a601ac5c97969e1dc571952a2df2d69fad7fca8f93f4a2cc717c603b",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

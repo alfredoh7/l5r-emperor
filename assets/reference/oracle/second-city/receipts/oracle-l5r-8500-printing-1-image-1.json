@@ -23,5 +23,18 @@
   "source_image_hash": "7f/7a",
   "source_url": "https://images.oracleofthevoid.com/l5r/7f/7a/printing_8500_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/7f/7a/printing_8500_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 133410,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-8500-printing-1-image-1.webp",
+    "sha256": "d89124f9de724fb0724c6e5405214c932fd61b5aceac9250230cf9daa9ca644d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

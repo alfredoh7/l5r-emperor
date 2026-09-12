@@ -23,5 +23,18 @@
   "source_image_hash": "eb/b4",
   "source_url": "https://images.oracleofthevoid.com/l5r/eb/b4/printing_9860_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/eb/b4/printing_9860_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 146220,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9860-printing-1-image-1.webp",
+    "sha256": "be4852c5b71501b215ce33675d6b819762420fa8d95807f4c1d01d72a245b85e",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }
