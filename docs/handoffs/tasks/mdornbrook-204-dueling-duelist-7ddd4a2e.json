@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Second round of merge-conflict resolution for mdornbrook/204-dueling-duelist (PR #206, issue #204): PR #193 (deck-return/Goju House Guard/Aberrations, issue #192) merged to main since the first resolution round. Reordered the PublishedContent wave loaders so Strategy Wave 5 lands last and its own duplicate-id check covers the three newly-merged waves; merged the embedded-resource list and CardCatalog's own Concat chain; corrected the published count to 207.",
-  "validation": "dotnet build src/L5R.Core/L5R.Core.csproj: 0 errors. dotnet run --project tests/L5R.Core.Tests: 119/119 core + 34/34 published + 8/8 deck-format all passing. Both Python suites pass. docs/CARD_INVENTORY.xlsx regenerated (207 wired).",
+  "summary": "Third round of merge-conflict resolution for mdornbrook/204-dueling-duelist (PR #206, issue #204): PR #197 (Rings concept, issue #194) merged to main since the second resolution round. Everything auto-merged cleanly except the binary docs/CARD_INVENTORY.xlsx, regenerated (207 wired, unchanged).",
+  "validation": "dotnet build src/L5R.Core/L5R.Core.csproj: 0 errors. dotnet run --project tests/L5R.Core.Tests: 126/126 core + 34/34 published + 8/8 deck-format all passing. Both Python suites pass.",
   "remaining": "None beyond what PR #206 itself already tracked.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/204",
   "branch": "mdornbrook/204-dueling-duelist",
-  "updated": "2026-09-12T22:29:38.658939+00:00"
+  "updated": "2026-09-12T22:41:46.536593+00:00"
 }
