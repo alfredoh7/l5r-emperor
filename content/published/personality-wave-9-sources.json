@@ -1,0 +1,308 @@
+[
+  {
+    "card_id": "oracle-l5r-4406",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4406",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4406-printing-1-image-1.webp",
+    "image_sha256": "ecdbdcb69da704e3cfda121b49fbe06ccec2198fcd4025acbea8cebf546a9a67"
+  },
+  {
+    "card_id": "oracle-l5r-4409",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4409",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-4409-printing-1-image-1.webp",
+    "image_sha256": "60792f69e539cdadc04fabbb84e5aef62fce3e3f89e7b0778b2d2a2f68b86b79"
+  },
+  {
+    "card_id": "oracle-l5r-10453",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10453",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10453-printing-1-image-1.webp",
+    "image_sha256": "2c233abfc4c8a11486ab29a4bd0f642b64ebfa1cbad6f761c5b4bafbc92eb857"
+  },
+  {
+    "card_id": "oracle-l5r-10843",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10843",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10843-printing-1-image-1.webp",
+    "image_sha256": "2ac54b2c81f0db820b5973413a8f4cb8311bbe24cb5aa0f9b2b967f312f578ed"
+  },
+  {
+    "card_id": "oracle-l5r-10629",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10629",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10629-printing-1-image-1.webp",
+    "image_sha256": "4d247e2694d2d497931cb958e82127883de9b14dc16d9ea6571ba4b1a7479f1b"
+  },
+  {
+    "card_id": "oracle-l5r-4429",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4429",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-4429-printing-1-image-1.webp",
+    "image_sha256": "d6147d0f52e30bd390203924cb1e38e6f75dd5f38be329fb59fe99b07f81b8e3"
+  },
+  {
+    "card_id": "oracle-l5r-10630",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10630",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10630-printing-1-image-1.webp",
+    "image_sha256": "26fe9418b27d79ca78d3f19595fdc04c51e310e66ce3cc42b13ef2a3900c9595"
+  },
+  {
+    "card_id": "oracle-l5r-10844",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10844",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10844-printing-1-image-1.webp",
+    "image_sha256": "6e03cbbab368db1f9c7cf52ae981db462a62788aaf9fc0d6ddad81bf924eaba3"
+  },
+  {
+    "card_id": "oracle-l5r-5101",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5101",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-5101-printing-1-image-1.webp",
+    "image_sha256": "c95537be2bb9c04cc037c705014fb673db31d1e308ef736a9d0f17cb6ccb72d3"
+  },
+  {
+    "card_id": "oracle-l5r-10053",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10053",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10053-printing-1-image-1.webp",
+    "image_sha256": "39ccad2a59099d3c197150a6632d5afe326ca314a22e65766eb7dbf6c58c9fc9"
+  },
+  {
+    "card_id": "oracle-l5r-5104",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5104",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5104-printing-1-image-1.webp",
+    "image_sha256": "912eac9f897f972d42143188f1ca1c71f7b8868a6707e11446e8a17b6fb608ba"
+  },
+  {
+    "card_id": "oracle-l5r-10454",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10454",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10454-printing-1-image-1.webp",
+    "image_sha256": "8a0ede9af27ffcb1001186724742ef839200b5af3da11f34a508911df0f48aca"
+  },
+  {
+    "card_id": "oracle-l5r-5123",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5123",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-5123-printing-1-image-1.webp",
+    "image_sha256": "ac8b3c79b21e28ded5ab1bb131d327f05735071cdc5a9e177107ce25a7875240"
+  },
+  {
+    "card_id": "oracle-l5r-5125",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5125",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-5125-printing-1-image-1.webp",
+    "image_sha256": "f5705df854e17e3a8ce458b8b7eb47f098e13cf26626491334960cea0ad5150d"
+  },
+  {
+    "card_id": "oracle-l5r-10054",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10054",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10054-printing-1-image-1.webp",
+    "image_sha256": "c7ed6002a7fd938e51b016159d5d39e372621bda8eeaa9fe9e6166ca4894cb51"
+  },
+  {
+    "card_id": "oracle-l5r-9818",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9818",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9818-printing-1-image-1.webp",
+    "image_sha256": "1fc2f2a5ef39fc8862225f7d6c5fa0f44ccd04bd59b426d9007938c6bbd2cc3c"
+  },
+  {
+    "card_id": "oracle-l5r-5148",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5148",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5148-printing-1-image-1.webp",
+    "image_sha256": "4051ece4a3b4b655be63ade6c0af293e991dd4554274c1d773439c5820f92c75"
+  },
+  {
+    "card_id": "oracle-l5r-10286",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10286",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10286-printing-1-image-1.webp",
+    "image_sha256": "a161b04552780ecc5e4a744dece86cb25a38b6ddafd6a3ae59890f3107e81d69"
+  },
+  {
+    "card_id": "oracle-l5r-5178",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5178",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-5178-printing-1-image-1.webp",
+    "image_sha256": "461deb26cc9f27dbc4822a5d7391550110b77ce38ca3ee44c0937a1a5446970a"
+  },
+  {
+    "card_id": "oracle-l5r-10633",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10633",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10633-printing-1-image-1.webp",
+    "image_sha256": "0271155d934948a3f13ff39be85a2641ca0589dbf396002b5f9943efe5709d3a"
+  },
+  {
+    "card_id": "oracle-l5r-7777",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7777",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-7777-printing-1-image-1.webp",
+    "image_sha256": "d8b50e61ee22111043ebfd6ee491d104aeae9408a10bf7fd91271b417840a012"
+  },
+  {
+    "card_id": "oracle-l5r-7783",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7783",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7783-printing-1-image-1.webp",
+    "image_sha256": "3336e720f19c4a954e64376a8010b3cc11002cde29fca5abf958d96f2fddca3a"
+  },
+  {
+    "card_id": "oracle-l5r-7790",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7790",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-7790-printing-1-image-1.webp",
+    "image_sha256": "ff4a032cc7cc9398292b8ca5a84c3aa13271002edb89c947dddfa1766495fea5"
+  },
+  {
+    "card_id": "oracle-l5r-10057",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10057",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10057-printing-1-image-1.webp",
+    "image_sha256": "d81454cd17a39a3714ec925a5e956b4e3ac5bb115929ba936eda011800237cff"
+  },
+  {
+    "card_id": "oracle-l5r-9821",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9821",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9821-printing-1-image-1.webp",
+    "image_sha256": "83c081f50904b8fc115f57b1e609bf04c98402408e911f2d6bf337471a1a2d5a"
+  },
+  {
+    "card_id": "oracle-l5r-8545",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8545",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8545-printing-1-image-1.webp",
+    "image_sha256": "80bea97c679ef2769ce84f815c7878309c8a4f4f7d9348e4ede364dd969a952f"
+  },
+  {
+    "card_id": "oracle-l5r-9822",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9822",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9822-printing-1-image-1.webp",
+    "image_sha256": "b4f5f20329c200a9fa0a57e9c3a54d55c767625b6af1baead0203f57b91f626d"
+  },
+  {
+    "card_id": "oracle-l5r-10222",
+    "printing_set": [
+      "Emperor Edition Gempukku"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10222",
+    "image_path": "assets/reference/oracle/emperor-edition-gempukku/webp/oracle-l5r-10222-printing-1-image-1.webp",
+    "image_sha256": "1ee890f5f0b97bcb5d648597cefd64692dcb696568116cad69dc4a9ce3b7232f"
+  },
+  {
+    "card_id": "oracle-l5r-10289",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10289",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10289-printing-1-image-1.webp",
+    "image_sha256": "870ac583115cc9a757a487adb7176954a3453ce16bc5d75767d6618b15870b34"
+  },
+  {
+    "card_id": "oracle-l5r-10847",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10847",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10847-printing-1-image-1.webp",
+    "image_sha256": "8ee10d532b42e5bb7377269a3514f6ce704e51b75923637c7626516ff446230c"
+  },
+  {
+    "card_id": "oracle-l5r-10456",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10456",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10456-printing-1-image-1.webp",
+    "image_sha256": "8689573a5fcaa4b44b66709baf1c8cba2235cbe1bcdc3b1afb5d60add4c5c455"
+  },
+  {
+    "card_id": "oracle-l5r-10634",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10634",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10634-printing-1-image-1.webp",
+    "image_sha256": "f27ccab9b97bdf043025881d22241cc69b5ed780a17a3636dd973d9e6cad8d24"
+  },
+  {
+    "card_id": "oracle-l5r-10848",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10848",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10848-printing-1-image-1.webp",
+    "image_sha256": "5338af0a7ab1c1ff4c3b7630a386e99fd448c1b1f8efcccd5fe4f1581f216476"
+  },
+  {
+    "card_id": "oracle-l5r-8568",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8568",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8568-printing-1-image-1.webp",
+    "image_sha256": "c43d9bbcc9352ab0c4fc55850316ffcfb1e411fb3f66a907bb9e921752faabb5"
+  }
+]

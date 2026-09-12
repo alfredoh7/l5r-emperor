@@ -285,6 +285,9 @@ public sealed partial class MatchEngine
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
+            // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
+            case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
+            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
         }
     }
 

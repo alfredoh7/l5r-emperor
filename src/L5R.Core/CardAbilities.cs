@@ -405,6 +405,73 @@ public static class AbilityCatalog
         // ApplyDuelOutcome's own generic -1F case, used only so a test can observe the loser(s)
         // without needing a real card's own outcome.
         ["training-duel-challenge"] = new("Battle", "Training: choose your performing unbowed Personality and target an enemy Personality: duel (refusable)", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelRefusable: true),
+        // Dragon Clan review (issue #207): every real Dragon Clan Personality wired this pass, using
+        // only already-existing primitives plus the small additions documented alongside them (the
+        // self-performer duel extension, StraightenUnit, MoveToBattlefield, and a handful of new
+        // Target categories -- see their own comments above).
+        // Kitsuki Daisuke: "Daisuke duels him" -- no separate Performer, matching every other real
+        // Iaijutsu Personality below. Simplified from its own printed text: "if he is dishonorable,
+        // this movement will not be negated" is dropped -- nothing in the engine negates movement
+        // yet, so the clause is currently unobservable regardless.
+        ["daisuke-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Move the duel's loser home.", "enemy-personality", IssuesDuel: true),
+        ["fujimura-expose"] = new("Limited", "Bow Fujimura and target a Dishonorable Personality: his controller loses 2 Honor", "dishonorable-personality"),
+        ["kinaro-exp-bow"] = new("Open", "Iaijutsu, bow: Bow a target Personality with lower Personal Honor; gain 1 Honor if you control Kakita Ichigiku", "personality-lower-honor-than-self"),
+        ["nakai-exp-weaken"] = new("Open", "Give a target Personality -2F, or -3F if he is dishonorable", "personality"),
+        ["nubane-bow"] = new("Open", "Target an attachment: bow it", "attachment"),
+        ["bojan-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
+        ["hatsuto-weaken"] = new("Battle", "Give a target enemy Infantry Personality or Follower -3F", "enemy-force-non-cavalry"),
+        ["houken-straighten"] = new("BattleOrOpen", "Target a Personality with a Weapon: straighten his unit", "personality-with-weapon"),
+        // Mirumoto Houken, Experienced: "you may move him home, or, if he would be opposed, to the
+        // current battlefield" is deterministic, not a real choice -- moving to the battlefield only
+        // ever makes sense when opposed, so home is the only real fallback the rest of the time.
+        // BattleOrOpen carries none of the shared Battle-timing presence checks (matching every other
+        // BattleOrOpen ability already in the catalog), so no new exception is needed here.
+        ["houken-exp-straighten"] = new("BattleOrOpen", "Even if bowed: straighten Houken's unit. Move him home, or to the current battlefield if he would be opposed there.", "none"),
+        ["ichizo-exp-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true),
+        // Mirumoto Kojinrue: simplified cost -- always bows Kojinrue himself rather than offering a
+        // choice between him and one of his Weapons, the same "drop the choice among several eligible
+        // own cards" simplification used a few more times below (no generic cost-choice mechanism
+        // exists yet for "bow one of N eligible cards you control").
+        ["kojinrue-destroy"] = new("Battle", "Bow Kojinrue and target an enemy card without attachments: destroy it", "enemy-card-without-attachments"),
+        ["kouzei-bow"] = new("Battle", "Target an enemy card with equal or lower Force: bow it", "enemy-card-force-lte-self"),
+        // Mirumoto Michi / Togashi Rikyou below: "even if bowed" plus reinforcing a battle from
+        // somewhere else entirely -- neither the acting player's own presence at the battlefield nor
+        // this card's own AtBattle status can be required the normal way, since the whole point is
+        // moving in from outside (see the two id-based exceptions this needs in ValidateAbility).
+        ["michi-move"] = new("Battle", "Even if bowed: if opposed, move Michi to the current battlefield and straighten his unit", "none"),
+        ["mitoshi-bow"] = new("Battle", "Target a Personality with lower Force than Mitoshi: bow him", "personality-force-lt-self", UsageKey: "mitoshi-bow-straighten"),
+        ["mitoshi-straighten"] = new("Battle", "Target a Personality with lower Force than Mitoshi: straighten him", "personality-force-lt-self", UsageKey: "mitoshi-bow-straighten"),
+        ["shikei-draw"] = new("Limited", "Shikei meditates: draw a card", "none"),
+        ["shikei-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true),
+        // Mirumoto Yozo, Experienced: reuses the exact existing enemy-card-without-attachments
+        // category verbatim (a Follower, or a Personality without attachments).
+        ["yozo-exp-destroy"] = new("Battle", "Iaijutsu: Target an enemy Follower or Personality without attachments: destroy it (remove it from the game instead if it is a Lion Clan Personality)", "enemy-card-without-attachments"),
+        ["jinai-bow"] = new("Battle", "Earth: Target an enemy card without attachments: bow it", "enemy-card-without-attachments"),
+        // Tamori Muzu: the bow is conditional (attacking OR without attachments), not a targeting
+        // restriction -- Target stays the bare enemy-card category so a card WITH attachments is
+        // still a legal target, just not necessarily bowed by the effect.
+        ["muzu-bow"] = new("Battle", "Target an enemy card: bow it if it is attacking or has no attachments; gain 1 Honor", "enemy-card"),
+        // Togashi Hiroto: here the lack of attachments genuinely IS the targeting restriction (an
+        // attachment itself always qualifies, having none of its own), unlike Muzu just above.
+        ["hiroto-fire-tokens"] = new("Reaction", "After entering play, gain four +1F Fire tokens", "none", Trigger: "own-enters-play"),
+        ["hiroto-bow"] = new("Battle", "Target an enemy card without attachments: bow it (destroy it instead if it is an attachment)", "enemy-card", RequireNoAttachments: true),
+        // Togashi Kasuru: simplified -- the optional "you may discard a card to straighten Kasuru"
+        // sub-choice is dropped (no generic "optional secondary cost" primitive exists yet); the core
+        // "if attacking, draw a card" half is preserved.
+        ["kasuru-draw"] = new("Battle", "Bow Kasuru: if he is attacking, draw a card", "none"),
+        ["mihato-move"] = new("Battle", "Target an enemy Personality: move him home", "enemy-personality"),
+        ["noboru-exp2-favor"] = new("Limited", "Political: take the Imperial Favor", "none"),
+        ["noboru-shattered-star-entry-honor-loss"] = new("Reaction", "After entering play, lose 3 Honor", "none", Trigger: "own-enters-play"),
+        ["noboru-shattered-star-weaken"] = new("Battle", "Fire: Bow a target enemy Personality; give Noboru a Force bonus equal to the target's Force", "enemy-personality"),
+        ["noritada-invest"] = new("Reaction", "Invest 3 Gold: give this Personality two +1F Fire tokens", "none", Trigger: "own-enters-play"),
+        ["obote-boost"] = new("Limited", "Void: discard a card to give Obote a Force bonus equal to its Focus Value", "hand"),
+        ["rikyou-move"] = new("Battle", "Even if bowed: if any enemy units are at the current battlefield, move Rikyou there and straighten his unit", "none"),
+        ["kazuya-entry-honor-loss"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
+        // Togashi Korimi, Experienced: the second ability's own optional "you may discard a Kiho or
+        // Tattoo Strategy; if you did, destroy the target" bonus is dropped, the same "optional
+        // secondary cost" simplification as Kasuru above -- the bow itself is preserved.
+        ["korimi-exp-bow"] = new("Battle", "Target an enemy card without unbowed attachments: bow it", "enemy-card-without-unbowed-attachments"),
+        ["korimi-exp2-draw"] = new("Limited", "Draw a card", "none"),
     });
 }
 
@@ -431,7 +498,17 @@ public sealed partial class MatchEngine
     // exactly "resets at each player's end phase, regardless of whose turn it is."
     private bool StalwartNegatesBow(CardInstance card, int actingPlayerId)
     {
-        if (card.OwnerId == actingPlayerId || !Keyword(card, "Stalwart")) return false;
+        if (card.OwnerId == actingPlayerId) return false;
+        // Togashi Korimi, Experienced (issue #207): "while Korimi is defending, negate her bowing
+        // from other players' actions" -- an always-on, unlimited version of the same negation
+        // (not the once-per-turn Stalwart keyword itself), gated on defending rather than a
+        // per-turn stamp.
+        if (Definition(card).Effect == "negate-bow-while-defending" && IsDefendingUnit(card))
+        {
+            Emit("stalwartNegated", $"{Definition(card).Name} negates the bow while defending.", card.OwnerId, card.Id);
+            return true;
+        }
+        if (!Keyword(card, "Stalwart")) return false;
         if (card.AbilityUses.TryGetValue("stalwart-negate", out var used) && used == _state.TurnNumber) return false;
         card.AbilityUses["stalwart-negate"] = _state.TurnNumber;
         Emit("stalwartNegated", $"{Definition(card).Name}'s Stalwart negates the bow.", card.OwnerId, card.Id);
@@ -781,7 +858,9 @@ public sealed partial class MatchEngine
                 : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
                 "The ability's source is not in the required zone.");
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
-            Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten", "Abilities on bowed cards cannot be used.");
+            // Dragon Clan review (issue #207) adds three more real "even if bowed" cards.
+            Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten"
+                or "houken-exp-straighten" or "michi-move" or "rikyou-move", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
@@ -797,8 +876,12 @@ public sealed partial class MatchEngine
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         if (ability.Timing == "Battle")
         {
-            Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
-            if (source is not null && Definition(source).Type == CardType.Personality)
+            // Mirumoto Michi / Togashi Rikyou (issue #207): reinforcing a battle from elsewhere
+            // entirely -- the whole point is moving in, so neither the acting player's own existing
+            // presence nor this card's own AtBattle status can be required the normal way.
+            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move";
+            if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
+            if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
         }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
@@ -1081,6 +1164,31 @@ public sealed partial class MatchEngine
                         // Dishonorable Personality (not necessarily this target itself).
                         "personality-controller-controls-dishonorable" => personality &&
                             _state.Cards.Values.Any(c => c.OwnerId == target.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable),
+                        // Dragon Clan review (issue #207): Kitsuki Fujimura -- any Dishonorable
+                        // Personality, either side.
+                        "dishonorable-personality" => personality && target.Dishonorable,
+                        // Mirumoto Kouzei: an enemy Personality or Follower with Force at or below
+                        // the source's own current Force.
+                        "enemy-card-force-lte-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(source!),
+                        // Mirumoto Mitoshi: a Personality (either side) with strictly lower Force
+                        // than the source's own.
+                        "personality-force-lt-self" => personality && CardForce(target) < CardForce(source!),
+                        // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
+                        // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
+                        // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
+                        "enemy-force-non-cavalry" => !own && type is CardType.Personality or CardType.Follower && !Keyword(target, "Cavalry"),
+                        // Mirumoto Houken: a Personality (either side) with an attached Weapon-
+                        // keyword Item.
+                        "personality-with-weapon" => personality && Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
+                        // Togashi Hiroto / Tamori Muzu: any enemy card at all (Personality, Follower,
+                        // or an attachment) -- broader than enemy-force (Personality/Follower only)
+                        // or enemy-attachment (attached only); combines with the shared
+                        // RequireNoAttachments flag above, which is already true by construction for
+                        // an attachment (one can never itself carry a further attachment).
+                        "enemy-card" => !own,
+                        // Togashi Korimi, Experienced: subtly different from "without attachments" --
+                        // a card with only BOWED attachments (or none at all) still qualifies.
+                        "enemy-card-without-unbowed-attachments" => !own && !Attachments(target.Id).Any(a => !a.Bowed),
                         _ => false
                     }, "That card does not meet this ability's target or performer requirements.");
                 }
@@ -1103,7 +1211,8 @@ public sealed partial class MatchEngine
             // card's own recruit/attach cost. Each Invest card's own amount is hardcoded per ability
             // id here, same convention as Kharmic's fixed 2 Gold.
             : id == "clay-kshatriya-invest" ? 5
-            : id == "training-invest" ? 3 : 0;
+            : id == "training-invest" ? 3
+            : id == "noritada-invest" ? 3 : 0;
         ValidatePayment(player.Id, cost, command.SourceIds);
     }
 
@@ -1160,7 +1269,11 @@ public sealed partial class MatchEngine
         if (ability.IssuesDuel)
         {
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
-            IssueChallenge(id, player.Id, command.PerformerId!, target!.Id, ability.DuelStat, ability.DuelRefusable);
+            // Most Iaijutsu Personalities duel as themselves ("Kitsuki Daisuke... Daisuke duels
+            // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
+            // performer. ability.Performer null means exactly this: the source card is the challenger.
+            var challengerId = ability.Performer is not null ? command.PerformerId! : source!.Id;
+            IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable);
             return;
         }
         switch (id)
@@ -1528,6 +1641,81 @@ public sealed partial class MatchEngine
                 }
                 break;
             }
+            // Dragon Clan review (issue #207).
+            case "fujimura-expose":
+                source!.Bowed = true;
+                GainHonor(target!.OwnerId, -2, "Kitsuki Fujimura", target);
+                break;
+            case "kinaro-exp-bow":
+                source!.Bowed = true;
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Definition(c).Name == "Kakita Ichigiku")) GainHonor(player.Id, 1, "Kitsuki Kinaro", source);
+                break;
+            case "nakai-exp-weaken": ApplyModifier(target!, source!.Id, id, "Force", target!.Dishonorable ? -3 : -2); break;
+            case "nubane-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "bojan-entry-honor-loss": GainHonor(player.Id, -1, $"{Definition(source!).Name} entering play", source); break;
+            case "hatsuto-weaken": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
+            case "houken-straighten": StraightenUnit(target!); break;
+            case "houken-exp-straighten":
+                StraightenUnit(source!);
+                if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
+                else MoveHome(source!, false);
+                break;
+            case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!]); break;
+            case "kouzei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "michi-move":
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Michi may only reinforce a battlefield where he would be opposed.");
+                MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
+                StraightenUnit(source!);
+                break;
+            case "mitoshi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "mitoshi-straighten": Straighten(target!); break;
+            case "shikei-draw": Draw(player); break;
+            case "yozo-exp-destroy":
+                if (Definition(target!).Clan == "Lion") RemoveFromGame(target!); else DestroyUnits([target!]);
+                break;
+            case "jinai-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "muzu-bow":
+                if (IsAttacking(target!) || !HasAttachments(target!)) { if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; }
+                GainHonor(player.Id, 1, "Tamori Muzu", source);
+                break;
+            case "hiroto-fire-tokens":
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                break;
+            case "hiroto-bow":
+                if (target!.Zone == Zone.Attached) DestroyAttachment(target);
+                else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                break;
+            case "kasuru-draw":
+                source!.Bowed = true;
+                if (IsAttacking(source)) Draw(player);
+                break;
+            case "mihato-move": MoveHome(target!, false); break;
+            case "noboru-exp2-favor": _state.FavorPlayerId = player.Id; break;
+            case "noboru-shattered-star-entry-honor-loss": GainHonor(player.Id, -3, $"{Definition(source!).Name} entering play", source); break;
+            case "noboru-shattered-star-weaken":
+            {
+                var bonus = CardForce(target!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                ApplyModifier(source!, source!.Id, id, "Force", bonus);
+                break;
+            }
+            case "noritada-invest":
+                CreateToken(source!, "Fire", id, "Force", 1);
+                CreateToken(source!, "Fire", id, "Force", 1);
+                break;
+            case "obote-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
+            case "rikyou-move":
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Rikyou may only reinforce a battlefield with enemy units present.");
+                MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
+                StraightenUnit(source!);
+                break;
+            case "kazuya-entry-honor-loss": GainHonor(player.Id, -2, $"{Definition(source!).Name} entering play", source); break;
+            case "korimi-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "korimi-exp2-draw": Draw(player); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
@@ -1599,6 +1787,14 @@ public sealed partial class MatchEngine
         if (card.StraightenBlockedTurn == _state.TurnNumber || Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
         else card.Bowed = false;
+    }
+    // Dragon Clan review (issue #207): "straighten his unit" (Mirumoto Houken's own shape) --
+    // straightens the card AND every attachment, unlike the single-card Straighten calls every
+    // other ability uses.
+    private void StraightenUnit(CardInstance card)
+    {
+        Straighten(card);
+        foreach (var attachment in Attachments(card.Id)) Straighten(attachment);
     }
     private void MoveHome(CardInstance card, bool bow)
     {
