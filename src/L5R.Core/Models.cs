@@ -216,9 +216,13 @@ public sealed class MatchState
     public List<GameEvent> Events { get; set; } = [];
 }
 
+// DeckPosition ("Top"/"Bottom") is the acting player's own upfront choice of where a card goes in
+// its owner's deck (e.g. Goju House Guard's own cost, issue #192) -- unlike Choice, which resolves a
+// separate, later decision command, this is supplied on the initiating command itself, the same way
+// TargetId or SourceIds are.
 public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion, string? CardId = null,
     string[]? SourceIds = null, int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
-    Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null);
+    Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null, string? DeckPosition = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,

@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10714",
+      "Name": "Ritual Preparation",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Straighten your target card in a unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10714.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "ritual-preparation-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
