@@ -1,0 +1,57 @@
+{
+  "Profile": "item-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6469",
+      "Name": "Sankaku-Yari",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Melee 4 Attack, or Melee 5 Attack if the target is Cavalry.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6469.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "sankaku-yari-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5902",
+      "Name": "Pearl of Embers",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Bow this card: Straighten this Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5902.jpg",
+      "Keywords": [
+        "Pearl"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "pearl-of-embers-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

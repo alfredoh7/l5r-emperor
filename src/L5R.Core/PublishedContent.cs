@@ -463,6 +463,63 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 8 of ability-bearing Followers: Goju House Guard (issue #192) -- the first real
+    /// card exercising the new deck-return primitive (ToOwnerDeck), and Aberrations -- the first real
+    /// card exercising the top-of-Fate-deck discard primitive (DiscardTopOfFateDeck).</summary>
+    public static PublishedSnapshot FollowerWave8 { get; } = LoadFollowerWave8();
+
+    private static PublishedSnapshot LoadFollowerWave8()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave8.json", "follower-wave-8", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected follower-wave-8 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-8 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-8 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 2 of ability-bearing Items: Sankaku-Yari (issue #192, target-keyword-
+    /// conditional Attack strength, same shape as Horseback Warriors) and Pearl of Embers (zero new
+    /// primitives, the existing BattleOrOpen Timing verbatim).</summary>
+    public static PublishedSnapshot ItemWave2 { get; } = LoadItemWave2();
+
+    private static PublishedSnapshot LoadItemWave2()
+    {
+        var snapshot = Load("L5R.Published.ItemWave2.json", "item-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected item-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Item || card.Text.Length == 0)
+                throw new InvalidOperationException($"item-wave-2 card is not a textful Item: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("item-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 4 of ability-bearing Strategy cards (issue #192; numbered 4, not 3, to avoid a
+    /// filename collision with a sibling in-flight PR's own strategy-wave-3): Ritual Preparation,
+    /// needing one new Target category, own-unit-card (a own Personality OR Follower).</summary>
+    public static PublishedSnapshot StrategyWave4 { get; } = LoadStrategyWave4();
+
+    private static PublishedSnapshot LoadStrategyWave4()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave4.json", "strategy-wave-4", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected strategy-wave-4 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-4 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-4 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
