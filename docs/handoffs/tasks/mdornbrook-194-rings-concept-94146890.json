@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Resolves the merge conflict between PR #197 (issue #194: Rings concept, Enlightenment victory) and current main (now including issue #198's Personality wave 8, issue #200's WebP pipeline, and issues #190/#192's already-resolved merges). Conflicts were purely additive collisions in CardAbilities.cs (new AbilityCatalog entries, AttackStrength/AttackKind switch arms, a shared no-cost-attack case list, a Require block -- five separate regions), tests/Program.cs (two whole test functions inserted at the same anchor), docs/ROADMAP.md, and tools/content/build_card_inventory.py -- all resolved by keeping both sides' additions. CardCatalog.cs, PublishedContent.cs, and L5R.Core.csproj auto-merged cleanly this time (Rings cards are training-fixture-only, never published, so they never touch the wave/EmbeddedResource machinery the other two merges needed). Published count stays 198 (Rings adds no real published cards).",
-  "validation": "dotnet build (0 warnings/errors); dotnet run --project tests/L5R.Core.Tests -> 120/120 core + 34/34 published + 8/8 deck-format; python3 -m unittest discover -s tools/content -> 121/121; python3 -m unittest discover -s tools/collaboration -> 43/43.",
-  "remaining": "None; ready to push and update PR #197.",
+  "summary": "Resolved merge conflicts bringing mdornbrook/194-rings-concept (PR #197, Rings/Duelist keyword concept, issue #194) up to date with origin/main, which had since merged the Kiho keyword primitive (#191) and Singular keyword (#203). Kept both sides' new AbilityCatalog additions, both new test functions, and merged the ROADMAP.md primitive rows and content-coverage prose.",
+  "validation": "dotnet build src/L5R.Core/L5R.Core.csproj: 0 errors. dotnet run --project tests/L5R.Core.Tests: 123/123 core + 34/34 published + 8/8 deck-format all passing. python3 -m unittest discover -s tools/content: 121/121. python3 -m unittest discover -s tools/collaboration: 43/43. docs/CARD_INVENTORY.xlsx regenerated (200 wired, unchanged).",
+  "remaining": "None beyond what PR #197 itself already tracked: the six real Ring cards (and Moshi Ikako/Scholarly Hermit) remain wired to training fixtures only, pending their own scan images (issue #196).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/194",
   "branch": "mdornbrook/194-rings-concept",
-  "updated": "2026-09-12T11:40:49.264625+00:00"
+  "updated": "2026-09-12T22:07:25.947995+00:00"
 }
