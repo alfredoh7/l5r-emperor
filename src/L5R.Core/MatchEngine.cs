@@ -553,11 +553,18 @@ public sealed partial class MatchEngine
             var destroyedProvince=af>df+province.Strength;
             if(destroyedProvince) DestroyProvince(defender,province);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
+            // Ring recruitment (issue #194): checked with this resolution's own facts, before the
+            // per-battle flags below reset. False Ring of Air requires an outright win; Ring of
+            // Water does not (see the tie branch below).
+            GrantRingRecruit(Player(attacker),d.Length>0,"false-ring-of-air-recruit");
+            CheckRingOfWaterRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince);
         }
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
             if(!RehonorWinners(d)) GainHonor(defender,destroyedAttackers*2,"Battle victory");
+            GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
+            CheckRingOfWaterRecruit(Player(defender),destroyedAttackers>0);
         }
         else if(a.Length>0 && d.Length>0)
         {
@@ -570,6 +577,10 @@ public sealed partial class MatchEngine
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
             if(!defenderHadDishonorable) GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
+            // Ring of Water (issue #194): no "win" requirement, unlike False Ring of Air -- a tie
+            // still counts as "a battle resolves" for both players independently.
+            CheckRingOfWaterRecruit(Player(attacker),destroyedD>0);
+            CheckRingOfWaterRecruit(Player(defender),destroyedA>0);
         }
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
@@ -617,7 +628,14 @@ public sealed partial class MatchEngine
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
-        _state.AdditionalActions.Clear(); _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
+        // Ring recruitment (issue #194): a grant scoped to a Ring card (added above, in ResolveBattle,
+        // BEFORE this same call) must survive this Clear() -- it represents a right earned as of THIS
+        // battle's own conclusion, to be used in a later window, unlike an ordinary Additional Action
+        // grant (which genuinely is scoped to just this battle).
+        _state.AdditionalActions.RemoveAll(g => !(g.ScopeCardIds is { Length: 1 } ids && Definition(Card(ids[0])).Type == CardType.Ring));
+        _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
+        // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
+        foreach(var p in _state.Players) { p.TerrainPlayedThisBattle=false; p.TerrainDestroyedThisBattle=false; }
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
         {
@@ -690,6 +708,7 @@ public sealed partial class MatchEngine
                 "This battlefield already has a Terrain in play.");
             Player(command.PlayerId).Hand.Remove(card.Id);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
+            Player(command.PlayerId).TerrainPlayedThisBattle=true; // Ring of Water's own recruitment condition (issue #194)
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
             if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
             NextAction(command.PlayerId);
@@ -1012,10 +1031,21 @@ public sealed partial class MatchEngine
         var player=Player(_state.ActivePlayerId);
         _state.PriorityPlayerId=player.Id;
         if(player.Honor>=40) { Win(player.Id,"Honor victory at the start of the turn"); return; }
+        // Enlightenment victory (issue #194): begins their turn with all five REAL elemental Rings
+        // (Fire/Water/Air/Earth/Void) in play -- checked by Keyword, not a fixed card id, since more
+        // than one printing of a given Ring exists. Every False Ring carries its own matching
+        // elemental keyword too (e.g. False Ring of Air prints "Air"), so this alone is not enough
+        // to exclude them -- but all five False Rings also carry "Fudo", which no real Ring does,
+        // so that keyword is the actual False-Ring exclusion.
+        if(RingElements.All(e=>_state.Cards.Values.Any(c=>c.OwnerId==player.Id && InPlay(c) && Definition(c).Type==CardType.Ring && Keyword(c,e) && !Keyword(c,"Fudo"))))
+        { Win(player.Id,"Enlightenment victory"); return; }
         player.TurnsTaken++;
         player.MayNotAttackThisTurn=false;
+        player.FavorActionsThisTurn=0;
+        player.DestroyedEnemyPersonalityActionsThisTurn=0;
         StraightenPhase(player);
     }
+    private static readonly string[] RingElements=["Fire","Water","Air","Earth","Void"];
     private void StraightenPhase(PlayerState player)
     {
         SetPhase(Phase.Straighten,player.Id);

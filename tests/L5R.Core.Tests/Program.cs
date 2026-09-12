@@ -117,6 +117,13 @@ var tests = new (string Name, Action Run)[]
     ("Multi-keyword Target/Performer requirement (issue #190): a card may name any number of keywords, all independently required regardless of order (e.g. 'a Tattooed Monk') -- a card with only one of the two required keywords does not qualify", MultiKeywordRequirement),
     ("Goju House Guard and Aberrations (issue #192): the new deck-return primitive (top or bottom, controller's choice for Goju itself; unattached unit cards always to the bottom of their owner's appropriate deck, fully reset) and top-of-Fate-deck discard primitive (Force bonus equal to the discarded card's Focus Value)", GojuHouseGuardAndAberrations),
     ("Focus-1 Battle-action wave (issue #192): Sankaku-Yari (target-keyword-conditional Attack strength, zero new primitives), Pearl of Embers (BattleOrOpen, zero new primitives), Ritual Preparation (the new own-unit-card Target category -- a Personality OR Follower, own, in play)", FocusOneBattleActionsWave),
+    ("Enlightenment victory (issue #194): all five real elemental Rings in play at the start of a turn wins; a False Ring's own matching elemental keyword never substitutes, even for a missing real Ring -- Fudo is the actual exclusion", EnlightenmentVictory),
+    ("Ring of Air (issue #194): two Favor actions in one turn grants an Additional Battle Action scoped to the Ring rather than a forced interrupt; recruiting it, then its own Repeatable straighten action", RingOfAir),
+    ("Ring of Water (issue #194): a battle resolving with a Terrain played, a Terrain destroyed, and something destroyed grants an Additional Battle Action scoped to the Ring, surviving battle-end cleanup", RingOfWater),
+    ("Ring of the Void (issue #194): a Limited ability gated on two or fewer Rings in play, discarding the rest of the player's hand as its own cost", RingOfTheVoid),
+    ("False Ring of Air (issue #194): winning a battle with an opposing unit present grants an Additional Battle Action scoped to the Ring; recruiting it costs 2 Honor, unlike a real Ring", FalseRingOfAir),
+    ("False Ring of Water (issue #194): a standing Province-Strength-11-or-greater condition, not a Reaction/grant -- usable any time it holds, like an ordinary Battle ability", FalseRingOfWater),
+    ("Review of previously Ring-blocked cards (issue #194): Moshi Ikako's 'Fire Battle' is a plain classification, not Ring-gated (confirmed, zero new primitives); Scholarly Hermit needed only a Ring-type check in a discard pile (new own-ring-in-discard Target)", RingBlockedCardsReview),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -3123,6 +3130,161 @@ static void FocusOneBattleActionsWave()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ritual.Id,TargetId:follower.Id,AbilityId:"ritual-preparation-straighten"));
         Check(!e.State.Cards[follower.Id].Bowed,"Straightens the targeted Follower");
         Check(e.State.Cards[host.Id].Bowed,"The Personality herself is untouched -- a different card was targeted");
+    }
+}
+static void EnlightenmentVictory()
+{
+    {
+        // All five REAL elemental Rings in play at the start of a turn (issue #194) -- checked via
+        // CreateEconomyScenario's own Dynasty-phase start, matching HonorVictory's own harness.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-ring-of-air",0,Zone.Home); Add(s,"training-ring-of-water",0,Zone.Home);
+        Add(s,"training-ring-of-void",0,Zone.Home); Add(s,"training-ring-of-fire-stub",0,Zone.Home);
+        Add(s,"training-ring-of-earth-stub",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"endDynasty")); Check(e.State.WinnerId is null,"Not this player's own turn yet");
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.WinnerId,0); Equal(e.State.VictoryReason,"Enlightenment victory");
+    }
+    {
+        // False Rings never count, even sharing the exact same elemental keyword as a missing real
+        // Ring (issue #194) -- Fudo is the actual exclusion, not the elemental keyword itself.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-ring-of-air",0,Zone.Home); Add(s,"training-ring-of-water",0,Zone.Home);
+        Add(s,"training-ring-of-void",0,Zone.Home); Add(s,"training-ring-of-fire-stub",0,Zone.Home);
+        Add(s,"training-false-ring-of-earth",0,Zone.Home); // carries "Earth", but also "Fudo"
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"endDynasty")); SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Check(e.State.WinnerId is null,"A False Ring's own elemental keyword does not substitute for the real Ring");
+    }
+}
+static void RingOfAir()
+{
+    // Ring of Air (issue #194): two Favor actions in one turn grants an Additional Battle Action
+    // scoped to the Ring (rather than a forced mid-resolution interrupt, per the user's own
+    // simplification); consuming it recruits the Ring; its own in-play action (straighten a
+    // Personality or attachment, Repeatable) is then usable, bowing itself as the cost.
+    // Ring of Air's own condition is checked mid-Action-phase (Favor actions are usable there), but
+    // its recruit ability is Timing "Battle" -- a real match reaches both within the same turn via
+    // Action -> AttackDeclaration -> Battle. MatchEngine.State always returns a fresh copy (writes
+    // through it are no-ops), so the transition is modeled by capturing the post-Favor-action state,
+    // editing its Phase/PriorityPlayerId, and wrapping a second engine around it (same pattern used
+    // for Volcano Tattoo's own Phase.Action -> Phase.Battle test, issue #190).
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.Phase=Phase.Action; s.FavorPlayerId=0; s.Players[0].FavorActionsThisTurn=1;
+    var ring=Add(s,"training-ring-of-air",0,Zone.Hand);
+    var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0,bowed:true);
+    var shunya=Add(s,"training-honor-personality",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shunya.Id,AbilityId:"shunya-honor")); // this turn's 2nd Favor action
+    Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring");
+    var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0;
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:ring.Id,AbilityId:"ring-of-air-recruit"));
+    Equal(e2.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play"); Check(!e2.State.Players[0].Hand.Contains(ring.Id));
+    Accept(e2,Cmd(e2,"pass")); // priority ceded to the opponent once the grant is spent; they pass back
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:ring.Id,TargetId:host.Id,AbilityId:"ring-of-air-straighten"));
+    Check(!e2.State.Cards[host.Id].Bowed,"Straightens the target"); Check(e2.State.Cards[ring.Id].Bowed,"Bows itself as the in-play cost");
+}
+static void RingOfWater()
+{
+    // Ring of Water (issue #194): a battle resolves in which this player played a Terrain, destroyed
+    // a Terrain, and destroyed a card during resolution -- grants an Additional Battle Action scoped
+    // to the Ring, surviving FinishBattleResolution's own Clear() (only ordinary grants are cleared).
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var ring=Add(s,"training-ring-of-water",0,Zone.Hand);
+    var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3
+    var destroyer=Add(s,"training-terrain-destroyer",0,Zone.Battlefield,province:0); // Force 2 -- af=5
+    var terrain=Add(s,"training-terrain",0,Zone.Hand);
+    var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3 -- df=3, attacker wins
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("playStrategy",0,e.Version,CardId:terrain.Id));
+    Check(e.State.Players[0].TerrainPlayedThisBattle,"Playing a Terrain sets the flag");
+    Accept(e,Cmd(e,"pass"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:terrain.Id,AbilityId:"training-destroy-terrain"));
+    Check(e.State.Players[0].TerrainDestroyedThisBattle,"Destroying it sets the flag");
+    Resolve(e); // two passes in Phase.Battle -> ResolveBattle; af=5 > df=3, the enemy Personality is destroyed
+    Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring, surviving battle-end cleanup");
+}
+static void RingOfTheVoid()
+{
+    // Ring of the Void (issue #194): a Limited ability (not a granted Additional Action) -- gated
+    // only by controlling two or fewer Rings; its own cost discards the rest of the player's hand.
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var ring=Add(s,"training-ring-of-void",0,Zone.Hand);
+    var otherCard=Add(s,"training-follower",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-void-recruit"));
+    Equal(e.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play");
+    Equal(e.State.Cards[otherCard.Id].Zone,Zone.FateDiscard,"The rest of the hand is discarded");
+    Check(!e.State.Players[0].Hand.Contains(otherCard.Id) && !e.State.Players[0].Hand.Contains(ring.Id));
+}
+static void FalseRingOfAir()
+{
+    // False Ring of Air (issue #194): after winning a battle with an opposing unit present (approximated
+    // as "present at the moment of resolution"), grants an Additional Battle Action scoped to the Ring.
+    // Recruiting it costs 2 Honor, unlike any of the three real Rings.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var ring=Add(s,"training-false-ring-of-air",0,Zone.Hand);
+    Add(s,"training-lion-veteran",0,Zone.Battlefield,province:0); // Force 6
+    Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3 -- attacker wins, opposing unit was present
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e); // the battle win itself also grants Honor (destroyed the enemy Personality) -- captured below, after that settles
+    Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring, surviving battle-end cleanup");
+    var honorBefore=e.State.Players[0].Honor;
+    // The grant is only consumable during Phase.Battle, which this battle's own resolution has just
+    // left (FinishBattleResolution moves on to Dynasty/BattleSelection) -- reachable again at this
+    // player's NEXT battle, modeled the same way as Ring of Air's own Phase transition above.
+    var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0; s2.ActivePlayerId=0; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0];
+    Add(s2,"training-crane-samurai",0,Zone.Battlefield,province:0); // presence at a new battle, to satisfy the generic Battle-timing Require
+    var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:ring.Id,AbilityId:"false-ring-of-air-recruit"));
+    Equal(e2.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play");
+    Equal(e2.State.Players[0].Honor,honorBefore-2,"Costs 2 Honor, unlike a real Ring");
+}
+static void FalseRingOfWater()
+{
+    // False Ring of Water (issue #194): a standing condition (not a Reaction/grant) -- usable any
+    // time the current battlefield's own Province Strength is 11 or greater, like an ordinary
+    // Battle ability. Its own in-play action is a plain Ranged 3 Attack.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=1;
+    s.Players[1].Provinces.Single(p=>p.Index==0).Strength=10; // "the current battlefield's own province" is the Defender's
+    var ring=Add(s,"training-false-ring-of-water",1,Zone.Hand);
+    Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:ring.Id,AbilityId:"false-ring-of-water-recruit")); // Strength 10, not enough
+    var s2=e.State; s2.PriorityPlayerId=1; s2.Players[1].Provinces.Single(p=>p.Index==0).Strength=11;
+    var e2=MatchEngine.FromTestState(s2);
+    var honorBefore=e2.State.Players[1].Honor;
+    Accept(e2,new GameCommand("useAbility",1,e2.Version,CardId:ring.Id,AbilityId:"false-ring-of-water-recruit"));
+    Equal(e2.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play"); Equal(e2.State.Players[1].Honor,honorBefore-2,"Costs 2 Honor");
+}
+static void RingBlockedCardsReview()
+{
+    {
+        // Moshi Ikako (issue #194's own review): "Fire Battle" was speculatively noted as a possibly
+        // Ring-gated Timing -- confirmed, now that Rings are actually built, to be a plain
+        // printed-keyword classification instead. Zero new primitives.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ikako=Add(s,"training-moshi-ikako",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0).Id); // Force 2
+        target.Modifiers.Add(new("test-setup","test-setup","Force",-1)); // down to Force 1, within Ranged 1
+        var tooStrong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, no attachments
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ikako.Id,TargetId:tooStrong.Id,AbilityId:"moshi-ikako-attack")); // Force 6 > Ranged 1
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ikako.Id,TargetId:target.Id,AbilityId:"moshi-ikako-attack"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.FateDiscard,"Destroys the Force-1 (after modifier) Follower target");
+    }
+    {
+        // Scholarly Hermit (issue #194's own review): needed only a Ring-type check in a discard
+        // pile, now trivial with CardType.Ring in place. New Target "own-ring-in-discard".
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var hermit=Add(s,"training-scholarly-hermit",0,Zone.Attached,attachedTo:host.Id);
+        var ring=Add(s,"training-ring-of-water",0,Zone.FateDiscard);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hermit.Id,TargetId:ring.Id,AbilityId:"scholarly-hermit-search"));
+        Check(e.State.Players[0].Hand.Contains(ring.Id),"The Ring returns to hand"); Equal(e.State.Cards[ring.Id].Zone,Zone.Hand);
+        Equal(e.State.Cards[hermit.Id].Zone,Zone.Dead,"Destroys itself");
     }
 }
 static void LionClanPersonalityReview()
