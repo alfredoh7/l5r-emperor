@@ -336,7 +336,7 @@ public sealed partial class MatchEngine
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
-        if (Keyword(card,"Unique") && _state.Cards.Values.Any(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Name==def.Name)) error="You already control this Unique card.";
+        if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : []);
     }
@@ -667,6 +667,11 @@ public sealed partial class MatchEngine
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
         Require(def.Type!=CardType.Follower || def.HonorRequirement is null || CardPersonalHonor(target)>=def.HonorRequirement,"The Personality does not meet this Follower's Personal Honor Requirement.");
         Require(AttachmentAllowed(card,target),"A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
+        // Unique/Singular (issue #202): Equip had no in-play-duplicate check at all before this -- only
+        // QuotePurchase (Personality/Holding) did. Generalizes that same check to cover Follower/Item/
+        // Spell entry too, for both keywords.
+        Require(!(Keyword(card,"Unique") || Keyword(card,"Singular")) || !ControlsCopyOf(command.PlayerId,def.Name),
+            $"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.");
         Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;

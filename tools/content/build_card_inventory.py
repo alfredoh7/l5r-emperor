@@ -71,7 +71,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3280": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-3413": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-10588": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
-    "oracle-l5r-3522": "Needs discard-pile keyword search (the \"removed from game\" zone it also needs is now built, issue #184).",
     "oracle-l5r-3589": "Needs the Attack-vs-attachments override plus \"last attached to\" tracking after detachment.",
     "oracle-l5r-3611": "Needs a performer/wielder-keyed Attack-strength axis (already a known gap elsewhere).",
     "oracle-l5r-4118": "Needs a unit-Force-total comparison target (existing categories only compare individual card Force).",
