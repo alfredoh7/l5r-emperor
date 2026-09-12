@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Generalized the single-string AbilityDefinition.RequiredKeyword into RequiredKeywords (string[]?): a card may name any number of keywords, all independently required regardless of order (issue #190's own spec: 'a Dragon Clan Kensai', 'a Crane Clan Magistrate'). New HasKeywords(card, keywords) helper. Volcano Tattoo's own 'Tattooed Monk' Performer requirement now reuses the existing generic own-unbowed-personality-at-battle-with-keyword category with two required keywords, replacing the hardcoded own-unbowed-tattooed-monk-at-battle category from the prior commit on this same branch/PR. Every existing single-keyword catalog entry (Berserker, Kensai, Fudo, Monk) mechanically updated to a one-element array, unchanged behavior. Crosses into src/L5R.Client/Content/Published/ only for wave artwork already explained in the prior handoff on this branch -- no further client changes here.",
-  "validation": "114/114 core tests (new MultiKeywordRequirement test), 34/34 published tests, 8/8 deck-format tests, full bash tools/check.sh --skip-client green.",
-  "remaining": "None; ready for review.",
+  "summary": "Resolves the merge conflict between PR #191 (issue #190: Kiho keyword, discard-to-hand primitive, Volcano Tattoo/Hunter of Harmony) and current main (now including issue #198's Personality wave 8 and issue #200's WebP pipeline). Conflicts were purely additive collisions at the same insertion points (L5R.Core.csproj's EmbeddedResource list, PublishedContent.cs's snapshot loaders and duplicate-id chain, CardCatalog.cs's final Concat chain, tests/Program.cs's test-function block, PublishedTests.cs's hardcoded published count) -- resolved by keeping both sides' additions and recomputing the cumulative published count (183 + 198's own additions -> 200, since main's own 198 already included the 17 Lion Clan wave-8 cards). docs/CARD_INVENTORY.xlsx (a generated binary) was regenerated fresh via tools/content/build_card_inventory.py rather than hand-merged.",
+  "validation": "dotnet build (0 warnings/errors); dotnet run --project tests/L5R.Core.Tests -> 115/115 core + 34/34 published + 8/8 deck-format; python3 -m unittest discover -s tools/content -> 121/121; python3 -m unittest discover -s tools/collaboration -> 43/43.",
+  "remaining": "None; ready to push and update PR #191.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/190",
   "branch": "mdornbrook/190-kiho-discard-to-hand-hunter-of-harmony",
-  "updated": "2026-09-11T14:07:20.284664+00:00"
+  "updated": "2026-09-12T11:16:19.289701+00:00"
 }
