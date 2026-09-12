@@ -23,5 +23,18 @@
   "source_image_hash": "e0/e3",
   "source_url": "https://images.oracleofthevoid.com/l5r/e0/e3/printing_6060_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/e0/e3/printing_6060_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 162712,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6060-printing-1-image-1.webp",
+    "sha256": "367fdd6d8bc80589d793359ee0e9f1191607058c830af29de5dd18e8ba236469",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

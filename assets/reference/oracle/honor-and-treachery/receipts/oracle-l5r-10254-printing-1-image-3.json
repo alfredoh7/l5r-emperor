@@ -21,5 +21,18 @@
   "source_image_hash": "9a/71",
   "source_url": "https://images.oracleofthevoid.com/l5r/9a/71/printing_10254_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/9a/71/printing_10254_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 154296,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-10254-printing-1-image-3.webp",
+    "sha256": "f35fdd7bd92de32c31abde1d8d18176a06ed5a9d93a6ebd8328b02ba382badc7",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

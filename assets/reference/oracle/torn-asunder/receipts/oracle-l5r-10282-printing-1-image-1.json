@@ -23,5 +23,18 @@
   "source_image_hash": "a2/75",
   "source_url": "https://images.oracleofthevoid.com/l5r/a2/75/printing_10282_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/a2/75/printing_10282_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 129562,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10282-printing-1-image-1.webp",
+    "sha256": "76715be64e3291db4257006cb87c2c16475a51d87a27bb59c8f09a1540887bff",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

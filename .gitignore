@@ -30,5 +30,10 @@ runtime/
 # The published pool's source scans and all runtime art remain in Git.
 assets/reference/oracle/*/images/
 
+# Local WebP working copies (issue #200): materialized from the "Catalogue artwork - WebP 85 - v1"
+# Release by tools/content/sync_webp_working_copies.py. Each receipt's own `working_copy` field
+# (committed) names the exact release/asset to regenerate this from -- no need to keep it in Git.
+assets/reference/oracle/*/webp/
+
 # Personal agent memory is not the team record.
 CLAUDE.local.md

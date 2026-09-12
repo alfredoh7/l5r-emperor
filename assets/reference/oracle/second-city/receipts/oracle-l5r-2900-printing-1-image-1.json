@@ -23,5 +23,18 @@
   "source_image_hash": "9f/d2",
   "source_url": "https://images.oracleofthevoid.com/l5r/9f/d2/printing_2900_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/9f/d2/printing_2900_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 129218,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-2900-printing-1-image-1.webp",
+    "sha256": "d43f2a24e891ed56f9ef9f1739771654417294b4829e71a68bce6dc1ddc31810",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

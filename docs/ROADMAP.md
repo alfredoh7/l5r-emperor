@@ -98,6 +98,37 @@ These exist as reusable engine shapes, not just one-off card hacks — but only 
 | Events Phase turn-structure modeling | Done | [#10](https://github.com/alfredoh7/l5r-emperor/issues/10) |
 | Battle sub-phase structure (Maneuvers, Engage, Battle Actions, Resolution) | Not started | [#20](https://github.com/alfredoh7/l5r-emperor/issues/20) |
 
+## Scan asset pipeline: Oracle-of-the-Void originals vs. WebP working copies
+
+Every receipt under `assets/reference/oracle/*/receipts/*.json` now carries two independent
+identities (issue #200), never conflated:
+
+- Its own top-level `path`/`sha256`/`source_url`/etc. — untouched, forever — name the true
+  Oracle-of-the-Void master. Restoring one is just re-running `download_oracle_printings.py`/
+  `download_expansion_printings.py`, which already fetch by `source_url`.
+- A sibling `working_copy` block names a much smaller WebP artifact (format/path/sha256/
+  width/height/source), matched against the "Catalogue artwork - WebP 85 - v1" GitHub Release
+  (PR #124's own asset) by the ORIGINAL master's own sha256 — the release's own content-addressing
+  scheme. `tools/content/sync_webp_working_copies.py` builds this: it auto-fetches and extracts the
+  release into a local, gitignored cache the first time it's needed (pinned zip sha256, verified
+  before extracting, matching `tools/bootstrap.py`'s own pinned-SDK convention) — no session has to
+  manually rediscover/download it by hand again — then materializes each matching WebP file at
+  `assets/reference/oracle/<slug>/webp/<image id>.webp` (also gitignored; the committed `working_copy`
+  field is what makes it reproducible, not the bytes themselves).
+- `build_definition_fields` (shared by every `package_*_wave.py` script, in `package_vanilla_wave.py`)
+  prefers a receipt's `working_copy` when present — verified against ITS OWN sha256, converted to
+  JPEG only at the final `Content/Published/<card>.jpg` copy step — falling back to the original
+  behavior untouched when a receipt has no working copy yet.
+
+This supersedes issue #198's own `audit_and_install_scans.py`, which re-encoded WebP to JPEG and
+overwrote each receipt's OWN `sha256` with the re-encoded file's hash — destroying the tie back to
+the true master, which is exactly why those rewrites were kept local/uncommitted rather than pushed.
+Storing the WebP bytes as-is in a separate field fixes that: the original identity is never touched,
+so `working_copy` is safe to commit. Run with `--apply` as of 2026-09-12: 2,485 of 2,952 receipts
+now carry a working copy (~85% smaller on disk than the originals they replace for day-to-day
+packaging use); 467 have no WebP counterpart in the release and still need their original restored
+the old way if a wave ever needs one of them.
+
 ## Content coverage
 
 Published (playable) card count as of 2026-09-12: **198** — pinned Lion/Crane 40, Vanilla Wave 1 (61 ability-free), Stronghold Waves 1–3 (7 total), Personality Waves 1–8 (34 total), Follower Waves 1–6 (45 total), Strategy Waves 1–2 (7 total), Item Wave 1 (2). The full Emperor-legal reference catalogue (`content/deck-pool.json`) has 2,143 cards; the wider catalogue is reference-only until a card is explicitly wired up (`docs/rules/LION_CRANE_COVERAGE.md`, `AGENTS.md` — never silently turn an unsupported effect into a blank playable card).

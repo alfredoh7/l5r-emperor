@@ -23,5 +23,18 @@
   "source_image_hash": "9a/e8",
   "source_url": "https://images.oracleofthevoid.com/l5r/9a/e8/printing_8545_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/9a/e8/printing_8545_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 170164,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8545-printing-1-image-1.webp",
+    "sha256": "80bea97c679ef2769ce84f815c7878309c8a4f4f7d9348e4ede364dd969a952f",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

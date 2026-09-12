@@ -23,5 +23,18 @@
   "source_image_hash": "55/0e",
   "source_url": "https://images.oracleofthevoid.com/l5r/55/0e/printing_3850_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/55/0e/printing_3850_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 153492,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-3850-printing-1-image-1.webp",
+    "sha256": "fe34386544424a2eea1bae57183023f0c4435ddefb383c06341f863d00961bd1",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

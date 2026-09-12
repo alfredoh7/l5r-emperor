@@ -23,5 +23,18 @@
   "source_image_hash": "e7/b3",
   "source_url": "https://images.oracleofthevoid.com/l5r/e7/b3/printing_807_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/e7/b3/printing_807_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 147460,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-807-printing-1-image-1.webp",
+    "sha256": "560b49ca63c65cc0626ad3748edb3a9749fe89094694c83c1d35af3ab95568d8",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

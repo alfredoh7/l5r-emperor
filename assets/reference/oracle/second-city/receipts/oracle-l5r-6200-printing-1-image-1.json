@@ -23,5 +23,18 @@
   "source_image_hash": "d4/09",
   "source_url": "https://images.oracleofthevoid.com/l5r/d4/09/printing_6200_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d4/09/printing_6200_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 133444,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-6200-printing-1-image-1.webp",
+    "sha256": "40a54a1b04ef94a30bd4c27b3226990e74c8cab1a2b1de13d4456303045454f3",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

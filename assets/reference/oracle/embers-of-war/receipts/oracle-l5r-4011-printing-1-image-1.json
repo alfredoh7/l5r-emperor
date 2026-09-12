@@ -23,5 +23,18 @@
   "source_image_hash": "db/4d",
   "source_url": "https://images.oracleofthevoid.com/l5r/db/4d/printing_4011_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/db/4d/printing_4011_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 130842,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-4011-printing-1-image-1.webp",
+    "sha256": "187e5183e6621906221a2973e85b4dc1e39fdeec21c67152a9e5c870417ee8bd",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

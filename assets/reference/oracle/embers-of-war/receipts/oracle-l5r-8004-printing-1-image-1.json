@@ -23,5 +23,18 @@
   "source_image_hash": "76/c4",
   "source_url": "https://images.oracleofthevoid.com/l5r/76/c4/printing_8004_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/76/c4/printing_8004_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 157884,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8004-printing-1-image-1.webp",
+    "sha256": "586a58678b99f808347b49ad87dc27d4f9eac9fbf82a0c33775b8236befba540",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

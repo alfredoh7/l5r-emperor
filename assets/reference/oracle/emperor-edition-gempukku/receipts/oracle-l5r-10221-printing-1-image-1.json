@@ -23,5 +23,18 @@
   "source_image_hash": "60/7b",
   "source_url": "https://images.oracleofthevoid.com/l5r/60/7b/printing_10221_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/60/7b/printing_10221_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 153104,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition-gempukku/webp/oracle-l5r-10221-printing-1-image-1.webp",
+    "sha256": "68148f96365b9f13211e464d89b4b1bbe9c429dc8c8cbf2409352cddea4e742d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

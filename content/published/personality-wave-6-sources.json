@@ -5,8 +5,8 @@
       "Aftermath"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=10832",
-    "image_path": "assets/reference/oracle/aftermath/images/oracle-l5r-10832-printing-1-image-1.jpg",
-    "image_sha256": "743de4d89f05e8f66b8872d2516636dbcaba1753fc28d945725fe9ac58ea6be7"
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10832-printing-1-image-1.webp",
+    "image_sha256": "5292c7a42676dd11df5cd33dbda06c9565d26289db0644bd00eba66401095fdb"
   },
   {
     "card_id": "oracle-l5r-10854",
@@ -14,8 +14,8 @@
       "Aftermath"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=10854",
-    "image_path": "assets/reference/oracle/aftermath/images/oracle-l5r-10854-printing-1-image-1.jpg",
-    "image_sha256": "1b79919944a1affc82bf94acca62283bc3d1098c2eecdf328a8e1cdde258b0f1"
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10854-printing-1-image-1.webp",
+    "image_sha256": "6fb61ab2f8561a1da172a87374c2d1a26ffab058963ddcd5d481ef2c5fe6fd28"
   },
   {
     "card_id": "oracle-l5r-10244",
@@ -23,7 +23,7 @@
       "Honor and Treachery"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=10244",
-    "image_path": "assets/reference/oracle/honor-and-treachery/images/oracle-l5r-10244-printing-1-image-1.jpg",
-    "image_sha256": "65fb7df8be8968acf5bb6741c103a5d25771c1b3c74c438487a4cb53054561c8"
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-10244-printing-1-image-1.webp",
+    "image_sha256": "b67587a94595ae4c64d3807a33d4fc53510ec5a2702f767a3f54c14b95a6d05f"
   }
 ]
