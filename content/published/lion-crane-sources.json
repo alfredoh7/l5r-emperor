@@ -98,9 +98,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-229-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-229-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/7c/c8/printing_229_1_master.jpg",
-    "image_sha256": "d45f5608e74573eab5c082f9169accffb65c718c1a632b7c0ddb61dfecd23b4c"
+    "image_sha256": "cb4bfcd0dcb3c357361657ad64b6607a4436841285d292e0b30050358e7b934a"
   },
   {
     "card_id": "oracle-l5r-502",
@@ -474,9 +474,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-521-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-521-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/22/6b/printing_521_1_master.jpg",
-    "image_sha256": "43963ec7e34583c1102acc29772c5f88f97d223b85430fd453130b65e0d5febf"
+    "image_sha256": "00080d734ce154b094ef2922b9311bbe02b7bfcf3b734cc314d70b52bb24be29"
   },
   {
     "card_id": "oracle-l5r-679",
@@ -702,9 +702,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-679-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-679-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/76/61/printing_679_1_master.jpg",
-    "image_sha256": "bee110e931a1a42fb9f3a594c8156f879056f8ec94bb1b2837cb694edb6672ae"
+    "image_sha256": "2a8b06bfb4ca7016a7d0f7db5e7f9ff56c6b416ca499f60abf240999ae805d55"
   },
   {
     "card_id": "oracle-l5r-1045",
@@ -1289,9 +1289,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1045-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1045-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/b5/51/printing_1045_1_master.jpg",
-    "image_sha256": "534740aecbf66df574a15d6d0e122322038ba8483ccd0238d5fa7654eb9c317d"
+    "image_sha256": "6ce7566bb0aa8503392833481b60af722269123bd9cb0ae11c03ec9944f26a91"
   },
   {
     "card_id": "oracle-l5r-1106",
@@ -1424,9 +1424,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1106-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1106-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/d2/60/printing_1106_1_master.jpg",
-    "image_sha256": "81d3bff1a201d86c3f892711fc1cec4510ba1d1bbeec1af2aa70deca3720b28d"
+    "image_sha256": "a6759b4cffe773b61ff3e2c1883368bf7c3474061beaf92bbe4208a223496963"
   },
   {
     "card_id": "oracle-l5r-1521",
@@ -2304,9 +2304,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1645-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1645-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/88/0b/printing_1645_1_master.jpg",
-    "image_sha256": "2c8be86a584556a7a7a5a2e00320fbb872cdf00d40dd209f66909abc27b96cc2"
+    "image_sha256": "f58c5f4f8935c7753dc8b26bb3633d3ea95c2b49ef03b95da0a88f86432573d1"
   },
   {
     "card_id": "oracle-l5r-2158",
@@ -2464,9 +2464,9 @@
         "Uncommon"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2158-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2158-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/91/c1/printing_2158_1_master.jpg",
-    "image_sha256": "23e8bceb6d514b21115ba5a6e669fbf3793aed5e337ae7131e07d8cb02d31aec"
+    "image_sha256": "b46163eacda61389a1b7d5f74062ceabb63eb5740e6d84ea51105e867d227f0d"
   },
   {
     "card_id": "oracle-l5r-2619",
@@ -2778,9 +2778,9 @@
         "Rare"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2619-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2619-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/cc/06/printing_2619_1_master.jpg",
-    "image_sha256": "1076e862aad278e545289bb447f2fcfe803c2c1b20b9d82de33aeaa42f0c5263"
+    "image_sha256": "5c2ad67e15625be49b1e991ff050ae89cd1bffb51bab5c67b88d96e8604d4416"
   },
   {
     "card_id": "oracle-l5r-2867",
@@ -3255,9 +3255,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2867-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2867-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/64/f7/printing_2867_1_master.jpg",
-    "image_sha256": "a09a1e17f2714197b2c8d0c9499e4718498226340aff5c9c63cd0a6cb8989a3a"
+    "image_sha256": "27600508092c5a16ac71cb2f8f6f8e492c8fd0a283c524ffe624c5d34c0788d3"
   },
   {
     "card_id": "oracle-l5r-2949",
@@ -3387,9 +3387,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2949-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2949-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/05/20/printing_2949_1_master.jpg",
-    "image_sha256": "d9ed1159ceff2914fac7e26d63aafa440f78de40b39193aeb8c37d3eb9d6b971"
+    "image_sha256": "5aeb9062b985e93e6dadd6af7449d294fcaf9df117d20dac0fc8e00551dc1ee5"
   },
   {
     "card_id": "oracle-l5r-3640",
@@ -3968,9 +3968,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3730-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3730-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/77/b9/printing_3730_1_master.jpg",
-    "image_sha256": "11aea65c9c02e572324ab412bfab1b48137dd91d53c0dfe73eb90b3b8cad3014"
+    "image_sha256": "c98509a4c281f4930caabe53fb7ebb196854aecc923ea90c74c8fc7a469540c4"
   },
   {
     "card_id": "oracle-l5r-4395",
@@ -4069,9 +4069,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4395-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4395-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/6b/3f/printing_4395_1_master.jpg",
-    "image_sha256": "34ae17f51167746483bd1a1c204541aebceb7db5032266b059a6f11116d20685"
+    "image_sha256": "1a89b9171a43597963adb74b7103b82d4643379f4126f746b6dbcd756eb60686"
   },
   {
     "card_id": "oracle-l5r-4664",
@@ -4388,9 +4388,9 @@
         "Uncommon"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4664-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4664-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/45/ef/printing_4664_1_master.jpg",
-    "image_sha256": "0d0f227ef6f0ce497cc047cbcbf2ff78b09d7ed9615fb7f25726d0e3fe2ed2cb"
+    "image_sha256": "9322b743ae6cec7b470fab1e3a97c18bf39b2689335ffd77d0559046894745e2"
   },
   {
     "card_id": "oracle-l5r-4840",
@@ -4856,9 +4856,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4840-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4840-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/8c/11/printing_4840_1_master.jpg",
-    "image_sha256": "9442dad197423df96d944cb9c7c29fa6cfba5e2e828bd9e1a85a000bffc131ad"
+    "image_sha256": "1207a257ca8d3bd8da427510b5411a8143e3b70880d9f3c91ad8303c10b745b9"
   },
   {
     "card_id": "oracle-l5r-4915",
@@ -5013,9 +5013,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4915-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4915-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/a0/d5/printing_4915_1_master.jpg",
-    "image_sha256": "ce55433bea6f7b5e2b6bf1fe2d7cd0599407ac225b73a7514004debaf8427638"
+    "image_sha256": "8616b9588b488c2e6d710f8956a2a1e2eeebfea60beccda9164378a518a9ba20"
   },
   {
     "card_id": "oracle-l5r-5861",
@@ -5122,9 +5122,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-5861-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5861-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/91/ba/printing_5861_1_master.jpg",
-    "image_sha256": "27f7f26c5f03ed0762c14dfde147799a5bddf2723b0358291956227a4235a7bb"
+    "image_sha256": "16292c752f2ce2aaa5c2ae60c5e514a6df362d80057f28647339fe5ab905016c"
   },
   {
     "card_id": "oracle-l5r-6051",
@@ -5271,9 +5271,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6051-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6051-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/0e/b8/printing_6051_1_master.jpg",
-    "image_sha256": "b78e27717d7de92b07a60374ca5d6f29f84233ae586950e1d069c8e30b625b52"
+    "image_sha256": "b1622bbd7378c75aaa4c87e8699d9b10608a6a1fa44ca6b239050953e7654ec1"
   },
   {
     "card_id": "oracle-l5r-6086",
@@ -5388,9 +5388,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6086-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6086-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/6f/17/printing_6086_1_master.jpg",
-    "image_sha256": "cd8f64c7cc3a09f4342e68084e305f6482658db4dc5fbca0560bd0b5e653d6f8"
+    "image_sha256": "739d3adcff59ddf559a2b4bf4461dbc390e5d2f1414958ef35f2e1b66108a1c9"
   },
   {
     "card_id": "oracle-l5r-6258",
@@ -5682,9 +5682,9 @@
         "Fixed"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6855-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6855-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/b1/ba/printing_6855_1_master.jpg",
-    "image_sha256": "4706d3f896c7c61b8c5e1afd360f73cf07da55b7258d4a65b4d44d942255d452"
+    "image_sha256": "d307e712690c0ef67ac86c02c5bc0ff0f471d32feda690554b2529ce0fd77a76"
   },
   {
     "card_id": "oracle-l5r-7303",
@@ -6134,9 +6134,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-7303-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7303-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/17/3a/printing_7303_1_master.jpg",
-    "image_sha256": "24904ce25b5e37a7becc646cd58b8800395753f18f98153328d114f2485bdd9e"
+    "image_sha256": "f3bb1b752656ab0c0e9bcdefd8427444fcfadcd625301df79440d2df9587d981"
   },
   {
     "card_id": "oracle-l5r-9147",
@@ -6322,9 +6322,9 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-9147-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-9147-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/14/94/printing_9147_1_master.jpg",
-    "image_sha256": "cc922b52844538860f25b4141fb1c576ea70270be80036ea53a804b03ff44602"
+    "image_sha256": "cde90e92a6b4a4f58fb9da5f8a9b1f51af72d85b1bb6e1c60fd7f9b56716a780"
   },
   {
     "card_id": "oracle-l5r-9812",
@@ -7585,8 +7585,8 @@
         "Emperor Edition"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3623-printing-1-image-1.jpg",
-    "image_sha256": "d3f6fc19470c281767ccad388e069e2c64500c7bfb64c9aa38c6a95243b376a9"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3623-printing-1-image-1.webp",
+    "image_sha256": "95e4d0290fd5b987f18084e3502f5084c6c8c8133f0deff30eae20372779ae42"
   },
   {
     "card_id": "oracle-l5r-2060",
@@ -7689,8 +7689,8 @@
         "Emperor Edition"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-2060-printing-1-image-1.jpg",
-    "image_sha256": "3514834d6dd352c76870257231521adc9f096ed4fb6ade34a1a44b826bb614d1"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2060-printing-1-image-1.webp",
+    "image_sha256": "1327772ca03e0b994b4895d289dd44663c34ed162e42f5812e71b797a208bd27"
   },
   {
     "card_id": "oracle-l5r-3636",
@@ -8095,8 +8095,8 @@
         "Common"
       ]
     },
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3636-printing-1-image-1.jpg",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3636-printing-1-image-1.webp",
     "image_url": "https://images.oracleofthevoid.com/l5r/0a/f6/printing_3636_1_master.jpg",
-    "image_sha256": "adbe0926ab656b966b6bdbedb27a2ad45d8789a9869fc2932c41cdb0e86b0d49"
+    "image_sha256": "3e370873abced45f8fd5f85029409a7fbfc984ae54288725ad5bb695b65aebb7"
   }
 ]

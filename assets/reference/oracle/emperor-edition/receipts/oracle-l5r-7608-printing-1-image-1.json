@@ -23,5 +23,18 @@
   "source_image_hash": "5b/2d",
   "source_url": "https://images.oracleofthevoid.com/l5r/5b/2d/printing_7608_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/5b/2d/printing_7608_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 180106,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7608-printing-1-image-1.webp",
+    "sha256": "0c96e6e49cb69f002350230a353511d27280f258f8ebf6a59c22dfb276b9b36c",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

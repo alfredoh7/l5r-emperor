@@ -5,8 +5,8 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=4059",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4059-printing-1-image-1.jpg",
-    "image_sha256": "9c99e78e658ade894acb2a71a4be8f552c37da94b8a58b2349305ae0b3f1a04e"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4059-printing-1-image-1.webp",
+    "image_sha256": "487b4c8b730ee52e407ff18178eedbbbdb6977bb834449b400a274739f28cd9d"
   },
   {
     "card_id": "oracle-l5r-5982",
@@ -14,8 +14,8 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=5982",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-5982-printing-1-image-1.jpg",
-    "image_sha256": "db7103ff978e3c900f7eb3db6e8d099b4c42abc45336f81edddb5ed6a217e616"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5982-printing-1-image-1.webp",
+    "image_sha256": "8758d36bf454207645d1554e5a46ba9c39f00ff2aff40908a76979de2660bb1f"
   },
   {
     "card_id": "oracle-l5r-4676",
@@ -23,8 +23,8 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=4676",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-4676-printing-1-image-1.jpg",
-    "image_sha256": "d96266dac4bff41ee3d34ba14164abbaa306d1f1f9e0033cf4791b3bca34c27c"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4676-printing-1-image-1.webp",
+    "image_sha256": "1d870a8df9fb6d002da342bfdefdc96976d780fe9649f85d41ce8646f5bcad1c"
   },
   {
     "card_id": "oracle-l5r-6691",
@@ -32,7 +32,7 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=6691",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-6691-printing-1-image-1.jpg",
-    "image_sha256": "2abd656e99bca15723a1a47e080415b512be76645f47772bd26c0f4ec7c6d46f"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6691-printing-1-image-1.webp",
+    "image_sha256": "249af6c9bb7a5443ceac6d396d308b3bc5816c15d129770b464039af583bb62e"
   }
 ]

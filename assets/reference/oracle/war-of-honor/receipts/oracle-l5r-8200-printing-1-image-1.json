@@ -23,5 +23,18 @@
   "source_image_hash": "4a/8e",
   "source_url": "https://images.oracleofthevoid.com/l5r/4a/8e/printing_8200_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/4a/8e/printing_8200_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 113252,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-8200-printing-1-image-1.webp",
+    "sha256": "ea6cf3b79bb80ddead6d0d7ab9e8c332d28eb49c75ac6968a3ef6605d50ef2d6",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

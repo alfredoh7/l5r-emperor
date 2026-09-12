@@ -23,5 +23,18 @@
   "source_image_hash": "59/f8",
   "source_url": "https://images.oracleofthevoid.com/l5r/59/f8/printing_3413_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/59/f8/printing_3413_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 156104,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3413-printing-1-image-1.webp",
+    "sha256": "3fe130f2437c12a5cb4027bdd762d0d81cf6cbd9a91425c2706adf183b290370",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

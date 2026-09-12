@@ -23,5 +23,18 @@
   "source_image_hash": "9d/4d",
   "source_url": "https://images.oracleofthevoid.com/l5r/9d/4d/printing_6620_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/9d/4d/printing_6620_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 141592,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6620-printing-1-image-1.webp",
+    "sha256": "a878bdc3a62a534a71cb2bc1d21fcc857268d7ea7948233b95942ecd3c329192",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

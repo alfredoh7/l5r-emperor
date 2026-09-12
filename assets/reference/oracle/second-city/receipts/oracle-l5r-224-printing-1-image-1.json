@@ -23,5 +23,18 @@
   "source_image_hash": "3f/e9",
   "source_url": "https://images.oracleofthevoid.com/l5r/3f/e9/printing_224_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/3f/e9/printing_224_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 129352,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-224-printing-1-image-1.webp",
+    "sha256": "22cd0bc9c39981b10d2dc2c1af0d502068d9d0d57f77b3298a86ecb7d78af019",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

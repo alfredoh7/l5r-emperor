@@ -23,5 +23,18 @@
   "source_image_hash": "f9/28",
   "source_url": "https://images.oracleofthevoid.com/l5r/f9/28/printing_8030_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/f9/28/printing_8030_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 147712,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-8030-printing-1-image-1.webp",
+    "sha256": "8d30373f25d678b193d848aa2ef78db92644df27ddc49e1f503cc8256eb1574d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

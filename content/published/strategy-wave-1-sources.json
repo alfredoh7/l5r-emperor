@@ -5,8 +5,8 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=3671",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-3671-printing-1-image-1.jpg",
-    "image_sha256": "68042f9232833fba30bc011be3cd68e935485ac699ad9ad8610ecb6d8260542f"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3671-printing-1-image-1.webp",
+    "image_sha256": "955d966aa2f70388952f29fc29f6a5487c423984351ea63abf1347392bf93327"
   },
   {
     "card_id": "oracle-l5r-1044",
@@ -14,8 +14,8 @@
       "Emperor Edition"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=1044",
-    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-1044-printing-1-image-1.jpg",
-    "image_sha256": "a3db4a251bc2c8b869d30743cbcd3397e447a0439781770137912e14b8c823f0"
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1044-printing-1-image-1.webp",
+    "image_sha256": "6a9e436edec273df181f177c1ead97054c1fb23f8bd204434fd70cbb7f5657a7"
   },
   {
     "card_id": "oracle-l5r-1336",
@@ -23,8 +23,8 @@
       "War of Honor"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=1336",
-    "image_path": "assets/reference/oracle/war-of-honor/images/oracle-l5r-1336-printing-1-image-1.jpg",
-    "image_sha256": "47f008082d06c63441df2adafafc2296b3c912c4596562c4edb0f88e440a9cd9"
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-1336-printing-1-image-1.webp",
+    "image_sha256": "d4ac3f79920f6569916c24fb16de72cc16a2a4d89403c91ffbce8dc028a6d3e9"
   },
   {
     "card_id": "oracle-l5r-8999",
@@ -32,7 +32,7 @@
       "Before the Dawn"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=8999",
-    "image_path": "assets/reference/oracle/before-the-dawn/images/oracle-l5r-8999-printing-1-image-1.jpg",
-    "image_sha256": "4afdcbfc74886475c1e3888822e1b0d957174d65b90273f037fa3f0e270e4007"
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8999-printing-1-image-1.webp",
+    "image_sha256": "b4e3dec6be7ff33aa900282fe4fa423b531e56a26d45eafbabcab1d0fdb2997c"
   }
 ]

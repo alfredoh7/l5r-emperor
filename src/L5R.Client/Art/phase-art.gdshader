@@ -1,34 +1,31 @@
 shader_type canvas_item;
 render_mode unshaded;
-uniform sampler2D lit_reference : filter_linear_mipmap, repeat_disable;
-uniform vec2 plate_size = vec2(1260.0,101.24);
-uniform vec4 phase_weights = vec4(1.0,0.0,0.0,0.0);
+uniform sampler2D blank_lacquer : source_color, filter_linear;
+uniform vec2 plate_size = vec2(1260.0,109.38);
+uniform vec4 phase_weights = vec4(0.0);
+uniform vec2 phase_tail = vec2(0.0);
 uniform float glow_energy = 1.0;
-uniform vec4 priority_tint : source_color = vec4(.61,.92,.98,1.0);
 void fragment() {
-    // Direct bitmap presentation: no procedural outlines, rails or medallions.
-    vec2 plate_uv = (vec2(0.0,260.0)+UV*vec2(2066.0,166.0))/vec2(2066.0,761.0);
-    // The supplied crop cuts off its left corner. Reuse the plate's opposite end-cap,
-    // as a textured nine-slice would, so the live bar has a complete matching frame.
-    if (UV.x < .026) plate_uv.x = 1.0-UV.x;
-    vec4 base = texture(TEXTURE,plate_uv);
-    vec4 centers = vec4(230.0,778.0,1293.0,1791.0)/2066.0;
-    float scale = plate_size.x/1042.0;
-    for (int i=0;i<4;i++) {
-        vec2 center = vec2(centers[i]*plate_size.x,124.0/166.0*plate_size.y);
-        vec2 local = (UV*plate_size-center)/scale+vec2(119.0,21.0);
-        if (local.x>=0.0 && local.x<=240.0 && local.y>=0.0 && local.y<=48.0) {
-            vec2 delta = local-vec2(119.0,21.0);
-            float rail = exp(-pow(delta.y/7.0,2.0)*1.5)*smoothstep(0.0,16.0,local.x)*smoothstep(0.0,16.0,240.0-local.x);
-            float medallion = 1.0-smoothstep(16.0,24.0,length(delta));
-            float feather = max(rail,medallion);
-            vec3 lit = texture(lit_reference,(vec2(274.0,59.0)+local)/vec2(1042.0,122.0)).rgb;
-            float luminance = dot(lit,vec3(.299,.587,.114));
-            lit = mix(lit,priority_tint.rgb*luminance*1.32,.76);
-            base.rgb = mix(base.rgb,lit*glow_energy,feather*phase_weights[i]);
-        }
+    vec2 source=vec2(0.0,188.0)+UV*vec2(1774.0,154.0);
+    float centers[6]=float[6](190.0,471.0,748.0,1031.0,1319.0,1596.0);
+    vec3 base=texture(TEXTURE,source/vec2(1774.0,887.0)).rgb;
+    // One continuous 2D lacquer surface across the label band. Never stretch a
+    // thin scanline into separate rectangles behind each heading.
+    float band=smoothstep(211.0,221.0,source.y)*(1.0-smoothstep(270.0,280.0,source.y));
+    band*=smoothstep(35.0,58.0,source.x)*(1.0-smoothstep(1714.0,1735.0,source.x));
+    vec3 lacquer=texture(blank_lacquer,vec2(560.0+UV.x*400.0,280.0+(source.y-211.0))/vec2(2066.0,761.0)).rgb;
+    base=mix(base,lacquer,band);
+    vec2 activeDelta=source-vec2(1031.0,294.0);
+    if(abs(activeDelta.x)<127.0&&abs(activeDelta.y)<33.0)
+        base=texture(TEXTURE,(vec2(748.0,294.0)+activeDelta)/vec2(1774.0,887.0)).rgb;
+    for(int i=0;i<6;i++) {
+        vec2 d=source-vec2(centers[i],294.0);
+        float rail=exp(-pow(d.y/7.0,2.0))*(1.0-smoothstep(104.0,129.0,abs(d.x)));
+        float coin=1.0-smoothstep(19.0,31.0,length(d));
+        float weight=i<4?phase_weights[i]:phase_tail[i-4];
+        vec3 lit=texture(TEXTURE,(vec2(1031.0,294.0)+d)/vec2(1774.0,887.0)).rgb;
+        base=mix(base,lit*glow_energy,max(rail,coin)*weight);
     }
-    // The screenshot crop has a dark shadow below the metal; blend its edge into the game.
-    base.a = smoothstep(0.0,.025,UV.x)*smoothstep(0.0,.025,1.0-UV.x)*smoothstep(0.0,.035,UV.y)*smoothstep(0.0,.07,1.0-UV.y);
-    COLOR = base;
+    float alpha=smoothstep(0.0,.012,UV.x)*smoothstep(0.0,.012,1.0-UV.x)*smoothstep(0.0,.04,UV.y)*smoothstep(0.0,.08,1.0-UV.y);
+    COLOR=vec4(base,alpha);
 }

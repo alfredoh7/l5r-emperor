@@ -1,0 +1,499 @@
+{
+  "Profile": "personality-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10635",
+      "Name": "Akodo Dairuko",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 14,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 5,
+      "PersonalHonor": 5,
+      "HonorRequirement": 12,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow a target enemy Personality with lower Personal Honor. Destroy him if he is Unaligned.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10635.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Experienced",
+        "Lion Clan",
+        "Paragon",
+        "Samurai",
+        "Steel Lion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dairuko-exp-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9823",
+      "Name": "Akodo Furu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow or straighten a target Personality with equal or lower Chi.\nBattle: Target a Personality with equal or lower Chi: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9823.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "furu-bow",
+        "furu-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10636",
+      "Name": "Akodo Kamina",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 3 Attack, or Ranged 4 Attack if the target is Lion Clan or Unaligned.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10636.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Experienced",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kamina-exp-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-226",
+      "Name": "Akodo Kano",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Give Kano a Master token.\nBattle, Bow this card: Destroy a Master token on Kano to take two additional Battle actions.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-226.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Lion Clan",
+        "Master Tactician",
+        "Samurai",
+        "Soul of Kitsu Motso"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kano-token",
+        "kano-destroy-token"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10060",
+      "Name": "Akodo Michitsu",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Destroy a target enemy attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10060.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "michitsu-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-224",
+      "Name": "Akodo Kamina",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Tactical Open, Bow this card: Give a target Personality +4F. You may discard a card to ignore the cost of bowing Kamina.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-224.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kamina-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-302",
+      "Name": "Akodo Tsudoken",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Tsudoken is bowed: Straighten him. He rallies the guards. You may target a Personality and bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-302.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Commander",
+        "Experienced",
+        "Head of the Second City Guardsmen",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsudoken-exp-bow",
+        "tsudoken-exp-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10458",
+      "Name": "Akodo Tsudoken",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Tsudoken enters play, lose 3 Honor.\nTireless Battle/Open: Straighten your target Lion Clan or Fallen Personality. (You may use Tireless abilities even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10458.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Commander",
+        "Fallen",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsudoken-exp2-entry",
+        "tsudoken-exp2-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10637",
+      "Name": "Akodo Nojima",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Nojima enters play, lose 1 Honor.\nDestroy Nojima if he is ever in an army with a Personality with 3 or more Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10637.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Fallen",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nojima-entry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10459",
+      "Name": "Ikoma Aimi",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 15,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited, Bow this card: Discard a card. Gain Honor equal to its Focus Value, plus 1 if Shiba Iaimiko is in play.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10459.jpg",
+      "Keywords": [
+        "Unique",
+        "Courtier",
+        "Experienced",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "aimi-exp-discard"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10462",
+      "Name": "Ikoma Ayumi",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)\nAfter Ayumi enters play, lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10462.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Expendable",
+        "Fallen",
+        "Lion Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ayumi-entry"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10062",
+      "Name": "Ikoma Masumi",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(The Defender may draw a card after a Brash card is assigned to attack.)\nBattle: Target an enemy card without attachments: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10062.jpg",
+      "Keywords": [
+        "Brash",
+        "Imperial",
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "masumi-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9824",
+      "Name": "Ikoma Shuji",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack, with +1 strength if it targeted a Spider Clan Personality. You may discard a Terrain from your hand or destroy a Terrain in play; if you did either, draw a card.\nBattle: Ranged 4 Attack, with +1 strength if it targeted a Spider Clan Personality. You may discard a Terrain from your hand or destroy a Terrain in play; if you did either, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9824.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shuji-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3655",
+      "Name": "Ikoma Tsukasa",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a card in a unit; the card must have no attachments unless you control a Terrain: Bow or straighten the card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3655.jpg",
+      "Keywords": [
+        "Lion Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsukasa-bow",
+        "tsukasa-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4892",
+      "Name": "Matsu Arata",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Arata has +2F while attacking.\nBattle: Target an enemy Personality or Follower: Give it a Force penalty equal to Arata's Personal Honor. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4892.jpg",
+      "Keywords": [
+        "Justicar",
+        "Lion Clan",
+        "Paragon",
+        "Samurai",
+        "Soul of Matsu Nishijo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "arata-force-penalty"
+      ],
+      "Effect": "attacking-two"
+    },
+    {
+      "Id": "oracle-l5r-10295",
+      "Name": "Matsu Yoshito",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Yoshito has +1F while attacking, or +2F if the Defender is Dragon Clan.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10295.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "attacking-vs-dragon-bonus"
+    },
+    {
+      "Id": "oracle-l5r-6064",
+      "Name": "Pride of the Hand",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Pride of the Hand has +1F while you control a Terrain at its battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6064.jpg",
+      "Keywords": [
+        "Legendary",
+        "Lion",
+        "Lion Clan",
+        "Nonhuman",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-with-own-terrain-at-battlefield"
+    }
+  ],
+  "Decks": []
+}

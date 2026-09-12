@@ -23,5 +23,18 @@
   "source_image_hash": "8b/09",
   "source_url": "https://images.oracleofthevoid.com/l5r/8b/09/printing_3055_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/8b/09/printing_3055_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 144888,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-3055-printing-1-image-1.webp",
+    "sha256": "755fd9c88adc9c9b7e5f2f6d49877acfdcf3b12d87a0a8998377bbe13c9f207b",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }
