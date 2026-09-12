@@ -44,7 +44,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10891": "Needs card creation (new Follower instances).",
     "oracle-l5r-683": "Needs a new Reaction trigger: \"after a battle resolution ends.\"",
     "oracle-l5r-10892": "Needs a control-transfer mechanic (explicitly deferred since Loyal, #142).",
-    "oracle-l5r-1167": "Needs an \"after being targeted\" Reaction trigger, plus Rings (not built).",
+    "oracle-l5r-1167": "Needs a retroactive partial-negation Reaction trigger (\"after another player's action targets a card, negate just its bowing\" -- existing triggers fully negate, or fire before resolution, never after with a partial effect). Rings themselves are now built (issue #194); \"if you control any Rings\" is trivial.",
     "oracle-l5r-10682": "Needs Home-timing generalization plus hypothetical-opposition movement.",
     "oracle-l5r-10105": "Needs an \"after being targeted\" Reaction trigger, plus card creation and attachment transfer.",
     "oracle-l5r-1292": "Needs an \"after being targeted, negate\" Reaction trigger.",
@@ -88,7 +88,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10519": "Needs the Engage-timing Reaction window (explicitly not started, #15).",
     "oracle-l5r-10587": "Needs a compound Gold-plus-card-discard cost shape (Kharmic keyword's own reminder).",
     "oracle-l5r-10108": "Needs an \"after this card bows\" Reaction trigger plus negating its own future straightening.",
-    "oracle-l5r-10684": "Needs Rings (not built).",
     "oracle-l5r-9873": "Needs a Maneuvers-assignment restriction and a new Reaction trigger (the passive Attack-strength defense half is now built and directly reusable).",
     "oracle-l5r-10517": "Needs \"Equip this Follower as a Battle action\" (not yet a general capability).",
     "oracle-l5r-10338": "Needs a generic ability-usage-limit-reset mechanism.",
@@ -117,8 +116,22 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10842": "Needs conditional Gold-cost reduction (Kakita Ujirou's own \"enters play for N less Gold if...\").",
     "oracle-l5r-10846": "Needs conditional Gold-cost reduction (Tamori Shinji's own \"enters play for 4 less Gold if you are the Defender\").",
     "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
-    "oracle-l5r-10857": "Needs clarification on \"Fire Battle:\" (a Ring-gated Timing, unclear whether it depends on the not-yet-built Rings primitive) before wiring Moshi Ikako's own Ranged Attack.",
+    "oracle-l5r-10857": "Wired (issue #194) -- \"Fire Battle\" was confirmed to be a plain classification, not a Ring-gated Timing. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-10684": "Wired (issue #194) -- needed only a Ring-type check in a discard pile, now trivial. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
     "oracle-l5r-10300": "Needs an \"actions must target this card if legal\" redirect mechanic (Yoritomo Naoto's own Battle ability), on top of its own Additional Action grant.",
+    # Rings (issue #194): CardType.Ring, recruitment as a granted Additional Battle Action,
+    # Enlightenment victory. Five of the ten real/False Rings are wired (training fixtures only --
+    # every one of the ten has a receipt but no downloaded scan image locally, issue #196).
+    "oracle-l5r-6333": "Wired (issue #194) -- Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-6339": "Wired (issue #194) -- Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-6338": "Wired (issue #194) -- Ring of the Void. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-10531": "Wired (issue #194) -- False Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-10535": "Wired (issue #194) -- False Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    "oracle-l5r-6334": "Needs an Interrupt timing (not built) for Ring of Earth's own printed action; its recruitment condition is otherwise wirable.",
+    "oracle-l5r-6335": "Set aside (issue #195) -- the local oracle data's own selected printing/text for this Emperor Edition card is uncertain; a user-supplied photo did not match either candidate text found.",
+    "oracle-l5r-10532": "Needs Dueling/Focus Effects (not started at all) for False Ring of Earth's own recruitment condition.",
+    "oracle-l5r-10533": "Needs an Interrupt timing (not built) for its own printed action, plus an adjustable maximum-hand-size mechanism (not built) for its own recruitment condition.",
+    "oracle-l5r-10534": "Needs an Engage timing (explicitly not started, #15) for its own printed action; its recruitment condition is otherwise wirable.",
 
     # Focus-1 Battle-action wave audit (issue #192): every unwired Focus-1 card printing a Battle
     # (or Battle-prefixed/Battle/Open) action, triaged against the primitives available at the time.

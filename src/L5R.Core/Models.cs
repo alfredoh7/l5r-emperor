@@ -111,6 +111,22 @@ public sealed class PlayerState
     // a broad restriction (not just her own printed card's interaction), so it blocks DeclareAttack
     // outright regardless of what grants the assignment opportunity. Reset every StartTurn.
     public bool MayNotAttackThisTurn { get; set; }
+    // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
+    // actions in one turn." Incremented at each Favor-consuming ability's own execution case
+    // (shunya-honor, favor-cycle, favor-battle); reset every StartTurn.
+    public int FavorActionsThisTurn { get; set; }
+    // Ring of Fire's own recruitment condition (issue #194, the "Ring of Flame" printing): "after you
+    // resolve your second or later action in one turn which destroyed a Personality you did not
+    // control." Incremented once per qualifying ResolveBattle destruction (a simplification: only
+    // battle-driven destructions are counted, not every possible destroy path -- documented in
+    // ROADMAP.md). Reset every StartTurn.
+    public int DestroyedEnemyPersonalityActionsThisTurn { get; set; }
+    // Ring of Water's own recruitment condition (issue #194): "a battle... in which you played a
+    // Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution." Both
+    // flags are battle-scoped (like NoNewAdditionalActionsThisBattle): set when this player's own
+    // Terrain-play/Terrain-destroy actually happens, cleared at FinishBattleResolution.
+    public bool TerrainPlayedThisBattle { get; set; }
+    public bool TerrainDestroyedThisBattle { get; set; }
     public Dictionary<string, int> AbilityUses { get; set; } = [];
     public string StrongholdId { get; set; } = "";
     public List<string> DynastyDeck { get; set; } = [];
