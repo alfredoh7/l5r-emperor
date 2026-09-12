@@ -5,8 +5,8 @@
       "Coils of Madness"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=10528",
-    "image_path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10528-printing-1-image-1.jpg",
-    "image_sha256": "144bcfc2909ab6046441245d4bb4789688988906e5174abd453d0de7bc498ad3"
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10528-printing-1-image-1.webp",
+    "image_sha256": "a03eb2e020bbf8812976560685def493171582d022f1a5904419306b1ff1879d"
   },
   {
     "card_id": "oracle-l5r-10124",
@@ -14,7 +14,7 @@
       "Seeds of Decay"
     ],
     "source_url": "https://oracleofthevoid.com/#cardid=10124",
-    "image_path": "assets/reference/oracle/seeds-of-decay/images/oracle-l5r-10124-printing-1-image-1.jpg",
-    "image_sha256": "83e995f8beb84eaf88b62c8d5393b630d8caa43b2a9fe03d51354f5073cce25e"
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10124-printing-1-image-1.webp",
+    "image_sha256": "adb04ffbad5b0bfa1ef4b9ef3e1d19c435492522c7dd6021e952ac2bfb3c2e61"
   }
 ]

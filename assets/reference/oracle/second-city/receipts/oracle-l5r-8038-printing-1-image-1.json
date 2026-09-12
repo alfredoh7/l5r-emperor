@@ -23,5 +23,18 @@
   "source_image_hash": "97/98",
   "source_url": "https://images.oracleofthevoid.com/l5r/97/98/printing_8038_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/97/98/printing_8038_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 143400,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-8038-printing-1-image-1.webp",
+    "sha256": "aae1156dc7c7a7aed0a98d09434f37773764ebff5c148b56072629a40f486a4d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

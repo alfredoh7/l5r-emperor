@@ -117,7 +117,8 @@ var tests = new (string Name, Action Run)[]
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
-    ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency)
+    ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency),
+    ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview)
 };
 var failed=0;
 foreach(var test in tests)
@@ -2968,6 +2969,215 @@ static void FocusOneBattleActionsWave()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ritual.Id,TargetId:follower.Id,AbilityId:"ritual-preparation-straighten"));
         Check(!e.State.Cards[follower.Id].Bowed,"Straightens the targeted Follower");
         Check(e.State.Cards[host.Id].Bowed,"The Personality herself is untouched -- a different card was targeted");
+    }
+}
+static void LionClanPersonalityReview()
+{
+    {
+        // Akodo Dairuko, Experienced (issue #198): bow a target enemy Personality with lower Personal
+        // Honor; destroy him too if he is Unaligned.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var dairuko=Add(s,"oracle-l5r-10635",0,Zone.Battlefield,province:0);
+        var unaligned=Add(s,"training-honor-personality",1,Zone.Battlefield,province:0); // Clan Unaligned, PH 1 < Dairuko's 5
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:dairuko.Id,TargetId:unaligned.Id,AbilityId:"dairuko-exp-bow"));
+        Equal(e.State.Cards[unaligned.Id].Zone,Zone.Dead,"Bowed, then destroyed for being Unaligned");
+    }
+    {
+        // Akodo Furu (issue #198): a bare Chi comparison against the source itself, dual bow/straighten choice.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var furu=Add(s,"oracle-l5r-9823",0,Zone.Battlefield,province:0); // Chi 3
+        var lowChi=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true); // Chi 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:furu.Id,TargetId:lowChi.Id,AbilityId:"furu-straighten"));
+        Check(!e.State.Cards[lowChi.Id].Bowed,"Straightens a Personality with equal Chi");
+    }
+    {
+        // Akodo Kamina, Experienced (issue #198): Ranged 3, or 4 if the target is Lion Clan or Unaligned.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kamina=Add(s,"oracle-l5r-10636",0,Zone.Battlefield,province:0);
+        var craneTarget=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5 > Ranged 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kamina.Id,TargetId:craneTarget.Id,AbilityId:"kamina-exp-attack")); // no clan bonus: 3 < 5
+        var s2=StrongholdBattle("oracle-l5r-1218"); s2.ActivePlayerId=0;
+        var kamina2=Add(s2,"oracle-l5r-10636",0,Zone.Battlefield,province:0);
+        var lionTarget=Add(s2,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4 <= boosted Ranged 4
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kamina2.Id,TargetId:lionTarget.Id,AbilityId:"kamina-exp-attack"));
+        Equal(e2.State.Cards[lionTarget.Id].Zone,Zone.Dead,"Lion Clan target destroyed with the +1 bonus (Ranged 4)");
+    }
+    {
+        // Akodo Kano (issue #198): Limited grants a Master token; destroying it grants two Additional
+        // Battle Actions.
+        var s0=MatchEngine.CreateEconomyScenario().State; s0.Phase=Phase.Action; s0.PriorityPlayerId=0; s0.ActivePlayerId=0;
+        var kano0=Add(s0,"oracle-l5r-226",0,Zone.Home);
+        var e0=MatchEngine.FromTestState(s0);
+        Accept(e0,new GameCommand("useAbility",0,e0.Version,CardId:kano0.Id,AbilityId:"kano-token"));
+        Check(e0.State.Cards[kano0.Id].Tokens.Any(t=>t.Type=="Master"),"Gains a Master token");
+
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kano=Add(s,"oracle-l5r-226",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:kano.Id,AbilityId:"kano-destroy-token")); // no token yet
+        kano.Tokens=[new("t1","Master","test-fixture")];
+        var e2=MatchEngine.FromTestState(s);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kano.Id,AbilityId:"kano-destroy-token"));
+        Check(!e2.State.Cards[kano.Id].Tokens.Any(t=>t.Type=="Master"),"Master token consumed");
+        Equal(e2.State.AdditionalActions.Count(g=>g.PlayerId==0),2,"Two Additional Battle Actions granted");
+    }
+    {
+        // Akodo Michitsu (issue #198): destroy a target enemy attachment.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var michitsu=Add(s,"oracle-l5r-10060",0,Zone.Battlefield,province:0);
+        var enemyFollower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0).Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:michitsu.Id,TargetId:enemyFollower.Id,AbilityId:"michitsu-destroy"));
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.FateDiscard,"The attachment is destroyed");
+    }
+    {
+        // Akodo Kamina (issue #198): "Tactical Open" maps onto the existing Open Timing; bow for +4F.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var kamina=Add(s,"oracle-l5r-224",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kamina.Id,TargetId:target.Id,AbilityId:"kamina-boost"));
+        Check(e.State.Cards[kamina.Id].Bowed,"Bows itself as the cost");
+        Check(e.State.Cards[target.Id].Modifiers.Any(m=>m.Stat=="Force"&&m.Amount==4),"+4F applied");
+    }
+    {
+        // Akodo Tsudoken, Experienced (issue #198): usable even while bowed; straightens himself
+        // unconditionally, plus a dual bow/straighten choice on the target.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var tsudoken=Add(s,"oracle-l5r-302",0,Zone.Battlefield,province:0,bowed:true);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tsudoken.Id,TargetId:target.Id,AbilityId:"tsudoken-exp-straighten"));
+        Check(!e.State.Cards[tsudoken.Id].Bowed,"Straightens himself even though he was bowed");
+        Check(!e.State.Cards[target.Id].Bowed,"Straightens the target too");
+    }
+    {
+        // Akodo Tsudoken, Experienced 2 (issue #198): entry Honor loss, via the real Dynasty-purchase
+        // entry path; Tireless straighten of a Lion Clan or Fallen Personality.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="oracle-l5r-10458"; s.Cards[cardId].FaceUp=true;
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,7).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"tsudoken-exp2-entry"));
+        Equal(e.State.Players[0].Honor,honorBefore-3,"Loses 3 Honor");
+
+        var s2=StrongholdBattle("oracle-l5r-1218"); s2.ActivePlayerId=0;
+        var tsudoken2=Add(s2,"oracle-l5r-10458",0,Zone.Battlefield,province:0,bowed:true);
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:tsudoken2.Id,TargetId:tsudoken2.Id,AbilityId:"tsudoken-exp2-straighten"));
+        Check(!e2.State.Cards[tsudoken2.Id].Bowed,"Straightens even though bowed (Tireless), targeting himself (Lion Clan)");
+    }
+    {
+        // Akodo Nojima (issue #198): entry Honor loss, via the real Dynasty-purchase entry path.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="oracle-l5r-10637"; s.Cards[cardId].FaceUp=true;
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,4).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"nojima-entry"));
+        Equal(e.State.Players[0].Honor,honorBefore-1,"Loses 1 Honor");
+    }
+    {
+        // Ikoma Aimi, Experienced (issue #198): "Political Limited" maps onto the existing Limited
+        // Timing; discard a card, gain Honor equal to its Focus Value.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var aimi=Add(s,"oracle-l5r-10459",0,Zone.Home);
+        var discard=Add(s,"training-focus-strategy",0,Zone.Hand); // Focus 3
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:aimi.Id,TargetId:discard.Id,AbilityId:"aimi-exp-discard"));
+        Check(e.State.Cards[aimi.Id].Bowed,"Bows itself as the cost");
+        Equal(e.State.Cards[discard.Id].Zone,Zone.FateDiscard,"Discards the chosen card");
+        Equal(e.State.Players[0].Honor,honorBefore+3,"Gains Honor equal to its Focus Value");
+    }
+    {
+        // Ikoma Ayumi (issue #198): entry Honor loss, via the real Dynasty-purchase entry path.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="oracle-l5r-10462"; s.Cards[cardId].FaceUp=true;
+        var honorBefore=s.Players[0].Honor;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,7).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"ayumi-entry"));
+        Equal(e.State.Players[0].Honor,honorBefore-2,"Loses 2 Honor");
+    }
+    {
+        // Ikoma Masumi (issue #198): target an enemy card without attachments: bow it.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var masumi=Add(s,"oracle-l5r-10062",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:masumi.Id,TargetId:enemy.Id,AbilityId:"masumi-bow"));
+        Check(e.State.Cards[enemy.Id].Bowed,"Bows the unattached enemy");
+    }
+    {
+        // Ikoma Shuji (issue #198): Ranged 4, +1 strength against a Spider Clan Personality.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var shuji=Add(s,"oracle-l5r-9824",0,Zone.Battlefield,province:0);
+        var spider=Add(s,"training-spider-honor-loss",1,Zone.Battlefield,province:0); // Force 2, Clan Spider
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shuji.Id,TargetId:spider.Id,AbilityId:"shuji-attack"));
+        Equal(e.State.Cards[spider.Id].Zone,Zone.Dead,"Destroys the Force-2 Spider Clan target (Ranged 4, no bonus even needed)");
+    }
+    {
+        // Ikoma Tsukasa (issue #198): the "without attachments" restriction is waived while
+        // controlling a Terrain.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var tsukasa=Add(s,"oracle-l5r-3655",0,Zone.Battlefield,province:0);
+        var terrain=Add(s,"training-terrain",0,Zone.Battlefield,province:0);
+        var enemyUnitHead=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyUnitHead.Id); // gives the target an attachment
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tsukasa.Id,TargetId:enemyUnitHead.Id,AbilityId:"tsukasa-bow"));
+        Check(e.State.Cards[enemyUnitHead.Id].Bowed,"Bows a card WITH attachments, waived because Tsukasa's controller controls a Terrain");
+    }
+    {
+        // Matsu Arata (issue #198): +2F while attacking (attacking-two); Force penalty on a target
+        // equal to Arata's Personal Honor.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var arata=Add(s,"oracle-l5r-4892",0,Zone.Battlefield,province:0); // Force 3, PH 4
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var e=MatchEngine.FromTestState(s);
+        Equal(UnitView(e.State,arata.Id).Force,5,"3 printed + 2 while attacking");
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:arata.Id,TargetId:enemy.Id,AbilityId:"arata-force-penalty"));
+        Check(e.State.Cards[enemy.Id].Modifiers.Any(m=>m.Stat=="Force"&&m.Amount==-4),"Force penalty equal to Arata's own Personal Honor (4)");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Gains 1 Honor");
+    }
+    {
+        // Matsu Yoshito (issue #198): +1F while attacking, +2F instead if the Defender is Dragon Clan.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var yoshito=Add(s,"oracle-l5r-10295",0,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Equal(UnitView(e.State,yoshito.Id).Force,4,"+1F attacking a non-Dragon defender");
+
+        var s2=StrongholdBattle("oracle-l5r-1218"); s2.ActivePlayerId=0; s2.Players[1].Clan="Dragon";
+        var yoshito2=Add(s2,"oracle-l5r-10295",0,Zone.Battlefield,province:0);
+        var e2=MatchEngine.FromTestState(s2);
+        Equal(UnitView(e2.State,yoshito2.Id).Force,5,"+2F instead when the Defender is Dragon Clan");
+    }
+    {
+        // Pride of the Hand (issue #198): +1F while controlling a Terrain at its own battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var pride=Add(s,"oracle-l5r-6064",0,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Equal(UnitView(e.State,pride.Id).Force,3,"No Terrain yet");
+        var s2=e.State; Add(s2,"training-terrain",0,Zone.Battlefield,province:0);
+        var e2=MatchEngine.FromTestState(s2);
+        Equal(UnitView(e2.State,pride.Id).Force,4,"+1F once its own controller has a Terrain at this battlefield");
     }
 }
 static void GeneralizedEntryReactionWindow()

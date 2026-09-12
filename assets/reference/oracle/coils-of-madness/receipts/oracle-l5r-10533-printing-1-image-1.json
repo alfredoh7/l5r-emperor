@@ -23,5 +23,18 @@
   "source_image_hash": "f3/c6",
   "source_url": "https://images.oracleofthevoid.com/l5r/f3/c6/printing_10533_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/f3/c6/printing_10533_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 108858,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10533-printing-1-image-1.webp",
+    "sha256": "976de7b1f31d4b3cdf4428365759e48c4494b1b4525f6e4abc373a9b5f576e0a",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

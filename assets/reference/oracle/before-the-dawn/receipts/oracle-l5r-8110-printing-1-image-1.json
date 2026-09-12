@@ -23,5 +23,18 @@
   "source_image_hash": "1b/9e",
   "source_url": "https://images.oracleofthevoid.com/l5r/1b/9e/printing_8110_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/1b/9e/printing_8110_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 126720,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8110-printing-1-image-1.webp",
+    "sha256": "9332e5877709c543366f53c61725e46139ceed3f1b7101e6739ec27d6b573dc6",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

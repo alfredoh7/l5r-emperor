@@ -23,5 +23,18 @@
   "source_image_hash": "97/d0",
   "source_url": "https://images.oracleofthevoid.com/l5r/97/d0/printing_9222_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/97/d0/printing_9222_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 126262,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-9222-printing-1-image-1.webp",
+    "sha256": "e0a0b357ecb30a4146d6c1c6b0d8fbc98d427c48ca2e1f2f51aa247b6299d2f3",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

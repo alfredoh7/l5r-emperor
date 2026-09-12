@@ -23,5 +23,18 @@
   "source_image_hash": "96/47",
   "source_url": "https://images.oracleofthevoid.com/l5r/96/47/printing_2070_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/96/47/printing_2070_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 145248,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-2070-printing-1-image-1.webp",
+    "sha256": "0b12c2c9943130a6b34db838561138ee711394a444f23f9cd01054942b7d4d15",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

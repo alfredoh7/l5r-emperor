@@ -23,5 +23,18 @@
   "source_image_hash": "56/59",
   "source_url": "https://images.oracleofthevoid.com/l5r/56/59/printing_7800_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/56/59/printing_7800_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 137232,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7800-printing-1-image-1.webp",
+    "sha256": "5789fb921aa68248c271dbaac9f3ee09738ee58fac2551890d8d2a48589794cf",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

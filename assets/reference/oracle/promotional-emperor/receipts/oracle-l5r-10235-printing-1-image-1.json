@@ -14,12 +14,25 @@
   "playable": false,
   "printing_association": "explicit_oracle_printing_id_and_set",
   "printing_id": "1",
-  "printing_set": "Promotional–Emperor",
+  "printing_set": "Promotional\u2013Emperor",
   "quality": "master",
   "retrieved_at": "2026-09-09T16:26:37.626141+00:00",
   "sha256": "24016ea3a34372a1c7cf8f998f158439cd806d77b0da28c7a5a166a2c1783773",
   "source_image_hash": "95/19",
   "source_url": "https://images.oracleofthevoid.com/l5r/95/19/printing_10235_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/95/19/printing_10235_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 132398,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-10235-printing-1-image-1.webp",
+    "sha256": "d179ffe432cf910a9b8f9b656a830cf564402e5469b3681afb30e745d3b7eff7",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }
