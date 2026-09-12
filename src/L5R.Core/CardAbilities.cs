@@ -10,11 +10,17 @@ namespace L5R.Core;
 // (e.g. "bow or straighten him") share a single once-per-turn use, instead of each half getting
 // its own independent use by virtue of being a separate dictionary key; defaults to the entry's
 // own id, which is every other ability's actual behavior.
-// RequiredKeyword narrows a keyword-agnostic Target/Performer category (e.g. "own-personality") to
-// only cards carrying that printed or granted keyword -- the generic shape behind "Choose your
-// performing/target [Keyword] Personality" (core rules: a keyword with no mechanical rule of its own
-// still satisfies this kind of condition on another card, in addition to any mechanical ability it
-// does carry). See "own-personality-with-keyword" below.
+// RequiredKeywords narrows a keyword-agnostic Target/Performer category (e.g. "own-personality") to
+// only cards carrying ALL of the listed printed or granted keywords -- independently present, order
+// irrelevant (core rules: a keyword with no mechanical rule of its own still satisfies this kind of
+// condition on another card, in addition to any mechanical ability it does carry; a card may name as
+// many keywords as it likes, e.g. "a Dragon Clan Kensai" or "a Crane Clan Magistrate" -- issue #190).
+// A card with a keyword requirement and no satisfying candidate simply cannot be played/used, same as
+// any other unmet Target/Performer condition. See "own-personality-with-keyword" below. Distinct from
+// a keyword that only gates PART of an ability's effect once it's already resolving (e.g. Volcano
+// Tattoo's own Fire-conditional straighten) -- that is a plain in-place Keyword() check in the
+// execution switch, never folded into RequiredKeywords, since failing it negates only that portion of
+// the effect rather than blocking the action outright.
 // RequireNoAttachments layers "without attachments" (core rules: a boolean, not a count -- see
 // HasAttachments) onto whichever Target category is chosen, instead of a separate category per
 // combination (e.g. "enemy-force" + RequireNoAttachments, rather than a new "enemy-force-no-
@@ -28,7 +34,7 @@ namespace L5R.Core;
 // core rules default (Chi) needs no override. DuelRefusable opens an AwaitingAccept decision for the
 // challenged player first; "Your performer duels the target" (no refusal language at all) leaves it
 // false, matching every unrefusable duel-issuing card's own printed phrasing.
-public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string? RequiredKeyword = null, bool RequireNoAttachments = false,
+public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
     bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false);
 
 public static class AbilityCatalog
@@ -42,10 +48,10 @@ public static class AbilityCatalog
         // Training fixture for the generic keyword-satisfaction primitive (Immovable Object: "Battle/
         // Open: Choose your performing Berserker: Straighten him"). Open-only here -- this engine has
         // no dual-timing ability shape yet, and demonstrating the keyword gate needs only one.
-        ["training-keyword-conditional-straighten"] = new("Open", "Choose your performing Berserker: Straighten him", "own-personality-with-keyword", RequiredKeyword: "Berserker"),
+        ["training-keyword-conditional-straighten"] = new("Open", "Choose your performing Berserker: Straighten him", "own-personality-with-keyword", RequiredKeywords: ["Berserker"]),
         // Training fixture for the generic Performer-side keyword gate (mirrors Tactical Advantage's
         // Performer shape, but for any keyword instead of one hardcoded to Tactician).
-        ["training-keyword-conditional-force-boost"] = new("Battle", "Choose your performing Berserker at the current battlefield: +2 Force", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
+        ["training-keyword-conditional-force-boost"] = new("Battle", "Choose your performing Berserker at the current battlefield: +2 Force", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Berserker"]),
         ["shunya-honor"] = new("Limited", "Discard Favor · gain 2 Honor", "none"),
         // Utaku Chikako (issue #186): two independent effects -- the Honor gain and "may not declare
         // an attack this turn" both apply regardless of the other (see the execution case). Limited
@@ -77,11 +83,11 @@ public static class AbilityCatalog
         // Deferred when first wired (#179/#180), before the Additional Action primitive existed (#181).
         ["justice-of-crane-dishonor"] = new("Battle", "Dishonor a target enemy Personality", "enemy-personality"),
         ["again-boost"] = new("Battle", "Again!: Straighten your performing Kensai and his Weapons; their Battle abilities may be used again this turn; you may take an additional Battle action",
-            "none", Performer: "own-personality-with-keyword-at-battle", RequiredKeyword: "Kensai"),
+            "none", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Kensai"]),
         // "From cards in his unit" -- unlike Again!'s unscoped grant, these two are only usable by the
         // Kensai himself or one of his own attached Followers/Items (see the execution case below).
         ["two-hands-grant"] = new("Battle", "Choose your performing Kensai: take two additional Battle actions from cards in his unit; other actions will not grant new additional Battle actions this battle",
-            "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Kensai"),
+            "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Kensai"]),
         ["effortless-counterattack-negate"] = new("Reaction", "Before an additional Battle action resolves: negate its effects", "none", Trigger: "before-additional-action-resolves"),
         ["effortless-counterattack-move"] = new("Battle", "Target your performing unbowed Personality: move home a target Personality without attachments",
             "personality", Performer: "own-unbowed-personality-at-battle", RequireNoAttachments: true),
@@ -101,6 +107,17 @@ public static class AbilityCatalog
         ["training-destroy-token"] = new("Open", "Training: destroy a token on target", "own-personality-with-token"),
         ["monastery-fire-token"] = new("Limited", "Target your Tattooed Personality · +1F Fire token", "own-tattooed-personality"),
         ["monastery-fire-attack"] = new("Battle", "Destroy a Fire token · Ranged 5 Attack", "attack", Performer: "own-personality-with-fire-token-at-battle"),
+        // Volcano Tattoo (issue #190): "Fire Kiho Battle" -- the printed "Kiho" is a plain
+        // classification word on this card (see ROADMAP's Kiho entry), not a distinct Timing; the
+        // engine's own "Battle" timing already gates it correctly. "Tattooed Monk" is the generic
+        // multi-keyword Performer category (RequiredKeywords, issue #190), not a hardcoded category --
+        // both keywords independently required, order irrelevant. Bow the performing Tattooed Monk
+        // (cost) to target an unattached card in an enemy unit whose Personality's Chi is at or below
+        // the performer's; destroying a Follower counts as "destroyed an attachment" for the
+        // conditional Fire-keyword straighten -- Fire itself is NOT in RequiredKeywords: it only gates
+        // part of the already-resolving effect, so its absence negates that part rather than blocking
+        // the action outright (Followers are modeled as attachments throughout).
+        ["volcano-tattoo-destroy"] = new("Battle", "Bow your performing Tattooed Monk: target an unattached card in an enemy unit whose Personality has Chi at or below his. Destroy it. Straighten the performer if he is Fire and this destroyed an attachment.", "enemy-unattached-unit-card-chi-lte-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk", "Tattooed"]),
         // Training-only: exercises the Honor-loss-immunity primitive's "enters play, lose Honor"
         // shape (e.g. a card reading "After [X] enters play: lose N Honor") ahead of any published
         // card needing it.
@@ -200,14 +217,14 @@ public static class AbilityCatalog
         // Import wave: keyword-satisfaction primitive (issue #144's own worked example plus three more
         // Strategy cards needing nothing beyond it, the generic Performer/Target keyword gate, and one
         // new one-off comparison category each).
-        ["blind-rage"] = new("Battle", "Choose your performing unbowed Berserker: +5F. Lose 2 Honor.", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
+        ["blind-rage"] = new("Battle", "Choose your performing unbowed Berserker: +5F. Lose 2 Honor.", "none", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Berserker"]),
         ["unorthodox-attack"] = new("Battle", "Choose your performing unbowed Samurai and target an enemy card: Bow it.", "enemy-force", Performer: "own-unbowed-samurai-at-battle"),
-        ["chokehold"] = new("Battle", "Choose your performing unbowed Monk and target an enemy Personality with equal or lower Chi: Bow him.", "enemy-personality-chi-lte-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Monk"),
+        ["chokehold"] = new("Battle", "Choose your performing unbowed Monk and target an enemy Personality with equal or lower Chi: Bow him.", "enemy-personality-chi-lte-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
         // Immovable Object's two printed abilities are independent (separate once-per-turn uses), not
         // a shared choice -- no UsageKey needed. The first is the card the user's own worked example
         // ("Choose your performing Berserker: Straighten him") is drawn from directly.
-        ["immovable-object-straighten"] = new("BattleOrOpen", "Choose your performing Berserker: Straighten him.", "own-personality-with-keyword", RequiredKeyword: "Berserker"),
-        ["immovable-object-bow"] = new("Battle", "Choose your performing unbowed Berserker and target an enemy Personality or Follower with lower Force: Bow it.", "enemy-force-lower-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeyword: "Berserker"),
+        ["immovable-object-straighten"] = new("BattleOrOpen", "Choose your performing Berserker: Straighten him.", "own-personality-with-keyword", RequiredKeywords: ["Berserker"]),
+        ["immovable-object-bow"] = new("Battle", "Choose your performing unbowed Berserker and target an enemy Personality or Follower with lower Force: Bow it.", "enemy-force-lower-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Berserker"]),
         // Follower wave: cards audited against every currently-imported Follower for ones needing
         // nothing beyond already-built categories/helpers (issue #148). Each reuses an existing
         // Target category, Attack strength/kind pattern, or Force/Draw/bow helper verbatim.
@@ -236,7 +253,12 @@ public static class AbilityCatalog
         // Tireless (see the usage-dedupe exemption): straightens the Follower's OWN unit (its wielder
         // and every attachment), not a separately-chosen target -- Target "none", resolved from source.
         ["elite-sentry-straighten"] = new("BattleOrOpen", "Straighten this Follower's unit", "none"),
-        ["furugaro-charge"] = new("Limited", "Destroy this Follower to target a Fudo Personality: give him two Charging tokens", "own-personality-with-keyword", RequiredKeyword: "Fudo"),
+        ["furugaro-charge"] = new("Limited", "Destroy this Follower to target a Fudo Personality: give him two Charging tokens", "own-personality-with-keyword", RequiredKeywords: ["Fudo"]),
+        // Hunter of Harmony (issue #190): "remove this card from the game" as a Limited ability's own
+        // cost -- same shape as furugaro-charge's self-destruction above, just RemoveFromGame instead
+        // of DestroyUnits. The target, a Kiho Strategy in the player's own Fate discard pile, is put
+        // into hand "freshly drawn" (see ReturnToHand) rather than played directly.
+        ["hunter-of-harmony-return"] = new("Limited", "Remove this card from the game: choose a Kiho Strategy in your Fate discard pile. Put it into your hand.", "own-kiho-strategy-in-discard"),
         ["panku-madness"] = new("Limited", "Give a target card a Madness token", "any-card"),
         ["soshi-conditional-bow"] = new("BattleOrOpen", "Target a Personality: if it is a Combat Segment, bow him; if he is dishonorable, his controller loses 1 Honor", "personality"),
         ["unseen-assassin-strike"] = new("Limited", "Bow this Follower to destroy a target Follower; destroy this Follower and lose 2 Honor", "enemy-follower"),
@@ -337,6 +359,11 @@ public sealed partial class MatchEngine
 {
     private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
     private static bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+    // Multi-keyword requirement (issue #190): "a Dragon Clan Kensai", "a Crane Clan Magistrate" -- any
+    // number of keywords, independently present, order irrelevant. A null/empty list is deliberately
+    // false, not vacuously true: every RequiredKeywords-gated category exists specifically because it
+    // needs at least one keyword to mean anything (same as the old single-RequiredKeyword convention).
+    private static bool HasKeywords(CardInstance card, string[]? keywords) => keywords is { Length: > 0 } && keywords.All(k => Keyword(card, k));
     // Printed only, never a granted keyword -- Justice of the Crane's own text draws this exact
     // distinction ("has the PRINTED Magistrate keyword"), since it also grants Magistrate itself and
     // would otherwise always satisfy a plain Keyword() check.
@@ -726,17 +753,19 @@ public sealed partial class MatchEngine
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
-                // Generic "Choose your performing [Keyword] Personality" at battle -- for a future
-                // card naming any of the keywords with no mechanical rule of its own, without adding
-                // a new hardcoded Performer category each time. See AbilityDefinition.RequiredKeyword.
+                // Generic "Choose your performing [Keyword(s)] Personality" at battle -- for any card
+                // naming one or more keywords with no mechanical rule of their own (all independently
+                // required, order irrelevant -- see AbilityDefinition.RequiredKeywords), without adding
+                // a new hardcoded Performer category each time. Volcano Tattoo's "Tattooed Monk" is
+                // exactly this with two keywords instead of one.
                 "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
-                    ability.RequiredKeyword is not null && Keyword(performer, ability.RequiredKeyword),
+                    HasKeywords(performer, ability.RequiredKeywords),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // Again!'s shape: also no "unbowed" qualifier -- the whole point is straightening an
-                // already-bowed Kensai. Generic on RequiredKeyword like the unbowed variant above.
+                // already-bowed Kensai. Generic on RequiredKeywords like the unbowed variant above.
                 "own-personality-with-keyword-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) &&
-                    ability.RequiredKeyword is not null && Keyword(performer, ability.RequiredKeyword),
+                    HasKeywords(performer, ability.RequiredKeywords),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
                 // Equip (Battle): only a Shugenja Personality may ever hold a Spell -- a Follower with
@@ -833,6 +862,12 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && Keyword(target, "Kharmic")
                         && (target.Zone == Zone.Hand || target.Zone == Zone.Province && target.FaceUp),
                         "Discard a Kharmic card you control, from your hand or a face-up province.");
+                // Hunter of Harmony's own ability (issue #190): a Kiho Strategy card sitting in the
+                // player's own Fate discard pile -- not in play, so this needs its own branch just like
+                // "own-kharmic-card" above.
+                else if (ability.Target == "own-kiho-strategy-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
+                        "Choose a Kiho Strategy card from your Fate discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -852,10 +887,10 @@ public sealed partial class MatchEngine
                         // itself is a counter increment, not applied to this target at all.
                         "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
                         "own-personality" => personality && own,
-                        // Generic "Choose your performing/target [Keyword] Personality" -- for a
+                        // Generic "Choose your performing/target [Keyword(s)] Personality" -- for a
                         // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
-                        // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeyword.
-                        "own-personality-with-keyword" => personality && own && ability.RequiredKeyword is not null && Keyword(target, ability.RequiredKeyword),
+                        // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeywords.
+                        "own-personality-with-keyword" => personality && own && HasKeywords(target, ability.RequiredKeywords),
                         "enemy-personality" => personality && !own,
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
@@ -906,6 +941,13 @@ public sealed partial class MatchEngine
                         // Compared against the chosen Performer (a separately-selected card), unlike
                         // "-than-self" categories above which compare against the ability's own source.
                         "enemy-personality-chi-lte-performer" => personality && !own && Definition(target).Chi <= Definition(Card(command.PerformerId!)).Chi,
+                        // Volcano Tattoo (issue #190): "a card without attachments in his unit" -- the
+                        // same Follower-or-unattached-Personality shape the Ranged/Melee "attack" Target
+                        // already uses above, but compared against the unit's own Personality's Chi
+                        // (via PersonalityChi, which includes Item-attachment bonuses) rather than a
+                        // Force/strength check.
+                        "enemy-unattached-unit-card-chi-lte-performer" => !own && (type == CardType.Follower || personality && !HasAttachments(target)) &&
+                            PersonalityChi(type == CardType.Personality ? target : Card(target.AttachedTo!)) <= PersonalityChi(Card(command.PerformerId!)),
                         "enemy-force-lower-than-performer" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) < CardForce(Card(command.PerformerId!)),
                         // Bounty Hunter: "a target attachment or a target dishonorable Personality" --
                         // an OR of two otherwise-unrelated existing categories.
@@ -1243,6 +1285,19 @@ public sealed partial class MatchEngine
                 CreateToken(target!, "Charging", id);
                 CreateToken(target!, "Charging", id);
                 break;
+            case "hunter-of-harmony-return":
+                RemoveFromGame(source!);
+                ReturnToHand(target!);
+                break;
+            case "volcano-tattoo-destroy":
+            {
+                var performer = Card(command.PerformerId!);
+                performer.Bowed = true;
+                var destroyedAttachment = Definition(target!).Type == CardType.Follower;
+                DestroyUnits([target!], false);
+                if (destroyedAttachment && Keyword(performer, "Fire")) Straighten(performer);
+                break;
+            }
             case "panku-madness": CreateToken(target!, "Madness", id); break;
             case "soshi-conditional-bow":
                 if (_state.Phase == Phase.Battle && !StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -1381,6 +1436,16 @@ public sealed partial class MatchEngine
         card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         Emit("removedFromGame", $"{Definition(card).Name} was removed from the game.", card.OwnerId, card.Id);
     }
+    // A card moved from a discard pile back to hand (issue #190, e.g. Hunter of Harmony) is "treated
+    // as a freshly drawn card": any once-per-turn AbilityUses stamp from an earlier use this same turn
+    // is cleared, so its printed ability may be used again this turn -- unlike a card that merely stays
+    // in play or a discard pile, where the stamp persists.
+    private void ReturnToHand(CardInstance card)
+    {
+        card.Zone = Zone.Hand; card.ProvinceIndex = null; card.FaceUp = true; card.AbilityUses.Clear();
+        Player(card.OwnerId).Hand.Add(card.Id);
+        Emit("returnedToHand", $"{Definition(card).Name} was returned to {Player(card.OwnerId).Name}'s hand.", card.OwnerId, card.Id);
+    }
     // Terrain (a Strategy played as a Battle action): leaves the battlefield either when destroyed by
     // an ability targeting it, or automatically once its printed effects have been applied during
     // battle resolution (FinishBattleResolution) -- both paths share this single removal.
@@ -1455,8 +1520,8 @@ public sealed partial class MatchEngine
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
-                "own-unbowed-personality-at-battle-with-keyword" => ability.RequiredKeyword is not { } requiredKeyword ? [] :
-                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, requiredKeyword)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-at-battle-with-keyword" =>
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
