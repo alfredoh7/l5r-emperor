@@ -94,6 +94,7 @@ var tests = new (string Name, Action Run)[]
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
+    ("Unique/Singular (issue #202): both restrict simultaneous in-play copies of the same-named card to one per controller (Unique's own in-play restriction had no test before this), checked at all three entry-into-play paths -- Purchase, ordinary Equip (a real pre-existing gap for both keywords, fixed here), and Equip (Battle)", UniqueAndSingularInPlayRestriction),
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
@@ -1696,6 +1697,88 @@ static void SpellsAndShugenja()
         Equal(e.State.PriorityPlayerId,0);
         Check(!e.State.AdditionalActions.Any(g=>g.ScopeCardIds!.Contains(spell1.Id)),"Spell1's grant is forfeited, not carried over");
         Check(e.State.AdditionalActions.Any(g=>g.ScopeCardIds!.Contains(spell2.Id)),"Spell2's own fresh grant is still there");
+    }
+}
+static void UniqueAndSingularInPlayRestriction()
+{
+    {
+        // Unique (issue #202): recruiting a second copy of an already-controlled Unique Personality
+        // is rejected -- Unique's own in-play restriction had no training fixture or test at all
+        // before this. A DIFFERENT card is unaffected.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-unique-personality",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-unique-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(!quote.ProclaimEligible,"Not eligible: already controls this Unique card");
+        Equal(quote.Error,"You already control this Unique card.");
+    }
+    {
+        // Singular (issue #202): the same in-play restriction, but -- unlike Unique -- with no
+        // deck-construction limit (DeckFormat.cs is unaffected by Singular; not exercised here).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-singular-personality",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-singular-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(!quote.ProclaimEligible,"Not eligible: already controls this Singular card");
+        Equal(quote.Error,"You already control this Singular card.");
+    }
+    {
+        // Once the in-play copy leaves play (here, simply never having entered it), recruiting is
+        // legal again -- the restriction is about a copy currently in play, not about having owned
+        // one ever.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-singular-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Check(quote.ProclaimEligible,"No copy in play yet: eligible");
+        Equal(quote.Error,null);
+    }
+    {
+        // Unique/Singular via the ordinary Equip() path (issue #202): a Follower already controlled
+        // in play cannot be attached a second time -- Equip had no such check at all before this fix.
+        var s=MatchEngine.CreateStarterMatch().State;
+        var host1=Add(s,"training-crane-samurai",0,Zone.Home);
+        var host2=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"training-unique-follower",0,Zone.Attached,attachedTo:host1.Id);
+        var second=Add(s,"training-unique-follower",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:second.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:host2.Id));
+    }
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        var host1=Add(s,"training-crane-samurai",0,Zone.Home);
+        var host2=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"training-singular-follower",0,Zone.Attached,attachedTo:host1.Id);
+        var second=Add(s,"training-singular-follower",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:second.Id,sources:e.PaymentOptions(0,1).First().SourceIds,target:host2.Id));
+    }
+    {
+        // Unique/Singular via Equip (Battle) (issue #202): a Spell already controlled in play cannot
+        // be attached a second time either -- equip-battle had no such check at all before this fix.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var shugenja1=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var shugenja2=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        Add(s,"training-singular-spell",0,Zone.Attached,province:0,attachedTo:shugenja1.Id);
+        var second=Add(s,"training-singular-spell",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja2.Id,TargetId:second.Id,SourceIds:e.PaymentOptions(0,1).First().SourceIds));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var shugenja1=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var shugenja2=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0);
+        Add(s,"training-unique-spell",0,Zone.Attached,province:0,attachedTo:shugenja1.Id);
+        var second=Add(s,"training-unique-spell",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,AbilityId:"equip-battle",PerformerId:shugenja2.Id,TargetId:second.Id,SourceIds:e.PaymentOptions(0,1).First().SourceIds));
     }
 }
 static void LoyalKeyword()
