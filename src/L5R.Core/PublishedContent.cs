@@ -407,6 +407,24 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 8 of ability-bearing Personalities (issue #198): the first wave from the full
+    /// Lion Clan Personality review, 17 cards wired using only already-existing primitives.</summary>
+    public static PublishedSnapshot PersonalityWave8 { get; } = LoadPersonalityWave8();
+
+    private static PublishedSnapshot LoadPersonalityWave8()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave8.json", "personality-wave-8", requireDecks: false);
+        if(snapshot.Cards.Length != 17)
+            throw new InvalidOperationException("Unexpected personality-wave-8 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-8 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-8 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
