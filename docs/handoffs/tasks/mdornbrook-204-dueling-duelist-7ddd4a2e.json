@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Resolved merge conflicts bringing mdornbrook/204-dueling-duelist (PR #206, Dueling primitive, issue #204) up to date with origin/main, which had since merged the Kiho keyword primitive (#191). Kept both sides' AbilityDefinition additions, reordered the PublishedContent wave loaders so Strategy Wave 5's own duplicate-id check covers Kiho's waves too, and merged the ROADMAP.md primitive rows and content-coverage prose. Also caught and fixed a silent merge artifact: both branches' card-count lines read '200' by coincidence (from different additions), papering over what a real diff conflict would have caught -- the true combined total is 202.",
-  "validation": "dotnet build src/L5R.Core/L5R.Core.csproj: 0 errors. dotnet run --project tests/L5R.Core.Tests: 117/117 core + 34/34 published + 8/8 deck-format all passing. python3 -m unittest discover -s tools/content: 121/121. python3 -m unittest discover -s tools/collaboration: 43/43. docs/CARD_INVENTORY.xlsx regenerated (202 wired).",
+  "summary": "Second round of merge-conflict resolution for mdornbrook/204-dueling-duelist (PR #206, issue #204): PR #193 (deck-return/Goju House Guard/Aberrations, issue #192) merged to main since the first resolution round. Reordered the PublishedContent wave loaders so Strategy Wave 5 lands last and its own duplicate-id check covers the three newly-merged waves; merged the embedded-resource list and CardCatalog's own Concat chain; corrected the published count to 207.",
+  "validation": "dotnet build src/L5R.Core/L5R.Core.csproj: 0 errors. dotnet run --project tests/L5R.Core.Tests: 119/119 core + 34/34 published + 8/8 deck-format all passing. Both Python suites pass. docs/CARD_INVENTORY.xlsx regenerated (207 wired).",
   "remaining": "None beyond what PR #206 itself already tracked.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/204",
   "branch": "mdornbrook/204-dueling-duelist",
-  "updated": "2026-09-12T22:14:42.961913+00:00"
+  "updated": "2026-09-12T22:29:38.658939+00:00"
 }
