@@ -1,0 +1,34 @@
+{
+  "Profile": "personality-wave-11",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10055",
+      "Name": "Tamori Takeshi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your Personality: Takeshi helps him meditate. Effects of actions the target performs will not be negated.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10055.jpg",
+      "Keywords": [
+        "Artisan",
+        "Dragon Clan",
+        "Incense Master"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "takeshi-protect"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

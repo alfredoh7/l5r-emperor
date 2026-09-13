@@ -1061,7 +1061,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
         _state.TurnNumber++; _state.ActivePlayerId=1-_state.ActivePlayerId;
         StartTurn();
     }

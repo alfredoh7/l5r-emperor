@@ -493,6 +493,11 @@ public static class AbilityCatalog
         // target home BOWED -- the entire reason discarding the Favor here is worth it.
         ["jakuei-bow"] = new("Battle", "Political: bow a target enemy Personality", "enemy-personality", UsageKey: "jakuei-bow-favor"),
         ["jakuei-bow-favor"] = new("Battle", "Political: discard the Imperial Favor · bow a target enemy Personality and move him home bowed", "enemy-personality", UsageKey: "jakuei-bow-favor"),
+        // Tamori Takeshi (issue #212): "Takeshi helps him meditate" is non-functional flavor text
+        // folded into the Open action, confirmed dropped -- the real effect is Protection, granted
+        // to the target for the rest of the active player's own turn (the default duration, since
+        // no "for the rest of this battle"/"permanently" is printed).
+        ["takeshi-protect"] = new("Open", "Target your Personality: effects of actions the target performs will not be negated until the end of the turn", "own-personality"),
     });
 }
 
@@ -546,6 +551,28 @@ public sealed partial class MatchEngine
     // grant of it -- membership is boolean, so a duplicate entry would only ever complicate cleanup
     // (e.g. two Naval-granting attachments on the same Personality, one later detached) for no effect.
     private static void GrantKeyword(CardInstance card, string keyword, string source, string duration) { if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration)); }
+    // "Protection" (issue #212, Tamori Takeshi): "effects of actions the target performs will not be
+    // negated." Checked at the point a negation would otherwise apply -- the same convention
+    // StalwartNegatesBow already uses (the negating card/ability is still legal to play; only its own
+    // negating effect becomes a no-op) -- rather than as a Require blocking the reacting player from
+    // attempting it at all.
+    private static bool Protected(CardInstance card) => card.Protections.Count > 0;
+    private static void GrantProtection(CardInstance card, string source, string duration) => card.Protections.Add(new(source, duration));
+    // An Item/Weapon/Spell has no printed abilities of its own performer requirement -- any action it
+    // provides is really performed BY its wielder (AttackDefenseModifier already does the same
+    // Zone.Attached-to-parent lookup inline, for a different purpose). Every other card (a
+    // Personality, a Stronghold, a played-from-hand Strategy/Ring) performs its own actions directly.
+    private CardInstance ActingPersonality(CardInstance card) => card.Zone == Zone.Attached && card.AttachedTo is string parentId ? Card(parentId) : card;
+    // The Personality actually performing a resolving ability, for Protection's own purposes: an
+    // explicit Performer selection (command.PerformerId) when the ability has one, otherwise the
+    // source card itself (resolved to its wielder, if it is an attached Item/Weapon/Spell). Used for
+    // both an Attack (baked into PendingAttack.SourceId at issue time) and an Additional Action
+    // (PendingAdditionalAction IS the original command, so the overload below just looks its own
+    // ability up first).
+    private CardInstance ActionPerformer(AbilityDefinition ability, GameCommand command, CardInstance? source) =>
+        ActingPersonality(ability.Performer is not null ? Card(command.PerformerId!) : source!);
+    private CardInstance ActionPerformer(GameCommand command) =>
+        ActionPerformer(AbilityCatalog.All[command.AbilityId!], command, command.CardId is null ? null : Card(command.CardId));
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
@@ -1391,7 +1418,17 @@ public sealed partial class MatchEngine
                 _state.NoNewAdditionalActionsThisBattle = true;
                 break;
             }
-            case "effortless-counterattack-negate": _state.PendingAdditionalAction = null; break;
+            case "effortless-counterattack-negate":
+                // Protection (issue #212): a no-op against a protected performer's own action, the
+                // same "still legal to play, its own effect just does nothing" shape StalwartNegatesBow
+                // already uses -- PendingAdditionalAction is left set, so it resolves normally once
+                // this reaction window closes (see the "additionalActionReaction" branch in Apply()).
+                if (!Protected(ActionPerformer(_state.PendingAdditionalAction!)))
+                {
+                    _state.PendingAdditionalAction = null;
+                }
+                else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
+                break;
             case "training-discipline-ability": GainHonor(player.Id, 1, "Training Discipline"); break;
             case "training-bow-enemy": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
@@ -1400,9 +1437,9 @@ public sealed partial class MatchEngine
             case "training-destroy-terrain": DiscardTerrain(target!); player.TerrainDestroyedThisBattle=true; break; // Ring of Water's own recruitment condition (issue #194)
             case "carpenter-castle-siege":
                 Card(command.PerformerId).Bowed = true;
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
-            case "shiro-shiba-melee": if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return; break;
+            case "shiro-shiba-melee": if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return; break;
             case "training-create-token": CreateToken(target!, "Training", id, "Force", 1); break;
             case "training-move-token": MoveToken(target!, target!.Tokens[0], Card(command.PerformerId!)); break;
             case "training-destroy-token": DestroyToken(target!, target!.Tokens[0]); break;
@@ -1411,7 +1448,7 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 DestroyToken(performer, performer.Tokens.First(t => t.Type == "Fire"));
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, performer.Id, consumedGrant)) return;
                 break;
             }
             case "training-honor-loss-entry": GainHonor(player.Id, -2, "Training entry Honor loss", source); break;
@@ -1423,34 +1460,34 @@ public sealed partial class MatchEngine
                 break;
             case "torazu-fire-attack":
                 DestroyToken(source!, source!.Tokens.First(t => t.Type == "Fire"));
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack":
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "tsuruchi-isas-attack":
                 source!.Bowed = true;
-                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "false-ring-of-water-attack":
                 if (source!.Zone != Zone.Hand) source.Bowed = true; // the discard-from-hand case is handled generically in the tail below
-                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "training-honor-cost-attack":
                 // The Honor cost is paid up front, like the Gold cost at the top of UseAbility --
                 // not contingent on the Attack actually resolving or hitting.
                 GainHonor(player.Id, -2, "Training Honor-cost Attack", source);
-                if (ResolveOrDeferAttack(id, player, target?.Id, additional: consumedGrant)) return;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
             case "training-reconnaissance-strike":
@@ -1537,7 +1574,12 @@ public sealed partial class MatchEngine
             case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
-            case "training-attack-negate": _state.PendingAttack!.Strength = 0; break;
+            case "training-attack-negate":
+                // Protection (issue #212): same no-op-against-a-protected-performer shape as
+                // effortless-counterattack-negate above.
+                if (!Protected(Card(_state.PendingAttack!.SourceId!))) _state.PendingAttack!.Strength = 0;
+                else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
+                break;
             case "bounty-hunter-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "rumormonger-penalty":
                 source!.Bowed = true;
@@ -1759,6 +1801,9 @@ public sealed partial class MatchEngine
                 ReturnHome(target!, false); // bow above is preserved -- ReturnHome(bow:false) never straightens
                 Emit("unitMovedHome", $"{Definition(target!).Name}'s unit moved home bowed.", target!.OwnerId, target.Id);
                 break;
+            // Tamori Takeshi (issue #212): grants Protection for the rest of the active player's own
+            // turn -- the default duration, matching every other un-qualified effect in the engine.
+            case "takeshi-protect": GrantProtection(target!, source!.Id, "Turn"); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
