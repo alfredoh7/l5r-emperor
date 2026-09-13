@@ -239,12 +239,20 @@ public sealed partial class MatchEngine
         // rather than through the Reaction window below. Every entry point (Purchase, Equip, a played
         // Terrain, equip-battle's Spell attach) already funnels through this one shared function.
         if(Keyword(card,"Destined")) Draw(Player(playerId));
+        // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
+        // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
+        if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
         var watchingReactionAvailable = Definition(card).Type==CardType.Personality && AnyPersonalityEntryReactionAvailable(playerId);
         if (reactionId is null && !watchingReactionAvailable) return false;
-        if (reactionId is not null) card.AbilityUses.Remove(reactionId);
+        // Kitsuki Horume's own "choose a player, gain or lose" (issue #210) is the first
+        // entry-reaction to share a UsageKey across two catalog entries -- the actual dedupe stamp
+        // lives under the UsageKey (see ExecuteAbilityEffects' own `uses[ability.UsageKey ?? id]`),
+        // not the bare ability id, so clearing a stale one from an earlier entry must look the same
+        // key up, not assume UsageKey is always just the id itself.
+        if (reactionId is not null) card.AbilityUses.Remove(AbilityCatalog.All[reactionId].UsageKey ?? reactionId);
         _state.PendingChoice = new("entryReaction", playerId, card.Id, "After entry: use this card's own reaction, or pass.", closesTo);
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
@@ -1179,6 +1187,17 @@ public sealed partial class MatchEngine
     {
         if(performer.Dishonorable) { Rehonor(performer); return; }
         GainHonor(performer.OwnerId,amount,reason,performer);
+    }
+    // Kitsuki Horume (issue #210): "Choose a player. He gains or loses 1 Honor" -- a LOSS, or a
+    // gain targeting someone other than Horume's own controller, is a plain Honor change on the
+    // chosen player. A gain targeting Horume's OWN controller specifically is "an action performed
+    // by Horume that would grant his own controller Honor" -- exactly GainHonorFromPerformer's own
+    // shape (Doji Shunya/Shamate Keep's precedent): if Horume is Dishonorable, rehonor him instead
+    // of granting the Honor.
+    private void ApplyPlayerHonorChoice(CardInstance performer,int targetPlayerId,int amount)
+    {
+        if(amount>0 && targetPlayerId==performer.OwnerId) GainHonorFromPerformer(performer,amount,Definition(performer).Name);
+        else GainHonor(targetPlayerId,amount,Definition(performer).Name,performer);
     }
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
     private void SetPhase(Phase phase,int priority) { _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}."); }

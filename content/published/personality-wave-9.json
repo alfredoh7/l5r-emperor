@@ -198,10 +198,9 @@
         "Samurai"
       ],
       "Focus": 0,
-      "Abilities": [
-        "bojan-entry-honor-loss"
-      ],
-      "Effect": "none"
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 1
     },
     {
       "Id": "oracle-l5r-10844",
@@ -345,10 +344,9 @@
         "Samurai"
       ],
       "Focus": 0,
-      "Abilities": [
-        "kazuya-entry-honor-loss"
-      ],
-      "Effect": "none"
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 2
     },
     {
       "Id": "oracle-l5r-5123",
@@ -887,10 +885,10 @@
       ],
       "Focus": 0,
       "Abilities": [
-        "noboru-shattered-star-entry-honor-loss",
         "noboru-shattered-star-weaken"
       ],
-      "Effect": "none"
+      "Effect": "none",
+      "EntryHonorLoss": 3
     },
     {
       "Id": "oracle-l5r-10634",

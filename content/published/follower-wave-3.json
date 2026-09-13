@@ -460,10 +460,10 @@
       ],
       "Focus": 2,
       "Abilities": [
-        "panku-entry-honor-loss",
         "panku-madness"
       ],
-      "Effect": "none"
+      "Effect": "none",
+      "EntryHonorLoss": 1
     },
     {
       "Id": "oracle-l5r-10106",
@@ -687,10 +687,9 @@
         "Gaijin • Yodotai"
       ],
       "Focus": 2,
-      "Abilities": [
-        "aulus-entry-honor-loss"
-      ],
-      "Effect": "boost-legionnaires-in-unit"
+      "Abilities": [],
+      "Effect": "boost-legionnaires-in-unit",
+      "EntryHonorLoss": 2
     }
   ],
   "Decks": []

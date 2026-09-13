@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Mandatory vs. optional \"after X enters play\" text (CardDefinition.EntryHonorLoss, applied unconditionally alongside Destined's draw) and a new \"choose a player\" targeting primitive (Target \"player\", GameCommand.TargetPlayerId, ApplyPlayerHonorChoice). Corrected 5 already-published cards (Aulus, P'an Ku Cultist, Mirumoto Bojan, Mirumoto Kazuya, Togashi Noboru the Shattered Star Exp) that had been mis-wired as optional Reaction abilities when their real printed text has no 'Reaction:' prefix. Unblocked Kitsuki Horume's own first ability (horume-gain/horume-lose); both his abilities are wired now. Fixed a latent AbilityUses/UsageKey dedupe-clearing bug along the way.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 129/129 core, 34/34 published, 8/8 deck-format. python3 -m unittest discover -s tools/content: 121/121. python3 -m unittest discover -s tools/collaboration: 43/43. tools/check.sh could not run end-to-end in this Windows Git Bash environment due to a pre-existing, unrelated glob-expansion bug in tools/env.sh's Godot-path detection; every check it would run was verified independently above.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/210",
+  "branch": "mdornbrook/210-choose-a-player-entry-honor-loss",
+  "updated": "2026-09-13T10:50:57.755403+00:00"
+}

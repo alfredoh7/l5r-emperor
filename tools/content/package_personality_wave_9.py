@@ -24,12 +24,12 @@ ABILITIES: dict[int, list[str]] = {
     10843: [],
     10629: ["nakai-exp-weaken"],
     4429: ["nubane-bow"],
-    10630: ["bojan-entry-honor-loss"],
+    10630: [],
     10844: ["hatsuto-weaken"],
     5101: ["houken-straighten"],
     10053: ["houken-exp-straighten"],
     5104: ["ichizo-exp-duel"],
-    10454: ["kazuya-entry-honor-loss"],
+    10454: [],
     5123: ["kojinrue-destroy"],
     5125: ["kouzei-bow"],
     10054: ["michi-move"],
@@ -48,7 +48,7 @@ ABILITIES: dict[int, list[str]] = {
     10222: ["korimi-exp2-draw"],
     10289: ["mihato-move"],
     10847: ["noboru-exp2-favor"],
-    10456: ["noboru-shattered-star-entry-honor-loss", "noboru-shattered-star-weaken"],
+    10456: ["noboru-shattered-star-weaken"],
     10634: ["noritada-invest"],
     10848: ["obote-boost"],
     8568: ["rikyou-move"],
@@ -61,6 +61,13 @@ EFFECTS: dict[int, str] = {
     8545: "force-while-defending-personality",
     9822: "negate-bow-while-defending",
 }
+# Mandatory "after this Personality enters play, lose X Honor" -- no printed "Reaction:" prefix
+# (issue #210), so this is a data field (CardDefinition.EntryHonorLoss), not an ability id at all.
+ENTRY_HONOR_LOSS: dict[int, int] = {
+    10630: 1,  # Mirumoto Bojan
+    10454: 2,  # Mirumoto Kazuya
+    10456: 3,  # Togashi Noboru, the Shattered Star, Experienced
+}
 
 
 def package(card_ids: list[str], root: Path = ROOT) -> dict:
@@ -72,6 +79,8 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
         del fields["_oracle_id"]
         fields["Abilities"] = ABILITIES.get(oracle_id, [])
         fields["Effect"] = EFFECTS.get(oracle_id, "none")
+        if oracle_id in ENTRY_HONOR_LOSS:
+            fields["EntryHonorLoss"] = ENTRY_HONOR_LOSS[oracle_id]
         definitions.append(fields)
         sources.append(source)
     assert len(definitions) == len(card_ids) == len({c["Id"] for c in definitions}), "Duplicate or missing card"
