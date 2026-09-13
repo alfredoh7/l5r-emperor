@@ -114,7 +114,10 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10874": "Needs a Follower-Equip Battle ability with no Shugenja/opposed requirement (Daigotsu Chiboshi's own \"Equip a Follower to Chiboshi\"), plus tying its own Additional Action grant to a Reserve recruitment specifically.",
     "oracle-l5r-10862": "Needs a \"count of Spells in this unit\" Attack-strength axis (Isawa Ikariya's own Ranged Attack).",
     "oracle-l5r-10842": "Needs conditional Gold-cost reduction (Kakita Ujirou's own \"enters play for N less Gold if...\").",
-    "oracle-l5r-10846": "Needs conditional Gold-cost reduction (Tamori Shinji's own \"enters play for 4 less Gold if you are the Defender\").",
+    # Tamori Shinji (oracle-l5r-10846) published in personality-wave-12 (issue #216) -- his own
+    # narrow "enters play for 4 less Gold if you are the Defender" now applies specifically via
+    # RecruitReserve (QuotePurchase's own new viaReserve parameter), not the fully general
+    # persistent Gold-cost-modifier primitive a future card like A Fugitive Apprehended would need.
     "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
     "oracle-l5r-10857": "Wired (issue #194) -- \"Fire Battle\" was confirmed to be a plain classification, not a Ring-gated Timing. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
     "oracle-l5r-10684": "Wired (issue #194) -- needed only a Ring-type check in a discard pile, now trivial. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
@@ -303,7 +306,13 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-5095": "Needs a new 'Sensei' keyword mechanic (discard every other Sensei-keyword Personality you control when one enters play) shared with Mirumoto Yozo, Experienced 2 below -- deferred this pass for scope, not attempted; its own second ability (focusing from a discard pile once per duel, removed from the game afterward) is a genuine extension of Dueling's own Focus() method but was not built either, since it depends on the same card's still-missing Sensei restriction.",
     "oracle-l5r-5106": "Needs Additional-Action grants scoped by required ability classification (Iaijutsu) AND by a specific Performer, rather than by source card id -- the current grant shape (AdditionalActionGrant.ScopeCardIds) cannot express either restriction.",
     "oracle-l5r-10845": "Needs an Additional Action grant that re-triggers a second, differently-costed printed ability on the same performer -- buildable in principle by reusing the existing Additional Action primitive, but deferred this pass for scope.",
-    "oracle-l5r-5112": "Needs a conditional Gold-cost reduction tied to a named target Personality -- the same still-unbuilt gap already blocking Tamori Shinji below and Kakita Ujirou (see the Reserve primitive row); its own 'attachments will not be transferred' clause is currently a no-op regardless, since no attachment-Transfer mechanic exists yet either.",
+    # Mirumoto Katagi (oracle-l5r-5112) published in personality-wave-12 (issue #216) -- his own
+    # Non-Unique-Weapon Gold discount is wired (Equip's own cost formula). His own "weapons attached
+    # to Katagi will not be transferred" clause is still a no-op: no attachment-Transfer mechanic
+    # exists anywhere in the engine yet, and building one purely to give this one clause something
+    # to block (with zero real card performing an actual Transfer) would be speculative
+    # infrastructure with no observable, testable behavior -- the same reasoning already applied to
+    # Mirumoto Rokai/Tamori Tamoko's own still-unbuilt negation interrupt below.
     "oracle-l5r-10631": "Needs Equip from a discard pile -- an established gap (no mechanism returns a card to play from a discard pile yet, the same one blocking Bayushi Wateru's own 'Absent Interrupt').",
     "oracle-l5r-10284": "Needs a generic 'ignore this card's own bowed status' exemption for Maneuvers assignment AND Performer selection together -- narrower exemptions exist per-ability (the 'Even if bowed' id list), but this card's own exemption is unconditional and would touch both of those shared checks broadly for a single card; deferred this pass to limit blast radius.",
     "oracle-l5r-10285": "Needs a named-target restriction on a duel's own Target category (a self-performer duel against one specific enemy Personality by name, not any enemy) -- a small addition (mirrors AttachRequiresName's own shape) not attempted this pass.",
@@ -318,8 +327,10 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-5181": "Needs an independent, per-target optional move-home choice (two cards, each optionally moved) where the two printed branches differ only in mandatory-vs-optional -- this project treats a dropped 'may' sub-choice cautiously (see Nishimura's own deferred precedent) rather than guessing at a simplification.",
     "oracle-l5r-9820": "Needs a new per-player 'no province destroyed since your last turn ended' flag, reset at StartTurn and set by DestroyProvince -- a clean, small addition mirroring existing per-battle flags (TerrainDestroyedThisBattle), deferred this pass for scope; its own static '-2F on your turn' half has direct precedent and was not blocked, just not prioritized.",
     "oracle-l5r-7780": "Needs an exception to the shared Battle-timing AtBattle requirement (bowing itself 'even if not at the current battlefield') -- buildable as a one-off id exception, the same shape Mirumoto Michi/Togashi Rikyou use in wave 9, but deferred this pass to limit how many such exceptions land in one wave; its own province-Strength raise-or-lower effect directly reuses The Courtesy of the Crane's own precedent and is not itself blocked.",
-    "oracle-l5r-7789": "Needs a broad 'after your own action bows a Personality' Reaction trigger -- the same still-unbuilt gap already recorded against oracle-l5r-3083 ('after your action affects an opposing Personality').",
-    "oracle-l5r-10846": "Needs the conditional Gold-cost-reduction primitive noted above (Mirumoto Katagi/Kakita Ujirou) -- 'enters play for 4 less Gold if you are the Defender.'",
+    # Tamori Ruya (oracle-l5r-7789) published in personality-wave-12 (issue #216) -- the broad
+    # "after your own action bows a Personality" Reaction trigger landed as own-action-bowed-
+    # personality, narrower than oracle-l5r-3083's own still-unbuilt "affects an opposing
+    # Personality" (a genuinely broader trigger, not resolved by this).
     "oracle-l5r-7797": "Needs the same 'choose which of several eligible own cards to bow as a cost' shape simplified away for Mirumoto Kojinrue/Tamori Muzu in wave 9 (bow Shosei or a Temple Holding) -- deferred here rather than simplified, for scope.",
     # Tamori Takeshi (oracle-l5r-10055) published in personality-wave-11 (issue #212) once Protection
     # itself landed -- no remaining blocker note for him.
@@ -329,8 +340,15 @@ BLOCKERS: dict[str, str] = {
     # interrupt point exists, same as Rokai's own case.
     "oracle-l5r-10056": "Needs a delayed/scheduled end-of-turn conditional effect ('before the turn ends, gain 1 Honor if he was not assigned to attack') for its own first ability, and the same not-yet-built general 'before an arbitrary action resolves, negate one of its own named effects' interrupt as Mirumoto Rokai above (see #212) for its second (movement or straightening, not destruction).",
     "oracle-l5r-10288": "Needs a 'destroy one of my own attached cards as a cost' cost-target category, combined with a temporary Stalwart grant and a self-Force-copy modifier -- each piece individually has precedent (DestroyAttachment, turn-duration GrantKeyword, ApplyModifier), but the three-part combination was deferred this pass for scope.",
-    "oracle-l5r-7806": "Needs a conditional keyword grant ('has Cavalry while it is not your turn', not just a conditional Force bonus) and the same alternate-cost-choice shape deferred for Tamori Shosei above (bow or destroy one of Yayu's Spells) -- deferred this pass.",
-    "oracle-l5r-8521": "Its own Reaction half needs the same broad 'after an action bows a Personality' trigger already recorded against Tamori Ruya/oracle-l5r-3083; its Battle half (raise or lower the current battlefield's province strength) reuses The Courtesy of the Crane's own precedent directly and is not itself blocked, but was not wired standalone since the card's identity is mostly its Reaction half.",
+    # Tamori Yayu (oracle-l5r-7806) published in personality-wave-12 (issue #216) -- the
+    # bow-or-destroy alternate-cost-choice shape landed as a dual-catalog UsageKey pair
+    # (yayu-bow-attack/yayu-destroy-attack), the same shape as jakuei-bow/jakuei-bow-favor; his own
+    # conditional Cavalry-keyword grant ("while it is not your turn") reuses the existing
+    # conditional-Force-bonus pattern's own IsAttacking-style check and was wired alongside it.
+    # Togashi Hizumi (oracle-l5r-8521) published in personality-wave-12 (issue #216) -- his own
+    # Reaction half landed as bowed-personality-at-own-battlefield; his Battle half (raise/lower
+    # the current battlefield's province strength) reuses The Courtesy of the Crane's own precedent
+    # directly.
     "oracle-l5r-10455": "Needs a variable-magnitude token-destroy choice (destroy zero or more Fire tokens, chosen by the player) feeding a matching variable Ranged Attack strength -- every existing token-destroy pattern (Torazu, Monastery) destroys a fixed count as a flat cost; deferred this pass rather than force a 'destroy all' simplification.",
     "oracle-l5r-10058": "Needs the Brash keyword mechanic (the Defender may draw a card after a Brash card is assigned to attack, not built at all) and a Force-redirection-to-an-enemy-army mechanism (a card's Force counting toward the WRONG side's total, which every existing Army/BattleForce calculation assumes never happens) -- both novel.",
     "oracle-l5r-8565": "Needs a 'same location as source' targeting axis for a non-battle-restricted (BattleOrOpen) ability -- every existing 'at the same battlefield' check assumes Battle timing's own blanket AtBattle requirement, which BattleOrOpen deliberately carries none of.",

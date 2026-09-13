@@ -133,7 +133,8 @@ var tests = new (string Name, Action Run)[]
     ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview),
     ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction),
     ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive),
-    ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive)
+    ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive),
+    ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions)
 };
 var failed=0;
 foreach(var test in tests)
@@ -362,9 +363,17 @@ static void BattleTie()
 }
 static void FollowerForce()
 {
+    // Bowed Personality's OWN Force is suppressed, but its unbowed Follower still contributes
+    // (issue #216 correctness fix): the attacker's own printed 5F is suppressed to 0, but the
+    // Follower's unbowed 2F still counts, beating the defender's 1F.
     var s=Battle(5,1,6,true).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var enemy=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
     Add(s,"training-follower",0,Zone.Attached,attachedTo:personality.Id,province:0);
-    var e=MatchEngine.FromTestState(s); Resolve(e); Equal(e.State.Cards[personality.Id].Zone,Zone.Dead);
+    var e=MatchEngine.FromTestState(s);
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==personality.Id).UnitForce,2,"Personality's own 5F suppressed while bowed; Follower's unbowed 2F still counts");
+    Resolve(e);
+    Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"The attacker's own side won, 2 vs 1");
+    Equal(e.State.Cards[personality.Id].Zone,Zone.Home,"The attacker returns home after the battle, not destroyed");
 }
 static void EliteFollowerForce()
 {
@@ -1547,9 +1556,15 @@ static void UnitViewClamp()
 }
 static void UnitViewBows()
 {
-    var(s,p,f)=UnitViewFixture(); p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
+    var(s,p,f)=UnitViewFixture();
+    // Bowed Personality: only its OWN 2F is suppressed (issue #216 correctness fix) -- the
+    // still-unbowed Follower's own 5F still joins the unit total.
+    p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,5);
+    // Both bowed, neither Elite: the whole unit is now suppressed.
     f.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
-    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,0);
+    // The bowed Follower's own Elite EFFECT lets it count despite being bowed itself, independently
+    // of the (still bowed, still non-Elite, still suppressed) Personality.
+    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,5);
     p.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,7);
     f.Zone=Zone.FateDiscard; f.AttachedTo=null; Equal(UnitView(s,p.Id).UnitForce,2);
     p.Zone=Zone.Home; p.ProvinceIndex=null;
@@ -1582,6 +1597,7 @@ static void BowedPersonalityResolution()
     {
         var s=Battle(1,1,6).State;
         var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
+        var opposing=s.Cards.Values.Single(c=>c.OwnerId==1-owner && c.Zone==Zone.Battlefield); // untouched, Force 1
         p.DefinitionId=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
         p.Modifiers.Clear(); p.Bowed=true;
         var guide=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
@@ -1590,12 +1606,19 @@ static void BowedPersonalityResolution()
         var e=MatchEngine.FromTestState(s);
         var bowedCards=e.GetView(owner).Players[owner].Army;
         var card=bowedCards.Single(c=>c.Id==p.Id);
-        Equal(card.Force,3); Equal(card.Chi,3); Equal(card.UnitForce,0);
+        // Bowed Personality's OWN Force is suppressed (0), but its two unbowed Native Guides (5F
+        // each) still contribute -- issue #216 correctness fix, so this unit's own UnitForce is 10,
+        // not 0, and now beats rather than loses to the opposing 1F unit.
+        Equal(card.Force,3); Equal(card.Chi,3); Equal(card.UnitForce,10);
         Resolve(e);
-        Equal(e.State.Cards[p.Id].Zone,Zone.Dead,"Bowed Personality and its Followers must lose to the opposing 1F unit");
-        Check(!e.State.Players[1].Provinces[0].Destroyed);
+        Check(e.State.Cards[p.Id].Zone!=Zone.Dead,"The bowed Personality's own side wins (10 vs 1) thanks to its unbowed Followers -- it is not destroyed");
+        Equal(e.State.Cards[opposing.Id].Zone,Zone.Dead,"The 1F opposing unit loses instead");
+        // Only an ATTACKER's win can destroy the DEFENDER's own province -- owner 0 is the attacker
+        // here (Battle()'s own convention), so only that iteration's own win (10 vs 1, with a
+        // Province Strength of 6) destroys it (10 > 1+6).
+        Equal(e.State.Players[1].Provinces[0].Destroyed,owner==0);
         var result=e.GetView(owner).Events.Single(ev=>ev.Type=="battleResolved").Message;
-        Check(result.Contains(owner==0?"attacking Force 0, defending Force 1":"attacking Force 1, defending Force 0"),result);
+        Check(result.Contains(owner==0?"attacking Force 10, defending Force 1":"attacking Force 1, defending Force 10"),result);
         p.Bowed=false;
         var ready=MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army.Single(c=>c.Id==p.Id);
         Equal(ready.Force,3); Equal(ready.Chi,3); Equal(ready.UnitForce,13);
@@ -4641,5 +4664,228 @@ static void ProtectionPrimitive()
         Check(!e.State.Cards[target.Id].Protections.Any(),"Not protected yet");
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:takeshi.Id,TargetId:target.Id,AbilityId:"takeshi-protect"));
         Check(e.State.Cards[target.Id].Protections.Any(p=>p.Source==takeshi.Id && p.Duration=="Turn"),"Protected for the rest of the turn");
+    }
+}
+static void BrashForceRedirectAndBowReactions()
+{
+    {
+        // Brash: the Defender may draw a card, independently, once per Brash card assigned to
+        // attack -- regardless of how many different provinces they were sent to.
+        var s=MatchEngine.CreateStarterMatch().State; s.Phase=Phase.AttackDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var brash1=Add(s,"training-brash-personality",0,Zone.Home);
+        var brash2=Add(s,"training-brash-personality",0,Zone.Home);
+        var plain=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,Cmd(e,"attack",player:0,assignments:new(){[brash1.Id]=0,[brash2.Id]=1,[plain.Id]=0}));
+        Equal(e.State.PendingChoice?.Type,"brashDraw");
+        Equal(e.State.PendingBrashDraws,2);
+        Equal(e.State.PriorityPlayerId,1);
+        Accept(e,new GameCommand("brashDraw",1,e.Version,Choice:"decline"));
+        Equal(e.State.PendingBrashDraws,1);
+        Check(e.State.PendingChoice is not null,"Still one more offer");
+        Accept(e,new GameCommand("brashDraw",1,e.Version,Choice:"draw"));
+        Equal(e.State.Players[1].Hand.Count,handBefore+1);
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.Phase,Phase.DefenseAssignment);
+    }
+    {
+        // Togashi Noboru: redirects a lower-Chi enemy Personality's own Force to Noboru's own
+        // controller's army for the duration of the battle -- only his own Force, never his unbowed
+        // Follower's, which stays with its own controller.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var noboru=Add(s,"oracle-l5r-10058",0,Zone.Battlefield,province:0); // Chi 5, Force 4
+        var lowChi=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3, Force 3
+        Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:lowChi.Id); // Force 2, unbowed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:noboru.Id,TargetId:lowChi.Id,AbilityId:"noboru-redirect"));
+        Check(e.State.ForceRedirects.Any(r=>r.TargetId==lowChi.Id && r.ToPlayerId==0));
+        Resolve(e);
+        var msg=e.GetView(0).Events.Last(ev=>ev.Type=="battleResolved").Message;
+        Check(msg.Contains("attacking Force 7, defending Force 2"),msg);
+    }
+    {
+        // Live re-check: the beneficiary must still have a unit in their OWN current army at actual
+        // resolution -- not just when the redirect was granted.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var lowChi=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        s.ForceRedirects=[new(lowChi.Id,0)]; // granted to player 0, who has no unit here at all
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        var msg=e.GetView(0).Events.Last(ev=>ev.Type=="battleResolved").Message;
+        Check(msg.Contains("attacking Force 0, defending Force 3"),msg);
+    }
+    {
+        // Togashi Hizumi: after ANY action's resolution bows a Personality at Hizumi's own
+        // battlefield, his own controller may negate that Personality's own next straightening.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var hizumi=Add(s,"oracle-l5r-8521",0,Zone.Battlefield,province:0);
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var straightener=Add(s,"training-battle-straightener",0,Zone.Battlefield,province:0);
+        var straightener2=Add(s,"training-battle-straightener",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:target.Id,AbilityId:"training-bow-at-battle"));
+        Check(e.State.Cards[target.Id].Bowed);
+        Equal(e.State.PendingChoice?.Type,"bowReaction");
+        Equal(e.State.PendingChoice?.CardId,hizumi.Id);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hizumi.Id,TargetId:target.Id,AbilityId:"hizumi-negate-straighten"));
+        Equal(e.State.Cards[target.Id].StraightenBlockedTurn,e.State.TurnNumber);
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.PendingChoice is null);
+        // The window closed back to priority 1 (resuming exactly where the original bowing
+        // action's own NextAction would have left it) -- an ordinary pass hands it back to 0.
+        Accept(e,new GameCommand("pass",1,e.Version));
+        // Straighten() clears the block the moment it negates one attempt (issue #216 fix) --
+        // "negate his NEXT straightening" is a one-shot, not "cannot straighten for the rest of the
+        // turn"; a later attempt (a different source, its own dedupe scope) succeeds normally.
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:straightener.Id,TargetId:target.Id,AbilityId:"training-straighten-at-battle"));
+        Check(e.State.Cards[target.Id].Bowed,"Still bowed -- the first attempt was negated");
+        Equal(e.State.Cards[target.Id].StraightenBlockedTurn,-1,"Consumed, not blocked for the rest of the turn");
+        Accept(e,new GameCommand("pass",1,e.Version));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:straightener2.Id,TargetId:target.Id,AbilityId:"training-straighten-at-battle"));
+        Check(!e.State.Cards[target.Id].Bowed,"A second attempt succeeds normally");
+    }
+    {
+        // Tamori Ruya, at a battlefield: targets a DIFFERENT Personality at that same battlefield --
+        // unrelated to which Personality the triggering action actually bowed.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ruya=Add(s,"oracle-l5r-7789",0,Zone.Battlefield,province:0);
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var bowedByAction=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var alsoAtBattlefield=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:bowedByAction.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PendingChoice?.Type,"bowReaction");
+        Equal(e.State.PendingChoice?.CardId,ruya.Id);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ruya.Id,TargetId:alsoAtBattlefield.Id,AbilityId:"ruya-bow"));
+        Check(e.State.Cards[alsoAtBattlefield.Id].Bowed);
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+    }
+    {
+        // Tamori Ruya, at Home: "the same location" is Home WITH HER (same owner) -- the enemy's
+        // own Home, even though both are "Zone.Home", is a different location entirely.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var ruya=Add(s,"oracle-l5r-7789",0,Zone.Home);
+        var bower=Add(s,"training-bow-enemy-source",0,Zone.Home);
+        var enemyBowed=Add(s,"training-lion-samurai",1,Zone.Home);
+        var otherAtRuyasHome=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:enemyBowed.Id,AbilityId:"training-bow-enemy"));
+        Equal(e.State.PendingChoice?.Type,"bowReaction");
+        Equal(e.State.PendingChoice?.CardId,ruya.Id);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ruya.Id,TargetId:enemyBowed.Id,AbilityId:"ruya-bow"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ruya.Id,TargetId:otherAtRuyasHome.Id,AbilityId:"ruya-bow"));
+        Check(e.State.Cards[otherAtRuyasHome.Id].Bowed);
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+    }
+    {
+        // Tamori Yayu: "+2F and Cavalry while it is not your turn" -- a live conditional, not a
+        // durable grant, re-evaluated as ActivePlayerId itself changes.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; // not Yayu's own controller's turn
+        var yayu=Add(s,"oracle-l5r-7806",0,Zone.Battlefield,province:0); // printed Force 3
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==yayu.Id).Force,5,"+2F while it is not his controller's turn");
+        Check(e.State.Cards[yayu.Id].DefinitionId=="oracle-l5r-7806");
+        var s2=e.State; s2.ActivePlayerId=0; // now his own controller's turn
+        var e2=MatchEngine.FromTestState(s2);
+        Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==yayu.Id).Force,3,"No bonus on his own controller's own turn");
+    }
+    {
+        // Tamori Yayu: bowing one of his own Spells pays the cost for a Ranged 5 Attack.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var yayu=Add(s,"oracle-l5r-7806",0,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell",0,Zone.Attached,province:0,attachedTo:yayu.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yayu.Id,PerformerId:spell.Id,TargetId:enemy.Id,AbilityId:"yayu-bow-attack"));
+        Check(e.State.Cards[spell.Id].Bowed,"Paid by bowing the Spell");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Ranged 5 hits Force 3");
+    }
+    {
+        // The destroy-cost variant, and the shared UsageKey correctly deduping the pair once per turn.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var yayu=Add(s,"oracle-l5r-7806",0,Zone.Battlefield,province:0);
+        var spell=Add(s,"training-spell",0,Zone.Attached,province:0,attachedTo:yayu.Id);
+        var spell2=Add(s,"training-spell",0,Zone.Attached,province:0,attachedTo:yayu.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yayu.Id,PerformerId:spell.Id,TargetId:enemy.Id,AbilityId:"yayu-destroy-attack"));
+        Equal(e.State.Cards[spell.Id].Zone,Zone.FateDiscard,"Destroyed as the cost");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:yayu.Id,PerformerId:spell2.Id,TargetId:enemy.Id,AbilityId:"yayu-bow-attack"));
+    }
+    {
+        // Restricted to Spells only -- an Item attached to Yayu is not a legal cost card.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var yayu=Add(s,"oracle-l5r-7806",0,Zone.Battlefield,province:0);
+        var item=Add(s,"training-item",0,Zone.Attached,province:0,attachedTo:yayu.Id);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:yayu.Id,PerformerId:item.Id,TargetId:enemy.Id,AbilityId:"yayu-bow-attack"));
+    }
+    {
+        // Mirumoto Katagi: a Non-Unique Weapon attaching to him from hand pays 4 less Gold -- here,
+        // clamped all the way to 0 (the fixture's own printed cost is only 1).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var katagi=Add(s,"oracle-l5r-5112",0,Zone.Home);
+        var weapon=Add(s,"training-weapon",0,Zone.Hand); // GoldCost 1, Weapon, non-Unique
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:weapon.Id,target:katagi.Id));
+        Equal(e.State.Cards[weapon.Id].Zone,Zone.Attached,"Attached for free -- the discount clamps to 0");
+    }
+    {
+        // A Unique Weapon gets no discount -- "Non-Unique" is a real restriction, not decorative.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var katagi=Add(s,"oracle-l5r-5112",0,Zone.Home);
+        var weapon=Add(s,"training-unique-weapon",0,Zone.Hand); // GoldCost 1, Weapon, Unique
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:weapon.Id,target:katagi.Id)); // no sources offered -- still costs 1
+    }
+    {
+        // A non-Weapon attachment gets no discount either.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var katagi=Add(s,"oracle-l5r-5112",0,Zone.Home);
+        var spell=Add(s,"training-spell",0,Zone.Hand); // GoldCost 1, not a Weapon
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:spell.Id,target:katagi.Id));
+    }
+    {
+        // Tamori Shinji: enters play for 4 less Gold specifically via the Reserve-while-Defender
+        // path (ReserveKeyword's own generic absent-battle-action shape) -- printed cost 8, less 4.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=0;
+        var shinjiId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[shinjiId].DefinitionId="oracle-l5r-10846"; s.Cards[shinjiId].FaceUp=true;
+        s.Players[0].Honor=5; // meets the printed Honor Requirement outright
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,4).First();
+        Accept(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:payment.SourceIds));
+        Equal(e.State.Cards[shinjiId].Zone,Zone.Battlefield);
+    }
+    {
+        // Below the Honor Requirement, Clan Allegiance is still needed, and stacks with the
+        // discount as usual: 8 - 4 (Reserve-while-Defender) + 2 (Allegiance) = 6.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=0; s.Players[0].Clan="Dragon";
+        var shinjiId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[shinjiId].DefinitionId="oracle-l5r-10846"; s.Cards[shinjiId].FaceUp=true;
+        s.Players[0].Honor=4;
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:e.PaymentOptions(0,4).First().SourceIds,ClanAllegiance:false));
+        Accept(e,new GameCommand("recruitReserve",0,e.Version,CardId:shinjiId,SourceIds:e.PaymentOptions(0,6).First().SourceIds,ClanAllegiance:true));
+        Equal(e.State.Cards[shinjiId].Zone,Zone.Battlefield);
+    }
+    {
+        // An ordinary Dynasty-phase Purchase of the same card never qualifies for the discount.
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="oracle-l5r-10846";
+        s.Players[0].Honor=5;
+        e=MatchEngine.FromTestState(s);
+        var quote=e.QuotePurchase(0,cardId);
+        Equal(quote.Cost,8,"No Reserve-while-Defender discount on an ordinary Purchase");
     }
 }
