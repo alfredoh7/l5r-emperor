@@ -130,7 +130,8 @@ var tests = new (string Name, Action Run)[]
     ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency),
     ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview),
     ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling),
-    ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview)
+    ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview),
+    ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction)
 };
 var failed=0;
 foreach(var test in tests)
@@ -4359,5 +4360,96 @@ static void DragonClanPersonalityReview()
         // Abilities of their own at all.
         Check(CardCatalog.Get("oracle-l5r-10286").Abilities is { Length: 0 });
         Check(CardCatalog.Get("oracle-l5r-7790").Abilities is { Length: 0 });
+    }
+}
+static void DuelWonReaction()
+{
+    {
+        // Kitsuki Daisuke, Experienced: no duel-issuing ability of his own (unlike base Daisuke) --
+        // he wins a duel issued by something else entirely (the training-duel-challenge fixture,
+        // choosing him as performer), then his own "after this duel resolved" Reaction is offered.
+        // Used here; the window stays open (matching MeiyuEntersPlayReaction's own precedent) until
+        // two FRESH consecutive passes close it, since using the ability itself resets the streak.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var daisuke=Add(s,"oracle-l5r-4407",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:daisuke.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version)); // Daisuke's own Duelist re-focus, declined
+        Check(e.State.PendingDuel is null,"The duel itself is fully resolved");
+        Equal(e.State.PendingChoice?.Type,"duelWonReaction");
+        Equal(e.State.PendingChoice?.CardId,daisuke.Id,"Scoped to the specific card that won");
+        Equal(e.State.PriorityPlayerId,1,"Daisuke's own controller (the winner) goes first");
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:daisuke.Id,AbilityId:"daisuke-exp-draw"));
+        Equal(e.State.Players[1].Hand.Count,handBefore+1);
+        Check(e.State.PendingChoice is not null,"The window stays open, same as any other entry-style Reaction");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:daisuke.Id,AbilityId:"daisuke-exp-draw")); // once only
+        Accept(e,new GameCommand("declineReaction",0,e.Version)); // 1st of two fresh consecutive passes
+        Accept(e,new GameCommand("declineReaction",1,e.Version)); // 2nd -- closes
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.PriorityPlayerId,0,"Resumes exactly where the challenge was issued -- the Lion-side convention, here the challenger's opponent");
+    }
+    {
+        // Kitsuki Horume: the same shape, declined outright this time -- no Honor gained.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var horume=Add(s,"oracle-l5r-4412",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:horume.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.Players[1].Honor,honorBefore,"Declined -- no Honor gained");
+    }
+    {
+        // Kitsuki Jakuei: the Reaction half, used to take the Imperial Favor.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var jakuei=Add(s,"oracle-l5r-4416",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:jakuei.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:jakuei.Id,AbilityId:"jakuei-favor"));
+        Equal(e.State.FavorPlayerId,1);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+    }
+    {
+        // Kitsuki Jakuei's own separate Political Battle ability: bow only, no Favor involved.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var jakuei=Add(s,"oracle-l5r-4416",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow"));
+        Check(e.State.Cards[target.Id].Bowed); Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Not moved -- the plain half");
+    }
+    {
+        // Discarding the Favor for the bonus is rejected without controlling it...
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var jakuei=Add(s,"oracle-l5r-4416",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow-favor"));
+        // ...but with it, bows the target AND moves him home bowed -- the whole reason it's worth
+        // discarding the Favor here, unlike the plain rulebook favor-battle Player ability (which
+        // moves an enemy attacker home WITHOUT bowing him).
+        var s2=e.State; s2.FavorPlayerId=0;
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow-favor"));
+        Check(e2.State.Cards[target.Id].Bowed,"Moved home bowed, not straightened");
+        Equal(e2.State.Cards[target.Id].Zone,Zone.Home);
+        Check(e2.State.FavorPlayerId is null,"The Favor is discarded");
     }
 }

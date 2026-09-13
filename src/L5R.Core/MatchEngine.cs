@@ -190,6 +190,15 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
                 return;
             }
+            if (_state.PendingChoice.Type=="duelWonReaction")
+            {
+                // A duel is a single, complete action from challenge to consequences (issue #209):
+                // once it has fully resolved, the winning card's own controller may react to having
+                // won it -- the same shape as entryReaction, closing on two consecutive passes.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel-won reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;

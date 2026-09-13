@@ -472,6 +472,23 @@ public static class AbilityCatalog
         // secondary cost" simplification as Kasuru above -- the bow itself is preserved.
         ["korimi-exp-bow"] = new("Battle", "Target an enemy card without unbowed attachments: bow it", "enemy-card-without-unbowed-attachments"),
         ["korimi-exp2-draw"] = new("Limited", "Draw a card", "none"),
+        // "After a duel resolves" (issue #209): own-won-duel, scoped to the one specific card that
+        // won. Kitsuki Daisuke, Experienced: simplified from "After AN ACTION RESOLVES during which
+        // Daisuke won a duel" -- a duel is itself a complete action, and winning one is only ever
+        // determined during its own resolution, so the two phrasings are the same event.
+        ["daisuke-exp-draw"] = new("Reaction", "Iaijutsu: after this duel resolved, you may draw a card", "none", Trigger: "own-won-duel"),
+        // Kitsuki Horume's own second ability: "He boasts of his talents" is non-functional flavor
+        // text folded into the reaction, confirmed with the user and dropped.
+        ["horume-honor"] = new("Reaction", "After this duel resolved, you may gain 1 Honor", "none", Trigger: "own-won-duel"),
+        ["jakuei-favor"] = new("Reaction", "Political: after this duel resolved, you may take the Imperial Favor", "none", Trigger: "own-won-duel"),
+        // Kitsuki Jakuei's own separate Political Battle ability: a dual-choice pair sharing one
+        // UsageKey, the same shape as paid-bow/paid-straighten -- "you may discard the Imperial
+        // Favor" becomes "which of the two abilities did you use" rather than a new optional-cost
+        // command field. Unlike the rulebook favor-battle Player ability (which moves an enemy
+        // ATTACKER home without bowing him), Jakuei's own bow-first-then-move-home version sends the
+        // target home BOWED -- the entire reason discarding the Favor here is worth it.
+        ["jakuei-bow"] = new("Battle", "Political: bow a target enemy Personality", "enemy-personality", UsageKey: "jakuei-bow-favor"),
+        ["jakuei-bow-favor"] = new("Battle", "Political: discard the Imperial Favor · bow a target enemy Personality and move him home bowed", "enemy-personality", UsageKey: "jakuei-bow-favor"),
     });
 }
 
@@ -827,6 +844,13 @@ public sealed partial class MatchEngine
                 // Dueling (issue #204): "a reaction to being challenged or entering a duel" -- open
                 // to either side, same shape as before-attack-resolves.
                 "before-duel-begins" => _state.PendingChoice.Type == "duelReaction",
+                // Reaction to a duel's own resolution (issue #209): a duel is a single, complete
+                // action from challenge to consequences -- once it fully resolves (win/loss,
+                // outcomes, Focus Effects all applied), the card that WON it may react, the same
+                // "after entering play" shape own-enters-play already uses (scoped to one specific
+                // card by id), not open to either side the way before-duel-begins is.
+                "own-won-duel" => _state.PendingChoice.Type == "duelWonReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 _ => false
             },
             _ => false
@@ -884,7 +908,7 @@ public sealed partial class MatchEngine
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
         }
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
@@ -1248,7 +1272,7 @@ public sealed partial class MatchEngine
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
         if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
             Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
         {
             _state.FavorPlayerId = null;
             Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
@@ -1716,13 +1740,23 @@ public sealed partial class MatchEngine
             case "kazuya-entry-honor-loss": GainHonor(player.Id, -2, $"{Definition(source!).Name} entering play", source); break;
             case "korimi-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "korimi-exp2-draw": Draw(player); break;
+            // "After a duel resolves" (issue #209).
+            case "daisuke-exp-draw": Draw(player); break;
+            case "horume-honor": GainHonor(player.Id, 1, "Kitsuki Horume", source); break;
+            case "jakuei-favor": _state.FavorPlayerId = player.Id; break;
+            case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "jakuei-bow-favor":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                ReturnHome(target!, false); // bow above is preserved -- ReturnHome(bow:false) never straightens
+                Emit("unitMovedHome", $"{Definition(target!).Name}'s unit moved home bowed.", target!.OwnerId, target.Id);
+                break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
         // actions in one turn" -- every Favor-consuming ability shares this one shared Require
         // (see above), so the counter and the grant-check are shared here too, rather than
         // duplicated across each of the three execution cases.
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle")
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
         {
             player.FavorActionsThisTurn++;
             GrantRingRecruit(player, player.FavorActionsThisTurn >= 2, "ring-of-air-recruit");
