@@ -132,7 +132,8 @@ var tests = new (string Name, Action Run)[]
     ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling),
     ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview),
     ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction),
-    ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive)
+    ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive),
+    ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive)
 };
 var failed=0;
 foreach(var test in tests)
@@ -4573,5 +4574,72 @@ static void PlayerTargetingPrimitive()
         Accept(e3,new GameCommand("useAbility",0,e3.Version,CardId:cardId2,AbilityId:"horume-gain",TargetPlayerId:0));
         Equal(e3.State.Players[0].Honor,honorBefore,"Dishonorable Horume: gain negated");
         Check(!e3.State.Cards[cardId2].Dishonorable,"...and rehonored instead -- 'if Horume were dishonorable dead, brought back into play, instead of gaining honor, the player would rehonor Horume'");
+    }
+}
+static void ProtectionPrimitive()
+{
+    {
+        // Protection blocks the Attack-strength-negation Reaction: the exact AttackReactionWindow
+        // scenario, except the attacking Castle is protected beforehand -- training-attack-negate is
+        // still a legal Reaction to play (StalwartNegatesBow's own precedent: negating IS legal, it
+        // just becomes a no-op), so the window still opens and closes normally, but the attack still
+        // hits at full, unnegated strength.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        castle.Protections=[new("test-fixture","Turn")];
+        var reactor=Add(s,"training-attack-reactor",1,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingAttack?.SourceId,castle.Id,"PendingAttack now records the actual performer generically");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+        Equal(e.State.PendingAttack?.Strength,5,"Protection negates the negation -- strength is untouched");
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Dead,"Unnegated: the attack still hits");
+    }
+    {
+        // Protection blocks Effortless Counterattack's own Additional-Action negation: the exact
+        // AdditionalActionPrimitive scenario, except Kensai (the Weapon's own wielder, not the Weapon
+        // itself) is protected beforehand.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kensai=Add(s,"training-kensai",0,Zone.Battlefield,province:0,bowed:true);
+        kensai.Protections=[new("test-fixture","Turn")];
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:kensai.Id,bowed:true);
+        var enemyHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyHost.Id); // Force 2
+        var again=Add(s,"oracle-l5r-127",0,Zone.Hand);
+        var counter=Add(s,"oracle-l5r-2283",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:again.Id,PerformerId:kensai.Id,AbilityId:"again-boost"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon.Id,TargetId:enemy.Id,AbilityId:"training-weapon-attack"));
+        Equal(e.State.PendingChoice?.Type,"additionalActionReaction");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:counter.Id,AbilityId:"effortless-counterattack-negate"));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.PendingAdditionalAction is null,"Resolved normally once the window closed");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.FateDiscard,"Unnegated: the attack still resolves and hits (a Follower's own destruction lands in the Fate discard pile), because the Weapon's own wielder is protected");
+        Check(!e.State.Players[1].Hand.Contains(counter.Id),"Still discarded after use -- playing it was legal, only its own effect was negated");
+    }
+    {
+        // Turn-duration Protection clears at FinishTurn, the same as a Turn-duration GrantedKeyword.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var p=Add(s,"training-crane-samurai",0,Zone.Home);
+        p.Protections=[new("test-fixture","Turn"),new("test-fixture","Permanent")];
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Cards[p.Id].Protections.Count,1);
+        Equal(e.State.Cards[p.Id].Protections[0].Duration,"Permanent");
+    }
+    {
+        // Tamori Takeshi's own real Open ability: grants Protection to a target Personality.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var takeshi=Add(s,"oracle-l5r-10055",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.State.Cards[target.Id].Protections.Any(),"Not protected yet");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:takeshi.Id,TargetId:target.Id,AbilityId:"takeshi-protect"));
+        Check(e.State.Cards[target.Id].Protections.Any(p=>p.Source==takeshi.Id && p.Duration=="Turn"),"Protected for the rest of the turn");
     }
 }

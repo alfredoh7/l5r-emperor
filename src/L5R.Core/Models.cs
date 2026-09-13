@@ -73,6 +73,16 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
 public sealed record GrantedKeyword(string Keyword, string Source, string Duration);
 
+/// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
+/// will not be negated") -- while any Protection sits in a card's own list, no card of the
+/// opposing kind (Effortless Counterattack's own Additional-Action negation, Attack-strength
+/// negation) may negate an action performed by it. Same Duration convention as GrantedKeyword
+/// ("Turn" is the default -- core rules: an effect lasts until the end of the active player's own
+/// turn unless its own text says otherwise, e.g. "Permanent" or "until this battle ends"); cleared
+/// the same place ("Turn") FinishTurn already clears GrantedKeywords -- regardless of the card's
+/// own Zone, matching a Permanent GrantedKeyword's own survival through death and return.</summary>
+public sealed record Protection(string Source, string Duration);
+
 /// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
 /// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
@@ -92,6 +102,7 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    public List<Protection> Protections { get; set; } = [];
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
@@ -158,8 +169,11 @@ public sealed class PendingAttack
 {
     public string AbilityId { get; set; } = "";
     public int PlayerId { get; set; }
-    // The card that made the attack, when a card-specific post-attack effect (e.g. Tsuruchi Isas'
-    // "Move Isas home") needs the exact instance rather than just its controller.
+    // The Personality that made the attack (an attached Item/Weapon's own wielder, when the attack
+    // came from one of those rather than a Personality directly) -- populated for every Attack, not
+    // just the two cards that originally needed it for a card-specific post-attack effect (Tsuruchi
+    // Isas' "Move Isas home"; False Ring of Water's own discard-from-hand case). Also the performer
+    // Protection (issue #212) checks before letting a Reaction negate this Attack's own strength.
     public string? SourceId { get; set; }
     public string? TargetId { get; set; }
     public int Strength { get; set; }
