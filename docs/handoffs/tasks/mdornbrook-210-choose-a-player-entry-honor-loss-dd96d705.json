@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Mandatory vs. optional \"after X enters play\" text (CardDefinition.EntryHonorLoss, applied unconditionally alongside Destined's draw) and a new \"choose a player\" targeting primitive (Target \"player\", GameCommand.TargetPlayerId, ApplyPlayerHonorChoice). Corrected 5 already-published cards (Aulus, P'an Ku Cultist, Mirumoto Bojan, Mirumoto Kazuya, Togashi Noboru the Shattered Star Exp) that had been mis-wired as optional Reaction abilities when their real printed text has no 'Reaction:' prefix. Unblocked Kitsuki Horume's own first ability (horume-gain/horume-lose); both his abilities are wired now. Fixed a latent AbilityUses/UsageKey dedupe-clearing bug along the way.",
-  "validation": "dotnet run --project tests/L5R.Core.Tests: 129/129 core, 34/34 published, 8/8 deck-format. python3 -m unittest discover -s tools/content: 121/121. python3 -m unittest discover -s tools/collaboration: 43/43. tools/check.sh could not run end-to-end in this Windows Git Bash environment due to a pre-existing, unrelated glob-expansion bug in tools/env.sh's Godot-path detection; every check it would run was verified independently above.",
+  "summary": "Corrective merge: brings this branch (and thus PR #215, targeting main) up to date after PR #211 and PR #214 merged in an order that left issue #212's own Protection primitive content stranded on this branch instead of landing on main (see PR #215's own description for the full explanation). No new code changes -- merges origin/main into this branch and resolves the resulting text conflicts (ROADMAP.md, the tests array, the regenerated CARD_INVENTORY.xlsx) that arose purely from the squash-vs-merge commit-history divergence, not from any real content disagreement.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 130/130 core, 34/34 published, 8/8 deck-format, all rerun after the merge.",
   "remaining": "None; ready for review.",
-  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/210",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/212",
   "branch": "mdornbrook/210-choose-a-player-entry-honor-loss",
-  "updated": "2026-09-13T10:50:57.755403+00:00"
+  "updated": "2026-09-13T20:42:04.289198+00:00"
 }
