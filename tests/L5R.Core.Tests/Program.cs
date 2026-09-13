@@ -129,7 +129,9 @@ var tests = new (string Name, Action Run)[]
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
     ("Province adjacency: a destroyed province is skipped, its former neighbors become directly adjacent, and this compounds across multiple destructions -- matching every worked example given, including both ends destroyed", ProvinceAdjacency),
     ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview),
-    ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling)
+    ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling),
+    ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview),
+    ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction)
 };
 var failed=0;
 foreach(var test in tests)
@@ -3957,5 +3959,497 @@ static void Dueling()
         Check(e.State.Cards[challenged.Id].Modifiers.Any(m=>m.Amount==-1),"Both sides lose a Duelist-less tie");
         Check(e.State.Cards[challenger.Id].Modifiers.Any(m=>m.Amount==-1),"Both sides lose a Duelist-less tie");
         Check(e.State.PendingDuel is null);
+    }
+}
+static void DragonClanPersonalityReview()
+{
+    {
+        // Kitsuki Daisuke (issue #207): the marquee self-performer duel -- no separate Performer,
+        // Daisuke himself is the challenger. Also exercises his own printed Duelist keyword's
+        // optional re-focus (declined here) before resolution.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var daisuke=Add(s,"oracle-l5r-4406",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:daisuke.Id,TargetId:enemy.Id,AbilityId:"daisuke-duel"));
+        Check(e.State.PendingDuel is {Stage:"Focusing",ChallengerPlayerId:1,ChallengedPlayerId:0},"Daisuke himself is the challenger, no Performer selection");
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version)); // Daisuke's own Duelist re-focus, declined
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Home,"Daisuke wins (4 vs 3 Chi) -- the loser moves home");
+        Equal(e.State.Cards[daisuke.Id].Zone,Zone.Battlefield,"The winner is untouched");
+        Check(e.State.PendingDuel is null);
+    }
+    {
+        // Mirumoto Ichizo, Experienced: the same self-performer duel shape, but destroys the loser
+        // instead of moving him home.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var ichizo=Add(s,"oracle-l5r-5104",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:ichizo.Id,TargetId:enemy.Id,AbilityId:"ichizo-exp-duel"));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Ichizo wins and destroys the loser");
+    }
+    {
+        // Mirumoto Shikei: Limited Draw, plus the same self-performer duel/destroy shape as Ichizo.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var shikei=Add(s,"oracle-l5r-5148",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shikei.Id,AbilityId:"shikei-draw"));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1,"Shikei meditates and draws a card");
+    }
+    {
+        // Mirumoto Houken: "Battle/Open: Target a Personality with a Weapon: straighten his unit."
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var houken=Add(s,"oracle-l5r-5101",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        var weapon=Add(s,"training-weapon",1,Zone.Attached,province:0,attachedTo:host.Id,bowed:true);
+        var noWeapon=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:houken.Id,TargetId:noWeapon.Id,AbilityId:"houken-straighten")); // no Weapon
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:houken.Id,TargetId:host.Id,AbilityId:"houken-straighten"));
+        Check(!e.State.Cards[host.Id].Bowed && !e.State.Cards[weapon.Id].Bowed,"StraightenUnit straightens both the Personality and his Weapon");
+    }
+    {
+        // Mirumoto Houken, Experienced: even if bowed, straightens his own unit; moves to the
+        // current battlefield if opposed there, otherwise home.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var houken=Add(s,"oracle-l5r-10053",0,Zone.Home,bowed:true);
+        var follower=Add(s,"training-follower",0,Zone.Attached,attachedTo:houken.Id,bowed:true);
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // opposed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:houken.Id,AbilityId:"houken-exp-straighten"));
+        Check(!e.State.Cards[houken.Id].Bowed && !e.State.Cards[follower.Id].Bowed,"Straightens even though bowed");
+        Equal(e.State.Cards[houken.Id].Zone,Zone.Battlefield,"Moves to the current battlefield since he would be opposed there");
+    }
+    {
+        // Mirumoto Michi: even if bowed, reinforces the current battlefield only if opposed there --
+        // he starts at Home, nowhere near the battle, and moves in via the new MoveToBattlefield
+        // primitive.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var michi=Add(s,"oracle-l5r-10054",0,Zone.Home,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:michi.Id,AbilityId:"michi-move")); // nobody opposing yet
+        var s2=e.State; Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:michi.Id,AbilityId:"michi-move"));
+        Equal(e2.State.Cards[michi.Id].Zone,Zone.Battlefield,"Moves to the current battlefield");
+        Equal(e2.State.Cards[michi.Id].ProvinceIndex,0);
+        Check(!e2.State.Cards[michi.Id].Bowed,"Straightens his unit since he moved");
+    }
+    {
+        // Togashi Rikyou: the same MoveToBattlefield shape, gated on any enemy units present rather
+        // than specifically "opposed".
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var rikyou=Add(s,"oracle-l5r-8568",0,Zone.Home,bowed:true);
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:rikyou.Id,AbilityId:"rikyou-move"));
+        Equal(e.State.Cards[rikyou.Id].Zone,Zone.Battlefield);
+        Check(!e.State.Cards[rikyou.Id].Bowed);
+    }
+    {
+        // Kitsuki Fujimura: bow self, target a dishonorable Personality (either side), -2 Honor to
+        // its controller.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var fujimura=Add(s,"oracle-l5r-4409",0,Zone.Home);
+        var honorable=Add(s,"training-crane-samurai",1,Zone.Home);
+        var dishonorable=Add(s,"training-lion-samurai",1,Zone.Home); dishonorable.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:fujimura.Id,TargetId:honorable.Id,AbilityId:"fujimura-expose")); // not dishonorable
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:fujimura.Id,TargetId:dishonorable.Id,AbilityId:"fujimura-expose"));
+        Check(e.State.Cards[fujimura.Id].Bowed,"Bows itself as the cost");
+        Equal(e.State.Players[1].Honor,honorBefore-2);
+    }
+    {
+        // Mirumoto Kouzei: target an enemy card with equal or lower Force than Kouzei's own current
+        // Force (5) -- bow it.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kouzei=Add(s,"oracle-l5r-5125",0,Zone.Battlefield,province:0); // Force 5
+        var tooStrong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5 -- equal, legal
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kouzei.Id,TargetId:tooStrong.Id,AbilityId:"kouzei-bow"));
+        Check(e.State.Cards[tooStrong.Id].Bowed);
+    }
+    {
+        // Mirumoto Mitoshi: target a Personality (either side) with strictly lower Force than
+        // Mitoshi's own (4) -- bow or straighten him (a dual choice).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var mitoshi=Add(s,"oracle-l5r-9818",0,Zone.Battlefield,province:0); // Force 4
+        var tooStrong=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4 -- not strictly lower
+        var lower=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0,bowed:true); // Force 5 -- weaken below 4
+        lower.Modifiers=[new("test-setup","test-setup","Force",-2)]; // down to Force 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mitoshi.Id,TargetId:tooStrong.Id,AbilityId:"mitoshi-straighten"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mitoshi.Id,TargetId:lower.Id,AbilityId:"mitoshi-straighten"));
+        Check(!e.State.Cards[lower.Id].Bowed);
+    }
+    {
+        // Mirumoto Hatsuto: target an enemy Personality or Follower without the Cavalry keyword --
+        // "Infantry" is not a printed keyword, it just means not Cavalry.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var hatsuto=Add(s,"oracle-l5r-10844",0,Zone.Battlefield,province:0);
+        var cavalry=Add(s,"training-cavalry",1,Zone.Battlefield,province:0);
+        var infantry=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:hatsuto.Id,TargetId:cavalry.Id,AbilityId:"hatsuto-weaken")); // has Cavalry
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hatsuto.Id,TargetId:infantry.Id,AbilityId:"hatsuto-weaken"));
+        Check(e.State.Cards[infantry.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-3));
+    }
+    {
+        // Mirumoto Kojinrue: bow self (simplified from "bow Kojinrue or one of his Weapons"),
+        // target an enemy card without attachments, destroy it.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var kojinrue=Add(s,"oracle-l5r-5123",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kojinrue.Id,TargetId:target.Id,AbilityId:"kojinrue-destroy"));
+        Check(e.State.Cards[kojinrue.Id].Bowed); Equal(e.State.Cards[target.Id].Zone,Zone.Dead);
+    }
+    {
+        // Mirumoto Yozo, Experienced: the exact existing enemy-card-without-attachments category;
+        // removed from the game instead of merely destroyed when the target is Lion Clan.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var yozo=Add(s,"oracle-l5r-5178",0,Zone.Battlefield,province:0);
+        var lion=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yozo.Id,TargetId:lion.Id,AbilityId:"yozo-exp-destroy"));
+        Equal(e.State.Cards[lion.Id].Zone,Zone.RemovedFromGame,"A Lion Clan target is removed from the game, not merely destroyed");
+    }
+    {
+        // Kitsuki Nubane: target an attachment, bow it.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var nubane=Add(s,"oracle-l5r-4429",0,Zone.Home);
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var item=Add(s,"training-item",0,Zone.Attached,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nubane.Id,TargetId:item.Id,AbilityId:"nubane-bow"));
+        Check(e.State.Cards[item.Id].Bowed);
+    }
+    {
+        // Kitsuki Nakai, Experienced: -2F, or -3F if the target is dishonorable.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var nakai=Add(s,"oracle-l5r-10629",0,Zone.Home);
+        var dishonorable=Add(s,"training-crane-samurai",1,Zone.Home); dishonorable.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nakai.Id,TargetId:dishonorable.Id,AbilityId:"nakai-exp-weaken"));
+        Check(e.State.Cards[dishonorable.Id].Modifiers.Any(m=>m.Amount==-3));
+    }
+    {
+        // Kitsuki Kinaro, Experienced: bow self, target a Personality with lower Personal Honor;
+        // +1 Honor conditional on controlling a specific named card (not present here).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var kinaro=Add(s,"oracle-l5r-10453",0,Zone.Home); // PH 3
+        var lowerHonor=Add(s,"training-lion-samurai",1,Zone.Home); // PH 2
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kinaro.Id,TargetId:lowerHonor.Id,AbilityId:"kinaro-exp-bow"));
+        Check(e.State.Cards[kinaro.Id].Bowed); Check(e.State.Cards[lowerHonor.Id].Bowed);
+        Equal(e.State.Players[0].Honor,honorBefore,"No Kakita Ichigiku in play -- no bonus Honor");
+    }
+    {
+        // Mirumoto Bojan / Mirumoto Kazuya / Togashi Noboru, the Shattered Star: entry Honor loss,
+        // reusing the exact existing pattern (Destined/Expendable/Fallen keywords need no new code)
+        // -- exercised through a real Purchase, the same way MeiyuEntersPlayReaction does, since the
+        // ability is Timing "Reaction"/Trigger "own-enters-play" and only ever legal in that window.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var bojanId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Mirumoto Bojan").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=bojanId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        var payment=e.PaymentOptions(0,5).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"bojan-entry-honor-loss"));
+        Equal(e.State.Players[0].Honor,honorBefore-1);
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var kazuyaId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Mirumoto Kazuya").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=kazuyaId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        var payment=e.PaymentOptions(0,5).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"kazuya-entry-honor-loss"));
+        Equal(e.State.Players[0].Honor,honorBefore-2);
+    }
+    {
+        // Togashi Noboru, the Shattered Star, Experienced: entry Honor loss (exercised through a
+        // real Purchase, same as Bojan/Kazuya above), then Fire Battle: bow a target enemy
+        // Personality and take a Force bonus equal to its Force.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var noboruId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Togashi Noboru, the Shattered Star").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=noboruId; s.Cards[cardId].FaceUp=true;
+        var e0=MatchEngine.FromTestState(s);
+        var honorBefore=e0.State.Players[0].Honor;
+        var payment=e0.PaymentOptions(0,9).First();
+        Accept(e0,new GameCommand("purchase",0,e0.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Accept(e0,new GameCommand("useAbility",0,e0.Version,CardId:cardId,AbilityId:"noboru-shattered-star-entry-honor-loss"));
+        Equal(e0.State.Players[0].Honor,honorBefore-3);
+        // Now move on to the Battle ability, at the current battlefield.
+        var s2=e0.State; s2.Phase=Phase.Battle; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0]; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var noboru=s2.Cards[cardId]; noboru.Zone=Zone.Battlefield; noboru.ProvinceIndex=0; // Force 3
+        var target=Add(s2,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s2);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:noboru.Id,TargetId:target.Id,AbilityId:"noboru-shattered-star-weaken"));
+        Check(e.State.Cards[target.Id].Bowed);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==noboru.Id).Force,8,"Base Force 3 plus the target's own Force 5");
+    }
+    {
+        // Togashi Mihato: target an enemy Personality, move him home.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var mihato=Add(s,"oracle-l5r-10289",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mihato.Id,TargetId:target.Id,AbilityId:"mihato-move"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home);
+    }
+    {
+        // Togashi Noboru, Experienced 2: Political Limited -- take the Imperial Favor outright.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var noboru=Add(s,"oracle-l5r-10847",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:noboru.Id,AbilityId:"noboru-exp2-favor"));
+        Equal(e.State.FavorPlayerId,0);
+    }
+    {
+        // Togashi Noritada: Invest 3 Gold for two +1F Fire tokens, the exact existing Invest/Fire-
+        // token patterns composed together -- exercised through a real Purchase, same as
+        // Bojan/Kazuya above, since Invest reuses the same own-enters-play Reaction window.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var noritadaId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Togashi Noritada").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=noritadaId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,4).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"noritada-invest",SourceIds:e.PaymentOptions(0,3).First().SourceIds));
+        Equal(e.State.Cards[cardId].Tokens.Count(t=>t.Type=="Fire"),2);
+    }
+    {
+        // Togashi Obote: Void Limited -- discard a card, Force bonus equal to its Focus Value.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var obote=Add(s,"oracle-l5r-10848",0,Zone.Home);
+        var card=Add(s,"training-focus-strategy",0,Zone.Hand); // Focus Value 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:obote.Id,TargetId:card.Id,AbilityId:"obote-boost"));
+        Check(e.State.Cards[obote.Id].Modifiers.Any(m=>m.Amount==3));
+    }
+    {
+        // Togashi Korimi, Experienced 2: Limited, draw a card.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var korimi=Add(s,"oracle-l5r-10222",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:korimi.Id,AbilityId:"korimi-exp2-draw"));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1);
+    }
+    {
+        // Togashi Kasuru: bow self; if attacking, draw a card.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var kasuru=Add(s,"oracle-l5r-9821",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kasuru.Id,AbilityId:"kasuru-draw"));
+        Check(e.State.Cards[kasuru.Id].Bowed);
+        Equal(e.State.Players[0].Hand.Count,handBefore+1,"Kasuru is attacking (owner is the active player)");
+    }
+    {
+        // Kitsuki Miroken: +2F while opposing a dishonorable or Gaijin card.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var miroken=Add(s,"oracle-l5r-10843",0,Zone.Battlefield,province:0); // base Force 2
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==miroken.Id).Force,2,"No opposing dishonorable/Gaijin card yet");
+        var s2=e.State; Add(s2,"training-lion-samurai",1,Zone.Battlefield,province:0).Dishonorable=true;
+        var e2=MatchEngine.FromTestState(s2);
+        Equal(e2.GetView(0).Players[0].Army.Single(c=>c.Id==miroken.Id).Force,4,"+2F opposing a dishonorable card");
+    }
+    {
+        // Tamori Kazushige / Togashi Korimi: +2F while defending.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1; // owner 0 is defending
+        var kazushige=Add(s,"oracle-l5r-7777",0,Zone.Battlefield,province:0); // base Force 3
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kazushige.Id).Force,5,"+2F while defending");
+    }
+    {
+        // Tamori Muzu: your OTHER Earth Personalities have +1F while defending (army-scoped, not
+        // unit-scoped); Muzu himself does not grant it to himself.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=0; // owner 0 is defending
+        var muzu=Add(s,"oracle-l5r-7783",0,Zone.Battlefield,province:0); // base Force 3, Earth
+        var other=Add(s,"oracle-l5r-7777",0,Zone.Battlefield,province:0); // Kazushige, base Force 3, Earth
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var item=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==other.Id).Force,6,"Kazushige's own +2F defending, plus Muzu's own +1F");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==muzu.Id).Force,3,"Muzu does not boost himself");
+        // Muzu's own Battle ability: bow a target enemy card if it is attacking or has no
+        // attachments; always gain 1 Honor. Owner 1 is the active player, so host is attacking.
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:muzu.Id,TargetId:host.Id,AbilityId:"muzu-bow"));
+        Check(e.State.Cards[host.Id].Bowed,"Attacking (owner 1 is the active player) -- bowed regardless of its attachment");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Honor gained regardless");
+    }
+    {
+        // Togashi Hiroto: Reaction entry Fire tokens (four, unlike Meiyu/Torazu's three) --
+        // exercised through a real Purchase, same as Bojan/Kazuya above -- then Battle: target an
+        // enemy card without attachments (the bare enemy-card category plus RequireNoAttachments)
+        // -- bow it, or destroy it instead if it is itself an attachment.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var hirotoId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Togashi Hiroto").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=hirotoId; s.Cards[cardId].FaceUp=true;
+        var e0=MatchEngine.FromTestState(s);
+        var payment=e0.PaymentOptions(0,8).First();
+        Accept(e0,new GameCommand("purchase",0,e0.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Accept(e0,new GameCommand("useAbility",0,e0.Version,CardId:cardId,AbilityId:"hiroto-fire-tokens"));
+        Equal(e0.State.Cards[cardId].Tokens.Count(t=>t.Type=="Fire"),4);
+        var s2=e0.State; s2.Phase=Phase.Battle; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0]; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
+        var hiroto=s2.Cards[cardId]; hiroto.Zone=Zone.Battlefield; hiroto.ProvinceIndex=0;
+        var host=Add(s2,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var attachedItem=Add(s2,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:hiroto.Id,TargetId:host.Id,AbilityId:"hiroto-bow")); // host has an attachment
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:hiroto.Id,TargetId:attachedItem.Id,AbilityId:"hiroto-bow"));
+        Equal(e2.State.Cards[attachedItem.Id].Zone,Zone.FateDiscard,"Destroyed instead of bowed, since the target was itself an attachment");
+    }
+    {
+        // Togashi Korimi, Experienced: while defending, always negates her own bowing (an unlimited
+        // extension of Stalwart's own shape) -- tested against a real bow-inflicting ability
+        // (Tamori Jinai's own Battle bow, from the other side).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1; // owner 0 defending
+        var korimi=Add(s,"oracle-l5r-9822",0,Zone.Battlefield,province:0);
+        var jinai=Add(s,"oracle-l5r-10633",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:jinai.Id,TargetId:korimi.Id,AbilityId:"jinai-bow"));
+        Check(!e.State.Cards[korimi.Id].Bowed,"While defending, Korimi always negates the bow");
+    }
+    {
+        // Togashi Korimi, Experienced's own Battle ability: target an enemy card without unbowed
+        // attachments (an already-bowed attachment still qualifies, unlike ordinary "without
+        // attachments") -- bow it.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var korimi=Add(s,"oracle-l5r-9822",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var bowedItem=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:korimi.Id,TargetId:host.Id,AbilityId:"korimi-exp-bow"));
+        Check(e.State.Cards[host.Id].Bowed,"Only bowed attachments -- still a legal target");
+    }
+    {
+        // Tamori Jinai: Earth Battle, the exact existing enemy-card-without-attachments category.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var jinai=Add(s,"oracle-l5r-10633",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:jinai.Id,TargetId:target.Id,AbilityId:"jinai-bow"));
+        Check(e.State.Cards[target.Id].Bowed);
+    }
+    {
+        // Mirumoto Yonekura / Tamori Seiken: zero new primitives -- pure keyword reminder text, no
+        // Abilities of their own at all.
+        Check(CardCatalog.Get("oracle-l5r-10286").Abilities is { Length: 0 });
+        Check(CardCatalog.Get("oracle-l5r-7790").Abilities is { Length: 0 });
+    }
+}
+static void DuelWonReaction()
+{
+    {
+        // Kitsuki Daisuke, Experienced: no duel-issuing ability of his own (unlike base Daisuke) --
+        // he wins a duel issued by something else entirely (the training-duel-challenge fixture,
+        // choosing him as performer), then his own "after this duel resolved" Reaction is offered.
+        // Used here; the window stays open (matching MeiyuEntersPlayReaction's own precedent) until
+        // two FRESH consecutive passes close it, since using the ability itself resets the streak.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var daisuke=Add(s,"oracle-l5r-4407",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3, no Duelist
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:daisuke.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version)); // Daisuke's own Duelist re-focus, declined
+        Check(e.State.PendingDuel is null,"The duel itself is fully resolved");
+        Equal(e.State.PendingChoice?.Type,"duelWonReaction");
+        Equal(e.State.PendingChoice?.CardId,daisuke.Id,"Scoped to the specific card that won");
+        Equal(e.State.PriorityPlayerId,1,"Daisuke's own controller (the winner) goes first");
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:daisuke.Id,AbilityId:"daisuke-exp-draw"));
+        Equal(e.State.Players[1].Hand.Count,handBefore+1);
+        Check(e.State.PendingChoice is not null,"The window stays open, same as any other entry-style Reaction");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:daisuke.Id,AbilityId:"daisuke-exp-draw")); // once only
+        Accept(e,new GameCommand("declineReaction",0,e.Version)); // 1st of two fresh consecutive passes
+        Accept(e,new GameCommand("declineReaction",1,e.Version)); // 2nd -- closes
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.PriorityPlayerId,0,"Resumes exactly where the challenge was issued -- the Lion-side convention, here the challenger's opponent");
+    }
+    {
+        // Kitsuki Horume: the same shape, declined outright this time -- no Honor gained.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var horume=Add(s,"oracle-l5r-4412",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:horume.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.Players[1].Honor,honorBefore,"Declined -- no Honor gained");
+    }
+    {
+        // Kitsuki Jakuei: the Reaction half, used to take the Imperial Favor.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var jakuei=Add(s,"oracle-l5r-4416",1,Zone.Battlefield,province:0); // Chi 4, Duelist
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:jakuei.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",1,e.Version));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:jakuei.Id,AbilityId:"jakuei-favor"));
+        Equal(e.State.FavorPlayerId,1);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+    }
+    {
+        // Kitsuki Jakuei's own separate Political Battle ability: bow only, no Favor involved.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var jakuei=Add(s,"oracle-l5r-4416",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow"));
+        Check(e.State.Cards[target.Id].Bowed); Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Not moved -- the plain half");
+    }
+    {
+        // Discarding the Favor for the bonus is rejected without controlling it...
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var jakuei=Add(s,"oracle-l5r-4416",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow-favor"));
+        // ...but with it, bows the target AND moves him home bowed -- the whole reason it's worth
+        // discarding the Favor here, unlike the plain rulebook favor-battle Player ability (which
+        // moves an enemy attacker home WITHOUT bowing him).
+        var s2=e.State; s2.FavorPlayerId=0;
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:jakuei.Id,TargetId:target.Id,AbilityId:"jakuei-bow-favor"));
+        Check(e2.State.Cards[target.Id].Bowed,"Moved home bowed, not straightened");
+        Equal(e2.State.Cards[target.Id].Zone,Zone.Home);
+        Check(e2.State.FavorPlayerId is null,"The Favor is discarded");
     }
 }

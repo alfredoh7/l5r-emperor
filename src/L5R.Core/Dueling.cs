@@ -274,7 +274,30 @@ public sealed partial class MatchEngine
         }
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
+        // The duel itself is a single, complete action from challenge to consequences (issue #209):
+        // once everything above has applied, the winning card's own controller gets a chance to
+        // react to it having won -- before handing play back exactly where the challenge was issued.
+        if (winnerId is not null && OpenDuelWonReactionWindow(winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return;
         NextAction(challengerPlayerId);
+    }
+
+    // "After a duel resolves during which [this card] won" (issue #209): scoped to the one specific
+    // card that won, the same shape own-enters-play already uses for entering-play Reactions (see
+    // OpenEntryReactionWindow) -- a tie has no single winner, so there is nothing to react with here.
+    private static string? DuelWonReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
+
+    private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
+    {
+        var card = Card(winnerId);
+        var reactionId = DuelWonReactionAbility(card);
+        if (reactionId is null) return false;
+        card.AbilityUses.Remove(reactionId);
+        _state.PendingChoice = new("duelWonReaction", winnerPlayerId, card.Id, "After the duel resolved, you may use this card's own reaction, or pass.", closesTo);
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = winnerPlayerId;
+        Emit("reactionWindow", "Duel-won reaction window opened.", winnerPlayerId, card.Id);
+        return true;
     }
 
     // Each duel-issuing ability's own printed win/loss text. loserIds has two entries only on a
@@ -285,6 +308,9 @@ public sealed partial class MatchEngine
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
+            // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
+            case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
+            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
         }
     }
 

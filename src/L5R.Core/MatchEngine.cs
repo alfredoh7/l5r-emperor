@@ -190,6 +190,15 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
                 return;
             }
+            if (_state.PendingChoice.Type=="duelWonReaction")
+            {
+                // A duel is a single, complete action from challenge to consequences (issue #209):
+                // once it has fully resolved, the winning card's own controller may react to having
+                // won it -- the same shape as entryReaction, closing on two consecutive passes.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel-won reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;
@@ -821,6 +830,19 @@ public sealed partial class MatchEngine
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
         +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0)
+        // Dragon Clan review (issue #207): Tamori Kazushige / Togashi Korimi -- "+2F while defending",
+        // the same shape FollowerForce's own force-while-defending already covers, just for a
+        // Personality directly rather than an attached Follower.
+        +(Definition(card).Effect=="force-while-defending-personality"&&IsDefendingUnit(card)?2:0)
+        // Kitsuki Miroken: "+2F while opposing a dishonorable or Gaijin card" -- checked against the
+        // whole opposing army at the current battlefield, not a specific targeted card.
+        +(Definition(card).Effect=="force-vs-dishonorable-or-gaijin-opposed"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>c.Dishonorable||Keyword(c,"Gaijin"))?2:0)
+        // Tamori Muzu: "Your other Earth Personalities have +1F while defending" -- army-scoped (not
+        // unit-scoped, since Muzu's own bonus reaches every OTHER Earth-keyword card he controls at
+        // the same battlefield, not just his own unit) and keyword-based, following
+        // ArmyBattleMaidenBoost's own established shape, plus a defending condition on the RECEIVING
+        // card rather than the granter.
+        +(IsDefendingUnit(card)&&Keyword(card,"Earth")?_state.Cards.Values.Count(c=>c.Id!=card.Id&&c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Definition(c).Effect=="boost-earth-personalities-while-defending"&&Keyword(c,"Earth")):0)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
     // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
     // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
@@ -1002,6 +1024,15 @@ public sealed partial class MatchEngine
         card.Zone=Zone.Home; card.ProvinceIndex=null;
         if(bow) card.Bowed=true;
         foreach(var attachment in Attachments(card.Id)) { attachment.ProvinceIndex=null; if(bow) attachment.Bowed=true; }
+    }
+    // Dragon Clan review (issue #207): the mirror image of ReturnHome -- a Personality already in
+    // play (Mirumoto Michi/Togashi Rikyou's own shape: "move him to the current battlefield") moves
+    // to reinforce the current battle rather than leaving it, unlike Reserve's own dynasty-recruit
+    // path (which brings a fresh card straight from its province, never a card already in play).
+    private void MoveToBattlefield(CardInstance card,int province)
+    {
+        card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
+        foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
     }
 
     private void EndTurn()

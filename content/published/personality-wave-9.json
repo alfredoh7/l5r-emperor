@@ -1,0 +1,981 @@
+{
+  "Profile": "personality-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4406",
+      "Name": "Kitsuki Daisuke",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy Personality: Daisuke duels him. Move the duel's loser home; if he is dishonorable, this movement will not be negated.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4406.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Dragon Clan",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "daisuke-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4409",
+      "Name": "Kitsuki Fujimura",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow Fujimura and target a dishonorable Personality: Fujimura exposes his crimes. His controller loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4409.jpg",
+      "Keywords": [
+        "Duelist",
+        "Loyal",
+        "Dragon Clan",
+        "Justicar",
+        "Magistrate",
+        "Samurai",
+        "Scourge of the Scorpion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fujimura-expose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10453",
+      "Name": "Kitsuki Kinaro",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Open, Bow this card: Bow a target Personality with lower Personal Honor. Gain 1 Honor if you control Kakita Ichigiku.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10453.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Courtier",
+        "Dragon Clan",
+        "Experienced",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kinaro-exp-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10843",
+      "Name": "Kitsuki Miroken",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Miroken has +2F while opposing a dishonorable or Gaijin card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10843.jpg",
+      "Keywords": [
+        "Courtier",
+        "Dragon Clan",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-vs-dishonorable-or-gaijin-opposed"
+    },
+    {
+      "Id": "oracle-l5r-10629",
+      "Name": "Kitsuki Nakai",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Give a target Personality -2F, or -3F if he is dishonorable.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10629.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Magistrate",
+        "Samurai",
+        "Topaz Champion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nakai-exp-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4429",
+      "Name": "Kitsuki Nubane",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target an attachment: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4429.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Dragon Clan",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nubane-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10630",
+      "Name": "Mirumoto Bojan",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nAfter Bojan enters play, lose 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10630.jpg",
+      "Keywords": [
+        "Destined",
+        "Dragon Clan",
+        "Fallen",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bojan-entry-honor-loss"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10844",
+      "Name": "Mirumoto Hatsuto",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give a target enemy Infantry Personality or Follower -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10844.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hatsuto-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5101",
+      "Name": "Mirumoto Houken",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target a Personality with a Weapon: Straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5101.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Master of the Blade",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "houken-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10053",
+      "Name": "Mirumoto Houken",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Even if Houken is bowed: Straighten his unit. You may move him home, or, if he would be opposed, to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10053.jpg",
+      "Keywords": [
+        "Duelist",
+        "Kensai",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Favored of the Water Dragon",
+        "Master of the Blade",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "houken-exp-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5104",
+      "Name": "Mirumoto Ichizo",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy Personality: Ichizo duels him. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5104.jpg",
+      "Keywords": [
+        "Duelist",
+        "Loyal",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ichizo-exp-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10454",
+      "Name": "Mirumoto Kazuya",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)\nAfter Kazuya enters play, lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10454.jpg",
+      "Keywords": [
+        "Expendable",
+        "Kensai",
+        "Dragon Clan",
+        "Fallen",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kazuya-entry-honor-loss"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5123",
+      "Name": "Mirumoto Kojinrue",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Kojinrue or one of his Weapons, and target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5123.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kojinrue-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5125",
+      "Name": "Mirumoto Kouzei",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card with equal or lower Force: Bow it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5125.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kouzei-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10054",
+      "Name": "Mirumoto Michi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Michi is bowed: If he would be opposed, move him to the current battlefield. If he moved, straighten his unit.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10054.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "michi-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9818",
+      "Name": "Mirumoto Mitoshi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target a Personality with lower Force: Bow or straighten him.\nBattle: Target a Personality with lower Force: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9818.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitoshi-bow",
+        "mitoshi-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5148",
+      "Name": "Mirumoto Shikei",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Shikei meditates. Draw a card.\nIaijutsu Battle: Target an enemy personality: Shikei duels him. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5148.jpg",
+      "Keywords": [
+        "Duelist",
+        "Kensai",
+        "Loyal",
+        "Unique",
+        "Clan Champion",
+        "Dragon Clan",
+        "Monk",
+        "Naga",
+        "Samurai",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shikei-draw",
+        "shikei-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10286",
+      "Name": "Mirumoto Yonekura",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Elite cards contribute Force even if bowed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10286.jpg",
+      "Keywords": [
+        "Elite",
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5178",
+      "Name": "Mirumoto Yozo",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy Follower or Personality without attachments: Destroy it. Remove it from the game if it is a Lion Clan Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5178.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yozo-exp-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10633",
+      "Name": "Tamori Jinai",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Shugenja may attach and cast Spells.)\nEarth Battle: Bow a target enemy card without attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10633.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jinai-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7777",
+      "Name": "Tamori Kazushige",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kazushige has +2F while defending.\nOpen: If it is another player's turn, target one of his Personalities: Before this phase ends, straighten him. Before this turn ends, if the Personality did not assign to attack this turn, gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7777.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-while-defending-personality"
+    },
+    {
+      "Id": "oracle-l5r-7783",
+      "Name": "Tamori Muzu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your other Earth Personalities have +1F while defending.\nBattle: Target an enemy card: Bow it if it is attacking or has no attachments. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7783.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "muzu-bow"
+      ],
+      "Effect": "boost-earth-personalities-while-defending"
+    },
+    {
+      "Id": "oracle-l5r-7790",
+      "Name": "Tamori Seiken",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Once per turn, as an Absent Engage, move your unbowed Personality in a Cavalry unit to this battle. Shugenja may attach and cast Spells.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7790.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Dragon Clan",
+        "Earth",
+        "Mountaineer",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10057",
+      "Name": "Togashi Hiroto",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Hiroto enters play: Give him four +1F Fire tokens.\nBattle: Target an enemy card without attachments: Bow it. Destroy it if it is an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10057.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hiroto-fire-tokens",
+        "hiroto-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9821",
+      "Name": "Togashi Kasuru",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Battle: Discard a card to give this Tactician a Force bonus equal to the card's Focus Value.) \nBattle, Bow this card: If Kasuru is attacking, draw a card. You may discard a card to straighten Kasuru.\nBattle: If Kasuru is attacking, bow him or discard a card: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9821.jpg",
+      "Keywords": [
+        "Tactician",
+        "Monk",
+        "Tattooed",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kasuru-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8545",
+      "Name": "Togashi Korimi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Korimi has +2F while defending. \nInterrupt, Bow this card: After you Recruit Korimi, draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8545.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Earth",
+        "Monk",
+        "Soul of Togashi Oki",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "force-while-defending-personality"
+    },
+    {
+      "Id": "oracle-l5r-9822",
+      "Name": "Togashi Korimi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While Korimi is defending, negate her bowing from other players' actions.\nBattle: Target an enemy card without unbowed attachments: Bow the target. You may discard a Kiho or Tattoo Strategy; if you did, destroy the target.\nWhile Korimi is defending, negate her bowing from other players' actions.\nBattle: Target an enemy card without unbowed attachments: Bow the target. You may discard a Kiho or Tattoo Strategy; if you did, destroy the target.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9822.jpg",
+      "Keywords": [
+        "Unique",
+        "Dragon Clan",
+        "Earth",
+        "Experienced",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "korimi-exp-bow"
+      ],
+      "Effect": "negate-bow-while-defending"
+    },
+    {
+      "Id": "oracle-l5r-10222",
+      "Name": "Togashi Korimi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10222.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Dragon Clan",
+        "Earth",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "korimi-exp2-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10289",
+      "Name": "Togashi Mihato",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10289.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Monk",
+        "Tattooed",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mihato-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10847",
+      "Name": "Togashi Noboru",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Limited: Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10847.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Daimyo",
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "noboru-exp2-favor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10456",
+      "Name": "Togashi Noboru, the Shattered Star",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Noboru enters play, lose 3 Honor.\nFire Battle: Bow a target enemy Personality. Give Noboru a Force bonus equal to the target's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10456.jpg",
+      "Keywords": [
+        "Unique",
+        "Dragon Clan",
+        "Experienced",
+        "Fallen",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "noboru-shattered-star-entry-honor-loss",
+        "noboru-shattered-star-weaken"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10634",
+      "Name": "Togashi Noritada",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Invest :g3:: Give Noritada two +1F Fire tokens. (After this card enters play, you may also pay the Invest cost to get the effect, once.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10634.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "noritada-invest"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10848",
+      "Name": "Togashi Obote",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Void Limited: Discard a card to give Obote a Force bonus equal to its Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10848.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Monk",
+        "Tattooed",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "obote-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8568",
+      "Name": "Togashi Rikyou",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 3,
+      "PersonalHonor": 1,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if Rikyou is bowed, if any enemy units are at the current battlefield: Move him there. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8568.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Monk",
+        "Tattooed",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rikyou-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

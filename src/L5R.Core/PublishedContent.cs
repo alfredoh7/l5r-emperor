@@ -540,6 +540,45 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 9 of ability-bearing Personalities (issue #207): the first wave from the full
+    /// Dragon Clan Personality review -- every card wired using only primitives already built
+    /// through issue #204 (Dueling), plus a small number of new additions (the self-performer duel
+    /// extension, StraightenUnit, MoveToBattlefield, and several new Target categories).</summary>
+    public static PublishedSnapshot PersonalityWave9 { get; } = LoadPersonalityWave9();
+
+    private static PublishedSnapshot LoadPersonalityWave9()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave9.json", "personality-wave-9", requireDecks: false);
+        if(snapshot.Cards.Length != 34)
+            throw new InvalidOperationException("Unexpected personality-wave-9 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-9 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-9 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Wave 10 of ability-bearing Personalities (issue #209): the first three real cards
+    /// exercising the new "after a duel resolves" Reaction trigger (own-won-duel) -- Kitsuki
+    /// Daisuke, Experienced, Kitsuki Horume, and Kitsuki Jakuei.</summary>
+    public static PublishedSnapshot PersonalityWave10 { get; } = LoadPersonalityWave10();
+
+    private static PublishedSnapshot LoadPersonalityWave10()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave10.json", "personality-wave-10", requireDecks: false);
+        if(snapshot.Cards.Length != 3)
+            throw new InvalidOperationException("Unexpected personality-wave-10 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-10 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-10 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
