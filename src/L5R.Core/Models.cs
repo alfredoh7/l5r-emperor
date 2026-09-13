@@ -55,7 +55,14 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // wielding it, not the Item itself), or "Unit" (every card in the unit -- Singh Remnants'/
     // Elephant Cavalry's shape). Which scope applies is decided per card when it is wired, from its
     // own printed text -- the engine does not infer it from Type.
-    string? AttackDefenseKind = null, int AttackDefenseAmount = 0, string AttackDefenseScope = "Self");
+    string? AttackDefenseKind = null, int AttackDefenseAmount = 0, string AttackDefenseScope = "Self",
+    // Mandatory "after this card enters play" text with NO printed "Reaction:" prefix (core rules
+    // convention, issue #210) -- e.g. every Spider Clan "Lose X Honor" card: applied automatically,
+    // never offered as a choice, unlike an actual Reaction (which IS optional and must be offered).
+    // Checked unconditionally in OpenEntryReactionWindow, the same way Destined's own mandatory draw
+    // already is -- a data field rather than an ability id, since there is no decision to route
+    // through UseAbility at all.
+    int? EntryHonorLoss = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -266,7 +273,11 @@ public sealed class MatchState
 // TargetId or SourceIds are.
 public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion, string? CardId = null,
     string[]? SourceIds = null, int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
-    Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null, string? DeckPosition = null);
+    Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null, string? DeckPosition = null,
+    // "Choose a player" (issue #210): a player, not a card, is the target -- Kitsuki Horume's own
+    // shape ("Choose a player. He gains or loses 1 Honor."). Distinct from PlayerId (the ACTING
+    // player submitting this command).
+    int? TargetPlayerId = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,

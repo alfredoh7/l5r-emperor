@@ -131,7 +131,8 @@ var tests = new (string Name, Action Run)[]
     ("Lion Clan Personality wave 8 (issue #198): 17 cards from the full Lion Clan Personality review, wired using only already-existing primitives -- new Target categories (enemy-personality-lower-honor-than-self, personality-chi-lte-self, own-lion-or-fallen-personality, enemy-card-without-attachments, enemy-unit-card-terrain-conditional), a reused enemy-attachment category, clan-conditional Ranged Attack strength, a token-gated Additional Action grant, entry Honor loss via the real Dynasty-purchase path, and two passive Force modifiers (attacking-vs-dragon-bonus, force-with-own-terrain-at-battlefield)", LionClanPersonalityReview),
     ("Dueling (issue #204): the challenge/accept-or-refuse/reaction-window/focus-or-strike/Duelist-refocus/Focus-Effect-ordering/resolution state machine, wired against Steel on Steel and The Courtesy of the Crane -- reproducing the user's own worked example exactly (Doji Tatsuki 8 vs. Matsu Hachiro 7), plus a refusable-training-fixture decline, the four-focus cap, and both Duelist tie-break outcomes (wins alone; both lose when both/neither side has it)", Dueling),
     ("Dragon Clan Personality review (issue #207): 34 cards from a full review of all 79 catalogue Dragon Clan Personalities (69 previously unwired) -- three real self-performer Iaijutsu duels (the marquee use case for Dueling, just landed), StraightenUnit/MoveToBattlefield primitives, and several new Target categories (dishonorable-personality, enemy-card-force-lte-self, personality-force-lt-self, enemy-force-non-cavalry, personality-with-weapon, bare enemy-card, enemy-card-without-unbowed-attachments)", DragonClanPersonalityReview),
-    ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction)
+    ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction),
+    ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive)
 };
 var failed=0;
 foreach(var test in tests)
@@ -2189,16 +2190,17 @@ static void FollowerWave3Cards()
         Equal(e.State.Cards[fudo.Id].Tokens.Count(t=>t.Type=="Charging"),2,"Gives the target Fudo two Charging tokens");
     }
     {
-        // P'an Ku Cultist: entry Honor loss (own amount, -1) and a Limited ability giving a Madness token.
+        // P'an Ku Cultist: MANDATORY entry Honor loss (issue #210 -- no printed "Reaction:" prefix,
+        // so it applies automatically on entry, unlike an actual optional Reaction) and a separate
+        // Limited ability giving a Madness token.
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var host=Add(s,"training-crane-samurai",0,Zone.Home);
         var hand=Add(s,"oracle-l5r-10590",0,Zone.Hand);
         var e=MatchEngine.FromTestState(s);
         var honorBefore=e.State.Players[0].Honor;
         Accept(e,Cmd(e,"equip",id:hand.Id,sources:e.PaymentOptions(0,3).First().SourceIds,target:host.Id));
-        Equal(e.State.PendingChoice?.Type,"entryReaction");
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hand.Id,AbilityId:"panku-entry-honor-loss"));
-        Equal(e.State.Players[0].Honor,honorBefore-1,"Entering play costs 1 Honor");
+        Equal(e.State.Players[0].Honor,honorBefore-1,"Entering play costs 1 Honor, automatically -- no choice offered");
+        Check(e.State.PendingChoice is null,"No entering-play Reaction of its own left to offer");
         // panku-madness is a separate Limited ability, tested independently of the entry-reaction window.
         var s2=MatchEngine.CreateEconomyScenario().State; s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
         var cultist=Add(s2,"oracle-l5r-10590",0,Zone.Home);
@@ -4151,10 +4153,11 @@ static void DragonClanPersonalityReview()
         Equal(e.State.Players[0].Honor,honorBefore,"No Kakita Ichigiku in play -- no bonus Honor");
     }
     {
-        // Mirumoto Bojan / Mirumoto Kazuya / Togashi Noboru, the Shattered Star: entry Honor loss,
-        // reusing the exact existing pattern (Destined/Expendable/Fallen keywords need no new code)
-        // -- exercised through a real Purchase, the same way MeiyuEntersPlayReaction does, since the
-        // ability is Timing "Reaction"/Trigger "own-enters-play" and only ever legal in that window.
+        // Mirumoto Bojan / Mirumoto Kazuya / Togashi Noboru, the Shattered Star: MANDATORY entry
+        // Honor loss (issue #210 -- no printed "Reaction:" prefix, so CardDefinition.EntryHonorLoss
+        // applies it automatically on entry, the same way Destined's own draw already is, never an
+        // optional choice) -- exercised through a real Purchase, the same way
+        // MeiyuEntersPlayReaction does.
         var s=MatchEngine.CreateEconomyScenario().State;
         for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
         var bojanId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Mirumoto Bojan").Id;
@@ -4164,8 +4167,8 @@ static void DragonClanPersonalityReview()
         var honorBefore=e.State.Players[0].Honor;
         var payment=e.PaymentOptions(0,5).First();
         Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"bojan-entry-honor-loss"));
-        Equal(e.State.Players[0].Honor,honorBefore-1);
+        Equal(e.State.Players[0].Honor,honorBefore-1,"Automatic, no choice offered");
+        Check(e.State.PendingChoice is null,"Bojan has no own-enters-play Reaction of his own to offer");
     }
     {
         var s=MatchEngine.CreateEconomyScenario().State;
@@ -4177,13 +4180,11 @@ static void DragonClanPersonalityReview()
         var honorBefore=e.State.Players[0].Honor;
         var payment=e.PaymentOptions(0,5).First();
         Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"kazuya-entry-honor-loss"));
-        Equal(e.State.Players[0].Honor,honorBefore-2);
+        Equal(e.State.Players[0].Honor,honorBefore-2,"Automatic, no choice offered");
     }
     {
-        // Togashi Noboru, the Shattered Star, Experienced: entry Honor loss (exercised through a
-        // real Purchase, same as Bojan/Kazuya above), then Fire Battle: bow a target enemy
-        // Personality and take a Force bonus equal to its Force.
+        // Togashi Noboru, the Shattered Star, Experienced: the same mandatory entry Honor loss,
+        // then Fire Battle: bow a target enemy Personality and take a Force bonus equal to its Force.
         var s=MatchEngine.CreateEconomyScenario().State;
         for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
         var noboruId=PublishedContent.PersonalityWave9.Cards.Single(c=>c.Name=="Togashi Noboru, the Shattered Star").Id;
@@ -4193,8 +4194,7 @@ static void DragonClanPersonalityReview()
         var honorBefore=e0.State.Players[0].Honor;
         var payment=e0.PaymentOptions(0,9).First();
         Accept(e0,new GameCommand("purchase",0,e0.Version,CardId:cardId,SourceIds:payment.SourceIds));
-        Accept(e0,new GameCommand("useAbility",0,e0.Version,CardId:cardId,AbilityId:"noboru-shattered-star-entry-honor-loss"));
-        Equal(e0.State.Players[0].Honor,honorBefore-3);
+        Equal(e0.State.Players[0].Honor,honorBefore-3,"Automatic, no choice offered");
         // Now move on to the Battle ability, at the current battlefield.
         var s2=e0.State; s2.Phase=Phase.Battle; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0]; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
         var noboru=s2.Cards[cardId]; noboru.Zone=Zone.Battlefield; noboru.ProvinceIndex=0; // Force 3
@@ -4451,5 +4451,127 @@ static void DuelWonReaction()
         Check(e2.State.Cards[target.Id].Bowed,"Moved home bowed, not straightened");
         Equal(e2.State.Cards[target.Id].Zone,Zone.Home);
         Check(e2.State.FavorPlayerId is null,"The Favor is discarded");
+    }
+}
+static void PlayerTargetingPrimitive()
+{
+    {
+        // Generic fixture: mandatory entry Honor loss (no printed "Reaction:" prefix) -- automatic,
+        // exercised through a real Purchase, the same way Bojan/Kazuya/Noboru-Shattered-Star already are.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-entry-honor-loss-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.Players[0].Honor,honorBefore-3,"Automatic, no choice offered");
+        Check(e.State.PendingChoice is null,"No entering-play Reaction of its own to offer");
+    }
+    {
+        // Generic fixture: the "choose a player" Reaction pair -- choosing the OPPONENT to lose Honor.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-choose-player-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        var opponentHonorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"training-choose-player-lose",TargetPlayerId:1));
+        Equal(e.State.Players[1].Honor,opponentHonorBefore-1,"The chosen (opponent) player loses 1 Honor");
+        Accept(e,new GameCommand("declineReaction",1,e.Version)); // 1st pass -- priority returns to the controller
+        // Shared UsageKey: the paired "gain" half is now blocked, once per turn -- same stamp,
+        // not a separate one per catalog entry.
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"training-choose-player-gain",TargetPlayerId:1));
+        Accept(e,new GameCommand("declineReaction",0,e.Version)); // 2nd pass -- closes
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // Generic fixture: choosing OWN controller to gain Honor -- ordinary GainHonor, honorable performer.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-choose-player-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"training-choose-player-gain",TargetPlayerId:0));
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Honorable performer: own controller gains Honor normally");
+        Check(!e.State.Cards[cardId].Dishonorable,"Never dishonorable to begin with");
+    }
+    {
+        // Generic fixture: choosing OWN controller to "gain" while the performer is itself Dishonorable
+        // -- ApplyPlayerHonorChoice substitutes Rehonor instead of granting Honor (Doji Shunya's own
+        // GainHonorFromPerformer shape), the user's own worked example ("if Horume were dishonorable...
+        // the player would rehonor Horume").
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-choose-player-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        // MatchEngine.State returns a fresh copy on every access -- mutating it directly is a no-op
+        // against the live engine. Snapshot it, mutate the snapshot, then rebuild the engine from it.
+        var dishonoredState=e.State; dishonoredState.Cards[cardId].Dishonorable=true;
+        var e2=MatchEngine.FromTestState(dishonoredState);
+        var honorBefore=e2.State.Players[0].Honor;
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:cardId,AbilityId:"training-choose-player-gain",TargetPlayerId:0));
+        Equal(e2.State.Players[0].Honor,honorBefore,"Dishonorable performer: gain negated");
+        Check(!e2.State.Cards[cardId].Dishonorable,"...and rehonored instead");
+    }
+    {
+        // Generic fixture: choosing a LOSS against the performer's OWN controller is a plain Honor
+        // change regardless of the performer's own Dishonorable status -- Rehonor only substitutes for
+        // a gain targeting the performer's own controller, never for a loss.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-choose-player-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        var dishonoredState=e.State; dishonoredState.Cards[cardId].Dishonorable=true;
+        var e2=MatchEngine.FromTestState(dishonoredState);
+        var honorBefore=e2.State.Players[0].Honor;
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:cardId,AbilityId:"training-choose-player-lose",TargetPlayerId:0));
+        Equal(e2.State.Players[0].Honor,honorBefore-1,"Own controller still loses 1 Honor, plainly");
+        Check(e2.State.Cards[cardId].Dishonorable,"Still dishonorable -- Rehonor never applies to a loss");
+    }
+    {
+        // Kitsuki Horume's own real first ability: the same "choose a player, gain or lose 1 Honor"
+        // shape, exercised via a real Purchase, then his Dishonor/Rehonor interaction.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Players[0].Honor=10; // meets his printed Honor Requirement
+        for(var i=0;i<8;i++) Add(s,"training-marketplace",0,Zone.Home); // enough Gold for his 7 cost
+        var horumeId=PublishedContent.PersonalityWave10.Cards.Single(c=>c.Name=="Kitsuki Horume").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=horumeId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,7).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        var opponentHonorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"horume-lose",TargetPlayerId:1));
+        Equal(e.State.Players[1].Honor,opponentHonorBefore-1,"Horume's controller chooses the opponent to lose 1 Honor");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+
+        var s2=MatchEngine.CreateEconomyScenario().State; s2.Players[0].Honor=10;
+        for(var i=0;i<8;i++) Add(s2,"training-marketplace",0,Zone.Home);
+        var cardId2=s2.Players[0].Provinces[0].CardId!;
+        s2.Cards[cardId2].DefinitionId=horumeId; s2.Cards[cardId2].FaceUp=true;
+        var e2=MatchEngine.FromTestState(s2);
+        var payment2=e2.PaymentOptions(0,7).First();
+        Accept(e2,new GameCommand("purchase",0,e2.Version,CardId:cardId2,SourceIds:payment2.SourceIds));
+        var dishonoredState=e2.State; dishonoredState.Cards[cardId2].Dishonorable=true;
+        var e3=MatchEngine.FromTestState(dishonoredState);
+        var honorBefore=e3.State.Players[0].Honor;
+        Accept(e3,new GameCommand("useAbility",0,e3.Version,CardId:cardId2,AbilityId:"horume-gain",TargetPlayerId:0));
+        Equal(e3.State.Players[0].Honor,honorBefore,"Dishonorable Horume: gain negated");
+        Check(!e3.State.Cards[cardId2].Dishonorable,"...and rehonored instead -- 'if Horume were dishonorable dead, brought back into play, instead of gaining honor, the player would rehonor Horume'");
     }
 }

@@ -58,6 +58,8 @@
       ],
       "Focus": 0,
       "Abilities": [
+        "horume-gain",
+        "horume-lose",
         "horume-honor"
       ],
       "Effect": "none"

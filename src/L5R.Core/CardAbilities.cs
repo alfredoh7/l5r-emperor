@@ -384,8 +384,6 @@ public static class AbilityCatalog
         // decline), unlike a mandatory entry effect, so no new window shape is needed.
         ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play"),
         ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play"),
-        ["aulus-entry-honor-loss"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
-        ["panku-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
         ["thunderous-legion-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
         ["brothers-great-lake-bow"] = new("Battle", "Bow a target enemy card", "enemy-force"),
         // Dueling (issue #204): "Your performer duels the target" (unrefusable -- no printed language
@@ -418,7 +416,6 @@ public static class AbilityCatalog
         ["kinaro-exp-bow"] = new("Open", "Iaijutsu, bow: Bow a target Personality with lower Personal Honor; gain 1 Honor if you control Kakita Ichigiku", "personality-lower-honor-than-self"),
         ["nakai-exp-weaken"] = new("Open", "Give a target Personality -2F, or -3F if he is dishonorable", "personality"),
         ["nubane-bow"] = new("Open", "Target an attachment: bow it", "attachment"),
-        ["bojan-entry-honor-loss"] = new("Reaction", "After entering play, lose 1 Honor", "none", Trigger: "own-enters-play"),
         ["hatsuto-weaken"] = new("Battle", "Give a target enemy Infantry Personality or Follower -3F", "enemy-force-non-cavalry"),
         ["houken-straighten"] = new("BattleOrOpen", "Target a Personality with a Weapon: straighten his unit", "personality-with-weapon"),
         // Mirumoto Houken, Experienced: "you may move him home, or, if he would be opposed, to the
@@ -461,12 +458,10 @@ public static class AbilityCatalog
         ["kasuru-draw"] = new("Battle", "Bow Kasuru: if he is attacking, draw a card", "none"),
         ["mihato-move"] = new("Battle", "Target an enemy Personality: move him home", "enemy-personality"),
         ["noboru-exp2-favor"] = new("Limited", "Political: take the Imperial Favor", "none"),
-        ["noboru-shattered-star-entry-honor-loss"] = new("Reaction", "After entering play, lose 3 Honor", "none", Trigger: "own-enters-play"),
         ["noboru-shattered-star-weaken"] = new("Battle", "Fire: Bow a target enemy Personality; give Noboru a Force bonus equal to the target's Force", "enemy-personality"),
         ["noritada-invest"] = new("Reaction", "Invest 3 Gold: give this Personality two +1F Fire tokens", "none", Trigger: "own-enters-play"),
         ["obote-boost"] = new("Limited", "Void: discard a card to give Obote a Force bonus equal to its Focus Value", "hand"),
         ["rikyou-move"] = new("Battle", "Even if bowed: if any enemy units are at the current battlefield, move Rikyou there and straighten his unit", "none"),
-        ["kazuya-entry-honor-loss"] = new("Reaction", "After entering play, lose 2 Honor", "none", Trigger: "own-enters-play"),
         // Togashi Korimi, Experienced: the second ability's own optional "you may discard a Kiho or
         // Tattoo Strategy; if you did, destroy the target" bonus is dropped, the same "optional
         // secondary cost" simplification as Kasuru above -- the bow itself is preserved.
@@ -477,6 +472,15 @@ public static class AbilityCatalog
         // Daisuke won a duel" -- a duel is itself a complete action, and winning one is only ever
         // determined during its own resolution, so the two phrasings are the same event.
         ["daisuke-exp-draw"] = new("Reaction", "Iaijutsu: after this duel resolved, you may draw a card", "none", Trigger: "own-won-duel"),
+        // Kitsuki Horume's own FIRST ability (issue #210): "Choose a player. He gains or loses 1
+        // Honor" -- a dual-choice pair (same UsageKey shape as paid-bow/paid-straighten) rather than
+        // a new optional-Choice command field, sharing one once-per-entry use. Horume refers to
+        // himself only implicitly (his own name never actually appears in his own printed text, but
+        // this is still own-enters-play -- he is the one entering).
+        ["horume-gain"] = new("Reaction", "After Horume enters play: choose a player, he gains 1 Honor", "player", Trigger: "own-enters-play", UsageKey: "horume-gain-lose"),
+        ["horume-lose"] = new("Reaction", "After Horume enters play: choose a player, he loses 1 Honor", "player", Trigger: "own-enters-play", UsageKey: "horume-gain-lose"),
+        ["training-choose-player-gain"] = new("Reaction", "Training: after entering play, choose a player, he gains 1 Honor", "player", Trigger: "own-enters-play", UsageKey: "training-choose-player"),
+        ["training-choose-player-lose"] = new("Reaction", "Training: after entering play, choose a player, he loses 1 Honor", "player", Trigger: "own-enters-play", UsageKey: "training-choose-player"),
         // Kitsuki Horume's own second ability: "He boasts of his talents" is non-functional flavor
         // text folded into the reaction, confirmed with the user and dropped.
         ["horume-honor"] = new("Reaction", "After this duel resolved, you may gain 1 Honor", "none", Trigger: "own-won-duel"),
@@ -1018,6 +1022,14 @@ public sealed partial class MatchEngine
             Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
                 "Choose one of the enemy's provinces.");
         }
+        // "Choose a player" (issue #210): a player, not a card, is the target -- either player is
+        // always a legal choice (no restriction printed), so validation is just "is this a real
+        // player id at all."
+        else if (ability.Target == "player")
+        {
+            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a player, not a card.");
+            Require(command.TargetPlayerId is 0 or 1, "Choose a player.");
+        }
         else
         {
             Require(command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
@@ -1403,8 +1415,6 @@ public sealed partial class MatchEngine
                 break;
             }
             case "training-honor-loss-entry": GainHonor(player.Id, -2, "Training entry Honor loss", source); break;
-            case "aulus-entry-honor-loss": GainHonor(player.Id, -2, $"{Definition(source!).Name} entering play", source); break;
-            case "panku-entry-honor-loss": GainHonor(player.Id, -1, $"{Definition(source!).Name} entering play", source); break;
             case "training-item-entry-reaction": case "training-terrain-entry-reaction": GainHonor(player.Id, 1, "Training entry reaction", source); break;
             case "meiyu-fire-tokens": case "torazu-fire-tokens":
                 CreateToken(source!, "Fire", id, "Force", 1);
@@ -1677,7 +1687,6 @@ public sealed partial class MatchEngine
                 break;
             case "nakai-exp-weaken": ApplyModifier(target!, source!.Id, id, "Force", target!.Dishonorable ? -3 : -2); break;
             case "nubane-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
-            case "bojan-entry-honor-loss": GainHonor(player.Id, -1, $"{Definition(source!).Name} entering play", source); break;
             case "hatsuto-weaken": ApplyModifier(target!, source!.Id, id, "Force", -3); break;
             case "houken-straighten": StraightenUnit(target!); break;
             case "houken-exp-straighten":
@@ -1719,7 +1728,6 @@ public sealed partial class MatchEngine
                 break;
             case "mihato-move": MoveHome(target!, false); break;
             case "noboru-exp2-favor": _state.FavorPlayerId = player.Id; break;
-            case "noboru-shattered-star-entry-honor-loss": GainHonor(player.Id, -3, $"{Definition(source!).Name} entering play", source); break;
             case "noboru-shattered-star-weaken":
             {
                 var bonus = CardForce(target!);
@@ -1737,11 +1745,12 @@ public sealed partial class MatchEngine
                 MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 StraightenUnit(source!);
                 break;
-            case "kazuya-entry-honor-loss": GainHonor(player.Id, -2, $"{Definition(source!).Name} entering play", source); break;
             case "korimi-exp-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "korimi-exp2-draw": Draw(player); break;
             // "After a duel resolves" (issue #209).
             case "daisuke-exp-draw": Draw(player); break;
+            case "horume-gain": case "training-choose-player-gain": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, 1); break;
+            case "horume-lose": case "training-choose-player-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
             case "horume-honor": GainHonor(player.Id, 1, "Kitsuki Horume", source); break;
             case "jakuei-favor": _state.FavorPlayerId = player.Id; break;
             case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;

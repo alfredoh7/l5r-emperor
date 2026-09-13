@@ -31,14 +31,19 @@ ABILITIES: dict[int, list[str]] = {
     1119: ["bounty-hunter-bow"],
     10235: ["daifuke-swap-force"],
     494: ["asahina-straighten"],
-    10590: ["panku-entry-honor-loss", "panku-madness"],
+    10590: ["panku-madness"],
     2304: ["elite-sentry-destroy", "elite-sentry-straighten"],
     10236: ["furugaro-charge"],
     6404: ["rumormonger-penalty"],
     7347: ["soshi-conditional-bow"],
     10410: ["unseen-assassin-strike"],
-    10687: ["aulus-entry-honor-loss"],
     10515: ["thunderous-legion-destroy"],
+}
+# Mandatory "after this card enters play, lose X Honor" -- no printed "Reaction:" prefix (issue
+# #210), so this is a data field (CardDefinition.EntryHonorLoss), not an ability id at all.
+ENTRY_HONOR_LOSS: dict[int, int] = {
+    10590: 1,  # P'an Ku Cultist
+    10687: 2,  # Aulus
 }
 EFFECTS: dict[int, str] = {
     10902: "boost-followers-in-unit",   # Senior Infantry Legion
@@ -88,6 +93,8 @@ def package(card_ids: list[str], root: Path = ROOT) -> dict:
             fields["Text"] = TEXT[oracle_id]
         fields["Abilities"] = ABILITIES.get(oracle_id, [])
         fields["Effect"] = EFFECTS.get(oracle_id, "none")
+        if oracle_id in ENTRY_HONOR_LOSS:
+            fields["EntryHonorLoss"] = ENTRY_HONOR_LOSS[oracle_id]
         if oracle_id in ATTACH_REQUIRES_KEYWORD:
             fields["AttachRequiresKeyword"] = ATTACH_REQUIRES_KEYWORD[oracle_id]
         if oracle_id in ATTACH_EXCLUDES_KEYWORD:

@@ -291,9 +291,11 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10451": "Needs a conditional zero-cost Purchase gate tied to controlling a specific named Ring, and a delayed 'increase the Honor gained from your next Proclaim this turn' effect -- neither exists; every current Gold discount is either clan-alignment-based (Clan Discount) or a fixed printed amount (Tamori Shinji's own still-unbuilt case below), never conditional on board state.",
     "oracle-l5r-10452": "Needs a deck-search primitive (look at the top three cards of a Fate deck, conditionally take one matching a printed criterion, put the rest back in chosen order) -- an established, still-unbuilt gap (deck search).",
     # Kitsuki Daisuke, Experienced and Kitsuki Jakuei published in wave 10 (issue #209) once the
-    # after-duel-won Reaction trigger landed. Kitsuki Horume's own SECOND ability (gain 1 Honor
-    # after winning a duel) is published there too; only his first (below) remains blocked.
-    "oracle-l5r-4412": "Needs a 'choose a player' targeting primitive for Horume's own entering-play Reaction (the same gap deferred for The Courtesy of the Crane's own base ability) -- his second ability (gain 1 Honor after winning a duel) is published in wave 10.",
+    # after-duel-won Reaction trigger landed. Kitsuki Horume's own second ability (gain 1 Honor
+    # after winning a duel) published there too, and his first ability (the "choose a player, he
+    # gains or loses 1 Honor" entering-play Reaction) was unblocked immediately afterward by the
+    # new "choose a player" targeting primitive (issue #210) -- both of his abilities are wired now,
+    # no remaining blocker note for him.
     "oracle-l5r-10052": "Needs the Overconfident keyword mechanic (the Defender may draw a card after an Overconfident card enters or leaves play) -- not built at all -- plus a conditional keyword-suppression tied specifically to another player's Clan.",
     "oracle-l5r-4446": "Needs a new Reaction trigger for 'after an action targets a Samurai' (a card-targeted, not action-classified, trigger -- a different shape from every existing Reaction window) and a duel-refusal override tied to a specific pending challenge -- both novel.",
     "oracle-l5r-9817": "Needs an ability-suppression mechanism ('a target Personality's printed abilities may not be used') -- distinct from the existing keyword-suppression gap (Ikoma Aimi's own base printing, issue #198) and not built either.",

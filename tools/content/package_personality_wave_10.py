@@ -18,10 +18,9 @@ PROFILE = "personality-wave-10"
 
 ABILITIES: dict[int, list[str]] = {
     4407: ["daisuke-exp-draw"],
-    # Only Horume's own second ability (the duel-won Honor gain) is wired this pass; his first
-    # ("After Horume enters play: Choose a player. He gains or loses 1 Honor.") still needs a
-    # not-yet-built "choose a player" targeting primitive.
-    4412: ["horume-honor"],
+    # Both of Horume's own abilities are wired: the entering-play "choose a player, gain or lose 1
+    # Honor" (issue #210's own new player-targeting primitive) and the duel-won Honor gain.
+    4412: ["horume-gain", "horume-lose", "horume-honor"],
     4416: ["jakuei-favor", "jakuei-bow", "jakuei-bow-favor"],
 }
 
