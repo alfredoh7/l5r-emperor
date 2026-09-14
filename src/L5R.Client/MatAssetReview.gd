@@ -5,7 +5,7 @@ const MAT_SIZE := Vector2(1.8, 1.8 * 941.0 / 1672.0)
 var cameras: Array[Camera3D] = []
 var viewports: Array[SubViewport] = []
 var cloth_material: ShaderMaterial
-var detail_enabled := true
+var detail_enabled := false
 var target := Vector3.ZERO
 var view_scale := 1.0
 var overhead := false
@@ -50,7 +50,7 @@ func _ready() -> void:
         column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
         pair.add_child(column)
         var label := Label.new()
-        label.text = "CURRENT · single painted plane" if not proposed else "PROPOSED · same artwork / separate fabric & frame"
+        label.text = "ORIGINAL · 1672 × 941" if not proposed else "TOPAZ DERIVATIVE · 6688 × 3764 / separate frame prototype"
         label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
         label.add_theme_font_size_override("font_size", 18)
         column.add_child(label)
@@ -94,7 +94,7 @@ func build_surface(viewport: SubViewport, proposed: bool) -> void:
     var fabric := ShaderMaterial.new()
     fabric.shader = load("res://Art/MatFidelity/fabric.gdshader")
     fabric.set_shader_parameter("artwork", load("res://Art/navy-mat-v4.png"))
-    fabric.set_shader_parameter("detail_strength", 0.13 if proposed else 0.0)
+    fabric.set_shader_parameter("detail_strength", 0.0)
     if proposed:
         var model := load("res://Art/MatFidelity/navy-mat-separated.tscn").instantiate() as Node3D
         viewport.add_child(model)
@@ -144,7 +144,7 @@ func update_cameras() -> void:
         camera.position = target + (Vector3(0, 2, 0) if overhead else Vector3(0, 1.4, 1.65))
         camera.look_at(target, Vector3.FORWARD if overhead else Vector3.UP)
     if is_instance_valid(status):
-        status.text = "Wheel: zoom · Drag: pan · Esc: close  |  Fine threads: %s  |  Original art: 1672 × 941; not a 4K upscale" % ("on" if detail_enabled else "off")
+        status.text = "Wheel: zoom · Drag: pan · Esc: close  |  Extra threads: %s  |  Lossless WebP · source-matched UVs · frame prototype only" % ("on" if detail_enabled else "off")
 
 func _input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed:

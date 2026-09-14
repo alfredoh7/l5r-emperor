@@ -1,7 +1,7 @@
 [gd_resource type="ShaderMaterial" load_steps=4 format=3]
 
 [ext_resource type="Shader" path="res://Art/MatFidelity/frame.gdshader" id="1"]
-[ext_resource type="Texture2D" path="res://Art/navy-mat-v4.png" id="2"]
+[ext_resource type="Texture2D" path="res://Art/navy-mat-topaz-4x.webp" id="2"]
 [ext_resource type="Texture2D" path="res://Art/table_walnut-lacquer-generated.png" id="3"]
 
 [resource]

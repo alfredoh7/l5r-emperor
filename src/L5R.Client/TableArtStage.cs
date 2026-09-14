@@ -104,9 +104,15 @@ public partial class TableArtStage : Node3D
                     }
                     """ };
                 var material = new ShaderMaterial { Shader = ReviewMode ? shader : GD.Load<Shader>("res://Art/navy-table.gdshader") };
-                if (!ReviewMode) material.SetShaderParameter("plate_texture", GD.Load<Texture2D>("res://Art/navy-mat-v4.png"));
                 if (!ReviewMode)
                 {
+                    // Retain the original only for matched native fidelity captures.
+                    var matPath = OS.GetCmdlineUserArgs().Contains("--mat-original-review")
+                        ? "res://Art/navy-mat-v4.png" : "res://Art/navy-mat-topaz-4x.webp";
+                    var mat = GD.Load<Texture2D>(matPath);
+                    if (mat is null) throw new InvalidOperationException($"The playable mat texture is missing: {matPath}");
+                    material.SetShaderParameter("plate_texture", mat);
+                    GD.Print($"MAT_TEXTURE: {matPath} {mat.GetWidth()}x{mat.GetHeight()}; extra weave opt-in only.");
                     if (OS.GetCmdlineUserArgs().Contains("--mat-detail-preview"))
                         material.SetShaderParameter("fabric_detail_strength", .13f);
                     material.SetShaderParameter("lantern_texture", GD.Load<Texture2D>("res://Art/tavern-lantern.png"));
