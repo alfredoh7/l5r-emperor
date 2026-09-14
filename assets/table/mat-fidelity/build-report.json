@@ -1,0 +1,25 @@
+{
+  "objects": [
+    "FabricInsert",
+    "WoodenFrame"
+  ],
+  "dimensions_metres": [
+    1.8,
+    1.0130382775119617,
+    0.036
+  ],
+  "fabric_uv_bounds": [
+    0.016,
+    0.028,
+    0.984,
+    0.972
+  ],
+  "source": "assets/table/phase-8/navy-mat-v4.png",
+  "source_resolution": [
+    1672,
+    941
+  ],
+  "geometry_vertices": 28,
+  "geometry_faces_before_solidify": 25,
+  "glb_bytes": 5948
+}

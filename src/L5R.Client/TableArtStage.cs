@@ -107,6 +107,8 @@ public partial class TableArtStage : Node3D
                 if (!ReviewMode) material.SetShaderParameter("plate_texture", GD.Load<Texture2D>("res://Art/navy-mat-v4.png"));
                 if (!ReviewMode)
                 {
+                    if (OS.GetCmdlineUserArgs().Contains("--mat-detail-preview"))
+                        material.SetShaderParameter("fabric_detail_strength", .13f);
                     material.SetShaderParameter("lantern_texture", GD.Load<Texture2D>("res://Art/tavern-lantern.png"));
                     material.SetShaderParameter("weathered_texture", GD.Load<Texture2D>("res://Art/tavern-lantern-weathered.png"));
                 }

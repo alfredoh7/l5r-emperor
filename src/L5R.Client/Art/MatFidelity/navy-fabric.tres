@@ -1,0 +1,10 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://Art/MatFidelity/fabric.gdshader" id="1"]
+[ext_resource type="Texture2D" path="res://Art/navy-mat-v4.png" id="2"]
+
+[resource]
+resource_local_to_scene = true
+shader = ExtResource("1")
+shader_parameter/artwork = ExtResource("2")
+shader_parameter/detail_strength = 0.13
