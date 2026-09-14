@@ -883,7 +883,7 @@ public sealed partial class MatchEngine
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
-        +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0)
+        +(Definition(card).Effect=="force-max-dead-pile"?Math.Max(DeadCount(0),DeadCount(1)):0)
         // Dragon Clan review (issue #207): Tamori Kazushige / Togashi Korimi -- "+2F while defending",
         // the same shape FollowerForce's own force-while-defending already covers, just for a
         // Personality directly rather than an attached Follower.
@@ -902,6 +902,14 @@ public sealed partial class MatchEngine
         // card rather than the granter.
         +(IsDefendingUnit(card)&&Keyword(card,"Earth")?_state.Cards.Values.Count(c=>c.Id!=card.Id&&c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Definition(c).Effect=="boost-earth-personalities-while-defending"&&Keyword(c,"Earth")):0)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    // "Dead" (core rules Glossary): a status a card carries once it enters Zone.Dead, distinct from
+    // merely being discarded (Zone.DynastyDiscard/FateDiscard) -- both live in the same client-facing
+    // PlayerView.Discard array (see GetView), told apart there by each CardView's own Zone. This is
+    // the single shared source of truth for "how many of this player's own Personalities are dead
+    // right now" -- Moto Shunsuke's own force-max-dead-pile Effect above, PlayerView.DeadCount below,
+    // and any future card keyed off the same count (a real, recurring Unicorn Clan theme) all read
+    // through here, rather than each re-deriving its own filter over _state.Cards.
+    private int DeadCount(int playerId) => _state.Cards.Values.Count(c => c.Zone == Zone.Dead && c.OwnerId == playerId && Definition(c).Type == CardType.Personality);
     // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
     // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
     // Item's bonus always targets the Personality, never itself.

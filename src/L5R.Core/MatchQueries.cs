@@ -28,6 +28,7 @@ public sealed partial class MatchEngine
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
                 player.ProclaimUsedTurn==_state.TurnNumber,player.DishonorLossPending,
                 owned.Where(c=>c.Zone==Zone.RemovedFromGame).Select(c=>ViewCard(c)).ToArray(),
+                DeadCount(player.Id),
                 // Dueling (issue #204): a Focused card is private to its own owner until the duel's
                 // own Struck reveal -- omitted entirely from an opponent's own view until then (Hand's
                 // own convention; a placeholder would need its own stable-but-anonymous id scheme,

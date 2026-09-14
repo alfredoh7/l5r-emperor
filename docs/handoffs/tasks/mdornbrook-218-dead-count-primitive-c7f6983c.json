@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "New shared DeadCount(playerId) helper on MatchEngine -- the single source of truth for a player's own count of Zone.Dead Personalities -- and a new PlayerView.DeadCount field exposing that same authoritative aggregate to the client (the same convention CardView.UnitForce already established), for a future UI counter and any card keyed off 'count of dead' (a real, recurring Unicorn Clan theme; Moto Shunsuke's own already-published force-max-dead-pile Effect is the first consumer, refactored to read through the shared helper instead of its own inline filter).",
+  "validation": "dotnet build (whole solution, all 8 projects): clean. dotnet run --project tests/L5R.Core.Tests: 131/131 core, 34/34 published, 8/8 deck-format. dotnet run --project tests/L5R.AI.Tests: 13/13. dotnet run --project tests/L5R.Server.Tests: 5/5. dotnet run --project tests/L5R.Client.Transport.Tests: 4/4. python3 -m unittest discover -s tools/content / tools/collaboration: 121/121, 43/43.",
+  "remaining": "Wiring the Overconfident keyword mechanic itself (may-draw offers on entering/leaving play) is deferred -- a separate, larger piece of work; the 'leaves play' half in particular touches ~19 call sites across battle resolution, dueling, and ability execution and needs its own dedicated design pass.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/221",
+  "branch": "mdornbrook/218-dead-count-primitive",
+  "updated": "2026-09-14T08:37:03.733875+00:00"
+}
