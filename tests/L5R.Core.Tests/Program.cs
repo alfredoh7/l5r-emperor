@@ -134,7 +134,8 @@ var tests = new (string Name, Action Run)[]
     ("'After a duel resolves' Reaction trigger (issue #209): own-won-duel, scoped to the one specific card that won -- a duel is a single, complete action from challenge to consequences, the same shape own-enters-play already uses for entering-play Reactions, closing on two consecutive passes. Kitsuki Daisuke, Experienced (draw a card, used); Kitsuki Horume (gain 1 Honor, declined); Kitsuki Jakuei (take the Imperial Favor, used); plus Jakuei's own separate Political Battle ability, a dual-choice pair (bow only / bow-and-discard-the-Favor-to-also-move-home-bowed) gated on actually controlling the Favor", DuelWonReaction),
     ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive),
     ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive),
-    ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions)
+    ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
+    ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive)
 };
 var failed=0;
 foreach(var test in tests)
@@ -1451,6 +1452,171 @@ static void MotoShunsukeForceBonusAndMakeDead()
     Reject(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:ownDiscarded.Id,AbilityId:"shunsuke-make-dead"));
     Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:shunsuke2.Id,TargetId:discardedEnemy.Id,AbilityId:"shunsuke-make-dead"));
     Equal(e2.State.Cards[discardedEnemy.Id].Zone,Zone.Dead,"Becomes honorably dead");
+}
+static void OverconfidentPrimitive()
+{
+    {
+        // Enters play via Purchase: opponent offered a draw, and may accept.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-overconfident-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw");
+        Equal(e.State.PendingChoice?.PlayerId,1,"The enemy/opponent is offered the draw, never the controller");
+        Equal(e.State.PriorityPlayerId,1);
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,new GameCommand("overconfidentDraw",1,e.Version,Choice:"draw"));
+        Equal(e.State.Players[1].Hand.Count,handBefore+1);
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.PriorityPlayerId,0,"Resumes to the purchasing player -- Dynasty-phase Purchase never cedes priority on its own");
+    }
+    {
+        // Same entry, but declined -- always optional.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-marketplace",0,Zone.Home);
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId="training-overconfident-personality"; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,new GameCommand("overconfidentDraw",1,e.Version,Choice:"decline"));
+        Equal(e.State.Players[1].Hand.Count,handBefore,"Declining is legal");
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // Leaves play: dying while actually InPlay (here, a Ranged Attack destroying it outright)
+        // queues the offer for the OTHER player -- not the performer's own controller specifically.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var target=Add(s,"training-overconfident-personality",1,Zone.Battlefield,province:0); // Force 2, no Followers
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:target.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead);
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw");
+        Equal(e.State.PendingChoice?.PlayerId,0,"Target's own owner is player 1, so player 0 is offered");
+        Accept(e,new GameCommand("overconfidentDraw",0,e.Version,Choice:"draw"));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1);
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // A province/deck discard (DestroyProvince) never calls MarkDead -- the card was never in
+        // play at all, so no offer, even though it carries the keyword.
+        var s=Battle(5,0,0).State;
+        var provinceCardId=s.Players[1].Provinces[0].CardId!;
+        s.Cards[provinceCardId].DefinitionId="training-overconfident-personality";
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[provinceCardId].Zone,Zone.DynastyDiscard,"Discarded, never entered play");
+        Check(e.State.PendingOverconfidentDraws.Count==0,"DestroyProvince never routes through MarkDead");
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // MakeDead applied to a card ALREADY sitting in a discard pile is not "leaving play" --
+        // InPlay is false the whole time, so no offer, matching the user's own carve-out.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var tokenMaster=Add(s,"training-token-master",0,Zone.Home);
+        var discarded=Add(s,"training-overconfident-personality",1,Zone.DynastyDiscard);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tokenMaster.Id,TargetId:discarded.Id,AbilityId:"training-make-dead"));
+        Equal(e.State.Cards[discarded.Id].Zone,Zone.Dead);
+        Check(e.State.PendingOverconfidentDraws.Count==0,"Already discarded, not in play, when it became dead");
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // Bayushi Mugoshi: a real card with BOTH Overconfident and his own entering-play Reaction --
+        // his own entryReaction window closes first (used, then both decline), and only THEN, via
+        // PassReaction's own close hook, does the Overconfident offer open for the opponent.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Add(s,"training-marketplace",0,Zone.Home);
+        var mugoshiId=PublishedContent.PersonalityWave13.Cards.Single(c=>c.Name=="Bayushi Mugoshi").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=mugoshiId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        var opponentHonorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:cardId,AbilityId:"mugoshi-slander",TargetPlayerId:1));
+        Equal(e.State.Players[1].Honor,opponentHonorBefore-1,"Slandered player loses 1 Honor");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw","Chains into the Overconfident offer once the entry-reaction window itself closes");
+        Equal(e.State.PendingChoice?.PlayerId,1);
+        Accept(e,new GameCommand("overconfidentDraw",1,e.Version,Choice:"decline"));
+        Check(e.State.PendingChoice is null);
+    }
+    {
+        // A tie battle destroys both armies fully -- Overconfident casualties on BOTH sides queue
+        // separate, sequential offers, each to the other side's own opponent.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+        s.Players[1].Provinces[0].Strength=6;
+        var attackerUnit=Add(s,"training-overconfident-personality",0,Zone.Battlefield,province:0); // Force 2
+        var defenderUnit=Add(s,"training-overconfident-personality",1,Zone.Battlefield,province:0); // Force 2, tie
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[attackerUnit.Id].Zone,Zone.Dead);
+        Equal(e.State.Cards[defenderUnit.Id].Zone,Zone.Dead);
+        Equal(e.State.PendingOverconfidentDraws.Count,1,"One offer already opened; one still queued");
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw");
+        var firstOffered=e.State.PendingChoice!.PlayerId;
+        Accept(e,new GameCommand("overconfidentDraw",firstOffered,e.Version,Choice:"decline"));
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw","A second, separate offer opens for the other player");
+        Check(e.State.PendingChoice!.PlayerId!=firstOffered,"Each player is offered their own opponent's casualty, not the same one twice");
+        Accept(e,new GameCommand("overconfidentDraw",e.State.PendingChoice!.PlayerId,e.Version,Choice:"decline"));
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.Phase,Phase.Dynasty,"Both offers drained; the deferred battle-resolution tail (FinishBattleReturnHomeAndTransition) still completes the phase transition");
+    }
+    {
+        // Kitsuki Minori: suppressed entirely (in and out of play) while the OTHER player is Lion
+        // Clan -- the engine's own default economy-scenario matchup (player 0 Crane, player 1 Lion).
+        var s=MatchEngine.CreateEconomyScenario().State;
+        Equal(s.Players[1].Clan,"Lion","Sanity: default opponent is Lion Clan");
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var minoriId=PublishedContent.PersonalityWave13.Cards.Single(c=>c.Name=="Kitsuki Minori").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=minoriId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,5).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Check(e.State.PendingOverconfidentDraws.Count==0,"Overconfident suppressed vs. a Lion opponent");
+        Check(e.State.PendingChoice is null,"No own entry-reaction either, so Purchase's tail resolves with no window at all");
+    }
+    {
+        // Same purchase, but against a non-Lion opponent -- Overconfident stands.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Players[1].Clan="Crane";
+        for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+        var minoriId=PublishedContent.PersonalityWave13.Cards.Single(c=>c.Name=="Kitsuki Minori").Id;
+        var cardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[cardId].DefinitionId=minoriId; s.Cards[cardId].FaceUp=true;
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,5).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:cardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"overconfidentDraw","Overconfident stands vs. a non-Lion opponent");
+        Equal(e.State.PendingChoice?.PlayerId,1);
+    }
+    {
+        // Asahina Tsugio / Asako Kijo: raises OTHER players' own max hand size by 1 -- never the
+        // controller's own. Tsugio, controlled by player 1, raises player 0's own threshold to 9.
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var tsugioId=PublishedContent.PersonalityWave13.Cards.Single(c=>c.Name=="Asahina Tsugio").Id;
+        Add(s,tsugioId,1,Zone.Home);
+        while(s.Players[0].Hand.Count<9) Add(s,"training-rally",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Players[0].Hand.Count,10,"One over the raised threshold of 9 (8 printed +1 from Tsugio's opponent) after the End Phase draw");
+        Equal(e.State.PendingChoice!.Type,"discardHand");
+        Equal(e.State.PendingChoice!.Prompt,"Discard 1 card(s) to return to 9.");
+        Accept(e,Cmd(e,"discardHand",cards:[e.State.Players[0].Hand[0]]));
+        Equal(e.State.Players[0].Hand.Count,9);
+    }
 }
 static void CarpenterCastleAttack()
 {

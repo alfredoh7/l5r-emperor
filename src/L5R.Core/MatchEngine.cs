@@ -136,6 +136,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
+            if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -283,6 +284,7 @@ public sealed partial class MatchEngine
         card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
+        QueueOverconfidentDraw(card);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
@@ -292,7 +294,10 @@ public sealed partial class MatchEngine
             _state.ConsecutivePasses=0;
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
-        else OpenEntryReactionWindow(command.PlayerId,card);
+        // Dynasty-phase purchasing never cedes priority away from the active player on its own
+        // (they may keep buying) -- so unlike RecruitReserve below, an Overconfident window opened
+        // here must resume back to the SAME purchasing player, not their opponent.
+        else if(!OpenEntryReactionWindow(command.PlayerId,card)) OpenOverconfidentDrawWindow(command.PlayerId);
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -325,6 +330,7 @@ public sealed partial class MatchEngine
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("reserveRecruited",$"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.",command.PlayerId,card.Id);
+        QueueOverconfidentDraw(card);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
@@ -335,6 +341,7 @@ public sealed partial class MatchEngine
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
         else if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        else if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
         // An ordinary action (never itself an Additional Action) forfeits any of this player's own
         // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
         _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
@@ -352,8 +359,14 @@ public sealed partial class MatchEngine
         // Honorable before destruction: this is what spares the controller the dishonorable-death
         // Honor penalty applied generally in MarkDead.
         Rehonor(card);
+        // Seppuku is an Open action, cutting through the normal priority gate (see Apply()) -- it
+        // never touches priority on its own, so an Overconfident window it triggers (issue #223,
+        // MarkDead already queued it inside DestroyUnits below) must resume back to whoever already
+        // held it, not to either specific player.
+        var resumeTo=_state.PriorityPlayerId;
         DestroyUnits([card]);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
+        OpenOverconfidentDrawWindow(resumeTo);
     }
 
     // viaReserve (issue #216, Tamori Shinji): true only for a Reserve recruit made as an absent
@@ -454,12 +467,18 @@ public sealed partial class MatchEngine
         {
             _state.PendingChoice=null;
             _state.ConsecutivePasses=0;
+            Emit("reactionClosed","Both players passed; the reaction window closed.");
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
             // opponent, so the normal "any action cedes priority" rule still holds once it closes.
-            _state.PriorityPlayerId=pending.ActingPlayerId ?? _state.ActivePlayerId;
-            Emit("reactionClosed","Both players passed; the reaction window closed.");
+            var resumeTo=pending.ActingPlayerId ?? _state.ActivePlayerId;
+            // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
+            // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction
+            // window and being slandered elsewhere, a Reaction that destroyed something, etc.) before
+            // finally resuming where this window itself would have.
+            if(OpenOverconfidentDrawWindow(resumeTo)) return;
+            _state.PriorityPlayerId=resumeTo;
         }
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
     }
@@ -695,6 +714,17 @@ public sealed partial class MatchEngine
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
         foreach(var p in _state.Players) { p.TerrainPlayedThisBattle=false; p.TerrainDestroyedThisBattle=false; }
         if(_state.WinnerId is not null) return;
+        // Overconfident (issue #223): a chance to react to anything this battle's own resolution
+        // (DestroyUnits, above) just killed, before the battle actually closes out. Deferred here,
+        // by the same "let ResolveOverconfidentDraw recognize the state shape" convention as its own
+        // resume logic below, rather than stashing attacker/provinceIndex for a callback.
+        if(OpenOverconfidentDrawWindow(attacker)) return;
+        FinishBattleReturnHomeAndTransition(attacker);
+    }
+    // Split out so ResolveOverconfidentDraw's own deferred resume (see above) can re-enter exactly
+    // here once every queued Overconfident offer this battle produced has been resolved.
+    private void FinishBattleReturnHomeAndTransition(int attacker)
+    {
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -1041,8 +1071,57 @@ public sealed partial class MatchEngine
     // path to "becoming dead" -- combat destruction or otherwise -- must go through.
     private void MarkDead(CardInstance card)
     {
+        // Overconfident (issue #223): "leaves play" specifically means dying WHILE actually in play --
+        // MakeDead's own path (a card already sitting in a discard pile, not in play, that later
+        // becomes dead) does not qualify, matching the user's own "discarded from provinces/deck does
+        // not trigger this" carve-out. Checked before the Zone changes, using the card's own status
+        // right up to the moment it actually died.
+        if(InPlay(card)) QueueOverconfidentDraw(card);
         card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
         if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
+    }
+    // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
+    // Overconfident card enters or leaves play" -- both triggers share this one queuing helper (the
+    // entering-play half is called directly from Purchase/RecruitReserve, the leaves-play half from
+    // MarkDead above) and the one draining pair below.
+    private void QueueOverconfidentDraw(CardInstance card)
+    {
+        if(Definition(card).Type==CardType.Personality && Keyword(card,"Overconfident")) _state.PendingOverconfidentDraws.Add(1-card.OwnerId);
+    }
+    // Drains one queued offer at a time -- called at every point the engine is about to hand priority
+    // back normally, whether because no other reaction window ever opened here, or because one that
+    // did just closed (see PassReaction). closesTo is where control resumes once the WHOLE queue (not
+    // just this one offer) is empty.
+    private bool OpenOverconfidentDrawWindow(int closesTo)
+    {
+        if(_state.PendingOverconfidentDraws.Count==0) return false;
+        var playerId=_state.PendingOverconfidentDraws[0];
+        _state.PendingOverconfidentDraws.RemoveAt(0);
+        _state.PendingChoice=new("overconfidentDraw",playerId,null,"Overconfident: you may draw a card.",closesTo);
+        _state.PriorityPlayerId=playerId;
+        Emit("overconfidentDrawOffered",$"{Player(playerId).Name} may draw a card (Overconfident).",playerId);
+        return true;
+    }
+    private void ResolveOverconfidentDraw(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="overconfidentDraw" && command.PlayerId==pending.PlayerId && command.Choice is "draw" or "decline","Choose whether to draw a card.");
+        if(command.Choice=="draw") Draw(Player(command.PlayerId));
+        _state.PendingChoice=null;
+        var resumeTo=pending.ActingPlayerId!.Value;
+        if(OpenOverconfidentDrawWindow(resumeTo)) return;
+        // FinishBattleResolution's own tail (FinishBattleReturnHomeAndTransition) defers itself for
+        // this window -- recognized generically by the state shape a resolved-but-not-yet-transitioned
+        // battle is always left in (Phase still Battle, but CurrentBattleProvince already cleared),
+        // rather than a stashed callback (MatchState stays a plain, copyable state bag). resumeTo IS
+        // attacker here: FinishBattleResolution always passes its own attacker as closesTo.
+        if(_state.Phase==Phase.Battle && _state.CurrentBattleProvince is null && _state.WinnerId is null)
+        {
+            FinishBattleReturnHomeAndTransition(resumeTo);
+            return;
+        }
+        _state.PriorityPlayerId=resumeTo;
+        _state.ConsecutivePasses=0;
     }
     private void Rehonor(CardInstance card) => card.Dishonorable=false;
     // Dishonor (core rules Glossary, issue #186): gives a Personality the Dishonorable status --
@@ -1121,19 +1200,24 @@ public sealed partial class MatchEngine
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
     }
 
+    // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
+    // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
+    // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
+    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
     private void EndTurn()
     {
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
         Draw(player);
-        if(player.Hand.Count>8) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-8} card(s) to return to eight.");
+        var maxHand=MaxHandSize(player.Id);
+        if(player.Hand.Count>maxHand) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-maxHand} card(s) to return to {maxHand}.");
         else FinishTurn();
     }
     private void DiscardHand(GameCommand command)
     {
-        var player=Player(command.PlayerId); var ids=command.CardIds??[];
-        Require(ids.Length==player.Hand.Count-8 && ids.Distinct().Count()==ids.Length && ids.All(player.Hand.Contains),"Select exactly enough different cards from your hand to return to eight.");
+        var player=Player(command.PlayerId); var ids=command.CardIds??[]; var maxHand=MaxHandSize(command.PlayerId);
+        Require(ids.Length==player.Hand.Count-maxHand && ids.Distinct().Count()==ids.Length && ids.All(player.Hand.Contains),$"Select exactly enough different cards from your hand to return to {maxHand}.");
         foreach(var id in ids) { player.Hand.Remove(id); var card=Card(id); card.Zone=Zone.FateDiscard; card.FaceUp=true; Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name}.",player.Id,id); }
         _state.PendingChoice=null; FinishTurn();
     }

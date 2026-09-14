@@ -304,6 +304,12 @@ public sealed class MatchState
     // card's own Bowed status in between). Unused, and safe to leave stale, for Tamori Ruya's own
     // window (a different, unrelated Target shape -- see PersonalityAtSourceLocation).
     public List<string> BowReactionCandidateIds { get; set; } = [];
+    // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
+    // Overconfident card enters or leaves play" -- both triggers just queue the ONE beneficiary
+    // player id here (QueueOverconfidentDraw), drained one at a time (OpenOverconfidentDrawWindow)
+    // at every point the engine is about to hand priority back normally, whether that is because no
+    // other reaction window ever opened, or because one that did just closed (see PassReaction).
+    public List<int> PendingOverconfidentDraws { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
