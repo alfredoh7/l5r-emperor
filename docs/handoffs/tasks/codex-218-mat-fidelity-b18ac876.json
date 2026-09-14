@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Integrated the approved Topaz mat as a 6688x3764 lossless WebP default, with mipmaps and verified source provenance; refreshed native source-to-game comparisons and retained the separate Blender frame as a review prototype.",
+  "validation": "Pillow decoded-pixel identity verified; 19,905,220 bytes vs 77,313,066-byte master. Native Godot 4.7.2 import passed. Final client build 0 warnings/errors. 1920x1080 fit/cloth/frame/top asset comparisons inspected; actual 3440x1440 overview and max 2.0 zoom, plus 1920x1080 gold max through Play Latest.command, passed existing native camera/pan/card-click/HUD/modal probes with no resource/shader errors. Master untouched. Diff whitespace check passed.",
+  "remaining": "PR 219 pending fresh CI and review; prior Mac CI headless importer crashed on a worker-thread notification during font import (run 34822273287), while native import/render passed. Physical frame remains a review prototype pending its visual pass and live integration. No Windows graphical test or full performance profile. Future room lighting and selectable mats remain separate scope.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/218",
+  "branch": "codex/218-mat-fidelity",
+  "updated": "2026-09-14T17:16:37.728945+00:00"
+}

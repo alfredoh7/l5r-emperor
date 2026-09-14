@@ -1,0 +1,32 @@
+{
+  "master": {
+    "filename": "enhanced_navy-mat-v4.png",
+    "dimensions": [
+      13376,
+      7528
+    ],
+    "bytes": 77313066,
+    "sha256": "1d059c1d5f87c9144423f321431f60facb896b95dcd54a95e87d17d94cab0632",
+    "provenance": "User supplied Topaz 8x upscale; master preserved outside Git."
+  },
+  "runtime": {
+    "path": "src/L5R.Client/Art/navy-mat-topaz-4x.webp",
+    "dimensions": [
+      6688,
+      3764
+    ],
+    "bytes": 19905220,
+    "sha256": "932b3cadd4deea8352fe37b90b01e15b1e833f2d7757a773cbc23a172b47bc32",
+    "pixel_sha256": "f6cf8ab30df33f2e32396ff3092f48205649d9dedeb023ecf4e547c65b63e0a6",
+    "encoding": "Lossless WebP, method 4",
+    "resampling": "Lanczos",
+    "pillow": "12.3.0",
+    "decoded_pixel_match": true
+  },
+  "godot": {
+    "compression": "lossless",
+    "mipmaps": true,
+    "size_limit": 0,
+    "extra_procedural_weave": "off by default"
+  }
+}
