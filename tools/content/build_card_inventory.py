@@ -299,7 +299,10 @@ BLOCKERS: dict[str, str] = {
     # gains or loses 1 Honor" entering-play Reaction) was unblocked immediately afterward by the
     # new "choose a player" targeting primitive (issue #210) -- both of his abilities are wired now,
     # no remaining blocker note for him.
-    "oracle-l5r-10052": "Needs the Overconfident keyword mechanic (the Defender may draw a card after an Overconfident card enters or leaves play) -- not built at all -- plus a conditional keyword-suppression tied specifically to another player's Clan.",
+    # Kitsuki Minori (oracle-l5r-10052) published in personality-wave-13 (issue #223) once the
+    # Overconfident keyword mechanic landed -- her own conditional keyword-suppression ("does not
+    # have Overconfident while any other player is Lion Clan") is wired too, as a subtractive live
+    # Keyword() check. No remaining blocker note for her.
     "oracle-l5r-4446": "Needs a new Reaction trigger for 'after an action targets a Samurai' (a card-targeted, not action-classified, trigger -- a different shape from every existing Reaction window) and a duel-refusal override tied to a specific pending challenge -- both novel.",
     "oracle-l5r-9817": "Needs an ability-suppression mechanism ('a target Personality's printed abilities may not be used') -- distinct from the existing keyword-suppression gap (Ikoma Aimi's own base printing, issue #198) and not built either.",
     "oracle-l5r-5086": "Needs a target-redirection mechanism (another player's action, once targeted, is redirected to a different card instead) -- an established gap, the same family already deferred for Yoritomo Naoto (see the Reserve primitive row).",
@@ -350,7 +353,9 @@ BLOCKERS: dict[str, str] = {
     # the current battlefield's province strength) reuses The Courtesy of the Crane's own precedent
     # directly.
     "oracle-l5r-10455": "Needs a variable-magnitude token-destroy choice (destroy zero or more Fire tokens, chosen by the player) feeding a matching variable Ranged Attack strength -- every existing token-destroy pattern (Torazu, Monastery) destroys a fixed count as a flat cost; deferred this pass rather than force a 'destroy all' simplification.",
-    "oracle-l5r-10058": "Needs the Brash keyword mechanic (the Defender may draw a card after a Brash card is assigned to attack, not built at all) and a Force-redirection-to-an-enemy-army mechanism (a card's Force counting toward the WRONG side's total, which every existing Army/BattleForce calculation assumes never happens) -- both novel.",
+    # Togashi Noboru (oracle-l5r-10058) published in personality-wave-12 (issue #216) once the
+    # Brash keyword and Force-redirection-to-an-enemy-army mechanisms both landed -- no remaining
+    # blocker note for him.
     "oracle-l5r-8565": "Needs a 'same location as source' targeting axis for a non-battle-restricted (BattleOrOpen) ability -- every existing 'at the same battlefield' check assumes Battle timing's own blanket AtBattle requirement, which BattleOrOpen deliberately carries none of.",
     "oracle-l5r-8570": "Needs reading a live token COUNT (not just presence) into a variable Attack-strength formula, combined with a dual Fire-or-Sake token-type choice on entry -- each piece is small and has partial precedent, but the combination was not attempted this pass.",
     "oracle-l5r-10457": "Needs a genuine 'while another player's action is currently resolving' state flag, distinct from the simpler 'while it is not your turn' condition already used elsewhere (Tamori Yayu) -- a simplified reading would just reuse that existing pattern, but wasn't attempted here to avoid mischaracterizing the printed text.",
