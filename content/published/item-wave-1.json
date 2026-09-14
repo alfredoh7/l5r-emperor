@@ -1,0 +1,59 @@
+{
+  "Profile": "item-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10528",
+      "Name": "Justice of the Crane",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Magistrate.\nBattle: Dishonor a target enemy Personality. If this Personality has the printed Magistrate keyword, you may take an additional action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10528.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "justice-of-crane-dishonor"
+      ],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Magistrate"
+    },
+    {
+      "Id": "oracle-l5r-10124",
+      "Name": "Unparalleled Sword",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has Kensai.\nBattle: Melee 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10124.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "unparalleled-sword-attack"
+      ],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Kensai"
+    }
+  ],
+  "Decks": []
+}

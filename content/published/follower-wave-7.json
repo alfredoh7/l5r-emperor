@@ -1,0 +1,30 @@
+{
+  "Profile": "follower-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3522",
+      "Name": "Hunter of Harmony",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Remove this card from the game: Choose a Kiho Strategy in your discard pile. Put it into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3522.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "hunter-of-harmony-return"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

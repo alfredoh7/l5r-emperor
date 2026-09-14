@@ -262,7 +262,7 @@ public partial class Main : Node
         // Root controls use an explicit scale, so rasterize system fonts at the
         // matching density instead of magnifying their 1080p glyph textures.
         ((FontFile)Palette.Body).Oversampling = Math.Max(1, scale);
-        ((FontFile)Palette.Title).Oversampling = Math.Max(1, scale);
+        Palette.HeadingFace.Oversampling = Math.Max(1, scale);
         _layoutWidth = available.X / Math.Max(.1f, scale);
         _root.Size = DesignSize;
         _root.Scale = Vector2.One * scale;
@@ -393,7 +393,6 @@ public partial class Main : Node
     private void RenderTimeline()
     {
         _timeline.Present(View);
-        _timeline.PassRequested = PassOpportunity;
         _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
         if (PresentationBusy)
         {
@@ -406,6 +405,7 @@ public partial class Main : Node
     private CardTile Tile(CardView card, bool compact, float width, float height)
     {
         var tile = new CardTile(card, compact, SelectCard, _ => { }) { CustomMinimumSize = new Vector2(width, card.Zone == Zone.Hand ? height : PlaneHeight(height)), FaceHeight = height - 12, ReducedMotion = _reducedMotion, Highlighted = _selected?.Id == card.Id, SelectedSource = _sources.Contains(card.Id), PreviousBowed = Time.GetTicksMsec() - _bowChangedAt < 180 ? _previousBows.GetValueOrDefault(card.Id, card.Bowed) : card.Bowed, ContextualGoldProduction = Production(card, View.Players.Single(p => p.Id == card.OwnerId)) };
+        tile.TokenSourceName = id => FindCard(id)?.Definition?.Name;
         tile.ContextHelp = card.AttachedTo is { } parent ? "Attached to " + (FindCard(parent)?.Definition?.Name ?? parent) + ". Moves with this unit." : card.Zone == Zone.Battlefield ? $"At Province {card.ProvinceIndex + 1}'s battlefield. " + RulesHelp.Topic("force") : card.Zone == Zone.Home ? "At home. Not assigned to a province. " + (card.Bowed ? RulesHelp.Topic("bow") : "") : card.Zone == Zone.Hand ? "In your hand. Select to see legal actions and targets." : "Select to inspect available actions.";
         if (card.Zone == Zone.Province && card.ProvinceIndex is int province)
         {

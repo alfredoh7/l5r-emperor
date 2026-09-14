@@ -23,5 +23,18 @@
   "source_image_hash": "d1/f7",
   "source_url": "https://images.oracleofthevoid.com/l5r/d1/f7/printing_8840_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d1/f7/printing_8840_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 166160,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8840-printing-1-image-1.webp",
+    "sha256": "1772775307ed0c8e35be28e5fb46ebe3d2de992a7912b662c69aa1b3e62ce36c",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

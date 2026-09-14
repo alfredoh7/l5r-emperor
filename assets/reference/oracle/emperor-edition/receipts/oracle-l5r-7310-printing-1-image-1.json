@@ -23,5 +23,18 @@
   "source_image_hash": "0b/43",
   "source_url": "https://images.oracleofthevoid.com/l5r/0b/43/printing_7310_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/0b/43/printing_7310_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 136512,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-7310-printing-1-image-1.webp",
+    "sha256": "d6a79d255fad71cd56327dbbe1aa22235444c963720c3b7c1f9f9dd20f4c563a",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

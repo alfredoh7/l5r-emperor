@@ -1,0 +1,36 @@
+{
+  "Profile": "personality-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10102",
+      "Name": "Utaku Chikako",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Your dishonorable Battle Maidens do not have a maximum Personal Honor of 0 from the rulebook.\nLimited: Gain 2 Honor. You may not declare an attack this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10102.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "utaku-chikako-decline"
+      ],
+      "Effect": "battle-maiden-dishonor-immunity"
+    }
+  ],
+  "Decks": []
+}

@@ -23,5 +23,18 @@
   "source_image_hash": "da/d3",
   "source_url": "https://images.oracleofthevoid.com/l5r/da/d3/printing_8188_2_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/da/d3/printing_8188_2_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 153454,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8188-printing-2-image-1.webp",
+    "sha256": "9a90f5e3ed82354989de4f66f68fad308bb8833f1c13784a3b000846e462bc31",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

@@ -23,5 +23,18 @@
   "source_image_hash": "52/e1",
   "source_url": "https://images.oracleofthevoid.com/l5r/52/e1/printing_8590_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/52/e1/printing_8590_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 113282,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8590-printing-1-image-1.webp",
+    "sha256": "a843d48a5f9140bbd0e4f399d39f23a569a741478b26fab03ba8ee3591df30cf",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

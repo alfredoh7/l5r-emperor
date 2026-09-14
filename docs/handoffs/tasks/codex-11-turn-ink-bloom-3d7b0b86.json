@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved automatic Ink Bloom with original artwork and Weathered Quill. UI-only behavior; shared routing is due to the new repository verification script. No engine, protocol, legality or priority semantics changed.",
+  "validation": "Client build passed. Native artwork/mouse/keyboard tests1280x720/1920x1080 and real Main lifecycle1280x800/1672x941/2560x1080 passed. Source/native/combined screenshots reviewed. Combined preview built0warnings and passed283 regressions. Earlier implementation commit passed macOS/Windows CI; final handoff/evidence revision awaits CI.",
+  "remaining": "PR105 review/CI; main unchanged. No native Windows graphical test or new live remote reconnect; snapshot dedup was tested. Combined launcher includes prior unmerged UI passes.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/11",
+  "branch": "codex/11-turn-ink-bloom",
+  "updated": "2026-09-09T14:00:34.828649+00:00"
+}

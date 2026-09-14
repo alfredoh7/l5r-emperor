@@ -23,5 +23,18 @@
   "source_image_hash": "db/f8",
   "source_url": "https://images.oracleofthevoid.com/l5r/db/f8/printing_2060_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/db/f8/printing_2060_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 144744,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2060-printing-1-image-1.webp",
+    "sha256": "1327772ca03e0b994b4895d289dd44663c34ed162e42f5812e71b797a208bd27",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

@@ -51,7 +51,10 @@ public partial class TitleMenu : Control
     }
     private Button Entry(string text, Action action, int fontSize = 80)
     {
-        var button = new MenuEntry { Text = text, ReducedMotion = () => Preferences.ReducedMotion, CustomMinimumSize = new Vector2(0, 82), Alignment = HorizontalAlignment.Left, MouseDefaultCursorShape = CursorShape.PointingHand };
+        var button = new MenuEntry { Text = text.ToUpperInvariant(), ReducedMotion = () => Preferences.ReducedMotion, CustomMinimumSize = new Vector2(0, 82), Alignment = HorizontalAlignment.Left, MouseDefaultCursorShape = CursorShape.PointingHand };
+        // This face has generous vertical metrics. Fit its full line box, not just
+        // the glyph width, so five menu entries stay inside the artwork.
+        while (fontSize > 20 && (Palette.Title.GetHeight(fontSize) > 82 || Palette.Title.GetStringSize(button.Text, fontSize: fontSize).X > 490)) fontSize--;
         button.AddThemeFontOverride("font", Palette.Title); button.AddThemeFontSizeOverride("font_size", fontSize);
         foreach (var state in new[] { "normal", "hover", "pressed", "focus", "disabled" }) button.AddThemeStyleboxOverride(state, new StyleBoxEmpty { ContentMarginLeft = 8 });
         button.AddThemeColorOverride("font_color", new Color("dfd1af"));

@@ -60,6 +60,12 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
+        if (ShowTokenRail && CardTokenRail.HasTokens(Card))
+        {
+            AlignUnitRightEdge = true;
+            TokenRail = new CardTokenRail { CardAnchor = this, Offset = TokenRailOffset, Companions = TokenRailCompanions };
+            AddChild(TokenRail);
+        }
         _bowDestination = Card.Bowed ? Mathf.Pi / 2 : 0;
         _bowAngle = (PreviousBowed ?? Card.Bowed) ? Mathf.Pi / 2 : 0;
         if (ReducedMotion) _bowAngle = _bowDestination;
@@ -90,6 +96,11 @@ public partial class CardTile : Button
     // The same projected quadrilateral drives drawing, hit testing and arrows.
     // Bow rotation takes place in the table plane before camera foreshortening.
     public bool AlignUnitRightEdge { get; set; }
+    public bool ShowTokenRail { get; set; } = true;
+    public float TokenRailOffset { get; set; }
+    public CardTile[] TokenRailCompanions { get; set; } = [];
+    public Func<string,string?>? TokenSourceName { get; set; }
+    public CardTokenRail? TokenRail { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {
@@ -183,10 +194,11 @@ public partial class CardTile : Button
         {
             var rect=new Rect2(face.X*.035f,face.Y*.395f+i*face.Y*.08f,face.X*.93f,face.Y*.074f);
             var dishonorable=shown[i]=="Dishonorable";
+            var statusHeading=shown[i].ToUpperInvariant();
             DrawStyleBox(Palette.Box(dishonorable?new Color("492924"):new Color("202f33"),dishonorable?new Color("b37c67"):Palette.Gold,0,1),rect);
             var size=Math.Max(11,(int)(face.Y*.06f));
-            while(size>8 && Palette.Title.GetStringSize(shown[i],fontSize:size).X>rect.Size.X-6) size--;
-            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),shown[i],HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
+            while(size>8 && Palette.Title.GetStringSize(statusHeading,fontSize:size).X>rect.Size.X-6) size--;
+            DrawString(Palette.Title,rect.Position+new Vector2(3,rect.Size.Y*.80f),statusHeading,HorizontalAlignment.Center,rect.Size.X-6,size,Palette.Paper);
         }
         DrawSetTransformMatrix(Transform2D.Identity);
     }
@@ -291,7 +303,7 @@ public partial class CardTile : Button
         }
         if (height < 110)
         {
-            var wordsSmall = d.Name.Split(' '); var smallLines = new List<string>(); var current = "";
+            var wordsSmall = d.Name.ToUpperInvariant().Split(' '); var smallLines = new List<string>(); var current = "";
             foreach (var word in wordsSmall)
             {
                 var next = current.Length == 0 ? word : current + " " + word;
@@ -313,7 +325,7 @@ public partial class CardTile : Button
         }
         var nameSize = height < 110 ? 10 : Compact ? 12 : 15;
         var nameY = art.End.Y + (height < 110 ? 11 : Compact ? 16 : 20);
-        var words = d.Name.Split(' ');
+        var words = d.Name.ToUpperInvariant().Split(' ');
         var lines = new List<string>();
         var line = "";
         foreach (var word in words)

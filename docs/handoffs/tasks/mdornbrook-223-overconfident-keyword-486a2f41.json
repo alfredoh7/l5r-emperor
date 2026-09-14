@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wired the Overconfident keyword (issue #223): each other player may optionally draw a card after an Overconfident card enters or leaves play. New PendingOverconfidentDraws queue populated from MarkDead (leaves play, InPlay-gated) and Purchase/RecruitReserve (enters play), drained at 7 hand-back-priority points (PassReaction, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via a new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku). Kitsuki Minori's subtractive live Keyword() suppression vs. a Lion Clan opponent; Asahina Tsugio/Asako Kijo's MaxHandSize helper; Bayushi Mugoshi's own entering-play Reaction. Five real cards published as personality-wave-13 (count now 256). Fixed a bug found by the new tests: ExecuteAbilityEffects' own Overconfident check was overwriting an already-open reaction window's PendingChoice; guarded on PendingChoice is null.",
+  "validation": "dotnet build (whole solution, 0 warnings/errors); dotnet run for L5R.Core.Tests (132/132, including a new 10-block Overconfident test), L5R.AI.Tests (13/13, byte-identical), L5R.Server.Tests (5/5), L5R.Client.Transport.Tests (4/4); python3 -m unittest discover tools/collaboration (43/43) and tools/content (121/121).",
+  "remaining": "Doji Kazuo, Experienced's own non-Overconfident text (duel-focus compulsion; End-Phase-conditional Fate-deck-look) is explicitly deferred -- substantial, unrelated new-primitive work.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/223",
+  "branch": "mdornbrook/223-overconfident-keyword",
+  "updated": "2026-09-14T09:30:21.864483+00:00"
+}

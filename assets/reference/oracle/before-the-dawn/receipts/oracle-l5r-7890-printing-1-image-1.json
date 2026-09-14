@@ -23,5 +23,18 @@
   "source_image_hash": "da/eb",
   "source_url": "https://images.oracleofthevoid.com/l5r/da/eb/printing_7890_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/da/eb/printing_7890_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 143568,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-7890-printing-1-image-1.webp",
+    "sha256": "9498dd60e59f70abf2208647ad3edbecd577f294959fb49db9157de76c7d47b5",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

@@ -23,5 +23,18 @@
   "source_image_hash": "90/f4",
   "source_url": "https://images.oracleofthevoid.com/l5r/90/f4/printing_8320_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/90/f4/printing_8320_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 109578,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-8320-printing-1-image-1.webp",
+    "sha256": "eca87d00bd3c725176d10a3142cf9ddb0d96513ea9b58ac3bc2702ef0f5f53ca",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

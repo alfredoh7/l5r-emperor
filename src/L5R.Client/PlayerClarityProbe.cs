@@ -53,23 +53,21 @@ public partial class PlayerClarityProbe : Control
                 var hidden=_cards[0].Card with{ Definition=null,FaceUp=false };
                 var tile=new CardTile(hidden,true,_=>{},_=>{});
                 if(tile.PublicStatusLabels.Length!=0)throw new Exception("Hidden card status leak"); tile.Free();
-                if(_track.PassButton.Disabled || _track.PriorityLabel.Text!="You may act or pass")throw new Exception("Action cue missing");
+                if(_track.PriorityLabel.Text!="You may act or pass")throw new Exception("Action cue missing");
                 RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(_output);
-                // Exercise native keyboard activation against a real enabled engine command.
-                _view=_engine.GetView(_engine.State.PriorityPlayerId);var actions=_engine.QueryActions(_view.ViewerId);
-                var pass=actions.First(a=>a.Enabled && a.Type=="pass");
-                _track.Present(_view);_track.PresentActions(_view,actions,true);_version=_engine.Version;
-                _track.PassRequested=()=>{var result=_engine.Execute(pass.Command!);if(!result.Accepted)throw new Exception(result.Error);};
-                _track.PassButton.GrabFocus();
-                GetViewport().PushInput(new InputEventKey {Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=true},true);
-                GetViewport().PushInput(new InputEventKey {Keycode=Key.Enter,PhysicalKeycode=Key.Enter,Pressed=false},true);
+                // Phase help is read-only: keyboard activation must not advance the engine.
+                _view=_engine.GetView(_engine.State.PriorityPlayerId);
+                _track.Present(_view);_version=_engine.Version;
+                if(_track.GetChildren().OfType<Button>().Any(b=>b.Text=="Pass"))throw new Exception("Phase-bar Pass remains");
+                _track.HelpRegions[2].GrabFocus();
+                GetViewport().PushInput(new InputEventKey {Keycode=Key.Enter,Pressed=true},true);
+                GetViewport().PushInput(new InputEventKey {Keycode=Key.Enter,Pressed=false},true);
                 _step++;_clock=0;return;
             }
-            if(_engine.Version!=_version+1)throw new Exception("Keyboard Pass did not submit exactly once");
-            _track.PresentActions(_view,[],true);if(!_track.PassButton.Disabled || _track.PriorityLabel.Text.Contains("or pass"))throw new Exception("Required choice offers illegal pass");
-            _track.PresentActions(_view,_engine.QueryActions(_view.ViewerId),false);if(!_track.PassButton.Disabled)throw new Exception("Disconnected controls remain enabled");
+            if(_engine.Version!=_version)throw new Exception("Phase help changed engine state");
+            _track.PresentActions(_view,[],true);if(_track.PriorityLabel.Text.Contains("or pass"))throw new Exception("Required choice offers illegal pass");
             _track.PresentActions(_view with{ViewerId=1-_view.PriorityPlayerId},[],true);if(!_track.PriorityLabel.Text.Contains("Opponent"))throw new Exception("Opponent cue ambiguous");
-            GD.Print("PLAYER_CLARITY_PASS: same-clan owner/priority split; native keyboard Pass executes one authoritative command; required-choice/disconnected Pass disabled; hidden status suppressed; bowed/stacked keyword labels.");GetTree().Quit();
+            GD.Print("PLAYER_CLARITY_PASS: same-clan owner/priority split; phase help cannot dispatch commands; no phase-bar Pass; required-choice cue; hidden status suppressed; bowed/stacked keyword labels.");GetTree().Quit();
         }
         catch(Exception e){GD.PushError(e.ToString());GetTree().Quit(1);}
     }

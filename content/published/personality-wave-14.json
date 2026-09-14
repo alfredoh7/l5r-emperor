@@ -1,0 +1,37 @@
+{
+  "Profile": "personality-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10857",
+      "Name": "Moshi Ikako",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 3,
+      "GoldProduction": 3,
+      "Force": 0,
+      "Chi": 7,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\nFire Battle: Ranged 1 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10857.jpg",
+      "Keywords": [
+        "Naval",
+        "Reserve",
+        "Air",
+        "Fire",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "moshi-ikako-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

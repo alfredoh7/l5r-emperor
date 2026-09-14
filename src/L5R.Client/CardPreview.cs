@@ -11,7 +11,7 @@ public static class CardPreview
         var face = new CardTile(card with { Bowed = false }, true, _ => { }, _ => { })
         {
             CustomMinimumSize = new Vector2(width, height), ReducedMotion = true,
-            Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
+            ShowTokenRail = false, Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
             FocusMode = Control.FocusModeEnum.None
         };
         face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };
@@ -52,6 +52,8 @@ public static class CardPreview
             details.AddChild(Palette.Wrapped($"Printed: {def.Force} Force · {def.Chi} Chi",16,Palette.PaperDim));
             foreach(var modifier in card.Modifiers ?? []) details.AddChild(Palette.Wrapped($"{modifier.Amount:+0;-0;0} {modifier.Stat}",15,Palette.Gold));
         }
+        foreach(var token in CardTokenRail.Groups(card))
+            details.AddChild(Palette.Wrapped($"{token.Type} ×{token.Instances.Length}" + (CardTokenRail.Delta(token.Stat,token.Amount) is { Length: > 0 } delta ? $" · {delta} each" : ""),16,Palette.Gold));
         if (card.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 20, new Color("efaa9a")));
         foreach (var grant in card.GrantedKeywords ?? [])
             details.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}", 16, Palette.Gold));

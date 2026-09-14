@@ -80,16 +80,27 @@ public partial class Main
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
+    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasTokens(c));
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
-        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0);
-    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0);
+        .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0) + TokenAttachmentCount(card, owner) * CardTokenRail.Width;
+    private float TokenBottomPadding(CardView card, PlayerView owner)
+    {
+        var attachments=owner.Home.Concat(owner.Army).Where(c=>c.AttachedTo==card.Id).ToArray();
+        var padding=card.Bowed&&CardTokenRail.HasTokens(card)?CardTokenRail.Width:0f;
+        for(var i=0;i<attachments.Length;i++)
+            if(attachments[i].Bowed&&CardTokenRail.HasTokens(attachments[i]))
+                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasTokens))*CardTokenRail.Width*1.02f);
+        return padding;
+    }
+    private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0) + TokenBottomPadding(card,owner);
     private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        if (card.Bowed) return height;
+        var rail = CardTokenRail.HasTokens(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();
-        return (height - 12) * ratio + 16;
+        return (height - 12) * ratio + 16 + rail;
     }
 
     private void AddHome(PlayerView player) => AddMatCards(player, _homeRows[player.Id], _homeBounds[player.Id], false);
@@ -146,11 +157,11 @@ public partial class Main
         }
         // Expose a usable strip of each attachment. A spread opens the entire card.
         var step = expanded ? side * .80f : 24f;
-        var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max());
+        var faceWidth = Math.Max(CardFootprint(personality, side), attachments.Select(c => CardFootprint(c, side)).DefaultIfEmpty(0).Max()) + (expanded ? 0 : TokenAttachmentCount(personality, owner) * CardTokenRail.Width * side / CardHeight);
         var bannerWidth = personality.UnitForce.HasValue ? UnitStandard.ReservedWidth * side / CardHeight : 0;
         var width = (expanded && attachments.Length > 0 ? faceWidth * 2 + Math.Max(0, attachments.Length - 1) * step : faceWidth) + bannerWidth;
         var tileHeight = detail ? side : PlaneHeight(side);
-        var height = tileHeight + (expanded ? 0 : attachments.Length * step);
+        var height = tileHeight + (expanded ? 0 : attachments.Length * step) + TokenBottomPadding(personality,owner)*side/CardHeight;
         var group = new VBoxContainer { CustomMinimumSize = new Vector2(width, 0) };
         group.AddThemeConstantOverride("separation", 0);
         var stack = new Control { CustomMinimumSize = new Vector2(width, height + 4), MouseFilter = Control.MouseFilterEnum.Pass };
@@ -158,12 +169,16 @@ public partial class Main
         for (var i = attachments.Length - 1; i >= 0; i--)
         {
             var child = Tile(attachments[i], true, faceWidth, side);
+            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasTokens)) * CardTokenRail.Width * (side-12)/198f;
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
             Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }
         var front = Tile(personality, true, faceWidth, side);
         if (detail) { front.ProjectToScreen = null; front.CustomMinimumSize = new Vector2(faceWidth, side); }
         Place(stack, front, 0, expanded ? 0 : attachments.Length * step, faceWidth, tileHeight);
+        var railPeers=stack.GetChildren().OfType<CardTile>().ToArray();
+        foreach(var tile in railPeers)
+            tile.TokenRailCompanions=railPeers;
         if (personality.UnitForce.HasValue)
         {
             var standard = new UnitStandard

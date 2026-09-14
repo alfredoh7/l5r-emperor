@@ -23,5 +23,18 @@
   "source_image_hash": "7b/3c",
   "source_url": "https://images.oracleofthevoid.com/l5r/7b/3c/printing_2580_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/7b/3c/printing_2580_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 132384,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2580-printing-1-image-1.webp",
+    "sha256": "a0acb5ac06d648fce1a870e704194a7f71680d3a32c77c35d855f1ac9609e069",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

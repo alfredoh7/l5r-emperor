@@ -260,15 +260,6 @@ public partial class Main
         button.ClipText = true; container.AddChild(button);
     }
 
-    private void PassOpportunity()
-    {
-        if (_session.Snapshot is null || _session.Busy || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId) return;
-        if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) return;
-        var pass = Actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
-        if (pass?.Command is not { } command) return;
-        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
-        Submit(command);
-    }
     private void RenderPhaseActions()
     {
         if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(Palette.Button("View battle details", ShowHistory)); return; }

@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Fixes bug 3 from issue #126's playtest report: attachments (Items/Followers) visually overlaid their Personality for the duration of their arrival animation, only settling into their correctly nested/z-ordered position once that animation landed. Root cause: EndTableMotion (Main.Motion.cs) sent every moved card through CardFlight, which always travels in the board's top-level overlay layer -- appropriate for a card entering/moving zones, but wrong for an attachment, which already has a live, correctly stacked tile behind its Personality (UnitStack) as soon as the same render pass places it there. Fixed by routing an attaching card (CardView.AttachedTo is not null) through the existing in-plane TableCardReflow instead: it slides smoothly from a prior table position if it had one, or simply appears already settled (e.g. straight from hand) -- never overlaying its Personality, even briefly. An attachment following its parent to a new battlefield gets the same treatment.",
+  "validation": "dotnet build: 0 warnings/errors. Ran the full board-capture regression suite (tools/check-table-followup.sh's 10 scenarios) and the ink-mat capture suite (tools/check-ink-mat.sh's 4 scenarios, which specifically exercise attachment rendering) directly against the Godot binary (rg is not installed in this environment, so invoked the underlying captures and grepped logs by hand) -- all pass with clean logs (no ERROR:/SCRIPT ERROR:/Exception, all expected PASS markers present).",
+  "remaining": "Visual confirmation in an actual live attach sequence is still recommended (capture scenarios exercise the code path but a human eye on the actual motion is the strongest check for a purely visual/timing fix).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/126",
+  "branch": "mdornbrook/126-attachment-overlay-timing",
+  "updated": "2026-09-09T19:22:43.181590+00:00"
+}

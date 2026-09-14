@@ -20,7 +20,9 @@ public partial class ClanPlaque : Control
         var icon=Emblem(clan,new Vector2(94,94)); icon.Position=new Vector2(8,11);
         AddChild(icon);
         var title=Palette.Text(clan.ToUpperInvariant(),23,Palette.Paper,true); title.Position=new Vector2(111,7); AddChild(title);
-        var turnLabel=Palette.Text(turn,15,Palette.Gold,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
+        var turnSize=15;
+        while(turnSize>10 && Palette.Title.GetStringSize(turn.ToUpperInvariant(),fontSize:(int)(turnSize*1.25f)).X>148)turnSize--;
+        var turnLabel=Palette.Text(turn,turnSize,Palette.Gold,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
         var cue=Palette.Text(action,14,Palette.PaperDim); cue.Position=new Vector2(111,57); cue.Size=new Vector2(148,23); cue.TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis; cue.TooltipText=action; cue.MouseFilter=MouseFilterEnum.Stop; AddChild(cue);
         var fan=new HonorFan { Position=new Vector2(110,86),Size=new Vector2(26,26),MouseFilter=MouseFilterEnum.Stop,TooltipText="Family Honor" }; AddChild(fan);
         var honorLabel=Palette.Text(honor.ToString(),23,Palette.Paper); honorLabel.Position=new Vector2(141,83); honorLabel.MouseFilter=MouseFilterEnum.Stop; honorLabel.TooltipText="Family Honor"; AddChild(honorLabel);
