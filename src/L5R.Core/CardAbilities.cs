@@ -322,6 +322,39 @@ public static class AbilityCatalog
         // Scholarly Hermit (issue #194's own review): needed only a Ring-type check in a discard
         // pile, now trivial. New Target "own-ring-in-discard".
         ["scholarly-hermit-search"] = new("Limited", "Bow: Put a Ring from your discard pile into your hand. Destroy this Follower.", "own-ring-in-discard"),
+        // Ring of Earth and Ring of Fire (issue #194, revalidated once their own scans became
+        // available -- their earlier blocker notes were themselves based on mismatched/incomplete
+        // scraped text, the same class of problem issue #195 flagged for Ring of Fire specifically).
+        // "You won" (Earth) is modeled the same way False Ring of Air's own win requirement already
+        // is: GrantRingRecruit only in the attackerWon/df>af branches of ResolveBattle, never the tie
+        // branch -- "none of your Personalities were destroyed" holds by construction on the winning
+        // side of an outright win (only DestroyUnits(the LOSING army) runs in those two branches; a
+        // tie is the only resolution that ever destroys the winning side's own units too).
+        ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none"),
+        // "Even if you control no units at the current battlefield" waives the ordinary Battle-timing
+        // presence check (the same id-based exemption Mirumoto Michi/Togashi Rikyou use, issue #207)
+        // -- "bow this card or discard it from your hand" is not a new cost shape at all: EVERY Ring
+        // ability may already be used either from hand (discarded afterward, ExecuteAbilityEffects'
+        // own tail) or in play (bowed here) -- see ValidateAbility's own Ring case. "+3 or -3" is the
+        // player's own choice, the same dual-UsageKey shape as horibe-bow/horibe-straighten, applied
+        // to a new "any-province" Target (an own-or-enemy generalization of the existing
+        // "enemy-province" category, since this ability may target either side's own provinces).
+        ["ring-of-earth-raise"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province +3 strength", "any-province", UsageKey: "ring-of-earth-strength"),
+        ["ring-of-earth-lower"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province -3 strength", "any-province", UsageKey: "ring-of-earth-strength"),
+        // Ring of Fire's own recruitment condition reuses the exact same "destroyed one or more
+        // provinces or enemy cards in this resolution" fact Ring of Water's own CheckRingOfWaterRecruit
+        // already computes at each ResolveBattle call site -- no "win" requirement, same as Ring of
+        // Water, unlike Ring of Earth/False Ring of Air above.
+        ["ring-of-fire-recruit"] = new("Battle", "After the resolution of a battle in which you destroyed one or more provinces or enemy cards, you may put this Ring into play from your hand", "none"),
+        // "Destroy your performing Personality" needs no new Performer category -- "own-personality"
+        // (no AtBattle/unbowed qualifier, same reasoning as Steel on Steel's own performer) already
+        // matches the printed text exactly. "enemy-personality-chi-lte-performer" (Chokehold's own
+        // Target, comparing against the PERFORMER's Chi, not the source's -- unlike
+        // personality-chi-lte-self, which would wrongly compare against the Ring's own nonexistent
+        // Chi) already exists too. DestroyUnits (already fully generic -- MarkDead, attachments,
+        // Honor bonuses -- used identically whether the destroyed card is a battle-army member or
+        // not) handles both the performer and the target; no new destroy primitive needed at all.
+        ["ring-of-fire-destroy"] = new("Battle", "Bow this card or discard it from your hand, destroy your performing Personality, and target an enemy Personality with equal or lower Chi: Destroy him", "enemy-personality-chi-lte-performer", Performer: "own-personality"),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
         // onto the existing Open/Battle/Limited/BattleOrOpen values verbatim (confirmed precedent,
@@ -993,8 +1026,11 @@ public sealed partial class MatchEngine
         {
             // Mirumoto Michi / Togashi Rikyou (issue #207): reinforcing a battle from elsewhere
             // entirely -- the whole point is moving in, so neither the acting player's own existing
-            // presence nor this card's own AtBattle status can be required the normal way.
-            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move";
+            // presence nor this card's own AtBattle status can be required the normal way. Ring of
+            // Earth (issue #194) waives the same presence check for an unrelated reason -- its own
+            // printed "Even if you control no units at the current battlefield" -- but needs the
+            // identical exemption from this one shared Require.
+            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower";
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
@@ -1008,7 +1044,7 @@ public sealed partial class MatchEngine
         // played/destroyed this battle, an opposing unit ever present in a won battle) is not itself
         // re-checked here. This also naturally makes the grant, not a separate flag, the single
         // source of truth for "was this satisfied."
-        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit")
+        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit")
             Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
                 "This Ring's recruitment condition has not been granted yet.");
         // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
@@ -1111,6 +1147,16 @@ public sealed partial class MatchEngine
             Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
             Require(command.Province is int idx && idx is >= 0 and <= 3 && !Player(1 - player.Id).Provinces[idx].Destroyed,
                 "Choose one of the enemy's provinces.");
+        }
+        // Ring of Earth (issue #194): "give A province +3 or -3 strength" -- either side's own,
+        // unlike enemy-province above -- so which player's province, not just which index, must be
+        // named. TargetPlayerId already exists for "choose a player" (issue #210); reused here purely
+        // as "whose province," alongside Province as the index.
+        else if (ability.Target == "any-province")
+        {
+            Require(command.TargetId is null && (command.CardIds is null || command.CardIds.Length == 0), "This action targets a province, not a card.");
+            Require(command.TargetPlayerId is 0 or 1 && command.Province is int anyIdx && anyIdx is >= 0 and <= 3 && !Player(command.TargetPlayerId.Value).Provinces[anyIdx].Destroyed,
+                "Choose a province (yours or the enemy's).");
         }
         // "Choose a player" (issue #210): a player, not a card, is the target -- either player is
         // always a legal choice (no restriction printed), so validation is just "is this a real
@@ -1718,7 +1764,7 @@ public sealed partial class MatchEngine
             // Rings (issue #194): every recruit case shares the same shape -- leave hand, enter play
             // face up. False Rings additionally lose 2 Honor (their own printed cost); the three
             // real Rings do not.
-            case "ring-of-air-recruit": case "ring-of-water-recruit":
+            case "ring-of-air-recruit": case "ring-of-water-recruit": case "ring-of-earth-recruit": case "ring-of-fire-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
                 break;
             case "false-ring-of-air-recruit": case "false-ring-of-water-recruit":
@@ -1732,6 +1778,16 @@ public sealed partial class MatchEngine
             case "ring-of-air-straighten": Straighten(target!); if (source!.Zone != Zone.Hand) source.Bowed = true; break;
             case "ring-of-water-move-home": MoveHome(target!, false); if (source!.Zone != Zone.Hand) source.Bowed = true; break;
             case "false-ring-of-air-force": ApplyModifier(target!, source!.Id, id, "Force", -3); if (source.Zone != Zone.Hand) source.Bowed = true; break;
+            case "ring-of-earth-raise": if (source!.Zone != Zone.Hand) source.Bowed = true; Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength += 3; break;
+            case "ring-of-earth-lower": if (source!.Zone != Zone.Hand) source.Bowed = true; Player(command.TargetPlayerId!.Value).Provinces[command.Province!.Value].Strength -= 3; break;
+            case "ring-of-fire-destroy":
+            {
+                if (source!.Zone != Zone.Hand) source.Bowed = true;
+                var performer = Card(command.PerformerId!);
+                DestroyUnits([performer]);
+                DestroyUnits([target!]);
+                break;
+            }
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;

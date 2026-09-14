@@ -124,6 +124,8 @@ var tests = new (string Name, Action Run)[]
     ("False Ring of Air (issue #194): winning a battle with an opposing unit present grants an Additional Battle Action scoped to the Ring; recruiting it costs 2 Honor, unlike a real Ring", FalseRingOfAir),
     ("False Ring of Water (issue #194): a standing Province-Strength-11-or-greater condition, not a Reaction/grant -- usable any time it holds, like an ordinary Battle ability", FalseRingOfWater),
     ("Review of previously Ring-blocked cards (issue #194): Moshi Ikako's 'Fire Battle' is a plain classification, not Ring-gated (confirmed, zero new primitives); Scholarly Hermit needed only a Ring-type check in a discard pile (new own-ring-in-discard Target)", RingBlockedCardsReview),
+    ("Ring of Earth (issue #194, revalidated once its own scan became available): a won battle with enemy units present grants an Additional Battle Action scoped to the Ring; its own in-play action waives the ordinary Battle-timing presence check entirely and may raise or lower either side's own province strength by 3 (a new 'any-province' Target, generalizing the existing enemy-only category)", RingOfEarth),
+    ("Ring of Fire (issue #194, revalidated once its own scan became available -- resolving issue #195's own text uncertainty by reading the scan directly rather than the mismatched scrape): destroying a province or enemy card in a battle's own resolution (no win required, like Ring of Water) grants an Additional Battle Action scoped to the Ring; its own in-play action destroys its own performing Personality as part of the cost (DestroyUnits, already fully generic) and a target enemy Personality with equal or lower Chi than the performer (enemy-personality-chi-lte-performer, Chokehold's own existing Target)", RingOfFire),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -2327,7 +2329,7 @@ static void FollowerWave3Cards()
         var e2=MatchEngine.FromTestState(s);
         var honorBefore=e2.State.Players[0].Honor;
         Accept(e2,new GameCommand("useAbility",1,e2.Version,CardId:destroyer.Id,TargetId:ganesh.Id,AbilityId:"training-destroy-no-attachments"));
-        Equal(e2.State.Cards[ganesh.Id].Zone,Zone.Dead,"Destroyed during battle");
+        Equal(e2.State.Cards[ganesh.Id].Zone,Zone.FateDiscard,"Destroyed during battle -- a Follower, so its own FateDiscard, not Dead (issue #223's own review: only a Personality actually becomes dead)");
         Equal(e2.State.Players[0].Honor,honorBefore+1,"Its own controller gains 1 Honor from the destruction");
     }
     {
@@ -2381,7 +2383,7 @@ static void FollowerWave3Cards()
         var fudo=Add(s,"training-fudo-personality",0,Zone.Home);
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:furugaro.Id,TargetId:fudo.Id,AbilityId:"furugaro-charge"));
-        Equal(e.State.Cards[furugaro.Id].Zone,Zone.Dead,"Destroys itself");
+        Equal(e.State.Cards[furugaro.Id].Zone,Zone.FateDiscard,"Destroys itself -- a Follower, so its own FateDiscard, not Dead");
         Equal(e.State.Cards[fudo.Id].Tokens.Count(t=>t.Type=="Charging"),2,"Gives the target Fudo two Charging tokens");
     }
     {
@@ -2427,8 +2429,8 @@ static void FollowerWave3Cards()
         var e=MatchEngine.FromTestState(s);
         var honorBefore=e.State.Players[0].Honor;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:assassin.Id,TargetId:enemyFollower.Id,AbilityId:"unseen-assassin-strike"));
-        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"Destroys the target Follower");
-        Equal(e.State.Cards[assassin.Id].Zone,Zone.Dead,"Destroys itself");
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.FateDiscard,"Destroys the target Follower -- FateDiscard, not Dead");
+        Equal(e.State.Cards[assassin.Id].Zone,Zone.FateDiscard,"Destroys itself -- FateDiscard, not Dead");
         Equal(e.State.Players[0].Honor,honorBefore-2,"Loses 2 Honor");
     }
     {
@@ -2526,7 +2528,7 @@ static void KeywordMechanics()
         var e=MatchEngine.FromTestState(s);
         var handBefore=e.State.Players[1].Hand.Count;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:expendable.Id,AbilityId:"training-destroy-no-attachments"));
-        Equal(e.State.Cards[expendable.Id].Zone,Zone.Dead,"Destroyed via DestroyUnits' own top-level path");
+        Equal(e.State.Cards[expendable.Id].Zone,Zone.FateDiscard,"Destroyed via DestroyUnits' own top-level path -- a Follower, so FateDiscard, not Dead");
         Equal(e.State.Players[1].Hand.Count,handBefore+1,"Mandatory Fate-deck draw on destruction");
     }
     {
@@ -3183,7 +3185,7 @@ static void KihoDiscardToHand()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy"));
         Check(e.State.Cards[meiyu.Id].Zone==Zone.Battlefield && !e.State.Cards[meiyu.Id].Bowed,"Fire performer is straightened again: the destroyed Follower counted as an attachment");
-        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"The unattached Follower is destroyed");
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.FateDiscard,"The unattached Follower is destroyed -- FateDiscard, not Dead");
         Equal(e.State.Cards[volcano.Id].Zone,Zone.FateDiscard,"Volcano Tattoo discards after resolving, like any other Strategy");
         Check(e.State.Cards[volcano.Id].AbilityUses.ContainsKey("volcano-tattoo-destroy"),"Stamped used this turn");
     }
@@ -3217,7 +3219,7 @@ static void KihoDiscardToHand()
         var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0; s2.CurrentBattleProvince=0; s2.UnresolvedBattlefields=[0];
         var e2=MatchEngine.FromTestState(s2);
         Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:volcano.Id,PerformerId:meiyu.Id,TargetId:enemyFollower.Id,AbilityId:"volcano-tattoo-destroy"));
-        Equal(e2.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"May be used again this same turn, unlike a card that stayed in the discard pile");
+        Equal(e2.State.Cards[enemyFollower.Id].Zone,Zone.FateDiscard,"May be used again this same turn, unlike a card that stayed in the discard pile -- FateDiscard, not Dead");
     }
 }
 static void MultiKeywordRequirement()
@@ -3457,6 +3459,79 @@ static void FalseRingOfWater()
     Accept(e2,new GameCommand("useAbility",1,e2.Version,CardId:ring.Id,AbilityId:"false-ring-of-water-recruit"));
     Equal(e2.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play"); Equal(e2.State.Players[1].Honor,honorBefore-2,"Costs 2 Honor");
 }
+static void RingOfEarth()
+{
+    {
+        // Ring of Earth (issue #194, revalidated): winning a battle with enemy units present grants
+        // an Additional Battle Action scoped to the Ring -- the same "you won" requirement as False
+        // Ring of Air, unlike Ring of Water/Fire, which need no win at all.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Hand);
+        Add(s,"training-lion-veteran",0,Zone.Battlefield,province:0); // Force 6
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3 -- attacker wins, enemy unit was present
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring, surviving battle-end cleanup");
+    }
+    {
+        // Its own in-play action: "Even if you control no units at the current battlefield" waives
+        // the ordinary Battle-timing presence check entirely -- may target either side's own
+        // province (the new "any-province" category), raising or lowering its strength by 3, the
+        // player's own choice (a dual-UsageKey pair sharing one once-per-turn dedupe).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Home); // in play, no units of player 0's own anywhere at this battlefield
+        var e=MatchEngine.FromTestState(s);
+        var enemyStrengthBefore=e.State.Players[1].Provinces[0].Strength;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-raise",TargetPlayerId:1,Province:0));
+        Equal(e.State.Players[1].Provinces[0].Strength,enemyStrengthBefore+3,"Raises the enemy's own province by 3, even with no units of its own present");
+        Check(e.State.Cards[ring.Id].Bowed,"Bows itself as the in-play cost");
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0)); // already used this turn (shared UsageKey) and now bowed
+    }
+    {
+        // Used from hand instead: discarded afterward (the same generic Ring-from-hand shape every
+        // other Ring already has), never bowed.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var ownStrengthBefore=e.State.Players[0].Provinces[0].Strength;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0));
+        Equal(e.State.Players[0].Provinces[0].Strength,ownStrengthBefore-3,"May target its own controller's own province too");
+        Equal(e.State.Cards[ring.Id].Zone,Zone.FateDiscard,"Discarded from hand instead of bowed");
+    }
+}
+static void RingOfFire()
+{
+    {
+        // Ring of Fire (issue #194, revalidated -- issue #195's own text uncertainty resolved by
+        // reading the scan directly): no "win" requirement, same as Ring of Water -- destroying one
+        // or more provinces or enemy cards in a battle's own resolution is enough on its own.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ring=Add(s,"training-ring-of-fire-stub",0,Zone.Hand);
+        Add(s,"training-lion-veteran",0,Zone.Battlefield,province:0); // Force 6
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3 -- destroyed
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring, surviving battle-end cleanup");
+    }
+    {
+        // Its own in-play action: destroys its own performing Personality as part of the cost (no
+        // new destroy primitive -- DestroyUnits is already fully generic), and a target enemy
+        // Personality with equal or lower Chi than the performer (enemy-personality-chi-lte-performer,
+        // Chokehold's own Target -- not personality-chi-lte-self, which would wrongly compare against
+        // the Ring's own nonexistent Chi instead of the performer's).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ring=Add(s,"training-ring-of-fire-stub",0,Zone.Home);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Chi 3
+        var tooHighChi=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Chi 4 > 3
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3 <= 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,PerformerId:performer.Id,TargetId:tooHighChi.Id,AbilityId:"ring-of-fire-destroy"));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"ring-of-fire-destroy"));
+        Equal(e.State.Cards[performer.Id].Zone,Zone.Dead,"Destroys its own performing Personality as part of the cost");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Destroys the target");
+        Check(e.State.Cards[ring.Id].Bowed,"Bows itself as the in-play cost");
+    }
+}
 static void RingBlockedCardsReview()
 {
     {
@@ -3483,7 +3558,7 @@ static void RingBlockedCardsReview()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:hermit.Id,TargetId:ring.Id,AbilityId:"scholarly-hermit-search"));
         Check(e.State.Players[0].Hand.Contains(ring.Id),"The Ring returns to hand"); Equal(e.State.Cards[ring.Id].Zone,Zone.Hand);
-        Equal(e.State.Cards[hermit.Id].Zone,Zone.Dead,"Destroys itself");
+        Equal(e.State.Cards[hermit.Id].Zone,Zone.FateDiscard,"Destroys itself -- a Follower, so its own FateDiscard, not Dead");
     }
 }
 static void LionClanPersonalityReview()
@@ -3981,7 +4056,7 @@ static void NoAttachmentsFilter()
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:withItem.Id,AbilityId:"training-destroy-no-attachments"));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:enemyFollower.Id,AbilityId:"training-destroy-no-attachments"));
-        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.Dead,"An attachment is always a legal 'without attachments' target");
+        Equal(e.State.Cards[enemyFollower.Id].Zone,Zone.FateDiscard,"An attachment is always a legal 'without attachments' target -- FateDiscard, not Dead");
     }
 }
 static void ProvinceAdjacency()

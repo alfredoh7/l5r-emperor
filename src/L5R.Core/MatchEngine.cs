@@ -629,17 +629,21 @@ public sealed partial class MatchEngine
             if(destroyedProvince) DestroyProvince(defender,province);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
             // Ring recruitment (issue #194): checked with this resolution's own facts, before the
-            // per-battle flags below reset. False Ring of Air requires an outright win; Ring of
-            // Water does not (see the tie branch below).
+            // per-battle flags below reset. False Ring of Air and Ring of Earth require an outright
+            // win; Ring of Water and Ring of Fire do not (see the tie branch below).
             GrantRingRecruit(Player(attacker),d.Length>0,"false-ring-of-air-recruit");
+            GrantRingRecruit(Player(attacker),d.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince);
+            GrantRingRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince,"ring-of-fire-recruit");
         }
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
             if(!RehonorWinners(d)) GainHonor(defender,destroyedAttackers*2,"Battle victory");
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
+            GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(defender),destroyedAttackers>0);
+            GrantRingRecruit(Player(defender),destroyedAttackers>0,"ring-of-fire-recruit");
         }
         else if(a.Length>0 && d.Length>0)
         {
@@ -652,10 +656,12 @@ public sealed partial class MatchEngine
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
             if(!defenderHadDishonorable) GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
-            // Ring of Water (issue #194): no "win" requirement, unlike False Ring of Air -- a tie
-            // still counts as "a battle resolves" for both players independently.
+            // Ring of Water/Fire (issue #194): no "win" requirement, unlike False Ring of Air/Ring of
+            // Earth -- a tie still counts as "a battle resolves" for both players independently.
             CheckRingOfWaterRecruit(Player(attacker),destroyedD>0);
             CheckRingOfWaterRecruit(Player(defender),destroyedA>0);
+            GrantRingRecruit(Player(attacker),destroyedD>0,"ring-of-fire-recruit");
+            GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
@@ -1069,6 +1075,14 @@ public sealed partial class MatchEngine
     // equal to his base Personal Honor -- Seppuku (and any future rehonor-before-death effect) spares
     // this by clearing Dishonorable first (see Rehonor). This is the one shared entry point every
     // path to "becoming dead" -- combat destruction or otherwise -- must go through.
+    // "When a card is destroyed it is placed in its respective discard pile. If it is a Personality,
+    // it becomes dead" (core rules Glossary) -- only a Personality actually gets the separate "Dead"
+    // status (Zone.Dead); every other type destroyed this way goes straight to its own deck's
+    // discard pile instead, the same zones DestroyAttachment/DiscardTerrain already use for an
+    // attached/Terrain card. DestroyUnits is the one caller that can reach either branch (a
+    // battle-army Personality, but also Furugaro/Unseen Assassins/Scholarly Hermit's own Follower
+    // self-destroys); MakeDead's own callers are always Personality-gated already, so they only ever
+    // take the Dead branch.
     private void MarkDead(CardInstance card)
     {
         // Overconfident (issue #223): "leaves play" specifically means dying WHILE actually in play --
@@ -1077,7 +1091,10 @@ public sealed partial class MatchEngine
         // not trigger this" carve-out. Checked before the Zone changes, using the card's own status
         // right up to the moment it actually died.
         if(InPlay(card)) QueueOverconfidentDraw(card);
-        card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
+        card.Zone = Definition(card).Type==CardType.Personality ? Zone.Dead
+            : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
+            : Zone.DynastyDiscard;
+        card.FaceUp=true; card.Tokens.Clear();
         if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
     }
     // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
