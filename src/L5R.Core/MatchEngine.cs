@@ -164,26 +164,19 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
                 return;
             }
-            if (_state.PendingChoice.Type=="spellFollowUp")
+            if (_state.PendingChoice.Type=="additionalActionReaction")
             {
-                // A single bounded decision (act once, or decline), not a back-and-forth window --
-                // closes immediately either way, unlike proclaim/entryReaction/attackReaction above,
-                // which stay open until both sides pass. Restricted to the just-attached Spell's own
-                // Battle abilities; nothing else may be used while this is pending.
-                Require(command.PlayerId==_state.PendingChoice.PlayerId,"Only the equipping player may act in this window.");
-                Require(command.Type is "useAbility" or "declineReaction","Resolve the Spell follow-up action first.");
-                var spellId=_state.PendingChoice.CardId; var actingPlayerId=_state.PendingChoice.PlayerId;
-                if(command.Type=="useAbility")
+                // Additional Action (issue #181): open to either side, same shape as attackReaction
+                // above -- the opponent may play Effortless Counterattack's Reaction (negating the
+                // pending effects) or pass; the granting player may also pass here to decline this
+                // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
+                // already removed the grant regardless of what happens next).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
                 {
-                    Require(command.CardId==spellId,"You may only use a Battle ability on the Spell you just attached.");
-                    _state.PendingChoice=null;
-                    UseAbility(command); // its own NextAction(player.Id) call hands priority onward
-                }
-                else
-                {
-                    _state.PendingChoice=null;
-                    Emit("declinedSpellFollowUp","Declined the Spell's immediate Battle ability.",actingPlayerId,spellId);
-                    NextAction(actingPlayerId);
+                    var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
+                    ExecuteAbilityEffects(pending,consumedGrant:true);
                 }
                 return;
             }
@@ -202,6 +195,7 @@ public sealed partial class MatchEngine
             case "selectBattle": SelectBattle(command); break;
             case "equip": Equip(command); break;
             case "playStrategy": PlayStrategy(command); break;
+            case "recruitReserve": RecruitReserve(command); break;
             case "useAbility": UseAbility(command); break;
             default: throw new RuleViolation("Unsupported command.");
         }
@@ -262,6 +256,52 @@ public sealed partial class MatchEngine
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
         else OpenEntryReactionWindow(command.PlayerId,card);
+    }
+
+    // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
+    // "absent battle action" -- the recruiting player needs no presence of their own at this
+    // battlefield, unlike every other Battle action. Two conditions instead: the card is already
+    // face up in its province (a face-down Reserve card cannot be activated), there is a battlefield
+    // at that province (any currently unresolved one, not necessarily the one being resolved right
+    // now), and the ENEMY has presence there. Recruited directly to the battlefield, skipping the
+    // assignment step entirely -- no assignment-triggered Reaction exists in the engine yet, so there
+    // is nothing to actually skip today, but nothing here waits for one before this Personality is
+    // fully in play either. Deferred: Proclaim's own narrow exception for a Reserve recruit made
+    // possible by a defender's battlefield-creation ability at the attacker's own province -- that
+    // mechanic does not exist yet, so QuotePurchase's own ProclaimEligible (which already requires
+    // playerId==ActivePlayerId) is reused as-is and simply never overridden for this narrow case.
+    private void RecruitReserve(GameCommand command)
+    {
+        Require(_state.Phase==Phase.Battle,"Reserve recruitment is an absent battle action, only available during the Battle Phase.");
+        var card=Card(command.CardId);
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Province && card.FaceUp && Definition(card).Type==CardType.Personality && Keyword(card,"Reserve"),
+            "Choose your own face-up Reserve Personality in a province.");
+        var provinceIndex=card.ProvinceIndex!.Value;
+        Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
+        Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
+        var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
+        Require(quote.Error is null,quote.Error??"");
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
+        province.CardId=null;
+        card.Zone=Zone.Battlefield; card.FaceUp=true;
+        card.Bowed=Definition(card).Effect=="enters-bowed";
+        if(Definition(card).Effect=="enters-dishonored") card.Dishonorable=true;
+        Emit("reserveRecruited",$"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.",command.PlayerId,card.Id);
+        Refill(Player(command.PlayerId),province);
+        var reactionId=EntryReactionAbility(card);
+        if (quote.ProclaimEligible)
+        {
+            if(reactionId is not null) card.AbilityUses.Remove(reactionId);
+            _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
+            _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
+        }
+        else if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        // An ordinary action (never itself an Additional Action) forfeits any of this player's own
+        // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        NextAction(command.PlayerId);
     }
 
     private void OrderSeppuku(GameCommand command)
@@ -400,6 +440,10 @@ public sealed partial class MatchEngine
                 break;
             case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
+                // Additional Action (issue #181): passing forfeits any of this player's own still-
+                // unused grants rather than letting them linger for a future, ordinary turn -- the
+                // whole point of an Additional Action is that it resolves immediately, in a burst.
+                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId);
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.Dynasty:
@@ -543,6 +587,10 @@ public sealed partial class MatchEngine
         // Ashigaru Elite's boost is "for the remainder of the battle," not the turn -- a turn can
         // contain more than one battle (Infantry/Cavalry Maneuvers), so it must not carry into the next.
         _state.AshigaruBoost=new int[2];
+        // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
+        // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
+        // makes no sense carried into a battle it was never meant for.
+        _state.AdditionalActions.Clear(); _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
         if(_state.WinnerId is not null) return;
         if(_state.UnresolvedBattlefields.Count==0)
         {
@@ -608,7 +656,7 @@ public sealed partial class MatchEngine
         switch(def.Effect)
         {
             case "force-three": Require(target.OwnerId==command.PlayerId,"Training rally targets your Personality."); ApplyModifier(target,card.Id,def.Effect,"Force",3); break;
-            case "bow-small": Require(target.OwnerId!=command.PlayerId && PersonalityForce(target)<=3,"Training pressure targets an enemy Personality with 3 or less Force."); target.Bowed=true; break;
+            case "bow-small": Require(target.OwnerId!=command.PlayerId && PersonalityForce(target)<=3,"Training pressure targets an enemy Personality with 3 or less Force."); if(!StalwartNegatesBow(target,command.PlayerId)) target.Bowed=true; break;
             default: throw new RuleViolation("This card effect is not implemented.");
         }
         Player(command.PlayerId).Hand.Remove(card.Id); card.Zone=Zone.FateDiscard; card.FaceUp=true;
@@ -616,7 +664,12 @@ public sealed partial class MatchEngine
         NextAction(command.PlayerId);
     }
 
-    private void NextAction(int playerId) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=1-playerId; }
+    // stayWithPlayer (issue #181): true only when the action just resolved was itself Additional-
+    // Action-related (consumed a grant, or -- Again!/Two Hands themselves -- just created one) AND
+    // the player still has an unused grant afterward. An ordinary action never sets this, even if
+    // unrelated grants happen to be sitting unused for this player -- only the specific action that
+    // touched them may skip ceding priority.
+    private void NextAction(int playerId,bool stayWithPlayer=false) { _state.ConsecutivePasses=0; _state.PriorityPlayerId=stayWithPlayer?playerId:1-playerId; }
     private IEnumerable<CardInstance> Army(int playerId,int province) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality);
     // Province adjacency (core rules): a player's provinces sit in a line, 1-2-3-4. A destroyed
     // province is skipped entirely -- its former neighbors become directly adjacent to each other,
