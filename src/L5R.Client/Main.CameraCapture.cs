@@ -139,6 +139,21 @@ public partial class Main
                         _cameraFitted = false; _cameraZoom = FitZoom * .72f;
                         ApplyTableCamera();
                     }
+                    if (_captureMode.Contains("mat-max", StringComparison.Ordinal))
+                    {
+                        // Review the real table at its existing maximum zoom, with
+                        // both near-side artwork and cards visible for scale.
+                        _cameraFitted = false; _cameraZoom = 2f;
+                        _cameraCenter = new Vector2(WorldWidth * .2f, _selfProvinceY);
+                        if (_captureMode.Contains("gold", StringComparison.Ordinal))
+                        {
+                            var fabric = TableArtStage.FabricBounds(new Vector2(WorldWidth, _worldHeight));
+                            _cameraCenter.X = fabric.Position.X + fabric.Size.X * .09f;
+                        }
+                        ApplyTableCamera();
+                        RequireCamera(Mathf.IsEqualApprox(_cameraZoom, 2f), "mat review did not reach the maximum zoom");
+                        GD.Print($"MAT_MAX_ZOOM: zoom={_cameraZoom}, density={_root.Scale.X}, center={_cameraCenter}");
+                    }
                     MoveProbeMouse(_menu.GetGlobalRect().Position - new Vector2(10, 10));
                     break;
                 case 21:
