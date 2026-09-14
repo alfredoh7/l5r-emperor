@@ -336,11 +336,15 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
     CardToken[]? Tokens = null);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
+// DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
+// already present, individually, within Discard (each CardView's own Zone tells a dead card apart
+// from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
+// a UI can show it directly and a future card can read it without re-deriving its own filter.
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
-    CardView[]? Focused = null);
+    int DeadCount, CardView[]? Focused = null);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

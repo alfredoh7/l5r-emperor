@@ -92,7 +92,7 @@ var tests = new (string Name, Action Run)[]
     ("Shinjo Horibe may bow or straighten any Personality, but only while opposed", ShinjoHoribeBowOrStraighten),
     ("Doji Atsumichi may bow or straighten a Personality with lower Personal Honor than himself", DojiAtsumichiBowOrStraighten),
     ("Tetsuo destroys an attachment, and separately an enemy Personality with fewer Weapons than himself", TetsuoDestroyAttachmentAndWeakerWeaponed),
-    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile; his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
+    ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile (issue #221: the shared DeadCount helper, and PlayerView.DeadCount exposing the same authoritative per-player count for a future UI/card to read); his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
     ("Unique/Singular (issue #202): both restrict simultaneous in-play copies of the same-named card to one per controller (Unique's own in-play restriction had no test before this), checked at all three entry-into-play paths -- Purchase, ordinary Equip (a real pre-existing gap for both keywords, fixed here), and Equip (Battle)", UniqueAndSingularInPlayRestriction),
     ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
@@ -1436,6 +1436,11 @@ static void MotoShunsukeForceBonusAndMakeDead()
     Add(s,"training-lion-samurai",0,Zone.Dead); // player 0's (Shunsuke's own) dead pile: 1
     var e=MatchEngine.FromTestState(s);
     Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==shunsuke.Id).Force,5,"Base 3 + the largest single dead pile (2)");
+    // DeadCount (issue #221): the same authoritative per-player count PlayerView now exposes
+    // directly, computed through the exact same shared helper Shunsuke's own Force bonus reads.
+    Equal(e.GetView(0).Players[0].DeadCount,1);
+    Equal(e.GetView(0).Players[1].DeadCount,2);
+    Check(e.GetView(0).Players[1].Discard.Count(c=>c.Zone==Zone.Dead)==2,"Individually distinguishable within Discard too, by each CardView's own Zone");
 
     var s2=MatchEngine.CreateEconomyScenario().State;
     s2.Phase=Phase.Action; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
