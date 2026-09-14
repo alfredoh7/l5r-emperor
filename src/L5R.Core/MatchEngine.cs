@@ -190,6 +190,25 @@ public sealed partial class MatchEngine
                 }
                 return;
             }
+            if (_state.PendingChoice.Type=="beforeActionReaction")
+            {
+                // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): scoped to the one specific
+                // watching card by id, same shape as bowReaction/duelWonReaction above -- only that
+                // card's own controller may use it, or either side may pass to close the window.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
+                {
+                    var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
+                    ExecuteAbilityEffects(pending);
+                    // Defensive: a negation signal must never survive past the one re-invocation it
+                    // was set for -- if the re-invoked ability did not actually reach a matching
+                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear it here
+                    // rather than risk it leaking into a later, unrelated one.
+                    _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
+                }
+                return;
+            }
             if (_state.PendingChoice.Type=="duelReaction")
             {
                 // Dueling (issue #204): "a reaction to being challenged or entering a duel," offered
@@ -252,6 +271,12 @@ public sealed partial class MatchEngine
         // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
         // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
         if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
+        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
+        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
+        // so mandatory and unconditional, same convention as the two lines above; fires from any
+        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
+        // just Purchase.
+        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
@@ -267,6 +292,32 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
         return true;
+    }
+    // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
+    // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
+    // Zone.Home, or face-up in one of their own provinces (a face-down province card is hidden
+    // information and cannot be identified, so it is never affected). A plain discard, not a
+    // destruction -- no MarkDead, no "Dead" status, no Overconfident trigger even if the discarded
+    // card happens to carry it, matching DiscardProvince's own direct Zone.DynastyDiscard assignment.
+    private void DiscardOtherSensei(int playerId, CardInstance enteringCard)
+    {
+        var others = _state.Cards.Values.Where(c => c.Id != enteringCard.Id && c.OwnerId == playerId && Definition(c).Type == CardType.Personality
+            && Keyword(c, "Sensei") && (c.Zone == Zone.Home || c.Zone == Zone.Province && c.FaceUp)).ToArray();
+        foreach (var other in others)
+        {
+            if (other.Zone == Zone.Province)
+            {
+                var province = Player(playerId).Provinces.Single(p => p.CardId == other.Id);
+                other.Zone = Zone.DynastyDiscard; other.ProvinceIndex = null; province.CardId = null;
+                Emit("provinceDiscard", $"{Player(playerId).Name} discarded {Definition(other).Name} from a province (Sensei).", playerId, other.Id);
+                Refill(Player(playerId), province);
+            }
+            else
+            {
+                other.Zone = Zone.DynastyDiscard;
+                Emit("cardDiscarded", $"{Definition(other).Name} was discarded (Sensei).", playerId, other.Id);
+            }
+        }
     }
 
     private void Purchase(GameCommand command)
@@ -592,6 +643,11 @@ public sealed partial class MatchEngine
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
+            // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
+            // assigned to attack your provinces this turn" -- a turn-stamped flag, the same
+            // StraightenBlockedTurn convention, since by the time it is checked (End Phase) the
+            // battle may have already resolved and returned this card home, losing a live Zone check.
+            card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
         }
     }
@@ -1160,6 +1216,18 @@ public sealed partial class MatchEngine
         var count=0;
         foreach(var card in cards)
         {
+            // Mirumoto Rokai (issue #207 follow-up): "another player's action targets your
+            // Personality at Rokai's location, destroy Rokai: negate your Personality's destruction
+            // from the action's effects" -- consumed here, the single shared choke point behind
+            // every ability-triggered destroy (this is NEVER set for a bulk battle-resolution
+            // destroy, only ever by the defer-then-reexecute mechanism immediately re-invoking the
+            // one specific ability that was paused for this exact reaction).
+            if(_state.NegatedEffectKind=="destroy" && _state.NegatedEffectCardId==card.Id)
+            {
+                _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
+                Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
+                continue;
+            }
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
@@ -1223,6 +1291,14 @@ public sealed partial class MatchEngine
     private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
     private void EndTurn()
     {
+        // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
+        // Honor if he was not assigned to attack your provinces this turn" -- drained here,
+        // unconditionally, the same turn every one of these was queued (her own Open Timing is only
+        // ever usable "if it is not your turn," so every pending check here belongs to THIS turn
+        // actually ending now).
+        foreach(var check in _state.PendingTamokoHonorChecks)
+            if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
+        _state.PendingTamokoHonorChecks.Clear();
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }

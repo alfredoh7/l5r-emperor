@@ -126,6 +126,12 @@ var tests = new (string Name, Action Run)[]
     ("Review of previously Ring-blocked cards (issue #194): Moshi Ikako's 'Fire Battle' is a plain classification, not Ring-gated (confirmed, zero new primitives); Scholarly Hermit needed only a Ring-type check in a discard pile (new own-ring-in-discard Target)", RingBlockedCardsReview),
     ("Ring of Earth (issue #194, revalidated once its own scan became available): a won battle with enemy units present grants an Additional Battle Action scoped to the Ring; its own in-play action waives the ordinary Battle-timing presence check entirely and may raise or lower either side's own province strength by 3 (a new 'any-province' Target, generalizing the existing enemy-only category)", RingOfEarth),
     ("Ring of Fire (issue #194, revalidated once its own scan became available -- resolving issue #195's own text uncertainty by reading the scan directly rather than the mismatched scrape): destroying a province or enemy card in a battle's own resolution (no win required, like Ring of Water) grants an Additional Battle Action scoped to the Ring; its own in-play action destroys its own performing Personality as part of the cost (DestroyUnits, already fully generic) and a target enemy Personality with equal or lower Chi than the performer (enemy-personality-chi-lte-performer, Chokehold's own existing Target)", RingOfFire),
+    ("Sensei keyword (issue #207 follow-up): 'after this card enters play, discard all your other Sensei Personalities' -- a Home card discards directly, a face-up province card discards and refills, a face-down copy is untouched (hidden information), and the entering card is never its own 'other'", SenseiKeyword),
+    ("Mirumoto Yozo, Experienced 2 (issue #207 follow-up): 'after your Iaijutsu action resolves, give any Personality who performed it +2F' -- a new per-ability-id IsIaijutsuAction classification (every currently self-performer duel-issuing ability), applied via ApplyModifier regardless of the duel's own outcome", YozoIaijutsuBonus),
+    ("Mirumoto Hikaro (issue #207 follow-up): 'before you focus in a duel involving your Dragon Clan Personality, once per duel, you may focus from your discard pile instead' -- revealed to the opponent immediately (unlike an ordinary hidden focus) and removed from the game after the duel ends, not the ordinary FateDiscard", HikaroDiscardPileFocus),
+    ("Mirumoto Rokai (issue #207 follow-up): 'before an action resolves, negate its own destruction' -- a new defer-then-reexecute 'beforeActionReaction' primitive (the same shape PendingAdditionalAction already uses) so MoveHome/Straighten/DestroyUnits are never reached until the watcher's own controller answers, scoped to another player's action, Rokai's own controller's Personality, and Rokai's own location", RokaiNegatesDestruction),
+    ("Tamori Tamoko's own Reaction (issue #207 follow-up): 'before an action resolves, negate its own movement or straightening' -- the same beforeActionReaction primitive as Rokai, but with no 'another player's,' location, or cost restriction at all", TamokoNegatesMovementOrStraightening),
+    ("Tamori Tamoko's own Open action (issue #207 follow-up): 'if it is not your turn, target an unbowed Personality controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn' -- a new turn-stamped CardInstance.AssignedToAttackTurn flag, checked unconditionally in EndTurn", TamokoOpenHonorGain),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -3530,6 +3536,169 @@ static void RingOfFire()
         Equal(e.State.Cards[performer.Id].Zone,Zone.Dead,"Destroys its own performing Personality as part of the cost");
         Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Destroys the target");
         Check(e.State.Cards[ring.Id].Bowed,"Bows itself as the in-play cost");
+    }
+}
+static void SenseiKeyword()
+{
+    // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2, issue #207 follow-up): "After [this
+    // card] enters play: Discard all your other Sensei Personalities" -- a Home card discards
+    // directly; a face-up province card discards AND refills; a face-down province card and an
+    // unrelated (non-Sensei) card are both unaffected; the entering card itself is never its own
+    // "other".
+    var s=MatchEngine.CreateEconomyScenario().State;
+    for(var i=0;i<5;i++) Add(s,"training-marketplace",0,Zone.Home);
+    var homeSensei=Add(s,"training-sensei-personality",0,Zone.Home);
+    var provinceSenseiId=s.Players[0].Provinces[0].CardId!;
+    s.Cards[provinceSenseiId].DefinitionId="training-sensei-personality"; s.Cards[provinceSenseiId].FaceUp=true;
+    var faceDownSenseiId=s.Players[0].Provinces[1].CardId!;
+    // Forced back to hidden: CreateEconomyScenario's own StartTurn already ran EventsPhase, which
+    // reveals every one of the ACTIVE player's own provinces before Purchase is ever reachable --
+    // this specific combination (a face-down OWN province, still Purchase-reachable) does not occur
+    // naturally, but the same carve-out is real and reachable via RecruitReserve (a non-active
+    // player's own OTHER, unrelated provinces are never revealed by an opponent's own EventsPhase).
+    s.Cards[faceDownSenseiId].DefinitionId="training-sensei-personality"; s.Cards[faceDownSenseiId].FaceUp=false;
+    var nonSensei=Add(s,"training-crane-samurai",0,Zone.Home);
+    var enteringCardId=s.Players[0].Provinces[2].CardId!;
+    s.Cards[enteringCardId].DefinitionId="training-sensei-entry"; s.Cards[enteringCardId].FaceUp=true;
+    var e=MatchEngine.FromTestState(s);
+    var payment=e.PaymentOptions(0,3).First();
+    Accept(e,new GameCommand("purchase",0,e.Version,CardId:enteringCardId,SourceIds:payment.SourceIds));
+    Equal(e.State.Cards[homeSensei.Id].Zone,Zone.DynastyDiscard,"Discarded from Home");
+    Equal(e.State.Cards[provinceSenseiId].Zone,Zone.DynastyDiscard,"Discarded from a province, face-up");
+    Check(e.State.Cards[provinceSenseiId].ProvinceIndex is null);
+    Check(e.State.Players[0].Provinces[0].CardId!=provinceSenseiId,"The province refills with a different card");
+    Equal(e.State.Cards[faceDownSenseiId].Zone,Zone.Province,"A face-down copy is hidden information, never affected");
+    Equal(e.State.Cards[nonSensei.Id].Zone,Zone.Home,"A non-Sensei card is unaffected");
+    Equal(e.State.Cards[enteringCardId].Zone,Zone.Home,"The entering card itself is never discarded as its own 'other'");
+}
+static void YozoIaijutsuBonus()
+{
+    // Mirumoto Yozo, Experienced 2's own second trait (issue #207 follow-up): "after your Iaijutsu
+    // action resolves, give any Personality who performed it +2F" -- exercised against Kitsuki
+    // Daisuke's own real self-performer Iaijutsu duel (daisuke-duel), regardless of win or loss.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var daisuke=Add(s,"oracle-l5r-4406",0,Zone.Battlefield,province:0); // Chi 4
+    var weakEnemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3 -- Daisuke wins
+    Add(s,"training-yozo-exp2",0,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var forceBefore=e.GetView(0).Players[0].Army.Single(c=>c.Id==daisuke.Id).Force;
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:daisuke.Id,TargetId:weakEnemy.Id,AbilityId:"daisuke-duel"));
+    Accept(e,new GameCommand("strike",1,e.Version));
+    Accept(e,new GameCommand("duelistRefocus",0,e.Version)); // Daisuke carries Duelist: decline the extra refocus opportunity
+    Equal(e.State.Cards[weakEnemy.Id].Zone,Zone.Home,"Daisuke wins (Chi 4 > 3); the loser moves home, per daisuke-duel's own outcome");
+    Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==daisuke.Id).Force,forceBefore+2,"Yozo's own trait: +2F for performing an Iaijutsu action");
+}
+static void HikaroDiscardPileFocus()
+{
+    // Mirumoto Hikaro's own second trait (issue #207 follow-up): "before you focus in a duel
+    // involving your Dragon Clan Personality, once per duel, you may focus from your discard pile
+    // instead" -- revealed immediately (unlike an ordinary hidden focus), removed from the game
+    // after the duel ends (not the ordinary FateDiscard every other focused card gets), once per duel.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+    var dragon=Add(s,"oracle-l5r-4406",0,Zone.Battlefield,province:0); // Kitsuki Daisuke, Dragon Clan, Chi 4
+    var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3
+    Add(s,"training-hikaro",0,Zone.Home);
+    var discardedCard=Add(s,"training-rally",0,Zone.FateDiscard);
+    var otherDiscarded=Add(s,"training-rally",0,Zone.FateDiscard);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:dragon.Id,TargetId:enemy.Id,AbilityId:"daisuke-duel"));
+    Accept(e,new GameCommand("focus",1,e.Version,Choice:"deck")); // the challenged player's own first Focus-or-Strike option
+    Accept(e,new GameCommand("focus",0,e.Version,Choice:"discard",CardId:discardedCard.Id));
+    Equal(e.State.Cards[discardedCard.Id].Zone,Zone.Focused);
+    Check(e.State.Cards[discardedCard.Id].FaceUp,"Revealed to the opponent immediately, unlike an ordinary hidden focus");
+    Check(e.State.PendingDuel!.HikaroDiscardFocusUsed[0],"Marked used for this player this duel");
+    Accept(e,new GameCommand("focus",1,e.Version,Choice:"deck"));
+    Reject(e,new GameCommand("focus",0,e.Version,Choice:"discard",CardId:otherDiscarded.Id));
+    Accept(e,new GameCommand("strike",0,e.Version));
+    Accept(e,new GameCommand("duelistRefocus",0,e.Version)); // Daisuke carries Duelist: decline the extra refocus opportunity
+    Equal(e.State.Cards[discardedCard.Id].Zone,Zone.RemovedFromGame,"Removed from the game after the duel ends, not the ordinary FateDiscard");
+}
+static void RokaiNegatesDestruction()
+{
+    // Mirumoto Rokai (issue #207 follow-up): "after another player's action targets your
+    // Personality at Rokai's location, destroy Rokai: negate your Personality's destruction from
+    // the action's effects" -- deferred BEFORE the destroy ever applies (DestroyUnits is never
+    // reached until the choice is answered), scoped to another player's action, own controller, and
+    // Rokai's own location.
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+    var rokai=Add(s,"training-rokai",1,Zone.Battlefield,province:0);
+    var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // no attachments; Rokai's own controller's Personality, same location
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:target.Id,AbilityId:"training-destroy-no-attachments"));
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+    Equal(e.State.PendingChoice?.CardId,rokai.Id);
+    Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Not yet destroyed -- deferred until the choice is answered");
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:rokai.Id,AbilityId:"rokai-negate-destruction"));
+    Equal(e.State.Cards[rokai.Id].Zone,Zone.Dead,"Rokai's own cost: destroying himself");
+    Accept(e,Cmd(e,"declineReaction"));
+    Accept(e,Cmd(e,"declineReaction"));
+    Check(e.State.PendingChoice is null);
+    Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Negated: the original destroy never applied");
+}
+static void TamokoNegatesMovementOrStraightening()
+{
+    {
+        // "Negate his movement" -- Togashi Mihato's own real ability (mihato-move), no restriction
+        // to another player's action or any location -- Tamoko may negate her own controller's own
+        // action just as easily as an opponent's.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var mihato=Add(s,"oracle-l5r-10289",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var tamoko=Add(s,"training-tamoko",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mihato.Id,TargetId:target.Id,AbilityId:"mihato-move"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PendingChoice?.CardId,tamoko.Id);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tamoko.Id,AbilityId:"tamoko-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Negated: the move never applied, and Tamoko herself is untouched (no cost)");
+    }
+    {
+        // "Negate his straightening" -- a plain training fixture, declined this time.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var straightener=Add(s,"training-battle-straightener",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        Add(s,"training-tamoko",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:straightener.Id,TargetId:target.Id,AbilityId:"training-straighten-at-battle"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(!e.State.Cards[target.Id].Bowed,"Declined: the straighten applies normally");
+    }
+}
+static void TamokoOpenHonorGain()
+{
+    // Tamori Tamoko's own Open action (issue #207 follow-up): "if it is not your turn, target an
+    // unbowed Personality controlled by the active player: before the turn ends, gain 1 Honor if he
+    // was not assigned to attack your provinces this turn."
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=0;
+        var tamoko=Add(s,"training-tamoko",1,Zone.Home);
+        var target=Add(s,"training-lion-samurai",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:tamoko.Id,TargetId:target.Id,AbilityId:"tamoko-open")); // it IS player 0's own turn
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:tamoko.Id,TargetId:target.Id,AbilityId:"tamoko-open"));
+        var honorBefore=e.State.Players[1].Honor;
+        while(e.State.Phase!=Phase.End) Accept(e,Cmd(e,"pass"));
+        Equal(e.State.Players[1].Honor,honorBefore+1,"Not assigned to attack this turn: gains the Honor");
+    }
+    {
+        // "Open" is only ever usable during Phase.Action in this engine (every Open ability shares
+        // this convention) -- the "assigned to attack" flag itself is set directly here instead of
+        // walking through a real AttackDeclaration phase, to isolate EndTurn's own check.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=0;
+        var tamoko=Add(s,"training-tamoko",1,Zone.Home);
+        var target=Add(s,"training-lion-samurai",0,Zone.Home);
+        target.AssignedToAttackTurn=s.TurnNumber;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:tamoko.Id,TargetId:target.Id,AbilityId:"tamoko-open"));
+        var honorBefore=e.State.Players[1].Honor;
+        while(e.State.Phase!=Phase.End) Accept(e,Cmd(e,"pass"));
+        Equal(e.State.Players[1].Honor,honorBefore,"Assigned to attack this turn: no Honor gained");
     }
 }
 static void RingBlockedCardsReview()
