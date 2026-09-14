@@ -8,6 +8,10 @@ Update this file as part of the PR that ships (or meaningfully advances) an item
 
 Status values: **Not started** / **In progress** / **Done**.
 
+## Current delivery priority
+
+See [NEXT_GAME_PLAN.md](NEXT_GAME_PLAN.md), coordinated under #86: expanded catalogue viewer #120; existing builder #25/#67/#68; custom Practice #29/#69; dueling #121; Shugenja/Spells #122; bounded card import waves. Continue match/platform acceptance throughout. Battle presentation is sufficient for this pass; keep fixing play-blocking defects.
+
 ## Rules-engine mechanics
 
 Confirmed by direct source audit of `src/L5R.Core` on 2026-09-09, not by absence of a card that would need them.
