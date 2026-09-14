@@ -522,6 +522,12 @@ public static class AbilityCatalog
         // shape as jakuei-bow/jakuei-bow-favor -- not a new optional-cost command field.
         ["yayu-bow-attack"] = new("Battle", "Bow one of Yayu's Spells · Ranged 5 Attack", "attack", Performer: "own-spell-attached-to-source", UsageKey: "yayu-attack"),
         ["yayu-destroy-attack"] = new("Battle", "Destroy one of Yayu's Spells · Ranged 5 Attack", "attack", Performer: "own-spell-attached-to-source", UsageKey: "yayu-attack"),
+        // Bayushi Mugoshi (issue #223): "Political Reaction" -- the Timing-prefix word itself is
+        // never a blocker (issue #198's own confirmed precedent), so this is a plain Reaction. The
+        // same "choose a player" shape Kitsuki Horume's own first ability already uses (issue #210);
+        // "for not accepting the teachings of Fudo" is flavor folded into the choice, not a separate
+        // condition.
+        ["mugoshi-slander"] = new("Reaction", "Political: after Mugoshi enters play, choose a player: he loses 1 Honor", "player", Trigger: "own-enters-play"),
     });
 }
 
@@ -531,8 +537,20 @@ public sealed partial class MatchEngine
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
-    private bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal)
-        || keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
+    private bool Keyword(CardInstance card, string keyword)
+    {
+        var printedOrGranted = (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+        // Kitsuki Minori (issue #223): "does not have Overconfident (in and out of play) if any
+        // other player is Lion Clan" -- a SUBTRACTIVE conditional, the opposite of Tamori Yayu's own
+        // additive one below. A live check, not a one-time flag: Stronghold Clan never changes
+        // mid-game in this engine, so the two are equivalent, and this avoids a new persisted field.
+        if (printedOrGranted && keyword == "Overconfident" && Definition(card).Effect == "loses-overconfident-vs-lion" && Player(1 - card.OwnerId).Clan == "Lion")
+            return false;
+        if (printedOrGranted) return true;
+        // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
+        // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
+        return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
+    }
     // Multi-keyword requirement (issue #190): "a Dragon Clan Kensai", "a Crane Clan Magistrate" -- any
     // number of keywords, independently present, order irrelevant. A null/empty list is deliberately
     // false, not vacuously true: every RequiredKeywords-gated category exists specifically because it
@@ -1891,6 +1909,7 @@ public sealed partial class MatchEngine
                 DestroyAttachment(Card(command.PerformerId!));
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
+            case "mugoshi-slander": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
@@ -1928,6 +1947,16 @@ public sealed partial class MatchEngine
         // action, it is not itself a fresh "your action bowed a Personality" event that could
         // re-trigger the same (or another) watching card all over again.
         if (ability.Timing != "Reaction" && OpenBowReactionWindow(player.Id, bowedBeforeAction, 1 - player.Id)) return;
+        // Overconfident (issue #223): a chance to react to anything this ability's own resolution
+        // just destroyed or recruited (MarkDead/Purchase/RecruitReserve already queued it) -- but
+        // only when this action is actually about to hand priority back the ordinary way. A Reaction
+        // used INSIDE an already-open window (entryReaction, proclaim, bowReaction, ...) must leave
+        // that window's own PendingChoice alone -- it stays open afterward by design (NextAction below
+        // only ever flips PriorityPlayerId, never PendingChoice, letting the same window accept
+        // another reaction or a pass) -- so this only fires when PendingChoice is null here, same as
+        // every one of those windows' own eventual close funnels through PassReaction's own hook
+        // instead, not this one.
+        if (_state.PendingChoice is null && OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id, _state.AdditionalActions.Any(g => g.PlayerId == player.Id));
     }
     // Togashi Hizumi: "after the resolution of an action that bowed a Personality AT HIZUMI'S
