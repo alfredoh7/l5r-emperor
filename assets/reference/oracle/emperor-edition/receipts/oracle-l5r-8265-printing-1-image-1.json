@@ -23,5 +23,18 @@
   "source_image_hash": "2e/7d",
   "source_url": "https://images.oracleofthevoid.com/l5r/2e/7d/printing_8265_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/2e/7d/printing_8265_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 196394,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8265-printing-1-image-1.webp",
+    "sha256": "0469a6e2e82f77b2af65901566d8c392ecc15d1da6896e34813a52b9d1def069",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

@@ -23,5 +23,18 @@
   "source_image_hash": "fd/32",
   "source_url": "https://images.oracleofthevoid.com/l5r/fd/32/printing_8308_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/fd/32/printing_8308_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 149186,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-8308-printing-1-image-1.webp",
+    "sha256": "2293c9f217424e0151b7be568fcc8afd56e13137d7801ac327432da28d924e6d",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

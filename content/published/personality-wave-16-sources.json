@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-10455",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10455",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10455-printing-1-image-1.webp",
+    "image_sha256": "b294b55fee4a0561c77601877fc687837d61b499b9184e557967a92ea17220a7"
+  },
+  {
+    "card_id": "oracle-l5r-8570",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8570",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8570-printing-1-image-1.webp",
+    "image_sha256": "571e5ccf4899f3c2a884be3394667582ddb8ef982509de578b211c56c875ad73"
+  },
+  {
+    "card_id": "oracle-l5r-9415",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9415",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9415-printing-1-image-1.webp",
+    "image_sha256": "f93f29260bec4ae4dd499f03b002d7cf1d2a305587515d5b3f3df8292b9ca0b3"
+  },
+  {
+    "card_id": "oracle-l5r-7797",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7797",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-7797-printing-1-image-1.webp",
+    "image_sha256": "85b12f3e55e5d9f41e39c4fa666c99639a091f25b909ff8cf4ea8bfc59c8a5ea"
+  }
+]

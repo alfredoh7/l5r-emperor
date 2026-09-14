@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implemented Equip (Battle): a standing, tireless player ability letting a Shugenja attach a Spell from hand during battle, with a bounded immediate follow-up window to use the Spell's own Battle ability. New spellFollowUp PendingChoice type; CardType.Spell added to attachment/enemy-attachment target categories; fixed a payment-validation gap where ability cost was assumed to come only from the source card, not a Spell target. Shared-file note: all changed files are within L5R.Core (rules engine) and its test suite, a single rules-lane concern touching multiple engine files (CardAbilities, MatchEngine, MatchQueries, CardCatalog) plus their shared test file; no UI/client files touched.",
+  "validation": "dotnet test (88/88 core, 34/34 published, 8/8 deck format); bash tools/check.sh --skip-client (all AI, server, and client transport integration checks passed).",
+  "remaining": "Absent Battle (Shugenja at Home, not current battlefield -- e.g. Obscured Pathways) and Follower/Item/Weapon/Armor Tokens as attachments are explicitly deferred; noted in issue #140 as future work, not required for this primitive.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/140",
+  "branch": "mdornbrook/spells-shugenja-equip-battle",
+  "updated": "2026-09-09T23:19:00.698864+00:00"
+}

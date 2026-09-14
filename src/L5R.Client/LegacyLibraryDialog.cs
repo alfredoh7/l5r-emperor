@@ -443,7 +443,7 @@ internal static class LegacyLibraryDialog
     {
         var label = Palette.Wrapped(text, 27);
         label.Uppercase = true;
-        label.AddThemeFontOverride("font", CatalogueArt.Heading(27));
+        label.AddThemeFontOverride("font", Palette.HeadingLabel(27));
         return label;
     }
 

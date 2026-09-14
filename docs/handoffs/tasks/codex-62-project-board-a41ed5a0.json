@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Add the private board client and documented Codex/Claude claim, resume, evidence and handoff workflow; retain Mendon autonomy and GitHub outage fallback.",
+  "validation": "43 Python collaboration/board-client tests passed. Board app checks and live integration are recorded in alfredoh7/l5r-board; no gameplay checks claimed.",
+  "remaining": "Mendon review of shared integration, CI, and each collaborator agent-token onboarding. Human game acceptance remains on issues 71-73.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/62",
+  "branch": "codex/62-project-board",
+  "updated": "2026-09-08T21:58:04.640667+00:00"
+}

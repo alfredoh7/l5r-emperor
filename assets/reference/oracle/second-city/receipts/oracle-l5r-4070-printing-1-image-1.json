@@ -23,5 +23,18 @@
   "source_image_hash": "01/ee",
   "source_url": "https://images.oracleofthevoid.com/l5r/01/ee/printing_4070_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/01/ee/printing_4070_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 181338,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-4070-printing-1-image-1.webp",
+    "sha256": "81236c10c3a9c3e781170eac28eaf207fa8a09080052af73078e62528af95fd8",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

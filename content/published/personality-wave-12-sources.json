@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-10058",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10058",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10058-printing-1-image-1.webp",
+    "image_sha256": "89edd94643c61687c6541745e8cdd6fe2f9a9db9c9f062d1d83de66b8938e5af"
+  },
+  {
+    "card_id": "oracle-l5r-8521",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8521",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-8521-printing-1-image-1.webp",
+    "image_sha256": "6d6e302bd33dde63a4668b11d332d3b34df6cd1a5f2a6d3ccdf570a9a7cc3fa4"
+  },
+  {
+    "card_id": "oracle-l5r-7789",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7789",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-7789-printing-1-image-1.webp",
+    "image_sha256": "e304e7684e56769402ca1a3273850bdff81da8fe2ced4ce66eb4d71bb8ba7a2f"
+  },
+  {
+    "card_id": "oracle-l5r-7806",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=7806",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-7806-printing-1-image-1.webp",
+    "image_sha256": "38fa0f2f5a5b30a1c3dd3f60a5a068751377b5e8fec8fb71128b7f38d0745ea9"
+  },
+  {
+    "card_id": "oracle-l5r-5112",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5112",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-5112-printing-1-image-1.webp",
+    "image_sha256": "e35a8fc02aeac03e9dc0cdd600a8a00f523e90883a1eb9d68787060712de86b4"
+  },
+  {
+    "card_id": "oracle-l5r-10846",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10846",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10846-printing-1-image-1.webp",
+    "image_sha256": "07453657521c1dfbdcbbcb27988e93645aee416822ea916d9fcd9f8f6ade46c9"
+  }
+]

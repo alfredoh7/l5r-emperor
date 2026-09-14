@@ -23,5 +23,18 @@
   "source_image_hash": "16/cf",
   "source_url": "https://images.oracleofthevoid.com/l5r/16/cf/printing_10082_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/16/cf/printing_10082_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 136922,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10082-printing-1-image-1.webp",
+    "sha256": "353434d161fc63d743aecd61211cca9da1dc6e7eb0cab566701360e69eb1a6fd",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

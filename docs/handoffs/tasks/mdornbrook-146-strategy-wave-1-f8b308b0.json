@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Ships Strategy Wave 1 (issue #146), the first import wave following the generic keyword-satisfaction primitive (#144): Immovable Object (the primitive's own worked example, plus a new BattleOrOpen dual-timing AbilityDefinition value and a one-off Force-vs-Performer Target comparison), Blind Rage (needs nothing beyond the generic Performer category), Chokehold (generic Performer plus a one-off Chi-vs-Performer Target comparison), and Unorthodox Attack (reuses pre-existing categories verbatim, no new engine pieces). New tools/content/package_strategy_wave_1.py mirrors package_personality_wave_5.py; two of the four needed a Text correction from the fetched catalogue record versus the actual scanned card image, never silently trusted. Shared-file note: all changed files are within L5R.Core (rules engine), its test suite, docs/ROADMAP.md, the client's packaged card art, and content/ data files -- a single rules-lane content-import concern; no UI/client code touched (only data/art assets).",
+  "validation": "New StrategyWave1KeywordCards test covers all 4 cards and both of Immovable Object's abilities (including the Open-route dual timing). Full suite: 93/93 core + 34/34 published (published-card count updated 124->128) + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "Documented in issue #146: ~52 further 'clean' Strategy candidates and ~200+ with a bigger gap remain untriaged in detail; Personality/Spell/Stronghold-type candidates using these keywords are untouched. A future wave should pick the next highest-leverage candidates.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/146",
+  "branch": "mdornbrook/146-strategy-wave-1",
+  "updated": "2026-09-10T10:00:05.263914+00:00"
+}

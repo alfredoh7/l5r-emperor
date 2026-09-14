@@ -105,6 +105,15 @@ public partial class Main
         }
         if (_captureClock < 1.3) return;
         var path = _capturePath!;
+        if (menu.Page == "main")
+        {
+            foreach (var entry in menu.Entries.GetChildren().OfType<MenuEntry>())
+            {
+                MenuAssert(GetViewport().GetVisibleRect().Encloses(entry.GetGlobalRect()), "heading/menu entry fits viewport: " + entry.Text);
+                MenuAssert(entry.Text == entry.Text.ToUpperInvariant(), "heading uses uppercase: " + entry.Text);
+                MenuAssert(entry.Size.X <= 525 && entry.Size.Y <= 83, "heading line box fits menu spacing: " + entry.Text);
+            }
+        }
         GetViewport().GetTexture().GetImage().SavePng(path);
         File.WriteAllText(path+".json", JsonSerializer.Serialize(new { Page=menu.Page, MenuVisible, MatchExists=_session.Snapshot is not null, Preferences=_preferences.ReducedMotion, Resolution=GetViewport().GetVisibleRect().Size.ToString() }));
         GD.Print("MENU_CAPTURE: " + path); GetTree().Quit();

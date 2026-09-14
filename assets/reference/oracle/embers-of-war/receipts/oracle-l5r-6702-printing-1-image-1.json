@@ -23,5 +23,18 @@
   "source_image_hash": "d8/fc",
   "source_url": "https://images.oracleofthevoid.com/l5r/d8/fc/printing_6702_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d8/fc/printing_6702_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 139314,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6702-printing-1-image-1.webp",
+    "sha256": "f79df1f53ee146279ffc3651a4358ace904dc59383f54793e4a29caa02633815",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

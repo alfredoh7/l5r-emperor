@@ -9,6 +9,10 @@ The latest user request takes precedence. These instructions apply to every impl
 3. Check open PRs and assigned issues for overlapping files/tasks. Reuse the matching issue; create one for a new implementation task and record who is taking it. A draft PR on the task branch makes ownership visible early. Assign only yourself unless the user requests another assignee. Coordination records are not locks; check again before editing a shared file.
 4. Start from current `origin/main` on a short task branch (`codex/<issue>-<topic>` or `claude/<issue>-<topic>`). Resume an existing branch only when it belongs to this task. Separate simultaneous sessions into separate clones/worktrees. Never switch/reset/stash someone else's dirty work automatically; use a separate worktree for unrelated work. For a dirty task-owned branch, preserve and continue it.
 
+## Project board coordination
+
+Read `docs/PROJECT_BOARD.md` for the private board and agent client. When `L5R_BOARD_TOKEN` is configured, context includes live board state. Claim Ready work with `tools/board.py` before editing; use the exact executor/branch to resume, record scope revisions instead of silently expanding the task, and explicitly hand off after publishing the existing repository handoff. Do not claim success on authentication/network failure. Preserve current work and use explicit GitHub coordination for new work during an outage. Human acceptance is distinct from merge permission and cannot be provided by an agent token.
+
 ## Standing development authority
 
 - **Mendon (`mdornbrook`) and agents working on his tasks may change any part of the game without Alfredo’s approval**, including UI, menus, shared functions, custom-deck loaders, practice/sandbox modes, rules, card data and server code. This is explicit owner authorization, recorded in `.github/collaboration.json` under `autonomous_developers`; do not ask again because a file falls in Alfredo's usual lane.
@@ -37,6 +41,7 @@ The latest user request takes precedence. These instructions apply to every impl
 - Keep authoritative legality, Gold, Honor, payments, abilities and hidden state in `L5R.Core`/the server. UI submits intentions and presents engine choices.
 - Preserve the pinned Emperor Lion/Crane profile and printing provenance. The wider reference catalogue is not automatically playable; never silently turn unsupported effects into blank cards.
 - Preserve the approved game aesthetic, full card faces, physical stacks, header font, reduced motion and sparse board information. **Do not use the Impeccable skill**; the user explicitly rejected it for this game.
+- For approved imagegen art, follow `docs/ART_IMPLEMENTATION.md`: reuse the actual approved pixels or derive a faithful asset, preserve ornamental proportions, compare native output beside the source, and iterate on both close-up and playable views before delivery. Do not call an approximate redraw a 1:1 match.
 - Every playable update for Alfredo must include a clickable local launcher link in the final response. Run `python3 tools/create-dev-launcher.py` on this Mac to refresh `artifacts/L5R Emperor - Latest.app`; the portable checkout entry is `Play Latest.command`. These build/run the current checkout, not an old packaged release or a fetched branch. Verify the launcher after changing it. Never imply an earlier downloaded release includes unmerged work.
 - Keep credentials, local room storage, caches and binaries out of Git; use private Releases for game packages/bulk research scans. Do not rewrite shared history or change visibility.
 

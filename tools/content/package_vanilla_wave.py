@@ -20,6 +20,8 @@ import re
 import shutil
 from pathlib import Path
 
+from PIL import Image
+
 ROOT = Path(__file__).resolve().parents[2]
 CONTENT_DIR = Path("content/oracle")
 IMAGE_DEST = Path("src/L5R.Client/Content/Published")
@@ -86,12 +88,31 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False) 
     receipt = find_receipt(root, slug, image_id)
     if receipt["source_image_hash"] != printing["printimagehash"][0]:
         raise ValueError(f"{card_id} receipt does not match the selected printing")
-    source_image = root / receipt["path"]
-    if hashlib.sha256(source_image.read_bytes()).hexdigest() != receipt["sha256"]:
-        raise ValueError(f"Source scan changed since it was fetched: {card_id}")
     destination = root / IMAGE_DEST / f"{card_id}.jpg"
     destination.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(source_image, destination)
+
+    # Issue #200: a receipt's own top-level path/sha256 always identify the true Oracle-of-the-Void
+    # master (the "restore original if we need to" copy) and are never touched by this function. A
+    # sibling `working_copy` block -- present once tools/content/sync_webp_working_copies.py has run
+    # -- names a local, storage-lighter WebP artifact instead; prefer it when present so day-to-day
+    # packaging never needs the (gitignored, not-restored-by-default) original scan cache at all.
+    working_copy = receipt.get("working_copy")
+    if working_copy is not None:
+        working_image = root / working_copy["path"]
+        if hashlib.sha256(working_image.read_bytes()).hexdigest() != working_copy["sha256"]:
+            raise ValueError(f"Working-copy scan changed since it was synced: {card_id}")
+        if working_copy["format"].upper() == "JPEG":
+            shutil.copyfile(working_image, destination)
+        else:
+            with Image.open(working_image) as img:
+                img.convert("RGB").save(destination, "JPEG", quality=95)
+        image_path, image_sha256 = working_copy["path"], working_copy["sha256"]
+    else:
+        source_image = root / receipt["path"]
+        if hashlib.sha256(source_image.read_bytes()).hexdigest() != receipt["sha256"]:
+            raise ValueError(f"Source scan changed since it was fetched: {card_id}")
+        shutil.copyfile(source_image, destination)
+        image_path, image_sha256 = receipt["path"], receipt["sha256"]
 
     honor = c.get("honor", [])
     fields = dict(
@@ -103,8 +124,12 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False) 
         Keywords=[plain(k) for k in c.get("keywords", [])], Focus=num("focus"),
         _oracle_id=int(card_id.removeprefix("oracle-l5r-")),
     )
+    # image_path/image_sha256 name whichever file was actually copied into Content/Published (the
+    # working copy when one exists, else the original) -- the receipt's OWN path/sha256, naming the
+    # true Oracle-of-the-Void master unconditionally, remain the durable provenance record; nothing
+    # here needs to also carry them, since the committed receipt JSON is itself permanent.
     source = {"card_id": card_id, "printing_set": printing["set"], "source_url": record["source_url"],
-              "image_path": receipt["path"], "image_sha256": receipt["sha256"]}
+              "image_path": image_path, "image_sha256": image_sha256}
     return fields, source
 
 

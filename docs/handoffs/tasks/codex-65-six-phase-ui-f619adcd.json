@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "A six-phase art with C help, refined to uppercase Weathered Quill and compact glyph spacing. Remove phase label stripes and phase-bar Pass; keep action-sidebar Pass. Normalize heading line metrics and fit menus/plaques. Ribbon refinement is separately in PR92.",
+  "validation": "Final client build passed; native phase/input/reduced-motion checks at 1672 and scaled1280, actual board1920/1280, native menus and entry-bounds/uppercase checks at three aspect ratios, player/keyword/name and stat-inlay fixtures passed. Reviewed source comparisons and plaque/menu typography. Combined preview retains earlier battle/token UI; integrated rules suite281 passed.",
+  "remaining": "CI and mdornbrook semantic-help/shared review pending; main unchanged. No native Windows graphical playtest. Combined preview evidence includes unmerged PR76/92 visuals.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/65",
+  "branch": "codex/65-six-phase-ui",
+  "updated": "2026-09-09T13:23:30.297381+00:00"
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implements province adjacency (issue #160), the first prerequisite for the aggregate/group Force effects primitive, per the user's detailed spec. New AdjacentProvinces(playerId, index) derives adjacency on demand from each province's existing Destroyed flag -- a destroyed province is skipped, its former neighbors become directly adjacent, compounding across multiple destructions ('provinces slide together'). No new state, no adjacency table, no renumbering of existing fixed-index province references. Not hardcoded to 4 provinces: the loop bound is Provinces.Count (the actual list length), so a player with more than the usual 4 (e.g. a future Stronghold effect) is handled identically with no code change -- verified directly with a 6-province scenario, not just asserted. New Target category personality-at-adjacent-battlefield, demonstrated with a training fixture (a simplified Moto Gunso shape). Shared-file note: all changed files are within L5R.Core (rules engine) and its test suite, plus docs/ROADMAP.md -- a single rules-lane primitive change; no UI/client files touched.",
+  "validation": "New ProvinceAdjacency test verifies every worked example from the spec exactly (baseline line, each single middle province destroyed both directions, both middle provinces destroyed, the closing one-middle-one-end example), plus a 6-province scenario proving the algorithm is not hardcoded to 4. Full suite: 99/99 core + 34/34 published + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "Infrastructure only -- no published card needs adjacency yet (Moto Gunso, the motivating example, is not imported). Ready for whenever a wave picks it up, and for the boost-other-cards aggregate primitive requested alongside.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/160",
+  "branch": "mdornbrook/160-province-adjacency",
+  "updated": "2026-09-10T14:28:16.144543+00:00"
+}

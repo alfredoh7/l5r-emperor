@@ -33,7 +33,7 @@ public partial class CardFlight : Control
     }
     public override void _Draw()
     {
-        if (_clock < Delay || _done) return;
+        if (_done) return;
         var t = Math.Clamp((float)((_clock - Delay) / Duration), 0, 1);
         var ease = t*t*(3-2*t);
         var opacity = FadeOnArrival ? 1-Math.Clamp((t-.7f)/.3f,0,1) : 1;

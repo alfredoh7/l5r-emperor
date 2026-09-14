@@ -57,10 +57,11 @@ public partial class Main
 
     private void FitTableViewport()
     {
-        _tableViewport.Position = new Vector2(144, 148);
+        const int left = 144;
+        _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - 188,
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
@@ -69,8 +70,8 @@ public partial class Main
     private void FocusMySide()
     {
         _cameraFitted = false;
-        _cameraZoom = FitRegion(new Rect2(-20, _selfHomeY - 20, WorldWidth + 40, _worldHeight - _selfHomeY + 40));
-        _cameraCenter = new Vector2(WorldWidth / 2, (_selfHomeY + _worldHeight) / 2);
+        _cameraZoom = FitRegion(new Rect2(-20, Math.Min(_selfHomeY, _selfProvinceY - MatHeader) - 20, WorldWidth + 40, _worldHeight - Math.Min(_selfHomeY, _selfProvinceY - MatHeader) + 40));
+        _cameraCenter = new Vector2(WorldWidth / 2, (Math.Min(_selfHomeY, _selfProvinceY - MatHeader) + _worldHeight) / 2);
         ApplyTableCamera();
     }
 
@@ -81,17 +82,38 @@ public partial class Main
         var lanes = View.CurrentBattleProvince is int active ? new[] { active }
             : View.Players.SelectMany(p => p.Army).Where(c => c.ProvinceIndex is not null).Select(c => c.ProvinceIndex!.Value).Distinct().ToArray();
         if (lanes.Length == 0) return;
-        var left = lanes.Min(p => SlotX(defender, 2 + p) - (_laneWidths[p] - CardHeight) / 2);
-        var right = lanes.Max(p => SlotX(defender, 2 + p) + (_laneWidths[p] + CardHeight) / 2);
-        _cameraFitted = false;
-        _cameraZoom = FitRegion(new Rect2(left - 20, _battleY - 12, right - left + 40, _battleHeight + 24));
-        _cameraCenter = new Vector2((left + right) / 2, _battleY + _battleHeight / 2);
+        var regions = lanes.Where(_battleCourts.ContainsKey).Select(i => _battleCourts[i]
+            .Merge(_matTargets.First(s => s.Id == $"province:{defender.Id}:{i}").Bounds));
+        if (!regions.Any()) return;
+        var region = regions.Aggregate((a, b) => a.Merge(b)).Grow(24);
+        _cameraFitted = false; _cameraGlide = false;
+        _cameraZoom = FitRegion(region); _cameraCenter = region.GetCenter();
         ApplyTableCamera();
+    }
+
+    private bool _cameraGlide;
+    private Vector2 _cameraFrom, _cameraTo;
+    private float _zoomFrom, _zoomTo;
+    private double _cameraGlideTime;
+    private (int Turn, int Owner, int Province)? _framedBattle;
+    private void FrameNewBattle()
+    {
+        if (_capturePath is not null || PresentationBusy) return;
+        if (View.CurrentBattleProvince is not int province || !BattleActive) { _framedBattle = null; return; }
+        var key = (View.TurnNumber, View.ActivePlayerId, province);
+        if (_framedBattle == key) return;
+        _framedBattle = key;
+        var from = _cameraCenter; var zoom = _cameraZoom;
+        FocusBattle();
+        if (_reducedMotion) return;
+        _cameraTo = _cameraCenter; _zoomTo = _cameraZoom;
+        _cameraFrom = from; _zoomFrom = zoom; _cameraGlideTime = 0; _cameraGlide = true;
+        _cameraCenter = from; _cameraZoom = zoom; ApplyTableCamera();
     }
 
     private void ResetTableCamera()
     {
-        _cameraFitted = true; _cameraDragging = false;
+        _cameraGlide = false; _cameraFitted = true; _cameraDragging = false;
         ApplyTableCamera();
     }
 
@@ -120,6 +142,7 @@ public partial class Main
 
     private void ZoomTable(float factor, Vector2 point)
     {
+        _cameraGlide = false;
         var offset = TableSurface.UnprojectOffset(point - _tableViewport.Size / 2);
         var before = _cameraCenter + offset / _cameraZoom;
         _cameraFitted = false;
@@ -176,10 +199,10 @@ public partial class Main
             }
             _tableSurface.ForwardMouse(new InputEventMouseMotion { Position = mouse.Position });
             var hovered = TableHovered;
-            var emptyCloth = hovered is null || hovered == _root || hovered == _tableViewport || hovered == _world || hovered == _board || hovered == _pileHud;
+            var emptyCloth = hovered is null || hovered == _root || hovered == _tableViewport || hovered == _world || hovered == _board || hovered == _pileHud || hovered?.HasMeta("fallen_marker") == true;
             if (mouse.ButtonIndex == MouseButton.Middle || mouse.ButtonIndex == MouseButton.Left && (Input.IsPhysicalKeyPressed(Key.Space) || emptyCloth))
             {
-                _cameraDragging = true; _cameraDragButton = mouse.ButtonIndex;
+                _cameraGlide = false; _cameraDragging = true; _cameraDragButton = mouse.ButtonIndex;
                 ReleaseTableFocus(); HideTableTooltip(); _tableSurface.ExitMouse(); GetViewport().SetInputAsHandled();
             }
             else { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); }
@@ -225,6 +248,13 @@ public partial class Main
     private void ProcessTableCamera(double delta)
     {
         if (_capturePath is not null && _captureMode == "published-ink-film") return;
+        if (_cameraGlide && !CameraBlocked)
+        {
+            _cameraGlideTime += delta;
+            var t = _reducedMotion ? 1 : Mathf.SmoothStep(0, 1, (float)(_cameraGlideTime / .7));
+            _cameraCenter = _cameraFrom.Lerp(_cameraTo, t); _cameraZoom = Mathf.Lerp(_zoomFrom, _zoomTo, t);
+            ApplyTableCamera(); if (t >= 1) _cameraGlide = false;
+        }
         ProcessTableTooltip(delta);
         if (_world is null || CameraBlocked)
         {
@@ -235,6 +265,7 @@ public partial class Main
             (Input.IsPhysicalKeyPressed(Key.Down) ? 1 : 0) - (Input.IsPhysicalKeyPressed(Key.Up) ? 1 : 0));
         if (direction == Vector2.Zero) return;
         _cameraFitted = false;
+        _cameraGlide = false;
         _cameraCenter += direction.Normalized() * new Vector2(1, 1 / TableSurface.Pitch) * (float)delta * 650 / _cameraZoom;
         ApplyTableCamera();
     }
@@ -266,10 +297,14 @@ public partial class Main
             _tableSurface.ForwardMouse(new InputEventMouseMotion { Position = _lastTableMouse });
         }
         if (_cameraDragging || (CameraBlocked && token?.Inline != true) || (token is null && !PointerOnTable(_lastTableMouse)))
-        { HideTableTooltip(); return; }
+        { _matSections.Emphasize(null, hover:true); HideTableTooltip(); return; }
         Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
         if (token is null)
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
+        var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
+            : hovered is CardTile provinceCard && provinceCard.Card.Zone == L5R.Core.Zone.Province
+                ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
+        _matSections.Emphasize(provinceHover, hover:true);
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
         _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :

@@ -1,0 +1,100 @@
+{
+  "Profile": "personality-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4407",
+      "Name": "Kitsuki Daisuke",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Reaction: After an action resolves during which Daisuke won a duel: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4407.jpg",
+      "Keywords": [
+        "Duelist",
+        "Unique",
+        "Courtier",
+        "Dragon Clan",
+        "Experienced",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "daisuke-exp-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4412",
+      "Name": "Kitsuki Horume",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Horume enters play: Choose a player. He gains or loses 1 Honor.\nReaction: After a duel ends that Horume won: He boasts of his talents. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4412.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Dragon Clan",
+        "Gamekeeper",
+        "Justicar",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "horume-gain",
+        "horume-lose",
+        "horume-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4416",
+      "Name": "Kitsuki Jakuei",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After an action resolves during which Jakuei won a duel, take the Imperial Favor.\nFavor Political Battle: Bow a target enemy Personality. You may discard the Imperial Favor to move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4416.jpg",
+      "Keywords": [
+        "Duelist",
+        "Courtier",
+        "Dragon Clan",
+        "Imperial",
+        "Magistrate"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jakuei-favor",
+        "jakuei-bow",
+        "jakuei-bow-favor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

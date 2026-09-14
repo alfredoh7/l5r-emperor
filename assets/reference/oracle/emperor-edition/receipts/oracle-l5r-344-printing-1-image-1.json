@@ -23,5 +23,18 @@
   "source_image_hash": "df/90",
   "source_url": "https://images.oracleofthevoid.com/l5r/df/90/printing_344_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/df/90/printing_344_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 130966,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-344-printing-1-image-1.webp",
+    "sha256": "98f10bb9a983e631d6564de2733723cb8ead78cb5fabc4be8548e6e8ff235459",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

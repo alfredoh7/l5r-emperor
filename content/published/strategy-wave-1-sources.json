@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-3671",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3671",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3671-printing-1-image-1.webp",
+    "image_sha256": "955d966aa2f70388952f29fc29f6a5487c423984351ea63abf1347392bf93327"
+  },
+  {
+    "card_id": "oracle-l5r-1044",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1044",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-1044-printing-1-image-1.webp",
+    "image_sha256": "6a9e436edec273df181f177c1ead97054c1fb23f8bd204434fd70cbb7f5657a7"
+  },
+  {
+    "card_id": "oracle-l5r-1336",
+    "printing_set": [
+      "War of Honor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1336",
+    "image_path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-1336-printing-1-image-1.webp",
+    "image_sha256": "d4ac3f79920f6569916c24fb16de72cc16a2a4d89403c91ffbce8dc028a6d3e9"
+  },
+  {
+    "card_id": "oracle-l5r-8999",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8999",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8999-printing-1-image-1.webp",
+    "image_sha256": "b4e3dec6be7ff33aa900282fe4fa423b531e56a26d45eafbabcab1d0fdb2997c"
+  }
+]

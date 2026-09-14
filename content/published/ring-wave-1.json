@@ -1,0 +1,199 @@
+{
+  "Profile": "ring-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6333",
+      "Name": "Ring of Air",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Play after you resolve two or more Favor actions in one turn. You may discard this Ring from your hand to use its ability without cost.\nAir Repeatable Battle/Open, Bow this card: Straighten your target Personality or attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6333.jpg",
+      "Keywords": [
+        "Unique",
+        "Air"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ring-of-air-recruit",
+        "ring-of-air-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6339",
+      "Name": "Ring of Water",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution. You may discard this Ring from your hand to use its ability without cost.\nWater Absent Repeatable Battle, Bow this card: Move your target Personality home or, if he would be opposed, move your target Personality at any location to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6339.jpg",
+      "Keywords": [
+        "Unique",
+        "Water"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ring-of-water-recruit",
+        "ring-of-water-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6338",
+      "Name": "Ring of the Void",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may discard this Ring from your hand to use its Void ability without cost.\nLimited: Play if you have two or fewer Rings in play. Discard your hand. \nVoid Limited, Bow this card: Draw a card. If you now have more cards in your hand than any other player, discard a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6338.jpg",
+      "Keywords": [
+        "Unique",
+        "Void"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ring-of-void-recruit",
+        "ring-of-void-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10531",
+      "Name": "False Ring of Air",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Does not count towards an Enlightenment Victory.\nAfter you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor.\nAbsent Battle, Bow this card: Give a target Personality -3F. (Absent actions can be taken without presence.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10531.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Fudo"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "false-ring-of-air-recruit",
+        "false-ring-of-air-force"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10535",
+      "Name": "False Ring of Water",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Does not count towards an enlightenment victory.\nBattle: If the current battlefield's Province Strength is 11 or greater, put this Ring into play and lose 2 Honor.\nBattle, Bow this card: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10535.jpg",
+      "Keywords": [
+        "Unique",
+        "Fudo",
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "false-ring-of-water-recruit",
+        "false-ring-of-water-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6334",
+      "Name": "Ring of Earth",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of a battle that you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle: You may put this card into play from your hand.\nBattle: Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province +3 or -3 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6334.jpg",
+      "Keywords": [
+        "Unique",
+        "Earth"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ring-of-earth-recruit",
+        "ring-of-earth-raise",
+        "ring-of-earth-lower"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6335",
+      "Name": "Ring of Fire",
+      "Type": "Ring",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of a battle at a province, if you destroyed one or more provinces or enemy cards in that resolution: You may put this card into play from your hand.\nBattle: Bow this card or discard it from your hand, destroy your performing Personality, and target an enemy Personality with equal or lower Chi: Destroy him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6335.jpg",
+      "Keywords": [
+        "Unique",
+        "Fire"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "ring-of-fire-recruit",
+        "ring-of-fire-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

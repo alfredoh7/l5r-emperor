@@ -1,0 +1,61 @@
+{
+  "Profile": "follower-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2851",
+      "Name": "Goju House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Spider Clan Personality.\nNinja Battle: Put this card on the top or bottom of your Fate deck to target an enemy Personality. Put all cards without attachments in his unit on the bottom of their owner's appropriate deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2851.jpg",
+      "Keywords": [
+        "Unique",
+        "Ninja",
+        "Shadowlands"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "goju-house-guard-return"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Spider Clan"
+    },
+    {
+      "Id": "oracle-l5r-10516",
+      "Name": "Aberrations",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard the top card of a Fate deck. Give this Follower a Force bonus equal to the card's Focus Value.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10516.jpg",
+      "Keywords": [
+        "Disciples of P'an Ku",
+        "Fallen"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "aberrations-boost"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

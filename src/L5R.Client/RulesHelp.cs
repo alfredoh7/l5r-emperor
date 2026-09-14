@@ -23,6 +23,8 @@ public static class RulesHelp
     public static string Topic(string key) => Topics.First(t => t.Key == key).Body;
     public static string PhaseGuide(Phase phase) => phase switch
     {
+        Phase.Straighten => "Resolve straightening of eligible cards. Effects may prevent a card from straightening or offer a choice to leave it bowed; follow any required choice shown by the game.",
+        Phase.Events => "Resolve Events-phase effects and any required choices. When none require a decision, the game continues automatically.",
         Phase.Action => "Use a Limited or Open action, or attach a card from your hand. Select a card to see its legal actions. Pass when you are ready to move on.",
         Phase.AttackDeclaration => "Choose a highlighted Personality, then an opposing province. Repeat for each attacker and confirm. Leave units at home to keep them out of this attack.",
         Phase.DefenseAssignment => "Choose your defenders and the provinces they will protect. A Personality and its attachments move together when you confirm.",
