@@ -62,7 +62,17 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // Checked unconditionally in OpenEntryReactionWindow, the same way Destined's own mandatory draw
     // already is -- a data field rather than an ability id, since there is no decision to route
     // through UseAbility at all.
-    int? EntryHonorLoss = null);
+    int? EntryHonorLoss = null,
+    // Mirumoto Yozo, Experienced 2's own second trait: "after your Iaijutsu action resolves, give
+    // any Personality who performed it +2F" -- a passive, ongoing check (issue #207's own Dragon
+    // Clan review follow-up), separate from her entry trait (discard-other-sensei), which already
+    // occupies the single-valued Effect field above.
+    bool GrantsIaijutsuBonus = false,
+    // Mirumoto Hikaro's own second trait: "before you focus in a duel involving your Dragon Clan
+    // Personality, once per duel, you may focus from your discard pile instead (revealed to the
+    // opponent immediately; removed from the game after the duel ends)" -- same reasoning as above,
+    // separate from her own entry trait.
+    bool GrantsDiscardPileFocus = false);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -106,6 +116,9 @@ public sealed class CardInstance
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
+    // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
+    // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
+    public int AssignedToAttackTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
 }
 
@@ -212,6 +225,11 @@ public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds)
 /// resolution, not a one-time snapshot.</summary>
 public sealed record ForceRedirect(string TargetId, int ToPlayerId);
 
+/// <summary>Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if [TargetId]
+/// was not assigned to attack your provinces this turn" -- BeneficiaryPlayerId is Tamoko's own
+/// controller (the one who gains the Honor), not the targeted Personality's own controller.</summary>
+public sealed record TamokoHonorCheck(string TargetId, int BeneficiaryPlayerId);
+
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
 /// same shape as PendingAttack) until it resolves, then hands priority back exactly where the
@@ -248,6 +266,12 @@ public sealed class PendingDuel
     // Timing=="FocusEffect" ability, set once (by ResolveDuelFocusEffectsInOrder) just before
     // ResolveDuel actually applies them.
     public List<string> OrderedFocusEffects { get; set; } = [];
+    // Mirumoto Hikaro's own second trait: "once per duel, you may focus from your discard pile
+    // instead" -- per player (either side could independently control their own Hikaro), and which
+    // already-focused card ids came from a discard pile this way (ResolveDuel removes those from
+    // the game instead of the ordinary end-of-duel FateDiscard sweep every other focused card gets).
+    public bool[] HikaroDiscardFocusUsed { get; set; } = new bool[2];
+    public List<string> DiscardFocusedIds { get; set; } = [];
 }
 
 public sealed class MatchState
@@ -280,6 +304,18 @@ public sealed class MatchState
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
+    // "Before an action resolves, negate one of its own named effects" (Mirumoto Rokai's own
+    // destruction-negation; Tamori Tamoko's own movement-or-straightening-negation) -- the same
+    // defer-then-reexecute shape PendingAdditionalAction uses above: the whole triggering command is
+    // stashed here (never partially applied) while a "beforeActionReaction" window offers the one
+    // eligible watching card's controller a chance to use its own negating Reaction before
+    // re-invoking ExecuteAbilityEffects on the SAME command. NegatedEffectKind/NegatedEffectCardId
+    // (set by that Reaction's own execution, consumed -- read then cleared -- by whichever of
+    // MoveHome/Straighten/DestroyUnits actually runs first matching them) are the single shared
+    // negation signal; only one can ever be pending at a time, since resolution is synchronous.
+    public GameCommand? PendingNegatableAbility { get; set; }
+    public string? NegatedEffectKind { get; set; }
+    public string? NegatedEffectCardId { get; set; }
     // Force redirection (issue #216, Togashi Noboru): "the target's Force contributes to [Noboru's
     // controller's] army instead of his own controller's" -- battle-scoped ("for the duration of the
     // battle," core rules' own default for an in-battle condition), so cleared at
@@ -304,6 +340,19 @@ public sealed class MatchState
     // card's own Bowed status in between). Unused, and safe to leave stale, for Tamori Ruya's own
     // window (a different, unrelated Target shape -- see PersonalityAtSourceLocation).
     public List<string> BowReactionCandidateIds { get; set; } = [];
+    // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
+    // Overconfident card enters or leaves play" -- both triggers just queue the ONE beneficiary
+    // player id here (QueueOverconfidentDraw), drained one at a time (OpenOverconfidentDrawWindow)
+    // at every point the engine is about to hand priority back normally, whether that is because no
+    // other reaction window ever opened, or because one that did just closed (see PassReaction).
+    public List<int> PendingOverconfidentDraws { get; set; } = [];
+    // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed Personality
+    // controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to
+    // attack your provinces this turn" -- a delayed, mandatory (no further choice) check, queued
+    // here and drained unconditionally in EndTurn, the same turn it was queued (Tamoko's own Open
+    // Timing is only ever usable "if it is not your turn," so this always resolves before the SAME
+    // active player's own turn actually ends).
+    public List<TamokoHonorCheck> PendingTamokoHonorChecks { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
@@ -336,11 +385,15 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
     CardToken[]? Tokens = null);
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
+// DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
+// already present, individually, within Discard (each CardView's own Zone tells a dead card apart
+// from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
+// a UI can show it directly and a future card can read it without re-deriving its own filter.
 public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int TurnsTaken,
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
-    CardView[]? Focused = null);
+    int DeadCount, CardView[]? Focused = null);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

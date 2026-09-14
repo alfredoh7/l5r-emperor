@@ -136,6 +136,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
+            if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -186,6 +187,25 @@ public sealed partial class MatchEngine
                 {
                     var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
                     ExecuteAbilityEffects(pending,consumedGrant:true);
+                }
+                return;
+            }
+            if (_state.PendingChoice.Type=="beforeActionReaction")
+            {
+                // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): scoped to the one specific
+                // watching card by id, same shape as bowReaction/duelWonReaction above -- only that
+                // card's own controller may use it, or either side may pass to close the window.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
+                {
+                    var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
+                    ExecuteAbilityEffects(pending);
+                    // Defensive: a negation signal must never survive past the one re-invocation it
+                    // was set for -- if the re-invoked ability did not actually reach a matching
+                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear it here
+                    // rather than risk it leaking into a later, unrelated one.
+                    _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
                 }
                 return;
             }
@@ -251,6 +271,12 @@ public sealed partial class MatchEngine
         // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
         // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
         if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
+        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
+        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
+        // so mandatory and unconditional, same convention as the two lines above; fires from any
+        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
+        // just Purchase.
+        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
@@ -266,6 +292,32 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
         return true;
+    }
+    // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
+    // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
+    // Zone.Home, or face-up in one of their own provinces (a face-down province card is hidden
+    // information and cannot be identified, so it is never affected). A plain discard, not a
+    // destruction -- no MarkDead, no "Dead" status, no Overconfident trigger even if the discarded
+    // card happens to carry it, matching DiscardProvince's own direct Zone.DynastyDiscard assignment.
+    private void DiscardOtherSensei(int playerId, CardInstance enteringCard)
+    {
+        var others = _state.Cards.Values.Where(c => c.Id != enteringCard.Id && c.OwnerId == playerId && Definition(c).Type == CardType.Personality
+            && Keyword(c, "Sensei") && (c.Zone == Zone.Home || c.Zone == Zone.Province && c.FaceUp)).ToArray();
+        foreach (var other in others)
+        {
+            if (other.Zone == Zone.Province)
+            {
+                var province = Player(playerId).Provinces.Single(p => p.CardId == other.Id);
+                other.Zone = Zone.DynastyDiscard; other.ProvinceIndex = null; province.CardId = null;
+                Emit("provinceDiscard", $"{Player(playerId).Name} discarded {Definition(other).Name} from a province (Sensei).", playerId, other.Id);
+                Refill(Player(playerId), province);
+            }
+            else
+            {
+                other.Zone = Zone.DynastyDiscard;
+                Emit("cardDiscarded", $"{Definition(other).Name} was discarded (Sensei).", playerId, other.Id);
+            }
+        }
     }
 
     private void Purchase(GameCommand command)
@@ -283,6 +335,7 @@ public sealed partial class MatchEngine
         card.Bowed=Definition(card).Type==CardType.Holding || (Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-bowed");
         if(Definition(card).Type==CardType.Personality && Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("cardEnteredPlay",$"{Player(command.PlayerId).Name} brought {Definition(card).Name} into play{(card.Bowed ? " bowed" : "") }.",command.PlayerId,card.Id);
+        QueueOverconfidentDraw(card);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
@@ -292,7 +345,10 @@ public sealed partial class MatchEngine
             _state.ConsecutivePasses=0;
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
-        else OpenEntryReactionWindow(command.PlayerId,card);
+        // Dynasty-phase purchasing never cedes priority away from the active player on its own
+        // (they may keep buying) -- so unlike RecruitReserve below, an Overconfident window opened
+        // here must resume back to the SAME purchasing player, not their opponent.
+        else if(!OpenEntryReactionWindow(command.PlayerId,card)) OpenOverconfidentDrawWindow(command.PlayerId);
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -325,6 +381,7 @@ public sealed partial class MatchEngine
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("reserveRecruited",$"{Player(command.PlayerId).Name} recruited {Definition(card).Name} from Reserve.",command.PlayerId,card.Id);
+        QueueOverconfidentDraw(card);
         Refill(Player(command.PlayerId),province);
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
@@ -335,6 +392,7 @@ public sealed partial class MatchEngine
             Emit("reactionWindow","Proclaim reaction window opened.",command.PlayerId,card.Id);
         }
         else if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        else if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
         // An ordinary action (never itself an Additional Action) forfeits any of this player's own
         // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
         _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
@@ -352,8 +410,14 @@ public sealed partial class MatchEngine
         // Honorable before destruction: this is what spares the controller the dishonorable-death
         // Honor penalty applied generally in MarkDead.
         Rehonor(card);
+        // Seppuku is an Open action, cutting through the normal priority gate (see Apply()) -- it
+        // never touches priority on its own, so an Overconfident window it triggers (issue #223,
+        // MarkDead already queued it inside DestroyUnits below) must resume back to whoever already
+        // held it, not to either specific player.
+        var resumeTo=_state.PriorityPlayerId;
         DestroyUnits([card]);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
+        OpenOverconfidentDrawWindow(resumeTo);
     }
 
     // viaReserve (issue #216, Tamori Shinji): true only for a Reserve recruit made as an absent
@@ -454,12 +518,18 @@ public sealed partial class MatchEngine
         {
             _state.PendingChoice=null;
             _state.ConsecutivePasses=0;
+            Emit("reactionClosed","Both players passed; the reaction window closed.");
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
             // opponent, so the normal "any action cedes priority" rule still holds once it closes.
-            _state.PriorityPlayerId=pending.ActingPlayerId ?? _state.ActivePlayerId;
-            Emit("reactionClosed","Both players passed; the reaction window closed.");
+            var resumeTo=pending.ActingPlayerId ?? _state.ActivePlayerId;
+            // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
+            // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction
+            // window and being slandered elsewhere, a Reaction that destroyed something, etc.) before
+            // finally resuming where this window itself would have.
+            if(OpenOverconfidentDrawWindow(resumeTo)) return;
+            _state.PriorityPlayerId=resumeTo;
         }
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
     }
@@ -525,7 +595,7 @@ public sealed partial class MatchEngine
         Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
-        Assign(command,targets,cavalry);
+        Assign(command,targets,cavalry,false);
         _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
             .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
@@ -558,21 +628,31 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
-        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry);
+        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
         // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
         // battlefield-selection/resolution phases outright rather than stall with zero choices.
         SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
-    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry)
+    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
     {
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
             Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
-            Require(IsCavalryUnit(card)==cavalry,cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
+            // Xijkt (issue #207 follow-up): "may assign during Cavalry Maneuvers if you are the
+            // Defender" -- a narrow, card-specific Cavalry-eligibility override (checked here rather
+            // than broadening IsCavalryUnit's own shared logic for one card), additive only: it never
+            // removes his own default Infantry eligibility, only adds Cavalry while defending.
+            var cavalryEligible=IsCavalryUnit(card) || isDefender && Definition(card).Effect=="cavalry-if-defender";
+            Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
+            // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
+            // assigned to attack your provinces this turn" -- a turn-stamped flag, the same
+            // StraightenBlockedTurn convention, since by the time it is checked (End Phase) the
+            // battle may have already resolved and returned this card home, losing a live Zone check.
+            card.AssignedToAttackTurn=_state.TurnNumber;
             Emit("unitAssigned",$"{Definition(card).Name} assigned to province {assignment.Value+1}.",command.PlayerId,card.Id);
         }
     }
@@ -610,17 +690,21 @@ public sealed partial class MatchEngine
             if(destroyedProvince) DestroyProvince(defender,province);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
             // Ring recruitment (issue #194): checked with this resolution's own facts, before the
-            // per-battle flags below reset. False Ring of Air requires an outright win; Ring of
-            // Water does not (see the tie branch below).
+            // per-battle flags below reset. False Ring of Air and Ring of Earth require an outright
+            // win; Ring of Water and Ring of Fire do not (see the tie branch below).
             GrantRingRecruit(Player(attacker),d.Length>0,"false-ring-of-air-recruit");
+            GrantRingRecruit(Player(attacker),d.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince);
+            GrantRingRecruit(Player(attacker),destroyedDefenders>0||destroyedProvince,"ring-of-fire-recruit");
         }
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
             if(!RehonorWinners(d)) GainHonor(defender,destroyedAttackers*2,"Battle victory");
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
+            GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(defender),destroyedAttackers>0);
+            GrantRingRecruit(Player(defender),destroyedAttackers>0,"ring-of-fire-recruit");
         }
         else if(a.Length>0 && d.Length>0)
         {
@@ -633,10 +717,12 @@ public sealed partial class MatchEngine
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
             if(!defenderHadDishonorable) GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
-            // Ring of Water (issue #194): no "win" requirement, unlike False Ring of Air -- a tie
-            // still counts as "a battle resolves" for both players independently.
+            // Ring of Water/Fire (issue #194): no "win" requirement, unlike False Ring of Air/Ring of
+            // Earth -- a tie still counts as "a battle resolves" for both players independently.
             CheckRingOfWaterRecruit(Player(attacker),destroyedD>0);
             CheckRingOfWaterRecruit(Player(defender),destroyedA>0);
+            GrantRingRecruit(Player(attacker),destroyedD>0,"ring-of-fire-recruit");
+            GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
@@ -695,6 +781,17 @@ public sealed partial class MatchEngine
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
         foreach(var p in _state.Players) { p.TerrainPlayedThisBattle=false; p.TerrainDestroyedThisBattle=false; }
         if(_state.WinnerId is not null) return;
+        // Overconfident (issue #223): a chance to react to anything this battle's own resolution
+        // (DestroyUnits, above) just killed, before the battle actually closes out. Deferred here,
+        // by the same "let ResolveOverconfidentDraw recognize the state shape" convention as its own
+        // resume logic below, rather than stashing attacker/provinceIndex for a callback.
+        if(OpenOverconfidentDrawWindow(attacker)) return;
+        FinishBattleReturnHomeAndTransition(attacker);
+    }
+    // Split out so ResolveOverconfidentDraw's own deferred resume (see above) can re-enter exactly
+    // here once every queued Overconfident offer this battle produced has been resolved.
+    private void FinishBattleReturnHomeAndTransition(int attacker)
+    {
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -883,7 +980,7 @@ public sealed partial class MatchEngine
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
         // count of Zone.Dead Personalities, i.e. the largest single pile, not the combined total.
-        +(Definition(card).Effect=="force-max-dead-pile"?_state.Cards.Values.Where(c=>c.Zone==Zone.Dead&&Definition(c).Type==CardType.Personality).GroupBy(c=>c.OwnerId).Select(g=>g.Count()).DefaultIfEmpty(0).Max():0)
+        +(Definition(card).Effect=="force-max-dead-pile"?Math.Max(DeadCount(0),DeadCount(1)):0)
         // Dragon Clan review (issue #207): Tamori Kazushige / Togashi Korimi -- "+2F while defending",
         // the same shape FollowerForce's own force-while-defending already covers, just for a
         // Personality directly rather than an attached Follower.
@@ -902,6 +999,14 @@ public sealed partial class MatchEngine
         // card rather than the granter.
         +(IsDefendingUnit(card)&&Keyword(card,"Earth")?_state.Cards.Values.Count(c=>c.Id!=card.Id&&c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Definition(c).Effect=="boost-earth-personalities-while-defending"&&Keyword(c,"Earth")):0)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    // "Dead" (core rules Glossary): a status a card carries once it enters Zone.Dead, distinct from
+    // merely being discarded (Zone.DynastyDiscard/FateDiscard) -- both live in the same client-facing
+    // PlayerView.Discard array (see GetView), told apart there by each CardView's own Zone. This is
+    // the single shared source of truth for "how many of this player's own Personalities are dead
+    // right now" -- Moto Shunsuke's own force-max-dead-pile Effect above, PlayerView.DeadCount below,
+    // and any future card keyed off the same count (a real, recurring Unicorn Clan theme) all read
+    // through here, rather than each re-deriving its own filter over _state.Cards.
+    private int DeadCount(int playerId) => _state.Cards.Values.Count(c => c.Zone == Zone.Dead && c.OwnerId == playerId && Definition(c).Type == CardType.Personality);
     // An Item's own conditional Force bonus to its wielder, keyed by the Item's Effect string --
     // distinct from a Follower's self-referential conditional Force (FollowerForce below), since an
     // Item's bonus always targets the Personality, never itself.
@@ -1031,10 +1136,70 @@ public sealed partial class MatchEngine
     // equal to his base Personal Honor -- Seppuku (and any future rehonor-before-death effect) spares
     // this by clearing Dishonorable first (see Rehonor). This is the one shared entry point every
     // path to "becoming dead" -- combat destruction or otherwise -- must go through.
+    // "When a card is destroyed it is placed in its respective discard pile. If it is a Personality,
+    // it becomes dead" (core rules Glossary) -- only a Personality actually gets the separate "Dead"
+    // status (Zone.Dead); every other type destroyed this way goes straight to its own deck's
+    // discard pile instead, the same zones DestroyAttachment/DiscardTerrain already use for an
+    // attached/Terrain card. DestroyUnits is the one caller that can reach either branch (a
+    // battle-army Personality, but also Furugaro/Unseen Assassins/Scholarly Hermit's own Follower
+    // self-destroys); MakeDead's own callers are always Personality-gated already, so they only ever
+    // take the Dead branch.
     private void MarkDead(CardInstance card)
     {
-        card.Zone=Zone.Dead; card.FaceUp=true; card.Tokens.Clear();
+        // Overconfident (issue #223): "leaves play" specifically means dying WHILE actually in play --
+        // MakeDead's own path (a card already sitting in a discard pile, not in play, that later
+        // becomes dead) does not qualify, matching the user's own "discarded from provinces/deck does
+        // not trigger this" carve-out. Checked before the Zone changes, using the card's own status
+        // right up to the moment it actually died.
+        if(InPlay(card)) QueueOverconfidentDraw(card);
+        card.Zone = Definition(card).Type==CardType.Personality ? Zone.Dead
+            : Definition(card).Type is CardType.Follower or CardType.Item or CardType.Spell or CardType.Strategy or CardType.Ring ? Zone.FateDiscard
+            : Zone.DynastyDiscard;
+        card.FaceUp=true; card.Tokens.Clear();
         if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
+    }
+    // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
+    // Overconfident card enters or leaves play" -- both triggers share this one queuing helper (the
+    // entering-play half is called directly from Purchase/RecruitReserve, the leaves-play half from
+    // MarkDead above) and the one draining pair below.
+    private void QueueOverconfidentDraw(CardInstance card)
+    {
+        if(Definition(card).Type==CardType.Personality && Keyword(card,"Overconfident")) _state.PendingOverconfidentDraws.Add(1-card.OwnerId);
+    }
+    // Drains one queued offer at a time -- called at every point the engine is about to hand priority
+    // back normally, whether because no other reaction window ever opened here, or because one that
+    // did just closed (see PassReaction). closesTo is where control resumes once the WHOLE queue (not
+    // just this one offer) is empty.
+    private bool OpenOverconfidentDrawWindow(int closesTo)
+    {
+        if(_state.PendingOverconfidentDraws.Count==0) return false;
+        var playerId=_state.PendingOverconfidentDraws[0];
+        _state.PendingOverconfidentDraws.RemoveAt(0);
+        _state.PendingChoice=new("overconfidentDraw",playerId,null,"Overconfident: you may draw a card.",closesTo);
+        _state.PriorityPlayerId=playerId;
+        Emit("overconfidentDrawOffered",$"{Player(playerId).Name} may draw a card (Overconfident).",playerId);
+        return true;
+    }
+    private void ResolveOverconfidentDraw(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="overconfidentDraw" && command.PlayerId==pending.PlayerId && command.Choice is "draw" or "decline","Choose whether to draw a card.");
+        if(command.Choice=="draw") Draw(Player(command.PlayerId));
+        _state.PendingChoice=null;
+        var resumeTo=pending.ActingPlayerId!.Value;
+        if(OpenOverconfidentDrawWindow(resumeTo)) return;
+        // FinishBattleResolution's own tail (FinishBattleReturnHomeAndTransition) defers itself for
+        // this window -- recognized generically by the state shape a resolved-but-not-yet-transitioned
+        // battle is always left in (Phase still Battle, but CurrentBattleProvince already cleared),
+        // rather than a stashed callback (MatchState stays a plain, copyable state bag). resumeTo IS
+        // attacker here: FinishBattleResolution always passes its own attacker as closesTo.
+        if(_state.Phase==Phase.Battle && _state.CurrentBattleProvince is null && _state.WinnerId is null)
+        {
+            FinishBattleReturnHomeAndTransition(resumeTo);
+            return;
+        }
+        _state.PriorityPlayerId=resumeTo;
+        _state.ConsecutivePasses=0;
     }
     private void Rehonor(CardInstance card) => card.Dishonorable=false;
     // Dishonor (core rules Glossary, issue #186): gives a Personality the Dishonorable status --
@@ -1056,6 +1221,18 @@ public sealed partial class MatchEngine
         var count=0;
         foreach(var card in cards)
         {
+            // Mirumoto Rokai (issue #207 follow-up): "another player's action targets your
+            // Personality at Rokai's location, destroy Rokai: negate your Personality's destruction
+            // from the action's effects" -- consumed here, the single shared choke point behind
+            // every ability-triggered destroy (this is NEVER set for a bulk battle-resolution
+            // destroy, only ever by the defer-then-reexecute mechanism immediately re-invoking the
+            // one specific ability that was paused for this exact reaction).
+            if(_state.NegatedEffectKind=="destroy" && _state.NegatedEffectCardId==card.Id)
+            {
+                _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
+                Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
+                continue;
+            }
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
@@ -1113,19 +1290,32 @@ public sealed partial class MatchEngine
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
     }
 
+    // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
+    // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
+    // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
+    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
     private void EndTurn()
     {
+        // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
+        // Honor if he was not assigned to attack your provinces this turn" -- drained here,
+        // unconditionally, the same turn every one of these was queued (her own Open Timing is only
+        // ever usable "if it is not your turn," so every pending check here belongs to THIS turn
+        // actually ending now).
+        foreach(var check in _state.PendingTamokoHonorChecks)
+            if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
+        _state.PendingTamokoHonorChecks.Clear();
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
         Draw(player);
-        if(player.Hand.Count>8) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-8} card(s) to return to eight.");
+        var maxHand=MaxHandSize(player.Id);
+        if(player.Hand.Count>maxHand) _state.PendingChoice=new("discardHand",player.Id,null,$"Discard {player.Hand.Count-maxHand} card(s) to return to {maxHand}.");
         else FinishTurn();
     }
     private void DiscardHand(GameCommand command)
     {
-        var player=Player(command.PlayerId); var ids=command.CardIds??[];
-        Require(ids.Length==player.Hand.Count-8 && ids.Distinct().Count()==ids.Length && ids.All(player.Hand.Contains),"Select exactly enough different cards from your hand to return to eight.");
+        var player=Player(command.PlayerId); var ids=command.CardIds??[]; var maxHand=MaxHandSize(command.PlayerId);
+        Require(ids.Length==player.Hand.Count-maxHand && ids.Distinct().Count()==ids.Length && ids.All(player.Hand.Contains),$"Select exactly enough different cards from your hand to return to {maxHand}.");
         foreach(var id in ids) { player.Hand.Remove(id); var card=Card(id); card.Zone=Zone.FateDiscard; card.FaceUp=true; Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name}.",player.Id,id); }
         _state.PendingChoice=null; FinishTurn();
     }

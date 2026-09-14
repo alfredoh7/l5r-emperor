@@ -1,0 +1,121 @@
+{
+  "Profile": "personality-wave-15",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9819",
+      "Name": "Mirumoto Rokai",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 3,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 6,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your Personality at Rokai's location, destroy Rokai: Negate your Personality's destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9819.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "rokai-negate-destruction"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10056",
+      "Name": "Tamori Tamoko",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 4,
+      "GoldProduction": 4,
+      "Force": 5,
+      "Chi": 8,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: If it is not your turn, target an unbowed Personality controlled by the active player: Before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn.\nReaction: Before an action resolves, target a Personality: Negate either his movement or straightening from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10056.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tamoko-negate",
+        "tamoko-open"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5095",
+      "Name": "Mirumoto Hikaro",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 2,
+      "GoldProduction": 5,
+      "Force": 0,
+      "Chi": 7,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Hikaro enters play: Discard all your other Sensei Personalities.\nBefore you focus in a duel involving your Dragon Clan Personality: Once per duel, you may focus from your discard pile instead. Remove that card from the game after the duel ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5095.jpg",
+      "Keywords": [
+        "Duelist",
+        "Loyal",
+        "Dragon Clan",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "discard-other-sensei",
+      "GrantsDiscardPileFocus": true
+    },
+    {
+      "Id": "oracle-l5r-10287",
+      "Name": "Mirumoto Yozo",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 5,
+      "GoldProduction": 5,
+      "Force": 4,
+      "Chi": 10,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yozo enters play or overlays: Discard all your other Sensei Personalities.\nAfter your Iaijutsu action resolves: Give any Personality who performed it +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10287.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Unique",
+        "Dragon Clan",
+        "Favored of the Fire Dragon",
+        "Samurai",
+        "Sensei"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "discard-other-sensei",
+      "GrantsIaijutsuBonus": true
+    }
+  ],
+  "Decks": []
+}

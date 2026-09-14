@@ -111,12 +111,26 @@ public sealed partial class MatchEngine
         var isChallenger = command.PlayerId == duel.ChallengerPlayerId;
         var list = isChallenger ? duel.ChallengerFocused : duel.ChallengedFocused;
         Require(list.Count < 4, "You have already focused four times this duel and must Strike.");
-        string cardId;
+        string cardId; var fromDiscard = false;
         if (command.Choice == "deck")
         {
             var deck = Player(command.PlayerId).FateDeck;
             Require(deck.Count > 0, "Your Fate deck is empty.");
             cardId = deck[0]; deck.RemoveAt(0);
+        }
+        else if (command.Choice == "discard")
+        {
+            // Mirumoto Hikaro's own second trait: "before you focus in a duel involving your Dragon
+            // Clan Personality, once per duel, you may focus from your discard pile instead" -- gated
+            // on controlling a Hikaro-shaped card, not having used this already THIS duel, and the
+            // duel's own dueling Personality on this side being Dragon Clan (not the Hikaro herself).
+            Require(_state.Cards.Values.Any(c => c.OwnerId == command.PlayerId && InPlay(c) && Definition(c).GrantsDiscardPileFocus),
+                "Focusing from your discard pile needs a card that grants it.");
+            Require(!duel.HikaroDiscardFocusUsed[command.PlayerId], "Already focused from your discard pile once this duel.");
+            Require(ClanAlignments(Card(isChallenger ? duel.ChallengerId : duel.ChallengedId)).Contains("Dragon"), "The duel must involve your own Dragon Clan Personality.");
+            Require(command.CardId is not null && Card(command.CardId).OwnerId == command.PlayerId && Card(command.CardId).Zone is Zone.DynastyDiscard or Zone.FateDiscard,
+                "Choose a card in your own discard pile.");
+            cardId = command.CardId!; duel.HikaroDiscardFocusUsed[command.PlayerId] = true; duel.DiscardFocusedIds.Add(cardId); fromDiscard = true;
         }
         else
         {
@@ -124,7 +138,10 @@ public sealed partial class MatchEngine
             cardId = command.CardId!; Player(command.PlayerId).Hand.Remove(cardId);
         }
         var card = Card(cardId);
-        card.Zone = Zone.Focused; card.FaceUp = duel.Struck; card.ProvinceIndex = null;
+        // "Revealed to the opponent before being placed as a focus" -- a discard-pile focus is
+        // already public information (it sat face up in a discard pile), unlike an ordinary
+        // hand/deck focus, which stays hidden (FaceUp = duel.Struck) until a Strike reveals it.
+        card.Zone = Zone.Focused; card.FaceUp = fromDiscard || duel.Struck; card.ProvinceIndex = null;
         list.Add(cardId);
         Emit("duelFocused", $"{Player(command.PlayerId).Name} focused a card.", command.PlayerId, cardId);
         duel.TurnPlayerId = 1 - command.PlayerId;
@@ -267,17 +284,32 @@ public sealed partial class MatchEngine
         }
         // Every focused card is spent, win or lose (a card destroyed as part of the outcome above is
         // simply skipped here -- Card() would still resolve it, but it is no longer in Zone.Focused).
+        // Mirumoto Hikaro's own "remove that card from the game after the duel ends" -- a
+        // discard-pile focus (duel.DiscardFocusedIds) is removed instead of the ordinary FateDiscard.
         foreach (var id in duel.ChallengerFocused.Concat(duel.ChallengedFocused))
         {
             var card = Card(id);
-            if (card.Zone == Zone.Focused) card.Zone = Zone.FateDiscard;
+            if (card.Zone != Zone.Focused) continue;
+            if (duel.DiscardFocusedIds.Contains(id)) RemoveFromGame(card); else card.Zone = Zone.FateDiscard;
         }
+        // Mirumoto Yozo, Experienced 2's own trait: "after your Iaijutsu action resolves, give any
+        // Personality who performed it +2F" -- "regardless of how it resolves" (the user's own
+        // clarification), so applied here unconditionally, win, lose, or tie, before anything below
+        // touches priority. Not restricted to once per turn/personality -- ApplyModifier's own
+        // Modifiers list stacks naturally, so a personality performing multiple Iaijutsu actions (or
+        // the same one more than once) receives the bonus again each time.
+        var performer = Card(duel.ChallengerId);
+        if (IsIaijutsuAction(duel.AbilityId) && _state.Cards.Values.Any(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus))
+            ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2);
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
         // react to it having won -- before handing play back exactly where the challenge was issued.
         if (winnerId is not null && OpenDuelWonReactionWindow(winnerId, winnerPlayerId!.Value, 1 - challengerPlayerId)) return;
+        // Overconfident (issue #223): a chance to react to whichever side the duel's own outcome
+        // destroyed (ApplyDuelOutcome/ApplyDuelFocusEffect, both above, already queued it via MarkDead).
+        if (OpenOverconfidentDrawWindow(1 - challengerPlayerId)) return;
         NextAction(challengerPlayerId);
     }
 
@@ -299,6 +331,14 @@ public sealed partial class MatchEngine
         Emit("reactionWindow", "Duel-won reaction window opened.", winnerPlayerId, card.Id);
         return true;
     }
+
+    // Mirumoto Yozo, Experienced 2 (issue #207 follow-up): "an action is an Iaijutsu action if it
+    // has the keyword Iaijutsu or the action states that it is an Iaijutsu Action" -- the same small,
+    // extendable per-ability-id classification shape AttackKind's own switch already uses. Every
+    // currently self-performer duel-issuing ability is already documented as an "Iaijutsu duel"
+    // (issue #207); extend this list as a future ability is wired with an explicit "Iaijutsu"
+    // Timing prefix (e.g. "Iaijutsu Open").
+    private static bool IsIaijutsuAction(string abilityId) => abilityId is "daisuke-duel" or "ichizo-exp-duel" or "shikei-duel";
 
     // Each duel-issuing ability's own printed win/loss text. loserIds has two entries only on a
     // double-loss tie; winnerId is null in that same case.

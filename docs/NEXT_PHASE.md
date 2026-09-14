@@ -1,5 +1,7 @@
 # Next development phase: dependable Lion–Crane matches
 
+**Sequence update (2026-09-09):** [NEXT_GAME_PLAN.md](NEXT_GAME_PLAN.md) is the current delivery order: catalogue → deck builder/storage → custom Practice → dueling → Spells → card waves. The acceptance procedures below remain applicable; the older tutorial-first ordering is superseded.
+
 The user is ready to pause broad visual redesign after the bitmap phase-bar pass. Keep the current table as the presentation baseline; further changes should address problems found during play.
 
 ## 1. Complete-match acceptance and rules corrections
