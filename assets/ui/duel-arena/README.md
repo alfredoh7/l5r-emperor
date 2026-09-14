@@ -12,6 +12,8 @@ Alfredo supplied `approved-duel-mat.png` and `approved-stone-lantern.png` on 202
 
 The garden, pavilion silhouettes, rail, rollers and plinth remain simple layout geometry. The new mat and lanterns do not mean the entire approved concept has been reproduced. Background detail, final lighting and transitions, live match integration, and human visual acceptance remain subsequent work.
 
+Alfredo has restored Meshy as the default route for detailed props, with direct API access through `tools/meshy.py`. Follow the [production workflow](../../../docs/MESHY_WORKFLOW.md) for future approved assets; the current lantern remains the user-supplied source. Connection setup made no new generation request.
+
 ## Open and review
 
 - Click `Review Duel Arena.command` in this task checkout. It builds the current source, imports natively, then opens `DuelArenaReview.tscn`.

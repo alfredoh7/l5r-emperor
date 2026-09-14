@@ -9,7 +9,7 @@ Overall target: `approved-generation-3.png`. The user generates new images exter
 | Scroll surface and indigo border | Supplied flat image; complete proportional UV on one mesh | No baked perspective or lighting; full playing area remains quiet |
 | Rollers, lacquer plinth, rail, simple pavilion shapes | Direct Blender geometry | Accurate silhouette, useful dimensions and independent transforms |
 | Stone lantern | Supplied textured Meshy file → Blender scale, pivot and aperture cleanup | Lantern opening remains a real cavity; separate flame/light element |
-| Garden rocks and pine | Future separate references; authoring route deferred | Readable silhouettes at actual camera distance; no intrusion into cards |
+| Garden rocks and pine | Future approved individual references → direct Meshy API → Blender cleanup | Readable silhouettes at actual camera distance; no intrusion into cards |
 | Distant moonlit garden | Decide after layout review whether geometry or an approved distant backdrop is justified | Clearly distinguish any 2D backdrop from actual 3D assets |
 | Light, mist, shadows and reveal transitions | Godot | Judge in native captures, including reduced motion |
 
@@ -33,6 +33,6 @@ After selecting the object, ask for front, side and rear views of that **same** 
 
 ## Meshy / Blender handoff
 
-Alfredo supplied both Meshy Blender files directly. They are retained in `assets/table/duel-arena/meshy/`; this task imports the textured file without calling a generation service. Direct Meshy service access is not verified in the current task; there is no callable Meshy integration in the exposed tool inventory. Do not substitute another generator or claim Meshy work was performed. Use the user's connected Meshy workflow or returned exports when that stage arrives.
+Alfredo supplied both Meshy Blender files directly. They are retained in `assets/table/duel-arena/meshy/`; iteration 3 imports the textured file without a new service job. He subsequently approved Meshy as the standard route for detailed props and supplied API access. Use `python3 tools/meshy.py` for future approved assets; authentication is verified, and the private credential is stored in macOS Keychain. Follow [MESHY_WORKFLOW.md](../../../docs/MESHY_WORKFLOW.md) for direct submission, retrieval, provenance and cleanup. Manual service-export transfer is no longer required on this Mac. Keep the current supplied lantern; setup did not regenerate it or verify a new paid task end to end.
 
 Once an asset is available: inspect base-color, normal and roughness textures; correct dimensions and orientation; clean geometry while preserving silhouette and UVs; set base pivots; and export the cleaned model through GLB. These checks follow [Meshy's cleanup workflow](https://help.meshy.ai/en/articles/16100257-meshy-to-blender-cleanup-workflow). Runtime export follows [Godot's recommended glTF pipeline](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html).

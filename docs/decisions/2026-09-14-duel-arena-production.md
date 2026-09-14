@@ -23,3 +23,9 @@ Keep the first blockout; save the new source as `duel-arena-v2.blend`, including
 ## Accepted revision — supplied Meshy lantern replaces the manual study
 
 Alfredo rejected the manual lantern result and supplied `Meshy_AI_Mosslit_Stone_Lantern_0914201150_generate.blend` and `Meshy_AI__0914201140_texture.blend`. Use the textured Meshy asset for iteration 3 while retaining the approved mat and card camera. This supersedes the preceding manual-lantern direction. Preserve both source files unchanged; use Blender for scale/pivot normalization and removal of the generated solid window panels so the lamp can actually illuminate its chamber. Keep the supplied exterior UV artwork and PBR maps. The cleaned runtime mesh has 4,407 triangles (source: 4,051). The rejected manual study is retained locally for recovery, not loaded by the review. No service generation was run by Codex.
+
+## Accepted revision — Meshy is the default detailed-prop workflow
+
+Alfredo preferred the Meshy result and explicitly restored the original production sequence with direct API access. Future approved individual props use Meshy, with Blender responsible for layout, architecture, scale, geometry/UV cleanup and assembly. This supersedes the temporary no-Meshy route and the requirement for manual transfer of future service exports. External ChatGPT image creation and human image approval remain unchanged.
+
+The configured project entry point is `tools/meshy.py`, using the pinned official CLI and a private macOS Keychain credential. [MESHY_WORKFLOW.md](../MESHY_WORKFLOW.md) records submission/recovery, provenance and native acceptance. API authentication and a no-request dry run were verified; no new paid generation was run during setup. Preserve the supplied lantern's existing provenance. Issue #205 and draft [PR #220](https://github.com/alfredoh7/l5r-emperor/pull/220) retain the presentation scope; no mechanics/interface changes are implied by this tooling decision.
