@@ -13,3 +13,13 @@ The first deliverable is an isolated layout review, with real card faces and the
 Reference pixels must not be passed off as 3D geometry. The blockout uses honest simple materials; compare its composition to the target separately. Final surface art will need an approved flat asset with no baked perspective, lighting or card slots. The reference's invented heraldic symbols are not approved clan emblems.
 
 GLB is the runtime interchange; preserve editable `.blend` source and reproducible scripts. The source image, scene measurements, native captures and any discrepancies belong in the task PR. Human art acceptance, native camera checks, gameplay validation and rules acceptance are distinct.
+
+## Accepted revision — supplied mat and lantern, no Meshy for now
+
+Later on 2026-09-14, Alfredo supplied the flat duel mat and a single neutral three-quarter stone-lantern reference, then explicitly requested proceeding in Blender without Meshy. This supersedes the Meshy dependency for this iteration. Apply the exact supplied mat pixels, preserve their original aspect and border, and model the lantern directly as editable geometry with a real hollow chamber. Procedural stone and its Blender-baked PBR maps are allowed authoring work, not external image generation.
+
+Keep the first blockout; save the new source as `duel-arena-v2.blend`, including a separate authoring scene with the individual lantern parts and packed reference. Compare the actual native mat and lantern beside the originals. A single-view reconstruction is approximate; no hidden-surface accuracy or photogrammetry is claimed. Human approval of the references is authorization to build this pass, not pre-approval of its resulting model or final scene. Mendon retains mechanics work, and live duel integration remains outside this asset iteration.
+
+## Accepted revision — supplied Meshy lantern replaces the manual study
+
+Alfredo rejected the manual lantern result and supplied `Meshy_AI_Mosslit_Stone_Lantern_0914201150_generate.blend` and `Meshy_AI__0914201140_texture.blend`. Use the textured Meshy asset for iteration 3 while retaining the approved mat and card camera. This supersedes the preceding manual-lantern direction. Preserve both source files unchanged; use Blender for scale/pivot normalization and removal of the generated solid window panels so the lamp can actually illuminate its chamber. Keep the supplied exterior UV artwork and PBR maps. The cleaned runtime mesh has 4,407 triangles (source: 4,051). The rejected manual study is retained locally for recovery, not loaded by the review. No service generation was run by Codex.

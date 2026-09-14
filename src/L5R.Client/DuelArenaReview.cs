@@ -13,15 +13,20 @@ public partial class DuelArenaReview : Control
     private TextureRect _worldImage = null!, _reference = null!;
     private Camera3D _camera = null!;
     private Node3D _model = null!;
+    private WorldEnvironment _environment = null!;
+    private DirectionalLight3D _keyLight = null!;
+    private readonly List<OmniLight3D> _lanternLights = [];
     private TableSurface _table = null!;
     private Control _plane = null!, _hud = null!;
     private readonly List<CardTile> _cards = [];
     private readonly List<Control> _fixed = [];
     private CardTile? _reading;
     private bool _showReference, _revealed, _crowded, _bowed, _sidebar;
+    private bool _clean, _lanternDetail, _matDetail;
+    private Texture2D _compositionSource = null!, _matSource = null!, _lanternSource = null!;
     private bool _selfCheck;
     private string? _capture;
-    private string _title = "Duel arena · layout study";
+    private string _title = "Duel arena · iteration 3";
     private double _elapsed;
     private int _checkStep, _inspections;
     private float _zoom = 1, _density;
@@ -40,30 +45,50 @@ public partial class DuelArenaReview : Control
             _bowed |= arg == "--bowed";
             _sidebar |= arg == "--sidebar";
             _selfCheck |= arg == "--check";
+            _clean |= arg == "--clean";
+            _lanternDetail |= arg == "--lantern";
+            _matDetail |= arg == "--mat";
         }
         Theme = Palette.MakeTheme();
         _world = new SubViewport { OwnWorld3D = true, RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
             HandleInputLocally = false, Msaa3D = Viewport.Msaa.Msaa4X };
         AddChild(_world);
-        _model = GD.Load<PackedScene>("res://Art/DuelArena/duel-arena-blockout.glb").Instantiate<Node3D>();
+        _model = GD.Load<PackedScene>("res://Art/DuelArena/duel-arena-v3.glb").Instantiate<Node3D>();
         _world.AddChild(_model);
-        _world.AddChild(new WorldEnvironment { Environment = new Godot.Environment
+        var matMesh = (MeshInstance3D)_model.FindChild("ApprovedDuelMat", true, false);
+        var originalMaterial = (BaseMaterial3D)matMesh.GetActiveMaterial(0);
+        var paintedMat = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/DuelArena/approved-mat.gdshader") };
+        paintedMat.SetShaderParameter("artwork", originalMaterial.AlbedoTexture);
+        matMesh.MaterialOverride = paintedMat;
+        _environment = new WorldEnvironment { Environment = new Godot.Environment
         {
             BackgroundMode = Godot.Environment.BGMode.Color, BackgroundColor = new Color("111823"),
             AmbientLightSource = Godot.Environment.AmbientSource.Color,
-            AmbientLightColor = new Color("b8c5d4"), AmbientLightEnergy = .25f,
+            AmbientLightColor = new Color("b8c5d4"), AmbientLightEnergy = .45f,
             TonemapMode = Godot.Environment.ToneMapper.Linear
-        }});
-        _world.AddChild(new DirectionalLight3D { RotationDegrees = new Vector3(-62, -25, 0),
-            LightColor = new Color("f4dfbe"), LightEnergy = .65f, ShadowEnabled = true });
+        }};
+        _world.AddChild(_environment);
+        _keyLight = new DirectionalLight3D { RotationDegrees = new Vector3(-62, -25, 0),
+            LightColor = new Color("e4ebff"), LightEnergy = .8f, ShadowEnabled = true };
+        _world.AddChild(_keyLight);
+        foreach (var name in new[] { "StoneLanternLeftGlow", "StoneLanternRightGlow" })
+        {
+            var anchor = (Node3D)_model.FindChild(name, true, false);
+            var light = new OmniLight3D { LightColor = new Color("ffaf58"), LightEnergy = 1,
+                OmniRange = 2.3f, ShadowEnabled = true };
+            anchor.AddChild(light); _lanternLights.Add(light);
+        }
         _camera = new Camera3D { Current = true, Near = .05f, Far = 100,
             Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch)) };
         _world.AddChild(_camera); _camera.LookAt(Vector3.Zero);
         _worldImage = new TextureRect { Texture = _world.GetTexture(), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
             MouseFilter = MouseFilterEnum.Ignore };
         AddChild(_worldImage);
-        var path = ProjectSettings.GlobalizePath("res://../../assets/ui/duel-arena/approved-generation-3.png");
-        _reference = new TextureRect { Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(path)),
+        Texture2D Source(string name) => ImageTexture.CreateFromImage(Image.LoadFromFile(
+            ProjectSettings.GlobalizePath("res://../../assets/ui/duel-arena/" + name)));
+        _compositionSource = Source("approved-generation-3.png");
+        _matSource = Source("approved-duel-mat.png"); _lanternSource = Source("approved-stone-lantern.png");
+        _reference = new TextureRect { Texture = _compositionSource,
             ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
             MouseFilter = MouseFilterEnum.Ignore };
         AddChild(_reference);
@@ -72,7 +97,7 @@ public partial class DuelArenaReview : Control
         _hud = new Control { MouseFilter = MouseFilterEnum.Ignore }; AddChild(_hud);
         GetViewport().SizeChanged += Layout;
         Layout();
-        GD.Print("DUEL_LAYOUT: isolated Blender blockout, real published scans, TableSurface camera. No gameplay commands.");
+        GD.Print("DUEL_LAYOUT: approved mat, imported Meshy lantern, real published scans, TableSurface camera. No gameplay commands.");
     }
 
     private Vector2 LayoutAnchor(string name)
@@ -88,21 +113,58 @@ public partial class DuelArenaReview : Control
         foreach (var c in _hud.GetChildren()) { _hud.RemoveChild(c); c.QueueFree(); }
         _cards.Clear(); _fixed.Clear(); _reading = null;
         var screen = GetViewportRect().Size;
+        var detail = _lanternDetail || _matDetail;
+        _environment.Environment.AmbientLightEnergy = detail ? .55f : .25f;
+        _keyLight.LightEnergy = detail ? .8f : .4f;
+        foreach (var light in _lanternLights) light.Visible = !detail;
         var side = _sidebar ? Math.Min(260, screen.X * .20f) : 0;
-        _play = new Rect2(Vector2.Zero, new Vector2(screen.X - side, screen.Y));
+        _play = new Rect2(Vector2.Zero, new Vector2(detail ? screen.X / 2 : screen.X - side, screen.Y));
         _density = Math.Min(_play.Size.X / 1600, _play.Size.Y / 900) * .8f * _zoom;
         _world.Size = (Vector2I)_play.Size;
         _worldImage.Position = _play.Position; _worldImage.Size = _play.Size;
+        _camera.Projection = Camera3D.ProjectionType.Perspective;
+        _camera.Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch));
+        _camera.LookAt(Vector3.Zero);
         _camera.Fov = Mathf.RadToDeg(2 * Mathf.Atan(_play.Size.Y / (2 * Distance * Unit * _density)));
-        _reference.Position = Vector2.Zero; _reference.Size = screen;
-        _reference.Visible = _showReference;
-        _worldImage.Visible = !_showReference;
+        foreach (var child in _model.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>())
+            child.Visible = !detail || (_lanternDetail ? child.Name == "StoneLanternLeft" : child.Name == "ApprovedDuelMat");
+        if (_lanternDetail)
+        {
+            var lantern = (Node3D)_model.FindChild("StoneLanternLeft", true, false);
+            _camera.Position = lantern.GlobalPosition + new Vector3(3.4f, 2.8f, 5.2f);
+            _camera.LookAt(lantern.GlobalPosition + new Vector3(0, 1.28f, 0));
+            _camera.Fov = 31;
+        }
+        if (_matDetail)
+        {
+            _camera.Projection = Camera3D.ProjectionType.Orthogonal;
+            _camera.Position = new Vector3(0, 12, -1.2f); _camera.RotationDegrees = new Vector3(-90, 0, 0);
+            _camera.Size = Math.Max(7.8f, 16 / (_play.Size.X / _play.Size.Y));
+        }
+        _reference.Texture = _lanternDetail ? _lanternSource : _matDetail ? _matSource : _compositionSource;
+        _reference.Position = detail ? new Vector2(screen.X / 2, 80) : Vector2.Zero;
+        _reference.Size = detail ? new Vector2(screen.X / 2, screen.Y - 160) : screen;
+        if (_matDetail)
+        {
+            var imageWidth = _play.Size.X * 15.65f / 16;
+            _reference.Position = new Vector2(screen.X / 2 + (_play.Size.X - imageWidth) / 2, 80);
+            _reference.Size = new Vector2(imageWidth, screen.Y - 160);
+        }
+        _reference.Visible = detail || _showReference;
+        _worldImage.Visible = detail || !_showReference;
         _table.Position = _play.Position;
         _table.Scale = Vector2.One * _density;
         _table.ResizePlane(_play.Size / _density, Math.Max(1, _density * 1.4f));
-        _table.Visible = !_showReference;
+        _table.Visible = !detail && !_showReference && !_clean;
         _plane.Size = _table.CanvasSize;
-        _hud.Visible = !_showReference;
+        _hud.Visible = detail || (!_showReference && !_clean);
+        if (detail)
+        {
+            Text(_lanternDetail ? "Lantern · Meshy asset in Godot" : "Mat · native top view", new Vector2(28, 22), 24, Palette.Paper, true);
+            Text("Supplied reference", new Vector2(screen.X / 2 + 28, 22), 24, Palette.Paper, true);
+            Text("L lantern   M mat   V clear view   Tab concept   Esc close", new Vector2(28, screen.Y - 32), 14, Palette.PaperDim);
+            return;
+        }
         var definitions = PublishedContent.Snapshot.Cards;
         CardDefinition Named(string name) => CardCatalog.Cards.Values.First(d => d.Name == name);
         var left = Named("Doji Tatsuki"); var right = Named("Matsu Hachiro");
@@ -130,8 +192,8 @@ public partial class DuelArenaReview : Control
         }
         var ui = Math.Min(screen.X / 1600, screen.Y / 900);
         Text(_title, new Vector2(28, 18) * ui, 24 * ui, Palette.Paper, true);
-        Text("Blender blockout · temporary materials · public sample cards", new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
-        Text("Tab reference   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
+        Text("Supplied mat · Meshy stone lanterns · public sample cards", new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
+        Text("Tab concept   V clear   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
             new Vector2(28 * ui, screen.Y - 27 * ui), 13 * ui, Palette.PaperDim);
         var handDefs = definitions.Where(d => d.Type == CardType.Strategy).Take(5).ToArray();
         for (var i = 0; i < handDefs.Length; i++)
@@ -203,14 +265,21 @@ public partial class DuelArenaReview : Control
     {
         if (@event is InputEventMouseButton { Pressed: true } wheel && wheel.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
         { _zoom = Math.Clamp(_zoom + (wheel.ButtonIndex == MouseButton.WheelUp ? .05f : -.05f), .75f, 1.35f); Layout(); return; }
-        if (!_showReference && @event is InputEventMouse mouse && _reading is null && _play.HasPoint(mouse.Position)
+        if (!_showReference && !_clean && !_lanternDetail && !_matDetail && @event is InputEventMouse mouse && _reading is null && _play.HasPoint(mouse.Position)
             && !_fixed.Any(c => c.GetGlobalRect().HasPoint(mouse.Position)))
             _table.ForwardMouse(mouse);
         if (@event is not InputEventKey { Pressed: true, Echo: false } key) return;
+        if (_capture is not null && key.Keycode != Key.Escape) return;
         switch (key.Keycode)
         {
             case Key.Escape: GetTree().Quit(); return;
-            case Key.Tab: _showReference = !_showReference; break;
+            case Key.Tab:
+                _showReference = !_showReference; _lanternDetail = _matDetail = false; break;
+            case Key.V:
+                _clean = _lanternDetail || _matDetail || !_clean;
+                _lanternDetail = _matDetail = _showReference = false; break;
+            case Key.L: _lanternDetail = !_lanternDetail; _matDetail = _showReference = false; break;
+            case Key.M: _matDetail = !_matDetail; _lanternDetail = _showReference = false; break;
             case Key.R: _revealed = !_revealed; break;
             case Key.C: _crowded = !_crowded; break;
             case Key.B: _bowed = !_bowed; break;
@@ -229,7 +298,10 @@ public partial class DuelArenaReview : Control
         try
         {
             // Compare an independently imported Blender anchor against the existing 2.5D projection.
-            var maxError = new[] { "DuelLeft", "DuelRight", "FocusLeft", "FocusRight", "Center" }.Max(name =>
+            var detail = _lanternDetail || _matDetail;
+            if (_selfCheck && (detail || _clean || _showReference))
+                throw new InvalidOperationException("--check requires the visible card layout.");
+            var maxError = detail ? 0 : new[] { "DuelLeft", "DuelRight", "FocusLeft", "FocusRight", "Center" }.Max(name =>
             {
                 var a = LayoutAnchor(name);
                 var screen = _camera.UnprojectPosition(new Vector3(a.X / Unit, 0, a.Y / Unit));
@@ -242,7 +314,8 @@ public partial class DuelArenaReview : Control
                     throw new Exception($"Missing actual card art: {def.Name}");
                 if (c.FaceCornersOnViewport().Any(p => !_play.HasPoint(p)))
                     throw new Exception($"Card is outside the play viewport: {c.Card.Id}");
-                var silk = new Rect2(-740, -462.5f, 1480, 685);
+                // Inner parchment bounds of the original 1817x866 image on its 15.65-unit plane.
+                var silk = new Rect2(-748, -460, 1496, 671);
                 if (c.FaceCornersInCanvas().Any(p => !silk.HasPoint(p - _table.CanvasSize / 2)))
                     throw new Exception($"Card is outside the silk: {c.Card.Id}");
             }
@@ -271,7 +344,9 @@ public partial class DuelArenaReview : Control
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
             System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
-                Stage = "composition blockout", Viewport = GetViewportRect().Size.ToString(),
+                Stage = "iteration 3", Viewport = GetViewportRect().Size.ToString(),
+                MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
+                CameraChecked = !detail,
                 MaxCameraErrorPixels = maxError, NativeCardClicks = _inspections,
                 Crowded = _crowded, Bowed = _bowed, Revealed = _revealed, Sidebar = _sidebar,
                 CardFaces = _cards.Count, GameplayTested = false, FinalArt = false }));

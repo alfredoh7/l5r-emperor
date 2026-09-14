@@ -1,19 +1,19 @@
-# Image 3 — next assets after the camera review
+# Image 3 — asset briefs and current status
 
-Overall target: `approved-generation-3.png`. The user generates new images externally in ChatGPT using their chosen model, returns the results to this conversation, and approves each direction before 3D conversion. This file supplies briefs; no new image generation or Meshy job has occurred.
+Overall target: `approved-generation-3.png`. The user generates new images externally in ChatGPT using their chosen model, returns the results to this conversation, and approves each direction before 3D conversion. The two briefs below are retained as provenance. Alfredo has now returned both images and initially requested manual Blender construction, then replaced that lantern study with supplied Meshy Blender files. `approved-duel-mat.png` is applied directly and `approved-stone-lantern.png` is the image target for the supplied Meshy model in iteration 3. No Meshy service job was run by this task.
 
 ## Production split
 
 | Component | Authoring route | Acceptance check |
 |---|---|---|
-| Scroll surface and indigo border | External image generation of a flat surface; separate Blender meshes and UVs | No baked perspective or lighting; full playing area remains quiet |
+| Scroll surface and indigo border | Supplied flat image; complete proportional UV on one mesh | No baked perspective or lighting; full playing area remains quiet |
 | Rollers, lacquer plinth, rail, simple pavilion shapes | Direct Blender geometry | Accurate silhouette, useful dimensions and independent transforms |
-| Stone lantern | External image reference → Meshy → Blender cleanup | Lantern opening remains a real cavity; separate flame/light element |
-| Garden rocks and pine | Separate references → Meshy → Blender cleanup | Readable silhouettes at actual camera distance; no intrusion into cards |
+| Stone lantern | Supplied textured Meshy file → Blender scale, pivot and aperture cleanup | Lantern opening remains a real cavity; separate flame/light element |
+| Garden rocks and pine | Future separate references; authoring route deferred | Readable silhouettes at actual camera distance; no intrusion into cards |
 | Distant moonlit garden | Decide after layout review whether geometry or an approved distant backdrop is justified | Clearly distinguish any 2D backdrop from actual 3D assets |
 | Light, mist, shadows and reveal transitions | Godot | Judge in native captures, including reduced motion |
 
-One unit in the blockout corresponds to 100 existing card-plane units. Meshy pieces must be fitted to their allocated footprints, not force the arena to expand around arbitrary generated scale. Base pivots go at ground contact. Retain source meshes and textures separately; cleanup exports use GLB with materials embedded.
+One unit in the blockout corresponds to 100 existing card-plane units. Any later props must be fitted to their allocated footprints, not force the arena to expand around arbitrary generated scale. Base pivots go at ground contact. Retain source meshes and textures separately; cleanup exports use GLB with materials embedded.
 
 ## Prompt A — flat silk artwork (first after layout acceptance)
 
@@ -21,7 +21,7 @@ Attach image 3 as the visual reference, then paste:
 
 > Using the attached approved duel-arena image, create only the flat ink-and-silk surface artwork that lies between its two wooden rollers. Preserve the reference's smoky ivory silk, faded monochrome mountains and pines along the upper edge, sparse corner branches, quiet unfinished ink circle at the center, and narrow indigo brocade perimeter. Produce a perfectly front-facing, orthographic top-down rectangle, approximately 2.1:1 landscape. It must work as an albedo texture on a real flat mesh: no camera perspective, contact shadows, directional illumination, ambient occlusion, highlights, curled edges or physical thickness. No rollers, table, buildings, garden scenery outside the mat, cards, slots, controls, lettering or emblems. Keep both the left and right playing areas broad, calm and equally prominent. Keep all ink illustrations outside those quiet areas and avoid making the central circle darker than the source. Show the complete rectangle with no crop. Match the approved material and brushwork closely rather than inventing a new design. Output the largest clean image available.
 
-This is a source asset proposal, not a request to tile/repeat the whole illustration. The border and silk will remain independently editable in Blender.
+This is a source asset proposal, not a request to tile/repeat the whole illustration. The accepted result has a continuous painted border; iteration 2 keeps it intact rather than cutting or duplicating its ornaments. Geometry and UVs remain editable.
 
 ## Prompt B — stone lantern reference
 
@@ -33,6 +33,6 @@ After selecting the object, ask for front, side and rear views of that **same** 
 
 ## Meshy / Blender handoff
 
-Meshy access is not verified in the current task; there is no callable Meshy integration in the exposed tool inventory. Do not substitute another generator or claim Meshy work was performed. Use the user's connected Meshy workflow or returned exports when that stage arrives.
+Alfredo supplied both Meshy Blender files directly. They are retained in `assets/table/duel-arena/meshy/`; this task imports the textured file without calling a generation service. Direct Meshy service access is not verified in the current task; there is no callable Meshy integration in the exposed tool inventory. Do not substitute another generator or claim Meshy work was performed. Use the user's connected Meshy workflow or returned exports when that stage arrives.
 
 Once an asset is available: inspect base-color, normal and roughness textures; correct dimensions and orientation; clean geometry while preserving silhouette and UVs; set base pivots; and export the cleaned model through GLB. These checks follow [Meshy's cleanup workflow](https://help.meshy.ai/en/articles/16100257-meshy-to-blender-cleanup-workflow). Runtime export follows [Godot's recommended glTF pipeline](https://docs.godotengine.org/en/stable/tutorials/assets_pipeline/importing_3d_scenes/available_formats.html).
