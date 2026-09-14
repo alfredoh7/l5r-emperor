@@ -637,6 +637,74 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Ring wave 1 (issue #194): the first seven real CardType.Ring cards. Air, Water,
+    /// Void, False Air, False Water unblocked once their scan images became available locally via
+    /// the WebP working-copy pipeline (issue #200) -- see issue #196. Earth and Fire revalidated
+    /// once their own scans became available too -- their earlier blocker notes were themselves
+    /// based on mismatched/incomplete scraped text (both the printed rules text AND, for Fire, the
+    /// keyword-suppression-style "needs Dueling" framing were simply wrong -- the same class of
+    /// problem issue #195 flagged for Fire specifically), hand-corrected against the images directly
+    /// (see package_ring_wave_1.py's own TEXT_OVERRIDE). The engine-side Rings primitives
+    /// (recruitment as a granted Additional Battle Action, Enlightenment victory) landed in issue
+    /// #194 itself, tested only via training fixtures until now.</summary>
+    public static PublishedSnapshot RingWave1 { get; } = LoadRingWave1();
+
+    private static PublishedSnapshot LoadRingWave1()
+    {
+        var snapshot = Load("L5R.Published.RingWave1.json", "ring-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 7)
+            throw new InvalidOperationException("Unexpected ring-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Ring)
+                throw new InvalidOperationException($"ring-wave-1 card is not a Ring: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("ring-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Personality wave 14 (issue #194's own "review of previously Ring-blocked cards"):
+    /// Moshi Ikako, engine-complete since issue #194 itself (moshi-ikako-attack; "Fire Battle" is a
+    /// plain classification, not a Ring-gated Timing) but blocked on her own scan image not being
+    /// downloaded locally (issue #196) until now. Her local catalogue "stats" block does not match
+    /// her actual scan (see package_personality_wave_14.py's own STATS_OVERRIDE) -- hand-corrected
+    /// against the image directly.</summary>
+    public static PublishedSnapshot PersonalityWave14 { get; } = LoadPersonalityWave14();
+
+    private static PublishedSnapshot LoadPersonalityWave14()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave14.json", "personality-wave-14", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-14 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-14 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-14 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Follower wave 9 (issue #194's own "review of previously Ring-blocked cards"):
+    /// Scholarly Hermit, engine-complete since issue #194 itself (scholarly-hermit-search; needed
+    /// only a Ring-type check in a discard pile) but blocked on her own scan image not being
+    /// downloaded locally (issue #196) until now.</summary>
+    public static PublishedSnapshot FollowerWave9 { get; } = LoadFollowerWave9();
+
+    private static PublishedSnapshot LoadFollowerWave9()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave9.json", "follower-wave-9", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-9 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-9 card is not a textful Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-9 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

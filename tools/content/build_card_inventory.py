@@ -119,21 +119,30 @@ BLOCKERS: dict[str, str] = {
     # RecruitReserve (QuotePurchase's own new viaReserve parameter), not the fully general
     # persistent Gold-cost-modifier primitive a future card like A Fugitive Apprehended would need.
     "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
-    "oracle-l5r-10857": "Wired (issue #194) -- \"Fire Battle\" was confirmed to be a plain classification, not a Ring-gated Timing. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10684": "Wired (issue #194) -- needed only a Ring-type check in a discard pile, now trivial. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    # Moshi Ikako (oracle-l5r-10857) published in personality-wave-14, and Scholarly Hermit
+    # (oracle-l5r-10684) in follower-wave-9, once their own scan images became available locally via
+    # the WebP working-copy pipeline (issue #200) -- see issue #196, now resolved. Moshi Ikako's own
+    # local catalogue "stats" block did not match her actual scan (cost/chi/force were each wrong);
+    # hand-corrected against the image directly, see package_personality_wave_14.py's own
+    # STATS_OVERRIDE.
     "oracle-l5r-10300": "Needs an \"actions must target this card if legal\" redirect mechanic (Yoritomo Naoto's own Battle ability), on top of its own Additional Action grant.",
     # Rings (issue #194): CardType.Ring, recruitment as a granted Additional Battle Action,
-    # Enlightenment victory. Five of the ten real/False Rings are wired (training fixtures only --
-    # every one of the ten has a receipt but no downloaded scan image locally, issue #196).
-    "oracle-l5r-6333": "Wired (issue #194) -- Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6339": "Wired (issue #194) -- Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6338": "Wired (issue #194) -- Ring of the Void. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10531": "Wired (issue #194) -- False Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10535": "Wired (issue #194) -- False Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6334": "Needs an Interrupt timing (not built) for Ring of Earth's own printed action; its recruitment condition is otherwise wirable.",
-    "oracle-l5r-6335": "Set aside (issue #195) -- the local oracle data's own selected printing/text for this Emperor Edition card is uncertain; a user-supplied photo did not match either candidate text found.",
-    "oracle-l5r-10532": "Needs Dueling/Focus Effects (not started at all) for False Ring of Earth's own recruitment condition.",
-    "oracle-l5r-10533": "Needs an Interrupt timing (not built) for its own printed action, plus an adjustable maximum-hand-size mechanism (not built) for its own recruitment condition.",
+    # Enlightenment victory. Ring of Air, Ring of Water, Ring of the Void, False Ring of Air, and
+    # False Ring of Water (oracle-l5r-6333/6339/6338/10531/10535) published in ring-wave-1 once their
+    # own scan images became available locally (issue #196, now resolved via the WebP working-copy
+    # pipeline, issue #200).
+    #
+    # Revalidated against the now-available scans (a follow-up to issue #194/#196): Ring of Earth and
+    # Ring of Fire's own blocker notes below were themselves based on mismatched/incomplete scraped
+    # text, the same class of problem issue #195 flagged for Ring of Fire specifically -- corrected
+    # here now that the actual printed text is directly readable.
+    # Ring of Earth and Ring of Fire (oracle-l5r-6334/6335) published in ring-wave-1 once their own
+    # scans became available -- their earlier blocker notes were themselves based on mismatched
+    # scraped text (Earth's own supposed "Interrupt timing" and Fire's own supposed duel requirement
+    # were both artifacts of a wrong printing's text, the same class of problem issue #195 originally
+    # flagged for Fire specifically). No remaining blocker note for either.
+    "oracle-l5r-10532": "Not blocked; deferred for scope. Dueling (issue #204) and the own-won-duel Reaction trigger (issue #209) now exist, covering 'after you win a duel' -- only a small new 'the two duelists shared no keywords' comparison and a negative-magnitude variant of MaxHandSize (issue #223, currently only ever raises) remain; no separate Battle action to wire at all (its full text is just the recruitment condition plus the passive -1 hand size).",
+    "oracle-l5r-10533": "Needs an Interrupt timing (not built) for its own printed action ('Interrupt: Reduce all Honor gains and losses from an action by 2'). Its own recruitment condition ('if your maximum hand size is 10 or more') is no longer blocked -- MaxHandSize (issue #223) already exposes this per player.",
     "oracle-l5r-10534": "Needs an Engage timing (explicitly not started, #15) for its own printed action; its recruitment condition is otherwise wirable.",
 
     # Focus-1 Battle-action wave audit (issue #192): every unwired Focus-1 card printing a Battle
@@ -158,7 +167,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-2035": "Needs an opponent-chooses-or-random discard mechanic (Reconnaissance-conditional).",
     "oracle-l5r-2332": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-2342": "Not blocked; deferred for scope (Monk Performer, attachment-destroy Target, and Fire-token-conditional Attack strength are all existing patterns, just not yet combined on one card).",
-    "oracle-l5r-10126": "Needs Rings (not built).",
+    "oracle-l5r-10126": "Rings themselves are now built (issue #194); that alone does not unblock this card. Its own scan (\"Extend the Soul's Boundaries\") shows: enters play paying 1 less Gold per Ring controlled (a new variable, count-scaled discount -- every existing discount is either clan-alignment-based or a fixed printed amount, never scaled by a live count); Battle: destroy this card, bow the performing Shugenja, destroy him unless he is Void, target an enemy Personality whose controller may shuffle him and his attachments back into their owners' decks (needs a shuffle-into-deck primitive, not built); if he did not choose this, the acting player takes two additional Battle actions (a grant conditioned on the TARGET's own opponent choice, a novel shape). Three separate unbuilt pieces, not one.",
     "oracle-l5r-2419": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-2530": "Needs a \"before a card effect destroys a Personality, negate\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10552": "Not blocked; deferred for scope (DiscardTopOfFateDeck, the Madness token, and an unattached-unit-card Target all now exist; needs resolving \"a Fate deck\"'s ownership the same way Aberrations did).",
@@ -260,7 +269,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10292": "Needs deck search (pull a specific card out of a shuffled deck) and Regions (neither built).",
     "oracle-l5r-3660": "The Battle Ranged 4 Attack is directly wirable; blocked by its own passive -- a global 'all your Ranged Attacks get +1 strength while you control a Terrain' scope, distinct from a single card's own conditional Attack strength (existing kamina-exp-attack/shuji-attack-style bonuses only affect their own card's attack, not every Attack the controller makes).",
     "oracle-l5r-10223": "Needs the Engage-timing Reaction window (explicitly not started, #15), plus a 'first Battle-action opportunity, restricted to Terrain actions' priority override.",
-    "oracle-l5r-10461": "Needs the Ring of Earth (not yet wired as a real published card) and clarification on 'Earth Battle' as a Ring-gated Timing (same open question already flagged for Moshi Ikako, oracle-l5r-10857) before wiring Jikoji's own army-wide Force bonus, plus a conditional Gold-Cost waiver tied to Ring control.",
+    "oracle-l5r-10461": "Ring of Earth is now published (ring-wave-1); 'Earth Battle' is very likely a plain printed-keyword classification too, following Moshi Ikako's own 'Fire Battle' precedent (oracle-l5r-10857, confirmed issue #194) -- not re-verified against this specific card's own scan yet. Still needs a conditional Gold-Cost waiver tied to Ring control before wiring Jikoji's own army-wide Force bonus (the waiver itself: no current Gold discount is conditional on board state, only clan-alignment-based or a fixed printed amount).",
     "oracle-l5r-4371": "Needs card creation (a new Personality instance) -- Kitsu Akai's own Limited half creates the only Ancestors his Battle half can use as a Performer.",
     "oracle-l5r-4375": "Needs a 'bow OR destroy the performer' cost-choice (not yet built), and is functionally contingent on card creation existing elsewhere (every other Ancestor-Personality source for this deck is itself blocked on 'Needs card creation').",
     "oracle-l5r-4382": "Needs card creation (a new Personality instance) as an entry Reaction effect.",
