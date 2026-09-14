@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fixed docs/CARD_INVENTORY.xlsx per user report of a stale count mismatch: regenerated from current content/published/*.json (confirms 256 wired, matching docs/ROADMAP.md), and cleaned up two stale BLOCKERS dict entries in tools/content/build_card_inventory.py left over after cards were wired without removing their old blocker note (Kitsuki Minori, oracle-l5r-10052, wave 13/#223; Togashi Noboru, oracle-l5r-10058, wave 12/#216). Verified via a small audit script that zero BLOCKERS entries now overlap with the wired-id set.",
+  "validation": "python3 tools/content/build_card_inventory.py reports {\"cards\": 2143, \"wired\": 256}; python3 -m unittest discover tools/content (121/121); a one-off audit script confirms set(BLOCKERS) & wired_ids is empty.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/225",
+  "branch": "mdornbrook/225-fix-card-inventory-audit",
+  "updated": "2026-09-14T09:59:02.169283+00:00"
+}
