@@ -23,5 +23,18 @@
   "source_image_hash": "fe/c2",
   "source_url": "https://images.oracleofthevoid.com/l5r/fe/c2/printing_3065_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/fe/c2/printing_3065_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 142094,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-3065-printing-1-image-1.webp",
+    "sha256": "bdf4f0ddf09f450f05ae64ee9b89f838d3a9b06399e1ae84ad1f694811dd0843",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

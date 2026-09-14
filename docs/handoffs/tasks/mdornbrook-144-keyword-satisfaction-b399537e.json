@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implements a generic keyword-satisfaction primitive (issue #144): keywords with no mechanical rule of their own (Berserker and dozens more) still satisfy a 'choose your performing/target [Keyword] Personality' condition, additive to any mechanical ability a keyword already carries. New AbilityDefinition.RequiredKeyword narrows two new generic Target/Performer categories (own-personality-with-keyword, own-unbowed-personality-at-battle-with-keyword), wired into both ValidateAbility and AbilityActions so a future single-keyword card needs only a catalog entry, no new switch case. Demonstrated by Immovable Object's exact worked example via two new training fixtures. Shared-file note: all changed files are within L5R.Core (rules engine), its test suite, and docs/ROADMAP.md -- a single rules-lane concern; no UI/client files touched.",
+  "validation": "New KeywordSatisfaction test covers both the Target-side and Performer-side generic categories: a Berserker-keyword Personality can be chosen (and the effect applies), a Personality without it cannot. Full suite: 92/92 core + 34/34 published + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "This is a primitive with no published card wired to it yet -- future single-card imports referencing any keyword in the list (issue #144) can reuse it directly. 'Nonhuman'-default-Human distinction and the Singular keyword's actual rules effect are explicitly out of scope here, per the user's own framing.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/144",
+  "branch": "mdornbrook/144-keyword-satisfaction",
+  "updated": "2026-09-10T09:29:11.033051+00:00"
+}

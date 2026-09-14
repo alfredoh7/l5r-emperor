@@ -1,0 +1,101 @@
+[
+  {
+    "card_id": "oracle-l5r-262",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=262",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-262-printing-2-image-1.webp",
+    "image_sha256": "8d1e6a2db3d080ae134f4b403b488e9d1456a5af83d095cc866f583f3ff0d07a"
+  },
+  {
+    "card_id": "oracle-l5r-10333",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10333",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10333-printing-1-image-1.webp",
+    "image_sha256": "4547b2197f9737df1617531db392981a6dcfd7f5b8d74d767978bfdebade216e"
+  },
+  {
+    "card_id": "oracle-l5r-1839",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1839",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-1839-printing-1-image-1.webp",
+    "image_sha256": "ce2fee5c000b485509a4cac6b9eb1f26e14bacec18e6da108d88bcd0506783de"
+  },
+  {
+    "card_id": "oracle-l5r-3456",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3456",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3456-printing-1-image-1.webp",
+    "image_sha256": "5b7c267858776ff7a1430b37210ea9bdc2758d44be975fa58a64c667a1c734cd"
+  },
+  {
+    "card_id": "oracle-l5r-5445",
+    "printing_set": [
+      "Embers of War"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=5445",
+    "image_path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-5445-printing-1-image-1.webp",
+    "image_sha256": "fe10154c31bc4b9e9422945d002da4f92918087fcd85a13add0fb6ad8a700e7f"
+  },
+  {
+    "card_id": "oracle-l5r-9144",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9144",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-9144-printing-1-image-1.webp",
+    "image_sha256": "d0400cd8e71c828ee53b80c84ea3f02bdaef98a2866a83d335e9ddcf4bc11a09"
+  },
+  {
+    "card_id": "oracle-l5r-3277",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3277",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-3277-printing-3-image-1.webp",
+    "image_sha256": "d4a00acc770278d2606aae2a4771a07aca7b9a6ac20b13de4a9d2a6673860e9a"
+  },
+  {
+    "card_id": "oracle-l5r-10513",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10513",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10513-printing-1-image-1.webp",
+    "image_sha256": "17eb22660606d8db91a78914a0f518309b9b2a84d3adbadb51f777f8bd5a0886"
+  },
+  {
+    "card_id": "oracle-l5r-3325",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3325",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3325-printing-1-image-1.webp",
+    "image_sha256": "05a6d1e840a6e76d8d7351b77d1b9d1d669082ab96e7c0ecf8665af51702d89a"
+  },
+  {
+    "card_id": "oracle-l5r-9869",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9869",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9869-printing-1-image-1.webp",
+    "image_sha256": "86299ba2b4bcaf37fab6c4ff76d7e065245aa4d037a22a640eb955dbd77bd756"
+  },
+  {
+    "card_id": "oracle-l5r-10686",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10686",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10686-printing-1-image-1.webp",
+    "image_sha256": "1a6a629172a310700282cdb4a3d8695cc39169eae37a276457fe78da9238980e"
+  }
+]

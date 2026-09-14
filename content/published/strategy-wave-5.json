@@ -1,0 +1,57 @@
+{
+  "Profile": "strategy-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7483",
+      "Name": "Steel on Steel",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Personality and target an enemy Personality: Your performer duels the target. Destroy the duel's loser.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7483.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "steel-on-steel-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7996",
+      "Name": "The Courtesy of the Crane",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: After this duel ends, if you won it, give all your provinces +2 strength.\nOpen: Choose your performing unbowed Crane Clan Personality: Choose another player. He may draw a card. Draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7996.jpg",
+      "Keywords": [
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "courtesy-of-the-crane-focus"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Bug 1 of issue #126 (playtest report): adds persistent dashed lines from every already-committed attacker/defender to its province during Cavalry Maneuvers (Phase.CavalryDeclaration/CavalryDefense), so the still-in-progress cavalry declaration isn't made blind to which infantry assignments are already locked in. Extends the existing IntentArrows() overlay (BoardIntentOverlay/IntentArrow, already used for in-progress draft assignments) to also read committed assignments straight from the View (CardView.ProvinceIndex on every Zone.Battlefield unit, both sides), reusing the same province-button lookup and dashed-line rendering already established for the draft case -- no new visual language introduced.",
+  "validation": "dotnet build succeeds, 0 warnings/errors. Ran the full existing board-capture regression suite (tools/check-table-followup.sh, 10 scenarios) against the modified IntentArrows() function -- all pass with clean logs (no ERROR:/SCRIPT ERROR:/Exception), confirming no regression to the pre-existing draft-assignment and ability-targeting arrow paths this function also serves. The new Cavalry-phase branch itself is not exercised by any existing capture scenario (none reach Phase.CavalryDeclaration/CavalryDefense) -- could not verify the actual rendered line visually; the desktop computer-use tool cannot target the Godot window (not a Start-menu-registered app).",
+  "remaining": "Visual confirmation of the rendered dashed lines during an actual Cavalry Maneuvers segment is still needed -- either a manual playtest, or a dedicated capture-mode addition to tools/check-table-followup.sh (a real follow-up task, not done here given scope). Bug 2 (unexpected bow on recruit) is paused pending a practice replay export from the user.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/126",
+  "branch": "mdornbrook/126-cavalry-assignment-lines",
+  "updated": "2026-09-09T18:36:26.813479+00:00"
+}

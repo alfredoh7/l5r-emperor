@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Built a new 'before an action resolves, negate one of its own named effects' interrupt (Mirumoto Rokai's destruction-negation, Tamori Tamoko's movement/straightening-negation) -- a defer-then-reexecute pattern generalizing the existing PendingAdditionalAction shape, with a curated per-ability-id classification (DestroysTarget/MoveOrStraightenKind) for eligibility and two shared MatchState fields (NegatedEffectKind/NegatedEffectCardId) consumed inside MoveHome/Straighten/DestroyUnits. Built the Sensei keyword (Mirumoto Hikaro, Mirumoto Yozo Experienced 2 -- discard all other Sensei Personalities on entry), plus each card's own second trait: Hikaro's discard-pile Focus extension to Dueling, Yozo's stacking +2F Iaijutsu-action Force bonus (new IsIaijutsuAction classification). Tamoko's own separate Open action needed a new turn-stamped CardInstance.AssignedToAttackTurn flag, checked in EndTurn. Published all four cards as personality-wave-15 -- all four had systematically scrambled local catalogue stats (scraped GoldCost was actually Chi, scraped Force was actually GoldCost, scraped Chi was actually GoldProduction), hand-corrected against each card's own scan. Published count 265 -> 269.",
+  "validation": "dotnet build (whole solution, 0 warnings/errors); dotnet run for L5R.Core.Tests (140/140, incl. 6 new test functions for Sensei/Yozo/Hikaro/Rokai/Tamoko-negate/Tamoko-open), L5R.AI.Tests (13/13, byte-identical decisions/outcomes), 34/34 published tests, 8/8 deck-format tests; python3 -m unittest discover tools/collaboration (43/43) and tools/content (121/121).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/207",
+  "branch": "mdornbrook/207-negation-sensei-iaijutsu",
+  "updated": "2026-09-14T13:20:18.614067+00:00"
+}

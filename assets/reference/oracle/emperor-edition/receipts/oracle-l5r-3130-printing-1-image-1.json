@@ -23,5 +23,18 @@
   "source_image_hash": "7e/5a",
   "source_url": "https://images.oracleofthevoid.com/l5r/7e/5a/printing_3130_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/7e/5a/printing_3130_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 165872,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3130-printing-1-image-1.webp",
+    "sha256": "7c4ddfa9ff6bf17ea5212ea23358c1c067cf1d896cb1a043249cf11c21689fc6",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

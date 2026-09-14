@@ -23,5 +23,18 @@
   "source_image_hash": "aa/00",
   "source_url": "https://images.oracleofthevoid.com/l5r/aa/00/printing_4664_7_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/aa/00/printing_4664_7_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 147188,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/war-of-honor/webp/oracle-l5r-4664-printing-7-image-1.webp",
+    "sha256": "b00c789881f2a829322ba1ddbd57aed947bfc84813362739a599d8db721dbe67",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

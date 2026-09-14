@@ -1,0 +1,88 @@
+{
+  "Profile": "personality-wave-6",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10832",
+      "Name": "Hida Kurabi",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after you Recruit a Destined card. You may Recruit a Reserve Personality, if they would be opposed, as an Absent Battle action.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10832.jpg",
+      "Keywords": [
+        "Destined",
+        "Reserve",
+        "Berserker",
+        "Hero",
+        "Imperial"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10854",
+      "Name": "Matsu Ryohei",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\n(Draw a card after your Destined card enters play.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10854.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Destined",
+        "Reserve",
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10244",
+      "Name": "Shiba Jikaro",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Stalwart cards negate their first bowing each turn by other players' cards.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10244.jpg",
+      "Keywords": [
+        "Stalwart",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

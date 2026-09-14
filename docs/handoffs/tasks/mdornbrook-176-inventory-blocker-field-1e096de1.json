@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Adds a Blocker column to docs/CARD_INVENTORY.xlsx (tools/content/build_card_inventory.py), populated for the 77 Followers left unwired after Wave 3 (issue #174) with the specific engine gap keeping each one blocked -- curated by hand in a new BLOCKERS dict, matching the per-card breakdown already posted as a comment on #174. A handful (Village Guardian, Village Raiders, Water Spider Adept, Yodotai Legionnaire, Scourge of the Sea) are noted as not actually blocked, just deferred for scope -- honest about the distinction rather than inventing a technical gap. Blank for every other card (not yet triaged this way); future waves extend the dict as they audit other Types. Shared-file note: content-tooling only (tools/content/build_card_inventory.py, docs/CARD_INVENTORY.xlsx) -- no engine or client code touched.",
+  "validation": "Cross-checked the BLOCKERS dict programmatically against the actual unwired-Follower set computed the same way the script itself does: all 77 keys match, no typos, no stray entries pointing at a now-wired or non-Follower card. Verified the generated workbook's Cards sheet carries the new Blocker column with the expected text for a spot sample.",
+  "remaining": "Blocker notes exist only for the 77 Followers from Wave 3's audit. Extending coverage to other unwired Types (Personality, Strategy, Item, Spell, etc.) is a future wave's own job, once each is actually triaged the same way.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/174",
+  "branch": "mdornbrook/176-inventory-blocker-field",
+  "updated": "2026-09-10T22:14:40.401639+00:00"
+}

@@ -23,5 +23,18 @@
   "source_image_hash": "b9/81",
   "source_url": "https://images.oracleofthevoid.com/l5r/b9/81/printing_2660_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/b9/81/printing_2660_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 146030,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/second-city/webp/oracle-l5r-2660-printing-1-image-1.webp",
+    "sha256": "a3a0198382b20aec2dcf27907e653bdf3126b431e5bf428b87f3872fdee8f8a1",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

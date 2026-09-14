@@ -23,5 +23,18 @@
   "source_image_hash": "df/8d",
   "source_url": "https://images.oracleofthevoid.com/l5r/df/8d/printing_3994_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/df/8d/printing_3994_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 122720,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-3994-printing-1-image-1.webp",
+    "sha256": "7462369cc813c14688222633a958a10edce8870cce3d1316fe185de11527245a",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

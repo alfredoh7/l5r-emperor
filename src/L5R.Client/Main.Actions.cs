@@ -11,6 +11,13 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null ? "Review the highlighted target and any payment. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
+        if (PresentationBusy)
+        {
+            _guide.Visible = false;
+            _inspector.AddChild(new BattleTracker { Snapshot = View, ReducedMotion = _reducedMotion,
+                ResolutionMessage = _battleOutcomeText, PresentationInProgress = true, ActionOutcome = _actionOutcome });
+            return;
+        }
         if (View.WinnerId is { } winner)
         {
             _inspector.AddChild(Palette.Text("MATCH COMPLETE", 12, Palette.Gold));
@@ -148,10 +155,10 @@ public partial class Main
             var picker = new OptionButton(); picker.AddItem("Stay at home");
             foreach (var province in provinces) picker.AddItem($"Province {province + 1}");
             picker.Selected = _assignments.TryGetValue(id, out var assigned) ? Array.IndexOf(provinces, assigned) + 1 : 0;
-            picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderInspector(); Highlight(); };
+            picker.ItemSelected += i => { _selected = card; _assignmentUnit = id; if (i == 0) _assignments.Remove(id); else _assignments[id] = provinces[(int)i - 1]; RenderBoard(); RenderInspector(); Highlight(); };
             _inspector.AddChild(picker);
         }
-        _decisionActions.AddChild(Palette.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderInspector(); Highlight(); }));
+        _decisionActions.AddChild(Palette.Button("Keep selected unit home", () => { if (_assignmentUnit is string id) _assignments.Remove(id); RenderBoard(); RenderInspector(); Highlight(); }));
         _decisionActions.AddChild(Palette.Button("Confirm assignments", () => Submit(new GameCommand(action.Type, View.ViewerId, reviewedVersion, Assignments: new Dictionary<string, int>(_assignments))), true));
         _decisionActions.AddChild(Palette.Button("Cancel assignment", CancelChoice));
     }
@@ -236,7 +243,7 @@ public partial class Main
         _decisionActions.AddChild(Palette.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
@@ -253,17 +260,9 @@ public partial class Main
         button.ClipText = true; container.AddChild(button);
     }
 
-    private void PassOpportunity()
-    {
-        if (_session.Snapshot is null || _session.Busy || View.WinnerId is not null || View.PriorityPlayerId != View.ViewerId) return;
-        if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) return;
-        var pass = Actions.FirstOrDefault(a => a.Enabled && a.Command is not null && a.Type is "pass" or "declineReaction");
-        if (pass?.Command is not { } command) return;
-        _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
-        Submit(command);
-    }
     private void RenderPhaseActions()
     {
+        if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(Palette.Button("View battle details", ShowHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;

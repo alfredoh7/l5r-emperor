@@ -23,5 +23,18 @@
   "source_image_hash": "bc/8a",
   "source_url": "https://images.oracleofthevoid.com/l5r/bc/8a/printing_6034_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/bc/8a/printing_6034_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 173304,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-6034-printing-1-image-1.webp",
+    "sha256": "ad4eb78748b78194fc911b674bdc2d5f46ff0601aff230fa993ca9853b437919",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

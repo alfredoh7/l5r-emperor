@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Grants-keyword primitive (issue #179): GrantKeyword is now idempotent; wired Scourge of the Sea (Naval, Follower wave 5), Justice of the Crane (Magistrate + a new Battle Dishonor action), and Unparalleled Sword (Kensai + Melee 4 attack) as Item wave 1 -- the first ability-bearing Item-type cards. Corrected a real bug in Follower Wave 3's Seppun Heavy Elite wiring: it was granting the actual Elite keyword (AttachGrantsKeyword) when it should only grant Elite's effect (Force still counts while bowed); new CardDefinition.AttachGrantsEliteEffect + EliteEffect() helper fix this, replacing BattleForce's two raw Keyword(card,'Elite') checks. Justice of the Crane's 'additional action if the printed Magistrate keyword' bonus is deferred (no 'additional action' primitive yet, same gap as Effortless Counterattack in #177).",
+  "validation": "dotnet build clean; full test suite 106/106 core + 34/34 published + 8/8 deck-format; bash tools/check.sh --skip-client all green (13/13 AI, 5/5 server integration, 4/4 client transport integration).",
+  "remaining": "Justice of the Crane's additional-action bonus needs the not-yet-built 'additional action' mechanic. Elephant Cavalry/Shieldman still need their own separate remaining gaps per docs/CARD_INVENTORY.xlsx. Oracle-l5r-10683 still needs a 'may not attack' restriction flag.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/179",
+  "branch": "mdornbrook/179-grants-keyword-primitive",
+  "updated": "2026-09-10T23:45:49.463719+00:00"
+}

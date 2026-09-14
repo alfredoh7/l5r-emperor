@@ -23,5 +23,18 @@
   "source_image_hash": "d3/87",
   "source_url": "https://images.oracleofthevoid.com/l5r/d3/87/printing_6490_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/d3/87/printing_6490_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 127480,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-6490-printing-1-image-1.webp",
+    "sha256": "e0c3dda6060a2b4e0a0e34818b6c461e26295490338f137bc946a709c43c4322",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

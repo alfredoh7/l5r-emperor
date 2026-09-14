@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rebased PR #92 (token rails and card-mounted unit ribbons, originally alfredoh7's codex/81-token-rails) as a clean cherry-pick of its two actual commits (b1aff0a, 8344fcd) onto current main, since its original stacked branch (on top of PR #76) had accumulated conflicts. No content changes vs the originals -- pure UI/presentation, confirmed via adversarial review that neither commit touches src/L5R.Core. Shared-file note: touches client .cs UI code, art/screenshot assets, a decision doc and a check script together because that is exactly what the original single feature commit touched -- nothing added or removed beyond the cherry-pick itself.",
+  "validation": "dotnet build (client): 0 warnings/errors. Full token-rails capture suite (6 scenarios, run directly since rg is not installed in this environment) passes clean. General board-capture regression suite (5 scenarios) passes clean. Core test suite: 87/87+34/34+8/8 pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "None; ready for review. Supersedes #92 (same content, clean base).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/pull/92",
+  "branch": "mdornbrook/92-token-rails-rebased",
+  "updated": "2026-09-09T22:13:13.691301+00:00"
+}

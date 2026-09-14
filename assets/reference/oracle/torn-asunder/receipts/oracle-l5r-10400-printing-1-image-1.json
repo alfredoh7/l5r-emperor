@@ -23,5 +23,18 @@
   "source_image_hash": "ef/a3",
   "source_url": "https://images.oracleofthevoid.com/l5r/ef/a3/printing_10400_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/ef/a3/printing_10400_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 112376,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10400-printing-1-image-1.webp",
+    "sha256": "a9b978060aa9674374af7c64f6dc0b2418d2dd4bba08861be3065f389b2319f7",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

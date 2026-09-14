@@ -23,5 +23,18 @@
   "source_image_hash": "e4/d3",
   "source_url": "https://images.oracleofthevoid.com/l5r/e4/d3/printing_1983_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/e4/d3/printing_1983_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 127712,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-1983-printing-1-image-1.webp",
+    "sha256": "cb3bd20e49cc1b0e7e1a746a14b3d1cb112c367e4d72513be99454c06e432f68",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

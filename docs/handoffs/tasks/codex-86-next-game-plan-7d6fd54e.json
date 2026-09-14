@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Coordinate the next mechanical-game delivery plan under #86: expanded catalogue viewer #120, existing builder/storage/Practice tasks, dueling #121, Spell completion #122 and bounded card waves. Preserve test/live split and distinguish reference artwork from playable support.",
-  "validation": "Read live issues/PRs and current source at ea88983, including LibraryDialog/TitleMenu, deck/match entry points and #115/#117 handoffs. Reused existing builder tasks, checked for duplicate mechanic/viewer issues, validated four document links and git diff --check. Documentation only; no gameplay tests claimed.",
-  "remaining": "Plan PR review/CI. Next UI implementation is #120; rules tasks are proposed coordination, not assigned to Mendon. No game code or issue acceptance status changed.",
+  "summary": "Resolve PR #123 conflicts against current main; preserve shipped Terrain, Battle Equip and dueling status and the separate duel presentation follow-up; date the original planning audit.",
+  "validation": "Reviewed merge conflict against both parents and current ROADMAP implementation records; git diff --check passed. Documentation only.",
+  "remaining": "PR review and CI; no new gameplay acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/86",
   "branch": "codex/86-next-game-plan",
-  "updated": "2026-09-09T17:16:16.992098+00:00"
+  "updated": "2026-09-14T15:28:00.459334+00:00"
 }

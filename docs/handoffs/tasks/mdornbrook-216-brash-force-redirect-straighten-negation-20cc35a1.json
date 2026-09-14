@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Six Dragon Clan Personalities from the wave 9 audit (issue #216): Togashi Noboru (Brash keyword; a new battle-scoped, live-rechecked Force-redirection primitive), Togashi Hizumi and Tamori Ruya (a new generic 'after a bow resolves' Reaction-trigger detector, snapshot-diff based, plus a same-location Target category for Ruya), Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells, plus a live conditional Force/Cavalry grant that required Keyword() to become an instance method), and Mirumoto Katagi and Tamori Shinji (narrow, single-card Gold discounts). Correctness fix found and fixed along the way: BattleForce was suppressing an entire unit's Force when the host Personality was bowed, when only the Personality's own Force should be suppressed -- a still-unbowed Follower should keep contributing. Also fixed a latent Straighten() bug: a 'next straightening' block was never actually cleared once consumed, silently blocking every later straighten attempt the same turn instead of just the next one.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 131/131 core, 34/34 published, 8/8 deck-format. python3 -m unittest discover -s tools/content: 121/121. python3 -m unittest discover -s tools/collaboration: 43/43.",
+  "remaining": "Mirumoto Katagi's own 'weapons will not be Transferred' clause is unbuilt (no attachment-Transfer mechanic exists anywhere in the engine, and no real card performs one -- noted in docs/CARD_INVENTORY.xlsx and docs/ROADMAP.md). Tamori Shinji's discount is intentionally narrow (Reserve-while-Defender only), not the fully general persistent Gold-cost-modifier primitive a future card like A Fugitive Apprehended would need.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/216",
+  "branch": "mdornbrook/216-brash-force-redirect-straighten-negation",
+  "updated": "2026-09-13T21:33:43.592424+00:00"
+}

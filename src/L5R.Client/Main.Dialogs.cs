@@ -40,7 +40,7 @@ public partial class Main
         body.AddChild(Palette.Wrapped("Play the published 40/40 Lion and Crane decks with every card ability automated, or use the training scenarios to learn the flow.", 16, Palette.PaperDim));
         void Start(bool economy, bool published = false, int seat = 0)
         {
-            void Begin() { ResetStatHistory(); _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
+            void Begin() { _turnBloomGate.Reset(); _turnBloom.Cancel(); ResetStatHistory(); _tableLayoutSeen = false; _cameraFitted = true; _selected = null; _chosen = null; _session.StartPractice(economy, published, seat); EnterTable(); dialog.QueueFree(); SetNotice(published ? "Lion vs Crane · published Emperor playtest started." : economy ? "Choose a province card to review its payment." : "Crane vs Lion · training match started."); }
             if (_session.Online || _session.Snapshot?.View.Version > 0) Confirm("Start a new practice?", "This leaves the current table. Export a practice replay first if you want to keep it.", Begin);
             else Begin();
         }
@@ -160,7 +160,21 @@ public partial class Main
         var (_, body) = Dialog("Match history", 760, 620);
         var scroll = new ScrollContainer { CustomMinimumSize = new Vector2(720, 540), HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; body.AddChild(scroll);
         var rows = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; scroll.AddChild(rows);
-        foreach (var e in View.Events.Reverse()) rows.AddChild(Palette.Wrapped($"{e.Sequence:000}   {e.Message}", 15, Palette.PaperDim));
+        var events = (_session.Snapshot?.View.Events ?? View.Events).ToArray();
+        for (var i = events.Length - 1; i >= 0;)
+        {
+            var end = i;
+            var battle = Array.FindLastIndex(events, i, i + 1, e => e.Type == "battleResolved");
+            if (battle >= 0 && !events.Skip(battle + 1).Take(i - battle).Any(e => e.Type == "battleResolved" || e.Type == "phaseChanged"))
+            {
+                var details = new VBoxContainer { Visible = false }; var excerpt = events[battle..(end + 1)];
+                var caption = excerpt.FirstOrDefault(e => e.Type == "provinceDestroyed")?.Message ?? events[battle].Message;
+                rows.AddChild(Palette.Button(caption + " · Details", () => details.Visible = !details.Visible));
+                foreach (var e in excerpt) details.AddChild(Palette.Wrapped(e.Message, 15, Palette.PaperDim));
+                rows.AddChild(details); i = battle - 1;
+            }
+            else { rows.AddChild(Palette.Wrapped($"{events[i].Sequence:000}   {events[i].Message}", 15, Palette.PaperDim)); i--; }
+        }
     }
 
     private void ShowCoverage()

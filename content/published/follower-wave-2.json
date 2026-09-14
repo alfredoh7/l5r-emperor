@@ -1,0 +1,282 @@
+{
+  "Profile": "follower-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-262",
+      "Name": "Akodo Regulars",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Discard a card: Give this card a Force bonus equal to the discarded card's Focus Value (until the turn ends).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-262.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "akodo-regulars-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10333",
+      "Name": "Cavalry Flankers",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you are the Attacker, bow this card: Melee 2 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10333.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "cavalry-flankers-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1839",
+      "Name": "Dark Naga Scouts",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1839.jpg",
+      "Keywords": [
+        "Naga",
+        "Nonhuman",
+        "Scout"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "dark-naga-scouts-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3456",
+      "Name": "Horse Archers",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3456.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "horse-archers-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5445",
+      "Name": "Murderous Thieves",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card: Melee 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5445.jpg",
+      "Keywords": [
+        "Bandit"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "murderous-thieves-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9144",
+      "Name": "Veteran Advisor",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9144.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "veteran-advisor-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3277",
+      "Name": "Hired Legion",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3277.jpg",
+      "Keywords": [
+        "Unique"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "hired-legion-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10513",
+      "Name": "Naga Remnants",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow a target enemy attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10513.jpg",
+      "Keywords": [
+        "Naga",
+        "Nonhuman"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "naga-remnants-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3325",
+      "Name": "Hiruma Sniper",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you have Reconnaissance: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3325.jpg",
+      "Keywords": [
+        "Scout"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "hiruma-sniper-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9869",
+      "Name": "Heavy Chargers",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If this card is opposed, discard a card: Give this card +3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9869.jpg",
+      "Keywords": [
+        "Cavalry"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "heavy-chargers-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10686",
+      "Name": "Spitting Llama",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give a target enemy Personality or Follower -3F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10686.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Nonhuman"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "spitting-llama-force"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

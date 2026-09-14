@@ -23,5 +23,18 @@
   "source_image_hash": "69/3a",
   "source_url": "https://images.oracleofthevoid.com/l5r/69/3a/printing_4010_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/69/3a/printing_4010_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 137582,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-4010-printing-1-image-1.webp",
+    "sha256": "a7808e8879254aba2439a0dfdc0a557a74f5371d49b2b54d90bb07aed16da7af",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

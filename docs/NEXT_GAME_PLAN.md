@@ -2,7 +2,9 @@
 
 Agreed direction: 2026-09-09. Alfredo is satisfied with the battle presentation for now and asked to organize Mendon’s next mechanical priorities. Broad battle redesign is paused; defects that prevent legal play still get fixed. Tracking parent: [#86](https://github.com/alfredoh7/l5r-emperor/issues/86).
 
-## What the audit found
+**Integration update (2026-09-14):** The audit below records the September 9 baseline. Current main now includes the Terrain primitive (#135), Battle Equip for Shugenja/Spells (#140), and dueling/Duelist (#204). Preserve those implementations; passes 4 and 5 now concern remaining coverage, interaction and acceptance, not rebuilding the primitives. Duel presentation is tracked separately in #205. See [ROADMAP.md](ROADMAP.md) for current implementation status.
+
+## What the September 9 audit found
 
 - **Test/live deck separation is implemented:** #115 remains open, but PR #116 merged. The frozen test deck pins composition; card behavior still comes from one shared CardCatalog. It is not a second rules engine. Preserve the decision in `docs/decisions/2026-09-09-test-live-deck-split.md`.
 - **Catalogue data is ahead of its presentation:** #23 is closed; the reference pool contains 2,143 Emperor-legal entries. A `Card Library` menu entry and `LibraryDialog` already exist, including catalogue search. Finish/integrate them rather than building a duplicate viewer. The current engine-supported pool is much smaller than the reference pool.
@@ -33,7 +35,7 @@ This is a delivery order, not a requirement for Mendon to wait while UI work hap
 - Browsable, legal, implemented and human-accepted are distinct states. A downloaded card or an Emperor legality flag is not evidence of executable effects.
 - #25 permits editing over-limit decks with warnings; #67 must not turn those editing warnings into arbitrary hard blocks. Play-time legality/support comes from Core/server. Unimplemented cards can remain visible for planning while unsupported matches are rejected clearly.
 - Do not hard-code current supported-card counts into the UI. Derive support from the shared authoritative content data and show useful reasons when an effect is unavailable.
-- Dueling and Spells are major gaps, not the only gaps. #15 Engage reactions, remaining #20 battle-segment work, general Dishonor/Rehonor, Terrain, Region/Celestial behavior and other Reaction triggers remain in `ROADMAP.md`. Prioritize those by the next complete deck’s actual requirements; file bounded work before claiming those cards supported.
+- Remaining duel/Spell coverage, #15 Engage reactions, remaining #20 battle-segment work, general Dishonor/Rehonor, Terrain coverage, Region/Celestial behavior and other Reaction triggers are tracked in `ROADMAP.md`. Preserve the primitives already shipped on main. Prioritize remaining work by the next complete deck’s actual requirements; file bounded work before claiming those cards supported.
 - A general log was previously rejected on the left during battles. Do not reintroduce it as part of these passes without a new design decision.
 - Tutorials (#74), further cinematics and cosmetic battle expansions follow dependable-match acceptance, not this immediate implementation queue.
 

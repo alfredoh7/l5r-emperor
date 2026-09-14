@@ -1,0 +1,129 @@
+{
+  "Profile": "personality-wave-16",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10455",
+      "Name": "Togashi Mitsu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 7,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Fire Battle/Open: Give Mitsu +1F Fire tokens until he has exactly five.\nFire Battle: Destroy zero or more Fire tokens on Mitsu. Ranged Attack with strength equal to the number of tokens destroyed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10455.jpg",
+      "Keywords": [
+        "Unique",
+        "Dragon Clan",
+        "Fire",
+        "Inexperienced",
+        "Monk",
+        "Samurai",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mitsu-fire-tokens",
+        "mitsu-fire-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8570",
+      "Name": "Togashi Sakata",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 4,
+      "GoldProduction": 9,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Give Sakata a +1F Fire or Sake token. \nBattle: Sakata breathes fire. Ranged 4 Attack, with +1 strength for each Sake token on Sakata.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8570.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Drunken Master",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "sakata-fire-token",
+        "sakata-sake-token",
+        "sakata-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9415",
+      "Name": "Xijkt",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 3,
+      "GoldProduction": 6,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "If you are the Defender, Xijkt may be targeted by the rulebook Cavalry player ability. \nBattle, Bow this card: Bow a target enemy card without attachments. You may bow one of your Mines to ignore the cost of bowing Xijkt.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9415.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Mountaineer",
+        "Nonhuman",
+        "Zokujin"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "xijkt-bow"
+      ],
+      "Effect": "cavalry-if-defender"
+    },
+    {
+      "Id": "oracle-l5r-7797",
+      "Name": "Tamori Shosei",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 3,
+      "GoldProduction": 7,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: If you control a Temple, bow Shosei or one of your Temple Holdings: Shosei prays to the Fortunes. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7797.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Archivist",
+        "Dragon Clan",
+        "Earth",
+        "Imperial",
+        "Jade Hand",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shosei-honor"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

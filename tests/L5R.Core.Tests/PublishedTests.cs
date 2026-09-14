@@ -31,6 +31,7 @@ internal static class PublishedTests
             ("Items add Force and Chi even bowed; Armor and Weapon limits enforced", Attachments),
             ("Followers meet Personal Honor requirement and stay separate from Personality Force", Followers),
             ("Lion attack traits turn on and off as units move", AttackTraits),
+            ("Passing Infantry Maneuvers with nothing to assign still reaches Cavalry Maneuvers", CavalryAfterEmptyInfantry),
             ("Halls triggers on Combat destruction, not Resolution casualties", Ancestor),
             ("Lobby and Shunya use Favor with individual once-per-turn limits", Favor),
             ("Favor draw discards from hand and handles empty Fate deck", FavorCycle),
@@ -78,7 +79,7 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,124);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,273);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(PublishedContent.Snapshot.Cards.Length,40);
         foreach(var d in PublishedContent.Snapshot.Decks){Eq(d.Dynasty.Length,40);Eq(d.Fate.Length,40);Check(d.Dynasty.All(id=>CardCatalog.Get(id).Type is CardType.Holding or CardType.Personality));}
@@ -270,6 +271,20 @@ internal static class PublishedTests
             var s=State(true);s.ActivePlayerId=1;var p=Add(s,id,1,Zone.Battlefield,province:0);var e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,attacking);p.Zone=Zone.Home;e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,home);p.Zone=Zone.Battlefield;s.ActivePlayerId=0;e=MatchEngine.FromTestState(s);Eq(ViewCard(e,p.Id).Force,home);
         }
     }
+    private static void CavalryAfterEmptyInfantry()
+    {
+        // A pass with no Infantry to assign only declines Infantry Maneuvers -- it must not skip
+        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack.
+        var s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
+        var cavalry=Add(s,3623,0,Zone.Home); // Ikoma Natsu: printed Cavalry keyword.
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Eq(e.State.Phase,Phase.DefenseAssignment);
+        Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);Eq(e.State.PriorityPlayerId,0);
+        Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
+        Eq(Card(e,cavalry.Id).Zone,Zone.Battlefield);Eq(Card(e,cavalry.Id).ProvinceIndex,0);
+        Check(e.State.UnresolvedBattlefields.Contains(0));
+        Eq(e.State.Phase,Phase.CavalryDefense);
+    }
     private static void Ancestor()
     {
         var s=State(true);var ancestor=Add(s,"training-fragile-ancestor",1,Zone.Battlefield,province:0);var sword=Add(s,9879,1,Zone.Attached,province:0,parent:ancestor.Id);var never=Add(s,9916,zone:Zone.Hand);var e=MatchEngine.FromTestState(s);Accept(e,Use(e,never.Id,"never-afraid",sword.Id));Eq(Card(e,ancestor.Id).Zone,Zone.Dead);Eq(e.State.Players[1].Honor,8);
@@ -280,6 +295,12 @@ internal static class PublishedTests
     {
         var s=State();var lobby=Add(s,521);var shunya=Add(s,2158);var e=MatchEngine.FromTestState(s);Reject(e,Use(e,shunya.Id,"shunya-honor"));Accept(e,Use(e,null,"lobby",lobby.Id));Eq(e.State.FavorPlayerId,0);Check(Card(e,lobby.Id).Bowed);Pass(e);Accept(e,Use(e,shunya.Id,"shunya-honor"));Eq(e.State.Players[0].Honor,12);Eq(e.State.FavorPlayerId,null);Check(!Card(e,shunya.Id).Bowed);Pass(e);Reject(e,Use(e,null,"lobby",shunya.Id));
         s=State();s.Players[0].Honor=7;lobby=Add(s,521);e=MatchEngine.FromTestState(s);Reject(e,Use(e,null,"lobby",lobby.Id));
+        // Spending Favor (a Limited ability) does not consume the separate once-per-turn Lobby
+        // limit -- they are tracked by distinct AbilityUses keys. Once the opponent's action
+        // opportunity passes back, the same active player may Lobby again the same turn.
+        s=State();s.FavorPlayerId=0;var discard=Add(s,2619,zone:Zone.Hand);var relobby=Add(s,521);e=MatchEngine.FromTestState(s);
+        Accept(e,Use(e,null,"favor-cycle",discard.Id));Eq(e.State.FavorPlayerId,null);Pass(e);
+        Accept(e,Use(e,null,"lobby",relobby.Id,actor:0));Eq(e.State.FavorPlayerId,0);
     }
     private static void FavorCycle()
     {

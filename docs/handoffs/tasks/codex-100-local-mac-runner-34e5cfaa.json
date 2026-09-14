@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Installed repository-scoped alfredo-mac-studio runner v2.337.0 with verified SHA-256 outside development checkouts. Per-user launchd service runs one job at nice 10, restarts after exit/login, and prevents idle system sleep while allowing display sleep. Route Mac checks locally; retain hosted Windows/Linux and cancel superseded desktop runs. Document operation and recovery.",
+  "validation": "37 local collaboration tests, whitespace check and handoff audit passed. GitHub confirmed runner online. Live run 34355104056 macOS job 102477820749 passed full tools/check.sh including compilation and headless Godot import/smoke in 85 seconds. Initial setup-python assumption failed and was repaired with a job-local Python 3.14 venv (project requires 3.12+). Hosted Windows was still running when this record was written; final-head CI evidence belongs in PR #102.",
+  "remaining": "Final-head CI must pass and mdornbrook must review shared CI before merge. Runner is installed and tested; main keeps hosted macOS until PR #102 merges. No native graphical playtesting was performed or required for this workflow-only change.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/100",
+  "branch": "codex/100-local-mac-runner",
+  "updated": "2026-09-09T13:10:15.688032+00:00"
+}

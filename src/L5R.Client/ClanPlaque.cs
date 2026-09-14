@@ -17,17 +17,12 @@ public partial class ClanPlaque : Control
         Acting = acting; TurnOwner = turnOwner; TurnText=turn; ActionText=action;
         var frame=new LacquerPanel { MouseFilter=MouseFilterEnum.Ignore };
         AddChild(frame); frame.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
-        var emblemRegion = clan switch {
-            "Lion" => new Rect2(114,225,224,218), "Crane" => new Rect2(574,220,225,223),
-            "Phoenix" => new Rect2(0,0,222,222), "Scorpion" => new Rect2(234,0,219,222),
-            "Crab" => new Rect2(465,0,218,222), "Unicorn" => new Rect2(689,0,220,222),
-            "Dragon" => new Rect2(340,220,224,223), _ => new Rect2(114,225,224,218)
-        };
-        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-"+clan.ToLowerInvariant()+".png") : null;
-        var icon=Decal(extra is null ? "clan-reference.png" : "clan-"+clan.ToLowerInvariant()+".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero,extra.GetSize()),new Vector2(8,11),new Vector2(94,94),false);
+        var icon=Emblem(clan,new Vector2(94,94)); icon.Position=new Vector2(8,11);
         AddChild(icon);
         var title=Palette.Text(clan.ToUpperInvariant(),23,Palette.Paper,true); title.Position=new Vector2(111,7); AddChild(title);
-        var turnLabel=Palette.Text(turn,15,Palette.Gold,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
+        var turnSize=15;
+        while(turnSize>10 && Palette.Title.GetStringSize(turn.ToUpperInvariant(),fontSize:(int)(turnSize*1.25f)).X>148)turnSize--;
+        var turnLabel=Palette.Text(turn,turnSize,Palette.Gold,true); turnLabel.Position=new Vector2(111,36); AddChild(turnLabel);
         var cue=Palette.Text(action,14,Palette.PaperDim); cue.Position=new Vector2(111,57); cue.Size=new Vector2(148,23); cue.TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis; cue.TooltipText=action; cue.MouseFilter=MouseFilterEnum.Stop; AddChild(cue);
         var fan=new HonorFan { Position=new Vector2(110,86),Size=new Vector2(26,26),MouseFilter=MouseFilterEnum.Stop,TooltipText="Family Honor" }; AddChild(fan);
         var honorLabel=Palette.Text(honor.ToString(),23,Palette.Paper); honorLabel.Position=new Vector2(141,83); honorLabel.MouseFilter=MouseFilterEnum.Stop; honorLabel.TooltipText="Family Honor"; AddChild(honorLabel);
@@ -40,6 +35,17 @@ public partial class ClanPlaque : Control
         if(favor) { var mark=Palette.Text("◆",14,Palette.Gold); mark.Position=new Vector2(247,7); mark.MouseFilter=MouseFilterEnum.Stop; mark.TooltipText="Imperial Favor"; AddChild(mark); }
         // Draw glow over the lacquer so it cannot be hidden behind its opaque bitmap.
         var glow = new PlaqueGlow(this) { MouseFilter=MouseFilterEnum.Ignore }; AddChild(glow);
+    }
+    public static TextureRect Emblem(string clan,Vector2 size)
+    {
+        var emblemRegion = clan switch {
+            "Lion" => new Rect2(114,225,224,218), "Crane" => new Rect2(574,220,225,223),
+            "Phoenix" => new Rect2(0,0,222,222), "Scorpion" => new Rect2(234,0,219,222),
+            "Crab" => new Rect2(465,0,218,222), "Unicorn" => new Rect2(689,0,220,222),
+            "Dragon" => new Rect2(340,220,224,223), _ => new Rect2(114,225,224,218)
+        };
+        var extra = clan is "Mantis" or "Spider" ? GD.Load<Texture2D>("res://Art/clan-"+clan.ToLowerInvariant()+".png") : null;
+        return Decal(extra is null ? "clan-reference.png" : "clan-"+clan.ToLowerInvariant()+".png", extra is null ? emblemRegion : new Rect2(Vector2.Zero,extra.GetSize()),Vector2.Zero,size,false);
     }
     private static TextureRect Decal(string file,Rect2 region,Vector2 position,Vector2 size,bool coin)
     {

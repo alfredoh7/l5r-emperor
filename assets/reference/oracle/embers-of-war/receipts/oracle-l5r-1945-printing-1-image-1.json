@@ -23,5 +23,18 @@
   "source_image_hash": "85/61",
   "source_url": "https://images.oracleofthevoid.com/l5r/85/61/printing_1945_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/85/61/printing_1945_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 138218,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/embers-of-war/webp/oracle-l5r-1945-printing-1-image-1.webp",
+    "sha256": "a5e2bd67070f0701e087edf2a20f5f689fa9a6b639e059c8bff255d3fb30e0ef",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

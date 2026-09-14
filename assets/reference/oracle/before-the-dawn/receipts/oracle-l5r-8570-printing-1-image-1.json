@@ -23,5 +23,18 @@
   "source_image_hash": "82/20",
   "source_url": "https://images.oracleofthevoid.com/l5r/82/20/printing_8570_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/82/20/printing_8570_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 130774,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-8570-printing-1-image-1.webp",
+    "sha256": "571e5ccf4899f3c2a884be3394667582ddb8ef982509de578b211c56c875ad73",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

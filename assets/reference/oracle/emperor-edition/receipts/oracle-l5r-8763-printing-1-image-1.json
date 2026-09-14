@@ -23,5 +23,18 @@
   "source_image_hash": "bc/d9",
   "source_url": "https://images.oracleofthevoid.com/l5r/bc/d9/printing_8763_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/bc/d9/printing_8763_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 134104,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-8763-printing-1-image-1.webp",
+    "sha256": "66e0bf6fe87eec89e113031072d6e39f050cfebf6658893787a8d36b107dde40",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }

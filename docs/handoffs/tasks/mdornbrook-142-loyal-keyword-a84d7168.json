@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implements the Loyal keyword as a rules-engine primitive (issue #142): a Loyal Personality can only be recruited by a Stronghold whose Clan matches its own alignment. New CardDefinition.Clans (string array) overrides the single Clan field for a Personality aligned with more than one Clan; a ClanAlignments(card) helper resolves it. QuotePurchase rejects recruiting a Loyal Personality whose alignments don't include the recruiting player's Clan. Two training fixtures (single- and multi-Clan Loyal Personalities). Explicitly deferred: negating a control-change effect and the cannot-act-without-Clan-alignment restriction, both unreachable since the engine has no mechanism yet that changes a card's controller or strips a printed Clan/keyword. Shared-file note: all changed files are within L5R.Core (rules engine), its test suite, and docs/ROADMAP.md -- a single rules-lane concern; no UI/client files touched.",
+  "validation": "New LoyalKeyword test: a Loyal Personality recruits normally for its own Clan, is rejected for a non-aligned Clan, and a multi-Clan Loyal Personality recruits normally for either of its alignments. Full suite: 91/91 core + 34/34 published + 8/8 deck format pass. bash tools/check.sh --skip-client passes.",
+  "remaining": "Negating control-change effects and the cannot-act-without-Clan-alignment restriction are deferred -- noted in issue #142 as currently unreachable, not required for this primitive to be complete.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/142",
+  "branch": "mdornbrook/142-loyal-keyword",
+  "updated": "2026-09-10T08:45:18.210748+00:00"
+}

@@ -23,5 +23,18 @@
   "source_image_hash": "51/e1",
   "source_url": "https://images.oracleofthevoid.com/l5r/51/e1/printing_9630_1_master.jpg",
   "url_prefix": "https://images.oracleofthevoid.com/l5r/51/e1/printing_9630_1_",
-  "width": 750
+  "width": 750,
+  "working_copy": {
+    "bytes": 119360,
+    "format": "WEBP",
+    "height": 1050,
+    "path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-9630-printing-1-image-1.webp",
+    "sha256": "3edace2d691186b6612ff019c2445fc8c2058e6948cca1556e464b949b0795e9",
+    "source": {
+      "asset": "L5R-Catalogue-WebP85.zip",
+      "matched_by": "original_sha256",
+      "release": "catalogue-art-webp-v1"
+    },
+    "width": 750
+  }
 }
