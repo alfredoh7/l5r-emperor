@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Integrated updated catalogue/WebP PR #124 into PR #134, then merged current main through c345ec3. Preserved deck builder, catalogue heading/artwork mappings, and the newly merged Topaz playmat presentation.",
+  "validation": "tools/check.sh --skip-client passed: 43 collaboration, 130 content, 144 Core, 34 published, 8 deck-format, 8 deck-workshop, 13 AI, 5 server and 4 transport checks. Six catalogue artwork installer regressions passed. Native Windows tools/check-deck-builder.sh passed after final main integration: client build 0 warnings/errors; setup, quantity edits, search, warnings, comparisons, long-rule scrolling, save/load, invalid import recovery, unsaved/overwrite guards, responsive captures, six-entry menu fit, main-menu entry and Topaz mat path. Inspected mat, compact and small comparison captures. git diff --check passed.",
+  "remaining": "CI and human visual/rules acceptance. Custom-deck match launch remains issue #29; no complete-match or external multiplayer acceptance claimed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/25",
+  "branch": "codex/25-deck-builder",
+  "updated": "2026-09-14T20:41:12.097669+00:00"
+}

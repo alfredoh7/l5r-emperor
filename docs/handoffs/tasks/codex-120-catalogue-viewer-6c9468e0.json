@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Resolve PR #124 against current main: retain the catalogue screen, apply the shared heading helper in LegacyLibraryDialog, and reconcile 256 published resource mappings with existing verified WebP pack entries after the main-branch working-copy migration. The pinned 2486-image release is unchanged; aliases were verified by source hashes or exact JPEG reconstruction from receipt-verified WebP bytes.",
+  "validation": "Pinned client build: 0 warnings/errors. tools/check.sh --skip-client passed: 43 collaboration, 130 content, 144 Core, 34 published, 8 deck-format, 13 AI, 5 server and 4 transport checks. Six artwork installer regressions passed again. Complete pack installation and native Windows CatalogueProbe passed search/filter, inspection/dismissal, exact scroll restoration, compact layout, all printing mappings, local WebP decode, selective cache migration and corruption rejection. Inspected 1672x941 and 1280x800 captures. git diff --check passed.",
+  "remaining": "CI and existing human visual/rules acceptance; no complete match or multiplayer playtest performed. Local native captures are in artifacts/catalogue-checks.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/120",
+  "branch": "codex/120-catalogue-viewer",
+  "updated": "2026-09-14T15:34:15.099309+00:00"
+}

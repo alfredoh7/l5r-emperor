@@ -22,6 +22,7 @@ public partial class Main
             StartMatch = StartFromMenu,
             PrivateMatch = () => { _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
+            DeckBuilder = () => DeckBuilderDialog.Show(this),
             Resume = EnterTable,
             CanResume = () => _session.Snapshot is not null,
             IsOnline = () => _session.Online,

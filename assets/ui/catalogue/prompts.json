@@ -1,0 +1,6 @@
+{
+  "mode": "built-in imagegen",
+  "source": "approved-A.png",
+  "purpose": "Derived runtime cloth and border material",
+  "prompt": "Use case: precise-object-edit. Input image is approved CARD LIBRARY UI concept. Create a production background texture derived 1:1 from it. REMOVE ALL text, cards, clan icons, buttons, boxes, horizontal separators, search field, and any UI content. Preserve ONLY the extremely fine weathered antique gold outer border and small subtle outer corner flourishes exactly at the outer edge, and the dark near-black midnight navy worn cloth/black lacquer surface. Fill all removed content seamlessly with that same quiet textured navy surface, uniform low-contrast texture, no excessive vignetting. Full 16:9 rectangle, straight on orthographic no perspective. Do not redesign the outer frame; keep thin fine worn brass strokes. No lettering or symbols anywhere. Output image used as native Godot stretchable nine-patch backdrop. Preserve generous blank center, all ornament within outermost 25 pixels."
+}
