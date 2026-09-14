@@ -135,6 +135,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
+            if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -145,6 +146,14 @@ public sealed partial class MatchEngine
                 if (command.Type=="proclaim") Proclaim(command);
                 else if (command.Type=="useAbility") UseAbility(command);
                 else PassReaction();
+                return;
+            }
+            if (_state.PendingChoice.Type=="bowReaction")
+            {
+                // Togashi Hizumi / Tamori Ruya (issue #216): same shape as entryReaction below --
+                // this specific watching card's own reaction, or pass.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the bow reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
             if (_state.PendingChoice.Type=="entryReaction")
@@ -307,7 +316,7 @@ public sealed partial class MatchEngine
         var provinceIndex=card.ProvinceIndex!.Value;
         Require(_state.UnresolvedBattlefields.Contains(provinceIndex),"There is no battlefield at this province.");
         Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
-        var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
+        var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance,viaReserve:true);
         Require(quote.Error is null,quote.Error??"");
         Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
@@ -347,7 +356,13 @@ public sealed partial class MatchEngine
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
     }
 
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false)
+    // viaReserve (issue #216, Tamori Shinji): true only for a Reserve recruit made as an absent
+    // battle action while being attacked (RecruitReserve) -- "enters play for 4 less Gold if you are
+    // the Defender" is true by construction on that one path (you may only ever Reserve-recruit your
+    // OWN province's card, and doing so requires the enemy already has presence there, i.e. they are
+    // attacking YOUR province), so no separate "are you the Defender" check is needed. An ordinary
+    // Dynasty-phase Purchase of the same card never qualifies.
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
@@ -363,7 +378,8 @@ public sealed partial class MatchEngine
         else if(def.Type==CardType.Personality && Keyword(card,"Loyal") && !inClan) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
-        var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
+        var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
+            -(viaReserve && def.Effect=="reserve-defender-discount"?4:0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : []);
@@ -513,7 +529,30 @@ public sealed partial class MatchEngine
         _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
             .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
+        // Brash (core rules keyword, issue #216): the Defender may draw a card, independently, once
+        // per Brash card just assigned to attack -- deferred here, before the usual phase transition,
+        // so the Defender resolves every offer first; FinishBrashDraws makes that same transition
+        // once the queue empties.
+        var brashCount=command.Assignments?.Keys.Count(id=>Keyword(Card(id),"Brash"))??0;
+        if(brashCount>0)
+        {
+            _state.PendingBrashDraws=brashCount;
+            _state.PendingChoice=new("brashDraw",1-command.PlayerId,null,"Brash: you may draw a card.");
+            _state.PriorityPlayerId=1-command.PlayerId;
+            Emit("brashDrawOffered",$"{Player(1-command.PlayerId).Name} may draw a card ({brashCount} Brash {(brashCount==1?"card":"cards")} assigned to attack).",1-command.PlayerId);
+            return;
+        }
         SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,1-command.PlayerId);
+    }
+    private void ResolveBrashDraw(GameCommand command)
+    {
+        Require(command.Type=="brashDraw" && command.PlayerId==_state.PendingChoice!.PlayerId && command.Choice is "draw" or "decline","Choose whether to draw a card.");
+        if(command.Choice=="draw") Draw(Player(command.PlayerId));
+        _state.PendingBrashDraws--;
+        if(_state.PendingBrashDraws>0) return;
+        _state.PendingChoice=null;
+        var cavalry=_state.Phase==Phase.CavalryDeclaration;
+        SetPhase(cavalry?Phase.CavalryDefense:Phase.DefenseAssignment,command.PlayerId);
     }
     private void AssignDefense(GameCommand command)
     {
@@ -556,7 +595,7 @@ public sealed partial class MatchEngine
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
-        var af=a.Sum(BattleForce); var df=d.Sum(BattleForce);
+        var (af,df)=ArmyForces(a,d,attacker,defender);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
         // Reconnaissance resets to No for both players at this battlefield once its battle resolves,
         // regardless of the outcome -- the only trigger that clears it.
@@ -651,6 +690,8 @@ public sealed partial class MatchEngine
         // grant (which genuinely is scoped to just this battle).
         _state.AdditionalActions.RemoveAll(g => !(g.ScopeCardIds is { Length: 1 } ids && Definition(Card(ids[0])).Type == CardType.Ring));
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
+        // Force redirection (issue #216) is "for the duration of the battle," same reasoning.
+        _state.ForceRedirects.Clear();
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.
         foreach(var p in _state.Players) { p.TerrainPlayedThisBattle=false; p.TerrainDestroyedThisBattle=false; }
         if(_state.WinnerId is not null) return;
@@ -700,7 +741,12 @@ public sealed partial class MatchEngine
         // Spell entry too, for both keywords.
         Require(!(Keyword(card,"Unique") || Keyword(card,"Singular")) || !ControlsCopyOf(command.PlayerId,def.Name),
             $"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.");
-        Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
+        // Mirumoto Katagi (issue #216): "Non-Unique Weapons attaching to Katagi from your hand enter
+        // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
+        // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
+        // formula directly rather than as a new command flag.
+        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0));
+        Pay(command.PlayerId,card,cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
@@ -796,7 +842,7 @@ public sealed partial class MatchEngine
     private bool HasAttachments(CardInstance card) => Attachments(card.Id).Any() || card.Tokens.Any(t=>AttachmentTokenTypes.Contains(t.Type));
     // "Human" is never printed as a keyword -- a Personality/Follower without "Nonhuman" printed is
     // Human by default (core rules Glossary).
-    private static bool KeywordOrHuman(CardInstance card,string keyword) => keyword=="Human" ? !Keyword(card,"Nonhuman") : Keyword(card,keyword);
+    private bool KeywordOrHuman(CardInstance card,string keyword) => keyword=="Human" ? !Keyword(card,"Nonhuman") : Keyword(card,keyword);
     // An attachment's own "Will only/not attach to X" restriction and Follower Honor Requirement,
     // checked together wherever a legal target is decided (Equip's own Require and the offered-action
     // legal-targets filter both call this, so they can never disagree).
@@ -842,6 +888,10 @@ public sealed partial class MatchEngine
         // the same shape FollowerForce's own force-while-defending already covers, just for a
         // Personality directly rather than an attached Follower.
         +(Definition(card).Effect=="force-while-defending-personality"&&IsDefendingUnit(card)?2:0)
+        // Tamori Yayu (issue #216): "+2F ... while it is not your turn" -- the Cavalry-keyword half
+        // of the same printed sentence is a live conditional check in Keyword() itself, not a
+        // GrantedKeyword (which would be a durable, not continuously re-evaluated, grant).
+        +(Definition(card).Effect=="cavalry-force-while-not-your-turn"&&card.OwnerId!=_state.ActivePlayerId?2:0)
         // Kitsuki Miroken: "+2F while opposing a dishonorable or Gaijin card" -- checked against the
         // whole opposing army at the current battlefield, not a specific targeted card.
         +(Definition(card).Effect=="force-vs-dishonorable-or-gaijin-opposed"&&AtBattle(card)&&Army(1-card.OwnerId,card.ProvinceIndex??-1).Any(c=>c.Dishonorable||Keyword(c,"Gaijin"))?2:0)
@@ -942,19 +992,39 @@ public sealed partial class MatchEngine
         var parent = card.Zone==Zone.Attached ? Card(card.AttachedTo!) : card;
         return parent.Zone==Zone.Battlefield ? parent : null;
     }
-    // A bowed ordinary Personality suppresses its entire unit at resolution.
+    // A bowed ordinary Personality suppresses only its OWN Force at resolution (issue #216
+    // correctness fix) -- a Follower that is itself unbowed still contributes its own Force
+    // regardless of its host's bowed state; only a bowed, non-Elite FOLLOWER suppresses itself.
     // Preserve the explicit Elite-Personality exception accepted in #19/#17.
-    // An Elite Follower cannot bypass its non-Elite Personality's bowed state.
+    // An Elite Follower cannot bypass its non-Elite Personality's bowed state -- the Personality's
+    // OWN suppression is independent, but a Follower still checks its OWN bowed status too.
     // EliteEffect: true for a card with the actual printed/granted Elite keyword, but also for a
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
     private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect);
-    private int BattleForce(CardInstance card)
+    private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) ? 0 : PersonalityForce(card);
+    private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
+        .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
+        .Sum(FollowerForce);
+    private int BattleForce(CardInstance card) => PersonalityBattleContribution(card)+FollowerBattleContribution(card);
+    // Force redirection (issue #216, Togashi Noboru): each army's own total, honoring any active
+    // ForceRedirect -- a redirected card's own Personality contribution (never its Followers', which
+    // always stay with their own controller) counts toward the BENEFICIARY's total instead of its
+    // own controller's, but only while the beneficiary still has at least one unit in THEIR OWN
+    // current army (re-checked here, at actual resolution time, not when the redirect was granted).
+    private (int Attacker,int Defender) ArmyForces(CardInstance[] a,CardInstance[] d,int attacker,int defender)
     {
-        if(card.Bowed && !EliteEffect(card)) return 0;
-        return PersonalityForce(card)+Attachments(card.Id)
-            .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
-            .Sum(FollowerForce);
+        int af=0,df=0;
+        foreach(var c in a) { if(RedirectsTo(c,attacker,defender,a,d)==defender) df+=PersonalityBattleContribution(c); else af+=PersonalityBattleContribution(c); af+=FollowerBattleContribution(c); }
+        foreach(var c in d) { if(RedirectsTo(c,attacker,defender,a,d)==attacker) af+=PersonalityBattleContribution(c); else df+=PersonalityBattleContribution(c); df+=FollowerBattleContribution(c); }
+        return (af,df);
+    }
+    private int? RedirectsTo(CardInstance card,int attacker,int defender,CardInstance[] a,CardInstance[] d)
+    {
+        var redirect=_state.ForceRedirects.FirstOrDefault(r=>r.TargetId==card.Id);
+        if(redirect is null) return null;
+        var beneficiaryArmy=redirect.ToPlayerId==attacker?a:d;
+        return beneficiaryArmy.Length>0?redirect.ToPlayerId:null;
     }
     // "Dead / Destroy" (core rules Glossary): entering the Dead zone, distinct from merely being
     // discarded. A Personality who is still Dishonorable at this moment costs its controller Honor

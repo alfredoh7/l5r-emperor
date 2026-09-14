@@ -1,0 +1,177 @@
+{
+  "Profile": "personality-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10058",
+      "Name": "Togashi Noboru",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(The Defender may draw a card after a Brash card is assigned to attack.)\nBattle: Target an enemy Personality with lower Chi: Noboru pushes him to a new path. While you have at least one unit in your current army, the target's Force contributes to that army's total Force instead of his controller's.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10058.jpg",
+      "Keywords": [
+        "Brash",
+        "Unique",
+        "Dragon Clan",
+        "Fire",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "noboru-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8521",
+      "Name": "Togashi Hizumi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action that bowed a Personality at Hizumi's battlefield, target him: Negate his next straightening (this turn).\nBattle: Give the current battlefield's province +4 or -4 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8521.jpg",
+      "Keywords": [
+        "Dragon Clan",
+        "Earth",
+        "Empty Hand",
+        "Monk",
+        "Tattooed"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hizumi-negate-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7789",
+      "Name": "Tamori Ruya",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of your action that bowed a Personality, target a Personality at the same location: Bow him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7789.jpg",
+      "Keywords": [
+        "Unique",
+        "Alchemist",
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ruya-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7806",
+      "Name": "Tamori Yayu",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Yayu has +2F and Cavalry while it is not your turn.\nBattle: Bow or destroy one of Yayu's Spells: He lobs an alchemical potion at the enemy. Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7806.jpg",
+      "Keywords": [
+        "Alchemist",
+        "Dragon Clan",
+        "Earth",
+        "Mountaineer",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yayu-bow-attack",
+        "yayu-destroy-attack"
+      ],
+      "Effect": "cavalry-force-while-not-your-turn"
+    },
+    {
+      "Id": "oracle-l5r-5112",
+      "Name": "Mirumoto Katagi",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Weapons attached to Katagi will not be transferred.\nNon-Unique Weapons attaching to Katagi from your hand enter play paying 4 less Gold.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5112.jpg",
+      "Keywords": [
+        "Kensai",
+        "Unique",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "weapon-discount-non-unique"
+    },
+    {
+      "Id": "oracle-l5r-10846",
+      "Name": "Tamori Shinji",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(You may Recruit a Reserve card, if it would be opposed, as an Absent Battle action.)\nEnters play for 4 less Gold if you are the Defender.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10846.jpg",
+      "Keywords": [
+        "Reserve",
+        "Dragon Clan",
+        "Earth",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "reserve-defender-discount"
+    }
+  ],
+  "Decks": []
+}

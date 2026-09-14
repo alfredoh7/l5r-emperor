@@ -206,6 +206,12 @@ public sealed class PendingConqueror
 /// FinishBattleResolution, never carried into a later battle or turn.</summary>
 public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds);
 
+/// <summary>Force redirection (issue #216, Togashi Noboru): TargetId's own Force (not its unit's
+/// Followers) contributes to ToPlayerId's own army total instead of the target's own controller's,
+/// while ToPlayerId still has at least one unit in their own current army -- re-checked live at
+/// resolution, not a one-time snapshot.</summary>
+public sealed record ForceRedirect(string TargetId, int ToPlayerId);
+
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
 /// same shape as PendingAttack) until it resolves, then hands priority back exactly where the
@@ -274,6 +280,30 @@ public sealed class MatchState
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
+    // Force redirection (issue #216, Togashi Noboru): "the target's Force contributes to [Noboru's
+    // controller's] army instead of his own controller's" -- battle-scoped ("for the duration of the
+    // battle," core rules' own default for an in-battle condition), so cleared at
+    // FinishBattleResolution like AdditionalActions above, never carried into a later battle. Live
+    // re-checked at ACTUAL resolution time (ResolveBattle), not baked in when granted -- "while you
+    // have at least one unit in your current army" is a continuously-checked condition, not a
+    // snapshot: only the target Personality's own Force moves (never its Followers', which always
+    // stay with their own controller, since a Follower's owner is always its host's own owner).
+    public List<ForceRedirect> ForceRedirects { get; set; } = [];
+    // Brash (core rules keyword, issue #216): "the Defender may draw a card after a Brash card is
+    // assigned to attack" -- once independently per Brash card in ONE attack declaration, so this is
+    // a plain countdown (every offer is identical: draw or don't), not per-card state. Non-zero only
+    // while PendingChoice.Type=="brashDraw" is open; the deferred phase transition (which of
+    // DefenseAssignment/CavalryDefense DeclareAttack would otherwise have moved to) resumes once it
+    // reaches zero -- read off _state.Phase itself (still AttackDeclaration/CavalryDeclaration until
+    // then), so no separate field is needed to remember it.
+    public int PendingBrashDraws { get; set; }
+    // Bow reaction (issue #216, Togashi Hizumi): while PendingChoice.Type=="bowReaction" is open on
+    // Hizumi's own behalf, the specific newly-bowed personality/personalities at his own battlefield
+    // this action just bowed -- his own Target category checks membership here rather than
+    // re-deriving "was this bowed by that specific action" after the fact (nothing else changes a
+    // card's own Bowed status in between). Unused, and safe to leave stale, for Tamori Ruya's own
+    // window (a different, unrelated Target shape -- see PersonalityAtSourceLocation).
+    public List<string> BowReactionCandidateIds { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
