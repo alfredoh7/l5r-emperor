@@ -315,7 +315,9 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-4446": "Needs a new Reaction trigger for 'after an action targets a Samurai' (a card-targeted, not action-classified, trigger -- a different shape from every existing Reaction window) and a duel-refusal override tied to a specific pending challenge -- both novel.",
     "oracle-l5r-9817": "Needs an ability-suppression mechanism ('a target Personality's printed abilities may not be used') -- distinct from the existing keyword-suppression gap (Ikoma Aimi's own base printing, issue #198) and not built either.",
     "oracle-l5r-5086": "Needs a target-redirection mechanism (another player's action, once targeted, is redirected to a different card instead) -- an established gap, the same family already deferred for Yoritomo Naoto (see the Reserve primitive row).",
-    "oracle-l5r-5095": "Needs a new 'Sensei' keyword mechanic (discard every other Sensei-keyword Personality you control when one enters play) shared with Mirumoto Yozo, Experienced 2 below -- deferred this pass for scope, not attempted; its own second ability (focusing from a discard pile once per duel, removed from the game afterward) is a genuine extension of Dueling's own Focus() method but was not built either, since it depends on the same card's still-missing Sensei restriction.",
+    # Mirumoto Hikaro (oracle-l5r-5095) published in personality-wave-15 (issue #207 follow-up) once
+    # the Sensei keyword mechanic and Dueling's own discard-pile Focus extension both landed -- no
+    # remaining blocker note for her.
     "oracle-l5r-5106": "Needs Additional-Action grants scoped by required ability classification (Iaijutsu) AND by a specific Performer, rather than by source card id -- the current grant shape (AdditionalActionGrant.ScopeCardIds) cannot express either restriction.",
     "oracle-l5r-10845": "Needs an Additional Action grant that re-triggers a second, differently-costed printed ability on the same performer -- buildable in principle by reusing the existing Additional Action primitive, but deferred this pass for scope.",
     # Mirumoto Katagi (oracle-l5r-5112) published in personality-wave-12 (issue #216) -- his own
@@ -328,14 +330,14 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10631": "Needs Equip from a discard pile -- an established gap (no mechanism returns a card to play from a discard pile yet, the same one blocking Bayushi Wateru's own 'Absent Interrupt').",
     "oracle-l5r-10284": "Needs a generic 'ignore this card's own bowed status' exemption for Maneuvers assignment AND Performer selection together -- narrower exemptions exist per-ability (the 'Even if bowed' id list), but this card's own exemption is unconditional and would touch both of those shared checks broadly for a single card; deferred this pass to limit blast radius.",
     "oracle-l5r-10285": "Needs a named-target restriction on a duel's own Target category (a self-performer duel against one specific enemy Personality by name, not any enemy) -- a small addition (mirrors AttachRequiresName's own shape) not attempted this pass.",
-    # The Protection status itself now exists (issue #212, Tamori Takeshi below) and correctly
-    # blocks both existing negation points in the engine. Rokai's own gap is narrower but still real:
-    # his own Reaction needs a general "after another player's action targets a card, before its
-    # OWN destruction applies, negate just that" interrupt -- there is still no mechanism that pauses
-    # an ARBITRARY resolving ability's own destruction effect (only Attack strength and
-    # Additional-Action non-execution are interruptible today, neither of which is "destruction").
-    "oracle-l5r-9819": "Needs a general 'before this action's own destruction effect applies, negate it' interrupt -- Protection itself (issue #212) now exists and would correctly respect it once built, but nothing in the engine pauses an arbitrary resolving ability's own destruction effect yet (only Attack strength and Additional-Action non-execution are interruptible, neither of which is what Rokai's own text negates).",
-    "oracle-l5r-10287": "Needs the same new 'Sensei' keyword mechanic as Mirumoto Hikaro above, plus a Reaction trigger for 'after your Iaijutsu action resolves' (the same unbuilt classification-trigger family noted above, generalized beyond just duels to any Iaijutsu-classified action).",
+    # Mirumoto Rokai (oracle-l5r-9819) published in personality-wave-15 (issue #207 follow-up) once
+    # a new "beforeActionReaction" interrupt landed -- a curated, extendable per-ability-id
+    # classification (DestroysTarget/MoveOrStraightenKind in CardAbilities.cs), not the fully general
+    # "any arbitrary action's own named effect" mechanism speculated here; see the primitive itself
+    # for the exact scope. No remaining blocker note for him.
+    # Mirumoto Yozo, Experienced 2 (oracle-l5r-10287) published in the same wave -- the Sensei
+    # mechanic and a new IsIaijutsuAction classification (every currently self-performer duel-issuing
+    # ability) both landed too. No remaining blocker note for him.
     "oracle-l5r-5181": "Needs an independent, per-target optional move-home choice (two cards, each optionally moved) where the two printed branches differ only in mandatory-vs-optional -- this project treats a dropped 'may' sub-choice cautiously (see Nishimura's own deferred precedent) rather than guessing at a simplification.",
     "oracle-l5r-9820": "Needs a new per-player 'no province destroyed since your last turn ended' flag, reset at StartTurn and set by DestroyProvince -- a clean, small addition mirroring existing per-battle flags (TerrainDestroyedThisBattle), deferred this pass for scope; its own static '-2F on your turn' half has direct precedent and was not blocked, just not prioritized.",
     "oracle-l5r-7780": "Needs an exception to the shared Battle-timing AtBattle requirement (bowing itself 'even if not at the current battlefield') -- buildable as a one-off id exception, the same shape Mirumoto Michi/Togashi Rikyou use in wave 9, but deferred this pass to limit how many such exceptions land in one wave; its own province-Strength raise-or-lower effect directly reuses The Courtesy of the Crane's own precedent and is not itself blocked.",
@@ -350,7 +352,11 @@ BLOCKERS: dict[str, str] = {
     # action, negate one of its own named effects" interrupt as Mirumoto Rokai above (here: movement
     # or straightening, not destruction) -- Protection itself would already respect it once that
     # interrupt point exists, same as Rokai's own case.
-    "oracle-l5r-10056": "Needs a delayed/scheduled end-of-turn conditional effect ('before the turn ends, gain 1 Honor if he was not assigned to attack') for its own first ability, and the same not-yet-built general 'before an arbitrary action resolves, negate one of its own named effects' interrupt as Mirumoto Rokai above (see #212) for its second (movement or straightening, not destruction).",
+    # Tamori Tamoko (oracle-l5r-10056) published in personality-wave-15 (issue #207 follow-up) --
+    # her own Open action (a new turn-stamped CardInstance.AssignedToAttackTurn flag, checked in
+    # EndTurn) and her own Reaction (the same beforeActionReaction interrupt as Rokai above, but
+    # movement/straightening, no cost, no "another player's" restriction) both landed. No remaining
+    # blocker note for her.
     "oracle-l5r-10288": "Needs a 'destroy one of my own attached cards as a cost' cost-target category, combined with a temporary Stalwart grant and a self-Force-copy modifier -- each piece individually has precedent (DestroyAttachment, turn-duration GrantKeyword, ApplyModifier), but the three-part combination was deferred this pass for scope.",
     # Tamori Yayu (oracle-l5r-7806) published in personality-wave-12 (issue #216) -- the
     # bow-or-destroy alternate-cost-choice shape landed as a dual-catalog UsageKey pair

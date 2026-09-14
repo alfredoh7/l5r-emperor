@@ -355,6 +355,14 @@ public static class AbilityCatalog
         // Honor bonuses -- used identically whether the destroyed card is a battle-army member or
         // not) handles both the performer and the target; no new destroy primitive needed at all.
         ["ring-of-fire-destroy"] = new("Battle", "Bow this card or discard it from your hand, destroy your performing Personality, and target an enemy Personality with equal or lower Chi: Destroy him", "enemy-personality-chi-lte-performer", Performer: "own-personality"),
+        // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate
+        // one of its own named effects" -- destruction (Rokai) or movement/straightening (Tamoko).
+        // Target "none" for both: the affected card is auto-determined from the deferred command
+        // itself (MatchState.PendingNegatableAbility), not separately chosen by the reacting player
+        // -- see FindBeforeActionReactionWatcher/ResolveOrDeferBeforeActionReaction.
+        ["rokai-negate-destruction"] = new("Reaction", "After another player's action targets your Personality at Rokai's location, destroy Rokai: Negate your Personality's destruction from the action's effects.", "none", Trigger: "before-action-resolves"),
+        ["tamoko-negate"] = new("Reaction", "Before an action resolves, target a Personality: Negate either his movement or straightening from the action's effects.", "none", Trigger: "before-action-resolves"),
+        ["tamoko-open"] = new("Open", "If it is not your turn, target an unbowed Personality controlled by the active player: Before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn.", "unbowed-personality-controlled-by-active-player"),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
         // onto the existing Open/Battle/Limited/BattleOrOpen values verbatim (confirmed precedent,
@@ -649,6 +657,64 @@ public sealed partial class MatchEngine
     private static bool SameLocation(CardInstance a, CardInstance b) =>
         a.Zone == Zone.Battlefield && b.Zone == Zone.Battlefield && a.ProvinceIndex == b.ProvinceIndex
         || a.Zone == Zone.Home && b.Zone == Zone.Home && a.OwnerId == b.OwnerId;
+    // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate one
+    // of its own named effects" -- a curated, extendable set of ability ids (the same shape
+    // AttackKind's own switch already uses) that destroy/move/straighten their own declared Target,
+    // not a fully general interrupt reaching every conceivable ability (that would need touching
+    // dozens of individual execution cases for no real card yet). Deliberately excluded, a known
+    // scope limit rather than a silent gap: Attacks (the actual destroy happens later, inside the
+    // separate deferred-Attack pipeline, not synchronously here), and any ability that moves or
+    // straightens its own SOURCE/Performer rather than its Target (michi-move, rikyou-move,
+    // houken-exp-straighten, tsudoken-exp-straighten's own second straighten).
+    private static bool DestroysTarget(string abilityId) => abilityId is "tetsuo-destroy-weaker-weaponed" or "training-destroy-no-attachments"
+        or "elite-sentry-destroy" or "thunderous-legion-destroy" or "volcano-tattoo-destroy" or "ring-of-fire-destroy"
+        or "unseen-assassin-strike" or "kojinrue-destroy" or "dairuko-exp-bow" or "yozo-exp-destroy";
+    private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
+    {
+        "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
+            or "ring-of-water-move-home" or "mihato-move" or "block-supply" => "move",
+        "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
+            or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
+            or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
+            or "ring-of-air-straighten" or "mitoshi-straighten" => "straighten",
+        _ => null
+    };
+    // Finds the one eligible in-play watcher (Rokai for a classified destroy, Tamoko for a
+    // classified move/straighten) for a just-submitted command, if any -- both are "in play"
+    // Reactions (the user's own clarification), monitored live, never pre-registered. Rokai is
+    // further scoped to "another player's action," "your Personality," and "at Rokai's location";
+    // Tamoko has no such restriction at all (any action, any personality, hers or the opponent's).
+    private (CardInstance Watcher, string Kind)? FindBeforeActionReactionWatcher(GameCommand command)
+    {
+        if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)
+            || Definition(affected).Type != CardType.Personality) return null;
+        if (DestroysTarget(command.AbilityId))
+        {
+            var rokai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("rokai-negate-destruction")
+                && c.OwnerId == affected.OwnerId && command.PlayerId != c.OwnerId && SameLocation(c, affected));
+            if (rokai is not null) return (rokai, "destroy");
+        }
+        if (MoveOrStraightenKind(command.AbilityId) is string kind)
+        {
+            var tamoko = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("tamoko-negate"));
+            if (tamoko is not null) return (tamoko, kind);
+        }
+        return null;
+    }
+    // Defers the WHOLE command (never partially applied), the same shape ResolveOrDeferAdditionalAction
+    // already uses, so MoveHome/Straighten/DestroyUnits are never even reached until the watcher's
+    // own controller has answered -- avoiding any need to "undo" an already-applied effect (which
+    // would risk double-firing an unrelated hook, e.g. Overconfident's own MarkDead-triggered queue).
+    private bool ResolveOrDeferBeforeActionReaction(GameCommand command)
+    {
+        if (FindBeforeActionReactionWatcher(command) is not (CardInstance watcher, _)) return false;
+        _state.PendingNegatableAbility = command;
+        _state.PendingChoice = new("beforeActionReaction", watcher.OwnerId, watcher.Id, "Before this action resolves: you may use this card's own reaction, or pass.");
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = watcher.OwnerId;
+        Emit("reactionWindow", "Before-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        return true;
+    }
     // The Personality actually performing a resolving ability, for Protection's own purposes: an
     // explicit Performer selection (command.PerformerId) when the ability has one, otherwise the
     // source card itself (resolved to its wielder, if it is an attached Item/Weapon/Spell). Used for
@@ -975,6 +1041,11 @@ public sealed partial class MatchEngine
                 // for how each is actually distinguished when opening the window.
                 "bowed-personality-at-own-battlefield" or "own-action-bowed-personality" => _state.PendingChoice.Type == "bowReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): both scoped to the one
+                // specific watching card by id, the same shape own-won-duel/bowed-personality-at-
+                // own-battlefield already use.
+                "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 _ => false
             },
             _ => false
@@ -1038,6 +1109,7 @@ public sealed partial class MatchEngine
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
+        if (id == "tamoko-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
         // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
         // ability -- since the underlying historical condition (Favor actions this turn, a Terrain
@@ -1257,6 +1329,10 @@ public sealed partial class MatchEngine
                         // itself is a counter increment, not applied to this target at all.
                         "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
                         "own-personality" => personality && own,
+                        // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
+                        // Personality controlled by the active player" -- "if it is not your turn" is
+                        // checked separately below (a per-id Require, not part of this Target shape).
+                        "unbowed-personality-controlled-by-active-player" => personality && !target.Bowed && target.OwnerId == _state.ActivePlayerId,
                         // Ritual Preparation (issue #192): "your target card in a unit" -- either
                         // half of a unit (the Personality herself, or an attached Follower), own,
                         // in play. Items/Spells are never described as "in a unit" (core rules:
@@ -1420,6 +1496,11 @@ public sealed partial class MatchEngine
             ResolveOrDeferAdditionalAction(command);
             return;
         }
+        // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): checked after the Additional-Action
+        // branch above, not before -- an eligible watcher whose triggering ability also happens to be
+        // consumed as an Additional Action is a known, narrow scope limit this pass (see
+        // FindBeforeActionReactionWatcher's own comment), not silently mishandled.
+        if (ResolveOrDeferBeforeActionReaction(command)) return;
         ExecuteAbilityEffects(command);
     }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
@@ -1788,6 +1869,20 @@ public sealed partial class MatchEngine
                 DestroyUnits([target!]);
                 break;
             }
+            case "rokai-negate-destruction":
+            {
+                var pending = _state.PendingNegatableAbility!;
+                DestroyUnits([source!]); // Rokai's own cost -- destroying himself, unaffected by the negation signal set just below
+                _state.NegatedEffectKind = "destroy"; _state.NegatedEffectCardId = pending.TargetId;
+                break;
+            }
+            case "tamoko-negate":
+            {
+                var pending = _state.PendingNegatableAbility!;
+                _state.NegatedEffectKind = MoveOrStraightenKind(pending.AbilityId!); _state.NegatedEffectCardId = pending.TargetId;
+                break;
+            }
+            case "tamoko-open": _state.PendingTamokoHonorChecks.Add(new(target!.Id, player.Id)); break;
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
@@ -2087,6 +2182,17 @@ public sealed partial class MatchEngine
 
     private void Straighten(CardInstance card)
     {
+        // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his
+        // straightening from the action's effects" -- consumed here, the single shared choke point
+        // for every ability-triggered straighten (StraightenUnit calls through this too). Checked
+        // before StraightenBlockedTurn below, since a negated straighten was never attempted at all
+        // (unlike Hizumi's own block, which negates an attempt that DID happen).
+        if (_state.NegatedEffectKind == "straighten" && _state.NegatedEffectCardId == card.Id)
+        {
+            _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
+            Emit("straightenNegated", $"{Definition(card).Name}'s straightening was negated before it resolved.", card.OwnerId, card.Id);
+            return;
+        }
         // "Negate his NEXT straightening" (Shinden Asahina; Togashi Hizumi/Tamori Ruya, issue #216):
         // a one-shot block, not "cannot straighten this turn at all" -- consumed the moment it
         // negates an actual attempt, so a LATER straighten attempt the same turn (an ability that
@@ -2111,6 +2217,16 @@ public sealed partial class MatchEngine
     }
     private void MoveHome(CardInstance card, bool bow)
     {
+        // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his movement
+        // from the action's effects" -- consumed here, not inside ReturnHome, so the end-of-battle
+        // bulk return-home sweep (FinishBattleReturnHomeAndTransition) is never negatable this way --
+        // that is not "an action," and Tamoko's own text is scoped to one, not a whole battle ending.
+        if (_state.NegatedEffectKind == "move" && _state.NegatedEffectCardId == card.Id)
+        {
+            _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
+            Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
+            return;
+        }
         ReturnHome(card, bow);
         Emit("unitMovedHome", $"{Definition(card).Name}'s unit moved home{(bow ? " bowed" : "")}.", card.OwnerId, card.Id);
     }
