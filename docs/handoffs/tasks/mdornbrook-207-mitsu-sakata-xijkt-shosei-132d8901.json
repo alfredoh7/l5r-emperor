@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rules-lane content wave (issue #207 follow-up): Togashi Mitsu/Sakata (variable token-count-driven Ranged Attack strength) and Xijkt/Tamori Shosei (the general 'bow this card or one of your [keyword] Holdings' cost-choice Performer category, plus Xijkt's own additive Cavalry-Maneuvers-while-Defending eligibility), personality-wave-16. Touches src/L5R.Core (engine rules) plus docs/tools content-pipeline files under Mendon's standing cross-lane authority (AGENTS.md/.github/collaboration.json) -- no UI-owned files changed.",
+  "validation": "Whole-solution dotnet build clean; all 4 .NET test projects pass (L5R.Core.Tests 144/144 + 34/34 published + 8/8 deck-format, L5R.AI.Tests 13/13, L5R.Client.Transport.Tests 4/4, L5R.Server.Tests 5/5); both Python suites pass (collaboration 43/43, content 121/121); build_card_inventory.py confirms 273 wired, zero blocker/wired overlap.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/207",
+  "branch": "mdornbrook/207-mitsu-sakata-xijkt-shosei",
+  "updated": "2026-09-14T14:18:32.669538+00:00"
+}

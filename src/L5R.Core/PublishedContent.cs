@@ -728,6 +728,30 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Personality wave 16 (issue #207 follow-up): Togashi Mitsu and Togashi Sakata
+    /// (variable token-count-driven Ranged Attack strength), and Xijkt / Tamori Shosei (the "bow
+    /// this card or one of your [keyword] Holdings" cost-choice shape, plus Xijkt's own additive
+    /// Cavalry-Maneuvers-while-Defending eligibility). All four cards' own local catalogue "stats"
+    /// block was scrambled -- a different pattern than wave 15's (scraped GoldCost is actually
+    /// GoldProduction, scraped Force is actually GoldCost, scraped Chi is actually Force, losing the
+    /// real Chi value entirely) -- hand-corrected against each card's own scan directly, see
+    /// package_personality_wave_16.py's own STATS_OVERRIDE.</summary>
+    public static PublishedSnapshot PersonalityWave16 { get; } = LoadPersonalityWave16();
+
+    private static PublishedSnapshot LoadPersonalityWave16()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave16.json", "personality-wave-16", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected personality-wave-16 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-16 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-16 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

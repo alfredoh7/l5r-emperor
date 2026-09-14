@@ -345,7 +345,10 @@ BLOCKERS: dict[str, str] = {
     # "after your own action bows a Personality" Reaction trigger landed as own-action-bowed-
     # personality, narrower than oracle-l5r-3083's own still-unbuilt "affects an opposing
     # Personality" (a genuinely broader trigger, not resolved by this).
-    "oracle-l5r-7797": "Needs the same 'choose which of several eligible own cards to bow as a cost' shape simplified away for Mirumoto Kojinrue/Tamori Muzu in wave 9 (bow Shosei or a Temple Holding) -- deferred here rather than simplified, for scope.",
+    # Tamori Shosei (oracle-l5r-7797) published in personality-wave-16 (issue #207 follow-up) once
+    # the general "own-source-or-unbowed-holding-with-keyword" cost-choice Performer category
+    # landed -- bow Shosei or one of his controller's own Temple Holdings. No remaining blocker note
+    # for him.
     # Tamori Takeshi (oracle-l5r-10055) published in personality-wave-11 (issue #212) once Protection
     # itself landed -- no remaining blocker note for him.
     # Tamori Tamoko's own SECOND ability needs the same general "before an arbitrary resolving
@@ -367,14 +370,25 @@ BLOCKERS: dict[str, str] = {
     # Reaction half landed as bowed-personality-at-own-battlefield; his Battle half (raise/lower
     # the current battlefield's province strength) reuses The Courtesy of the Crane's own precedent
     # directly.
-    "oracle-l5r-10455": "Needs a variable-magnitude token-destroy choice (destroy zero or more Fire tokens, chosen by the player) feeding a matching variable Ranged Attack strength -- every existing token-destroy pattern (Torazu, Monastery) destroys a fixed count as a flat cost; deferred this pass rather than force a 'destroy all' simplification.",
+    # Togashi Mitsu (oracle-l5r-10455) published in personality-wave-16 (issue #207 follow-up) once
+    # ResolveOrDeferAttack gained a new strengthOverride parameter -- destroy zero or more of his own
+    # Fire tokens (named via command.CardIds), Ranged Attack strength equal to the number destroyed.
+    # No remaining blocker note for him.
     # Togashi Noboru (oracle-l5r-10058) published in personality-wave-12 (issue #216) once the
     # Brash keyword and Force-redirection-to-an-enemy-army mechanisms both landed -- no remaining
     # blocker note for him.
     "oracle-l5r-8565": "Needs a 'same location as source' targeting axis for a non-battle-restricted (BattleOrOpen) ability -- every existing 'at the same battlefield' check assumes Battle timing's own blanket AtBattle requirement, which BattleOrOpen deliberately carries none of.",
-    "oracle-l5r-8570": "Needs reading a live token COUNT (not just presence) into a variable Attack-strength formula, combined with a dual Fire-or-Sake token-type choice on entry -- each piece is small and has partial precedent, but the combination was not attempted this pass.",
+    # Togashi Sakata (oracle-l5r-8570) published in personality-wave-16 (issue #207 follow-up) once
+    # AttackStrength/EffectiveAttackStrength gained a new sourceId parameter, reading his own live
+    # Sake token count through the pre-existing TokenCount helper; his own dual Fire-or-Sake token
+    # choice is a UsageKey-shared catalog pair (sakata-fire-token/sakata-sake-token), the same shape
+    # as yayu-bow-attack/yayu-destroy-attack. No remaining blocker note for him.
     "oracle-l5r-10457": "Needs a genuine 'while another player's action is currently resolving' state flag, distinct from the simpler 'while it is not your turn' condition already used elsewhere (Tamori Yayu) -- a simplified reading would just reuse that existing pattern, but wasn't attempted here to avoid mischaracterizing the printed text.",
-    "oracle-l5r-9415": "Needs a Cavalry-eligibility override for a specific card without the printed keyword (touches the shared IsCavalryUnit logic broadly for one card) and the same alternate-cost-choice shape deferred above (bow Xijkt or one of your Mines) -- deferred this pass to limit blast radius.",
+    # Xijkt (oracle-l5r-9415) published in personality-wave-16 (issue #207 follow-up) once the
+    # own-source-or-unbowed-holding-with-keyword cost-choice Performer category landed (bow Xijkt or
+    # one of his controller's own Mines), alongside a narrow, additive-only Cavalry-eligibility
+    # override (Assign's own new isDefender parameter, gated on Effect=="cavalry-if-defender") rather
+    # than broadening the shared IsCavalryUnit logic itself. No remaining blocker note for him.
 }
 
 
