@@ -1,6 +1,9 @@
 shader_type spatial;
 render_mode unshaded, cull_disabled, fog_disabled;
 #include "res://Art/candlelight.gdshaderinc"
+#include "res://Art/MatFidelity/fabric-detail.gdshaderinc"
+// Asset-review opt-in only; the released table retains its approved material.
+uniform float fabric_detail_strength = 0.0;
 uniform sampler2D weathered_texture : filter_linear_mipmap, repeat_disable;
 uniform vec2 left_lamp = vec2(.08,.88);
 uniform vec2 right_lamp = vec2(.91,.16);
@@ -80,7 +83,12 @@ void fragment() {
     vec2 uv = (world-environment_origin)/environment_size;
     float edge = min(min(uv.x,1.0-uv.x),min(uv.y,1.0-uv.y));
     float coverage = smoothstep(0.0,.022,edge);
-    vec3 painted = mix(vec3(.012,.013,.015),texture(plate_texture,clamp(uv,vec2(0.0),vec2(1.0))).rgb,coverage);
+    vec3 print = texture(plate_texture,clamp(uv,vec2(0.0),vec2(1.0))).rgb;
+    if (fabric_detail_strength > 0.0) {
+        float interior = smoothstep(.028,.034,edge);
+        print = fabric_detail(print,uv,fabric_detail_strength*interior);
+    }
+    vec3 painted = mix(vec3(.012,.013,.015),print,coverage);
     vec2 left_base = left_lamp;
     vec2 right_base = right_lamp;
     vec2 left_shadow = (world-(environment_origin+environment_size*left_base))/vec2(83.0,45.0);

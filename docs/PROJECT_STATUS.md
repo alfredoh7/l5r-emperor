@@ -1,6 +1,6 @@
 # Shared project status
 
-Updated: 2026-09-07. This is the current summary for human collaborators and AI sessions; historical documents describe earlier checkpoints.
+Updated: 2026-09-09. This is the current summary for human collaborators and AI sessions; historical documents describe earlier checkpoints.
 
 ## Current playable baseline
 
@@ -11,6 +11,8 @@ Updated: 2026-09-07. This is the current summary for human collaborators and AI 
 - The published rules profile is a reproducible playtest profile, not a certified final historical tournament legality claim.
 
 ## Current focus
+
+Alfredo has paused broad battle presentation work. The current delivery plan is [NEXT_GAME_PLAN.md](NEXT_GAME_PLAN.md): finish catalogue viewing, deck building/storage and custom Practice, then dueling, Spells and further wired-card waves. The live playtest deck and frozen automated-test deck are separated by merged PR #116; card behavior remains shared. Reference catalogue/scan coverage is broader than playable engine support. Older baseline counts below are historical, not a current catalogue count.
 
 mdornbrook has accepted repository access and is playing/reviewing mechanics. Alfredo owns UI/QoL improvements. Both lanes progress on separate task branches, coordinated through AGENTS.md and docs/COLLABORATION.md. Validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
 

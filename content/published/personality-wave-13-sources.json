@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-10047",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10047",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10047-printing-1-image-1.webp",
+    "image_sha256": "010351b4001452ecde0d2bfc57bb6bd7ffd6550d6f9eb59498b755c3ade90bc3"
+  },
+  {
+    "card_id": "oracle-l5r-10074",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10074",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10074-printing-1-image-1.webp",
+    "image_sha256": "6f3d02d8a55d5869d0ec11a769c808749c5c9e89176085bed05d8633ae8fca7a"
+  },
+  {
+    "card_id": "oracle-l5r-10079",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10079",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10079-printing-1-image-1.webp",
+    "image_sha256": "8ca55819a1a64d11a8f716d714d2ff21589cc3e40e7e10e94ba5ca0abcf87ab6"
+  },
+  {
+    "card_id": "oracle-l5r-10282",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10282",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10282-printing-1-image-1.webp",
+    "image_sha256": "76715be64e3291db4257006cb87c2c16475a51d87a27bb59c8f09a1540887bff"
+  },
+  {
+    "card_id": "oracle-l5r-10052",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10052",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10052-printing-1-image-1.webp",
+    "image_sha256": "7799931cf9b1c7a0648f6e01aaf074dcf343b0f299c3caf52b1cd9093d5ecb2a"
+  }
+]

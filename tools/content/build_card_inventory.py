@@ -119,21 +119,30 @@ BLOCKERS: dict[str, str] = {
     # RecruitReserve (QuotePurchase's own new viaReserve parameter), not the fully general
     # persistent Gold-cost-modifier primitive a future card like A Fugitive Apprehended would need.
     "oracle-l5r-10890": "Needs an \"Absent Engage\" mechanic (Utaku Sakiko's own printed ability, on top of Destined/Reserve).",
-    "oracle-l5r-10857": "Wired (issue #194) -- \"Fire Battle\" was confirmed to be a plain classification, not a Ring-gated Timing. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10684": "Wired (issue #194) -- needed only a Ring-type check in a discard pile, now trivial. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
+    # Moshi Ikako (oracle-l5r-10857) published in personality-wave-14, and Scholarly Hermit
+    # (oracle-l5r-10684) in follower-wave-9, once their own scan images became available locally via
+    # the WebP working-copy pipeline (issue #200) -- see issue #196, now resolved. Moshi Ikako's own
+    # local catalogue "stats" block did not match her actual scan (cost/chi/force were each wrong);
+    # hand-corrected against the image directly, see package_personality_wave_14.py's own
+    # STATS_OVERRIDE.
     "oracle-l5r-10300": "Needs an \"actions must target this card if legal\" redirect mechanic (Yoritomo Naoto's own Battle ability), on top of its own Additional Action grant.",
     # Rings (issue #194): CardType.Ring, recruitment as a granted Additional Battle Action,
-    # Enlightenment victory. Five of the ten real/False Rings are wired (training fixtures only --
-    # every one of the ten has a receipt but no downloaded scan image locally, issue #196).
-    "oracle-l5r-6333": "Wired (issue #194) -- Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6339": "Wired (issue #194) -- Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6338": "Wired (issue #194) -- Ring of the Void. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10531": "Wired (issue #194) -- False Ring of Air. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-10535": "Wired (issue #194) -- False Ring of Water. Blocked only on its own scan image, not yet downloaded locally (issue #196).",
-    "oracle-l5r-6334": "Needs an Interrupt timing (not built) for Ring of Earth's own printed action; its recruitment condition is otherwise wirable.",
-    "oracle-l5r-6335": "Set aside (issue #195) -- the local oracle data's own selected printing/text for this Emperor Edition card is uncertain; a user-supplied photo did not match either candidate text found.",
-    "oracle-l5r-10532": "Needs Dueling/Focus Effects (not started at all) for False Ring of Earth's own recruitment condition.",
-    "oracle-l5r-10533": "Needs an Interrupt timing (not built) for its own printed action, plus an adjustable maximum-hand-size mechanism (not built) for its own recruitment condition.",
+    # Enlightenment victory. Ring of Air, Ring of Water, Ring of the Void, False Ring of Air, and
+    # False Ring of Water (oracle-l5r-6333/6339/6338/10531/10535) published in ring-wave-1 once their
+    # own scan images became available locally (issue #196, now resolved via the WebP working-copy
+    # pipeline, issue #200).
+    #
+    # Revalidated against the now-available scans (a follow-up to issue #194/#196): Ring of Earth and
+    # Ring of Fire's own blocker notes below were themselves based on mismatched/incomplete scraped
+    # text, the same class of problem issue #195 flagged for Ring of Fire specifically -- corrected
+    # here now that the actual printed text is directly readable.
+    # Ring of Earth and Ring of Fire (oracle-l5r-6334/6335) published in ring-wave-1 once their own
+    # scans became available -- their earlier blocker notes were themselves based on mismatched
+    # scraped text (Earth's own supposed "Interrupt timing" and Fire's own supposed duel requirement
+    # were both artifacts of a wrong printing's text, the same class of problem issue #195 originally
+    # flagged for Fire specifically). No remaining blocker note for either.
+    "oracle-l5r-10532": "Not blocked; deferred for scope. Dueling (issue #204) and the own-won-duel Reaction trigger (issue #209) now exist, covering 'after you win a duel' -- only a small new 'the two duelists shared no keywords' comparison and a negative-magnitude variant of MaxHandSize (issue #223, currently only ever raises) remain; no separate Battle action to wire at all (its full text is just the recruitment condition plus the passive -1 hand size).",
+    "oracle-l5r-10533": "Needs an Interrupt timing (not built) for its own printed action ('Interrupt: Reduce all Honor gains and losses from an action by 2'). Its own recruitment condition ('if your maximum hand size is 10 or more') is no longer blocked -- MaxHandSize (issue #223) already exposes this per player.",
     "oracle-l5r-10534": "Needs an Engage timing (explicitly not started, #15) for its own printed action; its recruitment condition is otherwise wirable.",
 
     # Focus-1 Battle-action wave audit (issue #192): every unwired Focus-1 card printing a Battle
@@ -158,7 +167,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-2035": "Needs an opponent-chooses-or-random discard mechanic (Reconnaissance-conditional).",
     "oracle-l5r-2332": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-2342": "Not blocked; deferred for scope (Monk Performer, attachment-destroy Target, and Fire-token-conditional Attack strength are all existing patterns, just not yet combined on one card).",
-    "oracle-l5r-10126": "Needs Rings (not built).",
+    "oracle-l5r-10126": "Rings themselves are now built (issue #194); that alone does not unblock this card. Its own scan (\"Extend the Soul's Boundaries\") shows: enters play paying 1 less Gold per Ring controlled (a new variable, count-scaled discount -- every existing discount is either clan-alignment-based or a fixed printed amount, never scaled by a live count); Battle: destroy this card, bow the performing Shugenja, destroy him unless he is Void, target an enemy Personality whose controller may shuffle him and his attachments back into their owners' decks (needs a shuffle-into-deck primitive, not built); if he did not choose this, the acting player takes two additional Battle actions (a grant conditioned on the TARGET's own opponent choice, a novel shape). Three separate unbuilt pieces, not one.",
     "oracle-l5r-2419": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-2530": "Needs a \"before a card effect destroys a Personality, negate\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10552": "Not blocked; deferred for scope (DiscardTopOfFateDeck, the Madness token, and an unattached-unit-card Target all now exist; needs resolving \"a Fate deck\"'s ownership the same way Aberrations did).",
@@ -260,7 +269,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10292": "Needs deck search (pull a specific card out of a shuffled deck) and Regions (neither built).",
     "oracle-l5r-3660": "The Battle Ranged 4 Attack is directly wirable; blocked by its own passive -- a global 'all your Ranged Attacks get +1 strength while you control a Terrain' scope, distinct from a single card's own conditional Attack strength (existing kamina-exp-attack/shuji-attack-style bonuses only affect their own card's attack, not every Attack the controller makes).",
     "oracle-l5r-10223": "Needs the Engage-timing Reaction window (explicitly not started, #15), plus a 'first Battle-action opportunity, restricted to Terrain actions' priority override.",
-    "oracle-l5r-10461": "Needs the Ring of Earth (not yet wired as a real published card) and clarification on 'Earth Battle' as a Ring-gated Timing (same open question already flagged for Moshi Ikako, oracle-l5r-10857) before wiring Jikoji's own army-wide Force bonus, plus a conditional Gold-Cost waiver tied to Ring control.",
+    "oracle-l5r-10461": "Ring of Earth is now published (ring-wave-1); 'Earth Battle' is very likely a plain printed-keyword classification too, following Moshi Ikako's own 'Fire Battle' precedent (oracle-l5r-10857, confirmed issue #194) -- not re-verified against this specific card's own scan yet. Still needs a conditional Gold-Cost waiver tied to Ring control before wiring Jikoji's own army-wide Force bonus (the waiver itself: no current Gold discount is conditional on board state, only clan-alignment-based or a fixed printed amount).",
     "oracle-l5r-4371": "Needs card creation (a new Personality instance) -- Kitsu Akai's own Limited half creates the only Ancestors his Battle half can use as a Performer.",
     "oracle-l5r-4375": "Needs a 'bow OR destroy the performer' cost-choice (not yet built), and is functionally contingent on card creation existing elsewhere (every other Ancestor-Personality source for this deck is itself blocked on 'Needs card creation').",
     "oracle-l5r-4382": "Needs card creation (a new Personality instance) as an entry Reaction effect.",
@@ -299,11 +308,16 @@ BLOCKERS: dict[str, str] = {
     # gains or loses 1 Honor" entering-play Reaction) was unblocked immediately afterward by the
     # new "choose a player" targeting primitive (issue #210) -- both of his abilities are wired now,
     # no remaining blocker note for him.
-    "oracle-l5r-10052": "Needs the Overconfident keyword mechanic (the Defender may draw a card after an Overconfident card enters or leaves play) -- not built at all -- plus a conditional keyword-suppression tied specifically to another player's Clan.",
+    # Kitsuki Minori (oracle-l5r-10052) published in personality-wave-13 (issue #223) once the
+    # Overconfident keyword mechanic landed -- her own conditional keyword-suppression ("does not
+    # have Overconfident while any other player is Lion Clan") is wired too, as a subtractive live
+    # Keyword() check. No remaining blocker note for her.
     "oracle-l5r-4446": "Needs a new Reaction trigger for 'after an action targets a Samurai' (a card-targeted, not action-classified, trigger -- a different shape from every existing Reaction window) and a duel-refusal override tied to a specific pending challenge -- both novel.",
     "oracle-l5r-9817": "Needs an ability-suppression mechanism ('a target Personality's printed abilities may not be used') -- distinct from the existing keyword-suppression gap (Ikoma Aimi's own base printing, issue #198) and not built either.",
     "oracle-l5r-5086": "Needs a target-redirection mechanism (another player's action, once targeted, is redirected to a different card instead) -- an established gap, the same family already deferred for Yoritomo Naoto (see the Reserve primitive row).",
-    "oracle-l5r-5095": "Needs a new 'Sensei' keyword mechanic (discard every other Sensei-keyword Personality you control when one enters play) shared with Mirumoto Yozo, Experienced 2 below -- deferred this pass for scope, not attempted; its own second ability (focusing from a discard pile once per duel, removed from the game afterward) is a genuine extension of Dueling's own Focus() method but was not built either, since it depends on the same card's still-missing Sensei restriction.",
+    # Mirumoto Hikaro (oracle-l5r-5095) published in personality-wave-15 (issue #207 follow-up) once
+    # the Sensei keyword mechanic and Dueling's own discard-pile Focus extension both landed -- no
+    # remaining blocker note for her.
     "oracle-l5r-5106": "Needs Additional-Action grants scoped by required ability classification (Iaijutsu) AND by a specific Performer, rather than by source card id -- the current grant shape (AdditionalActionGrant.ScopeCardIds) cannot express either restriction.",
     "oracle-l5r-10845": "Needs an Additional Action grant that re-triggers a second, differently-costed printed ability on the same performer -- buildable in principle by reusing the existing Additional Action primitive, but deferred this pass for scope.",
     # Mirumoto Katagi (oracle-l5r-5112) published in personality-wave-12 (issue #216) -- his own
@@ -316,14 +330,14 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10631": "Needs Equip from a discard pile -- an established gap (no mechanism returns a card to play from a discard pile yet, the same one blocking Bayushi Wateru's own 'Absent Interrupt').",
     "oracle-l5r-10284": "Needs a generic 'ignore this card's own bowed status' exemption for Maneuvers assignment AND Performer selection together -- narrower exemptions exist per-ability (the 'Even if bowed' id list), but this card's own exemption is unconditional and would touch both of those shared checks broadly for a single card; deferred this pass to limit blast radius.",
     "oracle-l5r-10285": "Needs a named-target restriction on a duel's own Target category (a self-performer duel against one specific enemy Personality by name, not any enemy) -- a small addition (mirrors AttachRequiresName's own shape) not attempted this pass.",
-    # The Protection status itself now exists (issue #212, Tamori Takeshi below) and correctly
-    # blocks both existing negation points in the engine. Rokai's own gap is narrower but still real:
-    # his own Reaction needs a general "after another player's action targets a card, before its
-    # OWN destruction applies, negate just that" interrupt -- there is still no mechanism that pauses
-    # an ARBITRARY resolving ability's own destruction effect (only Attack strength and
-    # Additional-Action non-execution are interruptible today, neither of which is "destruction").
-    "oracle-l5r-9819": "Needs a general 'before this action's own destruction effect applies, negate it' interrupt -- Protection itself (issue #212) now exists and would correctly respect it once built, but nothing in the engine pauses an arbitrary resolving ability's own destruction effect yet (only Attack strength and Additional-Action non-execution are interruptible, neither of which is what Rokai's own text negates).",
-    "oracle-l5r-10287": "Needs the same new 'Sensei' keyword mechanic as Mirumoto Hikaro above, plus a Reaction trigger for 'after your Iaijutsu action resolves' (the same unbuilt classification-trigger family noted above, generalized beyond just duels to any Iaijutsu-classified action).",
+    # Mirumoto Rokai (oracle-l5r-9819) published in personality-wave-15 (issue #207 follow-up) once
+    # a new "beforeActionReaction" interrupt landed -- a curated, extendable per-ability-id
+    # classification (DestroysTarget/MoveOrStraightenKind in CardAbilities.cs), not the fully general
+    # "any arbitrary action's own named effect" mechanism speculated here; see the primitive itself
+    # for the exact scope. No remaining blocker note for him.
+    # Mirumoto Yozo, Experienced 2 (oracle-l5r-10287) published in the same wave -- the Sensei
+    # mechanic and a new IsIaijutsuAction classification (every currently self-performer duel-issuing
+    # ability) both landed too. No remaining blocker note for him.
     "oracle-l5r-5181": "Needs an independent, per-target optional move-home choice (two cards, each optionally moved) where the two printed branches differ only in mandatory-vs-optional -- this project treats a dropped 'may' sub-choice cautiously (see Nishimura's own deferred precedent) rather than guessing at a simplification.",
     "oracle-l5r-9820": "Needs a new per-player 'no province destroyed since your last turn ended' flag, reset at StartTurn and set by DestroyProvince -- a clean, small addition mirroring existing per-battle flags (TerrainDestroyedThisBattle), deferred this pass for scope; its own static '-2F on your turn' half has direct precedent and was not blocked, just not prioritized.",
     "oracle-l5r-7780": "Needs an exception to the shared Battle-timing AtBattle requirement (bowing itself 'even if not at the current battlefield') -- buildable as a one-off id exception, the same shape Mirumoto Michi/Togashi Rikyou use in wave 9, but deferred this pass to limit how many such exceptions land in one wave; its own province-Strength raise-or-lower effect directly reuses The Courtesy of the Crane's own precedent and is not itself blocked.",
@@ -331,14 +345,21 @@ BLOCKERS: dict[str, str] = {
     # "after your own action bows a Personality" Reaction trigger landed as own-action-bowed-
     # personality, narrower than oracle-l5r-3083's own still-unbuilt "affects an opposing
     # Personality" (a genuinely broader trigger, not resolved by this).
-    "oracle-l5r-7797": "Needs the same 'choose which of several eligible own cards to bow as a cost' shape simplified away for Mirumoto Kojinrue/Tamori Muzu in wave 9 (bow Shosei or a Temple Holding) -- deferred here rather than simplified, for scope.",
+    # Tamori Shosei (oracle-l5r-7797) published in personality-wave-16 (issue #207 follow-up) once
+    # the general "own-source-or-unbowed-holding-with-keyword" cost-choice Performer category
+    # landed -- bow Shosei or one of his controller's own Temple Holdings. No remaining blocker note
+    # for him.
     # Tamori Takeshi (oracle-l5r-10055) published in personality-wave-11 (issue #212) once Protection
     # itself landed -- no remaining blocker note for him.
     # Tamori Tamoko's own SECOND ability needs the same general "before an arbitrary resolving
     # action, negate one of its own named effects" interrupt as Mirumoto Rokai above (here: movement
     # or straightening, not destruction) -- Protection itself would already respect it once that
     # interrupt point exists, same as Rokai's own case.
-    "oracle-l5r-10056": "Needs a delayed/scheduled end-of-turn conditional effect ('before the turn ends, gain 1 Honor if he was not assigned to attack') for its own first ability, and the same not-yet-built general 'before an arbitrary action resolves, negate one of its own named effects' interrupt as Mirumoto Rokai above (see #212) for its second (movement or straightening, not destruction).",
+    # Tamori Tamoko (oracle-l5r-10056) published in personality-wave-15 (issue #207 follow-up) --
+    # her own Open action (a new turn-stamped CardInstance.AssignedToAttackTurn flag, checked in
+    # EndTurn) and her own Reaction (the same beforeActionReaction interrupt as Rokai above, but
+    # movement/straightening, no cost, no "another player's" restriction) both landed. No remaining
+    # blocker note for her.
     "oracle-l5r-10288": "Needs a 'destroy one of my own attached cards as a cost' cost-target category, combined with a temporary Stalwart grant and a self-Force-copy modifier -- each piece individually has precedent (DestroyAttachment, turn-duration GrantKeyword, ApplyModifier), but the three-part combination was deferred this pass for scope.",
     # Tamori Yayu (oracle-l5r-7806) published in personality-wave-12 (issue #216) -- the
     # bow-or-destroy alternate-cost-choice shape landed as a dual-catalog UsageKey pair
@@ -349,12 +370,25 @@ BLOCKERS: dict[str, str] = {
     # Reaction half landed as bowed-personality-at-own-battlefield; his Battle half (raise/lower
     # the current battlefield's province strength) reuses The Courtesy of the Crane's own precedent
     # directly.
-    "oracle-l5r-10455": "Needs a variable-magnitude token-destroy choice (destroy zero or more Fire tokens, chosen by the player) feeding a matching variable Ranged Attack strength -- every existing token-destroy pattern (Torazu, Monastery) destroys a fixed count as a flat cost; deferred this pass rather than force a 'destroy all' simplification.",
-    "oracle-l5r-10058": "Needs the Brash keyword mechanic (the Defender may draw a card after a Brash card is assigned to attack, not built at all) and a Force-redirection-to-an-enemy-army mechanism (a card's Force counting toward the WRONG side's total, which every existing Army/BattleForce calculation assumes never happens) -- both novel.",
+    # Togashi Mitsu (oracle-l5r-10455) published in personality-wave-16 (issue #207 follow-up) once
+    # ResolveOrDeferAttack gained a new strengthOverride parameter -- destroy zero or more of his own
+    # Fire tokens (named via command.CardIds), Ranged Attack strength equal to the number destroyed.
+    # No remaining blocker note for him.
+    # Togashi Noboru (oracle-l5r-10058) published in personality-wave-12 (issue #216) once the
+    # Brash keyword and Force-redirection-to-an-enemy-army mechanisms both landed -- no remaining
+    # blocker note for him.
     "oracle-l5r-8565": "Needs a 'same location as source' targeting axis for a non-battle-restricted (BattleOrOpen) ability -- every existing 'at the same battlefield' check assumes Battle timing's own blanket AtBattle requirement, which BattleOrOpen deliberately carries none of.",
-    "oracle-l5r-8570": "Needs reading a live token COUNT (not just presence) into a variable Attack-strength formula, combined with a dual Fire-or-Sake token-type choice on entry -- each piece is small and has partial precedent, but the combination was not attempted this pass.",
+    # Togashi Sakata (oracle-l5r-8570) published in personality-wave-16 (issue #207 follow-up) once
+    # AttackStrength/EffectiveAttackStrength gained a new sourceId parameter, reading his own live
+    # Sake token count through the pre-existing TokenCount helper; his own dual Fire-or-Sake token
+    # choice is a UsageKey-shared catalog pair (sakata-fire-token/sakata-sake-token), the same shape
+    # as yayu-bow-attack/yayu-destroy-attack. No remaining blocker note for him.
     "oracle-l5r-10457": "Needs a genuine 'while another player's action is currently resolving' state flag, distinct from the simpler 'while it is not your turn' condition already used elsewhere (Tamori Yayu) -- a simplified reading would just reuse that existing pattern, but wasn't attempted here to avoid mischaracterizing the printed text.",
-    "oracle-l5r-9415": "Needs a Cavalry-eligibility override for a specific card without the printed keyword (touches the shared IsCavalryUnit logic broadly for one card) and the same alternate-cost-choice shape deferred above (bow Xijkt or one of your Mines) -- deferred this pass to limit blast radius.",
+    # Xijkt (oracle-l5r-9415) published in personality-wave-16 (issue #207 follow-up) once the
+    # own-source-or-unbowed-holding-with-keyword cost-choice Performer category landed (bow Xijkt or
+    # one of his controller's own Mines), alongside a narrow, additive-only Cavalry-eligibility
+    # override (Assign's own new isDefender parameter, gated on Effect=="cavalry-if-defender") rather
+    # than broadening the shared IsCavalryUnit logic itself. No remaining blocker note for him.
 }
 
 

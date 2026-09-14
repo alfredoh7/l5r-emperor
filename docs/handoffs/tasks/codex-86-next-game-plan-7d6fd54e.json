@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Resolve PR #123 conflicts against current main; preserve shipped Terrain, Battle Equip and dueling status and the separate duel presentation follow-up; date the original planning audit.",
+  "validation": "Reviewed merge conflict against both parents and current ROADMAP implementation records; git diff --check passed. Documentation only.",
+  "remaining": "PR review and CI; no new gameplay acceptance claimed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/86",
+  "branch": "codex/86-next-game-plan",
+  "updated": "2026-09-14T15:28:00.459334+00:00"
+}

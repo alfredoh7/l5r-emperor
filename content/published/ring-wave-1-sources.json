@@ -1,0 +1,65 @@
+[
+  {
+    "card_id": "oracle-l5r-6333",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6333",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6333-printing-1-image-1.webp",
+    "image_sha256": "47a314dcf9b17dc647f4e4ef957705d642ba85bb2e0b8329f1559e9af4a83077"
+  },
+  {
+    "card_id": "oracle-l5r-6339",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6339",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6339-printing-1-image-1.webp",
+    "image_sha256": "a8583c8044ab48c01cfac6309cf8ee2ce6d2e175752f2ccecd0c8a7831c92e9f"
+  },
+  {
+    "card_id": "oracle-l5r-6338",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6338",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6338-printing-1-image-1.webp",
+    "image_sha256": "074dab430e5edbcefc492054fbe306a7d40b507cfd3b6d82d6ef9eaf821bc92d"
+  },
+  {
+    "card_id": "oracle-l5r-10531",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10531",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10531-printing-1-image-1.webp",
+    "image_sha256": "713dd355afa772e05915c9300b307013b7b3abd106a6ab6c7d5cc982d5f2a210"
+  },
+  {
+    "card_id": "oracle-l5r-10535",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10535",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10535-printing-1-image-1.webp",
+    "image_sha256": "7a2f48a1c0d9c0d23664913a69469529c6a3140adaa96995b14ec444f3d4be27"
+  },
+  {
+    "card_id": "oracle-l5r-6334",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6334",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6334-printing-1-image-1.webp",
+    "image_sha256": "721ad9bbcb09df94930c1f66a0de098c94e4d76da1e82aa11c6795c09ec14a90"
+  },
+  {
+    "card_id": "oracle-l5r-6335",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6335",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-6335-printing-1-image-1.webp",
+    "image_sha256": "6e24f40d83576fa2f88bdb7419226115fe8b6f4e7086a5bc8beac7dba1d017bf"
+  }
+]
