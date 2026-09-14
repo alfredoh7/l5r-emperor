@@ -595,7 +595,7 @@ public sealed partial class MatchEngine
         Require(!(command.Assignments?.Count>0) || !Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
-        Assign(command,targets,cavalry);
+        Assign(command,targets,cavalry,false);
         _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
             .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
         Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
@@ -628,18 +628,23 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
-        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry);
+        Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
         // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
         // battlefield-selection/resolution phases outright rather than stall with zero choices.
         SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
-    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry)
+    private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
     {
         foreach(var assignment in command.Assignments??[])
         {
             var card=Card(assignment.Key);
             Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Home && !card.Bowed && Definition(card).Type==CardType.Personality,"Assign only your unbowed Personalities at home.");
-            Require(IsCavalryUnit(card)==cavalry,cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
+            // Xijkt (issue #207 follow-up): "may assign during Cavalry Maneuvers if you are the
+            // Defender" -- a narrow, card-specific Cavalry-eligibility override (checked here rather
+            // than broadening IsCavalryUnit's own shared logic for one card), additive only: it never
+            // removes his own default Infantry eligibility, only adds Cavalry while defending.
+            var cavalryEligible=IsCavalryUnit(card) || isDefender && Definition(card).Effect=="cavalry-if-defender";
+            Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;

@@ -132,6 +132,10 @@ var tests = new (string Name, Action Run)[]
     ("Mirumoto Rokai (issue #207 follow-up): 'before an action resolves, negate its own destruction' -- a new defer-then-reexecute 'beforeActionReaction' primitive (the same shape PendingAdditionalAction already uses) so MoveHome/Straighten/DestroyUnits are never reached until the watcher's own controller answers, scoped to another player's action, Rokai's own controller's Personality, and Rokai's own location", RokaiNegatesDestruction),
     ("Tamori Tamoko's own Reaction (issue #207 follow-up): 'before an action resolves, negate its own movement or straightening' -- the same beforeActionReaction primitive as Rokai, but with no 'another player's,' location, or cost restriction at all", TamokoNegatesMovementOrStraightening),
     ("Tamori Tamoko's own Open action (issue #207 follow-up): 'if it is not your turn, target an unbowed Personality controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn' -- a new turn-stamped CardInstance.AssignedToAttackTurn flag, checked unconditionally in EndTurn", TamokoOpenHonorGain),
+    ("Togashi Mitsu (issue #207 follow-up): 'Fire Battle/Open, give Mitsu +1F Fire tokens until he has exactly five' and 'Fire Battle: destroy zero or more Fire tokens on Mitsu, Ranged Attack with strength equal to the number destroyed' -- a new strengthOverride parameter on ResolveOrDeferAttack, and a CardIds carve-out in the 'attack' Target's own validation naming which Fire tokens to destroy", TogashiMitsuVariableAttack),
+    ("Togashi Sakata (issue #207 follow-up): 'Limited, give Sakata a +1F Fire or Sake token' (a UsageKey-shared choice) and 'Ranged 4 Attack, +1 strength for each Sake token on Sakata' -- only Sake tokens count toward Attack strength, via the pre-existing but previously-unused TokenCount helper threaded through AttackStrength/EffectiveAttackStrength's new sourceId parameter", TogashiSakataTokenAttack),
+    ("Xijkt (issue #207 follow-up): 'may assign during Cavalry Maneuvers if you are the Defender' (an additive-only Cavalry-eligibility override via Assign's new isDefender parameter) and 'bow Xijkt or one of your Mines' (the general own-source-or-unbowed-holding-with-keyword cost-choice Performer category, with the forced-pathway case emerging for free from ordinary eligibility validation)", XijktCavalryDefenseAndBowChoice),
+    ("Tamori Shosei (issue #207 follow-up): 'if you control a Temple, bow Shosei or one of your Temple Holdings: gain 1 Honor' -- the same cost-choice shape as Xijkt, plus a separate control-gate (a bowed Temple still counts as controlled for the gate, but is itself ineligible to pay the cost)", TamoriShoseiBowChoice),
     ("Utaku Elite Guard's shape: a static +1F, keyword-based (Battle Maiden) and army-scoped (every OTHER Battle-Maiden card the owner controls at the same battlefield, not just one unit) -- unlike Senior Infantry Legion's type-based, unit-scoped boost; unaffected: a non-Battle-Maiden card, a Battle Maiden not at this battlefield, and the enemy's own Battle Maiden; two guards in one army grant each other but not themselves", ArmyBattleMaidenBoostPrimitive),
     ("An attachment's 'Will only/not attach to X' restriction (keyword, the Human-is-not-Nonhuman special case, or a named Personality) gates Equip, both at Accept and in the offered legal-targets list; the Follower Honor Requirement now reads current, not printed, Personal Honor -- fixed at 0 while Dishonorable, with a Personal-Honor-boosting token still applying once honorable", AttachmentRestrictions),
     ("'Without attachments' is a boolean, not a count: any Item/Follower/Spell, or a Follower/Weapon/Armor token, blocks a Ranged/Melee Attack target and any ability flagged RequireNoAttachments (layered onto an existing category); an ordinary stat token does not, and an attachment itself is always a legal 'without attachments' target", NoAttachmentsFilter),
@@ -3699,6 +3703,146 @@ static void TamokoOpenHonorGain()
         var honorBefore=e.State.Players[1].Honor;
         while(e.State.Phase!=Phase.End) Accept(e,Cmd(e,"pass"));
         Equal(e.State.Players[1].Honor,honorBefore,"Assigned to attack this turn: no Honor gained");
+    }
+}
+static void TogashiMitsuVariableAttack()
+{
+    {
+        // "Fire Battle/Open: Give Mitsu +1F Fire tokens until he has exactly five" -- fills UP TO a
+        // target count (BattleOrOpen, either phase), not a flat number like Meiyu/Torazu's own three.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var mitsu=Add(s,"training-mitsu",0,Zone.Home);
+        mitsu.Tokens.Add(new("fixture-token-1","Fire","test-fixture","Force",1));
+        mitsu.Tokens.Add(new("fixture-token-2","Fire","test-fixture","Force",1));
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,AbilityId:"mitsu-fire-tokens"));
+        Equal(e.State.Cards[mitsu.Id].Tokens.Count(t=>t.Type=="Fire"),5,"Fills up to exactly five");
+    }
+    {
+        // "Fire Battle: destroy zero or more Fire tokens on Mitsu. Ranged Attack with strength equal
+        // to the number of tokens destroyed" -- a per-COMMAND variable strength (strengthOverride),
+        // chosen via CardIds naming which of Mitsu's own Fire tokens to destroy.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var mitsu=Add(s,"training-mitsu",0,Zone.Battlefield,province:0);
+        var t1=new CardToken("fixture-token-1","Fire","test-fixture","Force",1);
+        var t2=new CardToken("fixture-token-2","Fire","test-fixture","Force",1);
+        var t3=new CardToken("fixture-token-3","Fire","test-fixture","Force",1);
+        mitsu.Tokens.AddRange([t1,t2,t3]);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t1.Id])); // duplicated id
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t2.Id])); // strength 2 < Force 3
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,TargetId:enemy.Id,AbilityId:"mitsu-fire-attack",CardIds:[t1.Id,t2.Id,t3.Id]));
+        Equal(e.State.Cards[mitsu.Id].Tokens.Count,0,"Every destroyed token is removed");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Strength 3 (all 3 tokens destroyed) matches the Force-3 target");
+    }
+    {
+        // Destroying zero tokens (no CardIds at all) is legal: a Ranged 0 Attack, no target needed.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var mitsu=Add(s,"training-mitsu",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mitsu.Id,AbilityId:"mitsu-fire-attack"));
+    }
+}
+static void TogashiSakataTokenAttack()
+{
+    {
+        // "Limited: give Sakata a +1F Fire or Sake token" -- a UsageKey-shared choice of two
+        // effects (the same shape as yayu-bow-attack/yayu-destroy-attack), not two independent uses.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var sakata=Add(s,"training-sakata",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sakata.Id,AbilityId:"sakata-sake-token"));
+        Equal(e.State.Cards[sakata.Id].Tokens.Count(t=>t.Type=="Sake"),1);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:sakata.Id,AbilityId:"sakata-fire-token")); // shares its Limited use with sakata-sake-token this turn
+    }
+    {
+        // "Ranged 4 Attack, with +1 strength for each Sake token on Sakata" -- only Sake tokens
+        // count, even though his own Limited grants either Fire or Sake (both +1F alike).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var sakata=Add(s,"training-sakata",0,Zone.Battlefield,province:0);
+        sakata.Tokens.Add(new("fixture-sake-1","Sake","test-fixture","Force",1));
+        sakata.Tokens.Add(new("fixture-sake-2","Sake","test-fixture","Force",1));
+        sakata.Tokens.Add(new("fixture-fire-1","Fire","test-fixture","Force",1)); // doesn't count toward Attack strength
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, no attachments
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sakata.Id,TargetId:enemy.Id,AbilityId:"sakata-attack"));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"4 base + 2 Sake tokens = strength 6, matching the Force-6 target");
+    }
+}
+static void XijktCavalryDefenseAndBowChoice()
+{
+    {
+        // "Xijkt may assign during Cavalry Maneuvers if you are the Defender" -- he carries no
+        // Cavalry keyword of his own, so never eligible while ATTACKING.
+        var s=MatchEngine.CreateStarterMatch().State;
+        s.Phase=Phase.CavalryDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0; s.UnresolvedBattlefields=[0];
+        var xijkt=Add(s,"training-xijkt",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"attack",player:0,assignments:new(){[xijkt.Id]=0}));
+    }
+    {
+        // Additive-only override: eligible for Cavalry Maneuvers while DEFENDING.
+        var s=MatchEngine.CreateStarterMatch().State;
+        s.Phase=Phase.CavalryDefense; s.PriorityPlayerId=1; s.ActivePlayerId=0; s.UnresolvedBattlefields=[0];
+        var xijkt=Add(s,"training-xijkt",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"assignDefense",player:1,assignments:new(){[xijkt.Id]=0}));
+        Equal(e.State.Cards[xijkt.Id].Zone,Zone.Battlefield);
+    }
+    {
+        // "Battle: bow Xijkt or one of your Mines, and target an enemy card without attachments:
+        // bow it" -- the full cost-choice shape: an eligible unbowed Mine pays the cost instead.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var xijkt=Add(s,"training-xijkt",0,Zone.Battlefield,province:0);
+        var mine=Add(s,"training-mine-holding",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:xijkt.Id,PerformerId:mine.Id,TargetId:enemy.Id,AbilityId:"xijkt-bow"));
+        Check(e.State.Cards[mine.Id].Bowed,"Paid by bowing the Mine, not Xijkt himself");
+        Check(!e.State.Cards[xijkt.Id].Bowed);
+        Check(e.State.Cards[enemy.Id].Bowed,"The targeted enemy card is bowed");
+    }
+    {
+        // Forced pathway: no eligible Mine exists, so Xijkt himself is the only valid Performer left.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var xijkt=Add(s,"training-xijkt",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:xijkt.Id,PerformerId:xijkt.Id,TargetId:enemy.Id,AbilityId:"xijkt-bow"));
+        Check(e.State.Cards[xijkt.Id].Bowed,"No eligible Holding: forced to bow Xijkt himself");
+    }
+}
+static void TamoriShoseiBowChoice()
+{
+    {
+        // Gated on controlling a Temple AT ALL before the bow-cost choice is even offered.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var shosei=Add(s,"training-shosei",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:shosei.Id,PerformerId:shosei.Id,AbilityId:"shosei-honor"));
+    }
+    {
+        // A bowed Temple still counts as "controlled" for the gate, but is ineligible as the
+        // Performer itself (own-source-or-unbowed-holding-with-keyword requires unbowed) -- forcing
+        // Shosei himself to pay the cost.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var shosei=Add(s,"training-shosei",0,Zone.Home);
+        Add(s,"training-temple-holding",0,Zone.Home,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shosei.Id,PerformerId:shosei.Id,AbilityId:"shosei-honor"));
+        Equal(e.State.Players[0].Honor,honorBefore+1);
+        Check(e.State.Cards[shosei.Id].Bowed,"The bowed Temple is ineligible as Performer: forced to bow Shosei himself");
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var shosei=Add(s,"training-shosei",0,Zone.Home);
+        var temple=Add(s,"training-temple-holding",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shosei.Id,PerformerId:temple.Id,AbilityId:"shosei-honor"));
+        Check(e.State.Cards[temple.Id].Bowed,"Paid by bowing the Temple, not Shosei himself");
+        Check(!e.State.Cards[shosei.Id].Bowed);
     }
 }
 static void RingBlockedCardsReview()
