@@ -370,6 +370,14 @@ public static class AbilityCatalog
         // ability, so two separate source instances can each bow the same Stalwart target once this
         // turn, isolating the keyword's own negation from the ordinary once-per-turn dedupe.
         ["training-bow-enemy"] = new("Open", "Training: bow a target enemy Personality", "enemy-personality"),
+        // Togashi Hizumi / Tamori Ruya (issue #216): a Battle-timing bow, needed to exercise
+        // OpenBowReactionWindow at an actual battlefield (every existing bow training fixture is
+        // Open-timing, usable only during the Action phase, never while AtBattle is true).
+        ["training-bow-at-battle"] = new("Battle", "Training: bow a target enemy Personality at the current battlefield", "enemy-personality"),
+        // A second, independent source (own AbilityUses dedupe scope) so a test can straighten the
+        // SAME target twice in one turn -- proving Straighten() clears a consumed "next
+        // straightening" block rather than blocking every attempt for the rest of the turn.
+        ["training-straighten-at-battle"] = new("Battle", "Training: straighten a target Personality at the current battlefield", "personality"),
         // Training-only: exercises Stalwart's "never the card's own controller" exclusion -- "personality"
         // allows either side, unlike training-bow-enemy above.
         ["training-bow-any"] = new("Open", "Training: bow a target Personality, own or enemy", "personality"),
@@ -498,18 +506,38 @@ public static class AbilityCatalog
         // to the target for the rest of the active player's own turn (the default duration, since
         // no "for the rest of this battle"/"permanently" is printed).
         ["takeshi-protect"] = new("Open", "Target your Personality: effects of actions the target performs will not be negated until the end of the turn", "own-personality"),
+        // Togashi Noboru (issue #216): "Noboru pushes him to a new path" is non-functional flavor
+        // text folded into the Battle action. No separate Performer selection -- Noboru duels/acts as
+        // himself, the established self-performer convention (Performer left null).
+        ["noboru-redirect"] = new("Battle", "Target an enemy Personality with lower Chi: redirect his own Force to your army for the duration of the battle", "enemy-personality-chi-lt-self"),
+        // Togashi Hizumi (issue #216): "target him" is the Personality this action just bowed at
+        // Hizumi's own battlefield -- see OpenBowReactionWindow/bow-reaction-candidate.
+        ["hizumi-negate-straighten"] = new("Reaction", "After the resolution of an action that bowed a Personality at Hizumi's battlefield, target him: negate his next straightening this turn", "bow-reaction-candidate", Trigger: "bowed-personality-at-own-battlefield"),
+        // Tamori Ruya (issue #216): "your action" -- actor-scoped, no location restriction on the bow
+        // itself; her own target is unrelated to which Personality was actually bowed.
+        ["ruya-bow"] = new("Reaction", "After the resolution of your action that bowed a Personality, target a Personality at the same location: bow him", "personality-at-source-location", Trigger: "own-action-bowed-personality"),
+        // Tamori Yayu (issue #216): "He lobs an alchemical potion at the enemy" is non-functional
+        // flavor text folded into the Battle action. The player's own choice of which cost to pay
+        // (bow vs. destroy the chosen Spell) is the established dual-catalog UsageKey pair, the same
+        // shape as jakuei-bow/jakuei-bow-favor -- not a new optional-cost command field.
+        ["yayu-bow-attack"] = new("Battle", "Bow one of Yayu's Spells · Ranged 5 Attack", "attack", Performer: "own-spell-attached-to-source", UsageKey: "yayu-attack"),
+        ["yayu-destroy-attack"] = new("Battle", "Destroy one of Yayu's Spells · Ranged 5 Attack", "attack", Performer: "own-spell-attached-to-source", UsageKey: "yayu-attack"),
     });
 }
 
 public sealed partial class MatchEngine
 {
     private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
-    private static bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
+    // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
+    // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
+    // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
+    private bool Keyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal)
+        || keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
     // Multi-keyword requirement (issue #190): "a Dragon Clan Kensai", "a Crane Clan Magistrate" -- any
     // number of keywords, independently present, order irrelevant. A null/empty list is deliberately
     // false, not vacuously true: every RequiredKeywords-gated category exists specifically because it
     // needs at least one keyword to mean anything (same as the old single-RequiredKeyword convention).
-    private static bool HasKeywords(CardInstance card, string[]? keywords) => keywords is { Length: > 0 } && keywords.All(k => Keyword(card, k));
+    private bool HasKeywords(CardInstance card, string[]? keywords) => keywords is { Length: > 0 } && keywords.All(k => Keyword(card, k));
     // Printed only, never a granted keyword -- Justice of the Crane's own text draws this exact
     // distinction ("has the PRINTED Magistrate keyword"), since it also grants Magistrate itself and
     // would otherwise always satisfy a plain Keyword() check.
@@ -550,7 +578,7 @@ public sealed partial class MatchEngine
     // A card already carrying a keyword (printed or previously granted) gains no redundant second
     // grant of it -- membership is boolean, so a duplicate entry would only ever complicate cleanup
     // (e.g. two Naval-granting attachments on the same Personality, one later detached) for no effect.
-    private static void GrantKeyword(CardInstance card, string keyword, string source, string duration) { if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration)); }
+    private void GrantKeyword(CardInstance card, string keyword, string source, string duration) { if (!Keyword(card, keyword)) card.GrantedKeywords.Add(new(keyword, source, duration)); }
     // "Protection" (issue #212, Tamori Takeshi): "effects of actions the target performs will not be
     // negated." Checked at the point a negation would otherwise apply -- the same convention
     // StalwartNegatesBow already uses (the negating card/ability is still legal to play; only its own
@@ -563,6 +591,13 @@ public sealed partial class MatchEngine
     // Zone.Attached-to-parent lookup inline, for a different purpose). Every other card (a
     // Personality, a Stronghold, a played-from-hand Strategy/Ring) performs its own actions directly.
     private CardInstance ActingPersonality(CardInstance card) => card.Zone == Zone.Attached && card.AttachedTo is string parentId ? Card(parentId) : card;
+    // "Location" (core rules Glossary, issue #216): there are exactly two kinds -- a battlefield
+    // (associated with a province, either player's cards may share one) and Home (associated with a
+    // PLAYER, not shared between the two players -- your own Home and your opponent's are different
+    // locations even though both are "Zone.Home"). Tamori Ruya's own "at the same location" Target.
+    private static bool SameLocation(CardInstance a, CardInstance b) =>
+        a.Zone == Zone.Battlefield && b.Zone == Zone.Battlefield && a.ProvinceIndex == b.ProvinceIndex
+        || a.Zone == Zone.Home && b.Zone == Zone.Home && a.OwnerId == b.OwnerId;
     // The Personality actually performing a resolving ability, for Protection's own purposes: an
     // explicit Performer selection (command.PerformerId) when the ability has one, otherwise the
     // source card itself (resolved to its wielder, if it is an attached Item/Weapon/Spell). Used for
@@ -607,6 +642,7 @@ public sealed partial class MatchEngine
         "unparalleled-sword-attack" => 4,
         "shinjo-eun-sahng-attack" => 4,
         "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" => 5,
+        "yayu-bow-attack" or "yayu-destroy-attack" => 5,
         "stalking-tiger-attack" => 6,
         "tsuruchi-isas-attack" => 3,
         "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
@@ -665,6 +701,7 @@ public sealed partial class MatchEngine
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
         "moshi-ikako-attack" => "Ranged",
         "kamina-exp-attack" or "shuji-attack" => "Ranged",
+        "yayu-bow-attack" or "yayu-destroy-attack" => "Ranged",
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
         "horseback-warriors-attack" or "sankaku-yari-attack" => "Melee",
         "false-ring-of-water-attack" => "Ranged",
@@ -882,6 +919,11 @@ public sealed partial class MatchEngine
                 // card by id), not open to either side the way before-duel-begins is.
                 "own-won-duel" => _state.PendingChoice.Type == "duelWonReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Togashi Hizumi / Tamori Ruya (issue #216): both scoped to the one specific watching
+                // card by id, the same shape own-won-duel already uses -- see OpenBowReactionWindow
+                // for how each is actually distinguished when opening the window.
+                "bowed-personality-at-own-battlefield" or "own-action-bowed-personality" => _state.PendingChoice.Type == "bowReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 _ => false
             },
             _ => false
@@ -1019,6 +1061,9 @@ public sealed partial class MatchEngine
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
+                // Tamori Yayu (issue #216): the same "select one more card, separately from the
+                // Attack's own target" shape -- here, which of Yayu's own Spells pays the cost.
+                "own-spell-attached-to-source" => Definition(performer).Type == CardType.Spell && performer.AttachedTo == source!.Id,
                 "own-personality" => Definition(performer).Type == CardType.Personality,
                 // Steel on Steel (issue #204): no AtBattle qualifier of its own -- Dueling's own
                 // Timing (Battle, here) already gates the SOURCE card's own presence; the performer's
@@ -1240,6 +1285,23 @@ public sealed partial class MatchEngine
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
                         // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
                         "enemy-force-non-cavalry" => !own && type is CardType.Personality or CardType.Follower && !Keyword(target, "Cavalry"),
+                        // Togashi Noboru (issue #216): an enemy Personality with strictly lower Chi
+                        // than his own -- the enemy-scoped counterpart to personality-force-lt-self.
+                        "enemy-personality-chi-lt-self" => personality && !own && PersonalityChi(target) < PersonalityChi(source!),
+                        // Togashi Hizumi (issue #216): "target him" -- the specific Personality this
+                        // action just bowed at Hizumi's own battlefield (OpenBowReactionWindow already
+                        // narrowed the candidate set to exactly that, keyed by location).
+                        "bow-reaction-candidate" => personality && _state.BowReactionCandidateIds.Contains(target.Id),
+                        // Tamori Yayu (issue #216): "one of Yayu's Spells" -- a Spell attached
+                        // specifically to the performer (no separate Performer field -- Yayu acts as
+                        // himself), restricted to Spells only, as the user's own clarification asks.
+                        "own-spell-attached-to-source" => type == CardType.Spell && target.Zone == Zone.Attached && target.AttachedTo == source!.Id,
+                        // Tamori Ruya (issue #216): "a Personality at the same location" as Ruya
+                        // herself (source) -- either side, unrelated to which personality was actually
+                        // bowed by the triggering action. "Location" is Home (associated with a
+                        // player, so only that SAME player's other cards qualify there) or a
+                        // battlefield (associated with a province, so either side's cards there do).
+                        "personality-at-source-location" => personality && SameLocation(target, source!),
                         // Mirumoto Houken: a Personality (either side) with an attached Weapon-
                         // keyword Item.
                         "personality-with-weapon" => personality && Attachments(target.Id).Any(a => Keyword(a, "Weapon")),
@@ -1320,6 +1382,9 @@ public sealed partial class MatchEngine
         // Snapshot before the effect resolves so any Battle-action Honor loss it inflicts on an
         // opponent can be detected generically afterward (Law of Darkness Dojo's passive).
         var opponentHonorBeforeBattleAction = ability.Timing == "Battle" && target is not null && target.OwnerId != player.Id ? Player(target.OwnerId).Honor : (int?)null;
+        // Togashi Hizumi / Tamori Ruya (issue #216): snapshotted the same way, so any Personality this
+        // action newly bows can be detected generically afterward -- see OpenBowReactionWindow.
+        var bowedBeforeAction = _state.Cards.Values.Where(c => c.Bowed).Select(c => c.Id).ToHashSet();
         // Snapshotted by reference (not just a count): a switch case that itself grants fresh actions
         // (Again!/Two Hands/equip-battle) must never accidentally spare an unrelated PRE-EXISTING
         // grant from forfeiture below just because the total count happens to end up higher.
@@ -1431,6 +1496,8 @@ public sealed partial class MatchEngine
                 break;
             case "training-discipline-ability": GainHonor(player.Id, 1, "Training Discipline"); break;
             case "training-bow-enemy": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "training-bow-at-battle": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "training-straighten-at-battle": Straighten(target!); break;
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
@@ -1804,6 +1871,26 @@ public sealed partial class MatchEngine
             // Tamori Takeshi (issue #212): grants Protection for the rest of the active player's own
             // turn -- the default duration, matching every other un-qualified effect in the engine.
             case "takeshi-protect": GrantProtection(target!, source!.Id, "Turn"); break;
+            // Togashi Noboru (issue #216): redirects the target's own Force to Noboru's own
+            // controller's army for the rest of the battle -- re-checked live at ResolveBattle
+            // (ArmyForces/RedirectsTo), not applied here; this just records the standing grant. A
+            // repeat use against the same target simply overwrites (still only ever one entry per
+            // target id, since Dictionary-style dedupe is unnecessary for a plain list this small).
+            case "noboru-redirect": _state.ForceRedirects.RemoveAll(r => r.TargetId == target!.Id); _state.ForceRedirects.Add(new(target!.Id, player.Id)); break;
+            // Togashi Hizumi (issue #216): negates the target's own next straightening this turn --
+            // Straighten() itself clears the block the moment it actually negates one, so the target
+            // may still be straightened additional times afterward if something else straightens it
+            // again later the same turn.
+            case "hizumi-negate-straighten": target!.StraightenBlockedTurn = _state.TurnNumber; break;
+            case "ruya-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "yayu-bow-attack":
+                Card(command.PerformerId!).Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            case "yayu-destroy-attack":
+                DestroyAttachment(Card(command.PerformerId!));
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
@@ -1835,7 +1922,50 @@ public sealed partial class MatchEngine
         // A fresh grant this same action creates (Again!/Two Hands/equip-battle, above) is untouched
         // by this -- it was never in preExistingGrants -- and still keeps priority with the player.
         if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
+        // Togashi Hizumi / Tamori Ruya (issue #216): a chance to react to this action having just
+        // bowed a Personality, before handing priority back the ordinary way. Never checked for a
+        // Reaction's OWN resolution (e.g. Ruya's own "bow him" effect) -- a Reaction responds TO an
+        // action, it is not itself a fresh "your action bowed a Personality" event that could
+        // re-trigger the same (or another) watching card all over again.
+        if (ability.Timing != "Reaction" && OpenBowReactionWindow(player.Id, bowedBeforeAction, 1 - player.Id)) return;
         NextAction(player.Id, _state.AdditionalActions.Any(g => g.PlayerId == player.Id));
+    }
+    // Togashi Hizumi: "after the resolution of an action that bowed a Personality AT HIZUMI'S
+    // BATTLEFIELD" -- location-scoped on the trigger (open to either player's action), reacting by
+    // targeting that same bowed personality (BowReactionCandidateIds) to negate its own next
+    // straightening. Tamori Ruya: "after the resolution of YOUR action that bowed a Personality" --
+    // actor-scoped instead (only the acting player's own Ruya reacts), no location restriction on
+    // the bow itself; her own target is a Personality at RUYA'S location, unrelated to which
+    // personality was actually bowed. Hizumi checked first if somehow both are eligible at once --
+    // an arbitrary but deterministic tie-break, since nothing printed orders them relative to each
+    // other and no real scenario needs both simultaneously.
+    private static string? BowedAtBattlefieldReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "bowed-personality-at-own-battlefield");
+    private static string? OwnActionBowedPersonalityReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-action-bowed-personality");
+    private bool OpenBowReactionWindow(int actingPlayerId, HashSet<string> bowedBeforeAction, int closesTo)
+    {
+        var newlyBowed = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Personality).ToArray();
+        if (newlyBowed.Length == 0) return false;
+        var atABattlefield = newlyBowed.Where(AtBattle).ToArray();
+        var hizumi = atABattlefield.Length > 0 ? _state.Cards.Values.FirstOrDefault(c => InPlay(c) && AtBattle(c) && BowedAtBattlefieldReactionAbility(c) is not null && atABattlefield.Any(nb => nb.ProvinceIndex == c.ProvinceIndex)) : null;
+        if (hizumi is not null)
+        {
+            _state.BowReactionCandidateIds = atABattlefield.Where(nb => nb.ProvinceIndex == hizumi.ProvinceIndex).Select(c => c.Id).ToList();
+            _state.PendingChoice = new("bowReaction", hizumi.OwnerId, hizumi.Id, "After the bow resolved: you may use this card's own reaction, or pass.", closesTo);
+            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = hizumi.OwnerId;
+            Emit("reactionWindow", "Bow-reaction window opened.", hizumi.OwnerId, hizumi.Id);
+            return true;
+        }
+        var ruya = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == actingPlayerId && InPlay(c) && OwnActionBowedPersonalityReactionAbility(c) is not null);
+        if (ruya is not null)
+        {
+            _state.PendingChoice = new("bowReaction", ruya.OwnerId, ruya.Id, "After your own action bowed a Personality: you may use this card's own reaction, or pass.", closesTo);
+            _state.ConsecutivePasses = 0; _state.PriorityPlayerId = ruya.OwnerId;
+            Emit("reactionWindow", "Bow-reaction window opened.", ruya.OwnerId, ruya.Id);
+            return true;
+        }
+        return false;
     }
 
     private void ResolveShinden(GameCommand command)
@@ -1872,7 +2002,17 @@ public sealed partial class MatchEngine
 
     private void Straighten(CardInstance card)
     {
-        if (card.StraightenBlockedTurn == _state.TurnNumber || Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
+        // "Negate his NEXT straightening" (Shinden Asahina; Togashi Hizumi/Tamori Ruya, issue #216):
+        // a one-shot block, not "cannot straighten this turn at all" -- consumed the moment it
+        // negates an actual attempt, so a LATER straighten attempt the same turn (an ability that
+        // straightens more than once) succeeds normally. skip-first-straighten is a distinct,
+        // ongoing condition (a whole turn's worth of Novice restriction), never consumed this way.
+        if (card.StraightenBlockedTurn == _state.TurnNumber)
+        {
+            card.StraightenBlockedTurn = -1;
+            Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
+        }
+        else if (Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
         else card.Bowed = false;
     }
