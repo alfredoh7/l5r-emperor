@@ -5,5 +5,6 @@
   "source_sha256": "df88548cc42b99252951966e4baf5b8f1c8ac47b4d05eaac809cc8f2266f3cfb",
   "issue": 233,
   "scope": "Milestone 1: editable Blender room architecture and composition review. Pause for feedback before detailed props or live integration.",
-  "meshy_credits_spent": 0
+  "meshy_credits_spent": 0,
+  "scope_revision": "User requested a bigger room after inspecting the first layout; use judgement to arrange furnishings based on the source. Widen architecture, keep table dimensions, maintain milestone pauses. Individual furnishings use Meshy."
 }

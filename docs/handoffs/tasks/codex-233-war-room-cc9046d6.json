@@ -1,9 +1,9 @@
 {
   "lane": "ui",
-  "summary": "Started approved candlelit room architecture milestone in isolated paths; source archived unchanged.",
-  "validation": "Planning checkpoint only: approved source hash recorded, current main verified through GitHub API, no implementation validation yet.",
-  "remaining": "Build and inspect Blender architecture and native review; pause for user feedback before further milestones. No Meshy credits spent.",
+  "summary": "Architecture milestone 1 for the approved candlelit war room, revised during the task to a larger 4.3 m-wide room with deeper rear space and perimeter furnishings. Editable Blender architecture, table support and furniture placement models; original Topaz mat and frame reused. Isolated native Godot review and source comparison, no live game changes.",
+  "validation": "Blender 5.2.1 build, GLB export and Cycles render passed: 1326 mesh objects, 135104 triangles, 9694216-byte GLB. C# build and full review launcher passed with 0 warnings/errors. Three native Godot 4.7.2 Mac Compatibility captures visually inspected without runtime/script/shader errors. Original source, Topaz mat and frame hashes verified; Python/shell syntax, HTML local links and diff checks passed. Fresh refs/GitHub context, no overlap. Browser file preview blocked by policy; no gallery browser-interaction or Windows native test claimed.",
+  "remaining": "Paused at Alfredo-requested architecture review milestone; do not merge as final art. User requested larger room and Meshy for individual furnishings/props. Cabinets remain placement models and room materials/light are preliminary. Native live-match camera/input integration, detailed Meshy objects, source-faithful weathered materials, animation and performance profiling remain later milestones. No Meshy jobs or credits used. Draft PR #234.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/233",
   "branch": "codex/233-war-room",
-  "updated": "2026-09-15T07:37:01.497543+00:00"
+  "updated": "2026-09-15T08:02:26.077169+00:00"
 }
