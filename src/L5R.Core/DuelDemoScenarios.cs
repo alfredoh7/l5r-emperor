@@ -36,6 +36,13 @@ public sealed partial class MatchEngine
         var state = new MatchState { Players = [new() { Id=0,Name="Crane",Clan="Crane",Honor=8 },new() { Id=1,Name="Lion",Clan="Lion",Honor=6 }],
             Phase=id=="open"?Phase.Action:Phase.Battle, ActivePlayerId=1, PriorityPlayerId=0,
             CurrentBattleProvince=id=="open"?null:0, UnresolvedBattlefields=id=="open"?[]:[0] };
+        // Match the prepared participants' affiliations. In particular, Hikaro is Loyal and
+        // must not be placed under the canonical Crane player's affiliation in the discard setup.
+        var firstClan=id is "duelist" or "duelist-tie" or "discard" or "aftermath"?"Dragon":id=="tie"?"Lion":"Crane";
+        var secondClan=id=="duelist-tie"?"Dragon":id=="aftermath"?"Crane":"Lion";
+        state.Players[0].Clan=firstClan;state.Players[1].Clan=secondClan;
+        state.Players[0].Name=firstClan+(firstClan==secondClan?" · challenger":"");
+        state.Players[1].Name=secondClan+(firstClan==secondClan?" · challenged":"");
         var sequence=0;
         CardInstance Add(int owner,string definition,Zone zone,string? attached=null)
         {

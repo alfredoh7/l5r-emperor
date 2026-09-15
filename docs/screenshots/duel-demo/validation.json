@@ -9,20 +9,20 @@
       "Steps": 20,
       "ReducedMotion": false,
       "Resolution": "(1920, 1080)",
-      "FrameCount": 1250,
-      "P50Ms": 8.37,
-      "P95Ms": 13.815,
-      "P99Ms": 16.382
+      "FrameCount": 1251,
+      "P50Ms": 9.127,
+      "P95Ms": 13.796,
+      "P99Ms": 14.345
     },
     "small-reduced.json": {
       "Passed": true,
       "Steps": 20,
       "ReducedMotion": true,
       "Resolution": "(1120, 700)",
-      "FrameCount": 1160,
-      "P50Ms": 8.823,
-      "P95Ms": 14.283,
-      "P99Ms": 15.651
+      "FrameCount": 1168,
+      "P50Ms": 8.504,
+      "P95Ms": 13.951,
+      "P99Ms": 18.16
     },
     "stages.json": {
       "passed": true,
@@ -72,16 +72,16 @@
       "bytes": 3518162
     },
     "small-reduced-result.png": {
-      "sha256": "7b4e6c1012c046228b8a79a0e8caf65723e56fcefdb0d33c7c583de4894df810",
-      "bytes": 1415629
+      "sha256": "7e0fad9c165f3d62a5d63560293d9b7b52758383f02897278fde34713b1485df",
+      "bytes": 1415628
     },
     "stages-effects-order.png": {
       "sha256": "c3b06d3663dbd2232ee63371a2933ba6266e46f0e5c2506ace4bddbefc13596b",
       "bytes": 1520941
     },
     "stages-duelist-replacement.png": {
-      "sha256": "67f818a597b6e452c5b6df2ba9f09576a5bc4f2d8db7fc9754b3d663e124e07d",
-      "bytes": 2787554
+      "sha256": "178c134e103fd6756ac95a35a8b297104ddacc922ba6c0b3f48b5d170dcea293",
+      "bytes": 2789219
     },
     "launcher-final-focused.png": {
       "sha256": "28fdcefbab066d8d71d8d7b9d216d232919a346f8e30426542b2d4cd48f565b9",
@@ -90,6 +90,10 @@
     "launcher-final-result.png": {
       "sha256": "7e0fad9c165f3d62a5d63560293d9b7b52758383f02897278fde34713b1485df",
       "bytes": 1415628
+    },
+    "stages-discard-result.png": {
+      "sha256": "117c1eefe9bd75dd32253b3e0bc708d8a05911ece148f1c891db12e473072fe1",
+      "bytes": 2802026
     }
   },
   "limits": [

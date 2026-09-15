@@ -37,6 +37,8 @@ static class DuelDemoTests
         {
             var e=MatchEngine.CreateDuelDemo(s.Id);Begin(e,s.Id);
             Check(e.GetView(0).PendingDuel is not null,$"{s.Id} begins");
+            foreach(var card in e.State.Cards.Values.Where(c=>(CardCatalog.Get(c.DefinitionId).Keywords??[]).Contains("Loyal")))
+                Equal(e.State.Players[card.OwnerId].Clan,CardCatalog.Get(card.DefinitionId).Clan);
             Equal(JsonSerializer.Serialize(e.State),JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State));
         }
         var refused=MatchEngine.CreateDuelDemo("refusal");Begin(refused,"refusal");Send(refused,Action(refused,"declineDuel"));

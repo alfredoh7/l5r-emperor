@@ -34,7 +34,7 @@ An existing offline practice remains paused and unchanged. An active private tab
 | Aftermath reactions | Experienced Daisuke and Overconfident Tsugio |
 | Return to Action phase | Synthetic Open challenge |
 
-These are Core-owned prepared positions, separate from playable decks. Printed participants and cards retain catalogue/printing provenance. The small focus pool and follower ID are explicit constants, independent of future live-deck changes. Synthetic cards are named Training and have no pretended published artwork.
+These are Core-owned prepared positions, separate from playable decks. Dragon scenarios use Dragon-affiliated seats and an explicitly synthetic Dragon stronghold, so Loyal Hikaro is placed with a matching controller. Printed participants and cards retain catalogue/printing provenance. The small focus pool and follower ID are explicit constants, independent of future live-deck changes. Synthetic cards are named Training and have no pretended published artwork.
 
 ## Shared contract
 

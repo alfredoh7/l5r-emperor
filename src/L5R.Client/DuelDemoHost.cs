@@ -67,7 +67,7 @@ public partial class DuelDemoHost : Control
             picker.Selected=DuelDemoScenarios.All.ToList().FindIndex(s=>s.Id==_scenario);box.AddChild(picker);
             picker.ItemSelected+=index=>{_scenario=DuelDemoScenarios.All[(int)index].Id;Prepare();};
             box.AddChild(Palette.Wrapped(DuelDemoScenarios.Get(_scenario).Description,19));
-            var seat=new OptionButton{CustomMinimumSize=new Vector2(0,38)};seat.AddItem("Play first seat · Crane by default");seat.AddItem("Play opposing seat · Lion by default");seat.Selected=_seat;box.AddChild(seat);
+            var seat=new OptionButton{CustomMinimumSize=new Vector2(0,38)};seat.AddItem($"Play {Session.Snapshot!.View.Players[0].Name}");seat.AddItem($"Play {Session.Snapshot.View.Players[1].Name}");seat.Selected=_seat;box.AddChild(seat);
             seat.ItemSelected+=value=>{_seat=(int)value;Prepare();};
             var mode=new CheckBox{Text="Manual · control both seats",ButtonPressed=_manual};box.AddChild(mode);mode.Toggled+=value=>_manual=value;
             box.AddChild(Palette.Wrapped($"Seed {_seed} · restart repeats this deal\nCards with ‘Training’ in their name are synthetic fixtures. Prepared positions do not change playable decks.",16,Palette.PaperDim));
