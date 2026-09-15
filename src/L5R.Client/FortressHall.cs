@@ -3,11 +3,22 @@ using System.Text.Json;
 
 namespace L5R.Client;
 
-/// <summary>Approved B3 scenery. Static presentation only, with no match/state access.</summary>
+/// <summary>Approved B3 scenery and presentation-clock firelight, with no match/state access.</summary>
 public partial class FortressHall : Node3D
 {
     private readonly List<Node3D> _tableLanterns = [];
     private readonly List<OmniLight3D> _tableLights = [];
+    private sealed class Practical
+    {
+        public OmniLight3D Light = null!;
+        public float BaseEnergy, Phase, Rate = 1, Strength = 1;
+        public readonly List<ShaderMaterial> Flames = [], Halos = [];
+        public readonly List<StandardMaterial3D> Windows = [];
+    }
+    private readonly List<Practical> _practicals = [];
+    private ShaderMaterial? _bakedFloor;
+    private readonly Vector4[] _floorSources = new Vector4[11];
+    private readonly float[] _floorEnergy = new float[11];
     public override void _Ready()
     {
         var room = GD.Load<PackedScene>("res://Art/WarRoom/fortress-hall-b3.glb").Instantiate<Node3D>();
@@ -65,6 +76,9 @@ public partial class FortressHall : Node3D
             var position = new Vector3(p[0], p[2], -p[1]);
             var kind = lamp.GetProperty("kind").GetString()!;
             var height = lamp.GetProperty("height").GetSingle();
+            // Table phases match the existing cloth, frame and card candlelight.
+            var practical = new Practical { Phase = kind == "table" ? _tableLanterns.Count * 1.8f : 2.7f + _practicals.Count * 2.31f,
+                Rate = kind == "ember" ? 1.27f : 1f, Strength = kind == "room" ? .68f : 1f };
             if (kind != "ember")
             {
                 var path = $"res://Art/WarRoom/{kind}-lantern.glb";
@@ -90,7 +104,7 @@ public partial class FortressHall : Node3D
                                 mesh.SetSurfaceOverrideMaterial(surface, aged);
                             }
                     }
-                    AddCandle(prop, kind);
+                    AddCandle(prop, kind, practical);
                     if (kind == "table") _tableLanterns.Add(prop);
                 }
             }
@@ -99,7 +113,9 @@ public partial class FortressHall : Node3D
                 {
                     var fire = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/static-flame.gdshader") };
                     fire.SetShaderParameter("seed", i*1.7f);
-                    AddChild(new MeshInstance3D { Name="StationaryBrazierFlame", Mesh=new QuadMesh { Size=new Vector2(.045f,.075f+i%3*.017f) },
+                    fire.SetShaderParameter("turbulence", 1.35f);
+                    practical.Flames.Add(fire);
+                    AddChild(new MeshInstance3D { Name="BrazierFlame", Mesh=new QuadMesh { Size=new Vector2(.045f,.075f+i%3*.017f) },
                         Position=position+new Vector3((i-2)*.017f,.015f,-i%2*.012f), MaterialOverride=fire,
                         CastShadow=GeometryInstance3D.ShadowCastingSetting.Off });
                 }
@@ -112,6 +128,7 @@ public partial class FortressHall : Node3D
                 ShadowBias = .008f, ShadowNormalBias = .025f
             };
             AddChild(light);
+            practical.Light = light; practical.BaseEnergy = light.LightEnergy; _practicals.Add(practical);
             if (kind == "table") _tableLights.Add(light);
         }
         AddChild(new WorldEnvironment { Environment = new Godot.Environment
@@ -124,22 +141,26 @@ public partial class FortressHall : Node3D
         }});
         AddChild(new DirectionalLight3D { RotationDegrees = new(-38, -155, 0),
             LightColor = new Color("9ca9cc"), LightEnergy = .12f, ShadowEnabled = false });
-        GD.Print("FORTRESS_HALL_B3: static sparse hall; separate Meshy fixtures; source map/scenery; no new room animation.");
+        PresentLight(0, false);
+        GD.Print("FORTRESS_HALL_B3: sparse hall; separate Meshy fixtures; source map/scenery; synchronized firelight with reduced-motion support.");
     }
 
-    private static void AddCandle(Node3D prop, string kind)
+    private static void AddCandle(Node3D prop, string kind, Practical practical)
     {
-        // Meshy supplies the aged body. These separate optical surfaces can later
-        // animate without repainting the body or regenerating the whole fixture.
+        // Meshy supplies the aged body; flame, halo and window emission share
+        // one light signal without repainting or moving the body.
         var fire = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/static-flame.gdshader") };
-        var flame = new MeshInstance3D { Name = "StationaryCandleFlame",
+        practical.Flames.Add(fire);
+        var flame = new MeshInstance3D { Name = "CandleFlame",
             Mesh = new QuadMesh { Size = new Vector2(.066f, .095f) },
             MaterialOverride = fire, Position = new Vector3(0, kind == "table" ? .255f : .455f, 0),
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off };
         prop.AddChild(flame);
-        prop.AddChild(new MeshInstance3D { Name = "StaticCandleHalation",
+        var halo = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/practical-glow.gdshader") };
+        practical.Halos.Add(halo);
+        prop.AddChild(new MeshInstance3D { Name = "CandleHalation",
             Mesh = new QuadMesh { Size = new Vector2(1.3f, 1.3f) }, Position = new Vector3(0, .46f, 0),
-            MaterialOverride = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/practical-glow.gdshader") },
+            MaterialOverride = halo,
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
         if (kind == "room")
         {
@@ -158,6 +179,7 @@ public partial class FortressHall : Node3D
             AlbedoColor = new Color(1, .52f, .16f, .14f), Roughness = .32f, Metallic = .05f,
             CullMode = BaseMaterial3D.CullModeEnum.Disabled, EmissionEnabled = true,
             Emission = new Color("e88523"), EmissionEnergyMultiplier = .23f };
+        practical.Windows.Add(glass);
         prop.AddChild(new MeshInstance3D { Name = "AmberInnerWindows",
             Mesh = new CylinderMesh { TopRadius = kind == "room" ? .15f : .20f,
                 BottomRadius = kind == "room" ? .15f : .23f, Height = .44f,
@@ -178,7 +200,42 @@ public partial class FortressHall : Node3D
         }
     }
 
-    private static void Batch(Node3D room)
+    public void PresentLight(float time, bool animate)
+    {
+        for (var i = 0; i < _practicals.Count; i++)
+        {
+            var p = _practicals[i];
+            var phase = animate ? time * p.Rate + p.Phase : p.Phase;
+            var energy = animate ? 1 + (CandleEnergy(phase) - 1) * p.Strength : 1;
+            p.Light.LightEnergy = p.BaseEnergy * energy;
+            foreach (var flame in p.Flames)
+            {
+                flame.SetShaderParameter("phase", phase);
+                flame.SetShaderParameter("motion", animate ? 1f : 0f);
+                flame.SetShaderParameter("light_energy", energy);
+            }
+            foreach (var halo in p.Halos) halo.SetShaderParameter("light_energy", energy);
+            foreach (var glass in p.Windows) glass.EmissionEnergyMultiplier = .23f * energy;
+            var position = p.Light.Position;
+            _floorSources[i] = new Vector4(position.X, position.Z, p.Light.OmniRange, 0);
+            _floorEnergy[i] = energy;
+        }
+        _bakedFloor?.SetShaderParameter("practical_sources", _floorSources);
+        _bakedFloor?.SetShaderParameter("practical_energy", _floorEnergy);
+    }
+
+    // Same smooth signal as Art/candlelight.gdshaderinc, so actual lights follow
+    // the existing mat/card treatment. Reduced motion bypasses every time input.
+    private static float CandleEnergy(float t)
+    {
+        var cell = Mathf.Floor(t * 5.3f);
+        var blend = Mathf.SmoothStep(0, 1, t * 5.3f - cell);
+        static float Noise(float n) { var v = Mathf.Sin(n * 127.1f + 4.7f) * 43758.5453f; return v - Mathf.Floor(v); }
+        return 1 + .13f * Mathf.Sin(t * 1.65f) + .075f * Mathf.Sin(t * 3.8f + 1.2f)
+            + .035f * Mathf.Sin(t * 7.1f + .4f) + .055f * (Mathf.Lerp(Noise(cell), Noise(cell + 1), blend) - .5f);
+    }
+
+    private void Batch(Node3D room)
     {
         // Spatial partitions retain local light selection and culling; a single
         // hall-sized batch loses practical lights on Compatibility's light limit.
@@ -191,6 +248,7 @@ public partial class FortressHall : Node3D
             bakedFloor.SetShaderParameter("wood_normal", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-normal.jpg"));
             bakedFloor.SetShaderParameter("wood_roughness", GD.Load<Texture2D>("res://Art/WarRoom/floor-roughness-m4.jpg"));
             bakedFloor.SetShaderParameter("irradiance", GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m4.exr"));
+            _bakedFloor = bakedFloor;
         }
         foreach (var mesh in room.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().ToArray())
         {

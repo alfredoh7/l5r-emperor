@@ -10,11 +10,19 @@ var zoom := 1.0
 var pan := Vector3.ZERO
 var drag := false
 var room: Node3D
+var painted: Array[ShaderMaterial] = []
+var light_time := 0.0
+var animate := true
+var film_path := ""
+var film_frames := 192
 
 func _ready() -> void:
     for arg in OS.get_cmdline_user_args():
         if arg.begins_with("--room-capture="): capture_path = arg.trim_prefix("--room-capture=")
         if arg.begins_with("--room-view="): view_name = arg.trim_prefix("--room-view=")
+        if arg.begins_with("--room-film="): film_path = arg.trim_prefix("--room-film=")
+        if arg.begins_with("--room-frames="): film_frames = int(arg.trim_prefix("--room-frames="))
+        if arg == "--room-motion-off": animate = false
         clean = clean or arg == "--clean"
     room = load("res://FortressHall.tscn").instantiate()
     add_child(room)
@@ -30,6 +38,7 @@ func _ready() -> void:
     fabric.set_shader_parameter("left_lamp", Vector2(.06944, .82575))
     fabric.set_shader_parameter("right_lamp", Vector2(.91667, .14463))
     cloth.material_override = fabric
+    painted.append(fabric)
     add_child(cloth)
     var frame := load("res://Art/LacquerFrame/lacquer-frame-a.glb").instantiate() as Node3D
     var wood := ShaderMaterial.new()
@@ -41,6 +50,7 @@ func _ready() -> void:
     for mesh in frame.find_children("*", "MeshInstance3D"):
         mesh.material_override = wood
     add_child(frame)
+    painted.append(wood)
     camera = Camera3D.new()
     camera.current = true
     camera.near = .02
@@ -59,7 +69,7 @@ func _ready() -> void:
     reference.visible = false
     overlay.add_child(reference)
     status = Label.new()
-    status.text = "FORTRESS HALL · B3     1 Composition  ·  2 Overview  ·  3 Joinery  ·  4 Floor  ·  5/6 Lanterns  ·  R Reference  ·  Wheel / drag: inspect  ·  Home Reset"
+    status.text = "FORTRESS HALL · B3     1 Composition · 2 Overview · 3 Joinery · 4 Floor · 5/6 Lanterns · 7 Brazier · M Motion · R Reference · Wheel / drag · Home Reset"
     status.add_theme_font_override("font", load("res://Art/Fonts/Alegreya.ttf"))
     status.add_theme_font_size_override("font_size", 16)
     status.add_theme_color_override("font_color", Color("f2dfb6"))
@@ -70,10 +80,39 @@ func _ready() -> void:
     status.visible = not clean
     get_viewport().size_changed.connect(layout)
     layout()
-    print("WAR_ROOM_REVIEW: isolated Blender architecture; unchanged mat/frame. No gameplay commands. Separate Meshy fixtures; animation deferred.")
-    if not capture_path.is_empty():
+    print("WAR_ROOM_REVIEW: isolated Blender architecture; unchanged mat/frame. No gameplay commands. Separate Meshy fixtures; shared presentation-clock firelight.")
+    if not capture_path.is_empty() or not film_path.is_empty():
+        set_process(false)
         set_process_input(false)
         for _i in range(30): await get_tree().process_frame
+        if OS.get_cmdline_user_args().has("--room-check-motion"):
+            set_light(0.0, true)
+            var moving_a := rendered_image().get_data()
+            set_light(4.0, true)
+            var moving_b := rendered_image().get_data()
+            set_light(0.0, false)
+            var frozen_a := rendered_image().get_data()
+            set_light(8.0, false)
+            var frozen_b := rendered_image().get_data()
+            set_light(2.0, true)
+            var resumed := rendered_image().get_data()
+            if moving_a == moving_b or frozen_a != frozen_b or resumed == frozen_b:
+                push_error("Room motion check failed: visible motion, exact freeze or resume.")
+                get_tree().quit(1)
+                return
+            print("ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 byte-identical; motion resumes at phase 2.")
+        if not film_path.is_empty():
+            DirAccess.make_dir_recursive_absolute(film_path)
+            for frame_index in range(film_frames):
+                set_light(float(frame_index) / 24.0, animate)
+                var result := rendered_image().save_png(film_path.path_join("frame-%04d.png" % frame_index))
+                if result != OK:
+                    push_error("Room motion frame could not be saved.")
+                    get_tree().quit(1)
+                    return
+                await get_tree().process_frame
+            print("ROOM_FILM_PASS: ", film_frames, " native frames at 24 fps; view=", view_name)
+        set_light(0.0, animate)
         if OS.get_cmdline_user_args().has("--room-profile"):
             var started := Time.get_ticks_usec()
             for _i in range(60):
@@ -83,11 +122,25 @@ func _ready() -> void:
             var seconds := float(Time.get_ticks_usec() - started) / 1000000.0
             print("ROOM_DRAW_PROFILE: 60 forced draw/sync frames / ", seconds, " seconds = ", 60.0 / seconds, " fps; draw calls=", Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
         reference.hide()
-        RenderingServer.force_draw(false)
-        RenderingServer.force_sync()
-        var result := get_viewport().get_texture().get_image().save_png(capture_path)
+        var result := OK
+        if not capture_path.is_empty(): result = rendered_image().save_png(capture_path)
         print("WAR_ROOM_CAPTURE: ", view_name, " / ", result)
         get_tree().quit(0 if result == OK else 1)
+
+func rendered_image() -> Image:
+    RenderingServer.force_draw(false)
+    RenderingServer.force_sync()
+    return get_viewport().get_texture().get_image()
+
+func set_light(time: float, moving: bool) -> void:
+    room.call("PresentLight", time, moving)
+    for material in painted:
+        material.set_shader_parameter("candle_phase", time)
+        material.set_shader_parameter("candle_motion", 1.0 if moving else 0.0)
+
+func _process(delta: float) -> void:
+    light_time += delta
+    set_light(light_time, animate)
 
 func lamp(pos: Vector3, color: Color, energy: float, radius: float) -> void:
     var light := OmniLight3D.new()
@@ -132,6 +185,11 @@ func layout() -> void:
         var target := pan + Vector3(base[0], base[2] + half_height, -base[1] - half_height * .833)
         camera.position = target + Vector3(0,.36*.64,.36*sqrt(1.0-.64*.64))
         camera.look_at(target)
+    elif view_name == "brazier":
+        camera.set_perspective(42 * zoom, .002, 30)
+        var target := pan + Vector3(-1.73, -.03, -.79)
+        camera.position = target + Vector3(0, .50*.64, .50*sqrt(1.0-.64*.64))
+        camera.look_at(target)
     else:
         camera.set_perspective(40 * zoom, .02, 30)
         camera.position = pan + Vector3(-1.28, .61, 1.45)
@@ -147,6 +205,8 @@ func _input(event: InputEvent) -> void:
             KEY_4: view_name = "floor"; zoom = 1.0; pan = Vector3.ZERO
             KEY_5: view_name = "table-lantern"; zoom = 1.0; pan = Vector3.ZERO
             KEY_6: view_name = "room-lantern"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_7: view_name = "brazier"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_M: animate = not animate
             KEY_R: reference.visible = not reference.visible
             KEY_HOME: zoom = 1.0; pan = Vector3.ZERO
             KEY_ESCAPE: get_tree().quit()

@@ -6,6 +6,8 @@ uniform sampler2D wood_normal : hint_normal, filter_linear_mipmap_anisotropic, r
 uniform sampler2D wood_roughness : filter_linear_mipmap_anisotropic, repeat_enable;
 uniform sampler2D irradiance : filter_linear_mipmap, repeat_disable;
 uniform float exposure = 1.0;
+uniform vec4 practical_sources[11];
+uniform float practical_energy[11];
 varying vec3 world_position;
 varying vec3 wood_tint;
 void vertex() { world_position = (MODEL_MATRIX * vec4(VERTEX,1.0)).xyz; wood_tint=COLOR.rgb; }
@@ -17,7 +19,18 @@ void fragment() {
     // Keep native light specular/normal response; diffuse energy is baked once.
     ALBEDO=vec3(0.0);
     float contact=mix(1.0,texture(irradiance,clamp(light_uv,vec2(0.0),vec2(1.0))).a,inside);
-    EMISSION=grain*(vec3(.48,.50,.55)*pow(contact,1.2)+illumination*3.0)*exposure;
+    // Modulate only nearby warm illumination. The accepted baked baseline,
+    // ambient fill and contact shadows never pulse as one full-room layer.
+    float weight_sum=0.0;
+    float local_delta=0.0;
+    for(int i=0;i<11;i++) {
+        vec2 d=(world_position.xz-practical_sources[i].xy)/max(practical_sources[i].z,.01);
+        float weight=exp(-dot(d,d)*4.0);
+        weight_sum+=weight;
+        local_delta+=weight*(practical_energy[i]-1.0);
+    }
+    float warmth=1.0+.60*local_delta/max(1.0,weight_sum);
+    EMISSION=grain*(vec3(.48,.50,.55)*pow(contact,1.2)+illumination*3.0*warmth)*exposure;
     NORMAL_MAP=texture(wood_normal,UV).rgb;
     NORMAL_MAP_DEPTH=.32;
     ROUGHNESS=mix(.31,.56,texture(wood_roughness,UV).r);

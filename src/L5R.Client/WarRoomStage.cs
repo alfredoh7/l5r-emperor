@@ -51,7 +51,7 @@ public partial class WarRoomStage : Node3D
         _camera = new Camera3D { Current = true, Near = .005f, Far = 30,
             KeepAspect = Camera3D.KeepAspectEnum.Height };
         AddChild(_camera);
-        GD.Print("WAR_ROOM_LIVE: B3 fortress hall; original cloth/frame; card camera and rules unchanged. Static room lighting and separate Meshy lanterns.");
+        GD.Print("WAR_ROOM_LIVE: B3 fortress hall; original cloth/frame; card camera and rules unchanged. Presentation-clock firelight and separate Meshy lanterns.");
     }
 
     public void SetTableCamera(Vector2 screenCenter, float density, Vector2 center, float zoom,
@@ -117,6 +117,7 @@ public partial class WarRoomStage : Node3D
 
     public void PresentLight(float time, bool animate)
     {
+        _hall.PresentLight(time, animate);
         foreach (var material in _paint)
         {
             material.SetShaderParameter("candle_phase", time);
