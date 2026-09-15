@@ -27,6 +27,7 @@ public partial class TableArtStage : Node3D
         if (packed is null) { _capture = null; GetTree().Quit(1); return; }
         var environment = packed.Instantiate<Node3D>(); _environment = environment; AddChild(environment);
         ApplyPaintedMaterials(environment);
+        if (!ReviewMode) AddLacquerFrame();
         AddChild(new WorldEnvironment { Environment = new Godot.Environment
         {
             BackgroundMode = Godot.Environment.BGMode.Color,
@@ -123,6 +124,20 @@ public partial class TableArtStage : Node3D
                 _paintedMaterials.Add(material);
             }
         foreach (var child in node.GetChildren()) ApplyPaintedMaterials(child);
+    }
+
+    private void AddLacquerFrame()
+    {
+        var frame = GD.Load<PackedScene>("res://Art/LacquerFrame/lacquer-frame-a.glb").Instantiate<Node3D>();
+        var material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/LacquerFrame/lacquer-frame.gdshader") };
+        material.SetShaderParameter("source_art", GD.Load<Texture2D>("res://Art/LacquerFrame/approved-frame-a.png"));
+        material.SetShaderParameter("lantern_texture", GD.Load<Texture2D>("res://Art/tavern-lantern.png"));
+        material.SetShaderParameter("project_to_table", true);
+        foreach (var mesh in frame.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>())
+            mesh.MaterialOverride = material;
+        AddChild(frame);
+        _paintedMaterials.Add(material);
+        GD.Print("LACQUER_FRAME: approved Option A corner join; independent Blender rails, shared table projection.");
     }
 
     private void FitCamera()

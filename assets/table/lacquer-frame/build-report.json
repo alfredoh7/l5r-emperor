@@ -1,0 +1,32 @@
+{
+  "approval": "Alfredo, Option A / CORNER JOIN, 2026-09-15",
+  "dimensions_m": [
+    1.8,
+    1.0130382775119617,
+    0.03
+  ],
+  "rail_width_m": 0.03,
+  "cloth_height_m": 0,
+  "top_height_m": 0.003,
+  "miter_gap_m": 0.00025,
+  "source_sha256": "c246f80b95b00f13ed23198d13639e6e324151f9a4c35205bf67974cd1e02fe4",
+  "source_corner_pixel_origin": [
+    65,
+    772
+  ],
+  "source_corner_pixel_axes": [
+    [
+      119,
+      32
+    ],
+    [
+      70,
+      -79
+    ]
+  ],
+  "texture_strategy": "Two UV sets project original corner and mirrored straight-grain pixels; vertex colour blends the transition over 15 mm; no repainted pixels",
+  "vertices": 7416,
+  "triangles": 14816,
+  "glb_bytes": 819332,
+  "meshy_credits_spent": 0
+}
