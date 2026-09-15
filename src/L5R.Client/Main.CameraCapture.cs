@@ -150,6 +150,11 @@ public partial class Main
                             var fabric = TableArtStage.FabricBounds(new Vector2(WorldWidth, _worldHeight));
                             _cameraCenter.X = fabric.Position.X + fabric.Size.X * .09f;
                         }
+                        if (_captureMode.Contains("frame", StringComparison.Ordinal))
+                        {
+                            var fabric = TableArtStage.FabricBounds(new Vector2(WorldWidth, _worldHeight));
+                            _cameraCenter = new Vector2(fabric.Position.X, fabric.End.Y);
+                        }
                         ApplyTableCamera();
                         RequireCamera(Mathf.IsEqualApprox(_cameraZoom, 2f), "mat review did not reach the maximum zoom");
                         GD.Print($"MAT_MAX_ZOOM: zoom={_cameraZoom}, density={_root.Scale.X}, center={_cameraCenter}");
