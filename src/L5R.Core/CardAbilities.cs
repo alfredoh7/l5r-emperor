@@ -451,6 +451,10 @@ public static class AbilityCatalog
         // Training-only: a refusable challenge with no printed win/loss text of its own -- see
         // ApplyDuelOutcome's own generic -1F case, used only so a test can observe the loser(s)
         // without needing a real card's own outcome.
+        ["training-duel-force"] = new("Battle", "Training Force duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelStat: "Force"),
+        ["training-duel-honor"] = new("Battle", "Training Personal Honor duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelStat: "PersonalHonor"),
+        ["training-duel-open"] = new("Open", "Training Open duel", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true),
+        ["training-duel-reaction"] = new("Reaction", "Training: gain 1 Honor before the duel", "none", Trigger: "before-duel-begins"),
         ["training-duel-challenge"] = new("Battle", "Training: choose your performing unbowed Personality and target an enemy Personality: duel (refusable)", "enemy-personality", Performer: "own-unbowed-personality", IssuesDuel: true, DuelRefusable: true),
         // Dragon Clan review (issue #207): every real Dragon Clan Personality wired this pass, using
         // only already-existing primitives plus the small additions documented alongside them (the
@@ -2117,6 +2121,7 @@ public sealed partial class MatchEngine
             case "daisuke-exp-draw": Draw(player); break;
             case "horume-gain": case "training-choose-player-gain": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, 1); break;
             case "horume-lose": case "training-choose-player-lose": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
+            case "training-duel-reaction": GainHonor(player.Id, 1, "Training duel reaction", source); break;
             case "horume-honor": GainHonor(player.Id, 1, "Kitsuki Horume", source); break;
             case "jakuei-favor": _state.FavorPlayerId = player.Id; break;
             case "jakuei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
@@ -2457,6 +2462,7 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
+                "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),

@@ -1,0 +1,84 @@
+{
+  "date": "2026-09-16",
+  "issue": 205,
+  "pr": 220,
+  "platform": "macOS / Apple M1 Max / Godot 4.7.2 .NET",
+  "native": {
+    "native.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 1250,
+      "P50Ms": 8.37,
+      "P95Ms": 13.815,
+      "P99Ms": 16.382
+    },
+    "small-reduced.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 1160,
+      "P50Ms": 8.823,
+      "P95Ms": 14.283,
+      "P99Ms": 15.651
+    },
+    "stages.json": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "launcher.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 1251,
+      "P50Ms": 8.876,
+      "P95Ms": 13.694,
+      "P99Ms": 18.544
+    }
+  },
+  "regressions": {
+    "python_collaboration": 43,
+    "python_content": 130,
+    "python_meshy": 6,
+    "core": 152,
+    "published": 52,
+    "deck_format": 8,
+    "deck_workshop": 8,
+    "ai": 55,
+    "server": 5,
+    "client_transport": 6
+  },
+  "native_artifacts": "artifacts/duel-demo (ignored; regenerate with tools/check-duel-demo.sh)",
+  "screenshots": {
+    "launcher-result.png": {
+      "sha256": "7c5f8633b19947c738cd9671ab5379dac86b6fa972ba063e8bb2d746cf38d937",
+      "bytes": 3542815
+    },
+    "launcher-focused.png": {
+      "sha256": "ebff3a4ec2e897f2ad393c53035a7a61c887ba72cdc7bfba4344e7bfdb6367aa",
+      "bytes": 3518162
+    },
+    "small-reduced-result.png": {
+      "sha256": "7b4e6c1012c046228b8a79a0e8caf65723e56fcefdb0d33c7c583de4894df810",
+      "bytes": 1415629
+    },
+    "stages-effects-order.png": {
+      "sha256": "c3b06d3663dbd2232ee63371a2933ba6266e46f0e5c2506ace4bddbefc13596b",
+      "bytes": 1520941
+    },
+    "stages-duelist-replacement.png": {
+      "sha256": "67f818a597b6e452c5b6df2ba9f09576a5bc4f2d8db7fc9754b3d663e124e07d",
+      "bytes": 2787554
+    }
+  },
+  "limits": [
+    "mdornbrook mechanical/interface acceptance pending",
+    "Alfredo demo/presentation acceptance pending",
+    "Normal-match automatic entry follows acceptance",
+    "Native Windows graphical testing pending",
+    "AAA grass/cloud visual acceptance remains separate; sky uses an animated matte"
+  ]
+}

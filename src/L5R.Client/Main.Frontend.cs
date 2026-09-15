@@ -3,6 +3,8 @@ namespace L5R.Client;
 
 public partial class Main
 {
+    private DuelDemoHost? _duelDemo;
+    private bool DuelDemoOpen => _duelDemo is not null;
     private TitleMenu? _titleMenu;
     private MenuPreferences _preferences = null!;
     private bool _enteringPrivate;
@@ -20,6 +22,7 @@ public partial class Main
         {
             Preferences = _preferences,
             StartMatch = StartFromMenu,
+            DuelDemo = OpenDuelDemo,
             PrivateMatch = () => { _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),
@@ -31,9 +34,24 @@ public partial class Main
         layer.AddChild(_titleMenu);
         InitializeTurnBloom();
         GetTree().AutoAcceptQuit = false;
-        GetWindow().CloseRequested += () => { ShowMainMenu(); _titleMenu.ShowQuit(); };
+        GetWindow().CloseRequested += () => { CloseDuelDemo(); ShowMainMenu(); _titleMenu.ShowQuit(); };
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) ShowMainMenu();
         else _titleMenu.Hide();
+    }
+    private void OpenDuelDemo()
+    {
+        if (_duelDemo is not null) return;
+        if (_session.Online) _session.LeavePrivateTable();
+        _root.Hide(); _table.Hide(); _table.SetProcess(false); _titleMenu!.Hide();
+        _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
+        _duelDemo = new DuelDemoHost { ReducedMotion = _preferences.ReducedMotion };
+        _duelDemo.ReturnToMenu += CloseDuelDemo;
+        _titleMenu.GetParent().AddChild(_duelDemo);
+    }
+    private void CloseDuelDemo()
+    {
+        if (_duelDemo is not null) { _duelDemo.GetParent().RemoveChild(_duelDemo); _duelDemo.QueueFree(); _duelDemo=null; }
+        ShowMainMenu();
     }
     private void ApplyPreferences(bool window)
     {

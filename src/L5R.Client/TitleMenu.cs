@@ -5,6 +5,7 @@ namespace L5R.Client;
 public partial class TitleMenu : Control
 {
     public Action<int> StartMatch = _ => { };
+    public Action DuelDemo = () => { };
     public Action PrivateMatch = () => { }, Library = () => { }, DeckBuilder = () => { }, Resume = () => { }, PreferencesChanged = () => { };
     public Func<bool> CanResume = () => false;
     public Func<bool> IsOnline = () => false;
@@ -90,9 +91,18 @@ public partial class TitleMenu : Control
         if (CanResume()) Entry("Return to table", Resume, 44);
         Entry("Play Crane", () => Begin(0));
         Entry("Play Lion", () => Begin(1));
+        Entry("Duel Demo", BeginDuelDemo, 43);
         Entry("Back", ShowMain, 43);
         _message.Text = "Published Emperor decks · play against the practice opponent. Choose your Clan.";
         FocusFirst();
+    }
+    private void BeginDuelDemo()
+    {
+        if (!IsOnline()) { DuelDemo(); return; }
+        Clear("leave-for-duel");
+        Entries.AddChild(Palette.Wrapped("Leave your private table to open Duel Demo? This disconnects your seat; it does not concede.", 25));
+        Entry("Leave table and open demo", DuelDemo, 39);
+        Entry("Back", ShowPlay, 43); FocusFirst();
     }
     private void Begin(int seat)
     {

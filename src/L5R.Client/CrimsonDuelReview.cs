@@ -269,7 +269,7 @@ public partial class CrimsonDuelReview : Control
 public partial class CrimsonFocusBack : CardTile
 {
     public CrimsonFocusBack() { }
-    public CrimsonFocusBack(CardView card):base(card,true,_=>{},_=>{})
+    public CrimsonFocusBack(CardView card,Action<CardView>? clicked=null):base(card,true,clicked??(_=>{}),_=>{})
     { SetMeta("flat_tooltip",true);TooltipText="Focused Fate card · face down"; }
     public override void _Draw()
     {

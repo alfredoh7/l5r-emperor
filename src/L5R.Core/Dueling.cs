@@ -31,6 +31,10 @@ public sealed partial class MatchEngine
             Stage = refusable ? "AwaitingAccept" : "Reaction",
         };
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
+        var duelId = $"duel-{_state.Events[^1].Sequence}";
+        _state.PendingDuel.DuelId = duelId;
+        _state.LastDuel = new(duelId, stat, ViewCard(challenger), ViewCard(challenged),
+            Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray(), [], null, false);
         if (refusable) { _state.PriorityPlayerId = challenged.OwnerId; _state.ConsecutivePasses = 0; }
         else OpenDuelReactionWindowOrBeginFocusing();
     }
@@ -64,6 +68,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         Emit("duelRefused", $"{Definition(Card(duel.ChallengedId)).Name} refuses the duel.", duel.ChallengedPlayerId, duel.ChallengedId);
+        _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], [_state.Events[^1]], [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         NextAction(challengerPlayerId);
@@ -105,6 +110,11 @@ public sealed partial class MatchEngine
     // (Struck), matching a Hand card's own private-until-shown convention rather than inventing a new
     // one; command.Choice=="deck" selects the top-of-deck source, otherwise command.CardId names a
     // hand card.
+    private bool CanFocusDiscard(int playerId, PendingDuel duel) =>
+        !duel.HikaroDiscardFocusUsed[playerId] &&
+        ClanAlignments(Card(playerId == duel.ChallengerPlayerId ? duel.ChallengerId : duel.ChallengedId)).Contains("Dragon") &&
+        _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).GrantsDiscardPileFocus);
+
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
@@ -156,6 +166,7 @@ public sealed partial class MatchEngine
         foreach (var id in duel.ChallengerFocused) Card(id).FaceUp = true;
         foreach (var id in duel.ChallengedFocused) Card(id).FaceUp = true;
         Emit("duelStruck", "A Strike ends focusing; focused cards are revealed.", _state.PriorityPlayerId);
+        RecordDuelReveal("Strike");
         BeginDuelistRefocus();
     }
 
@@ -208,6 +219,7 @@ public sealed partial class MatchEngine
             list.Add(newId);
             Emit("duelistRefocused", $"{Player(playerId).Name} discarded a focused card to focus again.", playerId, newId);
         }
+        if (command.CardId is not null) RecordDuelReveal("Replacement");
         if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffects(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
@@ -268,6 +280,10 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; }
         }
+        var resultStart = _state.Events.Count;
+        var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, v.Strength, v.Strength))).ToArray();
+        var challengerStat = DuelStatValue(challenger, duel.Stat);
+        var challengedStat = DuelStatValue(challenged, duel.Stat);
         var winnerPlayerId = winnerId is null ? (int?)null : Card(winnerId).OwnerId;
         var loserPlayerIds = loserIds.Select(id => Card(id).OwnerId).ToList();
         Emit("duelResolved", winnerId is null ? "The duel is a tie; both personalities lose."
@@ -301,6 +317,10 @@ public sealed partial class MatchEngine
         var performer = Card(duel.ChallengerId);
         if (IsIaijutsuAction(duel.AbilityId) && _state.Cards.Values.Any(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus))
             ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2);
+        _state.LastDuel = _state.LastDuel! with { Result = new("Resolved", winnerId, loserIds.ToArray(),
+            challengerStat, challengedStat, challengerTotal, challengedTotal, duel.OrderedFocusEffects.ToArray(),
+            _state.Events.Skip(resultStart).ToArray(), strengthsBefore.Select(p => p with { After = Player(p.PlayerId).Provinces[p.Index].Strength }).ToArray(),
+            _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
@@ -347,6 +367,7 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
+            case "training-duel-force": case "training-duel-honor": case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;

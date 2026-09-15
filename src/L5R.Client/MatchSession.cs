@@ -44,6 +44,32 @@ public sealed class MatchSession : IDisposable
         RefreshLocal();
     }
 
+    /// <summary>Demo hosts own their own MatchSession; this never replaces the main practice session.</summary>
+    public void StartDuelDemo(string scenario, ulong seed, int seat = 0)
+    {
+        if (seat is <0 or >1) throw new ArgumentOutOfRangeException(nameof(seat));
+        Disconnect();
+        _engine = MatchEngine.CreateDuelDemo(scenario, seed);
+        _localSeat = _practiceNameSeat = seat;
+        RefreshLocal();
+    }
+
+    public Task BeginDuelDemo()
+    {
+        if (_engine is null || !_engine.GetView(0).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) || _engine.GetView(0).LastDuel is not null)
+            return Task.CompletedTask;
+        var scenario = DuelDemoScenarios.Get(_engine.GetView(0).Scenario[10..]);
+        var command = _engine.QueryActions(0).FirstOrDefault(a => a.Enabled && a.Command?.AbilityId == scenario.ChallengeAbility)?.Command;
+        if (command is null) { Notice?.Invoke("The prepared challenge is unavailable."); return Task.CompletedTask; }
+        return Submit(command);
+    }
+
+    public void LeavePrivateTable()
+    {
+        if (!Online) return;
+        Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
+    }
+
     public void SwitchPracticeSeat()
     {
         if (_engine is null || Online) return;
@@ -61,7 +87,7 @@ public sealed class MatchSession : IDisposable
     private void RefreshLocal()
     {
         if (_engine is null) return;
-        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), "Practice");
+        Snapshot = new(NamedView(_engine.GetView(_localSeat)), _engine.QueryActions(_localSeat), _engine.GetView(_localSeat).Scenario.StartsWith("duel-demo/", StringComparison.Ordinal) ? "Duel Demo" : "Practice");
         Changed?.Invoke();
     }
 

@@ -32,6 +32,10 @@ public static class CardCatalog
             // text of its own (ApplyDuelOutcome's own switch applies a plain -1F Modifier to every
             // loser instead, purely so a test can observe who lost without needing a real card's own
             // outcome), and a Personality carrying Duelist for the tie-break half.
+            new("training-duel-force", "Training Force challenge", CardType.Strategy, Abilities:["training-duel-force"], Text:"Synthetic Force-duel fixture. Not a published card."),
+            new("training-duel-honor", "Training Honor challenge", CardType.Strategy, Abilities:["training-duel-honor"], Text:"Synthetic Personal Honor duel fixture. Not a published card."),
+            new("training-duel-open", "Training Open challenge", CardType.Strategy, Abilities:["training-duel-open"], Text:"Synthetic Open-duel fixture. Not a published card."),
+            new("training-duel-reactor", "Training duel reaction", CardType.Holding, Abilities:["training-duel-reaction"], Text:"Synthetic before-duel reaction fixture. Not a published card."),
             new("training-duel-challenge", "Training duel challenge", CardType.Strategy, GoldCost:0, Focus:2, Abilities:["training-duel-challenge"], Text:"Synthetic Dueling fixture: a refusable challenge. Never included in a playable deck."),
             new("training-duelist-personality", "Training Duelist personality", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:3, PersonalHonor:1, Keywords:["Duelist"], Text:"Synthetic Duelist fixture: wins a tied duel outright. Never included in a playable deck."),
             new("training-singular-personality", "Training Singular personality", CardType.Personality, "Crane", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Singular"], Text:"Synthetic Singular fixture: at most one copy in play per controller; unlike Unique, no deck-construction limit. Never included in a playable deck."),
