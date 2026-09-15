@@ -4,6 +4,7 @@ using L5R.Core;
 
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
+var tests=new List<(string Name,Action Test)>();
 Run("waits without priority and never concedes automatically",()=>
 {
     var game=MatchEngine.CreateStarterMatch();
@@ -38,9 +39,10 @@ foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: published abilities, complete match and replay",()=>Play(seed,true));
+runner.Run("ai",tests);
 return runner.Finish();
 
-void Run(string name,Action run) => runner.Run("ai",[(name,run)]);
+void Run(string name,Action run) => tests.Add((name,run));
 
 static void Check(bool condition,string message) { if(!condition) throw new Exception(message); }
 static void Play(ulong seed,bool published=false)

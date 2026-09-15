@@ -1,3 +1,4 @@
+using static RegressionAssertions;
 using System.Text.Json;
 using L5R.Core;
 using L5R.Client;
@@ -6,9 +7,14 @@ var tests = new (string Name, Action Run)[]
 {
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
-    ("A bowed Personality suppresses two Native Guides in the view and actual resolution", BowedPersonalityResolution),
+    ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
+    ("BowedPersonalityResolution/defender: two Native Guides win without destroying the province", () => BowedPersonalityResolution(1,false,1,10)),
     ("Unit view clamps Personality reductions separately from Followers", UnitViewClamp),
-    ("Unit view follows bowed and Elite contributions and attachment removal", UnitViewBows),
+    ("UnitViewBows/unbowed Follower contributes with bowed Personality", () => UnitViewBows(false,false,false,5)),
+    ("UnitViewBows/both bowed without Elite contribute zero", () => UnitViewBows(true,false,false,0)),
+    ("UnitViewBows/bowed Elite Follower contributes independently", () => UnitViewBows(true,false,true,5)),
+    ("UnitViewBows/both bowed Elite cards contribute", () => UnitViewBows(true,true,true,7)),
+    ("Unit view refreshes after attachment removal and moving home", UnitViewRemoval),
     ("Unit view counts Items once and matches battle resolution", UnitViewResolution),
     ("Unit view is absent outside visible in-play Personalities and old payloads", UnitViewPrivacy),
     ("Starter setup uses four provinces, six-card hands and second-player bowed holding", Setup),
@@ -30,7 +36,7 @@ var tests = new (string Name, Action Run)[]
     ("Choose-straighten fixture straightens when not declined", ChooseStraightenDefault),
     ("Battle destroys province only on strictly greater margin", ProvinceThreshold),
     ("Tied armies destroy each other and gain one Honor per opposing card", BattleTie),
-    ("Bowed Personality suppresses its unbowed Followers at resolution", FollowerForce),
+    ("Unbowed Follower wins a battle while its bowed Personality contributes zero", FollowerForce),
     ("Bowed Elite Followers still count in unit Force; plain bowed Followers do not", EliteFollowerForce),
     ("A bowed Elite Personality's own Force still counts toward its unit", ElitePersonalityForce),
     ("Turn-duration granted keywords clear at turn end; Permanent grants do not", GrantedKeywordDuration),
@@ -58,7 +64,8 @@ var tests = new (string Name, Action Run)[]
     ("Unsupported definitions and replay versions fail explicitly", Unsupported),
     ("Public snapshots and diagnostic state cannot mutate engine", Detached),
     ("Empty decks do not remove provinces or create cards", EmptyDecks),
-    ("Every generated enabled exact command validates", ActionQueries),
+    ("ActionQueries/economy: every enabled exact command validates on a replay", () => ActionQueries(MatchEngine.CreateEconomyScenario())),
+    ("ActionQueries/starter: every enabled exact command validates on a replay", () => ActionQueries(MatchEngine.CreateStarterMatch())),
     ("Invalid later assignment rolls back earlier valid assignment", AssignmentRollback),
     ("Zero-Force battle with an empty side has no outcome", EmptyBattle),
     ("Proclaim use becomes available on a subsequent turn", ProclaimReset),
@@ -162,8 +169,6 @@ static string Json<T>(T value)=>JsonSerializer.Serialize(value);
 static void Equal<T>(T actual,T expected,string message="Values differ")=>Check(EqualityComparer<T>.Default.Equals(actual,expected),$"{message}: expected {expected}; got {actual}");
 static GameCommand Cmd(MatchEngine e,string type,int? player=null,string? id=null,string[]? sources=null,int? province=null,bool discount=false,bool allegiance=false,Dictionary<string,int>? assignments=null,string[]? cards=null,string? target=null)
     =>new(type,player??e.State.PriorityPlayerId,e.Version,id,sources,province,discount,allegiance,assignments,cards,target);
-static void Accept(MatchEngine e,GameCommand c) { var result=e.Execute(c); Check(result.Accepted,result.Error??"Rejected"); }
-static void Reject(MatchEngine e,GameCommand c) { var before=Json(e.State); Check(!e.Execute(c).Accepted,"Should reject"); Equal(Json(e.State),before,"Rejection mutated state"); }
 static CardInstance Find(MatchEngine e,string definition,int owner=0,Zone? zone=null)=>e.State.Cards.Values.First(c=>c.DefinitionId==definition && c.OwnerId==owner && (zone is null || c.Zone==zone));
 static string[] Sources(MatchEngine e,int owner=0)=>e.State.Cards.Values.Where(c=>c.OwnerId==owner && c.Zone is Zone.Home or Zone.Stronghold && !c.Bowed && CardCatalog.Get(c.DefinitionId).GoldProduction>0).Select(c=>c.Id).ToArray();
 static string ProvinceCard(MatchEngine e,int index=0,int owner=0)=>e.State.Players[owner].Provinces[index].CardId!;
@@ -184,6 +189,17 @@ static MatchEngine Battle(int attackForce=5,int defenseForce=2,int provinceStren
     var a=Add(s,"training-crane-veteran",0,Zone.Battlefield,attackBowed,0); a.Modifiers=[new("test-fixture","test-fixture","Force",attackForce-5)];
     var d=Add(s,"training-lion-veteran",1,Zone.Battlefield,false,0); d.Modifiers=[new("test-fixture","test-fixture","Force",defenseForce-6)];
     return MatchEngine.FromTestState(s);
+}
+static (MatchState State, CardInstance Attacker, CardInstance Defender) ForceBattleFixture(int attackForce,int defenseForce,int provinceStrength,bool bowed=false)
+{
+    var s=Battle(attackForce,defenseForce,provinceStrength,bowed).State;
+    return (s,s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield),
+        s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield));
+}
+static void AssertBattleForces(MatchEngine e,int attack,int defense)
+{
+    var result=e.GetView(0).Events.Single(ev=>ev.Type=="battleResolved").Message;
+    Check(result.Contains($"attacking Force {attack}, defending Force {defense}"),result);
 }
 static void Resolve(MatchEngine e) { Accept(e,Cmd(e,"pass")); Accept(e,Cmd(e,"pass")); }
 
@@ -213,7 +229,7 @@ static void Setup()
 {
     var e=MatchEngine.CreateStarterMatch(); var s=e.State;
     Equal(s.Phase,Phase.Action); Equal(s.ActivePlayerId,0); Equal(s.Version,0L);
-    foreach(var p in s.Players) { Equal(p.Provinces.Count,4); Equal(p.Hand.Count,6); Equal(p.DynastyDeck.Count,36); }
+    OpeningCounts(s);
     Check(Find(e,"training-bamboo",1).Bowed); Check(!s.Cards.Values.Any(c=>c.OwnerId==0 && c.DefinitionId=="training-bamboo"));
     Check(s.Players[0].Provinces.All(p=>s.Cards[p.CardId!].FaceUp));
     Check(s.Players[1].Provinces.All(p=>!s.Cards[p.CardId!].FaceUp));
@@ -224,7 +240,7 @@ static void Privacy()
     Equal(view.Players[0].Hand.Length,0); Equal(view.Players[0].HandCount,6); Equal(view.Players[1].Hand.Length,6);
     foreach(var p in view.Players[1].Provinces) { Check(p.Card!.Definition is null); Check(p.Card.Id.StartsWith("hidden-")); }
     var json=Json(view);
-    foreach(var id in s.Players[0].Hand.Concat(s.Players[0].FateDeck).Concat(s.Players[1].DynastyDeck)) Check(!json.Contains($"\"{id}\""),"Hidden card id leaked");
+    HiddenIdsAbsent(view,s.Players[0].Hand.Concat(s.Players[0].FateDeck).Concat(s.Players[1].DynastyDeck));
     var quote=e.QuotePurchase(1,ProvinceCard(e,owner:1)); Equal(quote.Cost,0); Check(quote.Error is not null);
     Check(!json.Contains("Seed"));
 }
@@ -376,8 +392,7 @@ static void FollowerForce()
     // Bowed Personality's OWN Force is suppressed, but its unbowed Follower still contributes
     // (issue #216 correctness fix): the attacker's own printed 5F is suppressed to 0, but the
     // Follower's unbowed 2F still counts, beating the defender's 1F.
-    var s=Battle(5,1,6,true).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
-    var enemy=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+    var (s,personality,enemy)=ForceBattleFixture(5,1,6,true);
     Add(s,"training-follower",0,Zone.Attached,attachedTo:personality.Id,province:0);
     var e=MatchEngine.FromTestState(s);
     Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==personality.Id).UnitForce,2,"Personality's own 5F suppressed while bowed; Follower's unbowed 2F still counts");
@@ -388,20 +403,20 @@ static void FollowerForce()
 static void EliteFollowerForce()
 {
     // With an unbowed zero-Force Personality, only the bowed Elite Follower counts.
-    var s=Battle(0,0,1,false).State; var personality=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var (s,personality,_)=ForceBattleFixture(0,0,1);
     Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
     var elite=Add(s,"training-follower",0,Zone.Attached,bowed:true,attachedTo:personality.Id,province:0);
     elite.GrantedKeywords=[new("Elite","test-fixture","Permanent")];
-    var e=MatchEngine.FromTestState(s); Resolve(e);
+    var e=MatchEngine.FromTestState(s); Resolve(e); AssertBattleForces(e,2,0);
     Check(e.State.Players[1].Provinces[0].Destroyed,"Bowed Elite Follower's Force should still count toward the attacking unit");
 }
 static void ElitePersonalityForce()
 {
     // A bowed Personality normally contributes nothing to its unit's Force; Elite is the exception,
     // whether printed or granted, same as for a Follower.
-    var s=Battle(9,0,1,true).State; var attacker=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var (s,attacker,_)=ForceBattleFixture(9,0,1,true);
     attacker.GrantedKeywords=[new("Elite","test-fixture","Permanent")];
-    var e=MatchEngine.FromTestState(s); Resolve(e);
+    var e=MatchEngine.FromTestState(s); Resolve(e); AssertBattleForces(e,9,0);
     Check(e.State.Players[1].Provinces[0].Destroyed,"A bowed Elite Personality's own Force should still count toward its unit");
 }
 static void BattleHonor()
@@ -609,14 +624,7 @@ static void EmptyDecks()
     var e=MatchEngine.FromTestState(s); Accept(e,Cmd(e,"discardProvince",id:ProvinceCard(e))); Check(e.State.Players[0].Provinces[0].CardId is null);
     Check(!e.State.Players[0].Provinces[0].Destroyed); var hand=e.State.Players[0].Hand.Count; Accept(e,Cmd(e,"endDynasty")); Equal(e.State.Players[0].Hand.Count,hand);
 }
-static void ActionQueries()
-{
-    foreach(var source in new[] {MatchEngine.CreateEconomyScenario(),MatchEngine.CreateStarterMatch()})
-        foreach(var action in source.QueryActions(source.State.PriorityPlayerId).Where(a=>a.Enabled && a.Command is not null))
-        {
-            var clone=MatchEngine.Replay(source.ExportReplay()); Accept(clone,action.Command!);
-        }
-}
+static void ActionQueries(MatchEngine source) => OfferedCommandsValidate(source,()=>MatchEngine.Replay(source.ExportReplay()));
 static void AssignmentRollback()
 {
     var s=MatchEngine.CreateStarterMatch().State; s.Phase=Phase.AttackDeclaration;
@@ -1720,10 +1728,9 @@ static void ShiroShibaAttack()
 // Presentation consumes the same authoritative contribution used by ResolveBattle.
 static (MatchState State, CardInstance Parent, CardInstance Follower) UnitViewFixture()
 {
-    var s=Battle(2,0,20).State;
-    var p=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+    var (s,p,_)=ForceBattleFixture(2,0,20);
     var f=Add(s,"training-follower",0,Zone.Attached,attachedTo:p.Id,province:0);
-    f.Modifiers=[new("fixture","fixture","Force",5-CardCatalog.Get(f.DefinitionId).Force)];
+    f.Modifiers=[new("fixture","fixture","Force",3)]; // Printed 2F plus 3F gives the fixture 5F.
     return(s,p,f);
 }
 static CardView UnitView(MatchState s,string id) => MatchEngine.FromTestState(s).GetView(0).Players[0].Army.Single(c=>c.Id==id);
@@ -1734,29 +1741,29 @@ static void UnitViewClamp()
     Equal(UnitView(s,p.Id).Force,0); Equal(UnitView(s,p.Id).UnitForce,5);
     Equal(UnitView(s,f.Id).Force,5); Equal(UnitView(s,f.Id).UnitForce,null);
 }
-static void UnitViewBows()
+static void UnitViewBows(bool followerBowed,bool personalityElite,bool followerElite,int expected)
 {
-    var(s,p,f)=UnitViewFixture();
-    // Bowed Personality: only its OWN 2F is suppressed (issue #216 correctness fix) -- the
-    // still-unbowed Follower's own 5F still joins the unit total.
-    p.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,5);
-    // Both bowed, neither Elite: the whole unit is now suppressed.
-    f.Bowed=true; Equal(UnitView(s,p.Id).UnitForce,0);
-    // The bowed Follower's own Elite EFFECT lets it count despite being bowed itself, independently
-    // of the (still bowed, still non-Elite, still suppressed) Personality.
-    f.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,5);
-    p.GrantedKeywords=[new("Elite","fixture","Permanent")]; Equal(UnitView(s,p.Id).UnitForce,7);
+    var(s,p,f)=UnitViewFixture(); p.Bowed=true; f.Bowed=followerBowed;
+    if(personalityElite) p.GrantedKeywords=[new("Elite","fixture","Permanent")];
+    if(followerElite) f.GrantedKeywords=[new("Elite","fixture","Permanent")];
+    Equal(UnitView(s,p.Id).UnitForce,expected);
+}
+static void UnitViewRemoval()
+{
+    var(s,p,f)=UnitViewFixture(); p.Bowed=true; f.Bowed=true;
+    p.GrantedKeywords=[new("Elite","fixture","Permanent")];
+    f.GrantedKeywords=[new("Elite","fixture","Permanent")];
+    Equal(UnitView(s,p.Id).UnitForce,7);
     f.Zone=Zone.FateDiscard; f.AttachedTo=null; Equal(UnitView(s,p.Id).UnitForce,2);
     p.Zone=Zone.Home; p.ProvinceIndex=null;
     Equal(MatchEngine.FromTestState(s).GetView(0).Players[0].Home.Single(c=>c.Id==p.Id).UnitForce,2);
 }
 static void UnitViewResolution()
 {
-    var(s,p,f)=UnitViewFixture(); var item=Add(s,"training-item",0,Zone.Attached,bowed:true,attachedTo:p.Id,province:0);
-    var bonus=CardCatalog.Get(item.DefinitionId).Force;
-    Equal(UnitView(s,p.Id).Force,2+bonus); Equal(UnitView(s,p.Id).UnitForce,7+bonus);
-    var e=MatchEngine.FromTestState(s); var total=UnitView(s,p.Id).UnitForce;
-    Resolve(e); Check(e.GetView(0).Events.Single(ev=>ev.Type=="battleResolved").Message.Contains($"attacking Force {total},"));
+    var(s,p,f)=UnitViewFixture(); Add(s,"training-item",0,Zone.Attached,bowed:true,attachedTo:p.Id,province:0);
+    Equal(UnitView(s,p.Id).Force,4); Equal(UnitView(s,p.Id).UnitForce,9);
+    var e=MatchEngine.FromTestState(s);
+    Resolve(e); AssertBattleForces(e,9,0);
     Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==p.Id).UnitForce,0,"Returning bowed units must refresh the projection");
 }
 static void UnitViewPrivacy()
@@ -1771,40 +1778,36 @@ static void UnitViewPrivacy()
     payload.Remove("UnitForce"); Equal(JsonSerializer.Deserialize<CardView>(payload.ToJsonString())!.UnitForce,null);
 }
 
-static void BowedPersonalityResolution()
+static void BowedPersonalityResolution(int owner,bool provinceDestroyed,int attackingForce,int defendingForce)
 {
-    foreach(var owner in new[]{0,1})
-    {
-        var s=Battle(1,1,6).State;
-        var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
-        var opposing=s.Cards.Values.Single(c=>c.OwnerId==1-owner && c.Zone==Zone.Battlefield); // untouched, Force 1
-        p.DefinitionId=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
-        p.Modifiers.Clear(); p.Bowed=true;
-        var guide=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
-        Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
-        Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
-        var e=MatchEngine.FromTestState(s);
-        var bowedCards=e.GetView(owner).Players[owner].Army;
-        var card=bowedCards.Single(c=>c.Id==p.Id);
-        // Bowed Personality's OWN Force is suppressed (0), but its two unbowed Native Guides (5F
-        // each) still contribute -- issue #216 correctness fix, so this unit's own UnitForce is 10,
-        // not 0, and now beats rather than loses to the opposing 1F unit.
-        Equal(card.Force,3); Equal(card.Chi,3); Equal(card.UnitForce,10);
-        Resolve(e);
-        Check(e.State.Cards[p.Id].Zone!=Zone.Dead,"The bowed Personality's own side wins (10 vs 1) thanks to its unbowed Followers -- it is not destroyed");
-        Equal(e.State.Cards[opposing.Id].Zone,Zone.Dead,"The 1F opposing unit loses instead");
-        // Only an ATTACKER's win can destroy the DEFENDER's own province -- owner 0 is the attacker
-        // here (Battle()'s own convention), so only that iteration's own win (10 vs 1, with a
-        // Province Strength of 6) destroys it (10 > 1+6).
-        Equal(e.State.Players[1].Provinces[0].Destroyed,owner==0);
-        var result=e.GetView(owner).Events.Single(ev=>ev.Type=="battleResolved").Message;
-        Check(result.Contains(owner==0?"attacking Force 10, defending Force 1":"attacking Force 1, defending Force 10"),result);
-        p.Bowed=false;
-        var ready=MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army.Single(c=>c.Id==p.Id);
-        Equal(ready.Force,3); Equal(ready.Chi,3); Equal(ready.UnitForce,13);
-        if(owner==0 && Environment.GetEnvironmentVariable("L5R_UNIT_VIEW_FIXTURE") is { Length: >0 } output)
-            File.WriteAllText(output,Json(new[]{bowedCards,MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army}));
-    }
+    var s=Battle(1,1,6).State;
+    var p=s.Cards.Values.Single(c=>c.OwnerId==owner && c.Zone==Zone.Battlefield);
+    var opposing=s.Cards.Values.Single(c=>c.OwnerId==1-owner && c.Zone==Zone.Battlefield); // untouched, Force 1
+    p.DefinitionId=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Akodo Kisho").Id; // Force 3, Chi 3
+    p.Modifiers.Clear(); p.Bowed=true;
+    var guide=PublishedContent.TestSnapshot.Cards.Single(d=>d.Name=="Native Guide").Id;
+    Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
+    Add(s,guide,owner,Zone.Attached,attachedTo:p.Id,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var bowedCards=e.GetView(owner).Players[owner].Army;
+    var card=bowedCards.Single(c=>c.Id==p.Id);
+    // Bowed Personality's OWN Force is suppressed (0), but its two unbowed Native Guides (5F
+    // each) still contribute -- issue #216 correctness fix, so this unit's own UnitForce is 10,
+    // not 0, and now beats rather than loses to the opposing 1F unit.
+    Equal(card.Force,3); Equal(card.Chi,3); Equal(card.UnitForce,10);
+    Resolve(e);
+    Check(e.State.Cards[p.Id].Zone!=Zone.Dead,"The bowed Personality's own side wins (10 vs 1) thanks to its unbowed Followers -- it is not destroyed");
+    Equal(e.State.Cards[opposing.Id].Zone,Zone.Dead,"The 1F opposing unit loses instead");
+    // Only an ATTACKER's win can destroy the DEFENDER's own province -- owner 0 is the attacker
+    // here (Battle()'s own convention), so only that iteration's own win (10 vs 1, with a
+    // Province Strength of 6) destroys it (10 > 1+6).
+    Equal(e.State.Players[1].Provinces[0].Destroyed,provinceDestroyed);
+    AssertBattleForces(e,attackingForce,defendingForce);
+    p.Bowed=false;
+    var ready=MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army.Single(c=>c.Id==p.Id);
+    Equal(ready.Force,3); Equal(ready.Chi,3); Equal(ready.UnitForce,13);
+    if(owner==0 && Environment.GetEnvironmentVariable("L5R_UNIT_VIEW_FIXTURE") is { Length: >0 } output)
+        File.WriteAllText(output,Json(new[]{bowedCards,MatchEngine.FromTestState(s).GetView(owner).Players[owner].Army}));
 }
 
 static void BattleJournalProjection()
