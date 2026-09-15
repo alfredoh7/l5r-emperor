@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Started approved candlelit room architecture milestone in isolated paths; source archived unchanged.",
+  "validation": "Planning checkpoint only: approved source hash recorded, current main verified through GitHub API, no implementation validation yet.",
+  "remaining": "Build and inspect Blender architecture and native review; pause for user feedback before further milestones. No Meshy credits spent.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/233",
+  "branch": "codex/233-war-room",
+  "updated": "2026-09-15T07:37:01.497543+00:00"
+}
