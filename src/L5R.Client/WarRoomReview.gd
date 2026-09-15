@@ -59,7 +59,7 @@ func _ready() -> void:
     reference.visible = false
     overlay.add_child(reference)
     status = Label.new()
-    status.text = "FORTRESS HALL · B3     1 Composition  ·  2 Overview  ·  3 Joinery  ·  R Reference  ·  Wheel / drag: inspect  ·  Home Reset"
+    status.text = "FORTRESS HALL · B3     1 Composition  ·  2 Overview  ·  3 Joinery  ·  4 Floor  ·  5/6 Lanterns  ·  R Reference  ·  Wheel / drag: inspect  ·  Home Reset"
     status.add_theme_font_override("font", load("res://Art/Fonts/Alegreya.ttf"))
     status.add_theme_font_size_override("font_size", 16)
     status.add_theme_color_override("font_color", Color("f2dfb6"))
@@ -114,6 +114,11 @@ func layout() -> void:
         camera.set_perspective(44 * zoom, .02, 30)
         camera.position = pan + Vector3(0, 3.5, 4.5)
         camera.look_at(pan + Vector3(0, .06, -.55))
+    elif view_name == "floor":
+        camera.set_perspective(42 * zoom, .002, 30)
+        var target := pan + Vector3(-1.30, -.16, -.45)
+        camera.position = target + Vector3(0, .80*.64, .80*sqrt(1.0-.64*.64))
+        camera.look_at(target)
     elif view_name == "table-lantern":
         camera.set_perspective(37 * zoom, .002, 30)
         camera.position = pan + Vector3(-.775,.044+.24*.64,.296+.24*sqrt(1.0-.64*.64))
@@ -139,6 +144,9 @@ func _input(event: InputEvent) -> void:
             KEY_1: view_name = "composition"; zoom = 1.0; pan = Vector3.ZERO
             KEY_2: view_name = "overview"; zoom = 1.0; pan = Vector3.ZERO
             KEY_3: view_name = "joinery"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_4: view_name = "floor"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_5: view_name = "table-lantern"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_6: view_name = "room-lantern"; zoom = 1.0; pan = Vector3.ZERO
             KEY_R: reference.visible = not reference.visible
             KEY_HOME: zoom = 1.0; pan = Vector3.ZERO
             KEY_ESCAPE: get_tree().quit()

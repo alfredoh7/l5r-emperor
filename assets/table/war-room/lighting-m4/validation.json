@@ -1,0 +1,270 @@
+{
+  "milestone": 4,
+  "date": "2026-09-15",
+  "base_commit": "ca9f0523b848d41e438e7836b0188acbc81aca60",
+  "scope": "Static room material and lighting refinement after Alfredo accepted milestone 3; no rules, camera, board geometry or new room animation changes.",
+  "build": {
+    "result": "pass",
+    "warnings": 0,
+    "errors": 0,
+    "log_sha256": "632cf47c58dd18043fb4c40e56b757981002a9e2da7a3559a79e8ec643aeeeab"
+  },
+  "godot_import": {
+    "result": "pass",
+    "log_sha256": "bd2e70cecc0d97eda703106312ca03ff834582b81d69adcc7c4b145a230b5f53"
+  },
+  "native_environment": "macOS Apple M1 Max; Godot 4.7.2 .NET Compatibility; .NET 10.0.400",
+  "native_suite": {
+    "command": "bash tools/check-war-room-live.sh",
+    "seven_cases_passed": true,
+    "log_sha256": "81d7ced206d428d9202c77960b79e51a0ef7fcc49553cb0bb2b345bad2e4cdc6"
+  },
+  "native_cases_and_launcher": [
+    {
+      "name": "playable",
+      "passed": true,
+      "visible_samples": 821,
+      "max_projection_error_px": 0.000195,
+      "offscreen_or_behind_eye_excluded": 29,
+      "log_sha256": "dff195fe0fe74d769d2919655275b9dc043f29a400f7f0ad0908f8eed19ede8a"
+    },
+    {
+      "name": "battle-focus",
+      "passed": true,
+      "visible_samples": 747,
+      "max_projection_error_px": 0.000281,
+      "offscreen_or_behind_eye_excluded": 3,
+      "log_sha256": "6ab51642b669aef69e7d70e01ec8722cb685a424595dd0db55b98193b481f8ee"
+    },
+    {
+      "name": "max-zoom",
+      "passed": true,
+      "visible_samples": 753,
+      "max_projection_error_px": 0.000173,
+      "offscreen_or_behind_eye_excluded": 22,
+      "log_sha256": "a01a90bb1ef5ceab06bf734a75c7fa388f3eecd69b35b69a4487b9b428a45b7c"
+    },
+    {
+      "name": "wide",
+      "passed": true,
+      "visible_samples": 775,
+      "max_projection_error_px": 0.000252,
+      "offscreen_or_behind_eye_excluded": 0,
+      "log_sha256": "58fa271a606c852b72c660a507877043fa200db60ff328b739549b078f39ba40"
+    },
+    {
+      "name": "compact",
+      "passed": true,
+      "visible_samples": 750,
+      "max_projection_error_px": 0.000252,
+      "offscreen_or_behind_eye_excluded": 0,
+      "log_sha256": "17a5aa128531f2b1fdf3d84134c3729b27a7cd90e87e9dc57253caf749f9ccd4"
+    },
+    {
+      "name": "expanded",
+      "passed": true,
+      "visible_samples": 250,
+      "max_projection_error_px": 0.000173,
+      "offscreen_or_behind_eye_excluded": 0,
+      "log_sha256": "13fa6f948769fd2c7f519081faf8b0913bc0ecfe2aeb8bb1a083eec2a5468912"
+    },
+    {
+      "name": "reduced-motion",
+      "passed": true,
+      "visible_samples": 275,
+      "max_projection_error_px": 0.000173,
+      "offscreen_or_behind_eye_excluded": 0,
+      "log_sha256": "f7bba09dd6ad3f3b37fc55efa695e616121250eb6c62e1f4aaaf914fa9c059db"
+    },
+    {
+      "name": "launcher",
+      "passed": true,
+      "visible_samples": 225,
+      "max_projection_error_px": 0.000153,
+      "offscreen_or_behind_eye_excluded": 0,
+      "log_sha256": "067bf7fc9d86d61d2653648ea9124701e26afd4b2ae4f02085aa2d0f3fde4873"
+    }
+  ],
+  "isolated_room_views": [
+    "composition",
+    "floor",
+    "table-lantern",
+    "room-lantern"
+  ],
+  "launcher": "Play Latest.command ran with Finder-style PATH=/usr/bin:/bin:/usr/sbin:/sbin; capture-mode=published-board; exit 0.",
+  "blender_bake": {
+    "result": "pass",
+    "version": "5.2.1 LTS",
+    "receipt": "provenance.json",
+    "log_sha256": "81dddc8a9fc3703bd86feba77ec9e2b192a404af08b736cdb64d757345ff1d05",
+    "technique": "Custom denoised static floor direct/indirect illumination, separate contact AO in EXR alpha; not whole-room GI."
+  },
+  "images": [
+    {
+      "path": "docs/screenshots/war-room/milestone-4/battle-focus.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 3127407,
+      "sha256": "c82e690ec6a2721e01f47cc522eb9d040c6e833d5df7649c6f4093b39cd4977d",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/compact.png",
+      "size": [
+        1440,
+        900
+      ],
+      "bytes": 2036131,
+      "sha256": "139fd3cb56fd80e828c6c3431ad6983e9f983d99666553403cc55e77d50d3f26",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/composition.png",
+      "size": [
+        1672,
+        942
+      ],
+      "bytes": 1987825,
+      "sha256": "b424a58a22490d1b6c5baeed38eee13bab7a7934b92dd7f1fe78aacfa3342d10",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/expanded.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 3070498,
+      "sha256": "00ce4d5c2d70e31bf5adb5bcf6b38fddeff742882bac8df47d95c5e87bb31450",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/floor.png",
+      "size": [
+        1672,
+        942
+      ],
+      "bytes": 2143731,
+      "sha256": "11d9633dd8bfbf42e4133bbd1022dda6fd06034174f6ab04951d4de41c7e6086",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/launcher.png",
+      "size": [
+        1672,
+        942
+      ],
+      "bytes": 2436291,
+      "sha256": "cd8371512c158607dfe4b106c6a672aac7f6e7cf81950da6e8f383b696535a5b",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/max-zoom.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 2582535,
+      "sha256": "35777667b3dc89a71688462cffcec9ffe8dcf04198893a3fa26dfd3376ed5b32",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/playable.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 3199930,
+      "sha256": "a943c8bb28d16587b9ee2d94458593a35d927a3c65ae3e5a9ee82c7331241b85",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/reduced-motion.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "bytes": 3250738,
+      "sha256": "43b50afc5d17e4932c7a36b4a23b1f4eef16b0a0337bf022ee1b5881d838a28d",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/room-lantern.png",
+      "size": [
+        1672,
+        942
+      ],
+      "bytes": 760525,
+      "sha256": "3096f7a331dfde2467b07a84111a5fab0b43956df8e6cbe124e7d72988e5ae83",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/table-lantern.png",
+      "size": [
+        1672,
+        942
+      ],
+      "bytes": 1988938,
+      "sha256": "ba47d8f8e232f0e7f7062db41b7499695562b5f81d7cb91b3521966825852a0f",
+      "visually_inspected": true
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-4/wide.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "bytes": 4083093,
+      "sha256": "f2cdbf410ea13c3cf9f38f86a90c13d1e0bbf81c6171642cf65ab88f23ad32ab",
+      "visually_inspected": true
+    }
+  ],
+  "preserved_assets": [
+    {
+      "path": "assets/table/war-room/approved-fortress-hall-b3.png",
+      "sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "assets/table/war-room/fortress-hall-b3.blend",
+      "sha256": "bdfdcda2a1a2b9fea918181aaed2ac1ea288d99bd522d978a4cdd3f7d741bebe",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "assets/table/war-room/layout-b3.json",
+      "sha256": "151cdd7efe8b4bfa0427727de531fc97b567ec9ef7991a860ad16055774519b3",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/L5R.Client/Art/WarRoom/fortress-hall-b3.glb",
+      "sha256": "9103294064476728b7de954254215a694ace1d49a84be0de277f0c569ef9889a",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/L5R.Client/Art/navy-mat-topaz-4x.webp",
+      "sha256": "932b3cadd4deea8352fe37b90b01e15b1e833f2d7757a773cbc23a172b47bc32",
+      "unchanged_from_base": true
+    },
+    {
+      "path": "src/L5R.Client/Art/LacquerFrame/lacquer-frame-a.glb",
+      "sha256": "f5099c4f67c77c4d7dfbf97450eb8adeb6f4998d1ed5ec4e0aeea4ef853d8136",
+      "unchanged_from_base": true
+    }
+  ],
+  "meshy": {
+    "new_jobs": 0,
+    "new_credits_spent": 0,
+    "existing_five_jobs_preserved": true
+  },
+  "iteration": "Rejected an early dark/noisy low-sample bake. Removed an unavailable compositor Denoise.prefilter property after a diagnostic API error. Final 128-sample bake, denoising, short-range AO, native exposure and candle seating verified in the final captures.",
+  "limitations": [
+    "Exact pixel-equivalence and milestone-4 human visual acceptance are not claimed.",
+    "Floor illumination is static and requires rebaking if practical lights or major occluders move; room animation remains deferred.",
+    "Architecture and props retain native direct/ambient lighting; this is not whole-room LightmapGI.",
+    "Distant scenery remains finite-resolution source artwork.",
+    "No native Windows graphical playtest or sustained FPS/performance claim.",
+    "Native automated checks are not expert rules or full-match acceptance."
+  ]
+}

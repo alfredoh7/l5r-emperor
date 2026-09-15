@@ -4,6 +4,10 @@ Alfredo approved the chair-free, sparse fortress hall on 2026-09-15 and requeste
 
 The approval and exact source hash are in `approval-b3.json`. `approved-fortress-hall-b3.png` is the unmodified approved image. No chairs, carpet, armour display, banners, rear table, loose scroll piles, foreground side cabinets or new furnishing categories are added.
 
+## Current refinement
+
+Alfredo accepted the native milestone-3 room and requested continuation. The next static pass adds a Blender-baked, denoised floor light field and contact shading while preserving the approved geometry and Meshy assets. See `lighting-m4/README.md`, its validation record and `docs/screenshots/war-room/milestone-4/index.html` for the latest source/native and before/after comparisons. No additional Meshy jobs were submitted.
+
 ## Current implementation
 
 - Editable low table support, hall floor, columns, beams, open bays and veranda rails, empty stepped dais, map screen, sparse perimeter chests, weapon racks and left brazier.
@@ -34,4 +38,4 @@ The source illustration uses corrected architectural verticals while the existin
 
 See `validation-b3.json` and `docs/screenshots/war-room/milestone-3/index.html` for the actual tested revision and captures. Native visual checks supplement camera/input assertions; passing them does not prove a pixel-perfect visual match or human approval.
 
-The current pass is a static room/prop review milestone. The room has real modeled geometry and relightable props, but the landscape is cropped background artwork, with finite resolution and deliberate reframing to fill the open bays. The existing native renderer uses Compatibility; the current lighting is a set of direct practical lights and manual ambient/fill, not baked global illumination. The source's precise material finish, distant vista detail and illumination remain visual acceptance items; do not describe this as a proven 1:1 full-screen reconstruction. New room animation, native Windows graphical acceptance and sustained performance profiling remain separate. Keep PR #234 draft until visual acceptance and relevant CI/review are complete.
+The current pass is a static room/prop review milestone. The room has real modeled geometry and relightable props, but the landscape is cropped background artwork, with finite resolution and deliberate reframing to fill the open bays. The existing native renderer uses Compatibility; the room uses direct practical lights and manual ambient/fill, supplemented by the M4 baked floor light field. This is not whole-room baked global illumination. The source's precise material finish, distant vista detail and illumination remain visual acceptance items; do not describe this as a proven 1:1 full-screen reconstruction. New room animation, native Windows graphical acceptance and sustained performance profiling remain separate. Keep PR #234 draft until visual acceptance and relevant CI/review are complete.

@@ -106,7 +106,7 @@ public partial class FortressHall : Node3D
             var light = new OmniLight3D
             {
                 Name = "PracticalLight", Position = position + new Vector3(0,height*.49f,-height*.49f*.833f),
-                LightColor = new Color("ffb264"), LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
+                LightColor = new Color("ffb264"), LightSpecular = .38f, LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
                 OmniRange = lamp.GetProperty("radius").GetSingle() * 1.25f, OmniAttenuation = 1.0f,
                 ShadowEnabled = kind == "table" || lamp.GetProperty("name").GetString()!.EndsWith("_0"),
                 ShadowBias = .008f, ShadowNormalBias = .025f
@@ -142,8 +142,18 @@ public partial class FortressHall : Node3D
             MaterialOverride = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/practical-glow.gdshader") },
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off });
         if (kind == "room")
-            prop.AddChild(new MeshInstance3D { Name="WaxCandle", Mesh=new CylinderMesh { TopRadius=.048f, BottomRadius=.05f,Height=.23f,RadialSegments=16 },
-                Position=new Vector3(0,.30f,0), MaterialOverride=new StandardMaterial3D { AlbedoColor=new Color("d8b977"),Roughness=.9f } });
+        {
+            // Seat the candle in the existing Meshy socket, covering the residual
+            // generated bulb stem. The wick anchors the separate flame visually.
+            var wax = new StandardMaterial3D { AlbedoColor = new Color("d8b977"), Roughness = .95f, MetallicSpecular = .12f };
+            prop.AddChild(new MeshInstance3D { Name="WaxCandle", Mesh=new CylinderMesh { TopRadius=.048f, BottomRadius=.054f,Height=.315f,RadialSegments=32 },
+                Position=new Vector3(0,.275f,0), MaterialOverride=wax });
+            prop.AddChild(new MeshInstance3D { Name="CharredWick", Mesh=new CylinderMesh { TopRadius=.003f, BottomRadius=.004f,Height=.023f,RadialSegments=8 },
+                Position=new Vector3(0,.441f,0), Rotation=new Vector3(0,0,-.13f),
+                MaterialOverride=new StandardMaterial3D { AlbedoColor=new Color("1b100b"),Roughness=1 } });
+            prop.AddChild(new MeshInstance3D { Name="CandleSocket", Mesh=new CylinderMesh { TopRadius=.062f, BottomRadius=.068f,Height=.018f,RadialSegments=24 },
+                Position=new Vector3(0,.120f,0), MaterialOverride=new StandardMaterial3D { AlbedoColor=new Color("594126"),Metallic=.65f,Roughness=.65f } });
+        }
         var glass = new StandardMaterial3D { Transparency = BaseMaterial3D.TransparencyEnum.Alpha,
             AlbedoColor = new Color(1, .52f, .16f, .14f), Roughness = .32f, Metallic = .05f,
             CullMode = BaseMaterial3D.CullModeEnum.Disabled, EmissionEnabled = true,
@@ -173,6 +183,15 @@ public partial class FortressHall : Node3D
         // Spatial partitions retain local light selection and culling; a single
         // hall-sized batch loses practical lights on Compatibility's light limit.
         var groups = new Dictionary<(Material, int, int), SurfaceTool>();
+        ShaderMaterial? bakedFloor = null;
+        if (ResourceLoader.Exists("res://Art/WarRoom/floor-irradiance-m4.exr") && !OS.GetCmdlineUserArgs().Contains("--room-no-baked-floor"))
+        {
+            bakedFloor = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/floor-lighting-m4.gdshader") };
+            bakedFloor.SetShaderParameter("wood_colour", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-albedo.jpg"));
+            bakedFloor.SetShaderParameter("wood_normal", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-normal.jpg"));
+            bakedFloor.SetShaderParameter("wood_roughness", GD.Load<Texture2D>("res://Art/WarRoom/floor-roughness-m4.jpg"));
+            bakedFloor.SetShaderParameter("irradiance", GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m4.exr"));
+        }
         foreach (var mesh in room.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().ToArray())
         {
             if (mesh.Name.ToString().Replace("_", "").Replace(" ", "").StartsWith("Staticember"))
@@ -183,7 +202,8 @@ public partial class FortressHall : Node3D
                 if (material is StandardMaterial3D vista && material.ResourceName == "Approved distant dusk scenery")
                 {
                     vista.ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded;
-                    vista.EmissionEnabled = false; vista.AlbedoColor = new Color(.72f,.72f,.72f);
+                    vista.EmissionEnabled = false; vista.AlbedoColor = new Color(.79f,.80f,.83f);
+                    vista.TextureFilter = BaseMaterial3D.TextureFilterEnum.LinearWithMipmapsAnisotropic;
                 }
                 if (material is StandardMaterial3D standard && material.ResourceName.StartsWith("Fortress"))
                 {
@@ -194,6 +214,8 @@ public partial class FortressHall : Node3D
                     standard.Roughness = material.ResourceName.Contains("floor") ? .30f : .68f;
                     standard.NormalScale = .48f;
                 }
+                if (material.ResourceName == "Fortress polished worn floor" && bakedFloor is not null)
+                    material = bakedFloor;
                 if (material.ResourceName == "Earthen plaster")
                     material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/earthen-plaster.gdshader") };
                 var batchCentre = mesh.Transform * mesh.GetAabb().GetCenter();

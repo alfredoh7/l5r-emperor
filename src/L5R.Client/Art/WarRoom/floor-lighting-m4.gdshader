@@ -1,0 +1,25 @@
+shader_type spatial;
+render_mode ambient_light_disabled;
+// Cycles direct/bounce irradiance, separate from the original scanned grain.
+uniform sampler2D wood_colour : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D wood_normal : hint_normal, filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D wood_roughness : filter_linear_mipmap_anisotropic, repeat_enable;
+uniform sampler2D irradiance : filter_linear_mipmap, repeat_disable;
+uniform float exposure = 1.0;
+varying vec3 world_position;
+varying vec3 wood_tint;
+void vertex() { world_position = (MODEL_MATRIX * vec4(VERTEX,1.0)).xyz; wood_tint=COLOR.rgb; }
+void fragment() {
+    vec2 light_uv = vec2((world_position.x + 2.5) / 5.0, (world_position.z + 2.25) / 3.8);
+    vec3 grain = texture(wood_colour,UV).rgb * wood_tint * vec3(.78,.73,.66);
+    float inside = smoothstep(0.0,.06,light_uv.x)*smoothstep(0.0,.06,1.0-light_uv.x)*smoothstep(0.0,.06,light_uv.y)*smoothstep(0.0,.06,1.0-light_uv.y);
+    vec3 illumination = mix(vec3(.025,.028,.035),texture(irradiance,clamp(light_uv,vec2(0.0),vec2(1.0))).rgb,inside);
+    // Keep native light specular/normal response; diffuse energy is baked once.
+    ALBEDO=vec3(0.0);
+    float contact=mix(1.0,texture(irradiance,clamp(light_uv,vec2(0.0),vec2(1.0))).a,inside);
+    EMISSION=grain*(vec3(.48,.50,.55)*pow(contact,1.2)+illumination*3.0)*exposure;
+    NORMAL_MAP=texture(wood_normal,UV).rgb;
+    NORMAL_MAP_DEPTH=.32;
+    ROUGHNESS=mix(.31,.56,texture(wood_roughness,UV).r);
+    SPECULAR=.25;
+}
