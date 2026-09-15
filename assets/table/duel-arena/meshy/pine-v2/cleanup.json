@@ -1,0 +1,11 @@
+{
+  "source_triangles": 7641180,
+  "runtime_triangles": 220000,
+  "vertices": 105436,
+  "uv_layers": 1,
+  "uv_finite": true,
+  "method": "Exact positional weld; decimate high Meshy source to 220k; nearest source face per target triangle and clamped barycentric UV interpolation; reuse original PBR maps.",
+  "source_sha256": "81c821e81645f3f41bb10fa93b6b24a8daceebff32d9fead67b71b9f81a46614",
+  "textured_source_sha256": "fc949ede9a5bac9309948527434a9cd9d928cc4b9edbe1497b6a7d54d6c85911",
+  "cleaned_sha256": "1f7ac6350df30b3a1bfd97e2005e6a41ab538efc9c2ae61cfe85684bccc45bba"
+}

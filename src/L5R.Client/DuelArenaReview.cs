@@ -22,11 +22,12 @@ public partial class DuelArenaReview : Control
     private readonly List<Control> _fixed = [];
     private CardTile? _reading;
     private bool _showReference, _revealed, _crowded, _bowed, _sidebar;
-    private bool _clean, _lanternDetail, _matDetail;
+    private bool _clean, _lanternDetail, _matDetail, _pineDetail, _pineReverse;
     private Texture2D _compositionSource = null!, _matSource = null!, _lanternSource = null!;
+    private Texture2D _pineSource = null!, _pineReverseSource = null!;
     private bool _selfCheck;
     private string? _capture;
-    private string _title = "Duel arena · iteration 3";
+    private string _title = "Duel arena · iteration 4";
     private double _elapsed;
     private int _checkStep, _inspections;
     private float _zoom = 1, _density;
@@ -48,12 +49,14 @@ public partial class DuelArenaReview : Control
             _clean |= arg == "--clean";
             _lanternDetail |= arg == "--lantern";
             _matDetail |= arg == "--mat";
+            _pineDetail |= arg == "--pine";
+            _pineReverse |= arg == "--reverse";
         }
         Theme = Palette.MakeTheme();
         _world = new SubViewport { OwnWorld3D = true, RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
             HandleInputLocally = false, Msaa3D = Viewport.Msaa.Msaa4X };
         AddChild(_world);
-        _model = GD.Load<PackedScene>("res://Art/DuelArena/duel-arena-v3.glb").Instantiate<Node3D>();
+        _model = GD.Load<PackedScene>("res://Art/DuelArena/duel-arena-v4.glb").Instantiate<Node3D>();
         _world.AddChild(_model);
         var matMesh = (MeshInstance3D)_model.FindChild("ApprovedDuelMat", true, false);
         var originalMaterial = (BaseMaterial3D)matMesh.GetActiveMaterial(0);
@@ -88,6 +91,7 @@ public partial class DuelArenaReview : Control
             ProjectSettings.GlobalizePath("res://../../assets/ui/duel-arena/" + name)));
         _compositionSource = Source("approved-generation-3.png");
         _matSource = Source("approved-duel-mat.png"); _lanternSource = Source("approved-stone-lantern.png");
+        _pineSource = Source("approved-pine-primary.png"); _pineReverseSource = Source("approved-pine-reverse.png");
         _reference = new TextureRect { Texture = _compositionSource,
             ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.KeepAspectCentered,
             MouseFilter = MouseFilterEnum.Ignore };
@@ -97,7 +101,7 @@ public partial class DuelArenaReview : Control
         _hud = new Control { MouseFilter = MouseFilterEnum.Ignore }; AddChild(_hud);
         GetViewport().SizeChanged += Layout;
         Layout();
-        GD.Print("DUEL_LAYOUT: approved mat, imported Meshy lantern, real published scans, TableSurface camera. No gameplay commands.");
+        GD.Print("DUEL_LAYOUT: approved mat, Meshy lantern and pine, real published scans, TableSurface camera. No gameplay commands.");
     }
 
     private Vector2 LayoutAnchor(string name)
@@ -113,9 +117,10 @@ public partial class DuelArenaReview : Control
         foreach (var c in _hud.GetChildren()) { _hud.RemoveChild(c); c.QueueFree(); }
         _cards.Clear(); _fixed.Clear(); _reading = null;
         var screen = GetViewportRect().Size;
-        var detail = _lanternDetail || _matDetail;
+        var detail = _lanternDetail || _matDetail || _pineDetail;
         _environment.Environment.AmbientLightEnergy = detail ? .55f : .25f;
         _keyLight.LightEnergy = detail ? .8f : .4f;
+        _keyLight.RotationDegrees = new Vector3(-62, _pineDetail && _pineReverse ? 155 : -25, 0);
         foreach (var light in _lanternLights) light.Visible = !detail;
         var side = _sidebar ? Math.Min(260, screen.X * .20f) : 0;
         _play = new Rect2(Vector2.Zero, new Vector2(detail ? screen.X / 2 : screen.X - side, screen.Y));
@@ -127,7 +132,7 @@ public partial class DuelArenaReview : Control
         _camera.LookAt(Vector3.Zero);
         _camera.Fov = Mathf.RadToDeg(2 * Mathf.Atan(_play.Size.Y / (2 * Distance * Unit * _density)));
         foreach (var child in _model.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>())
-            child.Visible = !detail || (_lanternDetail ? child.Name == "StoneLanternLeft" : child.Name == "ApprovedDuelMat");
+            child.Visible = !detail || child.Name == (_lanternDetail ? "StoneLanternLeft" : _pineDetail ? "PineLeft" : "ApprovedDuelMat");
         if (_lanternDetail)
         {
             var lantern = (Node3D)_model.FindChild("StoneLanternLeft", true, false);
@@ -141,7 +146,18 @@ public partial class DuelArenaReview : Control
             _camera.Position = new Vector3(0, 12, -1.2f); _camera.RotationDegrees = new Vector3(-90, 0, 0);
             _camera.Size = Math.Max(7.8f, 16 / (_play.Size.X / _play.Size.Y));
         }
-        _reference.Texture = _lanternDetail ? _lanternSource : _matDetail ? _matSource : _compositionSource;
+        if (_pineDetail)
+        {
+            var pine = (MeshInstance3D)_model.FindChild("PineLeft", true, false);
+            var bounds = pine.GetAabb();
+            var height = bounds.Size.Y;
+            var center = bounds.Position + bounds.Size * .5f;
+            _camera.Position = pine.GlobalTransform * (center + new Vector3(0, height * .02f, height * (_pineReverse ? -2.35f : 2.35f)));
+            _camera.LookAt(pine.GlobalTransform * center);
+            _camera.Fov = 32;
+        }
+        _reference.Texture = _lanternDetail ? _lanternSource : _matDetail ? _matSource
+            : _pineDetail ? (_pineReverse ? _pineReverseSource : _pineSource) : _compositionSource;
         _reference.Position = detail ? new Vector2(screen.X / 2, 80) : Vector2.Zero;
         _reference.Size = detail ? new Vector2(screen.X / 2, screen.Y - 160) : screen;
         if (_matDetail)
@@ -160,9 +176,11 @@ public partial class DuelArenaReview : Control
         _hud.Visible = detail || (!_showReference && !_clean);
         if (detail)
         {
-            Text(_lanternDetail ? "Lantern · Meshy asset in Godot" : "Mat · native top view", new Vector2(28, 22), 24, Palette.Paper, true);
+            Text(_lanternDetail ? "Lantern · Meshy asset in Godot" : _pineDetail
+                ? (_pineReverse ? "Pine · reverse view in Godot" : "Pine · Meshy asset in Godot") : "Mat · native top view",
+                new Vector2(28, 22), 24, Palette.Paper, true);
             Text("Supplied reference", new Vector2(screen.X / 2 + 28, 22), 24, Palette.Paper, true);
-            Text("L lantern   M mat   V clear view   Tab concept   Esc close", new Vector2(28, screen.Y - 32), 14, Palette.PaperDim);
+            Text("T pine   G reverse   L lantern   M mat   V clear view   Tab concept   Esc close", new Vector2(28, screen.Y - 32), 14, Palette.PaperDim);
             return;
         }
         var definitions = PublishedContent.Snapshot.Cards;
@@ -192,8 +210,8 @@ public partial class DuelArenaReview : Control
         }
         var ui = Math.Min(screen.X / 1600, screen.Y / 900);
         Text(_title, new Vector2(28, 18) * ui, 24 * ui, Palette.Paper, true);
-        Text("Supplied mat · Meshy stone lanterns · public sample cards", new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
-        Text("Tab concept   V clear   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
+        Text("Supplied mat · Meshy lanterns and pines · public sample cards", new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
+        Text("Tab concept   V clear   T pine   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
             new Vector2(28 * ui, screen.Y - 27 * ui), 13 * ui, Palette.PaperDim);
         var handDefs = definitions.Where(d => d.Type == CardType.Strategy).Take(5).ToArray();
         for (var i = 0; i < handDefs.Length; i++)
@@ -265,7 +283,7 @@ public partial class DuelArenaReview : Control
     {
         if (@event is InputEventMouseButton { Pressed: true } wheel && wheel.ButtonIndex is MouseButton.WheelUp or MouseButton.WheelDown)
         { _zoom = Math.Clamp(_zoom + (wheel.ButtonIndex == MouseButton.WheelUp ? .05f : -.05f), .75f, 1.35f); Layout(); return; }
-        if (!_showReference && !_clean && !_lanternDetail && !_matDetail && @event is InputEventMouse mouse && _reading is null && _play.HasPoint(mouse.Position)
+        if (!_showReference && !_clean && !_lanternDetail && !_matDetail && !_pineDetail && @event is InputEventMouse mouse && _reading is null && _play.HasPoint(mouse.Position)
             && !_fixed.Any(c => c.GetGlobalRect().HasPoint(mouse.Position)))
             _table.ForwardMouse(mouse);
         if (@event is not InputEventKey { Pressed: true, Echo: false } key) return;
@@ -274,12 +292,14 @@ public partial class DuelArenaReview : Control
         {
             case Key.Escape: GetTree().Quit(); return;
             case Key.Tab:
-                _showReference = !_showReference; _lanternDetail = _matDetail = false; break;
+                _showReference = !_showReference; _lanternDetail = _matDetail = _pineDetail = false; break;
             case Key.V:
-                _clean = _lanternDetail || _matDetail || !_clean;
-                _lanternDetail = _matDetail = _showReference = false; break;
-            case Key.L: _lanternDetail = !_lanternDetail; _matDetail = _showReference = false; break;
-            case Key.M: _matDetail = !_matDetail; _lanternDetail = _showReference = false; break;
+                _clean = _lanternDetail || _matDetail || _pineDetail || !_clean;
+                _lanternDetail = _matDetail = _pineDetail = _showReference = false; break;
+            case Key.L: _lanternDetail = !_lanternDetail; _matDetail = _pineDetail = _showReference = false; break;
+            case Key.M: _matDetail = !_matDetail; _lanternDetail = _pineDetail = _showReference = false; break;
+            case Key.T: _pineDetail = !_pineDetail; _lanternDetail = _matDetail = _showReference = false; break;
+            case Key.G: if (!_pineDetail) return; _pineReverse = !_pineReverse; break;
             case Key.R: _revealed = !_revealed; break;
             case Key.C: _crowded = !_crowded; break;
             case Key.B: _bowed = !_bowed; break;
@@ -298,7 +318,7 @@ public partial class DuelArenaReview : Control
         try
         {
             // Compare an independently imported Blender anchor against the existing 2.5D projection.
-            var detail = _lanternDetail || _matDetail;
+            var detail = _lanternDetail || _matDetail || _pineDetail;
             if (_selfCheck && (detail || _clean || _showReference))
                 throw new InvalidOperationException("--check requires the visible card layout.");
             var maxError = detail ? 0 : new[] { "DuelLeft", "DuelRight", "FocusLeft", "FocusRight", "Center" }.Max(name =>
@@ -344,8 +364,9 @@ public partial class DuelArenaReview : Control
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
             System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
-                Stage = "iteration 3", Viewport = GetViewportRect().Size.ToString(),
+                Stage = "iteration 4", Viewport = GetViewportRect().Size.ToString(),
                 MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
+                PineDetail = _pineDetail, PineReverse = _pineReverse,
                 CameraChecked = !detail,
                 MaxCameraErrorPixels = maxError, NativeCardClicks = _inspections,
                 Crowded = _crowded, Bowed = _bowed, Revealed = _revealed, Sidebar = _sidebar,
