@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Add lightweight shared console-runner filtering; regression consolidation in progress for issue 235.",
+  "validation": "Baseline core executable passed in 10.35 seconds. Focused FollowerForce passed; no-match and malformed filter exit 2.",
+  "remaining": "Complete fixture/assertion refactors, coverage map, focused checks and required full checks.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/235",
+  "branch": "codex/235-regression-fixtures",
+  "updated": "2026-09-15T07:54:45.400592+00:00"
+}

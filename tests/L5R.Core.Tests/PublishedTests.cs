@@ -3,7 +3,7 @@ using L5R.Core;
 
 internal static class PublishedTests
 {
-    public static int Run()
+    public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
             ("Published pool pins the Lion/Crane 40/40 decks and the ability-free vanilla wave", Catalogue),
@@ -41,13 +41,7 @@ internal static class PublishedTests
             ("Every offered published ability and alternate target validates", OfferedActions),
             ("Published full-game transcript replays deterministically", Replay),
         ];
-        var failed=0;
-        foreach(var (name,test) in tests)
-        {
-            try { test(); Console.WriteLine("PASS "+name); }
-            catch(Exception ex) { failed++; Console.Error.WriteLine($"FAIL {name}\n{ex}"); }
-        }
-        Console.WriteLine($"{tests.Length-failed}/{tests.Length} published tests passed."); return failed;
+        runner.Run("published",tests);
     }
     private static string Id(int id)=>"oracle-l5r-"+id;
     private static string Json<T>(T value)=>JsonSerializer.Serialize(value);

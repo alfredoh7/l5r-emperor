@@ -149,17 +149,13 @@ var tests = new (string Name, Action Run)[]
     ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
     ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive)
 };
-var failed=0;
-foreach(var test in tests)
-{
-    try { test.Run(); Console.WriteLine($"PASS {test.Name}"); }
-    catch(Exception ex) { failed++; Console.Error.WriteLine($"FAIL {test.Name}\n{ex}"); }
-}
-Console.WriteLine($"{tests.Length-failed}/{tests.Length} tests passed.");
-failed += PublishedTests.Run();
-failed += DeckFormatTests.Run();
-failed += DeckWorkshopTests.Run();
-return failed==0?0:1;
+var runner=new TestRunner(args);
+if(!runner.Valid) return 2;
+runner.Run("core",tests);
+PublishedTests.Run(runner);
+DeckFormatTests.Run(runner);
+DeckWorkshopTests.Run(runner);
+return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
 static string Json<T>(T value)=>JsonSerializer.Serialize(value);

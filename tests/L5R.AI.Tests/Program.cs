@@ -2,7 +2,8 @@ using System.Text.Json;
 using L5R.AI;
 using L5R.Core;
 
-var failures=0;
+var runner=new TestRunner(args);
+if(!runner.Valid) return 2;
 Run("waits without priority and never concedes automatically",()=>
 {
     var game=MatchEngine.CreateStarterMatch();
@@ -37,10 +38,10 @@ foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: published abilities, complete match and replay",()=>Play(seed,true));
-Console.WriteLine(failures==0?"13/13 AI tests passed.":$"{failures} AI tests failed.");
-return failures==0?0:1;
+return runner.Finish();
 
-void Run(string name,Action run) { try { run(); Console.WriteLine($"PASS {name}"); } catch(Exception ex) { failures++; Console.Error.WriteLine($"FAIL {name}: {ex.Message}"); } }
+void Run(string name,Action run) => runner.Run("ai",[(name,run)]);
+
 static void Check(bool condition,string message) { if(!condition) throw new Exception(message); }
 static void Play(ulong seed,bool published=false)
 {

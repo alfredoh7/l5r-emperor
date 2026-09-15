@@ -2,7 +2,7 @@ using L5R.Core;
 
 internal static class DeckFormatTests
 {
-    public static int Run()
+    public static void Run(TestRunner runner)
     {
         (string Name, Action Test)[] tests = [
             ("Round-trips a deck through Write then Parse", RoundTrip),
@@ -14,14 +14,7 @@ internal static class DeckFormatTests
             ("Legality flags a card over its copy limit but still returns a deck", LegalityOverLimit),
             ("Unique-keyword cards are capped at one copy, others at three", UniqueCapIsOne),
         ];
-        var failed = 0;
-        foreach (var (name, test) in tests)
-        {
-            try { test(); Console.WriteLine("PASS " + name); }
-            catch (Exception ex) { failed++; Console.Error.WriteLine($"FAIL {name}\n{ex}"); }
-        }
-        Console.WriteLine($"{tests.Length - failed}/{tests.Length} deck format tests passed.");
-        return failed;
+        runner.Run("deck-format",tests);
     }
 
     private static void Check(bool value, string message = "Assertion failed") { if (!value) throw new Exception(message); }
