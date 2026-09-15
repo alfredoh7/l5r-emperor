@@ -46,6 +46,15 @@ public partial class FortressHall : Node3D
                             worn.AlbedoColor = kind == "chest" ? new Color(.65f,.50f,.35f) : new Color(.35f,.30f,.25f);
                             worn.Metallic = kind == "chest" ? .40f : .75f;
                             worn.Roughness = .80f; worn.NormalScale = .65f;
+                            if (kind == "brazier")
+                            {
+                                worn.AlbedoColor = new Color(.90f,.85f,.80f);
+                                worn.Metallic = .55f; worn.MetallicSpecular = .24f;
+                                // Preserve Meshy's iron artwork and normals. Its packed
+                                // roughness has near-zero pits that sparkle under firelight.
+                                worn.RoughnessTexture = null; worn.Roughness = .82f;
+                                worn.NormalScale = .28f;
+                            }
                             mesh.SetSurfaceOverrideMaterial(i,worn);
                         }
             }
@@ -108,24 +117,17 @@ public partial class FortressHall : Node3D
                     if (kind == "table") _tableLanterns.Add(prop);
                 }
             }
-            if (kind == "ember")
-                for (var i=0; i<5; i++)
-                {
-                    var fire = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/static-flame.gdshader") };
-                    fire.SetShaderParameter("seed", i*1.7f);
-                    fire.SetShaderParameter("turbulence", 1.35f);
-                    practical.Flames.Add(fire);
-                    AddChild(new MeshInstance3D { Name="BrazierFlame", Mesh=new QuadMesh { Size=new Vector2(.045f,.075f+i%3*.017f) },
-                        Position=position+new Vector3((i-2)*.017f,.015f,-i%2*.012f), MaterialOverride=fire,
-                        CastShadow=GeometryInstance3D.ShadowCastingSetting.Off });
-                }
+            if (kind == "ember") AddBrazierFire(position, practical);
             var light = new OmniLight3D
             {
                 Name = "PracticalLight", Position = position + new Vector3(0,height*.49f,-height*.49f*.833f),
-                LightColor = new Color("ffb264"), LightSpecular = .38f, LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
+                LightColor = new Color("ffb264"), LightSpecular = .55f, LightEnergy = lamp.GetProperty("energy").GetSingle() * .43f,
                 OmniRange = lamp.GetProperty("radius").GetSingle() * 1.25f, OmniAttenuation = 1.0f,
-                ShadowEnabled = kind == "table" || lamp.GetProperty("name").GetString()!.EndsWith("_0"),
-                ShadowBias = .008f, ShadowNormalBias = .025f
+                ShadowEnabled = kind is "table" or "ember" || lamp.GetProperty("name").GetString()!.EndsWith("_0"),
+                ShadowBias = kind == "ember" ? .002f : .008f,
+                ShadowNormalBias = kind == "ember" ? .003f : .025f,
+                ShadowOpacity = kind == "ember" ? .68f : 1f,
+                ShadowBlur = kind == "ember" ? 2f : 1f
             };
             AddChild(light);
             practical.Light = light; practical.BaseEnergy = light.LightEnergy; _practicals.Add(practical);
@@ -241,13 +243,13 @@ public partial class FortressHall : Node3D
         // hall-sized batch loses practical lights on Compatibility's light limit.
         var groups = new Dictionary<(Material, int, int), SurfaceTool>();
         ShaderMaterial? bakedFloor = null;
-        if (ResourceLoader.Exists("res://Art/WarRoom/floor-irradiance-m4.exr") && !OS.GetCmdlineUserArgs().Contains("--room-no-baked-floor"))
+        if (ResourceLoader.Exists("res://Art/WarRoom/floor-irradiance-m6.exr") && !OS.GetCmdlineUserArgs().Contains("--room-no-baked-floor"))
         {
             bakedFloor = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/floor-lighting-m4.gdshader") };
             bakedFloor.SetShaderParameter("wood_colour", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-albedo.jpg"));
             bakedFloor.SetShaderParameter("wood_normal", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-normal.jpg"));
             bakedFloor.SetShaderParameter("wood_roughness", GD.Load<Texture2D>("res://Art/WarRoom/floor-roughness-m4.jpg"));
-            bakedFloor.SetShaderParameter("irradiance", GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m4.exr"));
+            bakedFloor.SetShaderParameter("irradiance", GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m6.exr"));
             _bakedFloor = bakedFloor;
         }
         foreach (var mesh in room.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().ToArray())

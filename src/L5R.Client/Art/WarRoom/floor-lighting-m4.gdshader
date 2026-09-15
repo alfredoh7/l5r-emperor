@@ -30,9 +30,9 @@ void fragment() {
         local_delta+=weight*(practical_energy[i]-1.0);
     }
     float warmth=1.0+.60*local_delta/max(1.0,weight_sum);
-    EMISSION=grain*(vec3(.48,.50,.55)*pow(contact,1.2)+illumination*3.0*warmth)*exposure;
+    EMISSION=grain*(vec3(.16,.19,.25)*pow(contact,1.45)+illumination*2.2*warmth)*exposure;
     NORMAL_MAP=texture(wood_normal,UV).rgb;
-    NORMAL_MAP_DEPTH=.32;
-    ROUGHNESS=mix(.31,.56,texture(wood_roughness,UV).r);
-    SPECULAR=.25;
+    NORMAL_MAP_DEPTH=.48;
+    ROUGHNESS=mix(.17,.37,texture(wood_roughness,UV).r);
+    SPECULAR=.42;
 }

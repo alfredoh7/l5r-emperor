@@ -177,13 +177,23 @@ for o in cols['Architecture'].objects:
     co=o.data.vertices[o.data.loops[li].vertex_index].co
     u=(co[side]-lo)/max(.001,hi-lo);v=co.z/h+.5
     o.data.uv_layers.active.data[li].uv=((205+u*55)/1672,1-(210-v*190)/941)
-# Distant mountains reuse the approved scenery, on far background planes behind real railings.
+# Distant mountains use a reference-derived matte behind the actual railings.
 land=source_mat.copy();land.name='Approved distant dusk scenery';n=land.node_tree.nodes;p=n.get('Principled BSDF');p.inputs['Emission Strength'].default_value=.85
+# M6 dedicated high-resolution reference-derived vista; normalized UV regions
+# retain the approved pine/valley/castle hierarchy through the existing bays.
+vista=bpy.data.images.load(str(OUT/'polish-m6/dusk-panorama.png'));vista.pack()
+for node in n:
+ if node.type=='TEX_IMAGE':node.image=vista
+def vista_panel(name,verts,uv_rect):
+ o=panel(name,verts,(0,0,1672,941),land,'Distant scenery')
+ u1,v1,u2,v2=uv_rect
+ for i,uv in enumerate([(u1,1-v2),(u2,1-v2),(u2,1-v1),(u1,1-v1)]):o.data.uv_layers.active.data[i].uv=uv
+ return o
 for side in [-1,1]:
  rect=(402,132,511,239) if side<0 else (1288,103,1390,235)
  x1,x2=(-2.35,-.58) if side<0 else (.58,2.35)
- panel('Mountain vista',[(x1,2.6,F-.06),(x2,2.6,F-.06),(x2,2.6,.96),(x1,2.6,.96)],rect,land,'Distant scenery')
-# Clean approved mountain/pine/castle crops are mapped only into the open bays.
+ vista_panel('Mountain vista',[(x1,2.6,F-.06),(x2,2.6,F-.06),(x2,2.6,.96),(x1,2.6,.96)],(0,0,.45,.95) if side<0 else (.56,0,1,.95))
+# Mountain/pine/castle regions are mapped only into the existing open bays.
 # The broader vista above remains a backdrop for pan overscan, not a second room.
 def vista_point(px,py):
  s=.64;c=math.sqrt(1-s*s);origin=Vector((0,-1.54*c,1.54*s))
@@ -198,7 +208,7 @@ for i,(rect,screen_rect) in enumerate([
  ((1316,103,1389,248),(1290,98,1408,321)),
 ]):
  x1,y1,x2,y2=screen_rect
- panel('Approved vista detail '+str(i),[vista_point(x1,y2),vista_point(x2,y2),vista_point(x2,y1),vista_point(x1,y1)],rect,land,'Distant scenery')
+ vista_panel('Approved vista detail '+str(i),[vista_point(x1,y2),vista_point(x2,y2),vista_point(x2,y1),vista_point(x1,y1)],[(.02,.13,.34,.86),(.54,.13,.73,.86),(.77,.12,.985,.83)][i])
 # Sparse inventory: two small chests, weapon racks, left brazier. No new furniture.
 def chest(n,x,y):
  w=.25;d=.17;h=.11
@@ -277,7 +287,7 @@ furnishing_layout=[
  {'name':'RightChest','kind':'chest','position':[2.04,1.20,F],'height':.113,'width':.25,'depth':.17},
  {'name':'BrazierBody','kind':'brazier','position':[-1.73,.69,F],'height':.175,'width':.21,'depth':.19}]
 for l in lamps+column_layout+furnishing_layout:
- asset=l['kind']+'-lantern-v1' if l['kind'] in ['table','room'] else l['kind']+'-v1'
+ asset=l['kind']+'-lantern-v1' if l['kind'] in ['table','room'] else ('brazier-v2' if l['kind']=='brazier' else l['kind']+'-v1')
  path=OUT/'meshy'/asset/'cleaned.glb'
  if l['kind']=='ember' or not path.exists():continue
  if l['kind'] not in prop_templates:

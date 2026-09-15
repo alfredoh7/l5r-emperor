@@ -6,8 +6,9 @@ from pathlib import Path
 import bpy, json, math, sys, hashlib
 from mathutils import Vector
 ROOT=Path(__file__).resolve().parents[2]
-OUT=ROOT/'assets/table/war-room/lighting-m4';OUT.mkdir(parents=True,exist_ok=True)
-RUN=ROOT/'src/L5R.Client/Art/WarRoom';WORK=ROOT/'artifacts/war-room-work/milestone-4';WORK.mkdir(parents=True,exist_ok=True)
+milestone=int(sys.argv[sys.argv.index('--milestone')+1]) if '--milestone' in sys.argv else 4
+OUT=ROOT/f'assets/table/war-room/lighting-m{milestone}';OUT.mkdir(parents=True,exist_ok=True)
+RUN=ROOT/'src/L5R.Client/Art/WarRoom';WORK=ROOT/f'artifacts/war-room-work/milestone-{milestone}';WORK.mkdir(parents=True,exist_ok=True)
 def option(name,default):
  return int(sys.argv[sys.argv.index(name)+1]) if name in sys.argv else default
 samples=option('--samples',128);size=option('--size',1536)
@@ -42,7 +43,7 @@ bpy.ops.object.transform_apply(location=False,rotation=False,scale=True)
 mat=bpy.data.materials.new('Neutral irradiance receiver');mat.use_nodes=True
 p=mat.node_tree.nodes['Principled BSDF'];p.inputs['Base Color'].default_value=(1,1,1,1);p.inputs['Roughness'].default_value=1
 receiver.data.materials.append(mat)
-img=bpy.data.images.new('Floor irradiance M4',width=size,height=round(size*(ymax-ymin)/(xmax-xmin)),alpha=False,float_buffer=True)
+img=bpy.data.images.new(f'Floor irradiance M{milestone}',width=size,height=round(size*(ymax-ymin)/(xmax-xmin)),alpha=False,float_buffer=True)
 img.colorspace_settings.name='Non-Color'
 node=mat.node_tree.nodes.new('ShaderNodeTexImage');node.image=img;mat.node_tree.nodes.active=node
 bpy.ops.object.select_all(action='DESELECT');receiver.select_set(True);bpy.context.view_layer.objects.active=receiver
@@ -51,7 +52,7 @@ bpy.ops.object.bake(type='DIFFUSE')
 img.filepath_raw=str(WORK/'floor-irradiance-raw.exr');img.file_format='OPEN_EXR';img.save()
 # A separate short-range occlusion pass anchors feet/legs without darkening
 # the whole room. Pack it into the light field alpha channel.
-ao=bpy.data.images.new('Floor contact occlusion M4',width=img.size[0],height=img.size[1],alpha=False,float_buffer=True)
+ao=bpy.data.images.new(f'Floor contact occlusion M{milestone}',width=img.size[0],height=img.size[1],alpha=False,float_buffer=True)
 ao.colorspace_settings.name='Non-Color'
 ao_target=mat.node_tree.nodes.new('ShaderNodeTexImage');ao_target.image=ao;mat.node_tree.nodes.active=ao_target
 occlusion=mat.node_tree.nodes.new('ShaderNodeAmbientOcclusion');occlusion.inputs['Distance'].default_value=.13;occlusion.samples=16
@@ -73,7 +74,7 @@ ao_noise=group.nodes.new('CompositorNodeDenoise');group.links.new(ao_source.outp
 alpha=group.nodes.new('CompositorNodeSetAlpha');group.links.new(noise.outputs['Image'],alpha.inputs['Image']);group.links.new(ao_noise.outputs['Image'],alpha.inputs['Alpha'])
 output=group.nodes.new('NodeGroupOutput');group.links.new(alpha.outputs['Image'],output.inputs['Image'])
 bpy.ops.render.render(scene=comp.name)
-bpy.data.images['Render Result'].save_render(str(RUN/'floor-irradiance-m4.exr'),scene=comp)
-receipt={'source':'fortress-hall-b3.blend','source_sha256':hashlib.sha256((ROOT/'assets/table/war-room/fortress-hall-b3.blend').read_bytes()).hexdigest(),'engine':'Blender Cycles Metal','samples':samples,'size':list(img.size),'world_bounds_xy':[xmin,ymin,xmax,ymax],'floor_z':-.169,'passes':['diffuse direct','diffuse indirect'],'practical_watt_multiplier':3.2,'practical_colour_linear':[1.0,.47,.19],'practical_radius_m':{'brazier':.045,'lantern':.027},'dusk_area_watts':3.0,'world_strength':.055,'color_baked':False,'alpha':'Short-range ambient occlusion at 0.13 m, 16 AO rays; denoised','denoiser':'Blender compositor OpenImageDenoise','geometry':'Existing approved room, Meshy assets and table provide occlusion; floor texture remains separate.','animation':'Static bounce/contact lighting; fixture animation deferred.','output_sha256':hashlib.sha256((RUN/'floor-irradiance-m4.exr').read_bytes()).hexdigest()}
+bpy.data.images['Render Result'].save_render(str(RUN/f'floor-irradiance-m{milestone}.exr'),scene=comp)
+receipt={'source':'fortress-hall-b3.blend','source_sha256':hashlib.sha256((ROOT/'assets/table/war-room/fortress-hall-b3.blend').read_bytes()).hexdigest(),'engine':'Blender Cycles Metal','samples':samples,'size':list(img.size),'world_bounds_xy':[xmin,ymin,xmax,ymax],'floor_z':-.169,'passes':['diffuse direct','diffuse indirect'],'practical_watt_multiplier':3.2,'practical_colour_linear':[1.0,.47,.19],'practical_radius_m':{'brazier':.045,'lantern':.027},'dusk_area_watts':3.0,'world_strength':.055,'color_baked':False,'alpha':'Short-range ambient occlusion at 0.13 m, 16 AO rays; denoised','denoiser':'Blender compositor OpenImageDenoise','geometry':'Existing approved room, Meshy assets and table provide occlusion; floor texture remains separate.','animation':'Static bounce/contact baseline; native synchronized firelight modulation is applied separately at runtime.','output_sha256':hashlib.sha256((RUN/f'floor-irradiance-m{milestone}.exr').read_bytes()).hexdigest()}
 (OUT/'provenance.json').write_text(json.dumps(receipt,indent=2)+'\n')
 print('FLOOR_IRRADIANCE_BAKED',json.dumps(receipt))

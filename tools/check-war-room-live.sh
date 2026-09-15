@@ -3,8 +3,8 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 cd "$L5R_PROJECT_ROOT"
-output="$L5R_PROJECT_ROOT/docs/screenshots/war-room/milestone-5"
-logs="$L5R_PROJECT_ROOT/artifacts/war-room-work/milestone-5"
+output="${L5R_ROOM_EVIDENCE_DIR:-$L5R_PROJECT_ROOT/docs/screenshots/war-room/milestone-6}"
+logs="${L5R_ROOM_LOG_DIR:-$L5R_PROJECT_ROOT/artifacts/war-room-work/milestone-6}"
 mkdir -p "$output" "$logs"
 for capture in \
   'playable:1920x1080:published-board-camera' \
