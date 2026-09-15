@@ -158,6 +158,7 @@ foreach(var test in tests)
 Console.WriteLine($"{tests.Length-failed}/{tests.Length} tests passed.");
 failed += PublishedTests.Run();
 failed += DeckFormatTests.Run();
+failed += DeckWorkshopTests.Run();
 return failed==0?0:1;
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }

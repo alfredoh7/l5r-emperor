@@ -156,6 +156,9 @@ def package(root: Path) -> dict[str, int]:
     }
     output = target / "library.json"
     output.write_text(json.dumps(result, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n", encoding="utf-8")
+    if (root / "content/oracle/emperor-catalogue.json").is_file():
+        from package_catalogue import package as package_printings
+        package_printings(root)
     return {"cards": len(cards), "decks": len(decks), "artwork": len(artwork),
             "source_linked_artwork": sum(art["mapping_status"] == "source_path_match" for art in artwork),
             "legacy_references": sum(len(card.get("legacy_references", [])) for card in cards),

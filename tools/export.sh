@@ -18,6 +18,7 @@ if [ ! -x "$GODOT" ] || [ ! -f .tools/export-templates/templates/macos.zip ] || 
   echo 'Install project export tools first: python tools/bootstrap.py --install --with-templates' >&2
   exit 1
 fi
+"$l5r_python" tools/ensure_catalogue_art.py
 mkdir -p .cache/export-staging artifacts/checks
 l5r_stage="$(mktemp -d "$L5R_PROJECT_ROOT/.cache/export-staging/build.XXXXXX")"
 echo "Export staging: $l5r_stage"
@@ -108,7 +109,7 @@ packs = [data for name, data in files.items() if name.endswith('.pck')]
 if len(packs) != 1 or packs[0][:4] != b'GDPC':
     raise SystemExit('Export must contain one valid Godot resource pack.')
 pack = packs[0]
-for marker in [b'Content/library.json', b'Art/table.glb', b'Art/training-atlas.png', b'Art/navy-table-v4.glb', b'Art/navy-mat-v4.png', b'Art/tavern-lantern.png', b'Art/lacquer-phase-plate.png', b'Art/reference-lit-rail.png', b'Art/phase-art.gdshader', b'Art/original-dynasty-back.png', b'Art/original-fate-back.png', b'Art/Fonts/MusashiBrush.otf', b'Art/Fonts/Alegreya.ttf', b'Art/Fonts/Alegreya-OFL.txt', b'Art/Fonts/Musashi-terms.txt', b'Art/navy-table.gdshader', b'Art/table-perspective.gdshader']:
+for marker in [b'Content/catalogue-art.zip', b'Content/catalogue-art.json', b'Content/catalogue-printings.json', b'Content/library.json', b'Art/table.glb', b'Art/training-atlas.png', b'Art/navy-table-v4.glb', b'Art/navy-mat-v4.png', b'Art/tavern-lantern.png', b'Art/lacquer-phase-plate.png', b'Art/reference-lit-rail.png', b'Art/phase-art.gdshader', b'Art/original-dynasty-back.png', b'Art/original-fate-back.png', b'Art/Fonts/MusashiBrush.otf', b'Art/Fonts/Alegreya.ttf', b'Art/Fonts/Alegreya-OFL.txt', b'Art/Fonts/Musashi-terms.txt', b'Art/navy-table.gdshader', b'Art/table-perspective.gdshader']:
     if marker not in pack:
         raise SystemExit(f'Missing client resource: {marker.decode()}.')
 for artwork in (root / 'src/L5R.Client/Content/Art').rglob('*.jpg'):

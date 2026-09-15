@@ -37,3 +37,6 @@ assets/reference/oracle/*/webp/
 
 # Personal agent memory is not the team record.
 CLAUDE.local.md
+
+# Optimized catalogue artwork is fetched automatically from the private release.
+src/L5R.Client/Content/catalogue-art.zip
