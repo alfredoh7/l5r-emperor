@@ -602,6 +602,8 @@ public sealed partial class MatchEngine
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
     private bool Keyword(CardInstance card, string keyword)
     {
+        if (keyword == "Unaligned" && Definition(card).Type == CardType.Personality && ClanAlignments(card).Length == 0)
+            return true;
         var printedOrGranted = (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
         // Kitsuki Minori (issue #223): "does not have Overconfident (in and out of play) if any
         // other player is Lion Clan" -- a SUBTRACTIVE conditional, the opposite of Tamori Yayu's own
@@ -650,9 +652,16 @@ public sealed partial class MatchEngine
         return true;
     }
     // Most Personalities have one printed Clan (the CardDefinition.Clan field); a few carry more than
-    // one alignment (Clans overrides it when present). Loyal restricts recruitment to a Stronghold
-    // whose Clan is among these.
-    private static string[] ClanAlignments(CardInstance card) => Definition(card).Clans ?? [Definition(card).Clan];
+    // one alignment (Clans overrides it when present). "Unaligned" means no Clan affiliation rather
+    // than an affiliation of its own. Removing the last affiliation therefore gives the Personality
+    // the Unaligned keyword and leaves a Loyal Personality eligible for control by any Clan.
+    private static string[] ClanAlignments(CardInstance card) =>
+        (Definition(card).Clans ?? [Definition(card).Clan])
+            .Where(clan => clan != "Unaligned" && !card.RemovedClanAffiliations.Contains(clan, StringComparer.Ordinal))
+            .Distinct(StringComparer.Ordinal).ToArray();
+    private bool HasClanAffiliation(CardInstance card, string clan) => ClanAlignments(card).Contains(clan, StringComparer.Ordinal);
+    private bool LoyaltyAllowsControl(CardInstance card, string clan) =>
+        !Keyword(card, "Loyal") || ClanAlignments(card).Length == 0 || HasClanAffiliation(card, clan);
     // "Attachment": lasts while the granting attachment stays attached (cleared in DestroyAttachment).
     // "Turn": cleared at FinishTurn, the default for a keyword granted by an action's effect.
     // "Permanent": only when the granting card's text says so; never auto-cleared.
@@ -796,8 +805,8 @@ public sealed partial class MatchEngine
         "cavalry-flankers-attack" => 2,
         "dark-naga-scouts-attack" => 3,
         "moshi-ikako-attack" => 1,
-        "kamina-exp-attack" => 3 + (target is not null && (Definition(target).Clan == "Lion" || Definition(target).Clan == "Unaligned") ? 1 : 0),
-        "shuji-attack" => 4 + (target is not null && Definition(target).Clan == "Spider" ? 1 : 0),
+        "kamina-exp-attack" => 3 + (target is not null && (HasClanAffiliation(target, "Lion") || Keyword(target, "Unaligned")) ? 1 : 0),
+        "shuji-attack" => 4 + (target is not null && HasClanAffiliation(target, "Spider") ? 1 : 0),
         "murderous-thieves-attack" => 3,
         "horse-archers-attack" or "hiruma-sniper-attack" => 4,
         "spawn-of-vritra-attack" => 6,
@@ -1431,7 +1440,7 @@ public sealed partial class MatchEngine
                         // above verbatim -- no new Target needed.
                         // Akodo Tsudoken's own second Experienced printing (issue #198): own Personality,
                         // Lion Clan OR carrying the Fallen keyword.
-                        "own-lion-or-fallen-personality" => own && personality && (Definition(target).Clan == "Lion" || Keyword(target, "Fallen")),
+                        "own-lion-or-fallen-personality" => own && personality && (HasClanAffiliation(target, "Lion") || Keyword(target, "Fallen")),
                         // Ikoma Masumi (issue #198): the same Follower-or-unattached-Personality shape
                         // the Ranged/Melee "attack" Target already uses, as a bare enemy-card check
                         // (no Attack strength/kind involved here, just "without attachments").
@@ -1816,7 +1825,7 @@ public sealed partial class MatchEngine
             // Lion Clan Personality review (issue #198):
             case "dairuko-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (Definition(target!).Clan == "Unaligned") DestroyUnits([target!], false);
+                if (Keyword(target!, "Unaligned")) DestroyUnits([target!], false);
                 break;
             case "furu-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "furu-straighten": Straighten(target!); break;
@@ -2062,7 +2071,7 @@ public sealed partial class MatchEngine
             case "mitoshi-straighten": Straighten(target!); break;
             case "shikei-draw": Draw(player); break;
             case "yozo-exp-destroy":
-                if (Definition(target!).Clan == "Lion") RemoveFromGame(target!); else DestroyUnits([target!]);
+                if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!]);
                 break;
             case "jinai-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "muzu-bow":
@@ -2348,7 +2357,7 @@ public sealed partial class MatchEngine
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
         card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
-        card.Tokens.Clear(); card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.AbilityUses.Clear();
+        card.Tokens.Clear(); card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedClanAffiliations.Clear(); card.AbilityUses.Clear();
         card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
         var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
         if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);

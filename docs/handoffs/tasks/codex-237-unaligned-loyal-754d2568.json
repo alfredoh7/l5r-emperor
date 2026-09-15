@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Correct Unaligned and Loyal behavior after Clan-affiliation removal. Shared-state change: CardInstance now records removed affiliations so rules, replay/state serialization, queries, and future clients share one authoritative value; no client rendering code changed.",
+  "validation": "Core test executable passed: 150/150 core, 52/52 published, 8/8 deck-format, 8/8 deck-workshop; focused Loyal/clan checks 3/3; build zero warnings/errors.",
+  "remaining": "Full repository check deferred to CI because this sparse checkout intentionally excludes large unrelated assets and non-core suites.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/237",
+  "branch": "codex/237-unaligned-loyal",
+  "updated": "2026-09-15T20:39:23.012050+00:00"
+}

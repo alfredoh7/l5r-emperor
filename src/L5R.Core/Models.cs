@@ -112,6 +112,9 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    // Clan affiliations removed from this specific Personality by card effects. When every printed
+    // affiliation is removed, the Personality is Unaligned for all rules checks.
+    public List<string> RemovedClanAffiliations { get; set; } = [];
     public List<Protection> Protections { get; set; } = [];
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
