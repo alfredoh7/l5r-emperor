@@ -22,12 +22,12 @@ public partial class DuelArenaReview : Control
     private readonly List<Control> _fixed = [];
     private CardTile? _reading;
     private bool _showReference, _revealed, _crowded, _bowed, _sidebar;
-    private bool _clean, _lanternDetail, _matDetail, _pineDetail, _pineReverse;
+    private bool _clean, _lanternDetail, _matDetail, _pineDetail, _pineReverse, _pineBefore;
     private Texture2D _compositionSource = null!, _matSource = null!, _lanternSource = null!;
     private Texture2D _pineSource = null!, _pineReverseSource = null!;
     private bool _selfCheck;
     private string? _capture;
-    private string _title = "Duel arena · iteration 4";
+    private string _title = "Duel arena · iteration 5";
     private double _elapsed;
     private int _checkStep, _inspections;
     private float _zoom = 1, _density;
@@ -51,12 +51,16 @@ public partial class DuelArenaReview : Control
             _matDetail |= arg == "--mat";
             _pineDetail |= arg == "--pine";
             _pineReverse |= arg == "--reverse";
+            if (arg == "--pine-before") _pineBefore = _pineDetail = true;
         }
+        if (_pineBefore) _title = "Duel arena · iteration 4 baseline";
         Theme = Palette.MakeTheme();
         _world = new SubViewport { OwnWorld3D = true, RenderTargetUpdateMode = SubViewport.UpdateMode.Always,
             HandleInputLocally = false, Msaa3D = Viewport.Msaa.Msaa4X };
         AddChild(_world);
-        _model = GD.Load<PackedScene>("res://Art/DuelArena/duel-arena-v4.glb").Instantiate<Node3D>();
+        _model = GD.Load<PackedScene>(_pineBefore
+            ? "res://Art/DuelArena/duel-arena-v4.glb"
+            : "res://Art/DuelArena/duel-arena-v5.glb").Instantiate<Node3D>();
         _world.AddChild(_model);
         var matMesh = (MeshInstance3D)_model.FindChild("ApprovedDuelMat", true, false);
         var originalMaterial = (BaseMaterial3D)matMesh.GetActiveMaterial(0);
@@ -119,6 +123,9 @@ public partial class DuelArenaReview : Control
         var screen = GetViewportRect().Size;
         var detail = _lanternDetail || _matDetail || _pineDetail;
         _environment.Environment.AmbientLightEnergy = detail ? .55f : .25f;
+        _environment.Environment.BackgroundColor = _pineDetail ? new Color("999999") : new Color("111823");
+        _environment.Environment.AmbientLightColor = _pineDetail ? Colors.White : new Color("b8c5d4");
+        _keyLight.LightColor = _pineDetail ? Colors.White : new Color("e4ebff");
         _keyLight.LightEnergy = detail ? .8f : .4f;
         _keyLight.RotationDegrees = new Vector3(-62, _pineDetail && _pineReverse ? 155 : -25, 0);
         foreach (var light in _lanternLights) light.Visible = !detail;
@@ -132,7 +139,7 @@ public partial class DuelArenaReview : Control
         _camera.LookAt(Vector3.Zero);
         _camera.Fov = Mathf.RadToDeg(2 * Mathf.Atan(_play.Size.Y / (2 * Distance * Unit * _density)));
         foreach (var child in _model.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>())
-            child.Visible = !detail || child.Name == (_lanternDetail ? "StoneLanternLeft" : _pineDetail ? "PineLeft" : "ApprovedDuelMat");
+            child.Visible = !detail || child.Name == (_lanternDetail ? "StoneLanternLeft" : _pineDetail ? (_pineBefore ? "PineLeft" : "PineHero") : "ApprovedDuelMat");
         if (_lanternDetail)
         {
             var lantern = (Node3D)_model.FindChild("StoneLanternLeft", true, false);
@@ -148,7 +155,7 @@ public partial class DuelArenaReview : Control
         }
         if (_pineDetail)
         {
-            var pine = (MeshInstance3D)_model.FindChild("PineLeft", true, false);
+            var pine = (MeshInstance3D)_model.FindChild(_pineBefore ? "PineLeft" : "PineHero", true, false);
             var bounds = pine.GetAabb();
             var height = bounds.Size.Y;
             var center = bounds.Position + bounds.Size * .5f;
@@ -176,8 +183,14 @@ public partial class DuelArenaReview : Control
         _hud.Visible = detail || (!_showReference && !_clean);
         if (detail)
         {
+            if (_pineDetail)
+            {
+                foreach (var y in new[] { 0f, screen.Y - 80 })
+                    _hud.AddChild(new ColorRect { Color = new Color("111823"), Position = new Vector2(0, y),
+                        Size = new Vector2(screen.X, 80), MouseFilter = MouseFilterEnum.Ignore });
+            }
             Text(_lanternDetail ? "Lantern · Meshy asset in Godot" : _pineDetail
-                ? (_pineReverse ? "Pine · reverse view in Godot" : "Pine · Meshy asset in Godot") : "Mat · native top view",
+                ? (_pineBefore ? "Pine · previous foliage" : _pineReverse ? "Pine · refined reverse view" : "Pine · refined needle clusters") : "Mat · native top view",
                 new Vector2(28, 22), 24, Palette.Paper, true);
             Text("Supplied reference", new Vector2(screen.X / 2 + 28, 22), 24, Palette.Paper, true);
             Text("T pine   G reverse   L lantern   M mat   V clear view   Tab concept   Esc close", new Vector2(28, screen.Y - 32), 14, Palette.PaperDim);
@@ -210,7 +223,9 @@ public partial class DuelArenaReview : Control
         }
         var ui = Math.Min(screen.X / 1600, screen.Y / 900);
         Text(_title, new Vector2(28, 18) * ui, 24 * ui, Palette.Paper, true);
-        Text("Supplied mat · Meshy lanterns and pines · public sample cards", new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
+        Text(_pineBefore ? "Earlier paired-pine layout · public sample cards"
+            : "Supplied mat · Meshy lanterns · central garden pine · public sample cards",
+            new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
         Text("Tab concept   V clear   T pine   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
             new Vector2(28 * ui, screen.Y - 27 * ui), 13 * ui, Palette.PaperDim);
         var handDefs = definitions.Where(d => d.Type == CardType.Strategy).Take(5).ToArray();
@@ -364,12 +379,14 @@ public partial class DuelArenaReview : Control
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
             System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
-                Stage = "iteration 4", Viewport = GetViewportRect().Size.ToString(),
+                Stage = _pineBefore ? "iteration 4 pine baseline" : "iteration 5", Viewport = GetViewportRect().Size.ToString(),
                 MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
-                PineDetail = _pineDetail, PineReverse = _pineReverse,
+                PineDetail = _pineDetail, PineReverse = _pineReverse, PineBefore = _pineBefore,
                 CameraChecked = !detail,
                 MaxCameraErrorPixels = maxError, NativeCardClicks = _inspections,
                 Crowded = _crowded, Bowed = _bowed, Revealed = _revealed, Sidebar = _sidebar,
+                ObservedFramesPerSecond = Engine.GetFramesPerSecond(),
+                RenderedPrimitives = RenderingServer.GetRenderingInfo(RenderingServer.RenderingInfo.TotalPrimitivesInFrame),
                 CardFaces = _cards.Count, GameplayTested = false, FinalArt = false }));
             GD.Print($"DUEL_LAYOUT_PASS: camera error {maxError:F4}px; {_cards.Count} cards in viewport; native clicks {_inspections}.");
             GetTree().Quit();
