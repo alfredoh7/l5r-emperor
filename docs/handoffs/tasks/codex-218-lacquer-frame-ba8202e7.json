@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "UI-only implementation of the approved Option A lacquer frame/corner join around the unchanged Topaz mat. Shared path classification comes solely from the decision record and native visual-check script; no rules, legal-action/state, protocol, hidden-information or other shared behavior changes. Editable Blender rails, original-source materials, candle/lantern occlusion and native comparison viewer.",
+  "validation": "C# build: zero warnings/errors. Native Godot 4.7.2 Mac Compatibility: 3 asset views and 5 gameplay captures without errors, visually inspected; cursor zoom, pan/drags, Home reset, projected card clicks, HUD/modal isolation, maximum/widest zoom and reduced motion passed. Blender export 14816 triangles, 819332-byte GLB; source hash preserved. Initial cold import crashed; cached single-threaded import and final runs succeeded. User approved A/corner join; UI lead is author. No Windows native test.",
+  "remaining": "Ready for CI and UI review. Shared label is conservative path routing only; no rules-lead interpretation is needed for this cosmetic asset. Runtime remains the existing 2.5D renderer with painted materials; PBR room lighting and mat selection remain separate tasks. No Meshy credits spent.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/218",
+  "branch": "codex/218-lacquer-frame",
+  "updated": "2026-09-15T06:24:06.275780+00:00"
+}
