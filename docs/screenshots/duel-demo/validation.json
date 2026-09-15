@@ -37,6 +37,16 @@
       "P50Ms": 8.876,
       "P95Ms": 13.694,
       "P99Ms": 18.544
+    },
+    "launcher-final.json": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 1163,
+      "P50Ms": 8.392,
+      "P95Ms": 13.649,
+      "P99Ms": 17.995
     }
   },
   "regressions": {
@@ -72,6 +82,14 @@
     "stages-duelist-replacement.png": {
       "sha256": "67f818a597b6e452c5b6df2ba9f09576a5bc4f2d8db7fc9754b3d663e124e07d",
       "bytes": 2787554
+    },
+    "launcher-final-focused.png": {
+      "sha256": "28fdcefbab066d8d71d8d7b9d216d232919a346f8e30426542b2d4cd48f565b9",
+      "bytes": 1392580
+    },
+    "launcher-final-result.png": {
+      "sha256": "7e0fad9c165f3d62a5d63560293d9b7b52758383f02897278fde34713b1485df",
+      "bytes": 1415628
     }
   },
   "limits": [

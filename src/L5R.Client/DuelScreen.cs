@@ -160,6 +160,7 @@ public partial class DuelScreen : Control
             var rightTotal=record.Challenger.OwnerId==view.ViewerId?result.ChallengedTotal:result.ChallengerTotal;
             var statName=record.Stat=="PersonalHonor"?"Personal Honor":record.Stat;
             _status.Text=outcome+(result.Kind=="Refused"?"":$"  ·  {statName}: {leftTotal} – {rightTotal}");
+            if(!record.Complete)_status.Text+=$" · {view.Players[view.PriorityPlayerId].Name}’s reaction";
             if(CanContinue)
             {
                 Button("View consequences",()=>ShowConsequences(record));Button("Continue",()=>PresentationFinished?.Invoke());return;
@@ -191,14 +192,13 @@ public partial class DuelScreen : Control
         else foreach(var option in Legal.Where(a=>a.Type is "acceptDuel" or "declineDuel" or "declineReaction" or "useAbility" or "overconfidentDraw"))
             if(view.LastDuel is not null)SubmitButton(option.Label,option.Command);
         if(_selectedInspection is {} selected && _tiles.TryGetValue(selected,out var tile))Button("Inspect selected card",()=>Inspect(tile.Card),inspectionParent);
-        if(view.PriorityPlayerId!=view.ViewerId)Text($"Waiting for {view.Players[view.PriorityPlayerId].Name}");
     }
     private string Status()
     {
         var v=Snapshot!.View;
-        return v.PendingChoice?.Prompt ?? v.PendingDuel?.Stage switch {
-            "AwaitingAccept"=>"The challenge awaits an answer", "Focusing"=>$"{v.Players[v.PriorityPlayerId].Name} · Focus or Strike",
-            "DuelistRefocus"=>"Duelist · select a focus card, then its replacement; or keep your focus", "OrderingEffects"=>"Choose the order of Focus Effects", _=>"" };
+        return v.PendingChoice is {} pending ? $"{v.Players[v.PriorityPlayerId].Name} · {pending.Prompt}" : v.PendingDuel?.Stage switch {
+            "AwaitingAccept"=>$"{v.Players[v.PriorityPlayerId].Name} · accept or refuse the challenge", "Focusing"=>$"{v.Players[v.PriorityPlayerId].Name} · Focus or Strike",
+            "DuelistRefocus"=>$"{v.Players[v.PriorityPlayerId].Name} · Duelist: select a focus card and its replacement, or keep your focus", "OrderingEffects"=>$"{v.Players[v.PriorityPlayerId].Name} · choose the order of Focus Effects", _=>"" };
     }
     private void Text(string text){var label=Palette.Wrapped(text,Math.Max(13,(int)(16*_scale)),Palette.Paper);_actions.AddChild(label);}
     private Button Button(string text,Action pressed,Control? parent=null)
