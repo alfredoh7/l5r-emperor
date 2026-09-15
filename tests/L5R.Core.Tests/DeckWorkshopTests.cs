@@ -10,7 +10,7 @@ internal static class DeckWorkshopTests
         new("f", "Strategy", ["Strategy"], ["Fate"], [], true), new("r", "Unwired", ["Spell"], ["Fate"], [], false)];
     private static void Check(bool value){if(!value)throw new Exception("Deck workshop assertion failed.");}
     private static void Throws(Action action){try{action();}catch(FormatException){return;}throw new Exception("Expected format rejection.");}
-    public static int Run()
+    public static void Run(TestRunner runner)
     {
         (string Name,Action Test)[] tests=[
             ("Setup selections replace versions and stay out of deck totals",()=>{var d=new DeckWorkshop(Pool);d.SelectSetup("Castle");d.SelectSetup("Other Castle");d.SelectSetup("Border Keep");d.SelectSetup("Border Keep - exp");d.SelectSetup("Bamboo Harvesters");d.Adjust("Samurai",3);Check(d.Count("Castle")==0&&d.Count("Border Keep")==0&&d.Review().Dynasty==3&&d.Review().Unimplemented==1);}),
@@ -22,6 +22,6 @@ internal static class DeckWorkshopTests
             ("Deck filenames reject traversal and Windows reserved names",()=>{var s=new DeckFileStore(Path.GetTempPath());foreach(var n in new[]{"../secret","a/b","CON","bad\nname",""}){try{s.PathFor(n);throw new Exception("Unsafe name accepted");}catch(ArgumentException){}}}),
             ("Unimplemented cards are explicit even in complete draft",()=>{var d=new DeckWorkshop(Pool);d.Adjust("Samurai",40);d.Adjust("Unwired",40);Check(d.Review().Unimplemented==1&&!d.Review().ChecksPassed);}),
         ];
-        var failed=0;foreach(var (name,test) in tests){try{test();Console.WriteLine("PASS "+name);}catch(Exception e){failed++;Console.Error.WriteLine("FAIL "+name+"\n"+e);}}Console.WriteLine($"{tests.Length-failed}/{tests.Length} deck workshop tests passed.");return failed;
+        runner.Run("deck-workshop",tests);
     }
 }

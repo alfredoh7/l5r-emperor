@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Consolidate regression assertions for command acceptance/atomic rejection, hidden IDs, opening counts and offered actions; share a small Force battle fixture; independently name Force, published follower, action-query and catalogue-wave cases. Shared test-runner source now serves Core/deck and AI suites with --filter and --list; no production rules, client behavior or pre-merge scripts changed. Coverage map and commands: tests/README.md. Open PRs checked; no overlap and origin/main current.",
+  "validation": "bash tools/check.sh --skip-client passed (98.31s): 43 collaboration, 130 content, 150 core, 52 published, 8 deck-format, 8 deck-workshop, 13 AI, 5 server, 4 transport. Used supported L5R_PYTHON override to installed Python after Windows app alias crash; direct content diagnostic also passed 130. Eight standalone runner contract probes passed (listing, filters, invalid/empty input, no-match and failure continuation). Focused Force 13/13; privacy/action/atomicity 13/13; catalogue/setup/followers checks passed; AI seed 42 training/live 2/2. Same standalone Core command: baseline 10.35s, final 9.82s; UnitView-only 0.60s. Single samples, not a demonstrated speedup. All builds zero warnings/errors. No native gameplay claim.",
+  "remaining": "Final PR CI and merge pending; implementation complete.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/235",
+  "branch": "codex/235-regression-fixtures",
+  "updated": "2026-09-15T13:40:40.483557+00:00"
+}
