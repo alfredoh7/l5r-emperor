@@ -131,13 +131,18 @@ public partial class DuelArenaReview : Control
         foreach (var light in _lanternLights) light.Visible = !detail;
         var side = _sidebar ? Math.Min(260, screen.X * .20f) : 0;
         _play = new Rect2(Vector2.Zero, new Vector2(detail ? screen.X / 2 : screen.X - side, screen.Y));
-        _density = Math.Min(_play.Size.X / 1600, _play.Size.Y / 900) * .8f * _zoom;
-        _world.Size = (Vector2I)_play.Size;
-        _worldImage.Position = _play.Position; _worldImage.Size = _play.Size;
+        var uiScale = Math.Min(screen.X / 1600, screen.Y / 900);
+        // Extra render height shifts the optical center down while the native
+        // window crops the unused foreground. Both 3D and cards share this
+        // canvas, leaving headroom for the complete central tree.
+        var stageSize = _play.Size + new Vector2(0, detail ? 0 : 300 * uiScale);
+        _density = Math.Min(_play.Size.X / 1600, _play.Size.Y / 900) * (detail ? .8f : .68f) * _zoom;
+        _world.Size = (Vector2I)stageSize;
+        _worldImage.Position = _play.Position; _worldImage.Size = stageSize;
         _camera.Projection = Camera3D.ProjectionType.Perspective;
         _camera.Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch));
         _camera.LookAt(Vector3.Zero);
-        _camera.Fov = Mathf.RadToDeg(2 * Mathf.Atan(_play.Size.Y / (2 * Distance * Unit * _density)));
+        _camera.Fov = Mathf.RadToDeg(2 * Mathf.Atan(stageSize.Y / (2 * Distance * Unit * _density)));
         foreach (var child in _model.FindChildren("*", "MeshInstance3D", true, false).OfType<MeshInstance3D>())
             child.Visible = !detail || child.Name == (_lanternDetail ? "StoneLanternLeft" : _pineDetail ? (_pineBefore ? "PineLeft" : "PineHero") : "ApprovedDuelMat");
         if (_lanternDetail)
@@ -177,7 +182,7 @@ public partial class DuelArenaReview : Control
         _worldImage.Visible = detail || !_showReference;
         _table.Position = _play.Position;
         _table.Scale = Vector2.One * _density;
-        _table.ResizePlane(_play.Size / _density, Math.Max(1, _density * 1.4f));
+        _table.ResizePlane(stageSize / _density, Math.Max(1, _density * 1.4f));
         _table.Visible = !detail && !_showReference && !_clean;
         _plane.Size = _table.CanvasSize;
         _hud.Visible = detail || (!_showReference && !_clean);
@@ -376,6 +381,24 @@ public partial class DuelArenaReview : Control
                 _checkStep = 2; _elapsed = 0; return;
             }
             RenderingServer.ForceDraw(false); RenderingServer.ForceSync();
+            Rect2? pineScreenBounds = null;
+            if (!detail && !_showReference && !_pineBefore)
+            {
+                // Check the actual imported silhouette, including roots. A matching
+                // card projection alone cannot catch a tree cropped by the window.
+                var pine = (MeshInstance3D)_model.FindChild("PineHero", true, false);
+                var minimum = new Vector2(float.PositiveInfinity, float.PositiveInfinity);
+                var maximum = new Vector2(float.NegativeInfinity, float.NegativeInfinity);
+                for (var surface = 0; surface < pine.Mesh.GetSurfaceCount(); surface++)
+                    foreach (var vertex in pine.Mesh.SurfaceGetArrays(surface)[(int)Mesh.ArrayType.Vertex].AsVector3Array())
+                    {
+                        var point = _camera.UnprojectPosition(pine.GlobalTransform * vertex);
+                        minimum = minimum.Min(point); maximum = maximum.Max(point);
+                    }
+                pineScreenBounds = new Rect2(minimum, maximum - minimum);
+                if (Mathf.IsEqualApprox(_zoom, 1) && !_play.Grow(-16 * Math.Min(_play.Size.X / 1600, _play.Size.Y / 900)).Encloses(pineScreenBounds.Value))
+                    throw new Exception($"Complete pine does not fit the default view: {pineScreenBounds}");
+            }
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
             System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
@@ -383,6 +406,7 @@ public partial class DuelArenaReview : Control
                 MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
                 PineDetail = _pineDetail, PineReverse = _pineReverse, PineBefore = _pineBefore,
                 CameraChecked = !detail,
+                PineScreenBounds = pineScreenBounds?.ToString(),
                 MaxCameraErrorPixels = maxError, NativeCardClicks = _inspections,
                 Crowded = _crowded, Bowed = _bowed, Revealed = _revealed, Sidebar = _sidebar,
                 ObservedFramesPerSecond = Engine.GetFramesPerSecond(),

@@ -174,22 +174,22 @@ bpy.ops.object.join()
 bpy.data.objects.remove(scene.objects['PineRight'], do_unlink=True)
 pine.name = 'PineHero'
 pine.data.name = 'Pine — refined wood and needles'
-pine.location = (.75, 8.8, -3.95)
+pine.location = (.75, 10.1, -.36)
 pine.scale = (2.1, 2.1, 2.1)
 pine['cleanup'] = 'Retained Meshy bark/branches; replace coarse green surfaces with open paired needle clusters'
 pine['source'] = 'assets/table/duel-arena/duel-arena-v4.blend'
-pine['placement'] = 'Single mature pine in the lower garden, crown centered behind the mat'
+pine['placement'] = 'Single mature pine on level garden ground; complete crown, trunk and roots in frame'
 
-# End the raised surround at the rear terrace. The larger tree is planted on
-# lower garden ground; its base is not buried inside the old solid platform.
+# End the surround at the terrace and extend level soil behind it.
+# Root contact is above the soil; the complete tree remains visible.
 surround = scene.objects['Table surround']
 surround.location.y = .05
 surround.dimensions.y = 15.7
-bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 12, -4.2))
+bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 12, -.62))
 garden = bpy.context.object
-garden.name = 'Lower garden ground'
+garden.name = 'Garden ground'
 garden.dimensions = (25, 8.2, .5)
-soil = bpy.data.materials.new('Lower garden — dark soil')
+soil = bpy.data.materials.new('Garden — dark soil')
 soil.use_nodes = True
 soil.diffuse_color = (.012, .017, .010, 1)
 soil_shader = soil.node_tree.nodes.get('Principled BSDF')
@@ -199,6 +199,9 @@ garden.data.materials.append(soil)
 scene.name = 'Duel arena — single refined pine / iteration 5'
 scene['status'] = 'Single mature pine and refined needles; architecture and atmosphere remain provisional'
 scene.camera = scene.objects['Card-plane matched camera']
+# Match the review’s wider lens and lower optical center at 1600x900.
+scene.camera.data.lens *= .85
+scene.camera.data.shift_y = 150 / 900  # Vertical sensor fit: 150px of headroom.
 scene.render.engine = 'CYCLES'
 scene.cycles.samples = 24
 scene.cycles.use_denoising = True
@@ -231,6 +234,7 @@ report = json.loads((ASSETS / 'layout-v4.json').read_text())
 report.update(
     stage='Iteration 5 — one mature central pine with refined foliage',
     pine_instances=1, linked_pine_mesh=False,
+    review_framing={'density_at_1600x900': .68, 'extra_canvas_height_at_1600x900': 300, 'optical_center_y_at_1600x900': 600},
     pine_height=float(pine.dimensions.z), pine_vertices=len(pine.data.vertices),
     pine_triangles=triangle_count(pine),
     pine_placements=[{'name': pine.name, 'location': list(pine.location),

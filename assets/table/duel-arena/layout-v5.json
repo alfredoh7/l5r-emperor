@@ -109,8 +109,8 @@
       "name": "PineHero",
       "location": [
         0.75,
-        8.800000190734863,
-        -3.950000047683716
+        10.100000381469727,
+        -0.36000001430511475
       ],
       "scale": [
         2.0999999046325684,
@@ -122,6 +122,11 @@
   ],
   "linked_pine_mesh": false,
   "pine_instances": 1,
+  "review_framing": {
+    "density_at_1600x900": 0.68,
+    "extra_canvas_height_at_1600x900": 300,
+    "optical_center_y_at_1600x900": 600
+  },
   "foliage_refinement": {
     "seed": 20515,
     "source_triangles": 220000,
