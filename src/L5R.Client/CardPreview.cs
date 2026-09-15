@@ -24,8 +24,8 @@ public static class CardPreview
         var design = new Vector2(card.Definition is null ? 380 : 750, card.Definition is null ? 118 : 558);
         var shell = new Control { CustomMinimumSize = design * scale, MouseFilter = Control.MouseFilterEnum.Ignore, ClipContents = true };
         shell.SetMeta("card_preview", card.Id);
-        var panel = new PanelContainer { Theme = Palette.MakeTheme(), MouseFilter = Control.MouseFilterEnum.Ignore };
-        panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color("171a16"), null, 10));
+        var panel = new PanelContainer { Theme = SidebarSkin.Theme(), MouseFilter = Control.MouseFilterEnum.Ignore };
+        panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
         shell.AddChild(panel); panel.Size = design; panel.Scale = Vector2.One * scale;
         var row = new HBoxContainer(); row.AddThemeConstantOverride("separation", 18); panel.AddChild(row);
         if (card.Definition is not { } def)

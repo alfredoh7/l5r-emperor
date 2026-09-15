@@ -136,8 +136,8 @@ public partial class Main
         {
             // Inspect the whole unit at useful size, instead of forcing six cards into
             // one narrow battlefield. These are the actual live tiles, not extra copies.
-            var panel = Place(_unitDetail, new LacquerPanel(), 238, 342, BoardWidth, 320);
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.04f, .037f, .025f, .98f), Palette.Gold, 16, 3));
+            var panel = Place(_unitDetail, new PanelContainer { Theme = SidebarSkin.Theme() }, 238, 342, BoardWidth, 320);
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             panel.SetMeta("battle_province", personality.ProvinceIndex ?? -1);
             panel.SetMeta("home_owner", personality.OwnerId);
             var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 6); panel.AddChild(content);
