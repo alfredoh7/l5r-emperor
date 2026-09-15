@@ -7,6 +7,9 @@ namespace L5R.Client;
 public partial class TableSurface : TextureRect
 {
     public const float Pitch = .64f, Depth = .00065f;
+    // Optional presentation camera. The normal game table keeps its original defaults.
+    public float PlanePitch { get; set; } = Pitch;
+    public float PlaneDepth { get; set; } = Depth;
     public SubViewport Canvas { get; private set; } = null!;
     public Vector2 CanvasSize { get; private set; }
     public float RenderScale { get; private set; } = 1;
@@ -33,21 +36,23 @@ public partial class TableSurface : TextureRect
         Canvas.CanvasTransform = Transform2D.Identity.Scaled(Vector2.One * RenderScale);
         _projection.SetShaderParameter("display_size", Size);
         _projection.SetShaderParameter("canvas_size", CanvasSize);
-        _projection.SetShaderParameter("pitch", Pitch);
-        _projection.SetShaderParameter("depth", Depth);
+        _projection.SetShaderParameter("pitch", PlanePitch);
+        _projection.SetShaderParameter("depth", PlaneDepth);
     }
-    public static Vector2 ProjectOffset(Vector2 plane)
+    public static Vector2 ProjectOffset(Vector2 plane) => ProjectOffset(plane, Pitch, Depth);
+    public static Vector2 ProjectOffset(Vector2 plane, float pitch, float depth)
     {
-        var divisor = 1 - plane.Y * Depth;
-        return new Vector2(plane.X, plane.Y * Pitch) / divisor;
+        var divisor = 1 - plane.Y * depth;
+        return new Vector2(plane.X, plane.Y * pitch) / divisor;
     }
-    public static Vector2 UnprojectOffset(Vector2 screen)
+    public static Vector2 UnprojectOffset(Vector2 screen) => UnprojectOffset(screen, Pitch, Depth);
+    public static Vector2 UnprojectOffset(Vector2 screen, float pitch, float depth)
     {
-        var y = screen.Y / (Pitch + Depth * screen.Y);
-        return new Vector2(screen.X * (1 - Depth * y), y);
+        var y = screen.Y / (pitch + depth * screen.Y);
+        return new Vector2(screen.X * (1 - depth * y), y);
     }
-    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (Size / 2 + ProjectOffset(plane - CanvasSize / 2));
-    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - Size / 2);
+    public Vector2 ProjectCanvas(Vector2 plane) => GetGlobalTransform() * (Size / 2 + ProjectOffset(plane - CanvasSize / 2, PlanePitch, PlaneDepth));
+    public Vector2 ScreenToCanvas(Vector2 screen) => CanvasSize / 2 + UnprojectOffset(GetGlobalTransform().AffineInverse() * screen - Size / 2, PlanePitch, PlaneDepth);
     public void ForwardMouse(InputEventMouse mouse)
     {
         var forwarded = (InputEventMouse)mouse.Duplicate();
