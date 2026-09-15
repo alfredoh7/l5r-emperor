@@ -102,7 +102,7 @@ var tests = new (string Name, Action Run)[]
     ("Moto Shunsuke's Force bonus tracks the largest single dead-Personality pile (issue #221: the shared DeadCount helper, and PlayerView.DeadCount exposing the same authoritative per-player count for a future UI/card to read); his Limited ability only targets another player's discarded Personality", MotoShunsukeForceBonusAndMakeDead),
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
     ("Unique/Singular (issue #202): both restrict simultaneous in-play copies of the same-named card to one per controller (Unique's own in-play restriction had no test before this), checked at all three entry-into-play paths -- Purchase, ordinary Equip (a real pre-existing gap for both keywords, fixed here), and Equip (Battle)", UniqueAndSingularInPlayRestriction),
-    ("Loyal restricts recruitment to a Clan the Personality is aligned with; a multi-Clan Personality recruits for any of its alignments", LoyalKeyword),
+    ("Loyal follows effective Clan affiliations; a Personality with none remaining is Unaligned and controllable by any Clan", LoyalKeyword),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
@@ -2033,6 +2033,38 @@ static void LoyalKeyword()
         var cardId=s.Players[0].Provinces[0].CardId!; s.Cards[cardId].DefinitionId="training-loyal-multi-clan";
         e=MatchEngine.FromTestState(s);
         Check(e.QuotePurchase(0,cardId).Error is null,"A Crane/Lion dual-aligned Loyal Personality recruits normally for a Crane player");
+    }
+    {
+        // Removing the last Clan affiliation makes a Loyal Personality Unaligned. Unaligned is not a
+        // tenth Clan: any player, including one with an Unaligned Stronghold, may take control.
+        foreach(var playerClan in new[]{"Lion","Unaligned"})
+        {
+            var e=MatchEngine.CreateEconomyScenario(); var s=e.State; s.Players[0].Clan=playerClan;
+            var cardId=s.Players[0].Provinces[0].CardId!; var card=s.Cards[cardId];
+            card.DefinitionId="training-loyal-crane"; card.RemovedClanAffiliations.Add("Crane");
+            e=MatchEngine.FromTestState(s);
+            Check(e.QuotePurchase(0,cardId).Error is null,$"An Unaligned Loyal Personality may be controlled by a {playerClan} player");
+        }
+    }
+    {
+        // Removing only one of several affiliations leaves the others in force.
+        var e=MatchEngine.CreateEconomyScenario(); var s=e.State;
+        var cardId=s.Players[0].Provinces[0].CardId!; var card=s.Cards[cardId];
+        card.DefinitionId="training-loyal-multi-clan"; card.RemovedClanAffiliations.Add("Crane");
+        s.Players[0].Clan="Lion"; e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is null,"A Loyal Personality remains aligned with its unremoved Clan");
+        s=e.State; s.Players[0].Clan="Crane"; e=MatchEngine.FromTestState(s);
+        Check(e.QuotePurchase(0,cardId).Error is not null,"A removed Clan affiliation no longer satisfies Loyal");
+    }
+    {
+        // The derived Unaligned keyword is visible to every ordinary keyword-based rule check.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var dairuko=Add(s,"oracle-l5r-10635",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-loyal-crane",1,Zone.Battlefield,province:0);
+        target.RemovedClanAffiliations.Add("Crane");
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:dairuko.Id,TargetId:target.Id,AbilityId:"dairuko-exp-bow"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"A Personality with no Clan affiliations has the Unaligned keyword");
     }
 }
 static void KeywordSatisfaction()
