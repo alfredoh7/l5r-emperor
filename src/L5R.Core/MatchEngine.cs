@@ -436,10 +436,10 @@ public sealed partial class MatchEngine
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
         if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp) error="Choose your face-up province card.";
         else if(def.Type is not (CardType.Personality or CardType.Holding)) error="This card cannot be purchased.";
-        // Loyal (core rules Glossary): recruitable only by a Stronghold whose Clan matches one of the
-        // Personality's own alignments -- a Clan-locked deck never exercises this today, only a custom
-        // deck mixing an off-Clan Loyal Personality into a player's own provinces would.
-        else if(def.Type==CardType.Personality && Keyword(card,"Loyal") && !inClan) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
+        // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
+        // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
+        // Clan restriction, including for a player whose Stronghold represents no Clan.
+        else if(def.Type==CardType.Personality && !LoyaltyAllowsControl(card,player.Clan)) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
@@ -1423,7 +1423,7 @@ public sealed partial class MatchEngine
         var stronghold = Definition(Card(Player(playerId).StrongholdId)).Effect;
         if(!HonorLossImmunity.TryGetValue(stronghold, out var rule)) return false;
         var def = Definition(source);
-        return rule.Clan == def.Clan || (rule.Fate && IsFateCardType(def.Type));
+        return (rule.Clan is not null && HasClanAffiliation(source,rule.Clan)) || (rule.Fate && IsFateCardType(def.Type));
     }
     private void GainHonor(int playerId,int amount,string reason,CardInstance? source=null)
     {
