@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Starting the approved Option A corner-join frame from current main; preserve Topaz cloth, construct independent Blender frame and verify native table projection.",
+  "validation": "Approval source copied and inspected; fresh GitHub context checked; implementation and native checks pending.",
+  "remaining": "Frame geometry/materials, Godot integration, source comparison, input validation and CI.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/218",
+  "branch": "codex/218-lacquer-frame",
+  "updated": "2026-09-15T05:53:22.722661+00:00"
+}
