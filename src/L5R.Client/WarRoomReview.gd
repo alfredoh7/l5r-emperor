@@ -16,47 +16,31 @@ func _ready() -> void:
         if arg.begins_with("--room-capture="): capture_path = arg.trim_prefix("--room-capture=")
         if arg.begins_with("--room-view="): view_name = arg.trim_prefix("--room-view=")
         clean = clean or arg == "--clean"
-    room = load("res://Art/WarRoom/war-room-m1.glb").instantiate()
+    room = load("res://FortressHall.tscn").instantiate()
     add_child(room)
     var cloth := MeshInstance3D.new()
     var plane := PlaneMesh.new()
     plane.size = Vector2(1.8, 1.8 * 941.0 / 1672.0)
     cloth.mesh = plane
     var fabric := ShaderMaterial.new()
-    fabric.shader = load("res://Art/MatFidelity/fabric.gdshader")
-    fabric.set_shader_parameter("artwork", load("res://Art/navy-mat-topaz-4x.webp"))
-    fabric.set_shader_parameter("detail_strength", 0.0)
+    fabric.shader = load("res://Art/WarRoom/cloth.gdshader")
+    fabric.set_shader_parameter("plate_texture", load("res://Art/navy-mat-topaz-4x.webp"))
+    fabric.set_shader_parameter("candle_motion", 0.0)
+    fabric.set_shader_parameter("environment_size", Vector2(1800, 1013.0383))
+    fabric.set_shader_parameter("left_lamp", Vector2(.06944, .82575))
+    fabric.set_shader_parameter("right_lamp", Vector2(.91667, .14463))
     cloth.material_override = fabric
     add_child(cloth)
     var frame := load("res://Art/LacquerFrame/lacquer-frame-a.glb").instantiate() as Node3D
     var wood := ShaderMaterial.new()
     wood.shader = load("res://Art/LacquerFrame/lacquer-frame.gdshader")
     wood.set_shader_parameter("source_art", load("res://Art/LacquerFrame/approved-frame-a.png"))
+    wood.set_shader_parameter("native_candlelight", true)
+    wood.set_shader_parameter("left_lamp", Vector2(.06944, .82575))
+    wood.set_shader_parameter("right_lamp", Vector2(.91667, .14463))
     for mesh in frame.find_children("*", "MeshInstance3D"):
         mesh.material_override = wood
     add_child(frame)
-    var env := Environment.new()
-    env.background_mode = Environment.BG_COLOR
-    env.background_color = Color("100e0b")
-    env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-    env.ambient_light_color = Color("b0b9c6")
-    env.ambient_light_energy = .34
-    env.tonemap_mode = Environment.TONE_MAPPER_LINEAR
-    var world := WorldEnvironment.new()
-    world.environment = env
-    add_child(world)
-    # Preliminary stationary light rig. Prop production and candle animation come later.
-    lamp(Vector3(-1.59, .10, -1.28), Color("ffc385"), 1.20, 1.6)
-    lamp(Vector3(1.57, .12, -1.46), Color("ffc385"), 1.20, 1.6)
-    lamp(Vector3(-.83, .15, .42), Color("ffac60"), .70, .70)
-    lamp(Vector3(.78, .15, -.41), Color("ffac60"), .65, .68)
-    lamp(Vector3(0, .15, -3.0), Color("ffad57"), .48, .95)
-    var fill := DirectionalLight3D.new()
-    fill.rotation_degrees = Vector3(-68, -22, 0)
-    fill.light_color = Color("b4bdcc")
-    fill.light_energy = .30
-    fill.shadow_enabled = true
-    add_child(fill)
     camera = Camera3D.new()
     camera.current = true
     camera.near = .02
@@ -67,7 +51,7 @@ func _ready() -> void:
     add_child(overlay)
     reference = TextureRect.new()
     reference.texture = ImageTexture.create_from_image(Image.load_from_file(
-        ProjectSettings.globalize_path("res://../../assets/table/war-room/approved-command-chamber.png")))
+        ProjectSettings.globalize_path("res://../../assets/table/war-room/approved-fortress-hall-b3.png")))
     reference.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
     reference.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
     reference.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -75,7 +59,7 @@ func _ready() -> void:
     reference.visible = false
     overlay.add_child(reference)
     status = Label.new()
-    status.text = "ARCHITECTURE · MILESTONE 1     1 Composition  ·  2 Overview  ·  3 Joinery  ·  R Reference  ·  Wheel / drag: inspect  ·  Home Reset"
+    status.text = "FORTRESS HALL · B3     1 Composition  ·  2 Overview  ·  3 Joinery  ·  R Reference  ·  Wheel / drag: inspect  ·  Home Reset"
     status.add_theme_font_override("font", load("res://Art/Fonts/Alegreya.ttf"))
     status.add_theme_font_size_override("font_size", 16)
     status.add_theme_color_override("font_color", Color("f2dfb6"))
@@ -86,12 +70,21 @@ func _ready() -> void:
     status.visible = not clean
     get_viewport().size_changed.connect(layout)
     layout()
-    print("WAR_ROOM_REVIEW: isolated Blender architecture; unchanged mat/frame. No gameplay commands or Meshy jobs.")
+    print("WAR_ROOM_REVIEW: isolated Blender architecture; unchanged mat/frame. No gameplay commands. Separate Meshy fixtures; animation deferred.")
     if not capture_path.is_empty():
         set_process_input(false)
         for _i in range(30): await get_tree().process_frame
+        if OS.get_cmdline_user_args().has("--room-profile"):
+            var started := Time.get_ticks_usec()
+            for _i in range(60):
+                RenderingServer.force_draw(false)
+                RenderingServer.force_sync()
+                await get_tree().process_frame
+            var seconds := float(Time.get_ticks_usec() - started) / 1000000.0
+            print("ROOM_DRAW_PROFILE: 60 forced draw/sync frames / ", seconds, " seconds = ", 60.0 / seconds, " fps; draw calls=", Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
         reference.hide()
-        await RenderingServer.frame_post_draw
+        RenderingServer.force_draw(false)
+        RenderingServer.force_sync()
         var result := get_viewport().get_texture().get_image().save_png(capture_path)
         print("WAR_ROOM_CAPTURE: ", view_name, " / ", result)
         get_tree().quit(0 if result == OK else 1)
@@ -112,17 +105,28 @@ func layout() -> void:
     if is_instance_valid(status): status.position = Vector2(20, size.y - 30)
     var aspect := size.x / maxf(1, size.y)
     if view_name == "composition":
-        # Blender 30.5 mm / 36 mm sensor with an off-centre lens. Same .64 plane pitch
-        # as the game; exact live TableSurface integration is a later milestone.
-        var plane_width := camera.near * 36.0 / 30.5 * zoom
+        var plane_width := camera.near * 1672.0 / 882.0 * zoom
         camera.keep_aspect = Camera3D.KEEP_HEIGHT
-        camera.set_frustum(plane_width / aspect, Vector2(.061, -.047) * plane_width, camera.near, 30)
-        camera.position = pan + Vector3(0, 2.28 * .64, 2.28 * sqrt(1.0 - .64 * .64))
+        camera.set_frustum(plane_width / aspect, Vector2(26.0/1672.0,86.5/1672.0) * plane_width, camera.near, 30)
+        camera.position = pan + Vector3(0, 1.54 * .64, 1.54 * sqrt(1.0 - .64 * .64))
         camera.look_at(pan)
     elif view_name == "overview":
         camera.set_perspective(44 * zoom, .02, 30)
         camera.position = pan + Vector3(0, 3.5, 4.5)
         camera.look_at(pan + Vector3(0, .06, -.55))
+    elif view_name == "table-lantern":
+        camera.set_perspective(37 * zoom, .002, 30)
+        camera.position = pan + Vector3(-.775,.044+.24*.64,.296+.24*sqrt(1.0-.64*.64))
+        camera.look_at(pan + Vector3(-.775,.044,.296))
+    elif view_name == "room-lantern":
+        camera.set_perspective(37 * zoom, .002, 30)
+        var placements: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://Art/WarRoom/layout-b3.json"))
+        var fixture: Dictionary = placements.lamps.filter(func(item): return item.name == "RoomLantern-1_0")[0]
+        var base: Array = fixture.position
+        var half_height: float = fixture.height * .5
+        var target := pan + Vector3(base[0], base[2] + half_height, -base[1] - half_height * .833)
+        camera.position = target + Vector3(0,.36*.64,.36*sqrt(1.0-.64*.64))
+        camera.look_at(target)
     else:
         camera.set_perspective(40 * zoom, .02, 30)
         camera.position = pan + Vector3(-1.28, .61, 1.45)

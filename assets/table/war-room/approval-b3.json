@@ -1,0 +1,30 @@
+{
+  "approved_by": "Alfredo",
+  "date": "2026-09-15",
+  "variant": "B3 sparse fortress hall, no foreground chairs",
+  "source_sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+  "source_file": "exec-4f8ff125-7ca3-4657-b220-a1d3b3684024.png",
+  "supersedes": "approved-command-chamber.png",
+  "scope": "Static room, lighting and separate Meshy table/room lanterns. Animation deferred.",
+  "preserve": [
+    "navy/gold mat",
+    "lacquer table frame",
+    "rear map screen and empty dais",
+    "worn timber columns",
+    "open mountain bays",
+    "sparse weapon racks",
+    "two small perimeter chests",
+    "left brazier",
+    "table lanterns near-left and far-right",
+    "room lanterns"
+  ],
+  "excluded": [
+    "chairs",
+    "carpet",
+    "armour display",
+    "banners",
+    "rear table or helmet",
+    "loose scrolls",
+    "foreground cabinets and clutter"
+  ]
+}
