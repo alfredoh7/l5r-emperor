@@ -27,8 +27,9 @@ public partial class DuelArenaReview : Control
     private Texture2D _pineSource = null!, _pineReverseSource = null!;
     private bool _selfCheck;
     private string? _capture;
-    private string _title = "Duel arena · iteration 5";
+    private string _title = "Duel arena · iteration 6";
     private double _elapsed;
+    private double _captureDelay = 1.5;
     private int _checkStep, _inspections;
     private float _zoom = 1, _density;
     private Rect2 _play;
@@ -37,6 +38,8 @@ public partial class DuelArenaReview : Control
 
     public override void _Ready()
     {
+        var preferences = new MenuPreferences("default"); preferences.Load();
+        _gardenReducedMotion = preferences.ReducedMotion;
         foreach (var arg in OS.GetCmdlineUserArgs())
         {
             if (arg.StartsWith("--capture=")) _capture = arg[10..];
@@ -52,6 +55,11 @@ public partial class DuelArenaReview : Control
             _pineDetail |= arg == "--pine";
             _pineReverse |= arg == "--reverse";
             if (arg == "--pine-before") _pineBefore = _pineDetail = true;
+            if (arg == "--reduced-motion") _gardenReducedMotion = true;
+            if (arg == "--motion") _gardenReducedMotion = false;
+            if (arg.StartsWith("--phase=")) _gardenPhase = int.Parse(arg[8..]);
+            if (arg.StartsWith("--zoom=")) _zoom = Math.Clamp(float.Parse(arg[7..], System.Globalization.CultureInfo.InvariantCulture), .75f, 1.35f);
+            if (arg.StartsWith("--settle=")) _captureDelay = Math.Clamp(double.Parse(arg[9..], System.Globalization.CultureInfo.InvariantCulture), 1.5, 10);
         }
         if (_pineBefore) _title = "Duel arena · iteration 4 baseline";
         Theme = Palette.MakeTheme();
@@ -88,6 +96,7 @@ public partial class DuelArenaReview : Control
         _camera = new Camera3D { Current = true, Near = .05f, Far = 100,
             Position = new Vector3(0, Distance * TableSurface.Pitch, Distance * Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch)) };
         _world.AddChild(_camera); _camera.LookAt(Vector3.Zero);
+        BuildGardenPresentation();
         _worldImage = new TextureRect { Texture = _world.GetTexture(), ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize,
             MouseFilter = MouseFilterEnum.Ignore };
         AddChild(_worldImage);
@@ -180,6 +189,7 @@ public partial class DuelArenaReview : Control
         }
         _reference.Visible = detail || _showReference;
         _worldImage.Visible = detail || !_showReference;
+        LayoutGardenPresentation(detail);
         _table.Position = _play.Position;
         _table.Scale = Vector2.One * _density;
         _table.ResizePlane(stageSize / _density, Math.Max(1, _density * 1.4f));
@@ -229,9 +239,9 @@ public partial class DuelArenaReview : Control
         var ui = Math.Min(screen.X / 1600, screen.Y / 900);
         Text(_title, new Vector2(28, 18) * ui, 24 * ui, Palette.Paper, true);
         Text(_pineBefore ? "Earlier paired-pine layout · public sample cards"
-            : "Supplied mat · Meshy lanterns · central garden pine · public sample cards",
+            : "Moonlit garden · central pine · public sample cards",
             new Vector2(28, 54) * ui, 14 * ui, Palette.PaperDim);
-        Text("Tab concept   V clear   T pine   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   Wheel zoom   F fit   Esc close",
+        Text("Tab concept   V clear   T pine   L lantern   M mat   R reveal   C attachments   B bow   P sidebar   N motion   Wheel zoom   F fit   Esc close",
             new Vector2(28 * ui, screen.Y - 27 * ui), 13 * ui, Palette.PaperDim);
         var handDefs = definitions.Where(d => d.Type == CardType.Strategy).Take(5).ToArray();
         for (var i = 0; i < handDefs.Length; i++)
@@ -325,6 +335,7 @@ public partial class DuelArenaReview : Control
             case Key.B: _bowed = !_bowed; break;
             case Key.P: _sidebar = !_sidebar; break;
             case Key.F: _zoom = 1; break;
+            case Key.N: _gardenReducedMotion = !_gardenReducedMotion; break;
             default: return;
         }
         Layout();
@@ -332,9 +343,10 @@ public partial class DuelArenaReview : Control
 
     public override void _Process(double delta)
     {
+        AnimateGardenPresentation(delta);
         if (_capture is null) return;
         _elapsed += delta;
-        if (_elapsed < 1.5) return;
+        if (_elapsed < _captureDelay) return;
         try
         {
             // Compare an independently imported Blender anchor against the existing 2.5D projection.
@@ -402,7 +414,9 @@ public partial class DuelArenaReview : Control
             var error = GetViewport().GetTexture().GetImage().SavePng(_capture);
             if (error != Error.Ok) throw new Exception($"Capture failed: {error}");
             System.IO.File.WriteAllText(_capture + ".json", JsonSerializer.Serialize(new {
-                Stage = _pineBefore ? "iteration 4 pine baseline" : "iteration 5", Viewport = GetViewportRect().Size.ToString(),
+                Stage = _pineBefore ? "iteration 4 pine baseline" : "iteration 6", Viewport = GetViewportRect().Size.ToString(),
+                GardenPhase = _gardenPhase, ReducedMotion = _gardenReducedMotion, AtmosphereTime = _gardenTime,
+                Zoom = _zoom,
                 MatDetail = _matDetail, LanternDetail = _lanternDetail, ClearView = _clean,
                 PineDetail = _pineDetail, PineReverse = _pineReverse, PineBefore = _pineBefore,
                 CameraChecked = !detail,

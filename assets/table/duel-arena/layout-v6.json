@@ -1,0 +1,19 @@
+{
+  "phase": 2,
+  "base": "duel-arena-v5.glb",
+  "environment": "duel-arena-v6-environment.glb",
+  "unchanged_base_meshes": [
+    "ApprovedDuelMat",
+    "PineHero",
+    "StoneLanternLeft",
+    "StoneLanternRight",
+    "Thin silk backing"
+  ],
+  "new_meshes": 83,
+  "new_triangles": 279894,
+  "pine_instances": 1,
+  "camera_framing": "Preserved v5 full-tree framing; all card anchors unchanged",
+  "rock_source": "assets/table/duel-arena/meshy/rock-v1/rock-source.glb",
+  "surface_provenance": "assets/table/duel-arena/surfaces/provenance.json",
+  "distant_background": "Approved concept pixels, explicitly 2D at runtime"
+}

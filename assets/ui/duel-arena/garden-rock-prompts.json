@@ -1,0 +1,21 @@
+{
+  "asset": "duel garden boulder v1",
+  "direction": "Approved generation 3 moonlit garden; user requested garden rocks, architecture and atmosphere on 2026-09-15",
+  "route": "Meshy text-to-3D from a brief derived from the approved overall concept; no new image generation",
+  "geometry_prompt": "One complete natural Japanese garden boulder, asymmetrical broad reclining silhouette, approximately twice as wide as tall. Dark weathered charcoal granite, irregular layered fracture planes, rounded worn ridges and shallow crevices. A substantial grounded base, one taller shoulder and one low taper. Dignified realistic stone matching a moonlit Japanese temple garden. Individual freestanding rock only, no pedestal, no scenery, no lantern, no tree, no text.",
+  "texture_prompt": "Weathered dark charcoal-gray granite with fine mineral grains, aged pale lichen specks and muted deep olive moss in upward crevices and around the base. Exposed ridges are gray stone. Natural restrained Japanese garden stone; no painted designs, no colored crystals, no baked directional light or scenery. Physically based rough stone, non-metallic.",
+  "estimated_credits": {
+    "preview": 20,
+    "refine_4k_pbr": 10
+  },
+  "pricing_source": "https://docs.meshy.ai/en/api/pricing",
+  "geometry_settings": {
+    "mode": "preview",
+    "prompt": "One complete natural Japanese garden boulder, asymmetrical broad reclining silhouette, approximately twice as wide as tall. Dark weathered charcoal granite, irregular layered fracture planes, rounded worn ridges and shallow crevices. A substantial grounded base, one taller shoulder and one low taper. Dignified realistic stone matching a moonlit Japanese temple garden. Individual freestanding rock only, no pedestal, no scenery, no lantern, no tree, no text.",
+    "model_type": "standard",
+    "ai_model": "meshy-7",
+    "should_remesh": true,
+    "topology": "triangle",
+    "target_polycount": 20000
+  }
+}
