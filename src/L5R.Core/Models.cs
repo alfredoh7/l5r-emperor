@@ -19,7 +19,15 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssign
 // the duel's own resolution order) -- visible to its own owner immediately, to both players once the
 // duel's own Struck reveal happens (PendingDuel.Struck), same shape as a private Hand card that
 // becomes public.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused }
+// EventInPlay (Suspicions, the first Event): an Event's printed text normally resolves once, in the
+// Events Phase, then goes straight to DynastyDiscard (core rules Glossary -- "resolves and is
+// discarded"). An Event whose own text is an ongoing/"until the end of the game" effect instead sits
+// here -- a physical reminder area next to a player's Personalities (the client's own future
+// "sideboard" rendering, not yet built) -- rather than the discard pile, for as long as that effect
+// stays active. Nothing yet moves a card OUT of this zone (Suspicions' own effect never ends), but the
+// intended shape for a future card that does end it is: move to DynastyDiscard, same as an ordinary
+// Event. Public zone, not hidden information, like RemovedFromGame.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -400,7 +408,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
-    int DeadCount, CardView[]? Focused = null);
+    int DeadCount, CardView[]? Focused = null,
+    // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
+    CardView[]? EventsInPlay = null);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
