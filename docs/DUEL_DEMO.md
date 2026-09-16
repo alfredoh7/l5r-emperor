@@ -1,6 +1,6 @@
 # Duel Demo within L5R
 
-Status: implemented on draft PR #220 for issue #205. Human presentation acceptance and mdornbrook's mechanical/interface review remain open. This is part of the normal application; there is no separate game, preferences profile or export preset.
+Status: implemented on PR #220 for issue #205. Alfredo approved the current presentation, including stakes/resolution, on September 16, 2026. mdornbrook's mechanical/interface review remains open; [the review packet](DUEL_MECHANICAL_REVIEW.md) identifies decisions and reproducible cases. This is part of the normal application; there is no separate game, preferences profile or export preset.
 
 ## Play
 
