@@ -63,7 +63,10 @@ public static class DeckFormat
     public static DeckLegality CheckLegality(Deck deck, Func<string, IReadOnlyList<string>> keywordsFor)
     {
         var violations = new List<DeckLegalityViolation>();
-        foreach (var entry in deck.Entries)
+        // A title plus its Experience Level is the construction identity. DeckWorkshop emits that
+        // canonical name; grouping here also prevents repeated/case-varied lines from evading limits.
+        foreach (var entry in deck.Entries.GroupBy(e => e.Name, StringComparer.OrdinalIgnoreCase)
+            .Select(g => new DeckEntry(g.First().Name, g.Sum(e => e.Count))))
         {
             var limit = keywordsFor(entry.Name).Contains("Unique", StringComparer.Ordinal) ? 1 : 3;
             if (entry.Count > limit) violations.Add(new(entry.Name, entry.Count, limit));

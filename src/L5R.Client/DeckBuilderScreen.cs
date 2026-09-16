@@ -194,7 +194,7 @@ public partial class DeckBuilderScreen : Control
         _empty.Visible=cards.Length==0;_empty.Text="Your "+Family+" mat is empty.\nAdd cards from the collection to begin.";
     }
     public void Adjust(CatalogueData.Card card,int delta)
-    {Draft.Adjust(card.Name,delta);Dirty=true;HideHover();UpdateStatus();Collection.Relayout();RefreshMat();}
+    {Draft.Adjust(card.Id,delta);Dirty=true;HideHover();UpdateStatus();Collection.Relayout();RefreshMat();}
     private void UpdateStatus()
     {
         if(_status is null||Draft is null)return;var r=Draft.Review();

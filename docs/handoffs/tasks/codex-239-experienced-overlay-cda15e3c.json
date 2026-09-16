@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Define levelled Experienced deck identities and authoritative free Overlay recruitment, including state and attachment transfer, imported title normalization, client deck selection, and AI action support.",
+  "validation": "222/222 core, published, deck-format, and deck-workshop checks passed; 14/14 AI checks passed; 5/5 server integration checks passed; 4/4 client transport checks passed; L5R.Client build succeeded with 0 errors (NU1900 vulnerability-feed warning only because nuget.org was unavailable in the sandbox); collaboration and content checks previously passed 43/43 and 130/130 on this branch.",
+  "remaining": "None; ready for review and CI.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/239",
+  "branch": "codex/239-experienced-overlay",
+  "updated": "2026-09-16T05:54:39.214996+00:00"
+}

@@ -7,7 +7,11 @@ internal static class DeckWorkshopTests
         new("b", "Border Keep", ["Holding"], ["Dynasty"], [], true), new("bx", "Border Keep - exp", ["Holding"], ["Dynasty"], [], false),
         new("h", "Bamboo Harvesters", ["Holding"], ["Dynasty"], [], true),
         new("p", "Samurai", ["Personality"], ["Dynasty"], [], true), new("u", "Unique Samurai", ["Personality"], ["Dynasty"], ["Unique"], true),
-        new("f", "Strategy", ["Strategy"], ["Fate"], [], true), new("r", "Unwired", ["Spell"], ["Fate"], [], false)];
+        new("f", "Strategy", ["Strategy"], ["Fate"], [], true), new("r", "Unwired", ["Spell"], ["Fate"], [], false),
+        new("p3", "Bayushi Paneki", ["Personality"], ["Dynasty"], ["Experienced 3"], true),
+        new("p5", "Bayushi Paneki", ["Personality"], ["Dynasty"], ["Experienced 5"], true),
+        new("strategy-exp1", "Ancestral Lesson", ["Strategy"], ["Fate"], ["Experienced"], true),
+        new("strategy-exp2", "Ancestral Lesson", ["Strategy"], ["Fate"], ["Experienced 2"], true)];
     private static void Check(bool value){if(!value)throw new Exception("Deck workshop assertion failed.");}
     private static void Throws(Action action){try{action();}catch(FormatException){return;}throw new Exception("Expected format rejection.");}
     public static void Run(TestRunner runner)
@@ -21,6 +25,8 @@ internal static class DeckWorkshopTests
             ("Saving is atomic and existing files require overwrite",()=>{var root=Path.Combine(Path.GetTempPath(),"l5r-decks-"+Guid.NewGuid());try{var s=new DeckFileStore(root);var d=new DeckWorkshop(Pool);d.Adjust("Samurai",3);var path=s.Save("Test deck",d.ToDeck());var before=DeckFileStore.Read(path);d.Adjust("Samurai",1);try{s.Save("Test deck",d.ToDeck());throw new Exception("Overwrite unexpectedly allowed");}catch(IOException){}Check(DeckFileStore.Read(path)==before&&Directory.GetFiles(root).Length==1);s.Save("Test deck",d.ToDeck(),true);d.Load(DeckFileStore.Read(path));Check(d.Count("Samurai")==4);}finally{Directory.Delete(root,true);}}),
             ("Deck filenames reject traversal and Windows reserved names",()=>{var s=new DeckFileStore(Path.GetTempPath());foreach(var n in new[]{"../secret","a/b","CON","bad\nname",""}){try{s.PathFor(n);throw new Exception("Unsafe name accepted");}catch(ArgumentException){}}}),
             ("Unimplemented cards are explicit even in complete draft",()=>{var d=new DeckWorkshop(Pool);d.Adjust("Samurai",40);d.Adjust("Unwired",40);Check(d.Review().Unimplemented==1&&!d.Review().ChecksPassed);}),
+            ("Same-titled Experienced levels remain separately selectable and countable",()=>{var d=new DeckWorkshop(Pool);d.Adjust("p3",3);d.Adjust("p5",2);var entries=d.ToDeck().Entries;Check(d.Count("p3")==3&&d.Count("p5")==2&&entries.Any(e=>e.Name=="Bayushi Paneki Experienced 3"&&e.Count==3)&&entries.Any(e=>e.Name=="Bayushi Paneki Experienced 5"&&e.Count==2));}),
+            ("Experienced on a non-Personality only separates deck identities",()=>{var d=new DeckWorkshop(Pool);d.Adjust("strategy-exp1",3);d.Adjust("strategy-exp2",3);var entries=d.ToDeck().Entries;Check(entries.Any(e=>e.Name=="Ancestral Lesson Experienced"&&e.Count==3)&&entries.Any(e=>e.Name=="Ancestral Lesson Experienced 2"&&e.Count==3));}),
         ];
         runner.Run("deck-workshop",tests);
     }

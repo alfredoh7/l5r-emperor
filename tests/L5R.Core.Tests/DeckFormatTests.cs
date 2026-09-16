@@ -13,6 +13,7 @@ internal static class DeckFormatTests
             ("Legality passes within copy limits", LegalityWithinLimits),
             ("Legality flags a card over its copy limit but still returns a deck", LegalityOverLimit),
             ("Unique-keyword cards are capped at one copy, others at three", UniqueCapIsOne),
+            ("Different Experienced levels are separate construction identities", ExperiencedLevelsAreSeparate),
         ];
         runner.Run("deck-format",tests);
     }
@@ -93,5 +94,14 @@ internal static class DeckFormatTests
         var deck = new Deck("Emperor", [new("Akodo Kisho", 2)]);
         var legality = DeckFormat.CheckLegality(deck, name => name == "Akodo Kisho" ? ["Unique", "Samurai"] : []);
         Check(!legality.IsLegal); Eq(legality.Violations[0].Limit, 1);
+    }
+
+    private static void ExperiencedLevelsAreSeparate()
+    {
+        var deck = new Deck("Emperor", [new("Bayushi Paneki Experienced 3",3),new("Bayushi Paneki Experienced 5",3)]);
+        var legality = DeckFormat.CheckLegality(deck,_=>[]);
+        Check(legality.IsLegal);Eq(legality.Violations.Length,0);
+        Eq(Experienced.DeckName("Bayushi Paneki",["Experienced 3"]),"Bayushi Paneki Experienced 3");
+        Eq(Experienced.DeckName("Bayushi Paneki",["Experienced 5"]),"Bayushi Paneki Experienced 5");
     }
 }
