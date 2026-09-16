@@ -16,7 +16,7 @@ for spec in '2240x990 comparison' '1920x1080 normal' '1920x1080 honorable' '1280
   check_log "artifacts/checks/fallen-$mode.log" FALLEN_PASS
   echo "Fallen native: $mode passed"
 done
-for spec in '1920x1080 table published-fallen-table' '1920x1080 gallery published-fallen-gallery' '1280x720 gallery-small published-fallen-gallery' '1920x1080 seat-1 published-fallen-seat-1-table'; do
+for spec in '1920x1080 table published-fallen-table' '1920x1080 gallery published-fallen-gallery' '1280x720 gallery-small published-fallen-gallery' '1920x1080 seat-1 published-fallen-seat-1-table' '1920x1080 overlap published-fallen-overlap-table' '1280x720 overlap-small published-fallen-overlap-table' '1920x1080 overlap-seat-1 published-fallen-overlap-seat-1-table'; do
   read -r resolution name mode <<< "$spec"
   "$GODOT" --path src/L5R.Client --resolution "$resolution" -- --capture="$L5R_PROJECT_ROOT/docs/screenshots/fallen/$name.png" --capture-mode="$mode" > "artifacts/checks/fallen-$name.log" 2>&1
   check_log "artifacts/checks/fallen-$name.log" FALLEN_TABLE_PASS

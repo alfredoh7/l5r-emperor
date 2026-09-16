@@ -33,18 +33,42 @@ public partial class Main
             foreach(var tile in _tiles.Where(t=>t.Card.Id.StartsWith("table-fallen-")))
                 if(!Mathf.IsEqualApprox(tile.VisualFaceAngle,(tile.Card.Bowed?Mathf.Pi/2:0)+(tile.Card.Dishonorable?Mathf.Pi:0)))
                     throw new Exception("Full-table dishonor orientation incorrect");
-            var counter=counters.Single(c=>c.Player.Id==view.ViewerId);
-            var point=counter.GetGlobalTransform()*(counter.Size/2);
+            var overlap=_captureMode.Contains("overlap",StringComparison.Ordinal);
+            var owner=overlap?1-view.ViewerId:view.ViewerId;
+            var counter=counters.Single(c=>c.Player.Id==owner);
+            var point=counter.GetGlobalTransform()*(overlap?counter.Size*new Vector2(.75f,.72f):counter.Size/2);
+            if(overlap)
+            {
+                // Put a real projected card directly under the opponent's strip.
+                // Default fitted captures and the bottom counter missed this regression.
+                var tile=_tiles.First(t=>t.Card.Id.StartsWith("table-fallen-"+owner));
+                var cardCenter=_world.GetGlobalTransform().AffineInverse()*tile.GetGlobalRect().GetCenter();
+                var local=_tableViewport.GetGlobalTransform().AffineInverse()*point;
+                _cameraFitted=false;_cameraZoom=1;
+                _cameraCenter=cardCenter-TableSurface.UnprojectOffset(local-_tableViewport.Size/2)/_cameraZoom;
+                ApplyTableCamera();
+                for(var i=0;i<8;i++)await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
+                if(ScreenCenter(tile).DistanceTo(point)>2||!_tableViewport.GetGlobalRect().HasPoint(point))
+                    throw new Exception("Overlap fixture did not place a projected card under Fallen");
+                GetViewport().GetTexture().GetImage().SavePng(_capturePath+".overlap.png");
+                GetWindow().GrabFocus();GetViewport().WarpMouse(point);
+                GetViewport().PushInput(new InputEventMouseMotion {Position=point,GlobalPosition=point},true);
+                var zoom=_cameraZoom;
+                GetViewport().PushInput(new InputEventMouseButton {Position=point,GlobalPosition=point,ButtonIndex=MouseButton.WheelUp,Pressed=true},true);
+                GetViewport().PushInput(new InputEventMouseButton {Position=point,GlobalPosition=point,ButtonIndex=MouseButton.WheelUp,Pressed=false},true);
+                if(!Mathf.IsEqualApprox(zoom,_cameraZoom))throw new Exception("Wheel over Fallen zoomed the card underneath");
+                if(TableHovered is CardTile)throw new Exception("Hover over Fallen reached the card underneath");
+            }
             GetWindow().GrabFocus();GetViewport().WarpMouse(point);
             GetViewport().PushInput(new InputEventMouseMotion {Position=point,GlobalPosition=point},true);
             GetViewport().PushInput(new InputEventMouseButton {Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=true},true);
             GetViewport().PushInput(new InputEventMouseButton {Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=false},true);
             for(var i=0;i<5;i++)await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
-            if(_fallenGallery?.OwnerId!=view.ViewerId||!IsInstanceValid(_fallenWindow)||!_fallenWindow!.Visible)
+            if(_fallenGallery?.OwnerId!=owner||!IsInstanceValid(_fallenWindow)||!_fallenWindow!.Visible)
                 throw new Exception("Native Fallen counter click did not open the correct player's modal");
             if(!CameraBlocked)throw new Exception("Fallen modal did not block table inputs");
             if(_fallenGallery.Rows.Any(r=>r.Card.Zone!=Zone.Dead))throw new Exception("Removed/discarded cards appeared in Fallen");
-            _fallenGallery.SelectCard("fallen-konomi-"+view.ViewerId);
+            _fallenGallery.SelectCard("fallen-konomi-"+owner);
             for(var i=0;i<8;i++)await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
             if(_session.Snapshot!=original)throw new Exception("Read-only navigation modified session snapshot");
             // Idle draw lists must keep their texture resources alive too.
@@ -58,6 +82,22 @@ public partial class Main
                 for(var i=0;i<8;i++)await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
                 if(IsInstanceValid(_fallenWindow))throw new Exception("Escape did not close Fallen");
                 GetWindow().GrabFocus();
+                if(overlap)
+                {
+                    var center=_cameraCenter;var zoom=_cameraZoom;
+                    var tablePoint=_tableViewport.GetGlobalRect().GetCenter();
+                    GetViewport().PushInput(new InputEventMouseMotion {Position=tablePoint,GlobalPosition=tablePoint},true);
+                    GetViewport().PushInput(new InputEventMouseButton {Position=tablePoint,GlobalPosition=tablePoint,ButtonIndex=MouseButton.WheelUp,Pressed=true},true);
+                    GetViewport().PushInput(new InputEventMouseButton {Position=tablePoint,GlobalPosition=tablePoint,ButtonIndex=MouseButton.WheelUp,Pressed=false},true);
+                    if(Mathf.IsEqualApprox(zoom,_cameraZoom))throw new Exception("Fixed HUD blocked zoom on uncovered table");
+                    GetViewport().PushInput(new InputEventMouseButton {Position=tablePoint,GlobalPosition=tablePoint,ButtonIndex=MouseButton.Middle,Pressed=true},true);
+                    GetViewport().PushInput(new InputEventMouseMotion {Position=point,GlobalPosition=point,Relative=point-tablePoint},true);
+                    GetViewport().PushInput(new InputEventMouseButton {Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Middle,Pressed=false},true);
+                    if(_cameraDragging)throw new Exception("Table drag remained active after release over Fallen");
+                    _cameraCenter=center;_cameraZoom=zoom;ApplyTableCamera();
+                    for(var i=0;i<5;i++)await ToSignal(GetTree(),SceneTree.SignalName.ProcessFrame);
+                    GD.Print("FALLEN_OVERLAP_PASS: covered-card hover/wheel blocked; counter opens correct owner; uncovered table zoom and drag release work.");
+                }
             }
             GD.Print("FALLEN_TABLE_PASS: native counter click, correct owner, modal table blocking, isolated public piles, unchanged session, full-table orientations.");
             _fallenProbeDone=true;

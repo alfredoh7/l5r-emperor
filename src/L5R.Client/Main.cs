@@ -315,7 +315,6 @@ public partial class Main : Node
         var canvas = new CanvasLayer(); AddChild(canvas);
         _root = new Control { Theme = Palette.MakeTheme(), Size = DesignSize, MouseFilter = Control.MouseFilterEnum.Ignore };
         canvas.AddChild(_root);
-        _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, 1920, 1080);
         BuildTableViewport();
         _status = Place(_root, Palette.Text("", 17, Palette.PaperDim), 295, 15, 750, 26);
         _status.HorizontalAlignment = HorizontalAlignment.Center;
@@ -347,6 +346,9 @@ public partial class Main : Node
         _notice.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _notice.MouseFilter = Control.MouseFilterEnum.Stop;
         _intentOverlay = new BoardIntentOverlay { MouseFilter = Control.MouseFilterEnum.Ignore, Arrows = IntentArrows };
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        // Fixed placards overlap the projected table and the hand. Keep both drawing
+        // and native GUI picking above those cards, but below expanded/modal views.
+        _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 45 }, 0, 0, 1920, 1080);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildCameraControls();
         BuildBattleFeedback();

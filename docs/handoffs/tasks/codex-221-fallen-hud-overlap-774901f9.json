@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix Fallen HUD overlap: fixed placards render/pick above table and hand, covered-table input is excluded, releases cancel safely. Shared path routing comes from Main.cs and inherited PR #262; this patch changes only client presentation/input, no rules or protocol.",
+  "validation": "Client compilation passed with zero warnings/errors. Native pre-fix overlap reproduced and corrected 1080p overlap passed. Remaining both-seat/small-window checks are running.",
+  "remaining": "Complete native visual/input checks. Stacked on #262; parent mechanics review remains separate. No new rules interpretation.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/221",
+  "branch": "codex/221-fallen-hud-overlap",
+  "updated": "2026-09-16T22:11:37.602851+00:00"
+}
