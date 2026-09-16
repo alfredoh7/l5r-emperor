@@ -54,9 +54,15 @@ public partial class DuelScreen
         _skipCinema=DuelUi.Button("Skip",SkipCinematic,fontSize:20);_skipCinema.Name="Skip cinematic";_skipCinema.TooltipText="Skip presentation · Space or Escape";_cinemaLayer.AddChild(_skipCinema);
         _cinemaLayer.Hide();
     }
+    private void SetTableRendering(bool active)
+    {
+        _stage.Visible=active;_stage.Occluded=!active;_table.Visible=active;
+        _table.Canvas.RenderTargetUpdateMode=active?SubViewport.UpdateMode.Always:SubViewport.UpdateMode.Disabled;
+        _uprights.Visible=active;_flights.Visible=active;
+    }
     private void ResetCamera()
     {
-        if(_scene is null)return;_scene.Scale=Vector2.One;_scene.Position=Vector2.Zero;
+        if(_scene is null)return;SetTableRendering(true);_scene.Scale=Vector2.One;_scene.Position=Vector2.Zero;
         if(_uprights is not null)_uprights.Position=_offset;
     }
     private void ResetCinema()
@@ -78,7 +84,7 @@ public partial class DuelScreen
             _introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
             _introStage.Build(record,Snapshot.View.ViewerId);
             _introStage.Advance(0,Size,record.Challenger.OwnerId,record.Challenged.OwnerId,_stage.AtmosphereTime,_windStrength);
-            _introStage.Hide();
+            _introStage.SetActive(false);
         }
         _cinemaLayer.Show();
     }
@@ -124,7 +130,8 @@ public partial class DuelScreen
                 _introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
                 _introStage.Build(Snapshot!.View.LastDuel!,Snapshot.View.ViewerId);
             }
-            if(t<2.5&&_introStage is {Visible:false})_introStage.Show();
+            if(t<2.5&&_introStage is {Visible:false})_introStage.SetActive(true);
+            SetTableRendering(t>=2.5);
             var challenger=Snapshot!.View.LastDuel!.Challenger;var challenged=Snapshot.View.LastDuel.Challenged;
             if(t<2.5)_introStage?.Advance(t,Size,challenger.OwnerId,challenged.OwnerId,_stage.AtmosphereTime,_windStrength);
             else

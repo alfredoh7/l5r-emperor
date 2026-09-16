@@ -1,5 +1,6 @@
 shader_type canvas_item;
 render_mode unshaded;
+#include "res://Art/CrimsonDuel/duel-wind.gdshaderinc"
 uniform float atmosphere_time=0.0;
 uniform float wind_strength=1.0;
 uniform bool intro_view=false;
@@ -23,16 +24,18 @@ void fragment(){
  float protected_sun=1.0-smoothstep(radius,radius+.018,length((uv-sun)*vec2(1.0,.563)));
  float skyline=intro_view?horizon(uv.x)+.17:horizon(uv.x);
  float sky=(1.0-smoothstep(skyline-.018,skyline,uv.y))*(1.0-protected_sun);
- vec4 upper=flow(TEXTURE,uv,vec2(.035,.002),.023);
- vec4 lower=flow(TEXTURE,uv,vec2(.019,-.001),.013);
+ vec4 upper=flow(TEXTURE,uv,vec2(.048,.0012),.018);
+ vec4 lower=flow(TEXTURE,uv,vec2(.026,-.0005),.011);
  float layer=smoothstep(0.0,intro_view?.22:.065,uv.y);
  vec4 clouds=mix(upper,lower,layer);
  vec4 c=mix(base,clouds,sky*.90);
  // Coherent waves in the distant painted field; the foreground uses actual segmented meshes.
  float top=intro_view?.45:.275;float bottom=intro_view?.58:.365;
  float field=smoothstep(top,top+.035,uv.y)*(1.0-smoothstep(bottom-.022,bottom,uv.y));
- float wave=sin(uv.x*17.0-atmosphere_time*1.3)*.65+sin(uv.x*33.0-atmosphere_time*1.9)*.35;
- vec2 grass_uv=uv+vec2(wave*.0022,sin(uv.x*21.0-atmosphere_time)*.0006)*wind_strength;
+ vec2 field_world=vec2((uv.x-.5)*16.72,-(bottom-uv.y)*42.0);
+ float gust=duel_gust(field_world,atmosphere_time);
+ float wave=(gust-.45)*1.3+sin(field_world.x*.74-atmosphere_time*1.05)*.15;
+ vec2 grass_uv=uv+vec2(wave*.0024,wave*.00025)*wind_strength;
  c=mix(c,texture(TEXTURE,grass_uv),field);
  if(softness>0.0){vec2 d=TEXTURE_PIXEL_SIZE*3.0*softness;c=(c*4.0+texture(TEXTURE,uv+d)+texture(TEXTURE,uv-d)+texture(TEXTURE,uv+vec2(d.x,-d.y))+texture(TEXTURE,uv+vec2(-d.x,d.y)))/8.0;}
  COLOR=c;

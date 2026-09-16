@@ -12,7 +12,7 @@ public partial class DuelFatePile : TooltipButton
     private double _settle=1;
     public float ShownCount=>_shown;
     public bool Selected {get;set;}
-    private Rect2 Face(float count)=>new((Size.X-146.43f)/2,8-count*.42f,146.43f,205);
+    private Rect2 Face(float count)=>new((Size.X-146.43f)/2,8-count*.95f,146.43f,205);
     public Rect2 TopFace=>Face(_shown);
     public DuelFatePile(PlayerView player,Action open)
     {
@@ -32,13 +32,17 @@ public partial class DuelFatePile : TooltipButton
     public override void _Draw()
     {
         if(_shown<.01f)return;
-        var ground=Face(0);DrawStyleBox(Palette.Box(new Color(0,0,0,.35f),null,0,3),ground.Grow(3));
+        var ground=Face(0);
+        for(var spread=10;spread>=2;spread-=2)
+            DrawRect(new Rect2(ground.Position+new Vector2(4,6),ground.Size).Grow(spread),new Color(.005f,.004f,.007f,.042f));
         for(var i=0;i<Math.Ceiling(_shown);i++)
         {
             var r=Face(Math.Min(i+1,_shown));DrawRect(r,new Color("151612"));
-            DrawLine(new Vector2(r.Position.X,r.End.Y),r.End,i%3==0?new Color("86785d"):new Color("494337"),.32f,true);
+            DrawLine(new Vector2(r.Position.X,r.End.Y),r.End,i%3==0?new Color("b59a70"):new Color("74634d"),.60f,true);
         }
         DrawTextureRect(TablePile.FateBack,TopFace,false);
+        DrawLine(TopFace.Position,TopFace.Position+Vector2.Right*TopFace.Size.X,new Color(.9f,.74f,.47f,.45f),.8f,true);
+        DrawLine(TopFace.End-Vector2.Right*TopFace.Size.X,TopFace.End,new Color("a08762"),.8f,true);
         if(Selected||IsHovered())DrawRect(TopFace.Grow(1),Selected?CardTile.SelectionColor:Palette.Gold,false,1.2f,true);
     }
 }

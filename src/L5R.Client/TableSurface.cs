@@ -10,6 +10,8 @@ public partial class TableSurface : TextureRect
     // Optional presentation camera. The normal game table keeps its original defaults.
     public float PlanePitch { get; set; } = Pitch;
     public float PlaneDepth { get; set; } = Depth;
+    // Fixed presentation scenes may bound their content more tightly than the pannable board.
+    public Vector2 CanvasExtent { get; set; } = new(1.7f, 2.7f);
     public SubViewport Canvas { get; private set; } = null!;
     public Vector2 CanvasSize { get; private set; }
     public float RenderScale { get; private set; } = 1;
@@ -29,7 +31,7 @@ public partial class TableSurface : TextureRect
     }
     public void ResizePlane(Vector2 size, float density)
     {
-        Size = size; CanvasSize = size * new Vector2(1.7f, 2.7f);
+        Size = size; CanvasSize = size * CanvasExtent;
         RenderScale = Math.Min(density, 8192 / Math.Max(CanvasSize.X, CanvasSize.Y));
         Canvas.Size = (Vector2I)(CanvasSize * RenderScale).Ceil();
         CanvasSize = (Vector2)Canvas.Size / RenderScale;

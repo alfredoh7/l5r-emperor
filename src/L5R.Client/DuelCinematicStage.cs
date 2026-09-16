@@ -17,6 +17,9 @@ public partial class DuelCinematicStage : Control
     private TextureRect _vegetationImage=null!;
     private DuelWindField _wind=null!;
     public bool DetailedAtmosphere {get;set;}=true;
+    public bool Occluded {get;set;}
+    private double _renderedTime=-1;
+    private float _renderedStrength=-1;
     public double AtmosphereTime=>ReducedMotion?0:_time;
     public float WindStrength {get;set;}=1;
     public int GrassInstances=>DetailedAtmosphere?_wind.Instances:0;
@@ -37,6 +40,7 @@ public partial class DuelCinematicStage : Control
     public void Resize(Vector2 size)
     {
         Size=size;ContentScale=Math.Min(size.X/Design.X,size.Y/Design.Y);ContentOffset=(size-Design*ContentScale)/2;
+        _renderedTime=-1;
         _plate.Position=ContentOffset;_plate.Size=Design*ContentScale;
         _vegetationView.Size=(Vector2I)(Design*ContentScale).Round();
         _vegetationImage.Position=ContentOffset;_vegetationImage.Size=_plate.Size;
@@ -44,11 +48,14 @@ public partial class DuelCinematicStage : Control
     public void Advance(double delta)
     {
         if(!ReducedMotion)_time+=delta;
+        if(Occluded){_vegetationView.RenderTargetUpdateMode=SubViewport.UpdateMode.Disabled;return;}
         var strength=ReducedMotion?1:WindStrength;
         _atmosphere.SetShaderParameter("atmosphere_time",(float)AtmosphereTime);
         _atmosphere.SetShaderParameter("wind_strength",strength);
         _wind.Present(AtmosphereTime,strength);
         _vegetationImage.Visible=DetailedAtmosphere;
-        _vegetationView.RenderTargetUpdateMode=DetailedAtmosphere?SubViewport.UpdateMode.Always:SubViewport.UpdateMode.Disabled;
+        var changed=_renderedTime!=AtmosphereTime||!Mathf.IsEqualApprox(_renderedStrength,strength);
+        _vegetationView.RenderTargetUpdateMode=DetailedAtmosphere&&changed?SubViewport.UpdateMode.Once:SubViewport.UpdateMode.Disabled;
+        _renderedTime=DetailedAtmosphere?AtmosphereTime:-1;_renderedStrength=strength;
     }
 }

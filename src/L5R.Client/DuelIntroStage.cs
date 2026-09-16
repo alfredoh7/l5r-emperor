@@ -14,6 +14,12 @@ public partial class DuelIntroStage : Control
     private ShaderMaterial _vignette=null!;
     public Vector2 NameAnchor(int owner)=>_camera.UnprojectPosition(new Vector3(owner==_viewer?-3.15f:3.15f,5.35f,0));
     private Vector2I _lastSize;
+    public void SetActive(bool active)
+    {
+        Visible=active;
+        // Render one warm-up frame beneath the stakes panel, then draw only for the close-ups.
+        _view.RenderTargetUpdateMode=active?SubViewport.UpdateMode.Always:SubViewport.UpdateMode.Once;
+    }
     public void Build(DuelRecord record,int viewer)
     {
         _viewer=viewer;MouseFilter=MouseFilterEnum.Ignore;

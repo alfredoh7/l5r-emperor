@@ -48,9 +48,38 @@ public partial class DuelScreen
         if(tile is not null)DuelUi.SkinInspection(_cardHover);
         AddChild(_cardHover);_cardHover.ZIndex=90;
         _cardHover.Size=_cardHover.CustomMinimumSize;
-        // Same bounded, pointer-adjacent full-card preview as the main table.
-        _cardHover.Position=(_lastHoverPointer+new Vector2(18,22)).Clamp(Vector2.One*8,Size-_cardHover.Size-Vector2.One*8);
+        // Keep the shared inspector intact; only choose the least obstructive position.
+        _cardHover.Position=PlaceCardPreview(_cardHover.Size,tile);
         IgnoreHover(_cardHover);
+    }
+    private Vector2 PlaceCardPreview(Vector2 extent,CardTile? source)
+    {
+        const float margin=12;
+        var max=(Size-extent-Vector2.One*margin).Max(Vector2.One*margin);
+        var candidates=new List<Vector2>();
+        foreach(var x in new[]{margin,max.X,(Size.X-extent.X)/2})
+            foreach(var y in new[]{Math.Min(72*_scale,max.Y),max.Y,(Size.Y-extent.Y)/2})
+                candidates.Add(new Vector2(x,y).Clamp(Vector2.One*margin,max));
+        var protectedAreas=new List<(Rect2 Bounds,float Weight)> {(_controlsRect,10),(_guidanceRect,10),
+            (new Rect2(_offset+new Vector2(606,260)*_scale,new Vector2(460,88)*_scale),5)};
+        foreach(var card in _tiles.Values)
+        {
+            var corners=card.FaceCornersOnViewport();
+            var low=corners.Aggregate(new Vector2(float.MaxValue,float.MaxValue),(a,b)=>a.Min(b));
+            var high=corners.Aggregate(new Vector2(float.MinValue,float.MinValue),(a,b)=>a.Max(b));
+            var weight=card==source?12:card.HasMeta("upright")?6:card.Card.Zone==Zone.Focused?3:1;
+            protectedAreas.Add((new Rect2(low,high-low),weight));
+        }
+        float Score(Vector2 point)
+        {
+            var rect=new Rect2(point,extent);
+            var score=protectedAreas.Sum(a=>{var area=rect.Intersection(a.Bounds).Size;return area.X*area.Y*a.Weight;});
+            if(rect.Grow(18).HasPoint(_lastHoverPointer))score+=extent.X*extent.Y*20;
+            // Break ties towards the outside edge, leaving the central confrontation open.
+            score+=Math.Min(point.X,Size.X-rect.End.X)*extent.Y*.15f;
+            return score;
+        }
+        return candidates.MinBy(Score);
     }
     private static void IgnoreHover(Node node)
     {

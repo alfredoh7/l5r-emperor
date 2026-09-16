@@ -16,6 +16,7 @@ public partial class DuelScreen
     private string? _dragCard;
     private Vector2 _dragStart;
     private bool _dragging;
+    private Vector2? _focusReleasePoint;
     private CardTile? _dragGhost;
     private static Vector2 FocusPoint(int side,int index)=>new((side==0?332:1042)+(index switch {0=>1,1=>2,2=>0,_=>3})*106,564);
     private static Vector2 PilePoint(int side,Zone zone)=>new(side==0?155:1517,zone==Zone.FateDeck?488:660);
@@ -35,11 +36,14 @@ public partial class DuelScreen
     private void RenderCards(bool animate=true)
     {
         if(_plane is null)return;
-        var old=_tiles.ToDictionary(p=>p.Key,p=>(p.Value.Card,Point:CardClickPoint(p.Key),Height:p.Value.HasMeta("upright")?p.Value.FaceHeight*_scale:p.Value.FaceHeight*_scale*.7f));
+        var oldTiles=_tiles.ToDictionary(p=>p.Key,p=>p.Value);
+        var old=_tiles.ToDictionary(p=>p.Key,p=>(p.Value.Card,Quad:p.Value.FaceCornersOnViewport(),Point:CardClickPoint(p.Key),Height:p.Value.HasMeta("upright")?p.Value.FaceHeight*_scale:p.Value.FaceHeight*_scale*.7f));
+        var focusCounts=_tiles.Values.Where(t=>t.Card.Zone==Zone.Focused).GroupBy(t=>t.Card.OwnerId).ToDictionary(g=>g.Key,g=>g.Count());
+        var deckCorners=_piles.ToDictionary(p=>p.Key,p=>new[]{p.Value.TopFace.Position,p.Value.TopFace.Position+Vector2.Right*p.Value.TopFace.Size.X,p.Value.TopFace.End,p.Value.TopFace.Position+Vector2.Down*p.Value.TopFace.Size.Y}.Select(v=>_table.ProjectCanvas(p.Value.Position+v)).ToArray());
         var counts=_piles.ToDictionary(p=>p.Key,p=>p.Value.ShownCount);
-        foreach(var parent in new[]{_plane,_uprights})foreach(var c in parent.GetChildren()){parent.RemoveChild(c);c.QueueFree();}
+        foreach(var parent in new[]{_plane,_uprights})foreach(var c in parent.GetChildren()){parent.RemoveChild(c);if(c is not CardTile||!oldTiles.Values.Contains(c))c.QueueFree();}
         _tiles.Clear();_piles.Clear();_tableLabels.Clear();_landing=null;_dragGhost=null;
-        if(Snapshot is null)return;
+        if(Snapshot is null){foreach(var tile in oldTiles.Values)tile.QueueFree();return;}
         var view=Snapshot.View;var record=view.LastDuel;
         var participants=record is null?view.Players.SelectMany(p=>p.Army.Concat(p.Home)).Where(c=>c.Definition?.Type==CardType.Personality&&c.Definition.Id!="oracle-l5r-5095").Take(2).ToArray():[record.Challenger,record.Challenged];
         var attachments=record?.Attachments??view.Players.SelectMany(p=>p.Army.Concat(p.Home)).Where(c=>c.Zone==Zone.Attached).ToArray();
@@ -82,7 +86,8 @@ public partial class DuelScreen
         }
         var hand=view.LastDuel?.Complete==true?[]:view.Players[view.ViewerId].Hand;var spacing=Math.Min(180,870f/Math.Max(1,hand.Length));
         for(var i=0;i<hand.Length;i++)AddFlat(hand[i],new Vector2(835+(i-(hand.Length-1)/2f)*spacing,778),225);
-        _animateEntry=false;RenderLanding();
+        foreach(var (id,tile) in oldTiles)if(!_tiles.TryGetValue(id,out var current)||current!=tile)tile.QueueFree();
+        _focusReleasePoint=null;_animateEntry=false;RenderLanding();
         if(animate&&!ReducedMotion&&_aftermathPlayed&&_cleanupClock>0)
             foreach(var (id,previous) in old.Where(p=>discarded.ContainsKey(p.Key)&&(p.Value.Card.Zone==Zone.Focused||p.Value.Card.Zone==Zone.Attached||participants.Any(c=>c.Id==p.Key))))
             {
@@ -99,13 +104,17 @@ public partial class DuelScreen
             }
         void Configure(CardTile tile)
         {
+            tile.Show();tile.Modulate=Colors.White;tile.MouseFilter=MouseFilterEnum.Stop;
             tile.ReducedMotion=ReducedMotion;tile.ShowTokenRail=false;tile.Material=CardPaper.Reading;
             tile.ContextHelp=InspectionContext(tile.Card);tile.SetMeta("flat_tooltip",true);tile.TooltipText="";
             tile.Highlighted=tile.Card.Id==_selectedHand||tile.Card.Id==_selectedFocus;_tiles[tile.Card.Id]=tile;
         }
         void AddUpright(CardView card,Vector2 foot,float height)
         {
-            var tile=new CardTile(card with {Bowed=false},true,Select,_=>{}){Size=Vector2.One*(height+12),FaceHeight=height,MouseFilter=MouseFilterEnum.Stop};
+            var shown=card with {Bowed=false};
+            var tile=oldTiles.TryGetValue(card.Id,out var prior)&&prior is DuelCardTile existing&&existing.Card==shown&&existing.Upright
+                ?existing:new DuelCardTile(shown,Select){Upright=true,Grounded=card.Definition?.Type==CardType.Personality};
+            tile.Size=Vector2.One*(height+12);tile.FaceHeight=height;
             Configure(tile);tile.SetMeta("upright",true);tile.ReducedMotion=true;tile.Position=foot-new Vector2(tile.Size.X/2,height+6);
             // CardTile supplies viewport coordinates already for native upright controls.
             tile.ProjectToScreen=point=>point;_uprights.AddChild(tile);
@@ -113,17 +122,35 @@ public partial class DuelScreen
         void AddFlat(CardView card,Vector2 design,float height,Action? click=null)
         {
             Action<CardView> select=click is null?Select:_=>click();
-            CardTile tile=card.Definition is null||card.Zone==Zone.Focused&&!card.FaceUp?new CrimsonFocusBack(card,select):new CardTile(card,true,select,_=>{});
+            CardTile tile=oldTiles.TryGetValue(card.Id,out var prior)&&prior is DuelCardTile existing&&existing.Card==card&&!existing.Upright
+                ?existing:new DuelCardTile(card,select){FaceDown=card.Definition is null||card.Zone==Zone.Focused&&!card.FaceUp};
             tile.Size=Vector2.One*(height+12);tile.FaceHeight=height;var target=PlanePoint(design)-tile.Size/2;
             Configure(tile);tile.ProjectToScreen=_table.ProjectCanvas;tile.Position=target;_plane.AddChild(tile);
             if(CinematicBusy&&_cinema==Cinema.Opening&&card.Zone==Zone.Hand)tile.Modulate=new Color(1,1,1,0);
             if(animate&&!ReducedMotion&&card.Zone==Zone.Focused)
             {
                 if(_revealClock>0){tile.PivotOffset=tile.Size/2;tile.Scale=new Vector2(.05f,1);tile.CreateTween().TweenProperty(tile,"scale",Vector2.One,.3).SetTrans(Tween.TransitionType.Sine);}
-                else if(!old.ContainsKey(card.Id))
+                else if(!CinematicBusy&&(!old.TryGetValue(card.Id,out var previous)||previous.Card.Zone!=Zone.Focused)&&old.Count>0)
                 {
-                    tile.Position=target+new Vector2(0,card.OwnerId==view.ViewerId?80:-50);
-                    tile.CreateTween().TweenProperty(tile,"position",target,.32).SetTrans(Tween.TransitionType.Cubic).SetEase(Tween.EaseType.Out);
+                    // Public deck-count change distinguishes a deck draw; hidden hands remain backs.
+                    var key=(card.OwnerId,Zone.FateDeck);
+                    var player=view.Players.First(p=>p.Id==card.OwnerId);
+                    var fromDeck=counts.TryGetValue(key,out var priorCount)&&priorCount>player.FateDeckCount;
+                    var destination=tile.FaceCornersOnViewport();
+                    Vector2[] origin;
+                    Texture2D? face=null;
+                    if(old.TryGetValue(card.Id,out var source)&&source.Card.Zone==Zone.Hand)
+                    {origin=_focusReleasePoint is {} release?destination.Select(p=>p+release-destination.Aggregate(Vector2.Zero,(a,b)=>a+b)/4).ToArray():source.Quad;face=source.Card.Definition is {} definition?CardTile.Artwork(definition):null;}
+                    else if(fromDeck&&deckCorners.TryGetValue(key,out var deck))origin=deck;
+                    else origin=destination.Select(p=>p+Vector2.Up*95*_scale).ToArray();
+                    // Do not replay existing anonymous commitments on a fresh seat view.
+                    if(card.Definition is null&&focusCounts.GetValueOrDefault(card.OwnerId)>=player.FocusCount)return;
+                    var inverse=_scene.GetGlobalTransform().AffineInverse();
+                    tile.Hide();tile.MouseFilter=MouseFilterEnum.Ignore;
+                    _focusClock=DuelFocusFlight.Duration+.10;
+                    _flights.AddChild(new DuelFocusFlight{From=origin.Select(p=>inverse*p).ToArray(),To=destination.Select(p=>inverse*p).ToArray(),SourceFace=face,ViewScale=_scale,
+                        Paused=()=>InputLocked||_reading is not null,
+                        Landed=()=>{if(GodotObject.IsInstanceValid(tile)&&tile.IsInsideTree()){tile.Show();tile.MouseFilter=MouseFilterEnum.Stop;}}});
                 }
             }
         }
@@ -256,7 +283,7 @@ public partial class DuelScreen
             var dragging=_dragging;_dragging=false;_dragCard=null;
             if(_dragGhost is not null){_plane.RemoveChild(_dragGhost);_dragGhost.QueueFree();_dragGhost=null;}
             if(dragging&&_landing is not null&&_landing.GetRect().HasPoint(_table.ScreenToCanvas(mouse.Position))&&SelectedFocusCommand() is {} command)
-            {Submit(command);GetViewport().SetInputAsHandled();return true;}
+            {_focusReleasePoint=mouse.Position;Submit(command);_focusReleasePoint=null;GetViewport().SetInputAsHandled();return true;}
             UpdateLandingCue(mouse.Position);
         }
         return false;

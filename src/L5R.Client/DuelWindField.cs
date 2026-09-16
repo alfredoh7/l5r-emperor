@@ -19,19 +19,21 @@ public partial class DuelWindField : Node3D
             material.SetShaderParameter("use_art",art);
             material.SetShaderParameter("foliage_art",GD.Load<Texture2D>("res://Art/CrimsonDuel/golden-grass-tuft.png"));
             _materials.Add(material);
-            var count=art?38:150;
+            var count=art?384:576;
             var mesh=Ribbon(art);
             var multi=new MultiMesh{TransformFormat=MultiMesh.TransformFormatEnum.Transform3D,UseCustomData=true,Mesh=mesh,InstanceCount=count};
             for(var i=0;i<count;i++)
             {
-                var x=R(-8.8f,8.8f);var depth=R(-1,1);
-                var height=art?R(.28f,.60f):R(.22f,.57f);
-                var width=art?height*R(.8f,1.25f):R(.010f,.022f);
-                var y=6.12f+depth*.16f+Mathf.Sin(x*1.7f)*.06f;
-                var z=depth;
+                // Interleaved depth bands fill the field without an obvious row of identical tufts.
+                var distance=(i%3)/2f;
+                var x=R(-8.8f,8.8f);
+                var height=R(.29f,.51f)*Mathf.Lerp(1,.48f,distance);
+                var width=art?height*R(.95f,1.50f):R(.007f,.014f);
+                var y=6.01f+distance*.52f+R(-.10f,.10f)+Mathf.Sin(x*.8f)*.035f;
+                var z=-distance*2+R(-.20f,.20f);
                 var basis=Basis.FromEuler(new Vector3(R(-.09f,.09f),R(-.52f,.52f),R(-.15f,.15f)))*Basis.FromScale(new Vector3(width,height,1));
                 multi.SetInstanceTransform(i,new Transform3D(basis,new Vector3(x,y,z)));
-                multi.SetInstanceCustomData(i,new Color(R(0,1),R(0,1),R(0,1),1));
+                multi.SetInstanceCustomData(i,new Color(R(0,1),R(0,1),R(0,1),distance));
             }
             AddChild(new MultiMeshInstance3D{Multimesh=multi,MaterialOverride=material,
                 CastShadow=GeometryInstance3D.ShadowCastingSetting.Off,ExtraCullMargin=2});

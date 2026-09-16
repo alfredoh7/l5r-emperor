@@ -10,7 +10,11 @@ internal static class DuelUi
     internal static Font Prompt => GD.Load<FontFile>("res://Art/Fonts/Satoshi-Bold.otf");
     internal static Font UiHeading => GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf");
 
-    public static Theme Theme()
+    private static Theme? _theme;
+    private static Texture2D? _focusFrame;
+    public static Theme Theme()=>_theme??=BuildTheme();
+    public static void Prepare(){_=Ink();_focusFrame??=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png");}
+    private static Theme BuildTheme()
     {
         var theme=SidebarSkin.Theme();
         theme.DefaultFont=Body;
@@ -135,7 +139,7 @@ internal static class DuelUi
     public static StyleBoxTexture FocusFrame(bool hover=false)
     {
         // Dedicated imagegen frame; crop only the empty exterior using native UVs.
-        var box=new StyleBoxTexture{Texture=new AtlasTexture{Atlas=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png"),Region=new Rect2(30,57,964,1420)},ModulateColor=hover?new Color(1.7f,1.5f,1.14f):Colors.White};
+        var box=new StyleBoxTexture{Texture=new AtlasTexture{Atlas=_focusFrame??=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png"),Region=new Rect2(30,57,964,1420)},ModulateColor=hover?new Color(1.7f,1.5f,1.14f):Colors.White};
         foreach(var side in new[]{Side.Left,Side.Top,Side.Right,Side.Bottom})box.SetTextureMargin(side,18);
         box.ContentMarginLeft=box.ContentMarginRight=8;box.ContentMarginTop=box.ContentMarginBottom=16;return box;
     }

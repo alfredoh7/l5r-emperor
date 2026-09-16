@@ -127,6 +127,7 @@ public partial class DuelAtmosphereReview : Control
             ReducedMotion=_reduced,DetailedGrass=!_light,GrassInstances=_screen.GrassInstances,Resolution=GetViewportRect().Size.ToString(),DurationSeconds=_elapsed,
             Mode=OS.HasFeature("movie")?"offline movie; not a performance benchmark":_benchmark?"real-time native benchmark; completed rendered frames; monotonic wall clock":"native review",
             Frames=Metrics(_frames.Values.SelectMany(v=>v)),ByPhase=_frames.ToDictionary(k=>k.Key,k=>Metrics(k.Value)),SlowFrames=_slowFrames,Timeline=_timeline,
+            TableRasterSize=_screen.TableRasterSize.ToString(),
             DrawCalls=RenderingServer.GetRenderingInfo(RenderingServer.RenderingInfo.TotalDrawCallsInFrame),Gpu=RenderingServer.GetVideoAdapterName(),
             Notes="Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Duels are silent; 3D grass is confined to the playable camera. Native Windows/AAA human acceptance not implied."};
         System.IO.File.WriteAllText(_output+".json",JsonSerializer.Serialize(report,Json));
