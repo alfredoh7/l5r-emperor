@@ -18,4 +18,4 @@ The match receives the selected compositions, Strongholds and starting Holdings.
 - Native `menu-flow`, `menu-input`, `menu-play` captures: current-match replacement/cancel, pause/resume, name ownership, preferences, keyboard navigation, fullscreen and quit checks passed.
 - `python3 tools/ensure_catalogue_art.py --verify-only`: pinned local WebP pack verified. `Play Latest.command` compiled and launched this checkout and captured its Play menu without runtime errors.
 
-Logs are in `docs/screenshots/practice`. Automated checks do not substitute for Mendon's review of the shared custom-deck launch contract, historical card-specific construction exceptions, or native Windows playtesting. Review and CI are required before merge.
+The committed validation summary is in `docs/screenshots/practice/validation.json`; full generated logs remain local in that directory. Automated checks do not substitute for Mendon's review of the shared custom-deck launch contract, historical card-specific construction exceptions, or native Windows playtesting. Review and CI are required before merge.
