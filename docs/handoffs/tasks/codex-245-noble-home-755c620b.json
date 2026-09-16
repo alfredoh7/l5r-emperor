@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Starting approved F Noble Crest Favor and D lacquer ongoing-effect reminder in a right-side persistent Home area. UI branch stacked on #242 for EventsInPlay; engine mechanics unchanged.",
-  "validation": "Read current origin/main, #231, #241/#242 and approved source images. Production art derivation running; no implementation validation yet.",
-  "remaining": "Art production, native UI implementation, behavioral/layout checks and visual iteration. Board unavailable; GitHub fallback claim on #245. Requires mdornbrook review of shared UI semantics.",
+  "summary": "Work in progress: Noble Crest Favor and D lacquer reminders rendered from public state in a persistent right-side Home area. Preparing requested native screenshot milestone; not final gameplay validation.",
+  "validation": "Client compiles with zero warnings/errors before screenshot fixture. Exact sources retained; nine clan Favor scans plus neutral fallback converted locally to full-resolution WebP q85. Native visual/layout validation in progress.",
+  "remaining": "Requested native preview capture, fidelity iteration, reminder/Favor input and transfer tests, crowded/seat/reduced-motion verification, final integration and review. #246 stacked on #242; no engine changes.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/245",
   "branch": "codex/245-noble-home",
-  "updated": "2026-09-16T08:41:48.084330+00:00"
+  "updated": "2026-09-16T09:45:52.038927+00:00"
 }
