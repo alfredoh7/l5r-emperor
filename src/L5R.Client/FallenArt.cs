@@ -32,6 +32,15 @@ public static class FallenArt
         for(var y=0;y<3;y++)for(var x=0;x<3;x++)
         {
             if(x==1&&y==1)continue;
+            if(source==GallerySource&&y==0&&x==1)
+            {
+                // The 22px corner slice reaches into the source title. Keep only
+                // the clean 14px frame run here so its letter tips cannot leak
+                // above the live heading; retain the full ornamental corners.
+                canvas.DrawTextureRectRegion(art,new Rect2(dx[x],dy[y],dx[x+1]-dx[x],14),
+                    new Rect2(source.Position+new Vector2(edge,0),new Vector2(source.Size.X-2*edge,14)));
+                continue;
+            }
             if(source==CounterSource&&y==2&&x==1)
             {
                 // Omit the tooltip pointer baked across the source's lower edge.

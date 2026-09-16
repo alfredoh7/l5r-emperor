@@ -11,6 +11,12 @@
 
 ## Launcher / catalogue dependency
 
+### Heading cleanup follow-up — 2026-09-16
+
+The gallery's top frame crop included tips of the imagegen source title, visible as two bright strokes above the live heading. The top middle now samples only the clean 14-pixel border run; ornamental corners retain their full 22-pixel slices. Source PNGs and live typography are unchanged.
+
+Rebuilt the client with **0 warnings and 0 errors**. Recaptured and visually inspected the native/source comparison and full-game galleries at **1920 × 1080** and **1280 × 720**; both full-game pointer/modal/owner/session checks passed. The 1080p capture ran through the actual `Play Latest.command` preflight/build/launch. `comparison.png`, `gallery.png` and `gallery-small.png` show this correction; other images above are the prior implementation baseline. The full 439-check/14-case baseline above was not rerun for this cosmetic crop adjustment.
+
 The first `Play Latest.command` verification caught seven main-branch printings missing from the older WebP manifest. The publisher builder regenerated the 2,749-image WebP85 pack from verified originals. Its SHA-256 **a1ecf9de0845f7619c6c6a69ba96943eb61952eac3046b36e4059dbab35d9e20** exactly matches the already published private `catalogue-art-webp-v4-20260916` release (375,462,528 bytes). The receipt and manifest now reference that existing release; no release was replaced and no original printing changed. Local installation and the real launcher’s offline preflight, build and native capture passed (`launcher.png`).
 
 ## Review limits
