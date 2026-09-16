@@ -184,6 +184,7 @@ runner.Run("core",tests);
 PublishedTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
+CustomPracticeTests.Run(runner);
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }

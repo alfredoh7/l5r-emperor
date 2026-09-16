@@ -20,6 +20,7 @@ public partial class Main
         {
             Preferences = _preferences,
             StartMatch = StartFromMenu,
+            PracticeSetup = ShowPracticeSetup,
             PrivateMatch = () => { _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
             DeckBuilder = () => DeckBuilderDialog.Show(this),
@@ -31,7 +32,7 @@ public partial class Main
         layer.AddChild(_titleMenu);
         InitializeTurnBloom();
         GetTree().AutoAcceptQuit = false;
-        GetWindow().CloseRequested += () => { ShowMainMenu(); _titleMenu.ShowQuit(); };
+        GetWindow().CloseRequested += () => { if(PracticeVisible){Confirm("Quit the game?","Unsaved deck edits and Practice progress will be lost.",()=>GetTree().Quit());return;} ShowMainMenu(); _titleMenu.ShowQuit(); };
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) ShowMainMenu();
         else _titleMenu.Hide();
     }

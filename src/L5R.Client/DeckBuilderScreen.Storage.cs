@@ -44,6 +44,16 @@ public partial class DeckBuilderScreen
         Put(_library,CatalogueArt.Button("Open deck folder",()=>{Directory.CreateDirectory(Store.DirectoryPath);OS.ShellOpen(Store.DirectoryPath);}),20,_library.Size.Y-44,220,38);
         Put(_library,CatalogueArt.Button("Back to menu",()=>Closed?.Invoke()),_library.Size.X-230,_library.Size.Y-44,210,38);
     }
+    public string? SavedPath => _currentPath;
+    public void OpenPracticeDeck(Deck deck, string name)
+    {
+        var incoming=NewDraft();incoming.Load(DeckFormat.Write(deck));Draft=incoming;
+        _currentPath=null;_savedFingerprint="";_savedName="";_compare.Clear();
+        _building=true;_name.Text=name;_building=false;Dirty=true;
+        var stronghold=incoming.Cards.FirstOrDefault(c=>c.SetupSlot=="Stronghold");
+        if(stronghold is not null)_setupClan=_byId[stronghold.Id].Clans.FirstOrDefault()??"Unaligned";
+        EnterEditor();
+    }
     public void NewDeck()
     {
         Draft=NewDraft();foreach(var id in new[]{"oracle-l5r-1106","oracle-l5r-679"})if(_byId.TryGetValue(id,out var c))Draft.SelectSetup(c.Id);
