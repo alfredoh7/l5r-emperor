@@ -8,7 +8,7 @@ from mathutils import Vector, Matrix
 ROOT=Path(__file__).resolve().parents[2]
 OUT=ROOT/'assets/table/war-room'
 RUN=ROOT/'src/L5R.Client/Art/WarRoom'
-WORK=ROOT/'artifacts/war-room-work/milestone-3'
+WORK=ROOT/'artifacts/war-room-work/milestone-7'
 for p in [OUT,RUN,WORK]:p.mkdir(parents=True,exist_ok=True)
 random.seed(2333)
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -89,15 +89,10 @@ for a in [wood,floor]:
  vc=n.new('ShaderNodeVertexColor');vc.layer_name='Wear tint'
  mix=n.new('ShaderNodeMixRGB');mix.blend_type='MULTIPLY';mix.inputs[0].default_value=1
  l.new(tex.outputs['Color'],mix.inputs[1]);l.new(vc.outputs['Color'],mix.inputs[2]);l.new(mix.outputs[0],p.inputs['Base Color'])
-# Thin joined floorboards with staggered ends, subtle height variation and nail heads.
-for row in range(75):
- y=-3.1+row*.081;offset=(row%3)*.30
- if y>1.35:continue
- for i in range(-5,5):
-  x=i*.90+offset
-  box('Floor board',(x,y,F-.014+random.uniform(-.0005,.0005)),(.898,.0795,.028),floor,.0012)
-  if -1.8<x<1.8 and -.9<y<2.1:
-   for dx in [-.43,.43]:rod('Floor nail',(x+dx,y-.021,F),(x+dx,y-.021,F+.0005),.0015,iron,vertices=6)
+# M7: three Meshy-textured variants on fitted board geometry.
+sys.path.insert(0,str(Path(__file__).resolve().parent))
+from fortress_m7_geometry import floorboards, shoji
+floorboards(ROOT,cols['Architecture'],F)
 # Pillars and lintels, with sparse repeated bays. Architecture is deep enough for panning.
 pillars=[]
 for side in [-1,1]:
@@ -120,6 +115,7 @@ for side in [-1,1]:
  for z in [.08,.82,1.26]:box('Wall horizontal beam',(side*2.13,1.0,z),(.11,3.0,.085),wood,.004)
  for y in [-.2,.5,1.2,1.9,2.6]:box('Side wall post',(side*2.12,y,.6),(.09,.10,1.50),wood,.004)
  for y in [.85,1.52,2.08]:box('Crossbeam',(0,y,1.29),(4.5,.14,.15),wood,.006)
+shoji(box,mat,wood,iron,F)
 # Low visible lintel/rafter undersides match the corrected B3 architectural camera.
 for y in [.88,1.50,2.08]:box('Visible ceiling lintel',(0,y,.65),(4.5,.12,.065),wood,.004)
 for x in [-1.6,-1.2,-.8,-.4,0,.4,.8,1.2,1.6]:box('Visible ceiling rafter',(x,1.5,.70),(.047,2.5,.058),wood,.003)
@@ -140,10 +136,7 @@ for side in [-1,1]:
   x=side*(.86+i*.138)
   box('Veranda spindle',(x,1.35,F+.075),(.022,.024,.15),wood,.002)
   if i%3==0:box('Balustrade cap',(x,1.35,F+.158),(.038,.038,.018),wood,.003)
-# Empty raised platform and its broad two steps.
-box('Dais',(0,1.65,F+.051),(1.40,.75,.102),wood,.004)
-box('Lower step',(0,1.17,F+.015),(1.50,.18,.03),wood,.003)
-box('Upper step',(0,1.28,F+.036),(1.45,.14,.072),wood,.003)
+# M7: dedicated Meshy dais replaces the plain box steps below.
 # Source artwork stays source artwork. UV patches only; no scene/card image plane.
 source=bpy.data.images.load(str(OUT/'approved-fortress-hall-b3.png'));source.pack()
 source_mat=mat('Approved source map',(.5,.3,.1),.8)
@@ -218,13 +211,6 @@ def chest(n,x,y):
  box('Chest latch',(x,y-d/2-.008,F+h*.65),(.026,.008,.040),brass,.002,'Ironwork')
 for side in [-1,1]:
  chest('Perimeter chest',-1.51 if side<0 else 2.04,1.26 if side<0 else 1.20)
- x=side*1.95;y=1.27
- for z in [F+.04,F+.23]:box('Weapons cross rail',(x,y,z),(.32,.026,.025),wood,.002,'Sparse furnishings')
- for dx in [-.14,.14]:box('Weapons rack upright',(x+dx,y,F+.22),(.027,.032,.44),wood,.002,'Sparse furnishings')
- for i in range(6):
-  xx=x-.13+i*.052;h=.48+random.uniform(-.04,.10)
-  rod('Spear wooden shaft',(xx,y,F+.018),(xx,y,F+h),.004,wood,'Sparse furnishings')
-  bpy.ops.mesh.primitive_cone_add(vertices=6,radius1=.009,radius2=0,depth=.082,location=(xx,y,F+h+.033));o=bpy.context.object;o.name='Spear steel point';o.data.materials.append(iron);into(o,'Sparse furnishings')
 # Low table support, original rails/cloth loaded independently in game.
 box('Solid table deck',(0,0,-.018),(1.81,1.024,.033),wood,.003,'Table')
 for x in [-.80,.80]:
@@ -237,8 +223,6 @@ lamps=[]
 def anchor(n,p,kind,height=.15,energy=.7,radius=.6):
  o=bpy.data.objects.new(n,None);cols['Lanterns'].objects.link(o);o.location=p;o['kind']=kind;o['height']=height
  lamps.append({'name':n,'position':list(p),'kind':kind,'height':height,'energy':energy,'radius':radius})
-anchor('TableLanternNear',(-.775,-.33,.003),'table',.084,.85,.66)
-anchor('TableLanternFar',(.75,.36,.003),'table',.084,.8,.63)
 for side in [-1,1]:
  for i,(x,y,z,h) in enumerate([(.64 if side<0 else .77,1.37,.105,.145),(1.36 if side<0 else 1.51,1.31,F+.055,.10),(1.17 if side<0 else 1.30,1.40,.256,.066),(2.08,1.22,.28,.16)]):
   anchor('RoomLantern'+str(side)+'_'+str(i),(side*x,y,z),'room',h,1.05,.72)
@@ -262,7 +246,7 @@ lamps.append({'name':'Brazier','position':[x,y,F+.15],'kind':'ember','height':0,
 # Match the approved image's map/dais centre, slightly right of the table centre.
 for o in list(cols['Map screen'].objects)+[o for o in cols['Architecture'].objects if o.name in ['Dais','Lower step','Upper step','Map alcove plaster']]:o.location.x+=.075
 # Native light layout serialized for exactly the same Godot assembly.
-(OUT/'layout-b3.json').write_text(json.dumps({'approved':'approval-b3.json','floor_z':F,'mat_m':[1.8,1.8*941/1672],'lamps':lamps,'static_only':True,'review_camera':{'distance':1.54,'pitch':.64,'focal_pixels':882,'centre':[810,557]}},indent=2)+'\n')
+(OUT/'layout-b3.json').write_text(json.dumps({'approved':'approval-b3.json','floor_z':F,'mat_m':[1.8,1.8*941/1672],'lamps':lamps,'static_only':False,'revision':'M7 side enclosure and materials','review_camera':{'distance':1.54,'pitch':.64,'focal_pixels':882,'centre':[810,557]}},indent=2)+'\n')
 # Optical compensation for the approved image's corrected architectural verticals.
 # The game camera has a fixed pitch: shearing only the room above the floor keeps
 # upright architecture parallel in screen space while retaining real depth/pan.
@@ -278,26 +262,30 @@ for key in ['Architecture','Ironwork','Map screen','Distant scenery','Sparse fur
   o.matrix_world.identity()
 for l in lamps:
  if l['kind']!='table':l['position'][1]+=shear*(l['position'][2]-F)
-(OUT/'layout-b3.json').write_text(json.dumps({'approved':'approval-b3.json','floor_z':F,'mat_m':[1.8,1.8*941/1672],'lamps':lamps,'static_only':True,'architectural_vertical_compensation':shear,'review_camera':{'distance':1.54,'pitch':.64,'focal_pixels':882,'centre':[810,557]}},indent=2)+'\n')
+(OUT/'layout-b3.json').write_text(json.dumps({'approved':'approval-b3.json','floor_z':F,'mat_m':[1.8,1.8*941/1672],'lamps':lamps,'static_only':False,'revision':'M7 side enclosure and materials','architectural_vertical_compensation':shear,'review_camera':{'distance':1.54,'pitch':.64,'focal_pixels':882,'centre':[810,557]}},indent=2)+'\n')
 # Import each Meshy type once. Linked copies share topology and packed PBR maps.
 prop_templates={}
-column_layout=[{'name':f'AgedColumn{i}','kind':'column','position':[x,y,F],'height':.86,'width':w} for i,(x,y,w) in enumerate(pillars)]
+column_layout=[{'name':f'AgedColumn{i}','kind':'column','asset':'column-timber-m7','position':[x,y,F],'height':.86,'width':w} for i,(x,y,w) in enumerate(pillars)]
 furnishing_layout=[
- {'name':'LeftChest','kind':'chest','position':[-1.51,1.26,F],'height':.113,'width':.25,'depth':.17},
- {'name':'RightChest','kind':'chest','position':[2.04,1.20,F],'height':.113,'width':.25,'depth':.17},
+ {'name':'LeftChest','kind':'chest','asset':'chest-m7','position':[-1.80,1.19,F],'height':.113,'width':.25,'depth':.17},
+ {'name':'RightChest','kind':'chest','asset':'chest-m7','position':[1.84,1.19,F],'height':.113,'width':.25,'depth':.17},
  {'name':'BrazierBody','kind':'brazier','position':[-1.73,.69,F],'height':.175,'width':.21,'depth':.19}]
+furnishing_layout.append({'name':'CraftedDais','kind':'dais','asset':'dais-fit-m7','position':[.075,1.47,F],'height':.104,'width':1.50,'depth':1.02})
+for i,(x,y,w) in enumerate(pillars):
+ furnishing_layout.append({'name':f'StoneFoot{i}','kind':'stone','asset':f'stone-{"a" if i%2==0 else "b"}-m7','position':[x,y,F],'height':.105,'width':w+.022,'depth':w+.025})
 for l in lamps+column_layout+furnishing_layout:
  asset=l['kind']+'-lantern-v1' if l['kind'] in ['table','room'] else ('brazier-v2' if l['kind']=='brazier' else l['kind']+'-v1')
+ asset=l.get('asset',asset)
  path=OUT/'meshy'/asset/'cleaned.glb'
  if l['kind']=='ember' or not path.exists():continue
- if l['kind'] not in prop_templates:
+ if asset not in prop_templates:
   with bpy.data.libraries.load(str(path.parent/'prepared.blend'),link=True) as (library,linked):linked.objects=list(library.objects)
-  prop_templates[l['kind']]=[o for o in linked.objects if o is not None]
+  prop_templates[asset]=[o for o in linked.objects if o is not None]
  parent=bpy.data.objects.new(l['name']+' model',None);cols['Lanterns'].objects.link(parent);parent.location=l['position'];parent.scale=(l['height'],)*3
- if l['kind'] in ['column','chest','brazier']:
+ if l['kind'] in ['column','chest','brazier','stone','dais']:
   report=json.loads((path.parent/'cleanup.json').read_text());dim=report['normalized_size'];sx=l['width']/dim[0];sy=l.get('depth',l['width'])/dim[1];h=l['height'];x,y,z=l['position']
   parent.matrix_basis=Matrix(((sx,0,0,x),(0,sy,h*shear,y),(0,0,h,z),(0,0,0,1)))
- copies={o:o.copy() for o in prop_templates[l['kind']]}
+ copies={o:o.copy() for o in prop_templates[asset]}
  for original,o in copies.items():
   cols['Lanterns'].objects.link(o);o.parent=copies.get(original.parent,parent)
 layout=json.loads((OUT/'layout-b3.json').read_text());layout['columns']=column_layout;layout['furnishings']=furnishing_layout;(OUT/'layout-b3.json').write_text(json.dumps(layout,indent=2)+'\n')

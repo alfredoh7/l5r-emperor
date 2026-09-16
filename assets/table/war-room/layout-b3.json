@@ -7,30 +7,6 @@
   ],
   "lamps": [
     {
-      "name": "TableLanternNear",
-      "position": [
-        -0.775,
-        -0.33,
-        0.003
-      ],
-      "kind": "table",
-      "height": 0.084,
-      "energy": 0.85,
-      "radius": 0.66
-    },
-    {
-      "name": "TableLanternFar",
-      "position": [
-        0.75,
-        0.36,
-        0.003
-      ],
-      "kind": "table",
-      "height": 0.084,
-      "energy": 0.8,
-      "radius": 0.63
-    },
-    {
       "name": "RoomLantern-1_0",
       "position": [
         -0.64,
@@ -139,7 +115,8 @@
       "radius": 0.9
     }
   ],
-  "static_only": true,
+  "static_only": false,
+  "revision": "M7 side enclosure and materials",
   "architectural_vertical_compensation": 0.8329267300725657,
   "review_camera": {
     "distance": 1.54,
@@ -154,6 +131,7 @@
     {
       "name": "AgedColumn0",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -1.5,
         0.88,
@@ -165,6 +143,7 @@
     {
       "name": "AgedColumn1",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -0.84,
         1.5,
@@ -176,6 +155,7 @@
     {
       "name": "AgedColumn2",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -1.41,
         1.35,
@@ -187,6 +167,7 @@
     {
       "name": "AgedColumn3",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -2.12,
         0.3,
@@ -198,6 +179,7 @@
     {
       "name": "AgedColumn4",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -2.12,
         1.15,
@@ -209,6 +191,7 @@
     {
       "name": "AgedColumn5",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         -2.12,
         2.05,
@@ -220,6 +203,7 @@
     {
       "name": "AgedColumn6",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         1.5699999999999998,
         0.88,
@@ -231,6 +215,7 @@
     {
       "name": "AgedColumn7",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         0.98,
         1.5,
@@ -242,6 +227,7 @@
     {
       "name": "AgedColumn8",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         1.4749999999999999,
         1.35,
@@ -253,6 +239,7 @@
     {
       "name": "AgedColumn9",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         2.12,
         0.3,
@@ -264,6 +251,7 @@
     {
       "name": "AgedColumn10",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         2.12,
         1.15,
@@ -275,6 +263,7 @@
     {
       "name": "AgedColumn11",
       "kind": "column",
+      "asset": "column-timber-m7",
       "position": [
         2.12,
         2.05,
@@ -288,9 +277,10 @@
     {
       "name": "LeftChest",
       "kind": "chest",
+      "asset": "chest-m7",
       "position": [
-        -1.51,
-        1.26,
+        -1.8,
+        1.19,
         -0.17
       ],
       "height": 0.113,
@@ -300,9 +290,10 @@
     {
       "name": "RightChest",
       "kind": "chest",
+      "asset": "chest-m7",
       "position": [
-        2.04,
-        1.2,
+        1.84,
+        1.19,
         -0.17
       ],
       "height": 0.113,
@@ -320,6 +311,175 @@
       "height": 0.175,
       "width": 0.21,
       "depth": 0.19
+    },
+    {
+      "name": "CraftedDais",
+      "kind": "dais",
+      "asset": "dais-fit-m7",
+      "position": [
+        0.075,
+        1.47,
+        -0.17
+      ],
+      "height": 0.104,
+      "width": 1.5,
+      "depth": 1.02
+    },
+    {
+      "name": "StoneFoot0",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        -1.5,
+        0.88,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.212,
+      "depth": 0.215
+    },
+    {
+      "name": "StoneFoot1",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        -0.84,
+        1.5,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.147,
+      "depth": 0.15
+    },
+    {
+      "name": "StoneFoot2",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        -1.41,
+        1.35,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.10700000000000001,
+      "depth": 0.11000000000000001
+    },
+    {
+      "name": "StoneFoot3",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        -2.12,
+        0.3,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.20199999999999999,
+      "depth": 0.205
+    },
+    {
+      "name": "StoneFoot4",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        -2.12,
+        1.15,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.182,
+      "depth": 0.185
+    },
+    {
+      "name": "StoneFoot5",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        -2.12,
+        2.05,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.182,
+      "depth": 0.185
+    },
+    {
+      "name": "StoneFoot6",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        1.5699999999999998,
+        0.88,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.212,
+      "depth": 0.215
+    },
+    {
+      "name": "StoneFoot7",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        0.98,
+        1.5,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.147,
+      "depth": 0.15
+    },
+    {
+      "name": "StoneFoot8",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        1.4749999999999999,
+        1.35,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.10700000000000001,
+      "depth": 0.11000000000000001
+    },
+    {
+      "name": "StoneFoot9",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        2.12,
+        0.3,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.20199999999999999,
+      "depth": 0.205
+    },
+    {
+      "name": "StoneFoot10",
+      "kind": "stone",
+      "asset": "stone-a-m7",
+      "position": [
+        2.12,
+        1.15,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.182,
+      "depth": 0.185
+    },
+    {
+      "name": "StoneFoot11",
+      "kind": "stone",
+      "asset": "stone-b-m7",
+      "position": [
+        2.12,
+        2.05,
+        -0.17
+      ],
+      "height": 0.105,
+      "width": 0.182,
+      "depth": 0.185
     }
   ]
 }

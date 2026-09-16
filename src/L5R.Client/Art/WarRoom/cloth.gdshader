@@ -12,6 +12,7 @@ uniform vec2 environment_origin = vec2(0.0);
 uniform vec2 environment_size = vec2(1920.0,1080.0);
 uniform float candle_phase = 0.0;
 uniform float candle_motion = 1.0;
+uniform bool table_lamps = false;
 vec3 preserve_painted_color(vec3 c) {
     vec3 linear_target = pow((c + vec3(0.055)) / 1.055, vec3(2.4));
     if (!OUTPUT_IS_SRGB) return mix(c / 12.92, linear_target, step(vec3(0.04045), c));
@@ -51,7 +52,7 @@ void fragment() {
     vec2 right_shadow = (world-(environment_origin+environment_size*right_base))/vec2(83.0,45.0);
     float shadow = max(exp(-dot(left_shadow,left_shadow)*1.9),exp(-dot(right_shadow,right_shadow)*1.9));
     vec3 light = floor_light(uv,left_base,candle_phase)+floor_light(uv,right_base,candle_phase+1.8);
-    painted += light*coverage;
-    painted *= 1.0-.72*shadow;
+    painted += table_lamps ? light*coverage : vec3(.014,.015,.018)*coverage;
+    painted *= table_lamps ? 1.0-.72*shadow : 1.0;
     ALBEDO = preserve_painted_color(clamp(painted,vec3(0.0),vec3(1.0)));
 }

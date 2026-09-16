@@ -44,7 +44,7 @@ func _ready() -> void:
     var wood := ShaderMaterial.new()
     wood.shader = load("res://Art/LacquerFrame/lacquer-frame.gdshader")
     wood.set_shader_parameter("source_art", load("res://Art/LacquerFrame/approved-frame-a.png"))
-    wood.set_shader_parameter("native_candlelight", true)
+    wood.set_shader_parameter("native_candlelight", false)
     wood.set_shader_parameter("left_lamp", Vector2(.06944, .82575))
     wood.set_shader_parameter("right_lamp", Vector2(.91667, .14463))
     for mesh in frame.find_children("*", "MeshInstance3D"):
@@ -69,7 +69,7 @@ func _ready() -> void:
     reference.visible = false
     overlay.add_child(reference)
     status = Label.new()
-    status.text = "FORTRESS HALL · B3     1 Composition · 2 Overview · 3 Joinery · 4 Floor · 5/6 Lanterns · 7 Brazier · M Motion · R Reference · Wheel / drag · Home Reset"
+    status.text = "FORTRESS HALL · B3     1 Composition · 2 Overview · 3 Joinery · 4 Floor · 5 Stone · 6 Lantern · 7 Brazier · 8 Dais · 9 Chest · 0 Shoji · M Motion · R Reference · Wheel / drag · Home Reset"
     status.add_theme_font_override("font", load("res://Art/Fonts/Alegreya.ttf"))
     status.add_theme_font_size_override("font_size", 16)
     status.add_theme_color_override("font_color", Color("f2dfb6"))
@@ -172,10 +172,19 @@ func layout() -> void:
         var target := pan + Vector3(-1.30, -.16, -.45)
         camera.position = target + Vector3(0, .80*.64, .80*sqrt(1.0-.64*.64))
         camera.look_at(target)
-    elif view_name == "table-lantern":
-        camera.set_perspective(37 * zoom, .002, 30)
-        camera.position = pan + Vector3(-.775,.044+.24*.64,.296+.24*sqrt(1.0-.64*.64))
-        camera.look_at(pan + Vector3(-.775,.044,.296))
+    elif view_name in ["stone", "dais", "chest", "shoji"]:
+        camera.set_perspective(42 * zoom, .002, 30)
+        var targets := {"stone": Vector3(-1.5,-.10,-.95), "dais": Vector3(.075,-.095,-1.45), "chest": Vector3(-1.80,-.105,-1.235), "shoji": Vector3(2.075,.19,-.65)}
+        var distances := {"stone": .55, "dais": 1.6, "chest": .62, "shoji": 1.25}
+        var target: Vector3 = pan + targets[view_name]
+        var distance: float = distances[view_name]
+        camera.position = target + Vector3(0,distance*.64,distance*sqrt(1.0-.64*.64))
+        if view_name == "chest": camera.position = target + Vector3(0,.32,.38)
+        if view_name == "shoji": camera.position = target + Vector3(-1.28,.26,.50)
+        camera.look_at(target)
+        # Architecture has the same vertical compensation as the game camera.
+        # Use its actual up vector for oblique inspection, avoiding a false tilt.
+        if view_name in ["chest", "shoji"]: camera.look_at(target, Vector3(0,1,-.833).normalized())
     elif view_name == "room-lantern":
         camera.set_perspective(37 * zoom, .002, 30)
         var placements: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://Art/WarRoom/layout-b3.json"))
@@ -203,9 +212,12 @@ func _input(event: InputEvent) -> void:
             KEY_2: view_name = "overview"; zoom = 1.0; pan = Vector3.ZERO
             KEY_3: view_name = "joinery"; zoom = 1.0; pan = Vector3.ZERO
             KEY_4: view_name = "floor"; zoom = 1.0; pan = Vector3.ZERO
-            KEY_5: view_name = "table-lantern"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_5: view_name = "stone"; zoom = 1.0; pan = Vector3.ZERO
             KEY_6: view_name = "room-lantern"; zoom = 1.0; pan = Vector3.ZERO
             KEY_7: view_name = "brazier"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_8: view_name = "dais"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_9: view_name = "chest"; zoom = 1.0; pan = Vector3.ZERO
+            KEY_0: view_name = "shoji"; zoom = 1.0; pan = Vector3.ZERO
             KEY_M: animate = not animate
             KEY_R: reference.visible = not reference.visible
             KEY_HOME: zoom = 1.0; pan = Vector3.ZERO

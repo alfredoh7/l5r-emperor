@@ -238,7 +238,7 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("candle_motion", animate ? 1 : 0);
         }
         _warRoom?.PresentLight(time, animate);
-        CardPaper.SetLight(time, animate);
+        CardPaper.SetLight(time, animate, tableLamps: _warRoom is null);
     }
 
     public override void _UnhandledKeyInput(InputEvent @event)

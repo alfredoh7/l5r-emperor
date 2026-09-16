@@ -43,7 +43,7 @@ public partial class WarRoomStage : Node3D
         var frame = GD.Load<PackedScene>("res://Art/LacquerFrame/lacquer-frame-a.glb").Instantiate<Node3D>();
         var wood = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/LacquerFrame/lacquer-frame.gdshader") };
         wood.SetShaderParameter("source_art", GD.Load<Texture2D>("res://Art/LacquerFrame/approved-frame-a.png"));
-        wood.SetShaderParameter("native_candlelight", true);
+        wood.SetShaderParameter("native_candlelight", false);
         foreach (var mesh in frame.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>())
             mesh.MaterialOverride = wood;
         AddChild(frame); _paint.Add(wood);

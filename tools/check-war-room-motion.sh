@@ -3,15 +3,15 @@
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/env.sh"
 cd "$L5R_PROJECT_ROOT"
-output="${L5R_ROOM_EVIDENCE_DIR:-$L5R_PROJECT_ROOT/docs/screenshots/war-room/milestone-6}"
-logs="${L5R_ROOM_LOG_DIR:-$L5R_PROJECT_ROOT/artifacts/war-room-work/milestone-6}"
+output="${L5R_ROOM_EVIDENCE_DIR:-$L5R_PROJECT_ROOT/docs/screenshots/war-room/milestone-7}"
+logs="${L5R_ROOM_LOG_DIR:-$L5R_PROJECT_ROOT/artifacts/war-room-work/milestone-7}"
 encoder="$(command -v ffmpeg)"
 mkdir -p "$output" "$logs"
-if [[ $# == 0 ]]; then set -- composition table-lantern room-lantern brazier; fi
+if [[ $# == 0 ]]; then set -- composition room-lantern brazier; fi
 for view in "$@"; do
     case "$view" in
         composition) frames=192 ;;
-        table-lantern|room-lantern|brazier) frames=144 ;;
+        room-lantern|brazier) frames=144 ;;
         *) echo "Unknown room view: $view" >&2; exit 1 ;;
     esac
     # A fresh evidence directory cannot accidentally reuse an old tail of frames.

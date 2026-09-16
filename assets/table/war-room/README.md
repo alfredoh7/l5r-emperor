@@ -6,20 +6,22 @@ The approval and exact source hash are in `approval-b3.json`. `approved-fortress
 
 ## Current refinement
 
+Milestone 7 adds three Meshy floor finishes, two matte stone footings, retextured chests and a fitted stepped dais, plus closed side shoji. Tabletop lamps and spear racks are removed by the latest request. The floor light field is rebuilt without those lamps. See `polish-m7/README.md` and `docs/screenshots/war-room/milestone-7/index.html` for the current source/native comparison. Eight Meshy jobs consumed 155 credits, including one rejected dais reconstruction; remaining balance 1,465.
+
 Milestone 6 replaces the rough brazier with a detailed imagegen → Meshy → Blender asset, separate charcoal/fire/embers and native pan shadows. The floor has darker ambient response, stronger grain reflections and a new Cycles bake; a dedicated dusk panorama replaces the tiny landscape crops. One replacement Meshy job consumed 35 credits. Chair-free layout, mat/card projection and restored lacquer menus remain intact. See `polish-m6/README.md` and `docs/screenshots/war-room/milestone-6/index.html` for source/native comparisons and review limits.
 
 Milestone 5 established the shared presentation-clock flame/halation/window/practical-light rhythms and reduced-motion behavior. Its captures and prior floor treatment remain historical evidence in `motion-m5/README.md` and `docs/screenshots/war-room/milestone-5/index.html`.
 
 ## Current implementation
 
-- Editable low table support, hall floor, columns, beams, open bays and veranda rails, empty stepped dais, map screen, sparse perimeter chests, weapon racks and left brazier.
+- Editable low table support, varied hall floor, timber columns with separate stone feet, beams, rear bays and veranda rails, closed side shoji, empty stepped dais, map screen, two perimeter chests and left brazier.
 - The original Topaz mat and approved lacquer frame remain separate unchanged artwork/geometry. Card layout, full faces, rules and input camera are unchanged.
-- Actual approved pixels provide the campaign map. The M6 imagegen panorama provides sharper dusk scenery through the existing bays. Scanned, licensed CC0 timber provides floor/beam texture and normals; provenance is in `materials/provenance.json`. No cards or UI are projected across the room.
+- Actual approved pixels provide the campaign map. The M6 imagegen panorama provides dusk scenery through the rear bays. Meshy supplies M7 board finishes; licensed CC0 timber supplements fine floor grain and beam texture, with provenance in `materials/provenance.json`. No cards or UI are projected across the room.
 - Meshy generated two distinct fixtures: the bronze tabletop lantern and rectangular room lantern. Three more separate jobs provide the aged structural column, closed perimeter chest and iron brazier. These replace the corresponding simple geometry; they add no new furnishing categories. Each has an original receipt, cleaned GLB and editable `prepared.blend` under `meshy/`.
 - Practical lights, amber inner window surfaces, candle interiors, subtle halation and brazier flames are native Godot elements. M5 synchronizes their firelight with the existing cloth/card presentation clock and reduced-motion preference.
-- `FortressHall` owns scenery and light only. It receives no match or hidden state. `WarRoomStage` matches the existing `TableSurface` projection and relocates the two physical table fixtures using the established lantern positions.
+- `FortressHall` owns scenery and light only. It receives no match or hidden state. `WarRoomStage` matches the existing `TableSurface` projection. Table fixtures and their card/mat/frame glow are disabled in M7; the older flat-table fallback retains its lighting.
 
-The full room composition and the normal gameplay camera are different views. The normal view retains card size and UI space; it does not shrink the game solely to reproduce the concept's wider framing. The comparison gallery labels this explicitly. It also includes native close-ups of both Meshy lanterns.
+The full room composition and the normal gameplay camera are different views. The normal view retains card size and UI space; it does not shrink the game solely to reproduce the concept's wider framing. The comparison gallery labels this explicitly and includes close-ups of the new materials.
 
 ## Authoring and reproduction
 
@@ -38,6 +40,6 @@ The source illustration uses corrected architectural verticals while the existin
 
 ## Validation and acceptance boundaries
 
-See `docs/screenshots/war-room/milestone-6/validation.json` and its adjacent gallery for current evidence; `validation-b3.json` and earlier milestone galleries remain historical records. Native visual checks supplement camera/input assertions; passing them does not prove a pixel-perfect visual match or human approval.
+See `docs/screenshots/war-room/milestone-7/validation.json` and its adjacent gallery for current evidence; `validation-b3.json` and earlier milestone galleries remain historical records. Native visual checks supplement camera/input assertions; passing them does not prove a pixel-perfect visual match or human approval.
 
-The current pass is a brazier/material/atmosphere review milestone. The room has real modeled geometry and relightable props; the 1776×888 panorama is background artwork reframed through the open bays. The native Compatibility renderer uses direct practical lights and manual ambient/fill, supplemented by the M6 baked floor light field and synchronized local modulation. This is not whole-room baked global illumination. The source's precise material finish, distant vista detail and illumination remain visual acceptance items; do not describe this as a proven 1:1 full-screen reconstruction. Final motion acceptance, native Windows graphical acceptance and sustained performance profiling remain separate. Keep PR #234 draft until visual acceptance and relevant CI/review are complete.
+The current pass is a materials and enclosure review milestone. The room has modeled geometry and relightable props; the 1776×888 panorama is background artwork reframed through the rear bays. The native Compatibility renderer uses direct practical lights and ambient/fill, supplemented by the M7 baked floor light field and synchronized local modulation. This is not whole-room baked global illumination. Precise material finish and illumination remain visual acceptance items; do not describe this as a proven 1:1 full-screen reconstruction. Native Windows graphical acceptance and sustained performance profiling remain separate. Keep PR #234 draft until visual acceptance and relevant CI/review are complete.

@@ -21,7 +21,7 @@ for device in prefs.devices:device.use=device.type=='METAL'
 scene.cycles.device='GPU'
 # A floor receiver samples lighting; the original boards keep their live grain/normals.
 for o in scene.objects:
- if o.name.startswith(('Floor board','Floor nail')):o.hide_render=True
+ if o.name.startswith(('Floor board','Floor nail','M7 floorboard')):o.hide_render=True
  if o.parent and any(k in o.parent.name for k in ['Lantern','lantern']):
   o.visible_shadow=False;o.visible_diffuse=False;o.visible_glossy=False
 # Match native lantern centres, including the fixed-pitch architectural compensation.

@@ -16,7 +16,7 @@ public partial class FortressHall : Node3D
         public readonly List<StandardMaterial3D> Windows = [];
     }
     private readonly List<Practical> _practicals = [];
-    private ShaderMaterial? _bakedFloor;
+    private readonly List<ShaderMaterial> _bakedFloors = [];
     private readonly Vector4[] _floorSources = new Vector4[11];
     private readonly float[] _floorEnergy = new float[11];
     public override void _Ready()
@@ -29,7 +29,8 @@ public partial class FortressHall : Node3D
             foreach (var placement in furnishings.EnumerateArray())
             {
                 var kind = placement.GetProperty("kind").GetString()!;
-                var prop = GD.Load<PackedScene>($"res://Art/WarRoom/{kind}.glb").Instantiate<Node3D>();
+                var asset = placement.TryGetProperty("asset", out var assetValue) ? assetValue.GetString() : kind;
+                var prop = GD.Load<PackedScene>($"res://Art/WarRoom/{asset}.glb").Instantiate<Node3D>();
                 var body = prop.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().First();
                 var dimensions = body.GetAabb().Size;
                 var p = placement.GetProperty("position").EnumerateArray().Select(v => v.GetSingle()).ToArray();
@@ -46,7 +47,27 @@ public partial class FortressHall : Node3D
                             worn.AlbedoColor = kind == "chest" ? new Color(.65f,.50f,.35f) : new Color(.35f,.30f,.25f);
                             worn.Metallic = kind == "chest" ? .40f : .75f;
                             worn.Roughness = .80f; worn.NormalScale = .65f;
-                            if (kind == "brazier")
+                            if (kind == "stone")
+                            {
+                                worn.AlbedoColor = new Color(.68f,.66f,.62f);
+                                worn.Metallic = 0; worn.MetallicTexture = null;
+                                worn.MetallicSpecular = .12f;
+                                worn.RoughnessTexture = null; worn.Roughness = .96f;
+                                worn.NormalScale = .32f;
+                            }
+                            else if (kind == "dais")
+                            {
+                                worn.AlbedoColor = new Color(.72f,.64f,.54f);
+                                worn.Metallic = 0; worn.MetallicSpecular = .22f;
+                                worn.RoughnessTexture = null; worn.Roughness = .61f; worn.NormalScale = .22f;
+                            }
+                            else if (kind == "chest")
+                            {
+                                worn.AlbedoColor = new Color(.70f,.66f,.58f);
+                                worn.Metallic = .55f; worn.MetallicSpecular = .25f;
+                                worn.Roughness = .80f; worn.NormalScale = .30f;
+                            }
+                            else if (kind == "brazier")
                             {
                                 worn.AlbedoColor = new Color(.90f,.85f,.80f);
                                 worn.Metallic = .55f; worn.MetallicSpecular = .24f;
@@ -61,7 +82,8 @@ public partial class FortressHall : Node3D
         if (layout.RootElement.TryGetProperty("columns", out var columns))
             foreach (var placement in columns.EnumerateArray())
             {
-                var column = GD.Load<PackedScene>("res://Art/WarRoom/aged-column.glb").Instantiate<Node3D>();
+                var asset = placement.TryGetProperty("asset", out var assetValue) ? assetValue.GetString() : "aged-column";
+                var column = GD.Load<PackedScene>($"res://Art/WarRoom/{asset}.glb").Instantiate<Node3D>();
                 var body = column.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().First();
                 var dimensions = body.GetAabb().Size;
                 var p = placement.GetProperty("position").EnumerateArray().Select(v => v.GetSingle()).ToArray();
@@ -74,8 +96,8 @@ public partial class FortressHall : Node3D
                         if (mesh.GetActiveMaterial(i) is StandardMaterial3D source)
                         {
                             var timber = (StandardMaterial3D)source.Duplicate();
-                            timber.Metallic = .08f; timber.MetallicSpecular = .22f;
-                            timber.Roughness = .88f; timber.NormalScale = .55f;
+                            timber.Metallic = .03f; timber.MetallicSpecular = .16f;
+                            timber.RoughnessTexture = null; timber.Roughness = .9f; timber.NormalScale = .32f;
                             mesh.SetSurfaceOverrideMaterial(i, timber);
                         }
             }
@@ -222,8 +244,11 @@ public partial class FortressHall : Node3D
             _floorSources[i] = new Vector4(position.X, position.Z, p.Light.OmniRange, 0);
             _floorEnergy[i] = energy;
         }
-        _bakedFloor?.SetShaderParameter("practical_sources", _floorSources);
-        _bakedFloor?.SetShaderParameter("practical_energy", _floorEnergy);
+        foreach (var floor in _bakedFloors)
+        {
+            floor.SetShaderParameter("practical_sources", _floorSources);
+            floor.SetShaderParameter("practical_energy", _floorEnergy);
+        }
     }
 
     // Same smooth signal as Art/candlelight.gdshaderinc, so actual lights follow
@@ -242,16 +267,8 @@ public partial class FortressHall : Node3D
         // Spatial partitions retain local light selection and culling; a single
         // hall-sized batch loses practical lights on Compatibility's light limit.
         var groups = new Dictionary<(Material, int, int), SurfaceTool>();
-        ShaderMaterial? bakedFloor = null;
-        if (ResourceLoader.Exists("res://Art/WarRoom/floor-irradiance-m6.exr") && !OS.GetCmdlineUserArgs().Contains("--room-no-baked-floor"))
-        {
-            bakedFloor = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/floor-lighting-m4.gdshader") };
-            bakedFloor.SetShaderParameter("wood_colour", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-albedo.jpg"));
-            bakedFloor.SetShaderParameter("wood_normal", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-normal.jpg"));
-            bakedFloor.SetShaderParameter("wood_roughness", GD.Load<Texture2D>("res://Art/WarRoom/floor-roughness-m4.jpg"));
-            bakedFloor.SetShaderParameter("irradiance", GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m6.exr"));
-            _bakedFloor = bakedFloor;
-        }
+        var floorMaterials = new Dictionary<Material, ShaderMaterial>();
+        var lightMap = GD.Load<Texture2D>("res://Art/WarRoom/floor-irradiance-m7.exr");
         foreach (var mesh in room.FindChildren("*", "MeshInstance3D").OfType<MeshInstance3D>().ToArray())
         {
             if (mesh.Name.ToString().Replace("_", "").Replace(" ", "").StartsWith("Staticember"))
@@ -274,10 +291,24 @@ public partial class FortressHall : Node3D
                     standard.Roughness = material.ResourceName.Contains("floor") ? .30f : .68f;
                     standard.NormalScale = .48f;
                 }
-                if (material.ResourceName == "Fortress polished worn floor" && bakedFloor is not null)
-                    material = bakedFloor;
+                if (material is StandardMaterial3D plank && material.ResourceName.StartsWith("M7_Floor_"))
+                {
+                    if (!floorMaterials.TryGetValue(material, out var floor))
+                    {
+                        floor = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/floor-lighting-m7.gdshader") };
+                        floor.SetShaderParameter("wood_colour", plank.AlbedoTexture);
+                        floor.SetShaderParameter("wood_normal", plank.NormalTexture);
+                        floor.SetShaderParameter("wood_roughness", plank.RoughnessTexture);
+                        floor.SetShaderParameter("irradiance", lightMap);
+                        floor.SetShaderParameter("fine_grain", GD.Load<Texture2D>("res://Art/WarRoom/fortress-hall-b3_weathered_brown_planks-albedo.jpg"));
+                        floorMaterials.Add(material, floor); _bakedFloors.Add(floor);
+                    }
+                    material = floor;
+                }
                 if (material.ResourceName == "Earthen plaster")
                     material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/earthen-plaster.gdshader") };
+                if (material.ResourceName == "M7 Shoji washi")
+                    material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/WarRoom/shoji-paper-m7.gdshader") };
                 var batchCentre = mesh.Transform * mesh.GetAabb().GetCenter();
                 var key = (material, Mathf.FloorToInt(batchCentre.X / .75f), Mathf.FloorToInt(batchCentre.Z / .75f));
                 if (!groups.TryGetValue(key, out var builder))

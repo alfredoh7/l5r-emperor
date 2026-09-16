@@ -1,0 +1,56 @@
+{
+  "kind": "column",
+  "raw_sha256": "eb119c5f6e50acdcc3ae78e64563ed5eb865520ca4b01b1fd51d264bce3150ea",
+  "raw_bounds": [
+    [
+      -0.3809939920902252,
+      -0.20594599843025208,
+      -0.9522389769554138
+    ],
+    [
+      0.38193100690841675,
+      0.21815599501132965,
+      0.9511330127716064
+    ]
+  ],
+  "normalized_size": [
+    0.40082812309265137,
+    0.22281613945960999,
+    1.0
+  ],
+  "raw_triangles": 533748,
+  "mesh_count": 1,
+  "materials": [
+    {
+      "name": "Material_0",
+      "textures": [
+        {
+          "name": "Image_0",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "name": "Image_1",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "name": "Image_2",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "cleaned_triangles": 46832,
+  "cleaned_sha256": "e079a825074cd5256d57963dfedbbf82b138ce1eab21a135f0c500f180d57ae2",
+  "cleanup": "Existing Meshy timber and iron UVs retained; geometry below original unit-height z=.122 removed for separate stone-foot variants; runtime maps 2K. Original pivot and unit-height scale retained.",
+  "derived_from": "assets/table/war-room/meshy/column-v1/prepared.blend",
+  "runtime_texture_max": 2048
+}
