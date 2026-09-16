@@ -34,7 +34,14 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssign
 // CardId for the Dynasty card sitting there); the Region's own AttachedTo stays null and its
 // ProvinceIndex names which province it is attached to. Public, face-up, like a Holding/Personality
 // once revealed. Visually renders like an ordinary attachment despite the different host.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region }
+// Celestial (the first being Lady Matsu's Rage): unlike Event/Region, enters play the instant it is
+// revealed in ANY phase (not deferred to the controller's own next Events Phase) and never
+// resolves-once-then-discards or attaches to anything -- it just stays in play, in the player's own
+// right-side sideboard alongside Rings and reminders (a visual grouping only; Rings themselves still
+// use Zone.Home internally), until something removes it. A player may control more than one Celestial
+// only in passing -- entering play immediately discards every OTHER Celestial that same player
+// controls, so at most one survives at rest.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -255,6 +262,15 @@ public sealed record ForceRedirect(string TargetId, int ToPlayerId);
 /// controller (the one who gains the Honor), not the targeted Personality's own controller.</summary>
 public sealed record TamokoHonorCheck(string TargetId, int BeneficiaryPlayerId);
 
+/// <summary>Lady Matsu's Rage (the first Celestial): "Bow the target. After the next time (this
+/// turn) it straightens, destroy it." Checked reactively wherever Straighten() actually flips
+/// Bowed to false, not polled -- consumed (removed) the instant it fires, or discarded unconsumed at
+/// EndTurn if the target never straightens this same turn. ActingPlayerId is whoever performed the
+/// original Battle action (Lady Matsu's Rage's own controller at the time), carried through to the
+/// delayed destroy so her own destroy-redirect trait still attributes correctly even though she has
+/// already been discarded as this ability's own cost by the time it fires.</summary>
+public sealed record LadyMatsusRageWatch(string TargetId, int ActingPlayerId);
+
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
 /// same shape as PendingAttack) until it resolves, then hands priority back exactly where the
@@ -378,6 +394,10 @@ public sealed class MatchState
     // Timing is only ever usable "if it is not your turn," so this always resolves before the SAME
     // active player's own turn actually ends).
     public List<TamokoHonorCheck> PendingTamokoHonorChecks { get; set; } = [];
+    // Lady Matsu's Rage (the first Celestial): reactive, checked inside Straighten() itself -- see
+    // LadyMatsusRageWatch's own doc comment. Cleared unconditionally in EndTurn (same call site as
+    // PendingTamokoHonorChecks above) for whichever entries never fired this turn.
+    public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
@@ -423,7 +443,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
     int DeadCount, CardView[]? Focused = null,
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
-    CardView[]? EventsInPlay = null);
+    CardView[]? EventsInPlay = null,
+    // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
+    CardView[]? Celestials = null);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

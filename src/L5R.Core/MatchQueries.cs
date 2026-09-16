@@ -37,7 +37,8 @@ public sealed partial class MatchEngine
                 // unlike a face-down province card's ProvinceIndex-keyed one, since a duel's own
                 // focused-card list has no comparable positional slot).
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray());
+                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
+                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray());
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,

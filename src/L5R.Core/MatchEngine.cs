@@ -507,7 +507,7 @@ public sealed partial class MatchEngine
         // MarkDead already queued it inside DestroyUnits below) must resume back to whoever already
         // held it, not to either specific player.
         var resumeTo=_state.PriorityPlayerId;
-        DestroyUnits([card]);
+        DestroyUnits([card],actingPlayerId:command.PlayerId);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
         OpenOverconfidentDrawWindow(resumeTo);
     }
@@ -1308,7 +1308,16 @@ public sealed partial class MatchEngine
         MarkDead(card);
         Emit("becameDead",$"{Definition(card).Name} became {(honorable?"honorably ":"")}dead.",card.OwnerId,card.Id);
     }
-    private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false)
+    // Lady Matsu's Rage (the first Celestial, issue TBD): "After your action resolves that destroyed
+    // any Personalities: Remove them from the game." actingPlayerId names whoever's ACTION this
+    // destroy is a direct consequence of -- passed only from the specific ability/Attack/duel-outcome
+    // call sites below (never from ResolveBattle's own three casualty-sweep calls, which pass none),
+    // and only from Action-Timed sources (Battle/Limited/Open, or a raw command like Seppuku) --
+    // never from a Reaction (Mirumoto Rokai's own self-destroy cost stays untouched) or from an
+    // indirect/derived rule consequence (a Chi-to-0 auto-destroy triggered by reducing Chi/destroying
+    // an attachment is not itself "the action's own destroy," the same principle that already
+    // excludes battle resolution's own Force-comparison sweep).
+    private int DestroyUnits(CardInstance[] cards, bool combatDestruction = false, int? actingPlayerId = null)
     {
         var count=0;
         foreach(var card in cards)
@@ -1334,6 +1343,16 @@ public sealed partial class MatchEngine
             card.ProvinceIndex=null;
             MarkDead(card);
             count++;
+            // The destruction itself, and everything it normally triggers (the Dishonorable-death
+            // penalty MarkDead already applied above, ExpendableDraw, DestroyedDuringBattleBonus,
+            // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
+            // Personality ends UP afterward. Attachments are unaffected (her own text names only the
+            // Personality itself), so the attachment-discard loop above is left untouched.
+            if(actingPlayerId is int aid && Definition(card).Type==CardType.Personality && ControlsCelestialEffect(aid,"lady-matsus-rage"))
+            {
+                card.Zone=Zone.RemovedFromGame;
+                Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game (Lady Matsu's Rage).",card.OwnerId,card.Id);
+            }
             if(combatDestruction && _state.Phase==Phase.Battle && HasHalls(card.OwnerId) && Keyword(card,"Ancestor")) GainHonor(card.OwnerId,1,"Halls of Memory — Combat Segment destruction");
             DestroyedDuringBattleBonus(card);
             ExpendableDraw(card);
@@ -1399,6 +1418,9 @@ public sealed partial class MatchEngine
         foreach(var check in _state.PendingTamokoHonorChecks)
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
+        // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
+        // (the target never straightened) simply expires here, with no further consequence.
+        _state.PendingLadyMatsusRageWatches.Clear();
         var player=Player(_state.ActivePlayerId);
         SetPhase(Phase.End,player.Id);
         if(player.DishonorLossPending) { Win(1-player.Id,"Dishonor defeat at the beginning of the End Phase"); return; }
@@ -1486,6 +1508,7 @@ public sealed partial class MatchEngine
                 Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
                 if(Definition(card).Type==CardType.Event) ResolveEvent(player,province,card);
                 else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
+                else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
         }
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
@@ -1536,6 +1559,33 @@ public sealed partial class MatchEngine
         }
         Refill(player,province);
     }
+    // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
+    // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop
+    // above is the only place a province card is ever turned face up, so this is only ever actually
+    // reached from there, but (unlike Event/Region, whose own resolution is deferred to the
+    // controller's next Events Phase if revealed elsewhere) a future "reveal a province card" effect
+    // outside the Events Phase must still call ResolveCelestial immediately from wherever it reveals
+    // the card, not defer it. A player may control more than one Celestial, but never more than one AT
+    // ONCE: entering play discards every other Celestial that SAME player currently controls (not the
+    // opponent's). Goes straight to Zone.Celestial -- never attaches to a province the way Region does,
+    // and (unlike Event) never resolves-once-then-discards; it just stays in play until something
+    // removes it.
+    private void ResolveCelestial(PlayerState player,ProvinceState province,CardInstance card)
+    {
+        province.CardId=null; card.ProvinceIndex=null;
+        foreach(var other in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.Celestial).ToArray())
+        {
+            other.Zone=Zone.DynastyDiscard;
+            Emit("celestialDiscarded",$"{Definition(other).Name} was discarded: {player.Name} may control only one Celestial in play at a time.",player.Id,other.Id);
+        }
+        card.Zone=Zone.Celestial;
+        Emit("celestialEnteredPlay",$"{Definition(card).Name} entered play.",player.Id,card.Id);
+        Refill(player,province);
+    }
+    // Lady Matsu's Rage's own destroy-redirect trait is Effect-keyed the same way RegionStrengthBonus
+    // is, checked from DestroyUnits' own single shared choke point (see its own doc comment).
+    private bool ControlsCelestialEffect(int playerId,string effect) =>
+        _state.Cards.Values.Any(c=>c.OwnerId==playerId && c.Zone==Zone.Celestial && Definition(c).Effect==effect);
     // Fallow Lands' shape (the first Region carrying a static province-strength bonus): live-
     // recomputed from whichever Region is currently attached, the same "read live off Attachments()"
     // approach PersonalityForce uses for an Item's own Force convey to its wielder -- NOT a one-shot
