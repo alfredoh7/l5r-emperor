@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Record a third design note in the Suspicions/Events decision doc (docs/decisions/2026-09-16-events-phase-and-ongoing-effect-zone.md): some Events print an action-style 'Limited:' precursor, but it is decorative -- the Event still resolves automatically and unconditionally in the Events Phase like any other Event, never as a player-activated Limited ability. Not implemented (no card needs it yet), matching the doc's existing reshuffle-copy note. Marked shared only because docs/decisions/ itself routes as a shared path; no code changed and no lane-specific behavior is affected.",
+  "validation": "Documentation-only change; no code touched. bash tools/check.sh --skip-client not re-run since nothing testable changed.",
+  "remaining": "None -- this is a recorded rule for whenever a 'Limited:'-prefixed Event is actually wired.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/241",
+  "branch": "mdornbrook/241-event-limited-prefix",
+  "updated": "2026-09-16T12:39:49.354297+00:00"
+}

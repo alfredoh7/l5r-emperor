@@ -27,7 +27,21 @@ public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssign
 // stays active. Nothing yet moves a card OUT of this zone (Suspicions' own effect never ends), but the
 // intended shape for a future card that does end it is: move to DynastyDiscard, same as an ordinary
 // Event. Public zone, not hidden information, like RemovedFromGame.
-public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay }
+// Region (the first being Low Market/Fallow Lands): attaches to a PROVINCE, not to another card --
+// deliberately a distinct Zone from Attached (which always resolves its parent via
+// CardInstance.AttachedTo/Card(...)) so Attachments()/DestroyAttachment()/AtBattle() never misfire on
+// it. ProvinceState.RegionId is the province-side pointer (the province "owns" the Region, mirroring
+// CardId for the Dynasty card sitting there); the Region's own AttachedTo stays null and its
+// ProvinceIndex names which province it is attached to. Public, face-up, like a Holding/Personality
+// once revealed. Visually renders like an ordinary attachment despite the different host.
+// Celestial (the first being Lady Matsu's Rage): unlike Event/Region, enters play the instant it is
+// revealed in ANY phase (not deferred to the controller's own next Events Phase) and never
+// resolves-once-then-discards or attaches to anything -- it just stays in play, in the player's own
+// right-side sideboard alongside Rings and reminders (a visual grouping only; Rings themselves still
+// use Zone.Home internally), until something removes it. A player may control more than one Celestial
+// only in passing -- entering play immediately discards every OTHER Celestial that same player
+// controls, so at most one survives at rest.
+public enum Zone { Stronghold, Home, Province, DynastyDeck, FateDeck, Hand, DynastyDiscard, FateDiscard, Dead, Battlefield, Attached, RemovedFromGame, Focused, EventInPlay, Region, Celestial }
 
 public sealed record CardDefinition(string Id, string Name, CardType Type, string Clan = "Unaligned", int GoldCost = 0,
     int GoldProduction = 0, int Force = 0, int Chi = 0, int PersonalHonor = 0, int? HonorRequirement = null,
@@ -146,6 +160,10 @@ public sealed class ProvinceState
     // by player id, defaulted to false. No ability removes it directly; it resets to false for both
     // players only once a battle at this province resolves (ResolveBattle), regardless of outcome.
     public bool[] Reconnaissance { get; set; } = new bool[2];
+    // The Region currently attached to this province, if any (at most one -- ResolveRegion discards a
+    // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
+    // face-down/face-up Dynasty card, but for the Zone.Region card instead.
+    public string? RegionId { get; set; }
 }
 
 public sealed class PlayerState
@@ -243,6 +261,15 @@ public sealed record ForceRedirect(string TargetId, int ToPlayerId);
 /// was not assigned to attack your provinces this turn" -- BeneficiaryPlayerId is Tamoko's own
 /// controller (the one who gains the Honor), not the targeted Personality's own controller.</summary>
 public sealed record TamokoHonorCheck(string TargetId, int BeneficiaryPlayerId);
+
+/// <summary>Lady Matsu's Rage (the first Celestial): "Bow the target. After the next time (this
+/// turn) it straightens, destroy it." Checked reactively wherever Straighten() actually flips
+/// Bowed to false, not polled -- consumed (removed) the instant it fires, or discarded unconsumed at
+/// EndTurn if the target never straightens this same turn. ActingPlayerId is whoever performed the
+/// original Battle action (Lady Matsu's Rage's own controller at the time), carried through to the
+/// delayed destroy so her own destroy-redirect trait still attributes correctly even though she has
+/// already been discarded as this ability's own cost by the time it fires.</summary>
+public sealed record LadyMatsusRageWatch(string TargetId, int ActingPlayerId);
 
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
@@ -369,6 +396,10 @@ public sealed class MatchState
     // Timing is only ever usable "if it is not your turn," so this always resolves before the SAME
     // active player's own turn actually ends).
     public List<TamokoHonorCheck> PendingTamokoHonorChecks { get; set; } = [];
+    // Lady Matsu's Rage (the first Celestial): reactive, checked inside Straighten() itself -- see
+    // LadyMatsusRageWatch's own doc comment. Cleared unconditionally in EndTurn (same call site as
+    // PendingTamokoHonorChecks above) for whichever entries never fired this turn.
+    public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
@@ -401,7 +432,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
     CardToken[]? Tokens = null);
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card);
+// Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
+// Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
@@ -412,7 +445,9 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
     int DeadCount, CardView[]? Focused = null,
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
-    CardView[]? EventsInPlay = null, int FocusCount = 0);
+    CardView[]? EventsInPlay = null,
+    // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
+    CardView[]? Celestials = null, int FocusCount = 0);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

@@ -1,0 +1,81 @@
+{
+  "Profile": "spell-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10133",
+      "Name": "Suitengu's Path",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Shugenja has Naval.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10133.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Naval"
+    },
+    {
+      "Id": "oracle-l5r-6502",
+      "Name": "Scouring Flood",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This Personality has +2F. \nBattle: Bow this card and target a defending Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6502.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "scouring-flood-move-home"
+      ],
+      "Effect": "scouring-flood-force"
+    },
+    {
+      "Id": "oracle-l5r-9889",
+      "Name": "The Earth's Hunger",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9889.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "earths-hunger-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

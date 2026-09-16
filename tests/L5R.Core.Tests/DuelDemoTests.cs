@@ -19,13 +19,15 @@ static class DuelDemoTests
         var lion=e.GetView(0).Players[1];Equal(lion.FocusCount,1);Equal(lion.Focused!.Length,0);
         var hidden=e.GetView(1).Players[1].Focused![0].Id;
         Check(!JsonSerializer.Serialize(e.GetView(0)).Contains(hidden),"opponent focus id not leaked in view/events");
-        // Integration regression: public Event reminders and private duel focuses coexist in one view.
+        // Integration regression: public Event/Celestial reminders and private duel focuses coexist in one view.
         var combined=e.State;
         combined.Cards.Add("public-event",new CardInstance{Id="public-event",DefinitionId="oracle-l5r-7675",OwnerId=1,Zone=Zone.EventInPlay,FaceUp=true});
+        combined.Cards.Add("public-celestial",new CardInstance{Id="public-celestial",DefinitionId="oracle-l5r-4658",OwnerId=1,Zone=Zone.Celestial,FaceUp=true});
         var combinedView=MatchEngine.FromTestState(combined).GetView(0);
         var roundTrip=JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(combinedView))!;
         Equal(roundTrip.Players[1].FocusCount,1);Equal(roundTrip.Players[1].Focused!.Length,0);
         Equal(roundTrip.Players[1].EventsInPlay!.Single().Definition!.Id,"oracle-l5r-7675");
+        Equal(roundTrip.Players[1].Celestials!.Single().Definition!.Id,"oracle-l5r-4658");
         HiddenIdsAbsent(roundTrip,[hidden]);
         Send(e,Action(e,"focus",c=>c.CardId is { } id && e.GetView(0).Players[0].Hand.Any(h=>h.Id==id&&h.Definition!.Id=="oracle-l5r-7996")));
         Send(e,Action(e,"strike"));

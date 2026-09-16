@@ -13,7 +13,9 @@ public sealed partial class MatchEngine
                 ViewCard(Card(player.StrongholdId)),
                 owned.Where(c=>c.Zone==Zone.Home || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Home).Select(c=>ViewCard(c)).ToArray(),
                 owned.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
-                player.Provinces.Select(p=>new ProvinceView(p.Index,p.Strength,p.Destroyed,p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp))).ToArray(),
+                player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
+                    p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)))).ToArray(),
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -24,6 +26,7 @@ public sealed partial class MatchEngine
                 // discard or revealed by Strike. Anonymous backs need no stable hidden card IDs.
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
                 EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
+                Celestials:owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray(),
                 FocusCount:owned.Count(c=>c.Zone==Zone.Focused));
         }).ToArray();
         var duel=_state.PendingDuel;

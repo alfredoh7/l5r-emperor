@@ -595,12 +595,55 @@ public static class AbilityCatalog
         // "for not accepting the teachings of Fudo" is flavor folded into the choice, not a separate
         // condition.
         ["mugoshi-slander"] = new("Reaction", "Political: after Mugoshi enters play, choose a player: he loses 1 Honor", "player", Trigger: "own-enters-play"),
+        // Low Market (the first Region, Embers of War): "Open: Bow this card, choose your performing
+        // Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to
+        // a minimum of 1." Not PlayerAbility -- it has a real source card, unlike Equip (Battle) --
+        // and not the ordinary Equip() command (which is hardcoded Limited-on-your-turn and has no
+        // per-card discount hook), so it's its own Open ability with its own Target category
+        // ("attachment-in-hand", broader than Equip (Battle)'s own "spell-or-reserve-in-hand": any
+        // Item/Follower/Spell, mirroring the ordinary Equip() command's own type filter). Bowing
+        // itself is the entire cost/limiter -- the shared "abilities on bowed cards cannot be used"
+        // rule already makes this usable at most once between straightens, no separate UsageKey
+        // needed, same convention as e.g. "hired-legion-draw".
+        ["low-market-equip"] = new("Open", "Open: Bow this card, choose your performing Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to a minimum of 1", "attachment-in-hand", Performer: "own-personality"),
+        // Fallow Lands (the first Region with a static trait, The Shadow's Embrace): "This province
+        // has +2 strength" (EffectiveProvinceStrength, live off ProvinceState.RegionId -- applies
+        // immediately on attach, without respect to presence, per its own printed wording) plus
+        // "Reaction: After a Melee or Ranged Attack is targeted: Give it -2 strength" -- Khol
+        // Regulars' own shape (case "khol-regulars-reaction" negates a Ranged Attack by +2), but for
+        // either Attack kind, and gated on its own province (not a battlefield-zone card's ordinary
+        // AtBattle()) actually being the one under attack, with its controller still having Personality
+        // presence there -- see its own Require below (id == "fallow-lands-reaction"). Usable the same
+        // turn Fallow Lands enters play: nothing about entry timing blocks a same-turn Reaction here.
+        ["fallow-lands-reaction"] = new("Reaction", "If this Region's own province is under attack and its controller has presence there, after a Melee or Ranged Attack is targeted: -2 strength", "none", Trigger: "before-attack-resolves"),
+        // Lady Matsu's Rage (the first Celestial, Embers of War): "Battle: Choose your performing
+        // unbowed attacking Personality, target an enemy card, and discard this card: Bow the target.
+        // After the next time (this turn) it straightens, destroy it." Her own trait ("After your
+        // action resolves that destroyed any Personalities: Remove them from the game") is not a
+        // separate ability entry at all -- it is wired directly into DestroyUnits' own shared choke
+        // point (see its own doc comment, and ControlsCelestialEffect), live for as long as she stays
+        // in Zone.Celestial. The delayed "destroy it once it straightens" half of THIS ability is
+        // tracked in MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten()
+        // itself, and cleared unconsumed at EndTurn -- "this turn" (the printed parenthetical) is
+        // enforced structurally by that clear, not by comparing a stored turn number.
+        ["lady-matsus-rage-bow-destroy"] = new("Battle", "Choose your performing unbowed attacking Personality, target an enemy card, and discard this card: Bow the target. After the next time (this turn) it straightens, destroy it.", "enemy-card", Performer: "own-unbowed-attacking-personality-at-battle"),
+        // Scouring Flood (Seeds of Decay wave, the first real Spell wired): "This Personality has
+        // +2F" is not a separate ability at all -- her own printed Force box now conveys to her
+        // wielder unconditionally via PersonalityForce's own new Spell term (see its doc comment),
+        // the same "always applies, bowed or not, every phase" shape an Item's Force box already had.
+        // Her own printed Battle ability bows herself (the Spell) as its entire cost -- no Performer
+        // needed, since nothing chooses which card acts, unlike Lady Matsu's Rage/The Earth's Hunger.
+        ["scouring-flood-move-home"] = new("Battle", "Bow this card and target a defending Personality: Move him home", "defending"),
+        // The Earth's Hunger (The Shadow's Embrace, the second Spell): "Bow this Shugenja, or bow
+        // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
+        // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
+        ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
     });
 }
 
 public sealed partial class MatchEngine
 {
-    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
+    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached or Zone.Region or Zone.Celestial;
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
@@ -969,7 +1012,7 @@ public sealed partial class MatchEngine
             var target = Card(targetId);
             if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
             {
-                DestroyAttackTarget(target);
+                DestroyAttackTarget(target, playerId);
                 if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
             }
         }
@@ -1159,6 +1202,12 @@ public sealed partial class MatchEngine
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
+            // The check above only ever applies to a Personality-type source -- a Spell's own Battle
+            // ability (Scouring Flood, The Earth's Hunger) needs its own equivalent: AtBattle(source)
+            // already resolves an ATTACHED card's own parent correctly (same helper Khol Regulars'
+            // own Reaction uses), so this is exactly "the Spell's own wielder is at this battlefield."
+            if (id is "scouring-flood-move-home" or "earths-hunger-destroy")
+                Require(AtBattle(source!), "This Spell's own wielder must be at the current battlefield.");
         }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
@@ -1183,7 +1232,7 @@ public sealed partial class MatchEngine
         // usable any time it holds, like an ordinary Battle ability. The current battlefield's own
         // province always belongs to the Defender.
         if (id == "false-ring-of-water-recruit")
-            Require(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength >= 11,
+            Require(EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)) >= 11,
                 "The current battlefield's Province Strength must be 11 or greater.");
         if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
@@ -1196,6 +1245,17 @@ public sealed partial class MatchEngine
         // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
         // with every other attack-boosting Reaction.
         if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
+        // Fallow Lands: unlike an ordinary Zone.Battlefield/Attached Reaction card, AtBattle() does not
+        // apply -- it never moves, it just sits at its own home province forever. "The province to which
+        // it is attached" is under attack only when the CURRENT active player is someone else (their own
+        // opponent, i.e. the attacker) attacking that exact province index of Fallow Lands' own
+        // controller -- province indices are not globally unique across players, so both halves of this
+        // check are needed. "The controlling player has presence" reuses Army() (a Region itself never
+        // satisfies presence, since it never sits in Zone.Battlefield).
+        if (id == "fallow-lands-reaction")
+            Require(_state.CurrentBattleProvince is not null && _state.ActivePlayerId != source!.OwnerId && _state.CurrentBattleProvince == source.ProvinceIndex
+                && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
+                "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
@@ -1219,6 +1279,10 @@ public sealed partial class MatchEngine
             Require(ability.Performer switch {
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
+                // Lady Matsu's Rage's own printed restriction: "your performing unbowed ATTACKING
+                // Personality" -- narrower than own-unbowed-personality-at-battle, which allows either
+                // side of the battle.
+                "own-unbowed-attacking-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && IsAttacking(performer),
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
                 // Generic "Choose your performing [Keyword(s)] Personality" at battle -- for any card
                 // naming one or more keywords with no mechanical rule of their own (all independently
@@ -1253,6 +1317,15 @@ public sealed partial class MatchEngine
                 // pathway" logic needed.
                 "own-source-or-unbowed-holding-with-keyword" => performer.Id == source!.Id
                     || Definition(performer).Type == CardType.Holding && !performer.Bowed && HasKeywords(performer, ability.RequiredKeywords),
+                // The Earth's Hunger: "Bow this Shugenja, or bow this card if he is Earth" -- a cost
+                // choice too, but shaped the other way round from Xijkt's own: the CONDITION is
+                // checked against the WIELDER (the card this Spell is attached to), not against the
+                // alternate candidate itself (there is no candidate-side keyword to check -- the
+                // Spell is always eligible once the wielder qualifies). The wielder is always an
+                // eligible choice; no "must be unbowed" check on the wielder either, same reasoning
+                // as Xijkt's own comment above.
+                "own-wielder-or-source-with-wielder-keyword" => performer.Id == Card(source!.AttachedTo!).Id
+                    || performer.Id == source.Id && HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords),
                 // Tamori Yayu (issue #216): the same "select one more card, separately from the
                 // Attack's own target" shape -- here, which of Yayu's own Spells pays the cost.
                 "own-spell-attached-to-source" => Definition(performer).Type == CardType.Spell && performer.AttachedTo == source!.Id,
@@ -1367,6 +1440,20 @@ public sealed partial class MatchEngine
                     // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
                     // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
                     // needed this check.
+                    Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
+                        $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
+                }
+                // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
+                // Item/Follower/Spell, matching the ordinary Equip() command's own type filter), reusing
+                // the same shared attach-legality helpers Equip() itself uses (AttachmentLegalTarget
+                // already folds in AttachRequiresKeyword/Excludes/Name AND a Follower's Honor
+                // Requirement; AttachmentAllowed is the Armor/Weapon-cap check).
+                else if (ability.Target == "attachment-in-hand")
+                {
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type is CardType.Item or CardType.Follower or CardType.Spell,
+                        "Choose an Item, Follower, or Spell from your hand.");
+                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Personality.");
+                    Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
                     Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
                         $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
                 }
@@ -1542,6 +1629,9 @@ public sealed partial class MatchEngine
         // attachment, not a Strategy's own GoldCost.
         var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
             : ability.Target == "spell-or-reserve-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
+            // Low Market: "paying 2 less Gold, to a minimum of 1" -- its own printed discount on the
+            // targeted attachment's own GoldCost, the same per-candidate-cost shape as Equip (Battle).
+            : ability.Target == "attachment-in-hand" && command.TargetId is not null ? Math.Max(1, Definition(Card(command.TargetId)).GoldCost - 2)
             // Singh Remnants' shape: attaching itself, paying all costs -- its own GoldCost, already
             // separately validated above against the just-entered Personality's own restrictions.
             : ability.Trigger == "any-personality-enters-play" ? Definition(source!).GoldCost
@@ -1785,6 +1875,39 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
+            case "fallow-lands-reaction": _state.PendingAttack!.Strength -= 2; break;
+            case "low-market-equip":
+            {
+                source!.Bowed = true;
+                var performer = Card(command.PerformerId!);
+                var attachment = target!;
+                Pay(player.Id, attachment, Math.Max(1, Definition(attachment).GoldCost - 2), command.SourceIds);
+                player.Hand.Remove(attachment.Id);
+                attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
+                if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
+                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via Low Market.", player.Id, attachment.Id);
+                if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
+                break;
+            }
+            case "lady-matsus-rage-bow-destroy":
+            {
+                // "Discard this card" is the cost -- she leaves play by discard, not destruction (her
+                // own controller-scoped destroy-redirect trait no longer applies to anything once she
+                // is gone, including this very card, which was never destroyed in the first place).
+                source!.Zone = Zone.DynastyDiscard;
+                Emit("celestialDiscarded", $"{Definition(source).Name} was discarded to use its Battle action.", player.Id, source.Id);
+                if (!StalwartNegatesBow(target!, player.Id))
+                {
+                    target!.Bowed = true;
+                    _state.PendingLadyMatsusRageWatches.Add(new(target.Id, player.Id));
+                }
+                break;
+            }
+            case "scouring-flood-move-home": source!.Bowed = true; MoveHome(target!, false); break;
+            case "earths-hunger-destroy":
+                Card(command.PerformerId!).Bowed = true;
+                DestroyUnits([target!], actingPlayerId: player.Id);
+                break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -1839,7 +1962,7 @@ public sealed partial class MatchEngine
             // Lion Clan Personality review (issue #198):
             case "dairuko-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (Keyword(target!, "Unaligned")) DestroyUnits([target!], false);
+                if (Keyword(target!, "Unaligned")) DestroyUnits([target!], false, player.Id);
                 break;
             case "furu-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "furu-straighten": Straighten(target!); break;
@@ -1873,7 +1996,7 @@ public sealed partial class MatchEngine
             case "atsumichi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
-            case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
+            case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true, player.Id); break;
             // Bowing the target Farm IS the cost; the effect is the counter increment, not applied to
             // the Farm itself. Consumed by PersonalityForce/FollowerForce (Keyword "Ashigaru" + AtBattle).
             case "training-ashigaru-boost": case "ashigaru-elite-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
@@ -1908,7 +2031,7 @@ public sealed partial class MatchEngine
                             ApplyModifier(follower, source!.Id, id, "Force", 1);
                 break;
             }
-            case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true); break;
+            case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true, player.Id); break;
             case "brothers-great-lake-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "elite-sentry-straighten":
             {
@@ -1918,7 +2041,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "furugaro-charge":
-                DestroyUnits([source!], false);
+                DestroyUnits([source!], false, player.Id);
                 CreateToken(target!, "Charging", id);
                 CreateToken(target!, "Charging", id);
                 break;
@@ -1931,7 +2054,7 @@ public sealed partial class MatchEngine
                 var performer = Card(command.PerformerId!);
                 performer.Bowed = true;
                 var destroyedAttachment = Definition(target!).Type == CardType.Follower;
-                DestroyUnits([target!], false);
+                DestroyUnits([target!], false, player.Id);
                 if (destroyedAttachment && Keyword(performer, "Fire")) Straighten(performer);
                 break;
             }
@@ -1959,12 +2082,14 @@ public sealed partial class MatchEngine
             {
                 if (source!.Zone != Zone.Hand) source.Bowed = true;
                 var performer = Card(command.PerformerId!);
-                DestroyUnits([performer]);
-                DestroyUnits([target!]);
+                DestroyUnits([performer], actingPlayerId: player.Id);
+                DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
             }
             case "rokai-negate-destruction":
             {
+                // Reaction-Timed, not an Action -- Lady Matsu's Rage's own trait is scoped to "your
+                // action resolves," so intentionally left without actingPlayerId here.
                 var pending = _state.PendingNegatableAbility!;
                 DestroyUnits([source!]); // Rokai's own cost -- destroying himself, unaffected by the negation signal set just below
                 _state.NegatedEffectKind = "destroy"; _state.NegatedEffectCardId = pending.TargetId;
@@ -1980,7 +2105,7 @@ public sealed partial class MatchEngine
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
-                DestroyUnits([source], false);
+                DestroyUnits([source], false, player.Id);
                 break;
             case "ring-of-void-draw":
                 if (source!.Zone != Zone.Hand) source.Bowed = true;
@@ -1998,8 +2123,8 @@ public sealed partial class MatchEngine
             case "unseen-assassin-strike":
                 // Limited (Action phase), not battle -- combatDestruction stays false for both.
                 source!.Bowed = true;
-                DestroyUnits([target!], false);
-                DestroyUnits([source], false);
+                DestroyUnits([target!], false, player.Id);
+                DestroyUnits([source], false, player.Id);
                 GainHonor(player.Id, -2, "Unseen Assassins", source);
                 break;
             case "asahina-straighten":
@@ -2066,7 +2191,7 @@ public sealed partial class MatchEngine
                 if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 else MoveHome(source!, false);
                 break;
-            case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!]); break;
+            case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!], actingPlayerId: player.Id); break;
             case "xijkt-bow":
                 Card(command.PerformerId!).Bowed = true;
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -2085,7 +2210,7 @@ public sealed partial class MatchEngine
             case "mitoshi-straighten": Straighten(target!); break;
             case "shikei-draw": Draw(player); break;
             case "yozo-exp-destroy":
-                if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!]);
+                if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
             case "jinai-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "muzu-bow":
@@ -2308,7 +2433,21 @@ public sealed partial class MatchEngine
         }
         else if (Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
-        else card.Bowed = false;
+        else
+        {
+            card.Bowed = false;
+            // Lady Matsu's Rage: "After the next time (this turn) it straightens, destroy it." The
+            // ONLY place a card actually straightens by game effect -- see LadyMatsusRageWatch's own
+            // doc comment -- so this is the correct, complete hook; nothing further needs to check it
+            // elsewhere. Consumed (removed) the instant it fires.
+            var watch = _state.PendingLadyMatsusRageWatches.FirstOrDefault(w => w.TargetId == card.Id);
+            if (watch is not null)
+            {
+                _state.PendingLadyMatsusRageWatches.Remove(watch);
+                Emit("ladyMatsusRageTriggered", $"{Definition(card).Name} straightened after being bowed by Lady Matsu's Rage -- destroyed.", card.OwnerId, card.Id);
+                DestroyUnits([card], actingPlayerId: watch.ActingPlayerId);
+            }
+        }
     }
     // Dragon Clan review (issue #207): "straighten his unit" (Mirumoto Houken's own shape) --
     // straightens the card AND every attachment, unlike the single-card Straighten calls every
@@ -2404,10 +2543,10 @@ public sealed partial class MatchEngine
     }
     // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
     // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.
-    private void DestroyAttackTarget(CardInstance target)
+    private void DestroyAttackTarget(CardInstance target, int playerId)
     {
         if (Definition(target).Type == CardType.Follower) DestroyAttachment(target);
-        else DestroyUnits([target], true);
+        else DestroyUnits([target], true, playerId);
     }
     private void DestroyAttachment(CardInstance card)
     {
@@ -2467,12 +2606,16 @@ public sealed partial class MatchEngine
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-attacking-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && IsAttacking(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle-with-keyword" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
                 "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
+                "own-wielder-or-source-with-wielder-keyword" => HasKeywords(Card(source!.AttachedTo!), ability.RequiredKeywords)
+                    ? new[] { Card(source.AttachedTo!).Id, source.Id } : new[] { Card(source.AttachedTo!).Id },
+
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
@@ -2495,16 +2638,22 @@ public sealed partial class MatchEngine
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
                 string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
+                    // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
+                    // Spell, matching the ordinary Equip() command's own type filter).
+                    "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
                     "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {
-                    // Equip (Battle)'s cost is the targeted Spell/Reserve card's own GoldCost, not a
-                    // fixed per-performer cost -- each candidate needs its own payment recomputed.
+                    // Equip (Battle)/Low Market's cost is the targeted attachment's own (possibly
+                    // discounted) GoldCost, not a fixed per-performer cost -- each candidate needs its
+                    // own payment recomputed.
                     var command = ability.Target == "spell-or-reserve-in-hand" && target is not null
                         ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
+                        : ability.Target == "attachment-in-hand" && target is not null
+                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(1, Definition(Card(target)).GoldCost - 2)).FirstOrDefault()?.SourceIds }
                         : prototype with { TargetId = target };
                     try { ValidateAbility(command); legal.Add(command); }
                     catch (RuleViolation e) { error ??= e.Message; }

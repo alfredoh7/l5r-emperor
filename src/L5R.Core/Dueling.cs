@@ -292,7 +292,7 @@ public sealed partial class MatchEngine
         // Focus-Effect-driven outcome layers on top, in the active player's own chosen order -- e.g.
         // a Focus Effect that dishonors the loser, resolved before the duel's own "destroy the
         // loser," makes that death a dishonorable one instead of an honorable one.
-        ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds);
+        ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId);
         foreach (var focusedId in duel.OrderedFocusEffects)
         {
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
@@ -362,16 +362,19 @@ public sealed partial class MatchEngine
 
     // Each duel-issuing ability's own printed win/loss text. loserIds has two entries only on a
     // double-loss tie; winnerId is null in that same case.
-    private void ApplyDuelOutcome(string abilityId, string? winnerId, List<string> loserIds)
+    // challengerPlayerId (Lady Matsu's Rage, the first Celestial): "a duel her controller initiated"
+    // is the CHALLENGER specifically -- win or lose is irrelevant to whose action this is -- so this
+    // is always duel.ChallengerPlayerId, never the winner's or a loser's own id.
+    private void ApplyDuelOutcome(string abilityId, string? winnerId, List<string> loserIds, int challengerPlayerId)
     {
         switch (abilityId)
         {
-            case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
+            case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "training-duel-force": case "training-duel-honor": case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
-            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray()); break;
+            case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
         }
     }
 
