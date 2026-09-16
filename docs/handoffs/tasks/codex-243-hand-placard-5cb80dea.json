@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Placard A implementation in progress: Meshy/Blender frame, native three-stat HUD and authoritative hand-limit projection; Home revisions are concepts only.",
-  "validation": "Core, AI, server and transport checks passed; Godot compile and isolated native comparison/input probe passed. Integrated room preview pending.",
-  "remaining": "Complete latest-room preview, final visual refinement, provenance and review.",
+  "summary": "Implemented approved Placard A with Meshy/Blender lacquer frame, Gold coin and authoritative hand-limit display; revised Imperial Favor concepts await selection. Increased spacing between clan heading, turn cue and player name following user feedback.",
+  "validation": "Full deterministic checks passed (152 core, 52 published, 9 deck-format, 10 deck-workshop, 14 AI, 5 server, 4 transport plus Python checks). Client build: zero warnings/errors. Latest native placard comparison/input probe passed after spacing adjustment. Integrated preview previously passed normal, compact, ultrawide and reduced-motion captures; refreshing latest spacing in the playable room.",
+  "remaining": "Final integrated spacing captures, visual acceptance and mdornbrook shared-view review. Home design awaits selection. No native Windows or new two-machine gameplay acceptance claimed. GitHub fallback claim recorded on #243.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/243",
   "branch": "codex/243-hand-placard",
-  "updated": "2026-09-16T07:58:36.635099+00:00"
+  "updated": "2026-09-16T08:15:03.326362+00:00"
 }

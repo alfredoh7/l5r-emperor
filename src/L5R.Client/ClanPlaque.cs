@@ -40,31 +40,31 @@ public partial class ClanPlaque : Control
         AddChild(_design);
         AddSprite(FrameTexture, new Rect2(0, 0, DesignWidth, DesignHeight));
         var emblem = Emblem(clan, new Vector2(94, 94)); emblem.Position = new Vector2(7, 7); _design.AddChild(emblem);
-        var title = Palette.Text(clan.ToUpperInvariant(), 25, Palette.Paper, true);
+        var title = Palette.Text(clan.ToUpperInvariant(), 22, Palette.Paper, true);
         title.AddThemeFontOverride("font", new FontVariation {
             BaseFont = _headingFace ??= CrispFace("res://Art/Fonts/WeatheredQuill-Regular.ttf"),
-            SpacingGlyph = -1, SpacingTop = -17, SpacingBottom = -12 });
-        title.Position = new Vector2(113, 8); title.Size = new Vector2(180, 29);
+            SpacingGlyph = -1, SpacingTop = -15, SpacingBottom = -11 });
+        title.Position = new Vector2(113, 3); title.Size = new Vector2(180, 29);
         title.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _design.AddChild(title);
-        var turnCue = Text(turn, 11, turnOwner ? new Color("a7d3d5") : Palette.PaperDim, new Rect2(115, 40, 178, 16));
+        var turnCue = Text(turn, 11, turnOwner ? new Color("a7d3d5") : Palette.PaperDim, new Rect2(115, 36, 178, 16));
         turnCue.TooltipText = turn;
-        var name = Text(action, 15, Palette.PaperDim, new Rect2(114, 47, 180, 23));
-        name.ClipText = true; name.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; name.Size = new Vector2(180,23);
+        var name = Text(action, 14, Palette.PaperDim, new Rect2(114, 54, 180, 20));
+        name.ClipText = true; name.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; name.Size = new Vector2(180,20);
         name.TooltipText = action; name.MouseFilter = MouseFilterEnum.Stop;
         // Labels can expand to their font's minimum width before the first layout pass.
         // A bounded viewport keeps untrusted/long player names inside the frame regardless.
-        var nameClip = new Control { Position = new Vector2(114,47), Size = new Vector2(180,23),
+        var nameClip = new Control { Position = new Vector2(114,54), Size = new Vector2(180,20),
             ClipContents = true, MouseFilter = MouseFilterEnum.Ignore };
         _design.RemoveChild(name); _design.AddChild(nameClip); nameClip.AddChild(name); name.Position = Vector2.Zero;
-        AddIcon(0, new Rect2(108, 72, 28, 25));
-        Text(honor.ToString(), honor is >99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 68, 31, 28));
-        AddIcon(1, new Rect2(178, 67, 30, 30));
-        var goldValue = Text(gold.ToString(), gold > 99 ? 15 : 21, new Color("17110b"), new Rect2(178, 67, 30, 29));
+        AddIcon(0, new Rect2(108, 74, 28, 23));
+        Text(honor.ToString(), honor is >99 or < -9 ? 18 : 21, Palette.Paper, new Rect2(140, 70, 31, 28));
+        AddIcon(1, new Rect2(179, 69, 28, 28));
+        var goldValue = Text(gold.ToString(), gold > 99 ? 15 : 21, new Color("17110b"), new Rect2(178, 68, 30, 29));
         goldValue.HorizontalAlignment = HorizontalAlignment.Center;
-        AddIcon(2, new Rect2(225, 70, 26, 27));
+        AddIcon(2, new Rect2(225, 72, 26, 24));
         var countSize = 21;
         while (countSize > 12 && BodyFace.GetStringSize(HandText, fontSize:countSize).X > 47) countSize--;
-        var hand = new RichTextLabel { Position = new Vector2(256, 68), Size = new Vector2(48, 28),
+        var hand = new RichTextLabel { Position = new Vector2(256, 70), Size = new Vector2(48, 28),
             BbcodeEnabled = true, ScrollActive = false, MouseFilter = MouseFilterEnum.Ignore,
             Text = $"{handCount?.ToString() ?? "—"} / [color=#edc46f]{handLimit?.Maximum.ToString() ?? "—"}[/color]" };
         hand.AddThemeFontOverride("normal_font", BodyFace); hand.AddThemeFontSizeOverride("normal_font_size", countSize);
@@ -148,8 +148,9 @@ public partial class ClanPlaque : Control
         var shell = new Control { CustomMinimumSize = design * scale, MouseFilter = MouseFilterEnum.Ignore };
         var panel = new Control { Size = design, Scale = Vector2.One * scale, MouseFilter = MouseFilterEnum.Ignore };
         shell.AddChild(panel);
-        panel.AddChild(new TextureRect { Texture = FrameTexture, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, Size = design,
-            MouseFilter = MouseFilterEnum.Ignore });
+        panel.AddChild(new NinePatchRect { Texture = FrameTexture, PatchMarginLeft = 96, PatchMarginRight = 96,
+            PatchMarginTop = 96, PatchMarginBottom = 96, Scale = Vector2.One * .25f, Size = design * 4,
+            MouseFilter = MouseFilterEnum.Ignore, TextureFilter = TextureFilterEnum.LinearWithMipmaps });
         var title = Palette.Text(heading, 23, Palette.Paper); title.AddThemeFontOverride("font", BodyFace);
         title.Position = new Vector2(25, 17); panel.AddChild(title);
         var copy = Palette.Wrapped(string.Join("\n",lines), 18, Palette.Paper); copy.AddThemeFontOverride("font", BodyFace);
@@ -168,9 +169,9 @@ public partial class ClanPlaque : Control
             foreach (var x in new[] { 170f, 216f })
                 DrawLine(new Vector2(x, 73), new Vector2(x, 94), Palette.Gold with { A = .65f }, 1, true);
             if (!turnOwner) return;
-            DrawLine(new Vector2(108, 47), new Vector2(112, 47), Palette.Crane with { A = .8f }, 1, true);
+            DrawLine(new Vector2(108, 43), new Vector2(112, 43), Palette.Crane with { A = .8f }, 1, true);
             var cueWidth = BodyFace.GetStringSize(TurnCue, fontSize:11).X;
-            DrawLine(new Vector2(Math.Min(290, 120+cueWidth), 47), new Vector2(Math.Min(297, 144+cueWidth), 47), Palette.Crane with { A = .8f }, 1, true);
+            DrawLine(new Vector2(Math.Min(290, 120+cueWidth), 43), new Vector2(Math.Min(297, 144+cueWidth), 43), Palette.Crane with { A = .8f }, 1, true);
         }
         public string TurnCue { get; set; } = "YOUR TURN";
     }
