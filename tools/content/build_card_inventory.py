@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 """Build docs/CARD_INVENTORY.xlsx: every card in the reference catalogue
-(content/deck-pool.json), one row each, with its Type, whether it has been
-wired up (published into CardCatalog via any content/published/*.json wave),
-and -- for cards a wave audit has actually triaged -- a Blocker note naming
-the specific engine gap keeping it unwired (curated by hand in the BLOCKERS
-dict below; blank for anything not yet triaged this way).
+(content/deck-pool.json), one row each, with its Type, its own primary
+printing's Set (read directly from content/oracle/emperor-catalogue.json --
+deck-pool.json itself carries no set/printing info, so this is not threaded
+through that schema, only read alongside it here), whether it has been wired
+up (published into CardCatalog via any content/published/*.json wave), and --
+for cards a wave audit has actually triaged -- a Blocker note naming the
+specific engine gap keeping it unwired (curated by hand in the BLOCKERS dict
+below; blank for anything not yet triaged this way).
 
 Run this after any wave lands (a new content/published/*-wave-*.json file, or a
 change to the pinned lion-crane-v1/vanilla-wave-1 pool) to keep the workbook in
@@ -26,6 +29,7 @@ from openpyxl.worksheet.table import Table, TableStyleInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 DECK_POOL = ROOT / "content/deck-pool.json"
+EMPEROR_CATALOGUE = ROOT / "content/oracle/emperor-catalogue.json"
 PUBLISHED_DIR = ROOT / "content/published"
 OUTPUT = ROOT / "docs/CARD_INVENTORY.xlsx"
 
@@ -270,8 +274,11 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3660": "The Battle Ranged 4 Attack is directly wirable; blocked by its own passive -- a global 'all your Ranged Attacks get +1 strength while you control a Terrain' scope, distinct from a single card's own conditional Attack strength (existing kamina-exp-attack/shuji-attack-style bonuses only affect their own card's attack, not every Attack the controller makes).",
     "oracle-l5r-10223": "Needs the Engage-timing Reaction window (explicitly not started, #15), plus a 'first Battle-action opportunity, restricted to Terrain actions' priority override.",
     "oracle-l5r-10461": "Ring of Earth is now published (ring-wave-1); 'Earth Battle' is very likely a plain printed-keyword classification too, following Moshi Ikako's own 'Fire Battle' precedent (oracle-l5r-10857, confirmed issue #194) -- not re-verified against this specific card's own scan yet. Still needs a conditional Gold-Cost waiver tied to Ring control before wiring Jikoji's own army-wide Force bonus (the waiver itself: no current Gold discount is conditional on board state, only clan-alignment-based or a fixed printed amount).",
-    "oracle-l5r-4371": "Needs card creation (a new Personality instance) -- Kitsu Akai's own Limited half creates the only Ancestors his Battle half can use as a Performer.",
-    "oracle-l5r-4375": "Needs a 'bow OR destroy the performer' cost-choice (not yet built), and is functionally contingent on card creation existing elsewhere (every other Ancestor-Personality source for this deck is itself blocked on 'Needs card creation').",
+    # Kitsu Akai (oracle-l5r-4371) published in personality-wave-17 (issue #257) once card creation
+    # itself landed (MatchEngine.CreatePersonality) -- his own Limited half creates the Lion Ancestor
+    # (oracle-l5r-9785, also published there, CardDefinition.CreatedOnly) his Battle half uses as a
+    # Performer. No remaining blocker note for him.
+    "oracle-l5r-4375": "Card creation itself is now built (issue #257), but this card still needs a 'bow OR destroy the performer' cost-choice, distinct from the existing bow-or-bow cost choices (own-wielder-or-source-with-wielder-keyword, own-source-or-unbowed-holding-with-keyword) -- not yet built.",
     "oracle-l5r-4382": "Needs card creation (a new Personality instance) as an entry Reaction effect.",
     "oracle-l5r-4386": "Needs card creation (a new Personality instance created directly at a battlefield, then removed from the game when the battle ends) and a 'Home Battle' Timing (performable from Home, unlike ordinary Battle actions which require AtBattle) -- neither built.",
     "oracle-l5r-10293": "Needs deck search (pull a specific card, filtered by Clan/Type/Unique-status, out of a shuffled Dynasty deck) -- not built.",
@@ -392,40 +399,86 @@ BLOCKERS: dict[str, str] = {
 }
 
 
-def load_wired_ids() -> set[str]:
-    wired: set[str] = set()
+def load_published_cards() -> dict[str, dict]:
+    """Id -> the full published CardDefinition dict, for every card published into any
+    content/published/*.json wave. Doubles as the wired-id set (its own keys) and as the source row
+    data for a wired card that build_deck_pool.py's own EXCLUDED_TYPES={"Proxy"} filter correctly
+    leaves out of deck-pool.json entirely (a created-only card, Proxy-typed in the raw oracle schema,
+    like the Lion Ancestor -- it was never a deck-buildable reference card, but it IS a wired card
+    this inventory must still show a row for)."""
+    cards: dict[str, dict] = {}
     for path in sorted(PUBLISHED_DIR.glob("*.json")):
         if path.name.endswith("-sources.json"):
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
-        cards = data.get("Cards")
-        if cards is None:
-            continue
-        for card in cards:
-            wired.add(card["Id"])
-    return wired
+        for card in data.get("Cards") or []:
+            cards[card["Id"]] = card
+    return cards
+
+
+def load_sets() -> dict[str, str]:
+    """Id -> its own primary printing's Set name(s), read directly from
+    content/oracle/emperor-catalogue.json (the same source build_deck_pool.py itself reads, but that
+    script's own output schema carries no set/printing field to reuse here)."""
+    data = json.loads(EMPEROR_CATALOGUE.read_text(encoding="utf-8"))
+    sets: dict[str, str] = {}
+    for card in data["cards"]:
+        printings = card.get("printings") or []
+        primary = next((p for p in printings if p.get("id") == card.get("current_primary_printing_id")), None) \
+            or (printings[0] if printings else None)
+        card_sets = (primary.get("sets") or []) if primary else []
+        if card_sets:
+            sets[card["id"]] = ", ".join(card_sets)
+    return sets
+
+
+# Hand-curated, same discipline as BLOCKERS: only for a card whose Set is not derivable from
+# emperor-catalogue.json at all (a created-only, Proxy-typed card absent from that catalogue --
+# verified directly against its own scan instead of inferred).
+SET_OVERRIDE: dict[str, str] = {
+    "oracle-l5r-9785": "Second City",  # Lion Ancestor (personality-wave-17, issue #257)
+}
 
 
 def build(root: Path = ROOT) -> dict:
     pool = json.loads(DECK_POOL.read_text(encoding="utf-8"))["cards"]
-    wired_ids = load_wired_ids()
+    published_cards = load_published_cards()
+    wired_ids = set(published_cards)
+    sets_by_id = load_sets()
 
     rows = []
+    seen_ids: set[str] = set()
     for card in pool:
         types = card.get("types") or ["Unknown"]
+        seen_ids.add(card["id"])
         rows.append((
             card["id"],
             card["name"],
+            SET_OVERRIDE.get(card["id"]) or sets_by_id.get(card["id"], ""),
             types[0],
             ", ".join(card.get("clans") or []) or "Unaligned",
             "Wired" if card["id"] in wired_ids else "Unwired",
             BLOCKERS.get(card["id"], ""),
         ))
-    rows.sort(key=lambda r: (TYPE_ORDER.index(r[2]) if r[2] in TYPE_ORDER else 99, r[1]))
+    # A wired card absent from deck-pool.json entirely -- see load_published_cards' own doc comment.
+    for card_id, definition in published_cards.items():
+        if card_id in seen_ids:
+            continue
+        rows.append((
+            card_id,
+            definition["Name"],
+            SET_OVERRIDE.get(card_id, ""),
+            definition["Type"],
+            definition.get("Clan") or "Unaligned",
+            "Wired",
+            BLOCKERS.get(card_id, ""),
+        ))
+        seen_ids.add(card_id)
+    rows.sort(key=lambda r: (TYPE_ORDER.index(r[3]) if r[3] in TYPE_ORDER else 99, r[1]))
 
-    unmatched_wired = wired_ids - {r[0] for r in rows}
+    unmatched_wired = wired_ids - seen_ids
     if unmatched_wired:
-        raise ValueError(f"Wired card ids not found in deck-pool.json: {sorted(unmatched_wired)}")
+        raise ValueError(f"Wired card ids not found in deck-pool.json or published defs: {sorted(unmatched_wired)}")
 
     wb = Workbook()
 
@@ -439,7 +492,7 @@ def build(root: Path = ROOT) -> dict:
     for cell in summary[4]:
         cell.font = Font(bold=True)
     by_type: dict[str, list[int, int]] = {}
-    for _id, _name, t, _clan, status, _blocker in rows:
+    for _id, _name, _set, t, _clan, status, _blocker in rows:
         counts = by_type.setdefault(t, [0, 0])
         counts[1] += 1
         if status == "Wired":
@@ -457,7 +510,7 @@ def build(root: Path = ROOT) -> dict:
         summary.column_dimensions[col].width = width
 
     sheet = wb.create_sheet("Cards")
-    header = ["Id", "Name", "Type", "Clan", "Status", "Blocker"]
+    header = ["Id", "Name", "Set", "Type", "Clan", "Status", "Blocker"]
     sheet.append(header)
     header_fill = PatternFill(start_color="FFD9D9D9", end_color="FFD9D9D9", fill_type="solid")
     for cell in sheet[1]:
@@ -469,7 +522,7 @@ def build(root: Path = ROOT) -> dict:
     table = Table(displayName="CardInventory", ref=f"A1:{last_col}{len(rows) + 1}")
     table.tableStyleInfo = TableStyleInfo(name="TableStyleMedium2", showRowStripes=True)
     sheet.add_table(table)
-    widths = {"A": 16, "B": 34, "C": 14, "D": 16, "E": 10, "F": 70}
+    widths = {"A": 16, "B": 34, "C": 18, "D": 14, "E": 16, "F": 10, "G": 70}
     for col, width in widths.items():
         sheet.column_dimensions[col].width = width
     sheet.freeze_panes = "A2"
