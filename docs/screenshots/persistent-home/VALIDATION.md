@@ -27,4 +27,6 @@ Artwork/capacity captures use explicitly staged public snapshots (including dupl
 - Fixed duplicate/oversized hover previews; bounded preview retains Caudex and active lacquer material.
 - Enabled mipmaps for the minified Home art and Favor faces.
 
+Final clickable-launcher smoke exposed stale catalogue pack coverage. Rebuilt with the publisher tool against current pinned sources (2,736 WebP-85 scans), published an immutable v2 private pack, installed with integrity verification, and checked the actual Play Latest.command path. Original scans, dimensions and printing selection remain unchanged.
+
 No Windows graphical playtest, human expert rules acceptance or exact full-screen pixel-equivalence claim. Mendon's shared review and dependency #242 are still required before merging PR #246.
