@@ -112,6 +112,9 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    // Keywords removed from this specific card by permanent or ongoing effects. Overlay transfers
+    // these removals just like granted keywords, so the replacement Personality retains its state.
+    public List<string> RemovedKeywords { get; set; } = [];
     // Clan affiliations removed from this specific Personality by card effects. When every printed
     // affiliation is removed, the Personality is Unaligned for all rules checks.
     public List<string> RemovedClanAffiliations { get; set; } = [];
@@ -378,6 +381,7 @@ public sealed record CommandResult(bool Accepted, string? Error, long Version, G
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
     bool ProclaimEligible, string? Error, PaymentOption[] Payments);
+public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null);
@@ -396,7 +400,13 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
-    int DeadCount, CardView[]? Focused = null);
+    int DeadCount, CardView[]? Focused = null)
+{
+    // Optional for older snapshots/replays. A missing value means unknown, not the printed base.
+    public HandLimitView? HandLimit { get; init; }
+}
+public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
+public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

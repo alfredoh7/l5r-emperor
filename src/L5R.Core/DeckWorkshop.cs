@@ -3,6 +3,8 @@ namespace L5R.Core;
 /// <summary>Catalogue facts supplied by the content adapter. No card effects are created here.</summary>
 public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented)
 {
+    public int ExperienceLevel => Experienced.Level(Keywords);
+    public string DeckName => Experienced.DeckName(Name, Keywords);
     public string SetupSlot => Types.Contains("Stronghold") ? "Stronghold" :
         Name == "Border Keep" || Name.StartsWith("Border Keep - ", StringComparison.Ordinal) ? "Border Keep" :
         Name == "Bamboo Harvesters" || Name.StartsWith("Bamboo Harvesters - ", StringComparison.Ordinal) ? "Bamboo Harvesters" : "";
@@ -19,27 +21,47 @@ public sealed class DeckWorkshop
 {
     public static readonly string[] SetupSlots = ["Stronghold", "Border Keep", "Bamboo Harvesters"];
     private readonly Dictionary<string, DeckCardInfo> _pool;
+    private readonly Dictionary<string, DeckCardInfo> _poolById;
     private readonly Dictionary<string, int> _counts = new(StringComparer.OrdinalIgnoreCase);
     public string Legality { get; private set; } = "Emperor";
-    public DeckWorkshop(IEnumerable<DeckCardInfo> pool) => _pool = pool.ToDictionary(c => c.Name, StringComparer.OrdinalIgnoreCase);
-    public int Count(string name) => _counts.GetValueOrDefault(name);
-    public DeckCardInfo[] Cards => _counts.Where(p => p.Value > 0).Select(p => _pool[p.Key]).ToArray();
-    public void Adjust(string name, int delta)
+    public DeckWorkshop(IEnumerable<DeckCardInfo> pool)
     {
-        var card = _pool[name];
-        if (card.SetupSlot.Length > 0) throw new InvalidOperationException("Use Select for setup cards.");
-        var count = Math.Clamp((long)Count(name) + delta, 0, 999);
-        if (count == 0) _counts.Remove(name); else _counts[name] = (int)count;
+        var cards = pool.ToArray();
+        _pool = cards.ToDictionary(c => c.DeckName, StringComparer.OrdinalIgnoreCase);
+        _poolById = cards.ToDictionary(c => c.Id, StringComparer.Ordinal);
     }
-    public void SelectSetup(string name)
+    private string ResolveKey(string nameOrId)
     {
-        var card = _pool[name];
+        if (_pool.ContainsKey(nameOrId)) return _pool.Keys.First(k => string.Equals(k, nameOrId, StringComparison.OrdinalIgnoreCase));
+        if (_poolById.TryGetValue(nameOrId, out var byId)) return byId.DeckName;
+        var byTitle = _pool.Values.Where(c => string.Equals(c.Name, nameOrId, StringComparison.OrdinalIgnoreCase)).ToArray();
+        if (byTitle.Length == 1) return byTitle[0].DeckName;
+        if (byTitle.Length > 1) throw new ArgumentException($"{nameOrId} has multiple Experience Levels; use its Experienced deck name or card id.");
+        throw new KeyNotFoundException($"Unknown card: {nameOrId}.");
+    }
+    public int Count(string nameOrId)
+    {
+        try { return _counts.GetValueOrDefault(ResolveKey(nameOrId)); }
+        catch (KeyNotFoundException) { return 0; }
+    }
+    public DeckCardInfo[] Cards => _counts.Where(p => p.Value > 0).Select(p => _pool[p.Key]).ToArray();
+    public void Adjust(string nameOrId, int delta)
+    {
+        var key = ResolveKey(nameOrId);
+        var card = _pool[key];
+        if (card.SetupSlot.Length > 0) throw new InvalidOperationException("Use Select for setup cards.");
+        var count = Math.Clamp((long)_counts.GetValueOrDefault(key) + delta, 0, 999);
+        if (count == 0) _counts.Remove(key); else _counts[key] = (int)count;
+    }
+    public void SelectSetup(string nameOrId)
+    {
+        var card = _pool[ResolveKey(nameOrId)];
         if (card.SetupSlot.Length == 0) throw new InvalidOperationException("This is not a setup card.");
-        foreach (var old in Cards.Where(c => c.SetupSlot == card.SetupSlot).ToArray()) _counts.Remove(old.Name);
-        _counts[card.Name] = 1;
+        foreach (var old in Cards.Where(c => c.SetupSlot == card.SetupSlot).ToArray()) _counts.Remove(old.DeckName);
+        _counts[card.DeckName] = 1;
     }
     public Deck ToDeck() => new(Legality, Cards.OrderBy(c => c.SetupSlot.Length == 0 ? 1 : 0)
-        .ThenBy(c => c.Name, StringComparer.OrdinalIgnoreCase).Select(c => new DeckEntry(c.Name, Count(c.Name))).ToArray());
+        .ThenBy(c => c.DeckName, StringComparer.OrdinalIgnoreCase).Select(c => new DeckEntry(c.DeckName, Count(c.Id))).ToArray());
     public void Load(string text)
     {
         if (text.Length > 1_000_000) throw new FormatException("Deck file exceeds the 1 MB limit.");
@@ -50,9 +72,9 @@ public sealed class DeckWorkshop
         foreach (var entry in deck.Entries)
         {
             if (!_pool.TryGetValue(entry.Name, out var card)) throw new FormatException($"Unknown card: {entry.Name}. Use its catalogue name (including any Experienced suffix).");
-            var sum = (long)incoming.GetValueOrDefault(card.Name) + entry.Count;
-            if (entry.Count <= 0 || sum > 999) throw new FormatException($"Invalid quantity for {card.Name}; supported file quantities are 1–999.");
-            incoming[card.Name] = (int)sum;
+            var sum = (long)incoming.GetValueOrDefault(card.DeckName) + entry.Count;
+            if (entry.Count <= 0 || sum > 999) throw new FormatException($"Invalid quantity for {card.DeckName}; supported file quantities are 1–999.");
+            incoming[card.DeckName] = (int)sum;
         }
         // Commit only after the entire file resolves, so a bad import cannot erase a draft.
         _counts.Clear(); foreach (var pair in incoming) _counts.Add(pair.Key, pair.Value);
@@ -62,8 +84,8 @@ public sealed class DeckWorkshop
     {
         var warnings = new List<string>();
         foreach (var slot in SetupSlots)
-            if (Cards.Where(c => c.SetupSlot == slot).Sum(c => Count(c.Name)) != 1) warnings.Add($"Select exactly one {slot} version.");
-        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Name));
+            if (Cards.Where(c => c.SetupSlot == slot).Sum(c => Count(c.Id)) != 1) warnings.Add($"Select exactly one {slot} version.");
+        int Total(string family) => Cards.Where(c => c.SetupSlot.Length == 0 && c.Families.Contains(family)).Sum(c => Count(c.Id));
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
         if (fate < 40) warnings.Add($"Fate needs {40 - fate} more cards (40 minimum).");

@@ -46,7 +46,7 @@ public partial class DeckBuilderScreen
     }
     public void NewDeck()
     {
-        Draft=NewDraft();foreach(var id in new[]{"oracle-l5r-1106","oracle-l5r-679"})if(_byId.TryGetValue(id,out var c))Draft.SelectSetup(c.Name);
+        Draft=NewDraft();foreach(var id in new[]{"oracle-l5r-1106","oracle-l5r-679"})if(_byId.TryGetValue(id,out var c))Draft.SelectSetup(c.Id);
         _currentPath=null;_savedFingerprint="";_savedName="";_compare.Clear();_building=true;_name.Text="Untitled deck";_building=false;Dirty=true;
         EnterEditor();SetSetup("Stronghold");
     }

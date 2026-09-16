@@ -34,7 +34,8 @@ public sealed partial class MatchEngine
                 // own convention; a placeholder would need its own stable-but-anonymous id scheme,
                 // unlike a face-down province card's ProvinceIndex-keyed one, since a duel's own
                 // focused-card list has no comparable positional slot).
-                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray());
+                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray())
+                { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
@@ -237,6 +238,16 @@ public sealed partial class MatchEngine
                             var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";
                             Add("purchase",$"Buy {def.Name} · {quote.Cost} Gold{(def.Type==CardType.Personality?$" · {mode}":"")}",
                                 reason is null?Command("purchase",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote);
+                        }
+                        if(def.Type==CardType.Personality)
+                        {
+                            foreach(var target in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality
+                                && string.Equals(Experienced.BaseTitle(Definition(c).Name),Experienced.BaseTitle(def.Name),StringComparison.OrdinalIgnoreCase)))
+                            {
+                                var overlay=QuoteOverlay(playerId,card.Id,target.Id);
+                                Add("overlay",$"Overlay {def.Name} · Experience {overlay.HigherLevel} over {overlay.LowerLevel} · no Gold",
+                                    overlay.Error is null?Command("overlay",card.Id,target:target.Id):null,overlay.Error,card.Id,[target.Id]);
+                            }
                         }
                     }
                     Add("discardProvince",$"Discard {def.Name}",Command("discardProvince",card.Id),cardId:card.Id);

@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Placard A implementation in progress: Meshy/Blender frame, native three-stat HUD and authoritative hand-limit projection; Home revisions are concepts only.",
+  "validation": "Core, AI, server and transport checks passed; Godot compile and isolated native comparison/input probe passed. Integrated room preview pending.",
+  "remaining": "Complete latest-room preview, final visual refinement, provenance and review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/243",
+  "branch": "codex/243-hand-placard",
+  "updated": "2026-09-16T07:58:36.635099+00:00"
+}
