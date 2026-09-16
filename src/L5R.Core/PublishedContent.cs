@@ -870,6 +870,36 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Event wave 2 (issue #259): five more Events, all Second City. Formal Apology is a
+    /// one-shot Honor-below-starting watch (MatchEngine.CheckFormalApology, hooked into GainHonor's
+    /// own shared choke point). Harsh Choices is the first Event needing a genuine player choice at
+    /// reveal time (ResolveEvent now returns bool to defer through a PendingChoice). Rebuilding Kyuden
+    /// Hida, Times of Strife, and War Weariness are the first three Events with a bounded "until your
+    /// second turn from now begins" duration (CardInstance.ExpiresAtTurnsTaken, cleared in StartTurn)
+    /// rather than Suspicions' own "until the game ends" shape. Times of Strife adds the first
+    /// province-strength CEILING (EffectiveProvinceStrength's own new clamp) and a discard trigger
+    /// queued through the existing Overconfident-draw drain; War Weariness adds a once-per-phase
+    /// first-Personality-performed-action bow, approximated as "announced" rather than strictly
+    /// post-resolution (see ExecuteAbilityEffects' own comment). Rebuilding Kyuden Hida's own
+    /// restriction needed no enforcement code at all: verified already the engine's unconditional
+    /// default (SelectBattle's one SetPhase(Phase.Battle,...) call always seeds the Defender's own
+    /// priority first).</summary>
+    public static PublishedSnapshot EventWave2 { get; } = LoadEventWave2();
+
+    private static PublishedSnapshot LoadEventWave2()
+    {
+        var snapshot = Load("L5R.Published.EventWave2.json", "event-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 5)
+            throw new InvalidOperationException("Unexpected event-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Event || card.Text.Length == 0)
+                throw new InvalidOperationException($"event-wave-2 card is not a textful Event: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("event-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

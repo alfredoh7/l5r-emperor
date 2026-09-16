@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire five Events (issue #259): Formal Apology, Harsh Choices, Rebuilding Kyuden Hida, Times of Strife, War Weariness. New primitives: a bounded 'until your second turn from now begins' ongoing-Event duration, a province-strength ceiling, and the first Event needing a genuine reveal-time player choice.",
+  "validation": "dotnet build (Core + Client): 0 warnings/errors. dotnet run L5R.Core.Tests: 240/240 passed (5 new: FormalApologyWatch, HarshChoicesProvinceDestroy, RebuildingKyudenHidaDuration, TimesOfStrifeProvinceClampAndDiscard, WarWearinessFirstActionPerPhaseBows). bash tools/check.sh --skip-client: all core/published/deck-format/deck-workshop/ai/server/client-transport suites passed.",
+  "remaining": "None; ready for review. Lane is shared only because the packaging script writes 5 new scan images into src/L5R.Client/Content/Published/ (data assets, not client code). docs/CARD_INVENTORY.xlsx shows as locally modified (a stray, pre-existing OS-level file lock prevented restoring it to its committed state) but is NOT staged/committed by this PR.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/259",
+  "branch": "mdornbrook/260-five-events",
+  "updated": "2026-09-16T19:07:18.633440+00:00"
+}

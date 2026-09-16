@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-2660",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2660",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-2660-printing-1-image-1.webp",
+    "image_sha256": "a3a0198382b20aec2dcf27907e653bdf3126b431e5bf428b87f3872fdee8f8a1"
+  },
+  {
+    "card_id": "oracle-l5r-2978",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2978",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-2978-printing-1-image-1.webp",
+    "image_sha256": "0cbe5010deebca30dbb767369396bf966d461459b6faf2938505334fd43254bc"
+  },
+  {
+    "card_id": "oracle-l5r-6200",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6200",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-6200-printing-1-image-1.webp",
+    "image_sha256": "40a54a1b04ef94a30bd4c27b3226990e74c8cab1a2b1de13d4456303045454f3"
+  },
+  {
+    "card_id": "oracle-l5r-8494",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=8494",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-8494-printing-1-image-1.webp",
+    "image_sha256": "712ed5810d3b73584f7a7d6600bef9b7cf9de7a999c53d8c8662f0be38405591"
+  },
+  {
+    "card_id": "oracle-l5r-9222",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9222",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-9222-printing-1-image-1.webp",
+    "image_sha256": "e0a0b357ecb30a4146d6c1c6b0d8fbc98d427c48ca2e1f2f51aa247b6299d2f3"
+  }
+]
