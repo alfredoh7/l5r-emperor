@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Work in progress: Noble Crest Favor and D lacquer reminders rendered from public state in a persistent right-side Home area. Preparing requested native screenshot milestone; not final gameplay validation.",
-  "validation": "Client compiles with zero warnings/errors before screenshot fixture. Exact sources retained; nine clan Favor scans plus neutral fallback converted locally to full-resolution WebP q85. Native visual/layout validation in progress.",
-  "remaining": "Requested native preview capture, fidelity iteration, reminder/Favor input and transfer tests, crowded/seat/reduced-motion verification, final integration and review. #246 stacked on #242; no engine changes.",
+  "summary": "Noble Crest Home implementation in progress. Requested native screenshot milestone captured in integrated room/menu/placard preview; includes Favor, Rings and D lacquer Suspicions reminder.",
+  "validation": "Integrated client build passed with 0 warnings and 0 errors; Godot import passed; native 1920x1080 overview and detail captures passed. Captures use an explicit staged public snapshot, not a legally played-through match. Preview merge preserves HandLimit and EventsInPlay.",
+  "remaining": "Favor frame reads too gold against approved ivory-white source; visual fidelity iteration and native interaction/gameplay checks remain. No completion or pixel-perfect claim. Draft PR #246 stacked on #242; preview checkout includes #244 and room/menu work.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/245",
   "branch": "codex/245-noble-home",
-  "updated": "2026-09-16T09:45:52.038927+00:00"
+  "updated": "2026-09-16T09:55:14.688201+00:00"
 }
