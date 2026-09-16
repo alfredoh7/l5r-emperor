@@ -1,0 +1,54 @@
+{
+  "kind": "chest",
+  "raw_sha256": "e8bb331aa9b739f765518b6aff49d5af6e9b154ce912cb906811b52cb79bcd7d",
+  "raw_bounds": [
+    [
+      -0.9521039724349976,
+      -0.5845239758491516,
+      -0.42841100692749023
+    ],
+    [
+      0.9508299827575684,
+      0.5847449898719788,
+      0.4322200119495392
+    ]
+  ],
+  "normalized_size": [
+    2.2110915184020996,
+    1.3586182594299316,
+    1.0
+  ],
+  "raw_triangles": 498348,
+  "mesh_count": 1,
+  "materials": [
+    {
+      "name": "Material_0",
+      "textures": [
+        {
+          "name": "Image_0",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "name": "Image_1",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "name": "Image_2",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "cleaned_triangles": 59999,
+  "cleaned_sha256": "fd355fe8bf61cc4cec67d6a2312582f061af856a469690d9692ec6a34535b9eb",
+  "cleanup": "Grounded unit-height pivot; preserved generated material images/UVs; simplified triangulation to ~60k. Original retained in ignored download with durable hash. Native optical surfaces and practical lighting assembled separately where applicable."
+}

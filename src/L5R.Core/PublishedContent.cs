@@ -752,6 +752,29 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Event wave 1: the first CardType.Event card, Suspicions -- the first Event to be
+    /// resolved through the engine's own Events-Phase dispatch (MatchEngine.ResolveEvent), and the
+    /// first ongoing ("until the game ends") Event effect, tracked live via Zone.EventInPlay rather
+    /// than a snapshot flag (see the Zone enum's own doc comment). Its printed text is left exactly as
+    /// scanned; the engine's own bookkeeping choice to move the physical card out of its province and
+    /// into a dedicated reminder zone, instead of leaving it face-up where it was revealed, changes
+    /// nothing about the rules-visible effect.</summary>
+    public static PublishedSnapshot EventWave1 { get; } = LoadEventWave1();
+
+    private static PublishedSnapshot LoadEventWave1()
+    {
+        var snapshot = Load("L5R.Published.EventWave1.json", "event-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected event-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Event || card.Text.Length == 0)
+                throw new InvalidOperationException($"event-wave-1 card is not a textful Event: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("event-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

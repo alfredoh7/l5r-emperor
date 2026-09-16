@@ -5,6 +5,7 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
@@ -155,7 +156,8 @@ var tests = new (string Name, Action Run)[]
     ("Mandatory vs. optional 'after X enters play' text (issue #210): CardDefinition.EntryHonorLoss applies bare, un-prefixed 'lose X Honor' text automatically with no choice offered (the generic fixture); the new 'player' Target category and GameCommand.TargetPlayerId let an actual own-enters-play Reaction choose a player to gain or lose Honor (the generic dual-UsageKey fixture, and Kitsuki Horume's real first ability), with ApplyPlayerHonorChoice substituting Rehonor for a Dishonorable performer's own gain exactly as GainHonorFromPerformer already does, and the shared UsageKey correctly deduping the gain/lose pair to one use per entry", PlayerTargetingPrimitive),
     ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive),
     ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
-    ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive)
+    ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive),
+    ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect keeps firing every subsequent Events Phase, on either player's turn, with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -358,6 +360,37 @@ static void StraightenAndEventsPhaseOrder()
     var action=Array.IndexOf(order,"Phase: Action.");
     Check(straighten>=0 && events>straighten && action>events,"Straighten must precede Events, which must precede Action");
     Equal(e.State.Phase,Phase.Action);
+}
+static void SuspicionsEventInPlay()
+{
+    var s=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(s,"oracle-l5r-7675",1,Zone.Province,province:0);
+    card.FaceUp=false;
+    s.Players[1].Provinces[0].CardId=card.Id;
+    var honor0=s.Players[0].Honor; var honor1=s.Players[1].Honor;
+    var e=MatchEngine.FromTestState(s);
+    // Player 0's turn ends; player 1's Straighten -> Events reveals Suspicions in their own province,
+    // removes it, resolves it into play (not the discard pile) and immediately applies its ongoing
+    // effect -- "including the turn it is revealed" -- before reaching their own Action phase.
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Phase,Phase.Action);
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+    Check(e.State.Cards[card.Id].FaceUp,"Revealed face-up");
+    Check(e.State.Cards[card.Id].ProvinceIndex is null,"Removed from its province, not left sitting there");
+    Check(e.State.Players[1].Provinces[0].CardId!=card.Id,"Province refilled face down immediately");
+    Check(!e.State.Cards[e.State.Players[1].Provinces[0].CardId!].FaceUp,"Refilled card is face down");
+    Equal(e.State.Players[0].Honor,honor0-1);
+    Equal(e.State.Players[1].Honor,honor1-1);
+    Check(e.GetView(0).Players[1].EventsInPlay?.Any(c=>c.Id==card.Id)??false,"Public zone: visible to the opponent");
+    Check(e.GetView(1).Players[1].EventsInPlay?.Any(c=>c.Id==card.Id)??false,"Public zone: visible to its own controller");
+    Check(!e.GetView(0).Players[1].Discard.Any(c=>c.Id==card.Id),"Never discarded -- the effect is still active");
+    // The ongoing effect keeps firing on a later, unrelated player's Events Phase too -- it is not a
+    // one-turn effect, and the card never leaves Zone.EventInPlay for the discard pile on its own.
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Phase,Phase.Action);
+    Equal(e.State.Players[0].Honor,honor0-2);
+    Equal(e.State.Players[1].Honor,honor1-2);
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
 }
 static void ChooseStraightenDecline()
 {
@@ -1636,6 +1669,43 @@ static void OverconfidentPrimitive()
         Equal(e.State.Players[0].Hand.Count,9);
     }
 }
+static void PublicHandLimitView()
+{
+    var state = MatchEngine.CreateEconomyScenario().State;
+    var tsugio = PublishedContent.PersonalityWave13.Cards.Single(c => c.Name == "Asahina Tsugio").Id;
+    var baseline = MatchEngine.FromTestState(state).GetView(0);
+    Check(baseline.Players.All(p => p.HandLimit is { Base: 8, Maximum: 8, Modifiers.Length: 0 }));
+    var first = Add(state, tsugio, 1, Zone.Home);
+    var second = Add(state, tsugio, 1, Zone.Battlefield, province: 0);
+    Add(state, tsugio, 1, Zone.Hand); // Concealed copies neither modify the limit nor leak into sources.
+    var engine = MatchEngine.FromTestState(state);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        Equal(view.Players[0].HandLimit!.Maximum, 10);
+        Equal(view.Players[1].HandLimit!.Maximum, 8, "The controller does not gain their own modifier");
+        Equal(view.Players[0].HandLimit!.Modifiers.Length, 2);
+        Check(view.Players[0].HandLimit!.Modifiers.All(m => m.CardId == first.Id || m.CardId == second.Id));
+        Equal(view.Players[1-viewer].Hand.Length, 0, "Public counts must not reveal concealed cards");
+        var roundTrip = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(view))!;
+        Equal(roundTrip.Players[0].HandLimit!.Maximum, 10);
+        Equal(roundTrip.Players[0].HandLimit!.Modifiers[0].CardName, "Asahina Tsugio");
+    }
+    // Leaving play updates both public presentation and the very same End Phase threshold.
+    state.Cards[first.Id].Zone = Zone.Dead;
+    state.Cards[second.Id].Zone = Zone.DynastyDiscard;
+    engine = MatchEngine.FromTestState(state);
+    Equal(engine.GetView(0).Players[0].HandLimit!.Maximum, 8);
+    while (state.Players[0].Hand.Count < 9) Add(state, "training-rally", 0, Zone.Hand);
+    engine = MatchEngine.FromTestState(state);
+    Accept(engine, Cmd(engine, "endDynasty"));
+    var maximum = engine.GetView(0).Players[0].HandLimit!.Maximum;
+    Equal(engine.State.PendingChoice!.Prompt, $"Discard {engine.State.Players[0].Hand.Count-maximum} card(s) to return to {maximum}.");
+    var legacy = System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(baseline.Players[0]))!.AsObject();
+    legacy.Remove("HandLimit");
+    Check(JsonSerializer.Deserialize<PlayerView>(legacy.ToJsonString())!.HandLimit is null, "Old snapshots report an unknown limit");
+}
+
 static void CarpenterCastleAttack()
 {
     {

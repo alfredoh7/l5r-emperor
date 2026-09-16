@@ -1385,7 +1385,14 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
-    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
+    private HandLimitView HandLimitFor(int playerId)
+    {
+        var modifiers = _state.Cards.Values
+            .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect == "increase-other-hand-size")
+            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, 1)).ToArray();
+        return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
+    }
+    private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
     private void EndTurn()
     {
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
@@ -1474,14 +1481,63 @@ public sealed partial class MatchEngine
     private void EventsPhase(PlayerState player)
     {
         SetPhase(Phase.Events,player.Id);
-        // No card in the current published pool triggers an Events-phase decision; the phase still
-        // exists in turn order and the log for future Event/Celestial/Region cards to hook into.
         foreach(var province in player.Provinces.Where(p=>!p.Destroyed && p.CardId is not null))
         {
             var card=Card(province.CardId);
-            if(!card.FaceUp) { card.FaceUp=true; Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id); }
+            if(!card.FaceUp)
+            {
+                card.FaceUp=true;
+                Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
+                if(Definition(card).Type==CardType.Event) ResolveEvent(player,province,card);
+            }
         }
+        // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
+        // not just the phase that reveals them, so a card already sitting in Zone.EventInPlay from a
+        // previous turn triggers here too.
+        ResolveOngoingEvents(player);
         SetPhase(Phase.Action,player.Id);
+    }
+    // An Event (core rules Glossary): removed from its province and resolved immediately upon reveal --
+    // before refilling -- then discarded, unless its own printed text is an ongoing "until the end of
+    // the game" effect (Suspicions' shape), in which case it goes to Zone.EventInPlay instead of the
+    // discard pile, as a physical reminder that the effect is still active. Effect-keyed, the same
+    // convention every other one-off card behavior in this file already uses.
+    private void ResolveEvent(PlayerState player,ProvinceState province,CardInstance card)
+    {
+        province.CardId=null; card.ProvinceIndex=null;
+        switch(Definition(card).Effect)
+        {
+            case "suspicions":
+                card.Zone=Zone.EventInPlay;
+                Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play: each player loses 1 Honor at the end of every Events Phase until the effect ends.",player.Id,card.Id);
+                break;
+            default:
+                card.Zone=Zone.DynastyDiscard;
+                Emit("eventResolved",$"{Definition(card).Name} resolved and was discarded.",player.Id,card.Id);
+                break;
+        }
+        Refill(player,province);
+    }
+    // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
+    // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
+    // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
+    // Zone.EventInPlay IS the "effect still active" flag, so nothing else needs to remember it
+    // separately, and nothing needs to clear it (Suspicions' own effect never ends). "The player's
+    // Events Phase" (singular, Suspicions' own printed wording) is whichever player's turn this is --
+    // only the active player has an Events Phase at all (turn-based, core rules turn order), and its
+    // trigger affects BOTH players' Honor once per such phase, including the very turn Suspicions
+    // itself is revealed (ResolveEvent above already moved it into Zone.EventInPlay earlier in this
+    // same EventsPhase call).
+    private void ResolveOngoingEvents(PlayerState activePlayer)
+    {
+        foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.EventInPlay).ToArray())
+        {
+            // Suspicions' own printed order: "each player in turn order starting with you" -- the
+            // revealing/active player's own loss resolves first, then the other player's.
+            if(Definition(card).Effect=="suspicions")
+                foreach(var playerId in new[] { activePlayer.Id, 1-activePlayer.Id })
+                    GainHonor(playerId,-1,$"Suspicions (end of {activePlayer.Name}'s Events Phase)",card);
+        }
     }
     private void Draw(PlayerState player)
     {

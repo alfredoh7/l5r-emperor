@@ -1,0 +1,49 @@
+{
+  "kind": "table",
+  "raw_sha256": "0922daff3e0c91c87d34e1c45bd2115619c32aa03d6a0afe699d754f624892ba",
+  "raw_bounds": [
+    [
+      -0.6139699816703796,
+      -0.5150489807128906,
+      -0.9520360231399536
+    ],
+    [
+      0.6131330132484436,
+      0.5157880187034607,
+      0.9509829878807068
+    ]
+  ],
+  "raw_triangles": 1266546,
+  "mesh_count": 1,
+  "materials": [
+    {
+      "name": "Material_0",
+      "textures": [
+        {
+          "name": "Image_0",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "name": "Image_1",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "name": "Image_2",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "cleaned_triangles": 60000,
+  "cleaned_sha256": "dc016eb3fc843ae2d469f23bc0358abacae92b4650b926fa67d5e3e911f6f6c9",
+  "cleanup": "Grounded unit-height pivot; preserved generated material images/UVs; simplified triangulation to ~60k. Original retained in ignored download with durable hash. Native translucent panes and candle light assembled separately."
+}

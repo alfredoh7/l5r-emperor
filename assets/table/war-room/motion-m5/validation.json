@@ -1,0 +1,339 @@
+{
+  "milestone": 5,
+  "date": "2026-09-15",
+  "base_commit": "512755f6702c711b2df7bc6f402403f7321af86c",
+  "scope": "First firelight animation milestone after accepted M4. Existing presentation clock/reduced motion; no game-state, card-layout, camera or Meshy geometry changes.",
+  "environment": "Native macOS / Apple M1 Max / Godot 4.7.2 .NET Compatibility / .NET 10.0.400",
+  "build": {
+    "result": "pass",
+    "warnings": 0,
+    "errors": 0,
+    "log_sha256": "58584af84288b72934f804c5aaa622613ce6017b52acbdd23346e7b49ad7dccc"
+  },
+  "import": {
+    "result": "pass",
+    "log_sha256": "4dc81f10e15885ae36674e1bb074e71afc86946549c97ee6647ad64ab2756ed6",
+    "note": "Final shader versions also compiled successfully in the final native motion and live captures."
+  },
+  "four_room_motion_probes": "All four final views have differing animated phases, byte-identical disabled phases 0/8, and successful resume at phase 2. Strict wrapper checks full frame counts and completion markers.",
+  "films": [
+    {
+      "name": "composition",
+      "frames": 192,
+      "fps": 24,
+      "metadata": {
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1",
+        "duration": "8.000000",
+        "nb_frames": "192"
+      },
+      "sha256": "82eae245b83ebb4dd1cb9d103a92cb16c4773c315927787debeb52704f70d95c",
+      "log_sha256": "effbd10bc98434b0356bdd6c0b23f9dcca37ba5194685044155de3210ce7e66f",
+      "consecutive_frame_mean_rgb_difference_0_255": {
+        "min": 0.02325665509259259,
+        "max": 0.09629991319444443,
+        "mean": 0.05085008468465193
+      },
+      "inspection": "Native source frames at multiple phases inspected; no compositing, recorded-time sampling rather than a real-time performance claim."
+    },
+    {
+      "name": "table-lantern",
+      "frames": 144,
+      "fps": 24,
+      "metadata": {
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1",
+        "duration": "6.000000",
+        "nb_frames": "144"
+      },
+      "sha256": "2aa1dad751fe12eab18663424d6288ced86ace39d5787f62b1c2210eb6345954",
+      "log_sha256": "86ef0df0c9193b82af2068e2d359a1081bf27d41b460ff25f7ebfa6ff72d1134",
+      "consecutive_frame_mean_rgb_difference_0_255": {
+        "min": 0.012885199652777778,
+        "max": 0.8217230902777778,
+        "mean": 0.2584112484014828
+      },
+      "inspection": "Native source frames at multiple phases inspected; no compositing, recorded-time sampling rather than a real-time performance claim."
+    },
+    {
+      "name": "room-lantern",
+      "frames": 144,
+      "fps": 24,
+      "metadata": {
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1",
+        "duration": "6.000000",
+        "nb_frames": "144"
+      },
+      "sha256": "9d378808e0b37ac7c0668ba032549a476f1ba4a51bbe6cac20ae9e77cbf75035",
+      "log_sha256": "afbfc526119df3d2d270920093909e6ccd09ee67ee0dfb985d1f2d14e59e6723",
+      "consecutive_frame_mean_rgb_difference_0_255": {
+        "min": 0.003571686921296296,
+        "max": 0.22753002025462962,
+        "mean": 0.07929891108602045
+      },
+      "inspection": "Native source frames at multiple phases inspected; no compositing, recorded-time sampling rather than a real-time performance claim."
+    },
+    {
+      "name": "brazier",
+      "frames": 144,
+      "fps": 24,
+      "metadata": {
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "24/1",
+        "duration": "6.000000",
+        "nb_frames": "144"
+      },
+      "sha256": "d806b26ad8695268f7ca04a8e8e58be86ccd05a131f0d03bc8d807b5e4674a9f",
+      "log_sha256": "23dbd748548563dbe6beecb4a3ee2717d761c644ddaef4aa4dd27756bd7a005e",
+      "consecutive_frame_mean_rgb_difference_0_255": {
+        "min": 0.05308702256944445,
+        "max": 0.5943377459490741,
+        "mean": 0.23597813319493008
+      },
+      "inspection": "Native source frames at multiple phases inspected; no compositing, recorded-time sampling rather than a real-time performance claim."
+    },
+    {
+      "name": "live",
+      "frames": 72,
+      "fps": 12,
+      "metadata": {
+        "width": 1280,
+        "height": 720,
+        "r_frame_rate": "12/1",
+        "duration": "6.000000",
+        "nb_frames": "72"
+      },
+      "sha256": "f43f19cb189722872e4aec339310d2d225e339baf83eb0d032bcb8f7a821de82",
+      "log_sha256": "77c4c93423f78b3df6b8ae198554d6a1017d16ad08620b34328eafebbe2e9236",
+      "consecutive_frame_mean_rgb_difference_0_255": {
+        "min": 0.028428819444444444,
+        "max": 0.18434425636574073,
+        "mean": 0.08904548529603547
+      },
+      "inspection": "Native source frames at multiple phases inspected; no compositing, recorded-time sampling rather than a real-time performance claim."
+    }
+  ],
+  "native_cases_and_launcher": [
+    {
+      "name": "playable",
+      "result": "pass",
+      "visible_samples": 725,
+      "max_projection_error_px": 0.000173,
+      "excluded_offscreen_or_behind_eye": 0,
+      "log_sha256": "0555bc355f95e961dccf8d86161b60cd14f253c3329cde1f53a2ab011b30e409"
+    },
+    {
+      "name": "battle-focus",
+      "result": "pass",
+      "visible_samples": 770,
+      "max_projection_error_px": 0.000193,
+      "excluded_offscreen_or_behind_eye": 5,
+      "log_sha256": "64f6e37ec3e213ea8c6388b7c561024c2437b8e5c3ae118418392b15df4e3d55"
+    },
+    {
+      "name": "max-zoom",
+      "result": "pass",
+      "visible_samples": 703,
+      "max_projection_error_px": 0.000252,
+      "excluded_offscreen_or_behind_eye": 22,
+      "log_sha256": "386f9bc8770474e07c94a10127cb8c10f3e906664b786aaec4d67c5c7f4e8971"
+    },
+    {
+      "name": "wide",
+      "result": "pass",
+      "visible_samples": 678,
+      "max_projection_error_px": 0.000252,
+      "excluded_offscreen_or_behind_eye": 22,
+      "log_sha256": "b586b181753e789ab2892ae9995b9bcacde463bda697a1eb78eb0f7303c0cfd9"
+    },
+    {
+      "name": "compact",
+      "result": "pass",
+      "visible_samples": 750,
+      "max_projection_error_px": 0.000244,
+      "excluded_offscreen_or_behind_eye": 0,
+      "log_sha256": "831a4c647bf457bdc3ce6c426f9475770967b432373e98d0d054c1f4388c4720"
+    },
+    {
+      "name": "expanded",
+      "result": "pass",
+      "visible_samples": 229,
+      "max_projection_error_px": 0.000244,
+      "excluded_offscreen_or_behind_eye": 21,
+      "log_sha256": "22b89928e23a27dbe728fa38376caed9d8964fbd6b0160e35abdb798bbcf1aa6"
+    },
+    {
+      "name": "reduced-motion",
+      "result": "pass",
+      "visible_samples": 275,
+      "max_projection_error_px": 0.000173,
+      "excluded_offscreen_or_behind_eye": 0,
+      "log_sha256": "83eb0668beb1013f28ff2333bc3f47446ca9ccfd92a7fc7ba12e3c21d8684463"
+    },
+    {
+      "name": "launcher",
+      "result": "pass",
+      "visible_samples": 203,
+      "max_projection_error_px": 0.000153,
+      "excluded_offscreen_or_behind_eye": 22,
+      "log_sha256": "1e6f5f09fdfa64230b11cd37022bf97e2f531cb17e2d95269064c4290dacc5ec"
+    }
+  ],
+  "images": [
+    {
+      "path": "docs/screenshots/war-room/milestone-5/battle-focus.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "062fb94db3da62a97587b88e2e62e69735fd9be99619dea855742498d4f9cff4"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/brazier.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "41e64510bf59f811073b966027dc46595ed6f54958a854d6f02f6138b802f5ff"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/compact.png",
+      "size": [
+        1440,
+        900
+      ],
+      "sha256": "f0b380da023977b96e9684ed6b074856e3e428cd08c827a55e13872f52691700"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/composition.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "4de15555ef00d71fe3032feb81a043cb300de2ed83499c8b9c28798cad91823b"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/expanded.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "d1e25e172aff22e0f9a3c6f48a2e586206a913ad95a1ae1f5daebceaa2203052"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/launcher.png",
+      "size": [
+        1672,
+        942
+      ],
+      "sha256": "440c22026e1b11ecf168f692ffe86ab0fcfb501da34c3cd8a0109e9ca7fde2a2"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/live.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "ec30b501bca9e76a37037e9e3440d28d6a5f7b398f3d4eec813c0558b1781059"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/max-zoom.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "fc37ebd0652800360668f7241a02c02396da110ab630bbcf19497527f9bc4b6c"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/playable.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "5f7e6a525560c99f0e14ef6fceb7278313ee458a3be4137d11504aeb112b2d73"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/reduced-motion.png",
+      "size": [
+        1920,
+        1080
+      ],
+      "sha256": "79b0d5f9424058efec7b50e5114430bf081cf286ef31951886433269a76d4748"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/room-lantern.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "9afc3fc0dba371a50a70c48cbfbf79f330112b7b97925769072ad1828e0e667c"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/table-lantern.png",
+      "size": [
+        1280,
+        720
+      ],
+      "sha256": "d881ce057edfa4ad8575c7ac063c30d1cb1a49d96d0342e5f79c11d108cdf097"
+    },
+    {
+      "path": "docs/screenshots/war-room/milestone-5/wide.png",
+      "size": [
+        2560,
+        1080
+      ],
+      "sha256": "3fb61a0870fc04d640c0f830d99141c433df055b1cd725395cb759f6fabcec2f"
+    }
+  ],
+  "preserved_assets": [
+    {
+      "path": "assets/table/war-room/approved-fortress-hall-b3.png",
+      "sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+      "unchanged_from_accepted_m4": true
+    },
+    {
+      "path": "assets/table/war-room/fortress-hall-b3.blend",
+      "sha256": "bdfdcda2a1a2b9fea918181aaed2ac1ea288d99bd522d978a4cdd3f7d741bebe",
+      "unchanged_from_accepted_m4": true
+    },
+    {
+      "path": "src/L5R.Client/Art/WarRoom/fortress-hall-b3.glb",
+      "sha256": "9103294064476728b7de954254215a694ace1d49a84be0de277f0c569ef9889a",
+      "unchanged_from_accepted_m4": true
+    },
+    {
+      "path": "src/L5R.Client/Art/WarRoom/floor-irradiance-m4.exr",
+      "sha256": "501b00b294d280e658b573e04694098672f5e432a2a9218fa7ed981f24f74cbd",
+      "unchanged_from_accepted_m4": true
+    },
+    {
+      "path": "src/L5R.Client/Art/navy-mat-topaz-4x.webp",
+      "sha256": "932b3cadd4deea8352fe37b90b01e15b1e833f2d7757a773cbc23a172b47bc32",
+      "unchanged_from_accepted_m4": true
+    },
+    {
+      "path": "src/L5R.Client/Art/LacquerFrame/lacquer-frame-a.glb",
+      "sha256": "f5099c4f67c77c4d7dfbf97450eb8adeb6f4998d1ed5ec4e0aeea4ef853d8136",
+      "unchanged_from_accepted_m4": true
+    }
+  ],
+  "new_meshy_jobs": 0,
+  "new_meshy_credits_spent": 0,
+  "iteration": [
+    "Reserved vertical room for deforming flame tips.",
+    "Reworked brazier height/curl after its first motion resembled separate candles.",
+    "Corrected an additive halo rectangle visible at a zoomed camera; final films and live suite regenerated after the correction.",
+    "An early tabletop recording ended at 122 frames without a completion marker and is excluded. Final capture wrapper requires complete frame count and success markers."
+  ],
+  "limits": [
+    "Milestone-5 human motion acceptance and exact-source fidelity are not claimed.",
+    "Floor variation is a localized approximation over a combined static bake, not independent dynamic bounced-light transport.",
+    "Distant scenery remains finite-resolution source artwork.",
+    "No sustained gameplay FPS, native Windows graphical playtest, multiplayer or expert rules acceptance claim."
+  ]
+}
