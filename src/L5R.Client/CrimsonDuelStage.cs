@@ -17,6 +17,8 @@ public partial class CrimsonDuelStage : Control
     public int GrassInstances { get; private set; }
     public Vector2 ContentOffset { get; private set; }
     public float ContentScale { get; private set; }
+    public float MatLift { get; set; }
+    public Vector2 TableOffset => ContentOffset + Vector2.Up * MatLift * ContentScale;
     private TextureRect _landscape=null!,_worldImage=null!;
     private ShaderMaterial _sky=null!,_grass=null!;
     private ShaderMaterial? _foliage;
@@ -40,6 +42,7 @@ public partial class CrimsonDuelStage : Control
         var material=new ShaderMaterial {Shader=GD.Load<Shader>("res://Art/DuelArena/approved-mat.gdshader")};
         material.SetShaderParameter("artwork",GD.Load<Texture2D>("res://Art/CrimsonDuel/campaign-mat-albedo.png"));
         mat.MaterialOverride=material;
+        if(MatLift>0){mat.Scale=new Vector3(1,1,1.14f);mat.Position+=new Vector3(0,0,.7f);}
         _vegetation=new Node3D {Name="WindField"};World.AddChild(_vegetation);
         _grass=new ShaderMaterial {Shader=GD.Load<Shader>("res://Art/CrimsonDuel/grass.gdshader")};
         var random=new Random(2050915);
@@ -85,7 +88,7 @@ public partial class CrimsonDuelStage : Control
         // Keep the 16:9 art centered on other aspect ratios without stretching it.
         _landscape.StretchMode=TextureRect.StretchModeEnum.KeepAspectCovered;
         World.Size=(Vector2I)(StageCanvas*ContentScale).Round();
-        _worldImage.Position=ContentOffset;_worldImage.Size=(Vector2)World.Size;
+        _worldImage.Position=TableOffset;_worldImage.Size=(Vector2)World.Size;
         Camera.Position=new Vector3(0,CameraDistance*Pitch,CameraDistance*Mathf.Sqrt(1-Pitch*Pitch));
         Camera.LookAt(Vector3.Zero);
         Camera.Fov=Mathf.RadToDeg(2*Mathf.Atan(StageCanvas.Y/(2*CameraDistance*Unit*Density*zoom)));
@@ -100,7 +103,7 @@ public partial class CrimsonDuelStage : Control
         _foliage?.SetShaderParameter("atmosphere_time",t);
     }
     public void Advance(double delta) { if(!ReducedMotion) AtmosphereTime+=delta;SetTime(AtmosphereTime); }
-    public Vector2 ProjectWorld(Vector3 point)=>ContentOffset+Camera.UnprojectPosition(point);
+    public Vector2 ProjectWorld(Vector3 point)=>TableOffset+Camera.UnprojectPosition(point);
 
     private void BuildFoliageCards()
     {

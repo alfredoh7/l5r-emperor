@@ -41,10 +41,31 @@ internal static class DuelUi
     {
         if(state=="focus")return Palette.Box(Colors.Transparent,Palette.Paper,0,0);
         var tint=state switch {"hover"=>new Color(1.2f,1.15f,1.05f),"pressed"=>new Color(.8f,.8f,.8f),"disabled"=>new Color(.55f,.55f,.55f),_=>Colors.White};
-        var box=SidebarSkin.Surface(true,primary&&state!="disabled",tint);
+        var box=Plaque(scale,tint);
         box.ContentMarginLeft=box.ContentMarginRight=14*scale;
         box.ContentMarginTop=box.ContentMarginBottom=7*scale;
-        foreach(var side in new[]{Side.Left,Side.Top,Side.Right,Side.Bottom})box.SetTextureMargin(side,Math.Max(9,14*scale));
+        return box;
+    }
+
+    // Dedicated raster derived from the approved campaign-cloth concept. The atlas
+    // excludes transparent generation margins; only the plain lacquer center stretches.
+    private static Texture2D? _plaque;
+    public static StyleBoxTexture Plaque(float scale=1,Color? tint=null)
+    {
+        if(_plaque is null)
+        {
+            var pixels=GD.Load<Texture2D>("res://Art/DuelUi/campaign-plaque.png").GetImage().GetRegion(new Rect2I(12,211,2148,297));
+            pixels.Resize(360,50,Image.Interpolation.Lanczos);pixels.GenerateMipmaps();
+            _plaque=ImageTexture.CreateFromImage(pixels);
+        }
+        var texture=_plaque;
+        var box=new StyleBoxTexture {Texture=texture,ModulateColor=tint??Colors.White};
+        box.AxisStretchHorizontal=StyleBoxTexture.AxisStretchMode.Stretch;
+        box.AxisStretchVertical=StyleBoxTexture.AxisStretchMode.Stretch;
+        box.TextureMarginLeft=box.TextureMarginRight=13*scale;
+        box.TextureMarginTop=box.TextureMarginBottom=5*scale;
+        box.ContentMarginLeft=box.ContentMarginRight=18*scale;
+        box.ContentMarginTop=box.ContentMarginBottom=5*scale;
         return box;
     }
 
@@ -55,6 +76,9 @@ internal static class DuelUi
         button.CustomMinimumSize=new Vector2(0,Math.Max(30,40*scale));
         button.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(fontSize*scale)));
         button.AddThemeFontOverride("font",SidebarSkin.Bold);
+        foreach(var state in new[]{"font_color","font_hover_color","font_pressed_color","font_focus_color"})
+            button.AddThemeColorOverride(state,primary?Palette.Gold:Palette.Paper);
+        button.AddThemeColorOverride("font_disabled_color",Palette.PaperDim);
         foreach(var state in new[]{"normal","hover","pressed","disabled","focus"})
             button.AddThemeStyleboxOverride(state,ButtonStyle(state,primary,scale));
         return button;

@@ -277,5 +277,6 @@ public partial class CrimsonFocusBack : CardTile
         var rect=new Rect2((Size-face)/2,face);
         DrawRect(new Rect2(rect.Position+new Vector2(2,3),face),new Color(0,0,0,.45f));
         DrawTextureRect(GD.Load<Texture2D>("res://Art/original-fate-back.png"),rect,false);
+        if(Highlighted)DrawRect(rect.Grow(3),Palette.Gold,false,3,true);
     }
 }

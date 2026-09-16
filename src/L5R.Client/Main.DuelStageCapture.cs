@@ -13,9 +13,13 @@ public partial class Main
         if(++_scenarioMoves>650)throw new Exception("Duel stage probe stalled.");
         IEnumerable<Node> Descendants(Node n){foreach(var c in n.GetChildren()){yield return c;foreach(var d in Descendants(c))yield return d;}}
         var host=_duelDemo;
-        Button? Find(string text)=>host is null?null:Descendants(host).OfType<Button>().FirstOrDefault(b=>b.Text==text&&b.IsVisibleInTree());
+        Button? Find(string text)=>host is null?null:Descendants(host).OfType<Button>().FirstOrDefault(b=>(b.Text==text||b.Name==text)&&b.IsVisibleInTree());
         void Native(Vector2 p){Input.ParseInputEvent(new InputEventMouseMotion{Position=p,GlobalPosition=p});foreach(var pressed in new[]{true,false})Input.ParseInputEvent(new InputEventMouseButton{Position=p,GlobalPosition=p,ButtonIndex=MouseButton.Left,Pressed=pressed});}
-        void Press(string text){var b=Find(text)??throw new Exception($"Missing button {text} in {_stageScenarios[_scenarioProbe]}");if(b.Disabled)throw new Exception($"Disabled button {text}");Native(b.GetGlobalRect().GetCenter());}
+        void Press(string text){
+            if(text=="Switch seat"&&Find(text) is null){Native(Find("Menu")!.GetGlobalRect().GetCenter());return;}
+            if(text=="Focus from deck"&&Find(text) is null){Native(host!.Screen.PileClickPoint(host.Session.Snapshot!.View.ViewerId,Zone.FateDeck));return;}
+            if(text is "Focus selected card" or "Focus from deck"){Native(host!.Screen.LandingClickPoint);return;}
+            var b=Find(text)??throw new Exception($"Missing button {text} in {_stageScenarios[_scenarioProbe]}");if(b.Disabled)throw new Exception($"Disabled button {text}");Native(b.GetGlobalRect().GetCenter());}
         void Capture(string suffix){GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+_stageScenarios[_scenarioProbe]+"-"+suffix+".png");}
         if(_scenarioPhase==0)
         {
@@ -62,7 +66,7 @@ public partial class Main
             case "AwaitingAccept":Press("Refuse challenge");return;
             case "Focusing":
                 var cap=_stageScenarios[_scenarioProbe]=="four"?4:2;
-                if(v.Players[v.ViewerId].FocusCount>=cap||!actions.Any(a=>a.Type=="focus")){Press("Strike");return;}
+                if(v.Players[v.ViewerId].FocusCount>=cap||!actions.Any(a=>a.Type=="focus")){Capture("before-strike");Press("Strike");return;}
                 if(actions.FirstOrDefault(a=>a.Command!.Choice=="discard") is {} discard)
                 {Press("Focus from discard…");_pendingDemoCommand=discard.Command;return;}
                 var courtesy=v.Players[v.ViewerId].Hand.FirstOrDefault(c=>c.Definition!.Id=="oracle-l5r-7996");

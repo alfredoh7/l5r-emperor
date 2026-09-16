@@ -17,7 +17,7 @@ public partial class DuelDemoHost : Control
     private string _scenario="steel";
     private ulong _seed=DuelDemoScenarios.DefaultSeed;
     private int _seat;
-    private bool _manual,_setup=true,_handoff,_sending;
+    private bool _manual,_setup=true,_handoff,_sending,_menuOpen,_readingPause;
     private double _botClock;
     public override void _Ready()
     {
@@ -27,7 +27,7 @@ public partial class DuelDemoHost : Control
         Session.Changed+=Refresh;Session.Notice+=Notice;
         Screen.CommandRequested+=command=>_ = Submit(command);
         Screen.PresentationFinished+=()=>Prepare();
-        Screen.ReadingChanged+=reading=>_overlay.Visible=!reading;
+        Screen.ReadingChanged+=reading=>{_readingPause=reading;_overlay.Visible=!reading;};
         Resized+=BuildOverlay;Prepare();
     }
     private void Notice(string message){if(_notice is not null)_notice.Text=message;}
@@ -39,7 +39,7 @@ public partial class DuelDemoHost : Control
     }
     private void Prepare()
     {
-        _setup=true;_handoff=false;_botClock=0;Screen.ResetPresentation();
+        _setup=true;_handoff=false;_menuOpen=false;_botClock=0;Screen.ResetPresentation();
         Session.StartDuelDemo(_scenario,_seed,_seat);Screen.InputLocked=true;BuildOverlay();
     }
     private void BuildOverlay()
@@ -78,25 +78,23 @@ public partial class DuelDemoHost : Control
             AddButton(box,"Return to menu",()=>ReturnToMenu?.Invoke());
             return;
         }
-        Screen.InputLocked=false;
+        Screen.InputLocked=_menuOpen;
         var scale=Math.Clamp(Math.Min(size.X/1672,size.Y/941),.8f,1.15f);
-        var toolbar=DuelUi.Surface(_overlay,12);toolbar.Position=new Vector2(18,16);
-        var stack=new VBoxContainer();stack.AddThemeConstantOverride("separation",8);toolbar.AddChild(stack);
-        var bar=new HBoxContainer();bar.AddThemeConstantOverride("separation",6);stack.AddChild(bar);
-        void Tool(string text,Action action)
-        {
-            var button=DuelUi.Button(text,action,scale:scale,fontSize:17);
-            button.AutowrapMode=TextServer.AutowrapMode.Off;bar.AddChild(button);
-        }
-        Tool("Menu",()=>ReturnToMenu?.Invoke());
-        Tool("Restart",Prepare);
-        Tool("New deal",()=>{NewSeed();Prepare();});
-        Tool(_manual?"Manual":"Solo",()=>{_manual=!_manual;_botClock=0;BuildOverlay();});
-        Tool("Switch seat",SwitchSeat);
-        Tool("Save replay",SaveReplay);
-        var seed=DuelUi.Text($"{DuelDemoScenarios.Get(_scenario).Name} · seed {_seed}",Math.Max(13,(int)(15*scale)),Palette.PaperDim);
-        seed.AddThemeFontOverride("font",SidebarSkin.Italic);stack.AddChild(seed);
+        var menu=DuelUi.Button("Menu",()=>{_menuOpen=true;BuildOverlay();},scale:scale,fontSize:18);
+        menu.Position=new Vector2(18,16);menu.Size=new Vector2(115,42)*scale;_overlay.AddChild(menu);
+        if(!_menuOpen)return;
+        var veil=new ColorRect{Color=new Color(0,0,0,.55f),Size=size};_overlay.AddChild(veil);
+        var tools=DuelUi.Modal(veil,size,new Vector2(460,585),"Duel Demo");
+        tools.AddChild(DuelUi.Wrapped($"{DuelDemoScenarios.Get(_scenario).Name} · seed {_seed}",16,Palette.PaperDim));
+        AddButton(tools,"Resume",()=>{_menuOpen=false;BuildOverlay();},true);
+        AddButton(tools,"Restart",Prepare);
+        AddButton(tools,"New deal",()=>{NewSeed();Prepare();});
+        AddButton(tools,_manual?"Manual":"Solo",()=>{_manual=!_manual;_botClock=0;BuildOverlay();});
+        AddButton(tools,"Switch seat",()=>{_menuOpen=false;SwitchSeat();});
+        AddButton(tools,"Save replay",SaveReplay);
+        AddButton(tools,"Return to menu",()=>ReturnToMenu?.Invoke());
     }
+
     private static Button AddButton(Control parent,string text,Action action,bool primary=false)
     {
         var button=DuelUi.Button(text,action,primary);parent.AddChild(button);return button;
@@ -123,13 +121,13 @@ public partial class DuelDemoHost : Control
     }
     public override void _Process(double delta)
     {
-        if(_setup||_manual||_handoff||_sending||Screen.PresentationBusy||Session.Snapshot?.View.LastDuel is not {Complete:false})return;
+        if(_setup||_manual||_handoff||_sending||_menuOpen||_readingPause||Screen.PresentationBusy||Session.Snapshot?.View.LastDuel is not {Complete:false})return;
         _botClock+=delta;if(_botClock<(ReducedMotion?.15:.8))return;_botClock=0;
         Session.StepPracticeOpponent(DuelOpponent.Choose);
     }
     public override void _UnhandledKeyInput(InputEvent e)
     {
-        if(e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Escape}){ReturnToMenu?.Invoke();GetViewport().SetInputAsHandled();}
+        if(e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Escape}){if(!_setup&&!_handoff){_menuOpen=!_menuOpen;BuildOverlay();}GetViewport().SetInputAsHandled();}
     }
     public override void _ExitTree(){Session.Changed-=Refresh;Session.Notice-=Notice;Session.Dispose();}
 }

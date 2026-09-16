@@ -8,7 +8,7 @@ Open the normal development launcher (`Play Latest.command`, or the generated `a
 
 The default is Crane, Steel on Steel, seed 205. To reproduce Mendon's canonical example in manual mode: begin, switch to Lion and reveal the seat, focus from deck; switch to Crane, select The Courtesy of the Crane and focus it; switch back to Lion and Strike. The retained result is **8–7**, Hachiro and his attachment are destroyed, Crane's provinces gain 2 strength, and outer Battle priority returns to Lion. Inspect the result with **View consequences**, then **Continue** to return to setup.
 
-Click hand/focused cards to select them. **Inspect selected card** shows a full face when the current view permits it. Face-down focus cards stay on their backs even when their owner may inspect them. The opponent's unknown cards have no identity in the view. A discard focus is already public. Duelist replacement asks for a focused card and a replacement from hand or deck. Focus Effects can be moved earlier before submitting the complete order.
+Click hand/focused cards to select them. **Inspect selected card** (or **I**) shows a full face when the current view permits it. Face-down focus cards stay on their backs even when their owner may inspect them. The opponent's unknown cards have no identity in the view. A discard focus is already public. Duelist replacement asks for a focused card and a replacement from hand or deck. Focus Effects can be moved earlier before submitting the complete order.
 
 **Solo** normally focuses twice using stronger known cards, improves a Duelist focus with a known hand card when possible, accepts challenges and passes optional reactions. It only receives its own view and legal actions. **Switch seat** pauses the bot, covers all private previews with an opaque handoff screen, and requires the receiving player to reveal their seat.
 
@@ -16,9 +16,17 @@ Click hand/focused cards to select them. **Inspect selected card** shows a full 
 
 An existing offline practice remains paused and unchanged. An active private table requires the existing style of leave confirmation; leaving disconnects without conceding and the saved room seat can still reconnect.
 
-## Approved menu presentation
+## Approved Twin lanes presentation
 
-Duel setup, seat handoff, toolbar, decision controls, inspection controls and outcome/ordering panels use the approved worn black lacquer and aged-brass menu family from PRs #165/#169. The original `SidebarSkin`, lacquer atlas and licensed Caudex font files are reused unchanged from `5f438d427467d7e2f0e87c6c789b3c00377eecca`. `DuelUi` adapts their spacing to the mat and compact windows; it scopes Caudex to this screen while the menu rollout remains on its own branch. Existing display headings and printed card faces are retained. Gold marks primary actions, with distinct disabled/hover/focus states.
+Alfredo approved **Twin lanes with campaign-cloth (B) materials** on 2026-09-16, superseding the heavy in-duel toolbar and stacked focus menus. The exact approved capacity study is `assets/ui/duel-twin-lanes/approved-twin-lanes.png`. The new compact plaques are derived from B through imagegen; runtime crops and scales that raster for live labels. Original card scans, the existing mat/landscape and Musashi headings remain intact. See `assets/ui/duel-twin-lanes/README.md` for provenance.
+
+Each side has a fixed Fate deck and face-up Fate discard at its outer edge, a prominent flat personality with attachments, and a separate row of individually countable focused cards. The first two commitments occupy the central positions, then extend outward without moving already committed cards. Four normal commitments fit on each side; card count is not used as a substitute for the engine's legal-action query. The camera framing raises the mat and extends its near edge so the hand remains on the cloth.
+
+Select a hand card, then click **Place focus**, press **Enter**, or drag it to that destination. Select the physical Fate deck (or press **D**) and place its blind focus the same way. Left/right selects hand cards; **I** inspects a selected permitted face. Inspecting never spends a card. Own focused cards can be inspected after commitment; opponent backs remain anonymous. Strike and relevant reactions/replacement choices still submit engine-provided commands. The demo tools are behind **Menu**, which pauses solo play; inspection also pauses the bot.
+
+Fate discards open a public card spread. The visible pile face previews a public discard, preferentially a recently revealed focus after cleanup; the interface does not invent a chronological pile order. Dynasty discards, dead Personalities (shown sideways under **Fallen**), and removed cards stay distinct. Other destinations are accessible when relevant. Discard focusing remains available only when Core grants it.
+
+Reveals stay in their focus positions. After resolution, presentation transfers cards to their engine-provided destinations and clears the focus rows. **Review revealed cards** opens explicitly labeled history; it does not leave duplicate cards on the table. Totals remain beside their owners; **Continue** still holds the result and returns to setup. Reduced motion performs the same transfers immediately.
 
 ## Prepared positions
 
