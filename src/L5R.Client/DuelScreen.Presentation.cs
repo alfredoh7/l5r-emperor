@@ -40,7 +40,7 @@ public partial class DuelScreen
            _controlsRect.HasPoint(_lastHoverPointer) || _guidanceRect.HasPoint(_lastHoverPointer) || DuelValueAt(_lastHoverPointer) is not null)
         {HideCardHover();return;}
         var point=_table.ScreenToCanvas(_lastHoverPointer);
-        var tile=_plane.GetChildren().OfType<CardTile>().OrderByDescending(t=>t.ZIndex).FirstOrDefault(t=>t._HasPoint(point-t.Position));
+        var tile=UprightAt(_lastHoverPointer) ?? _plane.GetChildren().OfType<CardTile>().OrderByDescending(t=>t.ZIndex).FirstOrDefault(t=>t._HasPoint(point-t.Position));
         var pile=tile is null ? _piles.Values.FirstOrDefault(p=>p._HasPoint(point-p.Position)) : null;
         // Only identities already supplied by this seat's view can enter CardPreview.
         if(tile?.Card.Definition is null && pile is null){HideCardHover();return;}
@@ -63,7 +63,7 @@ public partial class DuelScreen
     private void RenderDuelValues()
     {
         if(Snapshot?.View.LastDuel is not {} record)return;
-        var result=_aftermathPlayed ? record.Result : null;
+        var result=(_aftermathPlayed||_cinema==Cinema.Ending) ? record.Result : null;
         if(result?.Kind=="Refused")return;
         foreach(var card in new[]{record.Challenger,record.Challenged})
         {
@@ -75,7 +75,7 @@ public partial class DuelScreen
             var label=DuelUi.Text(value.ToString(System.Globalization.CultureInfo.InvariantCulture),Math.Max(28,(int)((result is null?46:70)*_scale)),Palette.Paper,true);
             label.MouseFilter=MouseFilterEnum.Stop;label.Name=$"DuelValue{side}";label.HorizontalAlignment=HorizontalAlignment.Center;
             label.VerticalAlignment=VerticalAlignment.Center;
-            label.Position=_offset+new Vector2((side==0?548:1124)-90,result is null?505:535)*_scale;
+            label.Position=_offset+new Vector2((side==0?465:1205)-90,612)*_scale;
             label.Size=new Vector2(180,65)*_scale;
             label.AddThemeColorOverride("font_shadow_color",Colors.Black);
             label.AddThemeConstantOverride("shadow_offset_y",2);
@@ -87,7 +87,7 @@ public partial class DuelScreen
             {
                 var slash=new TextureRect{Texture=GD.Load<Texture2D>("res://Art/DuelUi/red-slash.png"),
                     ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,
-                    Position=_offset+new Vector2((side==0?548:1124)-47,589)*_scale,Size=new Vector2(94,20)*_scale,MouseFilter=MouseFilterEnum.Ignore};
+                    Position=_offset+new Vector2((side==0?465:1205)-47,675)*_scale,Size=new Vector2(94,20)*_scale,MouseFilter=MouseFilterEnum.Ignore};
                 _hud.AddChild(slash);
             }
         }
@@ -95,17 +95,11 @@ public partial class DuelScreen
 
     private void RenderResultFooter(DuelRecord record)
     {
-        _controlsRect=new Rect2(_offset+new Vector2(100,792)*_scale,new Vector2(1472,135)*_scale);
-        var footer=new Control{Name="DuelResultFooter",Position=_controlsRect.Position,Size=_controlsRect.Size,MouseFilter=MouseFilterEnum.Ignore};_hud.AddChild(footer);
-        var wash=new Panel{Size=footer.Size,MouseFilter=MouseFilterEnum.Ignore};wash.AddThemeStyleboxOverride("panel",DuelUi.Plaque(_scale));footer.AddChild(wash);
-        var messages=record.Result!.Consequences.Select(c=>c.Message).Where(m=>!string.IsNullOrWhiteSpace(m)).ToArray();
-        var summary=DuelUi.Text(messages.Skip(1).FirstOrDefault() ?? messages.FirstOrDefault() ?? (record.Result.Kind=="Refused"?"The challenge was refused.":"The duel is resolved."),Math.Max(14,(int)(20*_scale)));
-        summary.HorizontalAlignment=HorizontalAlignment.Center;summary.TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis;
-        summary.Position=new Vector2(280,9)*_scale;summary.Size=new Vector2(912,35)*_scale;footer.AddChild(summary);
+        _controlsRect=new Rect2(_offset+new Vector2(1320,780)*_scale,new Vector2(310,105)*_scale);
+        var next=DuelUi.Button("Continue",()=>{if(!InputLocked&&!_submitted&&CanContinue)PresentationFinished?.Invoke();},true,_scale,50);
+        next.Position=_controlsRect.Position;next.Size=_controlsRect.Size;_hud.AddChild(next);
         var details=DuelUi.Button("Duel details",()=>ShowConsequences(record),scale:_scale,fontSize:18);
-        details.Name="DuelDetails";details.Position=new Vector2(25,62)*_scale;details.Size=new Vector2(190,48)*_scale;footer.AddChild(details);
-        var next=DuelUi.Button("Continue",()=>{if(!InputLocked&&!_submitted&&CanContinue)PresentationFinished?.Invoke();},true,_scale,46);
-        next.Position=new Vector2(536,49)*_scale;next.Size=new Vector2(400,76)*_scale;footer.AddChild(next);
+        details.Position=_offset+new Vector2(155,22)*_scale;details.Size=new Vector2(150,40)*_scale;_hud.AddChild(details);
     }
 
     private VBoxContainer RecapPanel(out HBoxContainer actions)

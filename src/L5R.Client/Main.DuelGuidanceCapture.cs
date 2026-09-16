@@ -7,6 +7,7 @@ public partial class Main
 {
     private int _guidanceProbe;
     private long _guidanceVersion;
+    private long? _cinemaSkipVersion;
     private void ProcessDuelGuidanceCapture(double delta)
     {
         _captureClock+=delta;if(_captureClock<.65)return;_captureClock=0;
@@ -18,6 +19,14 @@ public partial class Main
         void Check(bool ok,string message){if(!ok)throw new Exception("DUEL_GUIDANCE_CHECK: "+message);GD.Print("DUEL_GUIDANCE_CHECK: "+message);}
         void Capture(string suffix)=>GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+suffix+".png");
         bool Saved(){var preferences=new MenuPreferences(_preferencesProfile);preferences.Load();return preferences.DuelGuidance;}
+        if(_cinemaSkipVersion is {} skippedVersion)
+        {
+            Check(!host!.Screen.CinematicBusy&&host.Session.Snapshot!.View.Version==skippedVersion,"Skip ends the cinematic without submitting a command");_cinemaSkipVersion=null;
+        }
+        if(host?.Screen.CinematicBusy==true)
+        {
+            _cinemaSkipVersion=host.Session.Snapshot!.View.Version;Capture("skip-control");Press("Skip cinematic");Input.FlushBufferedEvents();return;
+        }
         switch(_guidanceProbe)
         {
             case 0:_preferences.ReducedMotion=_captureMode.Contains("reduced");ApplyPreferences(false);_titleMenu!.ShowPlay();break;
@@ -35,7 +44,7 @@ public partial class Main
             case 10:
                 Check(host!.Screen.CoachingVisible,"quiet coaching appears for the active seat");
                 Capture("quiet");GD.Print("GUIDANCE_RECT: "+host.Screen.GuidanceRect);
-                Check(host.Screen.GuidanceRect.Size.Y<200&&host.Screen.GuidanceRect.Position.Y>GetViewport().GetVisibleRect().Size.Y*.5f,"quiet coaching stays compact outside the card surface");
+                Check(host.Screen.GuidanceRect.Size.Y<200&&host.Screen.GuidanceRect.End.Y<GetViewport().GetVisibleRect().Size.Y*.40f,"quiet coaching stays compact above the card surface");
                 Check(!Find("HideDuelGuidance").ButtonPressed,"do not show again starts unchecked");
                 _guidanceVersion=host.Session.Snapshot!.View.Version;Capture("quiet");Press("HideDuelGuidance");break;
             case 11:

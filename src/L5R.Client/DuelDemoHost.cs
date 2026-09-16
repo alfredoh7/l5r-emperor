@@ -94,6 +94,8 @@ public partial class DuelDemoHost : Control
         AddButton(tools,"Duel guidance…",()=>{_menuOpen=false;BuildOverlay();Screen.OpenGuidance();});
         var guidance=new CheckBox{Text="Show quiet coaching",ButtonPressed=Screen.GuidanceEnabled};tools.AddChild(guidance);
         guidance.Toggled+=value=>{if(!Screen.SetGuidanceEnabled(value,true))guidance.SetPressedNoSignal(Screen.GuidanceEnabled);};
+        var sound=new CheckBox{Text="Cinematic sound",ButtonPressed=Screen.SoundEnabled};tools.AddChild(sound);sound.Toggled+=value=>Screen.SoundEnabled=value;
+        AddButton(tools,"Public piles…",()=>{_menuOpen=false;BuildOverlay();Screen.OpenPublicPiles();});
         AddButton(tools,"Restart",Prepare);
         AddButton(tools,"New deal",()=>{NewSeed();Prepare();});
         AddButton(tools,_manual?"Manual":"Solo",()=>{_manual=!_manual;_botClock=0;BuildOverlay();});

@@ -63,7 +63,7 @@ public partial class DuelScreen
         if(steps.Count==0)
         {
             var body=CanContinue?"The result is held here. Review the revealed cards or consequences, then Continue when you are ready.":Status();
-            if(view.PriorityPlayerId!=view.ViewerId&&!CanContinue)body="Your opponent is deciding. You can inspect either public discard pile while you wait.";
+            if(view.PriorityPlayerId!=view.ViewerId&&!CanContinue)body="Your opponent is deciding. Open Menu → Public piles to inspect either public discard while you wait.";
             else if(view.PendingDuel?.Stage=="OrderingEffects")body="Open ‘Arrange Focus Effects’ and move cards earlier until the order is right. Resolve when ready.";
             else if(view.PendingDuel?.Stage=="DuelistRefocus")body="Select one of your focused cards and a hand replacement, or choose a deck replacement. You may also keep your focus.";
             if(string.IsNullOrEmpty(body))body="Select a personality or a public discard to inspect its full card face. Available decisions appear beside your hand.";
@@ -87,8 +87,8 @@ public partial class DuelScreen
         if(_helpContext!=context){_helpStep=0;_helpContext=context;_dontShowAgain=false;}
         var steps=GuidanceSteps();_helpStep=Math.Clamp(_helpStep,0,steps.Count-1);
         var current=steps[_helpStep];
-        var pos=_helpOpen?new Vector2(112,61):new Vector2(520,780);
-        var extent=_helpOpen?new Vector2(495,220):new Vector2(612,112);
+        var pos=_helpOpen?new Vector2(112,61):new Vector2(615,151);
+        var extent=_helpOpen?new Vector2(495,220):new Vector2(442,125);
         _guidanceRect=new Rect2(_offset+pos*_scale,extent*_scale);
         var panel=new PanelContainer{Name=_helpOpen?"AnchoredGuidance":"QuietCoaching",Position=_guidanceRect.Position,Size=_guidanceRect.Size,MouseFilter=MouseFilterEnum.Stop};
         var style=DuelUi.Plaque(_scale);style.ContentMarginLeft=style.ContentMarginRight=(_helpOpen?35:18)*_scale;

@@ -11,12 +11,26 @@ public partial class Main
     private string _preservedPractice="";
     private Vector2 _duelLastPlacement;
     private string? _deferredDuelButton;
-    private int _focusInspectionStep,_resultPileStep;
+    private int _focusInspectionStep,_resultPileStep,_uprightProbe;
+    private readonly HashSet<string> _cinemaCaptures=[];
+    private int _openingMovieFrame,_endingMovieFrame;
     private string? _inspectionBeforeOpponentClick;
     private void ProcessDuelDemoCapture(double delta)
     {
         if(_captureMode.StartsWith("menu-duel-guidance")) { ProcessDuelGuidanceCapture(delta); return; }
         if(_captureMode=="menu-duel-stages") { ProcessDuelStageCapture(delta); return; }
+        if(_duelDemo?.Screen is {} cinema && cinema.CinematicBusy)
+        {
+            var phase=cinema.CinematicPhase;
+            if(System.Environment.GetEnvironmentVariable("L5R_DUEL_MOVIE")=="1")
+            {
+                var opening=phase.StartsWith("opening");var directory=_capturePath+(opening?"-opening-frames":"-ending-frames");System.IO.Directory.CreateDirectory(directory);
+                var index=opening?_openingMovieFrame++:_endingMovieFrame++;
+                GetViewport().GetTexture().GetImage().SaveJpg(System.IO.Path.Combine(directory,$"{index:D5}.jpg"),.95f);
+            }
+            var threshold=phase switch {"opening-hush"=>.35,"opening-challenger"=>1.12,"opening-answer"=>2.05,"opening-standoff"=>3.18,"ending-reveal"=>.35,"ending-cut"=>.76,_=>1.38};
+            if(cinema.CinematicTime>=threshold && _cinemaCaptures.Add(phase))GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+phase+".png");
+        }
         var stamp=Time.GetTicksUsec();
         if(_duelProbeStep is >=4 and <=18 && _duelFrameStamp>0)_duelFrames.Add((stamp-_duelFrameStamp)/1000d);
         _duelFrameStamp=stamp;
@@ -40,6 +54,7 @@ public partial class Main
         }
         void Check(bool ok,string message){if(!ok)throw new InvalidOperationException("DUEL_DEMO_CHECK: "+message);GD.Print("DUEL_DEMO_CHECK: "+message);}
         void Capture(string name){var path=_capturePath!+"-"+name+".png";System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(path)!);GetViewport().GetTexture().GetImage().SavePng(path);}
+        if(host?.Screen.PresentationBusy==true)return;
         if(_deferredDuelButton is {} deferred)
         {
             _deferredDuelButton=null;
@@ -58,7 +73,14 @@ public partial class Main
                 Check(host is not null,"Play menu opens in-app demo");Capture("setup");Press("Manual · control both seats");break;
             case 3:Press("Begin Duel");break;
             case 4:
-                Check(host!.Session.Snapshot!.View.PendingDuel?.Stage=="Focusing","Begin Duel submits the real challenge");Capture("challenge");Press("Switch seat");break;
+                Check(host!.Session.Snapshot!.View.PendingDuel?.Stage=="Focusing","Begin Duel submits the real challenge");
+                Check(host.Screen.OpeningRuns==1,"opening plays once and submits no extra command");
+                Check(host.Screen.UprightCount==2&&host.Screen.VisibleDiscardPiles==0,"upright champions with no decorative corner discard piles");
+                var champion=host.Session.Snapshot.View.LastDuel!.Challenger;
+                if(_uprightProbe==0){var point=host.Screen.CardClickPoint(champion.Id);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_uprightProbe++;return;}
+                if(_uprightProbe==1){Check(host.Screen.HoverPreviewId==champion.Id,"upright champion hover reuses main-game card inspection");Capture("upright-hover");Native(host.Screen.CardClickPoint(champion.Id));_uprightProbe++;return;}
+                if(_uprightProbe==2){Check(host.Screen.HasPrivateInspection,"upright champion click opens full inspection");Press("Close inspection");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_uprightProbe++;return;}
+                Capture("challenge");Press("Switch seat");break;
             case 5:
                 Check(!host!.Screen.Visible&&host.Screen.HoverPreviewId is null,"private handoff hides the table and hover preview");Capture("handoff");Press("Reveal this seat");break;
             case 6:Press("Focus from deck");Native(_duelLastPlacement);break;
@@ -106,17 +128,21 @@ public partial class Main
                 if(host!.Screen.PresentationBusy)return;
                 var result=host.Session.Snapshot!.View.LastDuel!.Result!;
                 Check(host.Screen.VisibleFocusedCount==0,"resolved commitments leave the focus rows");
-                if(_resultPileStep==0){Native(host.Screen.PileClickPoint(host.Session.Snapshot.View.ViewerId,Zone.FateDiscard));_resultPileStep++;return;}
-                if(_resultPileStep==1){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
-                if(_resultPileStep==2){Native(host.Screen.FallenClickPoint(host.Session.Snapshot.View.ViewerId));_resultPileStep++;return;}
-                if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"dead personalities remain separate from Fate discards");Capture("fallen-spread");Press("Back");_resultPileStep++;return;}
-                if(_resultPileStep==4){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_resultPileStep++;return;}
-                if(_resultPileStep==5){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_resultPileStep++;return;}
+                if(_resultPileStep==0){Press("Menu");_resultPileStep++;return;}
+                if(_resultPileStep==1){Press("Public piles…");_resultPileStep++;return;}
+                if(_resultPileStep==2){Press("Your Fate discard");_resultPileStep++;return;}
+                if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
+                if(_resultPileStep==4){Native(host.Screen.FallenClickPoint(host.Session.Snapshot.View.ViewerId));_resultPileStep++;return;}
+                if(_resultPileStep==5){Check(host.Screen.HasPrivateInspection,"dead personalities remain separate from Fate discards");Capture("fallen-spread");Press("Back");_resultPileStep++;return;}
+                if(_resultPileStep==6){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_resultPileStep++;return;}
+                if(_resultPileStep==7){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_resultPileStep++;return;}
                 Check(result.ChallengerTotal==8&&result.ChallengedTotal==7,"native UI reproduces canonical 8–7");
                 var left=host.Session.Snapshot.View.LastDuel.Challenger.OwnerId==host.Session.Snapshot.View.ViewerId;
                 Check(host.Screen.VisibleDuelValues.SequenceEqual(new[]{(left?result.ChallengerTotal:result.ChallengedTotal).ToString(),(left?result.ChallengedTotal:result.ChallengerTotal).ToString()}),"large result numerals match authoritative totals for this seat");
                 host.Screen.Present(host.Session.Snapshot);
                 Check(!host.Screen.PresentationBusy,"repeated snapshots do not replay the reveal");
+                Check(host.Screen.EndingRuns==1,"victory sequence plays once and holds the authoritative result");
+                Check(host.Screen.UprightCount==1,"destroyed participant settles out of the upright champion position");
                 Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("Duel details");break;
             case 17:Capture("consequences");Press("Back");break;
             case 18:Press("Continue");break;

@@ -12,10 +12,11 @@ public partial class DuelScreen : Control
     private bool _inputLocked;
     public bool InputLocked { get=>_inputLocked; set {if(_inputLocked==value)return;_inputLocked=value;HideCardHover();RenderGuidance();RenderLanding();} }
     public bool ReducedMotion { get; set; }
-    public bool PresentationBusy => _revealQueue.Count>0 || _revealClock>0 || _cleanupClock>0;
+    public bool PresentationBusy => CinematicBusy || _revealQueue.Count>0 || _revealClock>0 || _cleanupClock>0;
     public SessionSnapshot? Snapshot { get; private set; }
     public bool CanContinue => Snapshot?.View.LastDuel is {Complete:true} && !PresentationBusy;
-    private CrimsonDuelStage _stage=null!;
+    private DuelCinematicStage _stage=null!;
+    private Control _scene=null!,_uprights=null!,_flights=null!;
     private TableSurface _table=null!;
     private Control _plane=null!,_hud=null!;
     private VBoxContainer _actions=null!;
@@ -28,7 +29,7 @@ public partial class DuelScreen : Control
     private string? _duelId,_selectedHand,_selectedFocus,_selectedInspection;
     private string[] _effectOrder=[];
     private bool _submitted,_aftermathPlayed,_animateEntry;
-    internal Vector2 CardClickPoint(string id) => _table.ProjectCanvas(_tiles[id].Position + _tiles[id].Size / 2);
+    internal Vector2 CardClickPoint(string id) => _tiles[id].HasMeta("upright") ? _tiles[id].GetGlobalTransform()*(_tiles[id].Size/2) : _table.ProjectCanvas(_tiles[id].Position + _tiles[id].Size / 2);
     private double _revealClock,_commandCooldown,_cleanupClock;
     private float _scale;
     private Vector2 _offset;
@@ -37,10 +38,14 @@ public partial class DuelScreen : Control
     public override void _Ready()
     {
         Theme=DuelUi.Theme();SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);MouseFilter=MouseFilterEnum.Ignore;
-        _stage=new CrimsonDuelStage{ReducedMotion=ReducedMotion,MatLift=120};AddChild(_stage);
-        _table=new TableSurface{PlanePitch=CrimsonDuelStage.Pitch,PlaneDepth=CrimsonDuelStage.Depth};AddChild(_table);
+        _scene=new Control{MouseFilter=MouseFilterEnum.Ignore};AddChild(_scene);
+        _stage=new DuelCinematicStage{ReducedMotion=ReducedMotion};_scene.AddChild(_stage);
+        _table=new TableSurface{PlanePitch=DuelCinematicStage.Pitch,PlaneDepth=DuelCinematicStage.Depth};_scene.AddChild(_table);
         _plane=new Control();_table.Canvas.AddChild(_plane);
+        _uprights=new Control{MouseFilter=MouseFilterEnum.Ignore};_scene.AddChild(_uprights);
+        _flights=new Control{MouseFilter=MouseFilterEnum.Ignore};_scene.AddChild(_flights);
         _hud=new Control{MouseFilter=MouseFilterEnum.Ignore};AddChild(_hud);
+        CreateCinema();
         Resized+=Layout;Layout();
     }
     public void Present(SessionSnapshot snapshot)
@@ -51,7 +56,7 @@ public partial class DuelScreen : Control
         HideCardHover();Snapshot=snapshot;_submitted=false;_selectedDeck=false;_dragCard=null;ClearReading();
         if(changedSeat){CloseGuidance();_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
         var record=snapshot.View.LastDuel;
-        if(record?.Id!=_duelId){_animateEntry=record is not null;_duelId=record?.Id;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;}
+        if(record?.Id!=_duelId){ResetCinema();_animateEntry=record is not null;_duelId=record?.Id;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;}
         foreach(var reveal in record?.Reveals??[])
             if(_seenReveals.Add(reveal.Sequence))_revealQueue.Enqueue(reveal);
         if(ReducedMotion)while(_revealQueue.TryDequeue(out var frame))_shownReveal=frame;
@@ -59,11 +64,12 @@ public partial class DuelScreen : Control
         if(_selectedFocus is {} focus && !(snapshot.View.Players[snapshot.View.ViewerId].Focused??[]).Any(c=>c.Id==focus))_selectedFocus=null;
         var order=snapshot.Actions.FirstOrDefault(a=>a.Type=="orderDuelFocusEffects")?.TargetIds??[];
         if(!_effectOrder.Order().SequenceEqual(order.Order()))_effectOrder=order.ToArray();
+        if(!_openingSeen && record is {Result:null} && snapshot.View.PendingDuel?.Stage=="Focusing")StartOpening();
         RenderCards();RenderActions();
     }
     public void ResetPresentation()
     {
-        HideCardHover();Snapshot=null;ResetGuidance();_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
+        ResetCinema();HideCardHover();Snapshot=null;ResetGuidance();_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
         _selectedHand=null;_selectedFocus=null;_selectedInspection=null;_selectedDeck=false;_dragCard=null;_cleanupClock=0;_effectOrder=[];_commandCooldown=0;_animateEntry=false;ClearReading();
     }
     private void Layout()
@@ -71,14 +77,16 @@ public partial class DuelScreen : Control
         if(_stage is null)return;
         HideCardHover();
         var size=GetViewportRect().Size;
-        _stage.Resize(size,1);_scale=_stage.ContentScale;_offset=_stage.ContentOffset;
-        var density=_scale*CrimsonDuelStage.Density;
+        _stage.Resize(size);_scale=_stage.ContentScale;_offset=_stage.ContentOffset;
+        var density=_scale*DuelCinematicStage.Density;
         _table.Position=_stage.TableOffset;_table.Scale=Vector2.One*density;
-        _table.ResizePlane((Vector2)_stage.World.Size/density,Math.Max(.8f,density*1.2f));
-        _plane.Size=_table.CanvasSize;_hud.Size=size;
+        _table.ResizePlane(DuelCinematicStage.StageCanvas/DuelCinematicStage.Density,Math.Max(.8f,density*1.2f));
+        _plane.Size=_table.CanvasSize;_hud.Size=size;_scene.Size=size;
+        _uprights.Position=_offset;_uprights.Scale=Vector2.One*_scale;
+        ResetCamera();
         RenderCards(false);RenderActions();
     }
-    private static Vector2 ToPlane(Vector2 point)=>TableSurface.UnprojectOffset((point+new Vector2(0,120)-CrimsonDuelStage.StageCanvas/2)/CrimsonDuelStage.Density,CrimsonDuelStage.Pitch,CrimsonDuelStage.Depth);
+    private static Vector2 ToPlane(Vector2 point)=>TableSurface.UnprojectOffset((point+new Vector2(0,DuelCinematicStage.MatLift)-DuelCinematicStage.StageCanvas/2)/DuelCinematicStage.Density,DuelCinematicStage.Pitch,DuelCinematicStage.Depth);
     private void Select(CardView card)
     {
         if(card.Definition is null||PresentationBusy||InputLocked)return;
@@ -102,24 +110,24 @@ public partial class DuelScreen : Control
         foreach(var c in _hud.GetChildren()){_hud.RemoveChild(c);c.QueueFree();}_reading=null;
         if(Snapshot is null)return;
         var view=Snapshot.View;var stage=view.PendingDuel?.Stage;
-        var ribbon=new Control{Position=_offset+new Vector2(370,275)*_scale,Size=new Vector2(932,42)*_scale,MouseFilter=MouseFilterEnum.Ignore};
+        var ribbon=new Control{Position=_offset+new Vector2(640,290)*_scale,Size=new Vector2(392,42)*_scale,MouseFilter=MouseFilterEnum.Ignore};
         _hud.AddChild(ribbon);ribbon.Visible=view.LastDuel is not null;
         _status=DuelUi.Text(Status(),19,Palette.Paper);_status.HorizontalAlignment=HorizontalAlignment.Center;
         _status.VerticalAlignment=VerticalAlignment.Center;_status.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);ribbon.AddChild(_status);
         _status.AddThemeColorOverride("font_shadow_color",Colors.Black);_status.AddThemeConstantOverride("shadow_offset_x",1);_status.AddThemeConstantOverride("shadow_offset_y",2);
         _status.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(19*_scale)));
-        _controlsRect=new Rect2(_offset+new Vector2(1190,798)*_scale,new Vector2(340,128)*_scale);
+        _controlsRect=new Rect2(_offset+new Vector2(1350,760)*_scale,new Vector2(295,150)*_scale);
         Control? inspectionParent=null;
-        RenderTableLabels();RenderDuelValues();
+        RenderTableLabels();if(_cinema!=Cinema.Opening)RenderDuelValues();
         _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",Math.Max(2,(int)(4*_scale)));_hud.AddChild(_actions);
-        if(PresentationBusy){Text(_shownReveal?.Kind=="Replacement"?"Duelist replacement":"Revealing focused cards…");return;}
+        if(PresentationBusy){ribbon.Visible=false;return;}
         if(view.LastDuel?.Result is {} result)
         {
             var record=view.LastDuel;
             var outcome=result.Kind=="Refused"?"Challenge refused":result.WinnerId is null?"Equal totals · both lose":$"{(result.WinnerId==record.Challenger.Id?record.Challenger:record.Challenged).Definition!.Name} wins";
             _status.Text=outcome;
-            ribbon.Position=_offset+new Vector2(265,80)*_scale;
-            ribbon.Size=new Vector2(1142,150)*_scale;
+            ribbon.Position=_offset+new Vector2(300,28)*_scale;
+            ribbon.Size=new Vector2(1072,135)*_scale;
             _status.AddThemeFontOverride("font",DuelUi.Heading);
             var headingSize=Math.Max(28,(int)(104*_scale));
             while(headingSize>28&&DuelUi.Heading.GetStringSize(outcome,fontSize:headingSize).X>ribbon.Size.X-32*_scale)headingSize--;
@@ -240,6 +248,11 @@ public partial class DuelScreen : Control
     public override void _Input(InputEvent e)
     {
         if(!IsVisibleInTree()||InputLocked)return;
+        if(CinematicBusy)
+        {
+            if(e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Space or Key.Escape}){SkipCinematic();GetViewport().SetInputAsHandled();}
+            return;
+        }
         if(e is InputEventKey{Pressed:true,Echo:false} key)
         {
             if(key.Keycode==Key.Escape&&_helpOpen){CloseGuidance();GetViewport().SetInputAsHandled();return;}
@@ -259,9 +272,9 @@ public partial class DuelScreen : Control
         {
             _lastHoverPointer=m.Position;
             if(m is InputEventMouseButton)HideCardHover();
-            if(_guidanceRect.HasPoint(m.Position)||DuelValueAt(m.Position) is not null){_table.ExitMouse();return;}
+            if(_guidanceRect.HasPoint(m.Position)||DuelValueAt(m.Position) is not null||UprightAt(m.Position) is not null){_table.ExitMouse();return;}
             if(_reading is null&&HandlePlacement(m))return;
-            if(_reading is null&&!_controlsRect.HasPoint(m.Position)&&m.Position.Y>_offset.Y+310*_scale)
+            if(_reading is null&&!_controlsRect.HasPoint(m.Position)&&m.Position.Y>_offset.Y+340*_scale)
             {
                 _table.ForwardMouse(m);
             }
@@ -270,18 +283,18 @@ public partial class DuelScreen : Control
     }
     public override void _Process(double delta)
     {
-        if(!IsVisibleInTree()){HideCardHover();return;}
+        if(!IsVisibleInTree()){HideCardHover();_windSound?.Stop();return;}
         ProcessCardHover(delta);
         if(_commandCooldown>0){_commandCooldown-=delta;if(_commandCooldown<=0){RenderLanding();RenderActions();}}
-        _stage.ReducedMotion=ReducedMotion;_stage.Advance(delta);
+        _stage.ReducedMotion=ReducedMotion;_stage.Advance(delta);AdvanceCinemaSound(delta);
+        if(CinematicBusy){AdvanceCinema(delta);return;}
         if(_cleanupClock>0){_cleanupClock-=delta;if(_cleanupClock<=0){RenderCards(false);RenderActions();}}
         if(_revealClock>0){_revealClock-=delta;if(_revealClock<=0){RenderCards();RenderActions();}}
         if(_revealClock<=0&&_revealQueue.TryDequeue(out var reveal))
         {_shownReveal=reveal;_revealClock=ReducedMotion?0:1.1;RenderCards();RenderActions();return;}
         if(!PresentationBusy && !_aftermathPlayed && Snapshot?.View.LastDuel?.Result is {})
         {
-            _aftermathPlayed=true;_cleanupClock=ReducedMotion?0:.65;
-            RenderCards(!ReducedMotion);RenderActions();
+            StartEnding();
         }
     }
 }
