@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved custom Practice setup and engine connection (#69/#29).",
+  "validation": "Planning and fresh-main/interface audit only; implementation checks pending.",
+  "remaining": "Implement validated custom matches, replay, approved UI, native checks; request Mendon review. Stacked on #261; private custom rooms excluded.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/69",
+  "branch": "codex/69-practice-setup",
+  "updated": "2026-09-16T20:43:24.641250+00:00"
+}
