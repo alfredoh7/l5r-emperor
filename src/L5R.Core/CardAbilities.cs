@@ -1693,6 +1693,39 @@ public sealed partial class MatchEngine
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
+        // Times of Strife (issue #259): "after each time another player who controls no units at the
+        // current battlefield announces a Battle action, he discards a card" -- checked here,
+        // "announcing" the action, before its own effects below apply (matching the card's own
+        // "after ... announces," not "after ... resolves"). Queued (PendingTimesOfStrifeDiscards),
+        // drained by OpenOverconfidentDrawWindow, rather than opened as a PendingChoice directly here,
+        // since this function has no safe place to defer BEFORE its own switch runs without also
+        // rewriting every case's own early-return shape.
+        if (ability.Timing == "Battle" && _state.CurrentBattleProvince is int cbp && !Army(player.Id, cbp).Any() && ControlsEventEffect(1 - player.Id, "times-of-strife"))
+            _state.PendingTimesOfStrifeDiscards.Add(player.Id);
+        // War Weariness (issue #259): "after the resolution of the first action each phase that one
+        // or more Personalities performed, bow them." Approximated as "announced" (checked here,
+        // before the switch below, alongside Times of Strife's own identical announce-timed check
+        // above) rather than strictly after every possible deferred-window resolution -- every
+        // currently published ability either bows its own performer as part of its own cost already
+        // (harmless/idempotent alongside this) or never reads its own performer's Bowed status mid-
+        // resolution, so bowing here instead of strictly after is not observably different today.
+        // Scoped to ExecuteAbilityEffects-dispatched abilities only (Battle/Limited/Open/etc. via
+        // useAbility) -- playStrategy/equip/recruitReserve are the CONTROLLER acting generically, not
+        // "a Personality performed" in the printed rules' own technical sense, so they are correctly
+        // out of scope, not merely unhandled.
+        if (!_state.WarWearinessBowedThisPhase && _state.Phase is Phase.Action or Phase.Battle or Phase.Dynasty
+            && (ControlsEventEffect(0, "war-weariness") || ControlsEventEffect(1, "war-weariness")))
+        {
+            var warWearinessPerformer = ability.Performer is not null
+                ? (command.PerformerId is not null ? ActingPersonality(Card(command.PerformerId)) : null)
+                : (command.CardId is not null ? ActingPersonality(Card(command.CardId)) : null);
+            if (warWearinessPerformer is not null && Definition(warWearinessPerformer).Type == CardType.Personality)
+            {
+                warWearinessPerformer.Bowed = true;
+                _state.WarWearinessBowedThisPhase = true;
+                Emit("warWearinessBow", $"{Definition(warWearinessPerformer).Name} bows (War Weariness).", warWearinessPerformer.OwnerId, warWearinessPerformer.Id);
+            }
+        }
         if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
             Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
