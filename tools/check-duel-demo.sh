@@ -9,7 +9,9 @@ mkdir -p "$out"
 run_probe() {
     local name="$1" resolution="$2" mode="$3"
     rm -f "$out/$name.json"
-    "$GODOT" --path src/L5R.Client --resolution "$resolution" --position 10,50 -- --capture="$out/$name" --capture-mode="$mode" > "$out/$name.log" 2>&1
+    # Stable input timing and a visible window prevent desktop occlusion/hover races.
+    # Performance is measured separately, without fixed FPS, by DuelAtmosphereReview.
+    "$GODOT" --path src/L5R.Client --always-on-top --fixed-fps 30 --resolution "$resolution" --position 10,50 -- --capture="$out/$name" --capture-mode="$mode" > "$out/$name.log" 2>&1
     if rg -q 'ERROR:|SCRIPT ERROR:' "$out/$name.log"; then cat "$out/$name.log"; return 1; fi
     test -f "$out/$name.json"
     echo "PASS $name"

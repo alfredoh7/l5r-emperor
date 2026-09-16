@@ -14,16 +14,19 @@ public partial class DuelIntroStage : Control
     private ShaderMaterial _vignette=null!;
     public Vector2 NameAnchor(int owner)=>_camera.UnprojectPosition(new Vector3(owner==_viewer?-3.15f:3.15f,5.35f,0));
     private Vector2I _lastSize;
+    private DuelWindField _wind=null!;
     public void Build(DuelRecord record,int viewer)
     {
         _viewer=viewer;MouseFilter=MouseFilterEnum.Ignore;
         _background=new TextureRect{Texture=GD.Load<Texture2D>("res://Art/CrimsonDuel/landscape-clean-plate.png"),
             ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCovered,
-            Material=new ShaderMaterial{Shader=GD.Load<Shader>("res://Art/CrimsonDuel/intro-background.gdshader")},MouseFilter=MouseFilterEnum.Ignore};AddChild(_background);
+            Material=new ShaderMaterial{Shader=GD.Load<Shader>("res://Art/CrimsonDuel/cinema-atmosphere.gdshader")},MouseFilter=MouseFilterEnum.Ignore};AddChild(_background);
+        ((ShaderMaterial)_background.Material).SetShaderParameter("intro_view",true);
         _view=new SubViewport{OwnWorld3D=true,TransparentBg=true,HandleInputLocally=false,
             RenderTargetUpdateMode=SubViewport.UpdateMode.Always,Msaa3D=Viewport.Msaa.Msaa4X};AddChild(_view);
         _view.AddChild(new WorldEnvironment{Environment=new Godot.Environment{BackgroundMode=Godot.Environment.BGMode.ClearColor,
             TonemapMode=Godot.Environment.ToneMapper.Linear,AmbientLightSource=Godot.Environment.AmbientSource.Color,AmbientLightColor=Colors.White,AmbientLightEnergy=1}});
+        _wind=new DuelWindField();_view.AddChild(_wind);_wind.Build(true);
         _camera=new Camera3D{Fov=48,Near=.05f,Far=100,Current=true};_view.AddChild(_camera);
         var output=new TextureRect{Texture=_view.GetTexture(),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,MouseFilter=MouseFilterEnum.Ignore};AddChild(output);
         output.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
@@ -58,9 +61,12 @@ public partial class DuelIntroStage : Control
             MaterialOverride=new StandardMaterial3D{AlbedoTexture=texture,ShadingMode=BaseMaterial3D.ShadingModeEnum.Unshaded,
                 CullMode=BaseMaterial3D.CullModeEnum.Disabled,TextureFilter=BaseMaterial3D.TextureFilterEnum.LinearWithMipmaps}});
     }
-    public void Advance(double time,Vector2 size,int challenger,int challenged)
+    public void Advance(double time,Vector2 size,int challenger,int challenged,double atmosphereTime=0,float windStrength=1,bool detailed=true)
     {
         Size=size;_background.Size=size;
+        _wind.Visible=detailed;_wind.Present(atmosphereTime,windStrength);
+        ((ShaderMaterial)_background.Material).SetShaderParameter("atmosphere_time",(float)atmosphereTime);
+        ((ShaderMaterial)_background.Material).SetShaderParameter("wind_strength",windStrength);
         var pixels=new Vector2I(Math.Max(1,(int)size.X),Math.Max(1,(int)size.Y));
         if(pixels!=_lastSize){_view.Size=pixels;_lastSize=pixels;}
         var wide=new Vector3(0,2.15f,10.4f);var wideAim=new Vector3(0,2,0);

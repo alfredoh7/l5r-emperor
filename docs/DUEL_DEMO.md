@@ -74,7 +74,7 @@ Native Windows graphical acceptance remains open. Local Mac frame samples are ev
 
 The latest presentation follows the approved close composition: upright original champion cards with attachment headers behind, flat focus lanes/hand, original Fate backs, with no redundant stat numerals on the mat; final totals remain in Duel details. Menu → Public piles retains actual public discards without decorative corner cards. The bottom result strip is removed; Continue sits on the mat and aftermath details remain optional. Main-game `CardPreview` still handles all permitted inspection.
 
-The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics; Cinematic sound controls quiet synthesized wind and paper/air accents. See [the accepted motion decision](decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/duel-demo/cinema/index.html).
+The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics; Cinematic sound controls paper/air accents; Field ambience separately controls the prototype wind bed. See [the accepted motion decision](decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/duel-demo/cinema/index.html).
 
 ## September 16 UI and camera follow-up
 
@@ -97,3 +97,7 @@ Core supplies optional `DuelRecord.Challenge` and `Beats`; old snapshots still d
 The ending keeps the verdict visible while showing one source and consequence at a time. Later aftermath reactions append their own explanations once. Focus Effect ordering now includes full card faces. Skip makes no game command, and the complete ordered account remains in **Duel details**. Reduced motion uses a static challenge introduction, instant card transfers and the same on-demand account. The optional story does not restore permanent Chi counters or a bottom recap.
 
 Native coverage includes the canonical path, full-motion additional scenarios, compact reduced motion and source inspection after Skip. Current findings and evidence are recorded in `docs/screenshots/duel-demo/stakes/validation.json`. Native Windows and Mendon's shared-interface/mechanical acceptance remain separate.
+
+## Atmosphere prototype
+
+The native atmosphere review adds shared wind timing, instanced segmented grass, slowly moving painted sky bands and independently controlled wind/effects. See [the prototype, reproduction steps and acceptance limits](DUEL_ATMOSPHERE.md). It does not change authoritative dueling behavior or close the mechanical review.

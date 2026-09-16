@@ -1,0 +1,23 @@
+{
+  "mat": {
+    "MeanChannelDifference": 0.0,
+    "Changed": false
+  },
+  "sun": {
+    "MeanChannelDifference": 0.0,
+    "Changed": false
+  },
+  "sky": {
+    "MeanChannelDifference": 2.8378593904909692,
+    "Changed": true
+  },
+  "grass": {
+    "MeanChannelDifference": 7.3041897506925215,
+    "Changed": true
+  },
+  "mountains": {
+    "MeanChannelDifference": 0.0,
+    "Changed": false
+  },
+  "ReducedMotionIdentical": true
+}

@@ -53,7 +53,10 @@ public partial class DuelScreen : Control
     public void Present(SessionSnapshot snapshot)
     {
         if(Snapshot?.View is {} previous && previous.Version==snapshot.View.Version && previous.ViewerId==snapshot.View.ViewerId && previous.Scenario==snapshot.View.Scenario)return;
-        var changedSeat=Snapshot?.View.ViewerId!=snapshot.View.ViewerId;
+        var oldView=Snapshot?.View;
+        var changedSeat=oldView?.ViewerId!=snapshot.View.ViewerId;
+        var focusedOwner=oldView is not null && oldView.LastDuel?.Id==snapshot.View.LastDuel?.Id
+            ? snapshot.View.Players.FirstOrDefault(p=>p.FocusCount>oldView.Players[p.Id].FocusCount)?.Id : null;
         _previousZones=(Snapshot?.View.Players.SelectMany(p=>p.Hand.Concat(p.Focused??[]).Concat(p.Discard))??[]).ToDictionary(c=>c.Id,c=>c.Zone);
         HideCardHover();Snapshot=snapshot;_submitted=false;_selectedDeck=false;_dragCard=null;ClearReading();
         if(changedSeat){CloseGuidance();_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
@@ -68,6 +71,7 @@ public partial class DuelScreen : Control
         if(!_effectOrder.Order().SequenceEqual(order.Order()))_effectOrder=order.ToArray();
         if(!_openingSeen && record is {Result:null} && snapshot.View.PendingDuel?.Stage=="Focusing")StartOpening();
         RenderCards();RenderActions();
+        if(!changedSeat&&focusedOwner is {} owner)PlayFocusSound(owner);
     }
     public void ResetPresentation()
     {
@@ -329,7 +333,7 @@ public partial class DuelScreen : Control
         if(!IsVisibleInTree()){HideCardHover();_windSound?.Stop();return;}
         ProcessCardHover(delta);
         if(_commandCooldown>0){_commandCooldown-=delta;if(_commandCooldown<=0){RenderLanding();RenderActions();}}
-        _stage.ReducedMotion=ReducedMotion;_stage.Advance(delta);AdvanceCinemaSound(delta);
+        _stage.ReducedMotion=ReducedMotion;AdvanceCinemaSound(delta);_stage.Advance(InputLocked||_reading is not null?0:delta);
         if(CinematicBusy){AdvanceCinema(delta);return;}
         if(InputLocked||_reading is not null)return;
         if(_cleanupClock>0){_cleanupClock-=delta;if(_cleanupClock<=0){RenderCards(false);RenderActions();}}

@@ -8,6 +8,7 @@ public partial class Main
     private int _guidanceProbe;
     private long _guidanceVersion;
     private long? _cinemaSkipVersion;
+    private string? _guidanceDeferredButton;
     private void ProcessDuelGuidanceCapture(double delta)
     {
         _captureClock+=delta;if(_captureClock<.65)return;_captureClock=0;
@@ -15,10 +16,24 @@ public partial class Main
         var host=_duelDemo;
         Button Find(string name)=>Descendants(host!).OfType<Button>().First(b=>(b.Name==name||b.Text==name)&&b.IsVisibleInTree());
         void Native(Vector2 p){Input.ParseInputEvent(new InputEventMouseMotion{Position=p,GlobalPosition=p});foreach(var pressed in new[]{true,false})Input.ParseInputEvent(new InputEventMouseButton{Position=p,GlobalPosition=p,ButtonIndex=MouseButton.Left,Pressed=pressed});}
-        void Press(string text)=>Native(Find(text).GetGlobalRect().GetCenter());
+        void Press(string text)
+        {
+            var button=Find(text);
+            for(var parent=button.GetParent();parent is not null;parent=parent.GetParent())
+                if(parent is ScrollContainer scroll)scroll.EnsureControlVisible(button);
+            // ScrollContainer lays out on the next frame. Click its actual visible position.
+            _guidanceDeferredButton=text;
+        }
         void Check(bool ok,string message){if(!ok)throw new Exception("DUEL_GUIDANCE_CHECK: "+message);GD.Print("DUEL_GUIDANCE_CHECK: "+message);}
         void Capture(string suffix)=>GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+suffix+".png");
         bool Saved(){var preferences=new MenuPreferences(_preferencesProfile);preferences.Load();return preferences.DuelGuidance;}
+        if(_guidanceDeferredButton is {} pending)
+        {
+            _guidanceDeferredButton=null;var button=Find(pending);var point=button.GetGlobalRect().GetCenter();
+            for(var parent=button.GetParent();parent is not null;parent=parent.GetParent())
+                if(parent is ScrollContainer scroll)Check(scroll.GetGlobalRect().HasPoint(point),"menu target is scrolled into view before native input");
+            Native(point);Input.FlushBufferedEvents();return;
+        }
         if(_cinemaSkipVersion is {} skippedVersion)
         {
             Check(!host!.Screen.CinematicBusy&&!host.Screen.MastheadVisible&&host.Session.Snapshot!.View.Version==skippedVersion,"Skip ends the cinematic and removes the DUEL title without submitting a command");_cinemaSkipVersion=null;

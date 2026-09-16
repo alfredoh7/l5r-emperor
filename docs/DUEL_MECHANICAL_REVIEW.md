@@ -1,6 +1,6 @@
 # Duel Demo mechanical review
 
-For mdornbrook on [PR #220](https://github.com/alfredoh7/l5r-emperor/pull/220), linked to #204/#205/#206. Gameplay implementation under review: `73dfe34816a5060abbbf43a3fafee2fbc30097bd`. Subsequent review-preparation changes are documentation only.
+For mdornbrook on [PR #220](https://github.com/alfredoh7/l5r-emperor/pull/220), linked to #204/#205/#206. Gameplay implementation under review: `73dfe34816a5060abbbf43a3fafee2fbc30097bd`. The review-preparation commit `b842465` was documentation only. Subsequent atmosphere work changes client presentation; the mechanical implementation remains at this reviewed baseline.
 
 Alfredo approved the current presentation, including the stakes/resolution pass, on September 16, 2026 and requested this mechanical review before normal-match integration. That approval does not constitute rules acceptance. This document requests decisions; unchecked items are not completed reviews.
 
@@ -38,3 +38,7 @@ The full list and current expected setup behavior are in [DuelDemoScenarios.cs](
 For reruns, use `L5R_PYTHON=/path/to/python3.12-or-newer bash tools/check.sh --skip-client`; native desktop probes use `bash tools/check-duel-demo.sh` with the pinned Godot/.NET tools. Native full-motion special-stage evidence used capture mode `menu-duel-stages-motion`.
 
 The review-routing Action currently fails closed on an incomplete GitHub PR file listing. The requested reviewer was verified directly as mdornbrook; no routing check or merge gate is bypassed. Fixing that automation, native Windows acceptance, normal-match integration and AAA atmosphere work remain separate tasks.
+
+## Automated review follow-up
+
+The [automated province-strength finding](https://github.com/alfredoh7/l5r-emperor/pull/220#discussion_r4030577476) reports that retained duel evidence uses raw province strength where Times of Strife may cap the effective value. Review `DuelBeat` before/after snapshots and `DuelResult.Provinces` against the authoritative effective-strength query, and add a Times of Strife/Courtesy regression before resolving this finding. It remains open; the atmosphere prototype deliberately makes no Core change. The companion handoff-scope finding is addressed by recording both the complete branch scope and which checks ran for the latest UI increment.

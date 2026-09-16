@@ -29,8 +29,13 @@ public partial class DuelScreen
     {
         if(_introStage is null)return;_cinemaLayer.RemoveChild(_introStage);_introStage.QueueFree();_introStage=null;
     }
-    private AudioStreamPlayer _cinemaSound=null!,_windSound=null!;
-    private static AudioStreamWav? _windClip;
+    private AudioStreamPlayer _cinemaSound=null!,_windSound=null!,_paperSound=null!;
+    public bool AmbienceEnabled {get;set;}=true;
+    public bool DetailedAtmosphere {get=>_stage.DetailedAtmosphere;set=>_stage.DetailedAtmosphere=value;}
+    internal double AtmosphereTime=>_stage.AtmosphereTime;
+    internal int GrassInstances=>_stage.GrassInstances;
+    internal double OpeningLeadIn {get;set;}
+    private float _windStrength=1;
     public bool SoundEnabled {get;set;}=true;
     internal bool CinematicBusy=>_cinema!=Cinema.None;
     internal double CinematicTime=>_cinemaTime;
@@ -50,8 +55,10 @@ public partial class DuelScreen
         _cinemaTitle=DuelUi.Text("",75,Palette.Paper,true);_cinemaTitle.AutowrapMode=TextServer.AutowrapMode.WordSmart;
         _cinemaTitle.AddThemeColorOverride("font_shadow_color",Colors.Black);_cinemaTitle.AddThemeConstantOverride("shadow_offset_y",3);_cinemaLayer.AddChild(_cinemaTitle);
         _skipCinema=DuelUi.Button("Skip",SkipCinematic,fontSize:20);_skipCinema.Name="Skip cinematic";_skipCinema.TooltipText="Skip presentation · Space or Escape";_cinemaLayer.AddChild(_skipCinema);
-        _cinemaSound=new AudioStreamPlayer{VolumeDb=-22};AddChild(_cinemaSound);
-        _windSound=new AudioStreamPlayer{VolumeDb=-48,Stream=_windClip??=BuildWind()};AddChild(_windSound);_cinemaLayer.Hide();
+        _cinemaSound=new AudioStreamPlayer{VolumeDb=-13};AddChild(_cinemaSound);
+        _windSound=new AudioStreamPlayer{VolumeDb=-30,Stream=DuelAudio.Wind};AddChild(_windSound);
+        _paperSound=new AudioStreamPlayer{VolumeDb=-12};AddChild(_paperSound);
+        _=DuelAudio.Accent(true);_=DuelAudio.Accent(false);_=DuelAudio.Paper(-1);_=DuelAudio.Paper(1);_cinemaLayer.Hide();
     }
     private void ResetCamera()
     {
@@ -62,15 +69,24 @@ public partial class DuelScreen
     {
         ClearStory();_seenBeats.Clear();_activeBeats=[];
         _cinema=Cinema.None;_cinemaTime=0;_openingSeen=false;_cutPlayed=false;OpeningRuns=EndingRuns=0;
-        ClearIntro();ResetCamera();_cinemaLayer?.Hide();_cinemaSound?.Stop();_windSound?.Stop();
+        ClearIntro();ResetCamera();_cinemaLayer?.Hide();_cinemaSound?.Stop();_windSound?.Stop();_paperSound?.Stop();
         if(_flights is not null)foreach(var child in _flights.GetChildren()){_flights.RemoveChild(child);child.QueueFree();}
     }
     private void StartOpening()
     {
         _openingSeen=true;OpeningRuns++;
-        _cinema=Cinema.Opening;_cinemaTime=0;HideCardHover();CloseGuidance();
+        _cinema=Cinema.Opening;_cinemaTime=-OpeningLeadIn;HideCardHover();CloseGuidance();
         ClearIntro();
-        _cinemaLayer.Show();PlayCinemaSound(false);
+        // Prepare the public-card viewport under the stakes panel, before its camera cut.
+        if(!ReducedMotion)
+        {
+            var record=Snapshot!.View.LastDuel!;
+            _introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
+            _introStage.Build(record,Snapshot.View.ViewerId);
+            _introStage.Advance(0,Size,record.Challenger.OwnerId,record.Challenged.OwnerId,_stage.AtmosphereTime,_windStrength,DetailedAtmosphere);
+            _introStage.Hide();
+        }
+        _cinemaLayer.Show();
     }
     private void StartEnding()
     {
@@ -104,6 +120,7 @@ public partial class DuelScreen
         _cinemaSlash.Visible=false;_cinemaTitle.Text="";_cinemaShade.Color=Colors.Transparent;
         if(_cinema==Cinema.Opening)
         {
+            if(t<0)return;
             if(t<StakesDuration){ShowStakes();return;}
             ClearStory();
             if(ReducedMotion){SkipCinematic();return;}
@@ -113,8 +130,9 @@ public partial class DuelScreen
                 _introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
                 _introStage.Build(Snapshot!.View.LastDuel!,Snapshot.View.ViewerId);
             }
+            if(t<2.5&&_introStage is {Visible:false}){_introStage.Show();PlayCinemaSound(false);}
             var challenger=Snapshot!.View.LastDuel!.Challenger;var challenged=Snapshot.View.LastDuel.Challenged;
-            if(t<2.5)_introStage?.Advance(t,Size,challenger.OwnerId,challenged.OwnerId);
+            if(t<2.5)_introStage?.Advance(t,Size,challenger.OwnerId,challenged.OwnerId,_stage.AtmosphereTime,_windStrength,DetailedAtmosphere);
             else
             {
                 // A film cut to the exact playable composition avoids superimposed card faces.
@@ -129,7 +147,10 @@ public partial class DuelScreen
                 _cinemaTitle.Text=card.Definition!.Name;
                 _cinemaTitle.Size=new Vector2(540,110)*_scale;
                 var anchor=_introStage!.NameAnchor(card.OwnerId)+Vector2.Right*(card.OwnerId==Snapshot!.View.ViewerId?-90:90)*_scale;
-                _cinemaTitle.Position=(anchor-_cinemaTitle.Size/2).Clamp(_offset+new Vector2(30,110)*_scale,Size-_cinemaTitle.Size-Vector2.One*30*_scale);
+                var titleMin=_offset+new Vector2(30,110)*_scale;
+                // Wrapped labels may retain their previous minimum height for one layout frame.
+                var titleMax=(Size-_cinemaTitle.Size-Vector2.One*30*_scale).Max(titleMin);
+                _cinemaTitle.Position=(anchor-_cinemaTitle.Size/2).Clamp(titleMin,titleMax);
                 _cinemaTitle.HorizontalAlignment=HorizontalAlignment.Center;
                 _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(30,(int)(68*_scale)));
                 _cinemaTitle.Modulate=new Color(1,1,1,Ease((elapsed-.12)/.18));
@@ -172,37 +193,24 @@ public partial class DuelScreen
     }
     private void AdvanceCinemaSound(double delta)
     {
-        if(!SoundEnabled||ReducedMotion||Snapshot?.View.LastDuel is null)
-        {_windSound.Stop();if(!SoundEnabled)_cinemaSound.Stop();return;}
+        var paused=InputLocked||_reading is not null;
+        _windSound.StreamPaused=paused;_cinemaSound.StreamPaused=paused;_paperSound.StreamPaused=paused;
+        var hush=_cinema==Cinema.Opening&&_cinemaTime>=0||(_cinema==Cinema.Ending&&_cinemaTime<1.5);
+        if(!paused)_windStrength=Mathf.MoveToward(_windStrength,hush?.28f:1,(float)delta*.65f);
+        _stage.WindStrength=_windStrength;
+        if(!SoundEnabled){_cinemaSound.Stop();_paperSound.Stop();}
+        if(!AmbienceEnabled||ReducedMotion||Snapshot?.View.LastDuel is null){_windSound.Stop();return;}
         if(!_windSound.Playing)_windSound.Play();
-        var hush=_cinema==Cinema.Opening||(_cinema==Cinema.Ending&&_cinemaTime<1.5);
-        _windSound.VolumeDb=Mathf.MoveToward(_windSound.VolumeDb,hush?-56:-35,(float)delta*18);
-    }
-    private static AudioStreamWav BuildWind()
-    {
-        const int rate=22050,samples=rate*12;var bytes=new byte[samples*2];var random=new Random(20517);double low=0;
-        for(var i=0;i<samples;i++)
-        {
-            low=low*.976+(random.NextDouble()*2-1)*.024;
-            var phase=i/(double)samples;var seam=Math.Min(1,Math.Min(phase,1-phase)*24);
-            var gust=.65+.2*Math.Sin(phase*Math.Tau*3)+.15*Math.Sin(phase*Math.Tau*7);
-            var pcm=(short)(low*gust*seam*22000);bytes[i*2]=(byte)(pcm&255);bytes[i*2+1]=(byte)((pcm>>8)&255);
-        }
-        return new AudioStreamWav{Format=AudioStreamWav.FormatEnum.Format16Bits,MixRate=rate,Stereo=false,Data=bytes,LoopMode=AudioStreamWav.LoopModeEnum.Forward,LoopEnd=samples};
+        _windSound.VolumeDb=Mathf.MoveToward(_windSound.VolumeDb,hush?-33:-20,(float)delta*12);
     }
     private void PlayCinemaSound(bool cut)
     {
         if(!SoundEnabled||ReducedMotion)return;
-        // Quiet deterministic paper/air accents. No engine event is inferred from audio.
-        const int rate=22050;var length=cut?.19:.65;var samples=(int)(rate*length);var bytes=new byte[samples*2];
-        var random=new Random(cut?2058:2054);double low=0;
-        for(var i=0;i<samples;i++)
-        {
-            var t=i/(double)rate;var noise=random.NextDouble()*2-1;low=low*.86+noise*.14;
-            var envelope=Math.Sin(Math.PI*i/samples)*Math.Exp(-t*(cut?14:3));
-            var value=(cut?noise*.5+low*.5:low)*envelope;
-            var pcm=(short)(value*16000);bytes[i*2]=(byte)(pcm&255);bytes[i*2+1]=(byte)((pcm>>8)&255);
-        }
-        _cinemaSound.Stream=new AudioStreamWav{Format=AudioStreamWav.FormatEnum.Format16Bits,MixRate=rate,Stereo=false,Data=bytes};_cinemaSound.Play();
+        _cinemaSound.Stream=DuelAudio.Accent(cut);_cinemaSound.Play();
+    }
+    private void PlayFocusSound(int owner)
+    {
+        if(!SoundEnabled||ReducedMotion)return;
+        _paperSound.Stream=DuelAudio.Paper(owner==Snapshot!.View.ViewerId?-1:1);_paperSound.Play();
     }
 }
