@@ -238,6 +238,16 @@ public sealed partial class MatchEngine
                             Add("purchase",$"Buy {def.Name} · {quote.Cost} Gold{(def.Type==CardType.Personality?$" · {mode}":"")}",
                                 reason is null?Command("purchase",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote);
                         }
+                        if(def.Type==CardType.Personality)
+                        {
+                            foreach(var target in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality
+                                && string.Equals(Experienced.BaseTitle(Definition(c).Name),Experienced.BaseTitle(def.Name),StringComparison.OrdinalIgnoreCase)))
+                            {
+                                var overlay=QuoteOverlay(playerId,card.Id,target.Id);
+                                Add("overlay",$"Overlay {def.Name} · Experience {overlay.HigherLevel} over {overlay.LowerLevel} · no Gold",
+                                    overlay.Error is null?Command("overlay",card.Id,target:target.Id):null,overlay.Error,card.Id,[target.Id]);
+                            }
+                        }
                     }
                     Add("discardProvince",$"Discard {def.Name}",Command("discardProvince",card.Id),cardId:card.Id);
                 }
