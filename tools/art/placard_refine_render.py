@@ -35,5 +35,6 @@ s=bpy.context.scene;s.view_settings.view_transform='Standard';s.view_settings.lo
 s.camera.data.ortho_scale=2.91
 s.render.resolution_x=1740;s.render.resolution_y=600;s.cycles.samples=64
 s.render.filepath=str(p/'refined-front.png')
+bpy.ops.file.pack_all()
 bpy.ops.wm.save_as_mainfile(filepath=str(p/'production-frame.blend'))
 bpy.ops.render.render(write_still=True)

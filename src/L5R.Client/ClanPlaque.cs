@@ -148,8 +148,9 @@ public partial class ClanPlaque : Control
         var shell = new Control { CustomMinimumSize = design * scale, MouseFilter = MouseFilterEnum.Ignore };
         var panel = new Control { Size = design, Scale = Vector2.One * scale, MouseFilter = MouseFilterEnum.Ignore };
         shell.AddChild(panel);
-        panel.AddChild(new TextureRect { Texture = FrameTexture, ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, Size = design,
-            MouseFilter = MouseFilterEnum.Ignore });
+        panel.AddChild(new NinePatchRect { Texture = FrameTexture, PatchMarginLeft = 96, PatchMarginRight = 96,
+            PatchMarginTop = 96, PatchMarginBottom = 96, Scale = Vector2.One * .25f, Size = design * 4,
+            MouseFilter = MouseFilterEnum.Ignore, TextureFilter = TextureFilterEnum.LinearWithMipmaps });
         var title = Palette.Text(heading, 23, Palette.Paper); title.AddThemeFontOverride("font", BodyFace);
         title.Position = new Vector2(25, 17); panel.AddChild(title);
         var copy = Palette.Wrapped(string.Join("\n",lines), 18, Palette.Paper); copy.AddThemeFontOverride("font", BodyFace);

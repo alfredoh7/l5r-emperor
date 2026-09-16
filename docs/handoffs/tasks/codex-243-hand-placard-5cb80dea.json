@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Placard A implementation in progress: Meshy/Blender frame, native three-stat HUD and authoritative hand-limit projection; Home revisions are concepts only.",
-  "validation": "Core, AI, server and transport checks passed; Godot compile and isolated native comparison/input probe passed. Integrated room preview pending.",
-  "remaining": "Complete latest-room preview, final visual refinement, provenance and review.",
+  "summary": "Implemented approved Placard A with a Meshy/Blender lacquer-and-brass frame, L5R-style Gold coin, live hand count/current engine limit and modifier tooltip. Produced three new white Imperial Favor concepts for approval only.",
+  "validation": "bash tools/check.sh --skip-client passed: 152 core, 52 published, 9 deck-format, 10 deck-workshop, 14 AI, 5 server and 4 transport checks; Python collaboration/content checks passed. Native Godot compile/import and check-clan-placard input/comparison probe passed. Separate current-room preview passed 1920x1080, 1440x900, 2560x1080 and reduced-motion captures with camera/input checks and no logged errors. Meshy task consumed 10 credits; original and packed Blender source archived in a private release.",
+  "remaining": "Human visual acceptance and mdornbrook shared-view review remain; PR not merged. Persistent Home design awaits user selection. No native Windows graphical or new two-machine multiplayer acceptance claimed. Board token unavailable; GitHub fallback claim recorded on #243.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/243",
   "branch": "codex/243-hand-placard",
-  "updated": "2026-09-16T07:58:36.635099+00:00"
+  "updated": "2026-09-16T08:08:45.492742+00:00"
 }

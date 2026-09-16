@@ -38,8 +38,8 @@
       "bytes": 15166324
     },
     "artifacts/meshy/placard-a-v1/production-frame.blend": {
-      "sha256": "13b2389f432e280956485537f11a1dbb812451f0fe1e00c0020d8f2ecb1e4cdc",
-      "bytes": 15216427
+      "sha256": "7796b1747438c28d7252c2d0402c2874998b0cf08678474c3249719946b5975d",
+      "bytes": 17111282
     },
     "src/L5R.Client/Art/ClanPlacard/frame.png": {
       "sha256": "573a25821d1cbbceaa33b2503ccecfbc8b60c97bb7a38a49184880cd69de765f",
@@ -49,5 +49,6 @@
       "sha256": "ead9d984bb40fed24994a6a4b88e4475c0994c4d7a18f0b836a3f8309e6db235",
       "bytes": 1251681
     }
-  }
+  },
+  "source_archive": "https://github.com/alfredoh7/l5r-emperor/releases/tag/art-source-placard-a-20260916"
 }
