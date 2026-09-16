@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Noble Crest Home implementation in progress. Requested native screenshot milestone captured in integrated room/menu/placard preview; includes Favor, Rings and D lacquer Suspicions reminder.",
-  "validation": "Integrated client build passed with 0 warnings and 0 errors; Godot import passed; native 1920x1080 overview and detail captures passed. Captures use an explicit staged public snapshot, not a legally played-through match. Preview merge preserves HandLimit and EventsInPlay.",
-  "remaining": "Favor frame reads too gold against approved ivory-white source; visual fidelity iteration and native interaction/gameplay checks remain. No completion or pixel-perfect claim. Draft PR #246 stacked on #242; preview checkout includes #244 and room/menu work.",
+  "summary": "Finish Noble Crest Home: Meshy 7 Ultra ivory frame, Blender finish, native original Favor faces, D effect reminders, active lacquer/Caudex tooltip skin, visible pending decisions and fitted-view clearance. Record Meshy during initial production of all new 3D assets.",
+  "validation": "All deterministic checks passed (43 collaboration, 130 content, 152 core, 52 published, 9 format, 10 workshop, 14 AI, 5 server, 4 transport); 6 Meshy wrapper tests. Task/integrated builds 0 warnings/errors. Native actual-engine and projected-input checks passed 1920x1080 reduced and 1440x900 normal motion. Final mipmap import and native overview/detail capture passed; source/native comparison in docs/screenshots/persistent-home/index.html; private Meshy/Blender source archived.",
+  "remaining": "Ready for Alfredo visual review and Mendon shared review. PR 246 is stacked on open dependency 242; integrate after dependency review/merge. Local combined preview preserves room, placards and black lacquer/Caudex menus. No native Windows or expert rules acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/245",
   "branch": "codex/245-noble-home",
-  "updated": "2026-09-16T09:55:14.688201+00:00"
+  "updated": "2026-09-16T11:00:39.739621+00:00"
 }

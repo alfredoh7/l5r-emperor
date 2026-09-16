@@ -11,6 +11,8 @@ public partial class HomeReminder : Button
     public bool IsFavor => Effect is null;
     public bool Selected { get; set; }
     public string Clan { get; }
+    public Theme? InspectionTheme { get; set; }
+    public StyleBox? InspectionSurface { get; set; }
     private readonly Texture2D? _face;
     private readonly TextureRect _art;
     public static Font BodyFont => GD.Load<FontFile>("res://Art/Fonts/Caudex-Regular.ttf");
@@ -31,9 +33,9 @@ public partial class HomeReminder : Button
         TooltipText = IsFavor ? $"{clan} · Imperial Favor\nPublic reminder · not a card in play.\nSelect to inspect the Favor actions currently offered by the game."
             : $"{effect!.Definition?.Name ?? "Ongoing effect"}\nEffect reminder · not a card in play.\n{effect.Definition?.Text}";
         _art = new TextureRect {
-            Texture = GD.Load<Texture2D>(IsFavor ? "res://Art/PersistentHome/noble-crest.png" : "res://Art/PersistentHome/effect-lacquer.png"),
+            Texture = GD.Load<Texture2D>(IsFavor ? "res://Art/PersistentHome/noble-crest-meshy.png" : "res://Art/PersistentHome/effect-lacquer.png"),
             ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize, StretchMode = TextureRect.StretchModeEnum.Scale,
-            Material = new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/PersistentHome/chroma-cutout.gdshader") },
+            Material = IsFavor ? null : new ShaderMaterial { Shader = GD.Load<Shader>("res://Art/PersistentHome/chroma-cutout.gdshader") },
             MouseFilter = MouseFilterEnum.Ignore, TextureFilter = TextureFilterEnum.LinearWithMipmaps
         };
         AddChild(_art);
@@ -61,8 +63,8 @@ public partial class HomeReminder : Button
     {
         get
         {
-            // The complete scan fits inside the generated opening; no text or card edge is cropped.
-            var opening = new Rect2(Size.X * .167f, Size.Y * .145f, Size.X * .666f, Size.Y * .727f);
+            // The complete period scan fits inside the Meshy/Blender frame aperture.
+            var opening = new Rect2(Size.X * .167f, Size.Y * .158f, Size.X * .664f, Size.Y * .727f);
             var height = Math.Min(opening.Size.Y, opening.Size.X * 1.4f);
             var face = new Vector2(height / 1.4f, height);
             return new Rect2(opening.GetCenter() - face / 2, face);
@@ -81,8 +83,15 @@ public partial class HomeReminder : Button
     }
     public Control CreateReadingPreview()
     {
-        var panel = new LacquerPanel { CustomMinimumSize = new Vector2(340, 0) };
-        var column = new VBoxContainer(); column.AddThemeConstantOverride("separation", 9); panel.AddChild(column);
+        // Use the active inspector skin, including the integrated approved lacquer theme.
+        var design = new Vector2(370, IsFavor ? 590 : 610);
+        var shell = new Control { CustomMinimumSize = design, MouseFilter = MouseFilterEnum.Ignore };
+        var panel = new PanelContainer { Theme = InspectionTheme, Size = design };
+        shell.AddChild(panel);
+        if (InspectionSurface is not null) panel.AddThemeStyleboxOverride("panel", InspectionSurface);
+        var scroll = new ScrollContainer { HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled, SizeFlagsVertical = SizeFlags.ExpandFill };
+        panel.AddChild(scroll);
+        var column = new VBoxContainer { SizeFlagsHorizontal = SizeFlags.ExpandFill }; column.AddThemeConstantOverride("separation", 9); scroll.AddChild(column);
         column.AddChild(Palette.Text(IsFavor ? "IMPERIAL FAVOR" : Effect?.Definition?.Name ?? "ONGOING EFFECT", 22, Palette.Paper, true));
         if (IsFavor)
         {
@@ -96,7 +105,7 @@ public partial class HomeReminder : Button
             column.AddChild(Palette.Wrapped("Ongoing effect reminder · not a card in play", 15, Palette.Gold));
             column.AddChild(Palette.Wrapped(Effect.Definition?.Text ?? "", 16, Palette.Paper));
         }
-        return panel;
+        return shell;
     }
-    public override Control _MakeCustomTooltip(string forText) => CreateReadingPreview();
+    public override Control _MakeCustomTooltip(string forText) => HasMeta("flat_tooltip") ? null! : CreateReadingPreview();
 }

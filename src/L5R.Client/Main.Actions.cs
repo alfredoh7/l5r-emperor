@@ -69,7 +69,8 @@ public partial class Main
         if (_chosen is { Type: "useAbility", Command.CardIds: not null }) { RenderProvinceRefresh(); return; }
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); return; }
         if (_chosen is { Type: "discardHand" }) { RenderHandDiscard(); return; }
-        if (_selectedHomeReminder is not null) { AddHomeReminderActions(); return; }
+        // An inspected reminder must never hide a new engine decision (e.g. hand limit).
+        if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
         if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment)
         {
