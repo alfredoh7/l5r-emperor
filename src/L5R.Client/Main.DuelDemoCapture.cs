@@ -15,6 +15,7 @@ public partial class Main
     private string? _inspectionBeforeOpponentClick;
     private void ProcessDuelDemoCapture(double delta)
     {
+        if(_captureMode.StartsWith("menu-duel-guidance")) { ProcessDuelGuidanceCapture(delta); return; }
         if(_captureMode=="menu-duel-stages") { ProcessDuelStageCapture(delta); return; }
         var stamp=Time.GetTicksUsec();
         if(_duelProbeStep is >=4 and <=18 && _duelFrameStamp>0)_duelFrames.Add((stamp-_duelFrameStamp)/1000d);
@@ -69,6 +70,7 @@ public partial class Main
                 Press("Switch seat");break;
             case 8:Press("Reveal this seat");break;
             case 9:
+                Capture("quiet-crane");
                 var courtesy=host!.Session.Snapshot!.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
                 Native(host.Screen.CardClickPoint(courtesy.Id));break;
             case 10:

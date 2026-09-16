@@ -17,3 +17,6 @@ run_probe() {
 run_probe native 1920x1080 menu-duel
 run_probe small-reduced 1120x700 menu-duel-reduced
 run_probe stages 1672x941 menu-duel-stages
+
+run_probe guidance 1920x1080 menu-duel-guidance
+run_probe guidance-reduced 1120x700 menu-duel-guidance-reduced

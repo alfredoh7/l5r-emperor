@@ -18,7 +18,7 @@ An existing offline practice remains paused and unchanged. An active private tab
 
 ## Approved Twin lanes presentation
 
-Alfredo approved **Twin lanes with campaign-cloth (B) materials** on 2026-09-16, superseding the heavy in-duel toolbar and stacked focus menus. The exact approved capacity study is `assets/ui/duel-twin-lanes/approved-twin-lanes.png`. The new compact plaques are derived from B through imagegen; runtime crops and scales that raster for live labels. Original card scans, the existing mat/landscape and Musashi headings remain intact. See `assets/ui/duel-twin-lanes/README.md` for provenance.
+Alfredo approved **Twin lanes** placement, then **A / Ink and silence** styling with **3 / Quiet coaching** and **2 / Anchored guidance** available for additional help. The selected sources are in `assets/ui/duel-guidance/`. Permanent player, deck/discard count and Focused placards are removed. Imagegen-derived charcoal washes and a red brush cut replace the bolted panels; live Musashi Brush headings and Caudex body text preserve the original font family. Original card scans and the current mat/landscape remain intact.
 
 Each side has a fixed Fate deck and face-up Fate discard at its outer edge, a prominent flat personality with attachments, and a separate row of individually countable focused cards. The first two commitments occupy the central positions, then extend outward without moving already committed cards. Four normal commitments fit on each side; card count is not used as a substitute for the engine's legal-action query. The camera framing raises the mat and extends its near edge so the hand remains on the cloth.
 
@@ -27,6 +27,14 @@ Select a hand card, then click **Place focus**, press **Enter**, or drag it to t
 Fate discards open a public card spread. The visible pile face previews a public discard, preferentially a recently revealed focus after cleanup; the interface does not invent a chronological pile order. Dynasty discards, dead Personalities (shown sideways under **Fallen**), and removed cards stay distinct. Other destinations are accessible when relevant. Discard focusing remains available only when Core grants it.
 
 Reveals stay in their focus positions. After resolution, presentation transfers cards to their engine-provided destinations and clears the focus rows. **Review revealed cards** opens explicitly labeled history; it does not leave duplicate cards on the table. Totals remain beside their owners; **Continue** still holds the result and returns to setup. Reduced motion performs the same transfers immediately.
+
+## Guidance
+
+The active player sees one short **Your move** prompt describing currently legal focus/Strike choices. **Got it** clears that prompt for the current encounter; choosing a hand card or deck also clears it so guidance does not cover a lifted card. The initially unchecked **Do not show again** saves suppression only when the prompt is dismissed. Restart/reopening respects that preference. It is stored with the existing application settings, not match state or replay commands.
+
+**Menu → Duel guidance…** opens untimed, anchored explanations for the legal hand, blind-deck and Strike options, or the relevant special-stage decision. Help remains available when automatic guidance is off. **Menu → Show quiet coaching** restores the automatic prompt. Help supports keyboard focus and Escape; it pauses the solo opponent, but the board remains playable. It cannot submit a game command or expose hidden deck identities.
+
+Essential turn status, reactions, required decisions, errors and held results remain visible independently of coaching. Pile counts are available on inspection/hover rather than permanent plaques. The native guidance probe uses an isolated capture preference profile and checks explicit consent, persistence/reload, restored help, keyboard dismissal and no gameplay click-through at normal and compact reduced-motion resolutions.
 
 ## Prepared positions
 
@@ -60,7 +68,7 @@ These are Core-owned prepared positions, separate from playable decks. Dragon sc
 
 Run `L5R_PYTHON=/path/to/python3.12-or-newer bash tools/check.sh --skip-client` and `bash tools/check-duel-demo.sh` on a graphical desktop with the pinned Godot/.NET tools. Native checks write PNGs, logs and JSON into ignored `artifacts/duel-demo/`.
 
-The native suite enters through Play, submits commands using actual mouse/button input, tests handoffs and duplicate clicks, inspects a projected card, verifies the canonical 8–7 result, holds it through repeated snapshots, and returns to unchanged offline practice. It covers 1920×1080 normal motion, 1120×700 reduced motion, and thirteen additional scenario flows. Core tests cover atomic invalid choices, privacy, immediate results and deterministic replays. The bot completes all fourteen scenarios for seeds 1, 205 and 9876. Transport checks cover typed results and leaving/reconnecting to a private room without conceding.
+The native suite enters through Play, submits commands using actual mouse/button input, tests handoffs and duplicate clicks, inspects a projected card, verifies the canonical 8–7 result, holds it through repeated snapshots, and returns to unchanged offline practice. It covers 1920×1080 normal motion, 1120×700 reduced motion, and thirteen additional scenario flows with coaching disabled. Additional guidance probes exercise the saved preference and manual help at both resolutions. Core tests cover atomic invalid choices, privacy, immediate results and deterministic replays. The bot completes all fourteen scenarios for seeds 1, 205 and 9876. Transport checks cover typed results and leaving/reconnecting to a private room without conceding.
 
 Native Windows graphical acceptance remains open. Local Mac frame samples are evidence for this machine only. Grass/cloud animation quality remains its own visual acceptance track; the current detailed sky is an animated matte, not volumetric clouds.
 

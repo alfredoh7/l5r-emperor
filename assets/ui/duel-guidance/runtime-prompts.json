@@ -1,0 +1,16 @@
+{
+  "tool": "Built-in image_gen.imagegen",
+  "reference": "03-quiet-coaching.png",
+  "assets": [
+    {
+      "name": "ink-wash.png",
+      "prompt": "Use case: background-extraction. Create a production-ready UI sprite on a genuinely transparent background. Reference image is approved L5R duel UI; use only the subtle black ink wash behind YOUR MOVE and STRIKE as style reference. Output ONE blank horizontal near-black charcoal sumi ink wash, width about 3 times height, centered, no text, no red strokes, no cards, no scenery. Dense dark charcoal center for readable ivory text, tactile barely visible fibers, naturally feathered ragged dry brush edges fading into alpha. Refined restrained Japanese ink, not paint splatter. The wash occupies 95% of canvas width and 75% height. All outside pixels transparent. Absolutely no lettering, frame, bolts, ornament, or background. This will be stretched/nine-sliced behind live text.",
+      "output_hint": "Generated images are saved to /Users/alfredo/.codex/generated_images/01a09ee0-1ef5-78f1-918b-fbe2432918cf as /Users/alfredo/.codex/generated_images/01a09ee0-1ef5-78f1-918b-fbe2432918cf/exec-6675ccfe-1069-4899-8533-ebfdeab32cf4.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    },
+    {
+      "name": "red-slash.png",
+      "prompt": "Use case: background-extraction. Create ONE production-ready transparent UI sprite using the red brush slash beside STRIKE in the supplied approved L5R duel UI as style reference. Single crisp vermilion-red diagonal rising brush cut from lower left to upper right at about 30 degrees, approximately three times wider than tall. A few narrow dry-brush strands follow the same stroke. Rich darker crimson at base. Sharp energetic tapered ends, visceral yet refined. Output only the red ink slash on genuine transparent alpha, no text, no black wash, no cards, no other symbols, no splatters, no background. Occupy central 90% width.",
+      "output_hint": "Generated images are saved to /Users/alfredo/.codex/generated_images/01a09ee0-1ef5-78f1-918b-fbe2432918cf as /Users/alfredo/.codex/generated_images/01a09ee0-1ef5-78f1-918b-fbe2432918cf/exec-6f13e165-c1da-462c-bf44-21dca2f824ec.png by default.\nIf you need to use a generated image at another path, copy it and leave the original in place unless the user explicitly asks you to delete it.\nThe generated image is already displayed to the user. There is no need to render it in the final response as a Markdown image or file link."
+    }
+  ]
+}

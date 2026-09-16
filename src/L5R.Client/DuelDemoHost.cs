@@ -10,6 +10,7 @@ public partial class DuelDemoHost : Control
 {
     public event Action? ReturnToMenu;
     public bool ReducedMotion {get;set;}
+    public MenuPreferences Preferences {get;set;}=new("default");
     internal MatchSession Session {get;}=new();
     internal DuelScreen Screen {get;private set;}=null!;
     private Control _overlay=null!;
@@ -17,12 +18,15 @@ public partial class DuelDemoHost : Control
     private string _scenario="steel";
     private ulong _seed=DuelDemoScenarios.DefaultSeed;
     private int _seat;
-    private bool _manual,_setup=true,_handoff,_sending,_menuOpen,_readingPause;
+    private bool _manual,_setup=true,_handoff,_sending,_menuOpen,_readingPause,_helpPause;
     private double _botClock;
     public override void _Ready()
     {
         Theme=DuelUi.Theme();SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);MouseFilter=MouseFilterEnum.Ignore;
         Screen=new DuelScreen{ReducedMotion=ReducedMotion};AddChild(Screen);
+        Screen.SetGuidanceEnabled(Preferences.DuelGuidance);
+        Screen.SaveGuidancePreference=SaveGuidance;
+        Screen.GuidanceHelpChanged+=open=>_helpPause=open;
         _overlay=new Control{MouseFilter=MouseFilterEnum.Ignore};AddChild(_overlay);_overlay.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         Session.Changed+=Refresh;Session.Notice+=Notice;
         Screen.CommandRequested+=command=>_ = Submit(command);
@@ -80,19 +84,29 @@ public partial class DuelDemoHost : Control
         }
         Screen.InputLocked=_menuOpen;
         var scale=Math.Clamp(Math.Min(size.X/1672,size.Y/941),.8f,1.15f);
-        var menu=DuelUi.Button("Menu",()=>{_menuOpen=true;BuildOverlay();},scale:scale,fontSize:18);
+        var menu=DuelUi.Button("Menu",()=>{_menuOpen=true;BuildOverlay();},scale:scale,fontSize:34);
         menu.Position=new Vector2(18,16);menu.Size=new Vector2(115,42)*scale;_overlay.AddChild(menu);
         if(!_menuOpen)return;
         var veil=new ColorRect{Color=new Color(0,0,0,.55f),Size=size};_overlay.AddChild(veil);
-        var tools=DuelUi.Modal(veil,size,new Vector2(460,585),"Duel Demo");
+        var tools=DuelUi.Modal(veil,size,new Vector2(510,730),"Duel Demo");
         tools.AddChild(DuelUi.Wrapped($"{DuelDemoScenarios.Get(_scenario).Name} · seed {_seed}",16,Palette.PaperDim));
         AddButton(tools,"Resume",()=>{_menuOpen=false;BuildOverlay();},true);
+        AddButton(tools,"Duel guidance…",()=>{_menuOpen=false;BuildOverlay();Screen.OpenGuidance();});
+        var guidance=new CheckBox{Text="Show quiet coaching",ButtonPressed=Screen.GuidanceEnabled};tools.AddChild(guidance);
+        guidance.Toggled+=value=>{if(!Screen.SetGuidanceEnabled(value,true))guidance.SetPressedNoSignal(Screen.GuidanceEnabled);};
         AddButton(tools,"Restart",Prepare);
         AddButton(tools,"New deal",()=>{NewSeed();Prepare();});
         AddButton(tools,_manual?"Manual":"Solo",()=>{_manual=!_manual;_botClock=0;BuildOverlay();});
         AddButton(tools,"Switch seat",()=>{_menuOpen=false;SwitchSeat();});
         AddButton(tools,"Save replay",SaveReplay);
         AddButton(tools,"Return to menu",()=>ReturnToMenu?.Invoke());
+    }
+
+    private bool SaveGuidance(bool enabled)
+    {
+        var before=Preferences.DuelGuidance;Preferences.DuelGuidance=enabled;
+        if(Preferences.Save()==Error.Ok)return true;
+        Preferences.DuelGuidance=before;Notice("Could not save guidance preference. Please try again.");return false;
     }
 
     private static Button AddButton(Control parent,string text,Action action,bool primary=false)
@@ -121,7 +135,7 @@ public partial class DuelDemoHost : Control
     }
     public override void _Process(double delta)
     {
-        if(_setup||_manual||_handoff||_sending||_menuOpen||_readingPause||Screen.PresentationBusy||Session.Snapshot?.View.LastDuel is not {Complete:false})return;
+        if(_setup||_manual||_handoff||_sending||_menuOpen||_readingPause||_helpPause||Screen.PresentationBusy||Session.Snapshot?.View.LastDuel is not {Complete:false})return;
         _botClock+=delta;if(_botClock<(ReducedMotion?.15:.8))return;_botClock=0;
         Session.StepPracticeOpponent(DuelOpponent.Choose);
     }

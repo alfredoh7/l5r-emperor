@@ -23,7 +23,7 @@ public partial class Main
         void Capture(string suffix){GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+_stageScenarios[_scenarioProbe]+"-"+suffix+".png");}
         if(_scenarioPhase==0)
         {
-            _preferences.ReducedMotion=true;ApplyPreferences(false);_titleMenu!.ShowPlay();_scenarioPhase=-1;return;
+            _preferences.ReducedMotion=true;_preferences.DuelGuidance=false;ApplyPreferences(false);_titleMenu!.ShowPlay();_scenarioPhase=-1;return;
         }
         if(_scenarioPhase==-1)
         {
@@ -43,6 +43,8 @@ public partial class Main
         if(host!.Screen.PresentationBusy)return;
         if(Find("Reveal this seat") is not null){Press("Reveal this seat");return;}
         var v=host.Session.Snapshot!.View;
+        if(host.Screen.CoachingVisible)throw new Exception("Suppressed coaching reappeared in a required stage.");
+        if(v.PendingDuel is not null&&string.IsNullOrEmpty(host.Screen.EssentialStatus))throw new Exception("Required stage lost its essential status.");
         if(v.LastDuel!.Complete)
         {
             Capture("result");GD.Print($"DUEL_STAGE_CHECK: {_stageScenarios[_scenarioProbe]} complete through native controls, {v.Version} commands");

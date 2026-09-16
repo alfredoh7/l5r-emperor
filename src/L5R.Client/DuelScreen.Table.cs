@@ -54,8 +54,6 @@ public partial class DuelScreen
                 pile.Position=PlanePoint(PilePoint(side,zone))-new Vector2(pile.Size.X/2,pile.Size.Y/2+17);
                 _plane.AddChild(pile);_piles[(player.Id,zone)]=pile;
                 if(counts.TryGetValue((player.Id,zone),out var before))pile.SettleFrom(before,ReducedMotion||!animate);
-                var label=zone==Zone.FateDeck?"Fate deck":"Fate discard";
-                _tableLabels.Add((new Vector2(side==0?215:1457,zone==Zone.FateDeck?543:724),$"{label} · {pile.Count}",190,()=>SelectPile(player.Id,zone)));
             }
             var participant=participants.FirstOrDefault(c=>c.OwnerId==player.Id);
             if(participant is not null)
@@ -72,7 +70,6 @@ public partial class DuelScreen
                     var total=participant.Id==record.Challenger.Id?outcome.ChallengerTotal:outcome.ChallengedTotal;
                     _tableLabels.Add((new Vector2(center.X,576),$"{record.Stat} · {total}",150,null));
                 }
-                _tableLabels.Add((new Vector2(center.X,316),$"{player.Name}{(side==0?" · You":"")}",266,null));
             }
             CardView[] known;int count;
             if(_aftermathPlayed){known=[];count=0;}
@@ -89,7 +86,6 @@ public partial class DuelScreen
                 // engine-supported sets get a second row rather than dropping a card.
                 Add(card,FocusPoint(side,i%4)+Vector2.Down*(i/4)*100,160);
             }
-            _tableLabels.Add((new Vector2(side==0?520:1150,714),$"Focused · {count}",188,null));
             var dead=player.Discard.Where(c=>c.Zone==Zone.Dead).ToArray();
             if(_aftermathPlayed&&dead.Length>0)
             {
@@ -176,6 +172,7 @@ public partial class DuelScreen
         {
             if(owner!=Snapshot!.View.ViewerId)return;
             if(!Legal.Any(a=>a.Type=="focus"&&a.Command!.Choice=="deck"))return;
+            _coachingDismissed.Add(Snapshot!.View.ViewerId);_dontShowAgain=false;
             _selectedDeck=true;_selectedHand=null;_selectedInspection=null;RenderLanding();RenderActions();
         }
         else ShowPile(owner,zone);

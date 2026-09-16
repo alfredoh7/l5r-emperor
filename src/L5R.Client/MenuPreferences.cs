@@ -6,6 +6,7 @@ public sealed class MenuPreferences
 {
     public bool Fullscreen, ReducedMotion;
     public bool VSync = true;
+    public bool DuelGuidance = true;
     public float Atmosphere = .65f;
     public string DisplayName = "";
     public static string CleanName(string value)
@@ -20,6 +21,7 @@ public sealed class MenuPreferences
     {
         var config = new ConfigFile();
         if (config.Load(Path) != Error.Ok) return;
+        DuelGuidance = config.GetValue("duel", "guidance", true).AsBool();
         DisplayName = CleanName(config.GetValue("local", "display_name", "").AsString());
         Fullscreen = config.GetValue("display", "fullscreen", false).AsBool();
         ReducedMotion = config.GetValue("display", "reduced_motion", false).AsBool();
@@ -30,6 +32,7 @@ public sealed class MenuPreferences
     public Error Save()
     {
         var config = new ConfigFile();
+        config.SetValue("duel", "guidance", DuelGuidance);
         config.SetValue("local", "display_name", CleanName(DisplayName));
         config.SetValue("display", "fullscreen", Fullscreen);
         config.SetValue("display", "reduced_motion", ReducedMotion);

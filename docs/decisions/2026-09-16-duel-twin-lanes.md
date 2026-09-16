@@ -11,3 +11,5 @@ Card placement replaces the routine focus action stack. Selection/inspection and
 Fate/Dynasty discards, dead Personalities and removed cards remain separate. A reveal is held for presentation, then the cards visibly leave for the actual engine destinations. Any later view of that reveal is explicitly history. The screen does not claim the representative public discard face is an authoritative ordered pile top.
 
 This is UI work on existing contracts. No new duel rules, bot strategy, game-state relocation, normal-match activation or AAA atmosphere acceptance is implied.
+
+The persistent label/bolted plaque styling is superseded by [quiet guidance](2026-09-16-duel-quiet-guidance.md); Twin lanes placement is retained.

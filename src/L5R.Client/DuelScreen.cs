@@ -9,7 +9,8 @@ public partial class DuelScreen : Control
     public event Action<GameCommand>? CommandRequested;
     public event Action? PresentationFinished;
     public event Action<bool>? ReadingChanged;
-    public bool InputLocked { get; set; }
+    private bool _inputLocked;
+    public bool InputLocked { get=>_inputLocked; set {if(_inputLocked==value)return;_inputLocked=value;RenderGuidance();RenderLanding();} }
     public bool ReducedMotion { get; set; }
     public bool PresentationBusy => _revealQueue.Count>0 || _revealClock>0 || _cleanupClock>0;
     public SessionSnapshot? Snapshot { get; private set; }
@@ -48,7 +49,7 @@ public partial class DuelScreen : Control
         var changedSeat=Snapshot?.View.ViewerId!=snapshot.View.ViewerId;
         _previousZones=(Snapshot?.View.Players.SelectMany(p=>p.Hand.Concat(p.Focused??[]).Concat(p.Discard))??[]).ToDictionary(c=>c.Id,c=>c.Zone);
         Snapshot=snapshot;_submitted=false;_selectedDeck=false;_dragCard=null;ClearReading();
-        if(changedSeat){_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
+        if(changedSeat){CloseGuidance();_selectedHand=null;_selectedFocus=null;_selectedInspection=null;}
         var record=snapshot.View.LastDuel;
         if(record?.Id!=_duelId){_animateEntry=record is not null;_duelId=record?.Id;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;}
         foreach(var reveal in record?.Reveals??[])
@@ -62,7 +63,7 @@ public partial class DuelScreen : Control
     }
     public void ResetPresentation()
     {
-        Snapshot=null;_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
+        Snapshot=null;ResetGuidance();_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
         _selectedHand=null;_selectedFocus=null;_selectedInspection=null;_selectedDeck=false;_dragCard=null;_cleanupClock=0;_effectOrder=[];_commandCooldown=0;_animateEntry=false;ClearReading();
     }
     private void Layout()
@@ -82,7 +83,7 @@ public partial class DuelScreen : Control
         if(card.Definition is null||PresentationBusy||InputLocked)return;
         _selectedDeck=false;
         _selectedInspection=card.Id;
-        if(card.Zone==Zone.Hand && card.OwnerId==Snapshot!.View.ViewerId)_selectedHand=card.Id;
+        if(card.Zone==Zone.Hand && card.OwnerId==Snapshot!.View.ViewerId){_selectedHand=card.Id;_coachingDismissed.Add(Snapshot.View.ViewerId);_dontShowAgain=false;}
         else if(card.Zone==Zone.Focused && card.OwnerId==Snapshot!.View.ViewerId)_selectedFocus=card.Id;
         else {Inspect(card);return;}
         foreach(var tile in _tiles.Values){tile.Highlighted=tile.Card.Id==_selectedHand||tile.Card.Id==_selectedFocus;tile.QueueRedraw();}
@@ -90,6 +91,10 @@ public partial class DuelScreen : Control
     }
     private IEnumerable<ActionOption> Legal=>Snapshot?.Actions.Where(a=>a.Enabled&&a.Command is not null)??[];
     private void RenderActions()
+    {
+        RenderActionsCore();RenderGuidance();
+    }
+    private void RenderActionsCore()
     {
         if(_hud is null)return;
         ClearReading();
@@ -102,7 +107,7 @@ public partial class DuelScreen : Control
         _status.VerticalAlignment=VerticalAlignment.Center;_status.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);ribbon.AddChild(_status);
         _status.AddThemeColorOverride("font_shadow_color",Colors.Black);_status.AddThemeConstantOverride("shadow_offset_x",1);_status.AddThemeConstantOverride("shadow_offset_y",2);
         _status.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(19*_scale)));
-        _controlsRect=new Rect2(_offset+new Vector2(1190,795)*_scale,new Vector2(215,130)*_scale);
+        _controlsRect=new Rect2(_offset+new Vector2(1210,802)*_scale,new Vector2(340,128)*_scale);
         Control? inspectionParent=null;
         RenderTableLabels();
         _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",Math.Max(2,(int)(4*_scale)));_hud.AddChild(_actions);
@@ -151,16 +156,18 @@ public partial class DuelScreen : Control
     {
         var v=Snapshot!.View;
         return v.PendingChoice is {} pending ? $"{v.Players[v.PriorityPlayerId].Name} · {pending.Prompt}" : v.PendingDuel?.Stage switch {
-            "AwaitingAccept"=>$"{v.Players[v.PriorityPlayerId].Name} · accept or refuse the challenge", "Focusing"=>v.PriorityPlayerId==v.ViewerId?(Legal.Any(a=>a.Type=="focus")?"Your decision · commit a card or Strike":"Your decision · Strike"):$"{v.Players[v.PriorityPlayerId].Name} is deciding",
+            "AwaitingAccept"=>$"{v.Players[v.PriorityPlayerId].Name} · accept or refuse the challenge", "Focusing"=>v.PriorityPlayerId==v.ViewerId?(Legal.Any(a=>a.Type=="focus")?"Your move":"Your move · Strike"):"Opponent’s move",
             "DuelistRefocus"=>$"{v.Players[v.PriorityPlayerId].Name} · Duelist: select a focus card and its replacement, or keep your focus", "OrderingEffects"=>$"{v.Players[v.PriorityPlayerId].Name} · choose the order of Focus Effects", _=>"" };
     }
+    internal string EssentialStatus=>_status?.Text??"";
     private void Text(string text){var label=DuelUi.Wrapped(text,Math.Max(13,(int)(16*_scale)),Palette.Paper);_actions.AddChild(label);}
     private Button Button(string text,Action pressed,Control? parent=null)
     {
         var primary=text is "Strike" or "Continue" or "Resolve in this order";
         var buttonScale=_reading is null?_scale:1;
-        var b=DuelUi.Button(text,()=>{if(!_submitted&&_commandCooldown<=0)pressed();},primary,buttonScale,primary?19:17);
-        b.CustomMinimumSize=new Vector2(0,Math.Max(25,(primary?48:34)*buttonScale));
+        var b=DuelUi.Button(text,()=>{if(!_submitted&&_commandCooldown<=0)pressed();},primary,buttonScale,text=="Strike"?85:primary?25:17);
+        if(parent is null or VBoxContainer)b.AutowrapMode=TextServer.AutowrapMode.WordSmart;
+        b.CustomMinimumSize=new Vector2(0,Math.Max(25,(text=="Strike"?84:primary?48:34)*buttonScale));
         foreach(var state in new[]{"normal","hover","pressed","disabled"})
         {
             var style=(StyleBoxTexture)b.GetThemeStylebox(state);style.ContentMarginTop=style.ContentMarginBottom=4*buttonScale;
@@ -178,7 +185,7 @@ public partial class DuelScreen : Control
     public void SubmissionFinished(){_submitted=false;RenderActions();}
     private VBoxContainer Panel(string title,float height=620)
     {
-        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);
+        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);RenderGuidance();
         return DuelUi.Modal(shade,Size,new Vector2(690,height),title);
     }
     private void ChoicePanel(string title,ActionOption[] choices)
@@ -213,17 +220,19 @@ public partial class DuelScreen : Control
     private void Inspect(CardView card)
     {
         if(card.Definition is null)return;
-        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);
+        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);RenderGuidance();
         var h=Math.Min(700,Size.Y*.78f);var tile=new CardTile(card with{Bowed=false},true,_=>ClearReading(),_=>{})
         {FaceHeight=h,Size=Vector2.One*(h+12),Position=Size/2-Vector2.One*(h+12)/2,ReducedMotion=true,ShowTokenRail=false,Material=CardPaper.Reading};shade.AddChild(tile);
         var close=Button("Close inspection",ClearReading,shade);close.Position=new Vector2(Size.X/2-100,Size.Y*.92f);close.Size=new Vector2(200,35);
     }
-    public void ClearReading(){if(_reading is null)return;_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);}
+    public void ClearReading(){if(_reading is null)return;_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);RenderGuidance();}
     public override void _Input(InputEvent e)
     {
         if(!IsVisibleInTree()||InputLocked)return;
         if(e is InputEventKey{Pressed:true,Echo:false} key)
         {
+            if(key.Keycode==Key.Escape&&_helpOpen){CloseGuidance();GetViewport().SetInputAsHandled();return;}
+            if(_guidanceLayer is not null&&GetViewport().GuiGetFocusOwner() is {} focused&&_guidanceLayer.IsAncestorOf(focused))return;
             if(key.Keycode==Key.Escape && _reading is not null){ClearReading();GetViewport().SetInputAsHandled();return;}
             if(_reading is not null)return;
             if(key.Keycode is Key.Left or Key.Right && Snapshot is not null && !PresentationBusy)
@@ -237,6 +246,7 @@ public partial class DuelScreen : Control
         }
         if(e is InputEventMouse m)
         {
+            if(_guidanceRect.HasPoint(m.Position)){_table.ExitMouse();return;}
             if(_reading is null&&HandlePlacement(m))return;
             if(_reading is null&&!_controlsRect.HasPoint(m.Position)&&m.Position.Y>_offset.Y+310*_scale)
             {

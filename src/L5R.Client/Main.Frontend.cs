@@ -44,7 +44,7 @@ public partial class Main
         if (_session.Online) _session.LeavePrivateTable();
         _root.Hide(); _table.Hide(); _table.SetProcess(false); _titleMenu!.Hide();
         _cameraDragging = false; HideTableTooltip(); ReleaseTableFocus();
-        _duelDemo = new DuelDemoHost { ReducedMotion = _preferences.ReducedMotion };
+        _duelDemo = new DuelDemoHost { ReducedMotion = _preferences.ReducedMotion, Preferences = _preferences };
         _duelDemo.ReturnToMenu += CloseDuelDemo;
         _titleMenu.GetParent().AddChild(_duelDemo);
     }
