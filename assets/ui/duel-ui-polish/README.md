@@ -4,10 +4,10 @@ User-approved sources are copied here as approved-duel-title.png and approved-in
 
 ## Runtime assets
 
-- Art/DuelUi/duel-wordmark.png: generated with built-in imagegen from the title reference, 2172×724, original output copied unaltered. Persistent top-center overlay throughout challenge, focus and results.
-- Art/DuelUi/focus-frame.png: generated with built-in imagegen from the introduction/material reference, 1024×1536. Runtime AtlasTexture crops the exterior to (30,57,964,1420); live Satoshi text is separate.
+- Art/DuelUi/duel-wordmark.png: generated with built-in imagegen from the title reference, 2172×724, original output copied unaltered. Top-center overlay during introductions; fades before interactive play.
+- Art/DuelUi/focus-frame.png: generated with built-in imagegen from the introduction/material reference, 1024×1536. Runtime AtlasTexture crops the exterior to (30,57,964,1420); live heading text is separate (Musashi Brush after Alfredo’s font-name clarification).
 - Satoshi Bold: unmodified official Fontshare OTF with license and provenance in Art/Fonts/Satoshi-README.md.
-- Existing shared SidebarSkin lacquer artwork, Caudex and WeatheredQuill serve menu/help/inspection surfaces. Musashi remains on champion names, duel totals and Strike/Continue.
+- Existing shared SidebarSkin lacquer artwork, Caudex and WeatheredQuill serve menu/help/inspection surfaces. Musashi supplies champion names, turn/focus headings and Strike/Continue. Final totals are available in Duel details.
 
 ## Exact imagegen prompts
 

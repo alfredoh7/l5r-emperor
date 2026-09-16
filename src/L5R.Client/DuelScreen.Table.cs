@@ -153,9 +153,9 @@ public partial class DuelScreen
         _landing.Position=PlanePoint(FocusPoint(0,count%4)+Vector2.Down*(count/4)*76)-_landing.Size/2;
         foreach(var state in new[]{"normal","hover","pressed","disabled"})_landing.AddThemeStyleboxOverride(state,DuelUi.FocusFrame(state=="hover"));
         _landing.AddThemeStyleboxOverride("focus",Palette.Box(Colors.Transparent,Palette.Paper,1,0));
-        _landing.AddThemeFontOverride("font",DuelUi.Prompt);
+        _landing.AddThemeFontOverride("font",DuelUi.Heading);
         foreach(var state in new[]{"font_color","font_hover_color","font_pressed_color","font_focus_color"})_landing.AddThemeColorOverride(state,Palette.Paper);
-        _landing.AddThemeFontSizeOverride("font_size",29);
+        _landing.AddThemeFontSizeOverride("font_size",44);
         _landing.Disabled=_submitted||_commandCooldown>0;_landing.Pressed+=()=>Submit(command);_plane.AddChild(_landing);
         _landingCue=new Panel{Position=new Vector2(-6,-6),Size=_landing.Size+new Vector2(12,12),ShowBehindParent=true,MouseFilter=MouseFilterEnum.Ignore};_landing.AddChild(_landingCue);
         UpdateLandingCue(_lastHoverPointer);
@@ -177,7 +177,7 @@ public partial class DuelScreen
         _landingCue.AddThemeStyleboxOverride("panel",cue);
         foreach(var state in new[]{"normal","hover","pressed"})_landing.AddThemeStyleboxOverride(state,DuelUi.FocusFrame(hot));
         _landing.Text=hot&&_dragging?"RELEASE\nTO\nFOCUS":"PLACE\nFOCUS";
-        _landing.AddThemeFontSizeOverride("font_size",hot&&_dragging?20:29);
+        _landing.AddThemeFontSizeOverride("font_size",hot&&_dragging?30:44);
     }
     private void SelectPile(int owner,Zone zone)
     {

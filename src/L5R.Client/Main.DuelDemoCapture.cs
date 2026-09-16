@@ -83,7 +83,7 @@ public partial class Main
                 Check(host.Screen.OpeningRuns==1,"opening plays once and submits no extra command");
                 Check(!host.Screen.MastheadVisible,"DUEL title is gone when the introduction finishes");
                 var status=Descendants(host.Screen).OfType<Label>().Single(l=>l.Name=="Duel status");
-                Check(status.GetThemeFont("font").GetFontName().Contains("Satoshi"),"turn prompt uses the actual Satoshi typeface");
+                Check(status.GetThemeFont("font").GetFontName().Contains("Musashi",StringComparison.OrdinalIgnoreCase),"turn prompt uses the original Musashi Brush heading");
                 Check(host.Screen.UprightCount==2&&host.Screen.VisibleDiscardPiles==0,"upright champions with no decorative corner discard piles");
                 var champion=host.Session.Snapshot.View.LastDuel!.Challenger;
                 if(_uprightProbe==0){var point=host.Screen.CardClickPoint(champion.Id);Move(point);_uprightProbe++;return;}
@@ -135,7 +135,7 @@ public partial class Main
                         Move(_duelLastPlacement);Input.FlushBufferedEvents();_placementProbe++;return;
                     }
                     Check(host.Screen.LandingArmed&&Find("Focus selected card").Text=="RELEASE\nTO\nFOCUS","legal drag target clearly signals release to focus");
-                    Check(Find("Focus selected card").GetThemeFont("font").GetFontName().Contains("Satoshi"),"focus target uses the actual Satoshi typeface");Capture("drag-ready");
+                    Check(Find("Focus selected card").GetThemeFont("font").GetFontName().Contains("Musashi",StringComparison.OrdinalIgnoreCase),"focus target uses the original Musashi Brush heading");Capture("drag-ready");
                     Input.ParseInputEvent(new InputEventMouseButton{Position=_duelLastPlacement,GlobalPosition=_duelLastPlacement,ButtonIndex=MouseButton.Left,Pressed=false});
                 }
                 Input.FlushBufferedEvents();

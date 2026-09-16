@@ -126,7 +126,7 @@ public partial class DuelScreen : Control
         if(stage=="Focusing")
         {
             _status.Text=view.PriorityPlayerId==view.ViewerId?"YOUR MOVE":"OPPONENT’S MOVE";
-            _status.AddThemeFontOverride("font",DuelUi.Prompt);_status.AddThemeFontSizeOverride("font_size",Math.Max(22,(int)((view.PriorityPlayerId==view.ViewerId?40:32)*_scale)));
+            _status.AddThemeFontOverride("font",DuelUi.Heading);_status.AddThemeFontSizeOverride("font_size",Math.Max(22,(int)((view.PriorityPlayerId==view.ViewerId?70:56)*_scale)));
             ribbon.Position=_offset+new Vector2(606,280)*_scale;ribbon.Size=new Vector2(460,56)*_scale;
         }
         _controlsRect=new Rect2(_offset+new Vector2(1350,760)*_scale,new Vector2(295,150)*_scale);
