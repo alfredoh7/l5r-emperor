@@ -845,6 +845,31 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Personality wave 17 (issue #257): Kitsu Akai and the Lion Ancestor, wired in
+    /// conjunction. Kitsu Akai's Limited action is the engine's first "create a card" effect
+    /// (MatchEngine.CreatePersonality) -- CreateToken only ever adds a stat marker to an existing
+    /// card. The Lion Ancestor it creates is CardDefinition.CreatedOnly: never drawn from a deck or
+    /// a Province, entering play only through that effect, and (MatchEngine.DestroyUnits) removed
+    /// from the game rather than discarded once ordinary destruction finishes with it, since it has
+    /// no physical printed card to return to any pile. Both fields (its own Type and Clan) are
+    /// hand-corrected from the local catalogue's own mis-scoped raw record -- see
+    /// package_personality_wave_17.py's own OVERRIDE.</summary>
+    public static PublishedSnapshot PersonalityWave17 { get; } = LoadPersonalityWave17();
+
+    private static PublishedSnapshot LoadPersonalityWave17()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave17.json", "personality-wave-17", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected personality-wave-17 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-17 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-17 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

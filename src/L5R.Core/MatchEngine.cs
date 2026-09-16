@@ -351,6 +351,27 @@ public sealed partial class MatchEngine
         // here must resume back to the SAME purchasing player, not their opponent.
         else if(!OpenEntryReactionWindow(command.PlayerId,card)) OpenOverconfidentDrawWindow(command.PlayerId);
     }
+    // Kitsu Akai's own Limited action, "Create a ... Personality" (issue #257): mints a brand-new
+    // CardInstance from a CardDefinition that was never drawn from a deck or a Province -- the
+    // engine's first "create a card" primitive (CreateToken only ever adds a stat marker to an
+    // EXISTING card). Enters play through the same shared entry sequence Purchase above funnels
+    // through (FaceUp, own entry-reaction window, Overconfident) but skips every purchase-specific
+    // step (QuotePurchase's Gold cost, Proclaim eligibility, Refill) since nothing was recruited
+    // from a province -- "created, not recruited," the user's own phrase. Returns true exactly when
+    // OpenEntryReactionWindow/OpenOverconfidentDrawWindow returns true, mirroring their own bool
+    // convention so the calling ExecuteAbilityEffects case can decide whether to return early, the
+    // same shape low-market-equip/equip-battle already use. Only a Personality is implemented; a
+    // created Holding/Region/Attachment is recorded as accepted future scope, not built until a
+    // real card needs it (see docs/decisions).
+    private bool CreatePersonality(int ownerId, string definitionId)
+    {
+        var definition=CardCatalog.Get(definitionId);
+        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definitionId,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        _state.Cards.Add(card.Id,card);
+        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
+        QueueOverconfidentDraw(card);
+        return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
+    }
 
     /// <summary>Checks the special free recruitment of a higher-Experienced Personality over a
     /// lower-level Personality with the same title. Honor Requirement and Gold are deliberately not
@@ -1354,7 +1375,17 @@ public sealed partial class MatchEngine
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
             // Personality ends UP afterward. Attachments are unaffected (her own text names only the
             // Personality itself), so the attachment-discard loop above is left untouched.
-            if(actingPlayerId is int aid && Definition(card).Type==CardType.Personality && ControlsCelestialEffect(aid,"lady-matsus-rage"))
+            // A created card (Kitsu Akai's Lion Ancestor, issue #257) has no physical printed card
+            // to return to any discard pile -- checked first and unconditionally (not gated on
+            // actingPlayerId like Lady Matsu's Rage below), since battle resolution's own casualty
+            // sweep -- the most common way one actually dies -- calls this with no actingPlayerId at
+            // all.
+            if(Definition(card).CreatedOnly)
+            {
+                card.Zone=Zone.RemovedFromGame;
+                Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game.",card.OwnerId,card.Id);
+            }
+            else if(actingPlayerId is int aid && Definition(card).Type==CardType.Personality && ControlsCelestialEffect(aid,"lady-matsus-rage"))
             {
                 card.Zone=Zone.RemovedFromGame;
                 Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game (Lady Matsu's Rage).",card.OwnerId,card.Id);

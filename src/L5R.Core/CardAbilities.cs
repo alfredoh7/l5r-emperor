@@ -634,6 +634,18 @@ public static class AbilityCatalog
         // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
         // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
         ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
+        // Kitsu Akai (Second City, issue #257): the engine's first "create a card" effect --
+        // MatchEngine.CreatePersonality, no target of its own (the created card is not chosen, only
+        // named by the effect itself, the same "none" shape kano-token already uses for a no-target
+        // Limited action).
+        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none"),
+        // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword
+        // already covers exactly this shape (Volcano Tattoo's own generic Performer category), just
+        // with a single RequiredKeywords entry instead of two. The created Lion Ancestor is the usual
+        // cost-payer, but any other own Ancestor-keyword Personality at the battle qualifies too --
+        // Ancestor carries no mechanical rule of its own beyond this kind of qualification check
+        // (issue #257's own user spec).
+        ["kitsu-akai-battle"] = new("Battle", "Bow your performing Ancestor Personality and target an enemy card without attachments: Destroy it. Gain 1 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ancestor"], RequireNoAttachments: true),
     });
 }
 
@@ -1903,6 +1915,16 @@ public sealed partial class MatchEngine
             case "earths-hunger-destroy":
                 Card(command.PerformerId!).Bowed = true;
                 DestroyUnits([target!], actingPlayerId: player.Id);
+                break;
+            case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
+            case "kitsu-akai-battle":
+                // No StalwartNegatesBow check -- unlike lady-matsus-rage-bow-destroy's own bow
+                // (inflicted on an enemy target), this bow is the performer's own chosen cost
+                // payment, the same distinction earths-hunger-destroy's own cost-bow above already
+                // draws.
+                Card(command.PerformerId!).Bowed = true;
+                DestroyUnits([target!], actingPlayerId: player.Id);
+                GainHonor(player.Id, 1, "Kitsu Akai", source);
                 break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;

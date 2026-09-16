@@ -165,7 +165,10 @@ var tests = new (string Name, Action Run)[]
     ("Celestial wave 1: Lady Matsu's Rage's Battle action -- discards herself as its own cost, bows a target enemy card, and (tracked via the new MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten() itself) destroys it if it straightens later the same turn; that delayed destroy is an ordinary death, not redirected, since she has already left play by the time it fires", LadyMatsusRageBattleAction),
     ("Spell wave 1: Suitengu's Path -- a pure AttachGrantsKeyword carrier (Naval), the first published Spell to use that mechanism, attached via the real Equip (Battle) path", SuitengusPathNavalGrant),
     ("Spell wave 1: Scouring Flood -- a text-described static +2F trait (PersonalityForce's own new Effect-keyed Spell term, since unlike an Item a Spell never prints its own Force stat) applying whether bowed or not, plus a Battle ability that bows itself as its entire cost and moves a targeted defending Personality home", ScouringFloodForceAndMoveHome),
-    ("Spell wave 1: The Earth's Hunger -- a cost-choice Battle ability (own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round): normally bows the wielding Shugenja, but may bow the Spell itself instead when the wielder carries the Earth keyword", TheEarthsHungerCostChoice)
+    ("Spell wave 1: The Earth's Hunger -- a cost-choice Battle ability (own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round): normally bows the wielding Shugenja, but may bow the Spell itself instead when the wielder carries the Earth keyword", TheEarthsHungerCostChoice),
+    ("Personality wave 17: Kitsu Akai's Limited action -- the engine's first 'create a card' effect (MatchEngine.CreatePersonality), producing a Lion Ancestor straight into Zone.Home with the correct stats/keywords, no Proclaim window, once-per-turn Limited usage, and no restriction on coexisting with an already-in-play copy", KitsuAkaiCreatesLionAncestor),
+    ("Personality wave 17: Kitsu Akai's Battle ability -- 'bow your performing Ancestor Personality' (own-unbowed-personality-at-battle-with-keyword) rejects Kitsu Akai himself (no Ancestor keyword) but accepts the created Lion Ancestor as the cost-payer, destroying an enemy card without attachments and gaining 1 Honor", KitsuAkaiBattleAncestorCost),
+    ("Personality wave 17: a created card (Lion Ancestor) follows ordinary Personality destruction rules -- including the Dishonorable-death penalty -- through battle resolution's own casualty sweep, then is removed from the game rather than left in a discard pile, since it has no physical printed card to return to", LionAncestorDestructionRemovedFromGame)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -685,6 +688,77 @@ static void TheEarthsHungerCostChoice()
         Check(!e.State.Cards[wielder.Id].Bowed,"Wielder left unbowed");
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
     }
+}
+static void KitsuAkaiCreatesLionAncestor()
+{
+    // The engine's first "create a card" effect (MatchEngine.CreatePersonality). No restriction on
+    // created-card copies (issue #257's own spec): a Lion Ancestor already in play does not block
+    // creating a second one.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+    var akai=Add(s,"oracle-l5r-4371",0,Zone.Home);
+    Add(s,"oracle-l5r-9785",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    var before=e.State.Cards.Keys.ToHashSet();
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,AbilityId:"kitsu-akai-create"));
+    var createdId=e.State.Cards.Keys.Except(before).Single();
+    var created=e.State.Cards[createdId];
+    Equal(created.DefinitionId,"oracle-l5r-9785","Created directly from the definition, not drawn from any deck/Province");
+    Equal(created.OwnerId,0);
+    Equal(created.Zone,Zone.Home,"Enters play directly in Home, like any other Personality (Zone.Home already IS in play here)");
+    Check(created.FaceUp,"Face up on entry");
+    Check(!created.Bowed,"Straightened by default -- the Lion Ancestor carries no enters-bowed effect");
+    Check(e.State.PendingChoice is null,"No Proclaim window -- created, not recruited; and no entry-reaction/Overconfident window either, since the Lion Ancestor has neither");
+    Equal(e.State.Cards.Values.Count(c=>c.DefinitionId=="oracle-l5r-9785" && c.OwnerId==0),2,"Coexists with the pre-existing copy -- no restriction on created-card copies");
+    var def=CardCatalog.Get(created.DefinitionId);
+    Equal(def.Force,2); Equal(def.Chi,2); Equal(def.PersonalHonor,3);
+    Check(def.CreatedOnly,"Flagged as created-only -- cannot be included in a deck");
+    foreach(var keyword in new[]{"Lion Clan","Samurai","Ancestor","Spirit"})
+        Check(def.Keywords!.Contains(keyword),$"Carries the {keyword} keyword named in Kitsu Akai's own Limited text");
+    // Limited, once per turn, like any other.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,AbilityId:"kitsu-akai-create"));
+}
+static void KitsuAkaiBattleAncestorCost()
+{
+    // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword,
+    // Volcano Tattoo's own generic Performer category, with a single RequiredKeywords entry. Kitsu
+    // Akai himself does not qualify (no Ancestor keyword of his own); the created Lion Ancestor
+    // (or any other own Ancestor Personality at the battle) does.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var akai=Add(s,"oracle-l5r-4371",0,Zone.Battlefield,province:0);
+    var ancestor=Add(s,"oracle-l5r-9785",0,Zone.Battlefield,province:0);
+    var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var honorBefore=e.State.Players[0].Honor;
+    // Kitsu Akai himself lacks the Ancestor keyword.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,TargetId:enemy.Id,AbilityId:"kitsu-akai-battle",PerformerId:akai.Id));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,TargetId:enemy.Id,AbilityId:"kitsu-akai-battle",PerformerId:ancestor.Id));
+    Check(e.State.Cards[ancestor.Id].Bowed,"The performing Ancestor Personality is bowed as the cost");
+    Check(!e.State.Cards[akai.Id].Bowed,"Kitsu Akai himself is untouched -- he is not the performer here");
+    Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    Equal(e.State.Players[0].Honor,honorBefore+1,"Gain 1 Honor");
+}
+static void LionAncestorDestructionRemovedFromGame()
+{
+    // A created card has no physical printed card to return to any discard pile: once ordinary
+    // destruction rules finish with it, it goes to RemovedFromGame instead -- exercised here through
+    // battle resolution's own Force-comparison casualty sweep (no actingPlayerId at all), the most
+    // common way one actually dies, not a specific ability's own actingPlayerId-carrying destroy.
+    // Dishonorable=true also exercises the ordinary Dishonorable-death penalty first, confirming
+    // "it follows the rules of destruction" -- normal Personality death consequences are untouched,
+    // only where the card ends UP afterward changes.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+    s.Players[1].Provinces[0].Strength=1;
+    var attacker=Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+    attacker.Modifiers=[new("test-fixture","test-fixture","Force",8-5)]; // Force 8, outright win
+    var ancestor=Add(s,"oracle-l5r-9785",1,Zone.Battlefield,province:0); // Force 2, defending
+    ancestor.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s);
+    var honorBefore=e.State.Players[1].Honor;
+    Resolve(e);
+    Equal(e.State.Cards[ancestor.Id].Zone,Zone.RemovedFromGame,"Created card: removed from the game once destruction finishes, not left in an ordinary discard pile");
+    Equal(e.State.Players[1].Honor,honorBefore-CardCatalog.Get(ancestor.DefinitionId).PersonalHonor,"Ordinary destruction rules still applied first -- the Dishonorable-death penalty fires exactly as it would for any other Personality");
 }
 static void ChooseStraightenDecline()
 {
