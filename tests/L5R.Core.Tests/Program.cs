@@ -162,7 +162,10 @@ var tests = new (string Name, Action Run)[]
     ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip),
     ("Celestial primitive: enters play immediately on reveal (Zone.Celestial), province refills; a new Celestial entering play discards every OTHER Celestial the SAME player controls, never the opponent's", CelestialAttachmentPrimitive),
     ("Celestial wave 1: Lady Matsu's Rage's own destroy-redirect trait, wired into DestroyUnits' single shared choke point -- redirects a Ranged/Melee Attack's own destroy to RemovedFromGame when the attacker controls her, but never battle resolution's own Force-comparison casualty sweep, even in a battle she controller declared", LadyMatsusRageDestroyRedirect),
-    ("Celestial wave 1: Lady Matsu's Rage's Battle action -- discards herself as its own cost, bows a target enemy card, and (tracked via the new MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten() itself) destroys it if it straightens later the same turn; that delayed destroy is an ordinary death, not redirected, since she has already left play by the time it fires", LadyMatsusRageBattleAction)
+    ("Celestial wave 1: Lady Matsu's Rage's Battle action -- discards herself as its own cost, bows a target enemy card, and (tracked via the new MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten() itself) destroys it if it straightens later the same turn; that delayed destroy is an ordinary death, not redirected, since she has already left play by the time it fires", LadyMatsusRageBattleAction),
+    ("Spell wave 1: Suitengu's Path -- a pure AttachGrantsKeyword carrier (Naval), the first published Spell to use that mechanism, attached via the real Equip (Battle) path", SuitengusPathNavalGrant),
+    ("Spell wave 1: Scouring Flood -- a text-described static +2F trait (PersonalityForce's own new Effect-keyed Spell term, since unlike an Item a Spell never prints its own Force stat) applying whether bowed or not, plus a Battle ability that bows itself as its entire cost and moves a targeted defending Personality home", ScouringFloodForceAndMoveHome),
+    ("Spell wave 1: The Earth's Hunger -- a cost-choice Battle ability (own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round): normally bows the wielding Shugenja, but may bow the Spell itself instead when the wielder carries the Earth keyword", TheEarthsHungerCostChoice)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -615,6 +618,73 @@ static void LadyMatsusRageBattleAction()
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:horibe.Id,TargetId:target.Id,AbilityId:"horibe-straighten"));
     Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Destroyed after straightening the same turn -- not redirected, since she already left play");
     Check(!e.State.PendingLadyMatsusRageWatches.Any(w=>w.TargetId==target.Id),"Watch consumed");
+}
+static void SuitengusPathNavalGrant()
+{
+    // Attached via the real Equip (Battle) path -- a Spell's own AttachGrantsKeyword, new territory
+    // (the mechanism itself is unchanged/generic; Suitengu's Path is the first published Spell to use it).
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+    Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // opposed
+    var spell=Add(s,"oracle-l5r-10133",0,Zone.Hand); // GoldCost 0
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,SourceIds:[],TargetId:spell.Id,AbilityId:"equip-battle",PerformerId:shugenja.Id));
+    Equal(e.State.Cards[spell.Id].Zone,Zone.Attached);
+    Check(e.GetView(0).Players[0].Army.Single(c=>c.Id==shugenja.Id).GrantedKeywords!.Any(g=>g.Keyword=="Naval"),"The wielder gains Naval");
+}
+static void ScouringFloodForceAndMoveHome()
+{
+    // "This Personality has +2F" applies whether bowed or not, every phase -- unlike an Item, a
+    // Spell never prints its own Force stat, so this is Effect-keyed (PersonalityForce's own new term).
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        var wielder=Add(s,"training-shugenja",0,Zone.Home,bowed:true);
+        Add(s,"oracle-l5r-6502",0,Zone.Attached,attachedTo:wielder.Id);
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==wielder.Id).Force,3,"Base Force 1 + 2 from Scouring Flood, applies even bowed");
+    }
+    // Battle ability: bowing itself is the cost; moves a targeted defending Personality home,
+    // without bowing it further.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var wielder=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var spell=Add(s,"oracle-l5r-6502",0,Zone.Attached,attachedTo:wielder.Id,province:0);
+        var defender=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:defender.Id,AbilityId:"scouring-flood-move-home"));
+        Check(e.State.Cards[spell.Id].Bowed,"Bowing itself is the cost");
+        Equal(e.State.Cards[defender.Id].Zone,Zone.Home,"Moved home");
+        Check(!e.State.Cards[defender.Id].Bowed,"Move home does not itself bow the target");
+    }
+}
+static void TheEarthsHungerCostChoice()
+{
+    // Without Earth: must bow the wielder -- the Spell itself is not a legal cost-payer.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var wielder=Add(s,"training-shugenja",0,Zone.Battlefield,province:0); // Phoenix, no Earth keyword
+        var spell=Add(s,"oracle-l5r-9889",0,Zone.Attached,attachedTo:wielder.Id,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:enemy.Id,AbilityId:"earths-hunger-destroy",PerformerId:spell.Id));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:enemy.Id,AbilityId:"earths-hunger-destroy",PerformerId:wielder.Id));
+        Check(e.State.Cards[wielder.Id].Bowed,"Wielder bowed -- the only legal cost-payer without Earth");
+        Check(!e.State.Cards[spell.Id].Bowed,"Spell itself untouched");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    }
+    // With Earth: the player may choose to bow the Spell itself instead, leaving the wielder unbowed.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var wielder=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        wielder.GrantedKeywords=[new("Earth","test-fixture","Permanent")];
+        var spell=Add(s,"oracle-l5r-9889",0,Zone.Attached,attachedTo:wielder.Id,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:enemy.Id,AbilityId:"earths-hunger-destroy",PerformerId:spell.Id));
+        Check(e.State.Cards[spell.Id].Bowed,"Chose to bow the Spell itself instead, since the wielder is Earth");
+        Check(!e.State.Cards[wielder.Id].Bowed,"Wielder left unbowed");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    }
 }
 static void ChooseStraightenDecline()
 {

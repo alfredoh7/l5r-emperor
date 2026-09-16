@@ -623,6 +623,17 @@ public static class AbilityCatalog
         // itself, and cleared unconsumed at EndTurn -- "this turn" (the printed parenthetical) is
         // enforced structurally by that clear, not by comparing a stored turn number.
         ["lady-matsus-rage-bow-destroy"] = new("Battle", "Choose your performing unbowed attacking Personality, target an enemy card, and discard this card: Bow the target. After the next time (this turn) it straightens, destroy it.", "enemy-card", Performer: "own-unbowed-attacking-personality-at-battle"),
+        // Scouring Flood (Seeds of Decay wave, the first real Spell wired): "This Personality has
+        // +2F" is not a separate ability at all -- her own printed Force box now conveys to her
+        // wielder unconditionally via PersonalityForce's own new Spell term (see its doc comment),
+        // the same "always applies, bowed or not, every phase" shape an Item's Force box already had.
+        // Her own printed Battle ability bows herself (the Spell) as its entire cost -- no Performer
+        // needed, since nothing chooses which card acts, unlike Lady Matsu's Rage/The Earth's Hunger.
+        ["scouring-flood-move-home"] = new("Battle", "Bow this card and target a defending Personality: Move him home", "defending"),
+        // The Earth's Hunger (The Shadow's Embrace, the second Spell): "Bow this Shugenja, or bow
+        // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
+        // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
+        ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
     });
 }
 
@@ -1187,6 +1198,12 @@ public sealed partial class MatchEngine
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
+            // The check above only ever applies to a Personality-type source -- a Spell's own Battle
+            // ability (Scouring Flood, The Earth's Hunger) needs its own equivalent: AtBattle(source)
+            // already resolves an ATTACHED card's own parent correctly (same helper Khol Regulars'
+            // own Reaction uses), so this is exactly "the Spell's own wielder is at this battlefield."
+            if (id is "scouring-flood-move-home" or "earths-hunger-destroy")
+                Require(AtBattle(source!), "This Spell's own wielder must be at the current battlefield.");
         }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
@@ -1296,6 +1313,15 @@ public sealed partial class MatchEngine
                 // pathway" logic needed.
                 "own-source-or-unbowed-holding-with-keyword" => performer.Id == source!.Id
                     || Definition(performer).Type == CardType.Holding && !performer.Bowed && HasKeywords(performer, ability.RequiredKeywords),
+                // The Earth's Hunger: "Bow this Shugenja, or bow this card if he is Earth" -- a cost
+                // choice too, but shaped the other way round from Xijkt's own: the CONDITION is
+                // checked against the WIELDER (the card this Spell is attached to), not against the
+                // alternate candidate itself (there is no candidate-side keyword to check -- the
+                // Spell is always eligible once the wielder qualifies). The wielder is always an
+                // eligible choice; no "must be unbowed" check on the wielder either, same reasoning
+                // as Xijkt's own comment above.
+                "own-wielder-or-source-with-wielder-keyword" => performer.Id == Card(source!.AttachedTo!).Id
+                    || performer.Id == source.Id && HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords),
                 // Tamori Yayu (issue #216): the same "select one more card, separately from the
                 // Attack's own target" shape -- here, which of Yayu's own Spells pays the cost.
                 "own-spell-attached-to-source" => Definition(performer).Type == CardType.Spell && performer.AttachedTo == source!.Id,
@@ -1873,6 +1899,11 @@ public sealed partial class MatchEngine
                 }
                 break;
             }
+            case "scouring-flood-move-home": source!.Bowed = true; MoveHome(target!, false); break;
+            case "earths-hunger-destroy":
+                Card(command.PerformerId!).Bowed = true;
+                DestroyUnits([target!], actingPlayerId: player.Id);
+                break;
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -2576,6 +2607,8 @@ public sealed partial class MatchEngine
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
+                "own-wielder-or-source-with-wielder-keyword" => HasKeywords(Card(source!.AttachedTo!), ability.RequiredKeywords)
+                    ? new[] { Card(source.AttachedTo!).Id, source.Id } : new[] { Card(source.AttachedTo!).Id },
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
