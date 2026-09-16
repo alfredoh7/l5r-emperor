@@ -23,7 +23,8 @@ public sealed partial class MatchEngine
                 // Counts are public; identities are private unless already publicly focused from
                 // discard or revealed by Strike. Anonymous backs need no stable hidden card IDs.
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
-                owned.Count(c=>c.Zone==Zone.Focused));
+                EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
+                FocusCount:owned.Count(c=>c.Zone==Zone.Focused));
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
