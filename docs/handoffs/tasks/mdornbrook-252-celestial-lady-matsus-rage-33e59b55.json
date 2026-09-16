@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire the first Celestial (issue #252): a new entry-instantly-on-reveal primitive (Zone.Celestial, ResolveCelestial, discard-all-other-celestials-this-player-controls) plus Lady Matsu's Rage -- her destroy-redirect trait wired into DestroyUnits' own shared choke point (actingPlayerId threaded through every Action-Timed, non-battle-resolution destroy call site across MatchEngine.cs/CardAbilities.cs/Dueling.cs), and her Battle action's delayed bow-then-straighten-destroy tracked via a new reactive watch (MatchState.PendingLadyMatsusRageWatches, checked from Straighten() itself). Marked shared only because the packaging script copies the scan into src/L5R.Client/Content/Published/ (the same data-asset path every other wave already writes to) and PlayerView gained a new Celestials field the client will eventually read -- no actual client/UI code changed; rendering the new sideboard zone is explicitly deferred to Alfredo (see the decision doc).",
+  "validation": "bash tools/check.sh --skip-client: 158/158 core (4 new regression tests), 52/52 published (bumped the pinned catalog-size assertion 276->277), 9/9 deck-format, 10/10 deck-workshop, 14/14 AI, 5/5 server, 4/4 client-transport, plus both Python content/collaboration unittest suites -- all green. dotnet build of src/L5R.Client/L5R.Client.csproj also succeeds.",
+  "remaining": "None for the card itself. UI rendering of the Celestial sideboard is explicitly deferred to Alfredo (UI lane) per the decision doc.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/252",
+  "branch": "mdornbrook/252-celestial-lady-matsus-rage",
+  "updated": "2026-09-16T13:51:19.548057+00:00"
+}

@@ -612,12 +612,23 @@ public static class AbilityCatalog
         // presence there -- see its own Require below (id == "fallow-lands-reaction"). Usable the same
         // turn Fallow Lands enters play: nothing about entry timing blocks a same-turn Reaction here.
         ["fallow-lands-reaction"] = new("Reaction", "If this Region's own province is under attack and its controller has presence there, after a Melee or Ranged Attack is targeted: -2 strength", "none", Trigger: "before-attack-resolves"),
+        // Lady Matsu's Rage (the first Celestial, Embers of War): "Battle: Choose your performing
+        // unbowed attacking Personality, target an enemy card, and discard this card: Bow the target.
+        // After the next time (this turn) it straightens, destroy it." Her own trait ("After your
+        // action resolves that destroyed any Personalities: Remove them from the game") is not a
+        // separate ability entry at all -- it is wired directly into DestroyUnits' own shared choke
+        // point (see its own doc comment, and ControlsCelestialEffect), live for as long as she stays
+        // in Zone.Celestial. The delayed "destroy it once it straightens" half of THIS ability is
+        // tracked in MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten()
+        // itself, and cleared unconsumed at EndTurn -- "this turn" (the printed parenthetical) is
+        // enforced structurally by that clear, not by comparing a stored turn number.
+        ["lady-matsus-rage-bow-destroy"] = new("Battle", "Choose your performing unbowed attacking Personality, target an enemy card, and discard this card: Bow the target. After the next time (this turn) it straightens, destroy it.", "enemy-card", Performer: "own-unbowed-attacking-personality-at-battle"),
     });
 }
 
 public sealed partial class MatchEngine
 {
-    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached or Zone.Region;
+    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached or Zone.Region or Zone.Celestial;
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
@@ -986,7 +997,7 @@ public sealed partial class MatchEngine
             var target = Card(targetId);
             if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
             {
-                DestroyAttackTarget(target);
+                DestroyAttackTarget(target, playerId);
                 if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
             }
         }
@@ -1247,6 +1258,10 @@ public sealed partial class MatchEngine
             Require(ability.Performer switch {
                 "shugenja" => Definition(performer).Type == CardType.Personality && Keyword(performer, "Shugenja") && !performer.Bowed,
                 "own-unbowed-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer),
+                // Lady Matsu's Rage's own printed restriction: "your performing unbowed ATTACKING
+                // Personality" -- narrower than own-unbowed-personality-at-battle, which allows either
+                // side of the battle.
+                "own-unbowed-attacking-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && IsAttacking(performer),
                 "own-unbowed-samurai-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) && Keyword(performer, "Samurai"),
                 // Generic "Choose your performing [Keyword(s)] Personality" at battle -- for any card
                 // naming one or more keywords with no mechanical rule of their own (all independently
@@ -1844,6 +1859,20 @@ public sealed partial class MatchEngine
                 if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
                 break;
             }
+            case "lady-matsus-rage-bow-destroy":
+            {
+                // "Discard this card" is the cost -- she leaves play by discard, not destruction (her
+                // own controller-scoped destroy-redirect trait no longer applies to anything once she
+                // is gone, including this very card, which was never destroyed in the first place).
+                source!.Zone = Zone.DynastyDiscard;
+                Emit("celestialDiscarded", $"{Definition(source).Name} was discarded to use its Battle action.", player.Id, source.Id);
+                if (!StalwartNegatesBow(target!, player.Id))
+                {
+                    target!.Bowed = true;
+                    _state.PendingLadyMatsusRageWatches.Add(new(target.Id, player.Id));
+                }
+                break;
+            }
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -1898,7 +1927,7 @@ public sealed partial class MatchEngine
             // Lion Clan Personality review (issue #198):
             case "dairuko-exp-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                if (Keyword(target!, "Unaligned")) DestroyUnits([target!], false);
+                if (Keyword(target!, "Unaligned")) DestroyUnits([target!], false, player.Id);
                 break;
             case "furu-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "furu-straighten": Straighten(target!); break;
@@ -1932,7 +1961,7 @@ public sealed partial class MatchEngine
             case "atsumichi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "atsumichi-straighten": Straighten(target!); break;
             case "tetsuo-destroy-attachment": DestroyAttachment(target!); break;
-            case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true); break;
+            case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true, player.Id); break;
             // Bowing the target Farm IS the cost; the effect is the counter increment, not applied to
             // the Farm itself. Consumed by PersonalityForce/FollowerForce (Keyword "Ashigaru" + AtBattle).
             case "training-ashigaru-boost": case "ashigaru-elite-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
@@ -1967,7 +1996,7 @@ public sealed partial class MatchEngine
                             ApplyModifier(follower, source!.Id, id, "Force", 1);
                 break;
             }
-            case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true); break;
+            case "elite-sentry-destroy": case "thunderous-legion-destroy": DestroyUnits([target!], true, player.Id); break;
             case "brothers-great-lake-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "elite-sentry-straighten":
             {
@@ -1977,7 +2006,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "furugaro-charge":
-                DestroyUnits([source!], false);
+                DestroyUnits([source!], false, player.Id);
                 CreateToken(target!, "Charging", id);
                 CreateToken(target!, "Charging", id);
                 break;
@@ -1990,7 +2019,7 @@ public sealed partial class MatchEngine
                 var performer = Card(command.PerformerId!);
                 performer.Bowed = true;
                 var destroyedAttachment = Definition(target!).Type == CardType.Follower;
-                DestroyUnits([target!], false);
+                DestroyUnits([target!], false, player.Id);
                 if (destroyedAttachment && Keyword(performer, "Fire")) Straighten(performer);
                 break;
             }
@@ -2018,12 +2047,14 @@ public sealed partial class MatchEngine
             {
                 if (source!.Zone != Zone.Hand) source.Bowed = true;
                 var performer = Card(command.PerformerId!);
-                DestroyUnits([performer]);
-                DestroyUnits([target!]);
+                DestroyUnits([performer], actingPlayerId: player.Id);
+                DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
             }
             case "rokai-negate-destruction":
             {
+                // Reaction-Timed, not an Action -- Lady Matsu's Rage's own trait is scoped to "your
+                // action resolves," so intentionally left without actingPlayerId here.
                 var pending = _state.PendingNegatableAbility!;
                 DestroyUnits([source!]); // Rokai's own cost -- destroying himself, unaffected by the negation signal set just below
                 _state.NegatedEffectKind = "destroy"; _state.NegatedEffectCardId = pending.TargetId;
@@ -2039,7 +2070,7 @@ public sealed partial class MatchEngine
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
-                DestroyUnits([source], false);
+                DestroyUnits([source], false, player.Id);
                 break;
             case "ring-of-void-draw":
                 if (source!.Zone != Zone.Hand) source.Bowed = true;
@@ -2057,8 +2088,8 @@ public sealed partial class MatchEngine
             case "unseen-assassin-strike":
                 // Limited (Action phase), not battle -- combatDestruction stays false for both.
                 source!.Bowed = true;
-                DestroyUnits([target!], false);
-                DestroyUnits([source], false);
+                DestroyUnits([target!], false, player.Id);
+                DestroyUnits([source], false, player.Id);
                 GainHonor(player.Id, -2, "Unseen Assassins", source);
                 break;
             case "asahina-straighten":
@@ -2125,7 +2156,7 @@ public sealed partial class MatchEngine
                 if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any()) MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
                 else MoveHome(source!, false);
                 break;
-            case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!]); break;
+            case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!], actingPlayerId: player.Id); break;
             case "xijkt-bow":
                 Card(command.PerformerId!).Bowed = true;
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
@@ -2144,7 +2175,7 @@ public sealed partial class MatchEngine
             case "mitoshi-straighten": Straighten(target!); break;
             case "shikei-draw": Draw(player); break;
             case "yozo-exp-destroy":
-                if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!]);
+                if (HasClanAffiliation(target!, "Lion")) RemoveFromGame(target!); else DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
             case "jinai-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "muzu-bow":
@@ -2366,7 +2397,21 @@ public sealed partial class MatchEngine
         }
         else if (Definition(card).Effect == "skip-first-straighten" && Player(card.OwnerId).TurnsTaken < 2)
             Emit("straightenNegated", $"{Definition(card).Name} could not straighten.", card.OwnerId, card.Id);
-        else card.Bowed = false;
+        else
+        {
+            card.Bowed = false;
+            // Lady Matsu's Rage: "After the next time (this turn) it straightens, destroy it." The
+            // ONLY place a card actually straightens by game effect -- see LadyMatsusRageWatch's own
+            // doc comment -- so this is the correct, complete hook; nothing further needs to check it
+            // elsewhere. Consumed (removed) the instant it fires.
+            var watch = _state.PendingLadyMatsusRageWatches.FirstOrDefault(w => w.TargetId == card.Id);
+            if (watch is not null)
+            {
+                _state.PendingLadyMatsusRageWatches.Remove(watch);
+                Emit("ladyMatsusRageTriggered", $"{Definition(card).Name} straightened after being bowed by Lady Matsu's Rage -- destroyed.", card.OwnerId, card.Id);
+                DestroyUnits([card], actingPlayerId: watch.ActingPlayerId);
+            }
+        }
     }
     // Dragon Clan review (issue #207): "straighten his unit" (Mirumoto Houken's own shape) --
     // straightens the card AND every attachment, unlike the single-card Straighten calls every
@@ -2462,10 +2507,10 @@ public sealed partial class MatchEngine
     }
     // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
     // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.
-    private void DestroyAttackTarget(CardInstance target)
+    private void DestroyAttackTarget(CardInstance target, int playerId)
     {
         if (Definition(target).Type == CardType.Follower) DestroyAttachment(target);
-        else DestroyUnits([target], true);
+        else DestroyUnits([target], true, playerId);
     }
     private void DestroyAttachment(CardInstance card)
     {
@@ -2525,6 +2570,7 @@ public sealed partial class MatchEngine
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-attacking-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && IsAttacking(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle-with-keyword" =>
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),

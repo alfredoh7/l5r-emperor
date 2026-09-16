@@ -159,7 +159,10 @@ var tests = new (string Name, Action Run)[]
     ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect keeps firing every subsequent Events Phase, on either player's turn, with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay),
     ("Region primitive: a Region attaches to a PROVINCE (the new Zone.Region/ProvinceState.RegionId), not to a card; a second Region revealed at an already-regioned province is discarded instead of replacing the first; destroying a province discards whichever Region was attached to it and clears the pointer", RegionAttachmentPrimitive),
     ("Region wave 1: Fallow Lands -- a static province-strength bonus live-recomputed from the attached Region (EffectiveProvinceStrength), applied immediately without respect to presence; reveal/attach/refill mechanics; its Reaction weakens a Melee/Ranged Attack by 2, usable the same turn it enters play, gated on the Attack actually being at Fallow Lands' own province with its controller's own presence there (a Region never satisfies presence itself)", FallowLandsRegion),
-    ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip)
+    ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip),
+    ("Celestial primitive: enters play immediately on reveal (Zone.Celestial), province refills; a new Celestial entering play discards every OTHER Celestial the SAME player controls, never the opponent's", CelestialAttachmentPrimitive),
+    ("Celestial wave 1: Lady Matsu's Rage's own destroy-redirect trait, wired into DestroyUnits' single shared choke point -- redirects a Ranged/Melee Attack's own destroy to RemovedFromGame when the attacker controls her, but never battle resolution's own Force-comparison casualty sweep, even in a battle she controller declared", LadyMatsusRageDestroyRedirect),
+    ("Celestial wave 1: Lady Matsu's Rage's Battle action -- discards herself as its own cost, bows a target enemy card, and (tracked via the new MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten() itself) destroys it if it straightens later the same turn; that delayed destroy is an ordinary death, not redirected, since she has already left play by the time it fires", LadyMatsusRageBattleAction)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -532,6 +535,86 @@ static void LowMarketEquip()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:lowMarket.Id,SourceIds:payment!.SourceIds,TargetId:item.Id,AbilityId:"low-market-equip",PerformerId:performer.Id));
         Equal(e.State.Cards[item.Id].Zone,Zone.Attached);
     }
+}
+static void CelestialAttachmentPrimitive()
+{
+    // Reveal enters play immediately (Zone.Celestial), province refills face down; a new Celestial
+    // entering play discards every OTHER Celestial the SAME player controls -- but not the opponent's.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    var mine1=Add(s,"oracle-l5r-4658",1,Zone.Celestial);
+    var mine2=Add(s,"oracle-l5r-4658",1,Zone.Celestial);
+    var theirs=Add(s,"oracle-l5r-4658",0,Zone.Celestial);
+    var incoming=Add(s,"oracle-l5r-4658",1,Zone.Province,province:0);
+    incoming.FaceUp=false;
+    s.Players[1].Provinces[0].CardId=incoming.Id;
+    var e=MatchEngine.FromTestState(s);
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    Equal(e.State.Cards[incoming.Id].Zone,Zone.Celestial,"The newly revealed Celestial enters play");
+    Equal(e.State.Cards[mine1.Id].Zone,Zone.DynastyDiscard,"Player 1's other Celestial is discarded");
+    Equal(e.State.Cards[mine2.Id].Zone,Zone.DynastyDiscard,"Player 1's other Celestial is discarded");
+    Equal(e.State.Cards[theirs.Id].Zone,Zone.Celestial,"Player 0's own Celestial is untouched -- discard is per-player");
+    Check(e.State.Players[1].Provinces[0].CardId!=incoming.Id,"Province refilled face down immediately");
+    Check(e.GetView(0).Players[1].Celestials?.Any(c=>c.Id==incoming.Id)??false,"Public zone: visible to the opponent");
+}
+static void LadyMatsusRageDestroyRedirect()
+{
+    // "After your action resolves that destroyed any Personalities: Remove them from the game" --
+    // Ranged/Melee Attack resolution is a real, non-battle-resolution action-triggered destroy.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); // Carpenter Castle
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Attacker's own presence
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        Add(s,"oracle-l5r-4658",0,Zone.Celestial);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, dies to strength 5
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.RemovedFromGame,"Redirected: the attacker controls Lady Matsu's Rage");
+    }
+    // Baseline: no redirect at all without her in play.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"No redirect without her in play");
+    }
+    // Battle resolution's own Force-comparison casualty sweep is NEVER redirected -- explicitly not
+    // "an action," even in a battle her controller declared, and even though she is in play. Ring of
+    // Fire's own destroy and a duel's own loss consequence share the identical
+    // DestroyUnits(..., actingPlayerId: player.Id) shape already exercised above; not independently
+    // re-tested here.
+    {
+        var s=Battle(attackForce:8,defenseForce:0,provinceStrength:1).State; // attacker wins outright
+        Add(s,"oracle-l5r-4658",0,Zone.Celestial);
+        var e=MatchEngine.FromTestState(s);
+        var defender=e.State.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+        Resolve(e);
+        Equal(e.State.Cards[defender.Id].Zone,Zone.Dead,"Battle resolution's own sweep is excluded, regardless of who controls her");
+    }
+}
+static void LadyMatsusRageBattleAction()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var matsu=Add(s,"oracle-l5r-4658",0,Zone.Celestial);
+    var performer=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // attacking, unbowed
+    var horibe=Add(s,"oracle-l5r-6885",0,Zone.Battlefield,province:0); // Shinjo Horibe, unbowed
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // gives Horibe "opposed" too
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:matsu.Id,PerformerId:performer.Id,TargetId:target.Id,AbilityId:"lady-matsus-rage-bow-destroy"));
+    Equal(e.State.Cards[matsu.Id].Zone,Zone.DynastyDiscard,"Discarded as this ability's own cost");
+    Check(e.State.Cards[target.Id].Bowed,"Target bowed");
+    Check(e.State.PendingLadyMatsusRageWatches.Any(w=>w.TargetId==target.Id),"Watching for the next time it straightens, this turn");
+    Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Not destroyed yet -- only bowed so far");
+    // Player 1 passes priority back; player 0 then straightens the SAME target via Shinjo Horibe --
+    // the delayed destroy fires. Lady Matsu's Rage has already left play by now (discarded as this
+    // very ability's own cost), so this is an ordinary death (Dead), NOT redirected to
+    // RemovedFromGame -- her own trait only applies for as long as she is actually still in play.
+    Accept(e,Cmd(e,"pass"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:horibe.Id,TargetId:target.Id,AbilityId:"horibe-straighten"));
+    Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Destroyed after straightening the same turn -- not redirected, since she already left play");
+    Check(!e.State.PendingLadyMatsusRageWatches.Any(w=>w.TargetId==target.Id),"Watch consumed");
 }
 static void ChooseStraightenDecline()
 {
