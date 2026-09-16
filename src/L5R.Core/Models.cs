@@ -94,7 +94,16 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // Personality, once per duel, you may focus from your discard pile instead (revealed to the
     // opponent immediately; removed from the game after the duel ends)" -- same reasoning as above,
     // separate from her own entry trait.
-    bool GrantsDiscardPileFocus = false);
+    bool GrantsDiscardPileFocus = false,
+    // Kitsu Akai's own Limited action (issue #257): this definition is minted at runtime by a card
+    // effect (MatchEngine.CreatePersonality), never drawn from a deck or a Province -- the Lion
+    // Ancestor's own printed text, "May not be included in decks." DeckWorkshop.Review flags a
+    // CreatedOnly card if one somehow ends up selected anyway (the same soft-warning convention
+    // every other deck-legality rule in this engine already uses, never a hard block). Also the
+    // signal MatchEngine.DestroyUnits reads to redirect a destroyed created card to
+    // Zone.RemovedFromGame instead of an ordinary discard pile once destruction otherwise finishes,
+    // since a created card has no physical printed card to return to any pile.
+    bool CreatedOnly = false);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -148,12 +157,28 @@ public sealed class CardInstance
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
     public Dictionary<string, int> AbilityUses { get; set; } = [];
+    // "Until your second turn from now begins" (issue #259 -- Rebuilding Kyuden Hida/Times of
+    // Strife/War Weariness, the first Events with a bounded ongoing duration; Suspicions' own
+    // "until the game ends" needs no expiry at all). Stamped with the OWNING player's own
+    // PlayerState.TurnsTaken value, +2, when a qualifying Event enters Zone.EventInPlay -- a
+    // per-player turn count, not the shared MatchState.TurnNumber (which advances once for EITHER
+    // player's turn, so "your second turn from now" is +4 raw turns in this two-player alternating
+    // game, not +2 -- TurnsTaken already counts only this player's own turns, avoiding that trap).
+    // StartTurn discards the card once the owner's own TurnsTaken reaches it. Null for an Event with
+    // no bounded duration (Suspicions, Formal Apology) or any non-Event card.
+    public int? ExpiresAtTurnsTaken { get; set; }
 }
 
 public sealed class ProvinceState
 {
     public int Index { get; set; }
     public int Strength { get; set; }
+    // Times of Strife (issue #259): "all Provinces have a maximum strength equal to their base
+    // strength" -- a clamp CEILING, distinct from Strength itself (which Ring of Earth/a Dueling win
+    // bonus/etc. already mutate directly, in place). Set once at match setup, identically to Strength
+    // there, and never touched again by anything -- the one stable value Times of Strife's own clamp
+    // (EffectiveProvinceStrength) has to cap back down to.
+    public int PrintedStrength { get; set; }
     public bool Destroyed { get; set; }
     public string? CardId { get; set; }
     // Reconnaissance (core rules Glossary): a per-player boolean at this specific province, indexed
@@ -320,6 +345,11 @@ public sealed class MatchState
 {
     public long Version { get; set; }
     public int TokenSequence { get; set; }
+    // Kitsu Akai's own Limited action (issue #257): a persistent sequence for minting fresh
+    // CardInstance.Id values at runtime, the same replay-determinism reasoning as TokenSequence
+    // above -- match setup's own local `nextId` closure only ever runs once, at Create(), and does
+    // not survive into gameplay.
+    public int CreatedCardSequence { get; set; }
     public int? FavorPlayerId { get; set; }
     public int TurnNumber { get; set; } = 1;
     public int ActivePlayerId { get; set; }
@@ -389,6 +419,18 @@ public sealed class MatchState
     // at every point the engine is about to hand priority back normally, whether that is because no
     // other reaction window ever opened, or because one that did just closed (see PassReaction).
     public List<int> PendingOverconfidentDraws { get; set; } = [];
+    // Times of Strife (issue #259): "another player who controls no units at the current battlefield
+    // announces a Battle action" -- a queue of player ids owing a discard, the same drain-one-at-a-
+    // time shape PendingOverconfidentDraws above already uses (see OpenOverconfidentDrawWindow, which
+    // now drains this queue first), so it composes for free with every existing deferred-window call
+    // site instead of needing its own.
+    public List<int> PendingTimesOfStrifeDiscards { get; set; } = [];
+    // War Weariness (issue #259): "the first action each phase that one or more Personalities
+    // performed" -- cleared only when Action/AttackDeclaration/Dynasty is entered (see SetPhase),
+    // never by every individual Phase.Battle re-entry (once per battlefield) -- the user's own
+    // clarification is that the whole Attack-Declaration-through-battle-resolution sequence counts as
+    // one "battle phase" for this purpose, not each battlefield separately.
+    public bool WarWearinessBowedThisPhase { get; set; }
     // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed Personality
     // controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to
     // attack your provinces this turn" -- a delayed, mandatory (no further choice) check, queued

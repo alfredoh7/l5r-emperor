@@ -167,7 +167,15 @@ var tests = new (string Name, Action Run)[]
     ("Celestial wave 1: Lady Matsu's Rage's Battle action -- discards herself as its own cost, bows a target enemy card, and (tracked via the new MatchState.PendingLadyMatsusRageWatches, checked reactively from Straighten() itself) destroys it if it straightens later the same turn; that delayed destroy is an ordinary death, not redirected, since she has already left play by the time it fires", LadyMatsusRageBattleAction),
     ("Spell wave 1: Suitengu's Path -- a pure AttachGrantsKeyword carrier (Naval), the first published Spell to use that mechanism, attached via the real Equip (Battle) path", SuitengusPathNavalGrant),
     ("Spell wave 1: Scouring Flood -- a text-described static +2F trait (PersonalityForce's own new Effect-keyed Spell term, since unlike an Item a Spell never prints its own Force stat) applying whether bowed or not, plus a Battle ability that bows itself as its entire cost and moves a targeted defending Personality home", ScouringFloodForceAndMoveHome),
-    ("Spell wave 1: The Earth's Hunger -- a cost-choice Battle ability (own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round): normally bows the wielding Shugenja, but may bow the Spell itself instead when the wielder carries the Earth keyword", TheEarthsHungerCostChoice)
+    ("Spell wave 1: The Earth's Hunger -- a cost-choice Battle ability (own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round): normally bows the wielding Shugenja, but may bow the Spell itself instead when the wielder carries the Earth keyword", TheEarthsHungerCostChoice),
+    ("Personality wave 17: Kitsu Akai's Limited action -- the engine's first 'create a card' effect (MatchEngine.CreatePersonality), producing a Lion Ancestor straight into Zone.Home with the correct stats/keywords, no Proclaim window, once-per-turn Limited usage, and no restriction on coexisting with an already-in-play copy", KitsuAkaiCreatesLionAncestor),
+    ("Personality wave 17: Kitsu Akai's Battle ability -- 'bow your performing Ancestor Personality' (own-unbowed-personality-at-battle-with-keyword) rejects Kitsu Akai himself (no Ancestor keyword) but accepts the created Lion Ancestor as the cost-payer, destroying an enemy card without attachments and gaining 1 Honor", KitsuAkaiBattleAncestorCost),
+    ("Personality wave 17: a created card (Lion Ancestor) follows ordinary Personality destruction rules -- including the Dishonorable-death penalty -- through battle resolution's own casualty sweep, then is removed from the game rather than left in a discard pile, since it has no physical printed card to return to", LionAncestorDestructionRemovedFromGame),
+    ("Event wave 2: Formal Apology -- a one-shot 'Honor below starting value' watch, checked both immediately at entry and continuously afterward through GainHonor's own single shared choke point, so it fires the first time it genuinely happens, not only at a snapshot moment", FormalApologyWatch),
+    ("Event wave 2: Harsh Choices -- the first Event needing a genuine player decision at reveal time (destroy this province for 3 cards, or resolve as an ordinary discard-and-refill Event), deferred through a new PendingChoice rather than resolving unconditionally", HarshChoicesProvinceDestroy),
+    ("Event wave 2: Rebuilding Kyuden Hida -- exercises only the new bounded 'until your second turn from now begins' duration (counted in the controller's own TurnsTaken, not raw shared TurnNumber); its own restriction needs no enforcement code, verified already the engine's unconditional default", RebuildingKyudenHidaDuration),
+    ("Event wave 2: Times of Strife -- a global province-strength CEILING (EffectiveProvinceStrength's own new clamp, live-visible through GetView) plus a discard trigger for 'another player who controls no units at the current battlefield announces a Battle action', queued through the existing Overconfident-draw drain", TimesOfStrifeProvinceClampAndDiscard),
+    ("Event wave 2: War Weariness -- bows the performer of the first Personality-performed action each phase even when that action's own printed text never bows its performer, but not a second one the same phase", WarWearinessFirstActionPerPhaseBows)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -186,6 +194,18 @@ static CardInstance Find(MatchEngine e,string definition,int owner=0,Zone? zone=
 static string[] Sources(MatchEngine e,int owner=0)=>e.State.Cards.Values.Where(c=>c.OwnerId==owner && c.Zone is Zone.Home or Zone.Stronghold && !c.Bowed && CardCatalog.Get(c.DefinitionId).GoldProduction>0).Select(c=>c.Id).ToArray();
 static string ProvinceCard(MatchEngine e,int index=0,int owner=0)=>e.State.Players[owner].Provinces[index].CardId!;
 static void SkipToDynasty(MatchEngine e) { while(e.State.Phase!=Phase.Dynasty) Accept(e,Cmd(e,"pass")); }
+// Ends the current turn all the way through, including a hand-limit discard should one come up (a
+// many-turns-in-a-row test otherwise stalls on it, since nothing else in a bare pass-only flow ever
+// spends a card) -- picks arbitrary cards, since which ones is never the point of a test using this.
+static void EndTurnFully(MatchEngine e)
+{
+    SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+    if(e.State.PendingChoice?.Type=="discardHand")
+    {
+        var pending=e.State.PendingChoice; var hand=e.State.Players[pending.PlayerId].Hand;
+        Accept(e,Cmd(e,"discardHand",player:pending.PlayerId,cards:hand.Take(hand.Count-8).ToArray()));
+    }
+}
 static void CloseReaction(MatchEngine e) { while(e.State.PendingChoice?.Type=="proclaim") Accept(e,Cmd(e,"declineReaction")); }
 static CardInstance Add(MatchState s,string def,int owner,Zone zone,bool bowed=false,int? province=null,string? attachedTo=null)
 {
@@ -687,6 +707,220 @@ static void TheEarthsHungerCostChoice()
         Check(!e.State.Cards[wielder.Id].Bowed,"Wielder left unbowed");
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
     }
+}
+static void KitsuAkaiCreatesLionAncestor()
+{
+    // The engine's first "create a card" effect (MatchEngine.CreatePersonality). No restriction on
+    // created-card copies (issue #257's own spec): a Lion Ancestor already in play does not block
+    // creating a second one.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+    var akai=Add(s,"oracle-l5r-4371",0,Zone.Home);
+    Add(s,"oracle-l5r-9785",0,Zone.Home);
+    var e=MatchEngine.FromTestState(s);
+    var before=e.State.Cards.Keys.ToHashSet();
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,AbilityId:"kitsu-akai-create"));
+    var createdId=e.State.Cards.Keys.Except(before).Single();
+    var created=e.State.Cards[createdId];
+    Equal(created.DefinitionId,"oracle-l5r-9785","Created directly from the definition, not drawn from any deck/Province");
+    Equal(created.OwnerId,0);
+    Equal(created.Zone,Zone.Home,"Enters play directly in Home, like any other Personality (Zone.Home already IS in play here)");
+    Check(created.FaceUp,"Face up on entry");
+    Check(!created.Bowed,"Straightened by default -- the Lion Ancestor carries no enters-bowed effect");
+    Check(e.State.PendingChoice is null,"No Proclaim window -- created, not recruited; and no entry-reaction/Overconfident window either, since the Lion Ancestor has neither");
+    Equal(e.State.Cards.Values.Count(c=>c.DefinitionId=="oracle-l5r-9785" && c.OwnerId==0),2,"Coexists with the pre-existing copy -- no restriction on created-card copies");
+    var def=CardCatalog.Get(created.DefinitionId);
+    Equal(def.Force,2); Equal(def.Chi,2); Equal(def.PersonalHonor,3);
+    Check(def.CreatedOnly,"Flagged as created-only -- cannot be included in a deck");
+    foreach(var keyword in new[]{"Lion Clan","Samurai","Ancestor","Spirit"})
+        Check(def.Keywords!.Contains(keyword),$"Carries the {keyword} keyword named in Kitsu Akai's own Limited text");
+    // Limited, once per turn, like any other.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,AbilityId:"kitsu-akai-create"));
+}
+static void KitsuAkaiBattleAncestorCost()
+{
+    // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword,
+    // Volcano Tattoo's own generic Performer category, with a single RequiredKeywords entry. Kitsu
+    // Akai himself does not qualify (no Ancestor keyword of his own); the created Lion Ancestor
+    // (or any other own Ancestor Personality at the battle) does.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var akai=Add(s,"oracle-l5r-4371",0,Zone.Battlefield,province:0);
+    var ancestor=Add(s,"oracle-l5r-9785",0,Zone.Battlefield,province:0);
+    var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    var honorBefore=e.State.Players[0].Honor;
+    // Kitsu Akai himself lacks the Ancestor keyword.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,TargetId:enemy.Id,AbilityId:"kitsu-akai-battle",PerformerId:akai.Id));
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:akai.Id,TargetId:enemy.Id,AbilityId:"kitsu-akai-battle",PerformerId:ancestor.Id));
+    Check(e.State.Cards[ancestor.Id].Bowed,"The performing Ancestor Personality is bowed as the cost");
+    Check(!e.State.Cards[akai.Id].Bowed,"Kitsu Akai himself is untouched -- he is not the performer here");
+    Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    Equal(e.State.Players[0].Honor,honorBefore+1,"Gain 1 Honor");
+}
+static void LionAncestorDestructionRemovedFromGame()
+{
+    // A created card has no physical printed card to return to any discard pile: once ordinary
+    // destruction rules finish with it, it goes to RemovedFromGame instead -- exercised here through
+    // battle resolution's own Force-comparison casualty sweep (no actingPlayerId at all), the most
+    // common way one actually dies, not a specific ability's own actingPlayerId-carrying destroy.
+    // Dishonorable=true also exercises the ordinary Dishonorable-death penalty first, confirming
+    // "it follows the rules of destruction" -- normal Personality death consequences are untouched,
+    // only where the card ends UP afterward changes.
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1;
+    s.Players[1].Provinces[0].Strength=1;
+    var attacker=Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+    attacker.Modifiers=[new("test-fixture","test-fixture","Force",8-5)]; // Force 8, outright win
+    var ancestor=Add(s,"oracle-l5r-9785",1,Zone.Battlefield,province:0); // Force 2, defending
+    ancestor.Dishonorable=true;
+    var e=MatchEngine.FromTestState(s);
+    var honorBefore=e.State.Players[1].Honor;
+    Resolve(e);
+    Equal(e.State.Cards[ancestor.Id].Zone,Zone.RemovedFromGame,"Created card: removed from the game once destruction finishes, not left in an ordinary discard pile");
+    Equal(e.State.Players[1].Honor,honorBefore-CardCatalog.Get(ancestor.DefinitionId).PersonalHonor,"Ordinary destruction rules still applied first -- the Dishonorable-death penalty fires exactly as it would for any other Personality");
+}
+static void FormalApologyWatch()
+{
+    // Entry-time trigger: Honor is ALREADY below starting the moment the event resolves -- "the next
+    // time" is right now, not merely from this point forward.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var startingHonor=CardCatalog.Get(s.Cards[s.Players[1].StrongholdId].DefinitionId).StartingHonor;
+        s.Players[1].Honor=startingHonor-1;
+        var card=Add(s,"oracle-l5r-2660",1,Zone.Province,province:0);
+        card.FaceUp=false;
+        s.Players[1].Provinces[0].CardId=card.Id;
+        var e=MatchEngine.FromTestState(s);
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Cards[card.Id].Zone,Zone.DynastyDiscard,"Triggered immediately: Honor was already below starting at entry");
+        Equal(e.State.Players[1].Honor,startingHonor-1+5);
+    }
+    // Continuous watch: sits inert while Honor stays at/above starting, then fires the first time it
+    // LATER drops below, via the ordinary GainHonor path (here: a Dishonorable death's own existing
+    // penalty) -- not merely a one-time snapshot check at entry.
+    {
+        var s=Battle(9,2,6).State;
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+        defender.Dishonorable=true; // training-lion-veteran: PersonalHonor 3
+        var startingHonor=CardCatalog.Get(s.Cards[s.Players[1].StrongholdId].DefinitionId).StartingHonor;
+        s.Players[1].Honor=startingHonor+2;
+        var watch=Add(s,"oracle-l5r-2660",1,Zone.EventInPlay);
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Players[1].Honor,startingHonor+2-3+5,"Dishonorable-death penalty (-3) drops Honor below starting, then the tea ceremony (+5) fires -- via the same shared GainHonor path, so any future honor-gain hook would apply equally");
+        Equal(e.State.Cards[watch.Id].Zone,Zone.DynastyDiscard,"One-shot: discarded once triggered");
+    }
+}
+static void HarshChoicesProvinceDestroy()
+{
+    // Destroy: draws 3, the province itself is destroyed (not merely discarded/refilled).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var card=Add(s,"oracle-l5r-2978",1,Zone.Province,province:0);
+        card.FaceUp=false;
+        s.Players[1].Provinces[0].CardId=card.Id;
+        var handBefore=s.Players[1].Hand.Count;
+        var e=MatchEngine.FromTestState(s);
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Check(e.State.PendingChoice?.Type=="harshChoices","Opens a pending choice instead of auto-resolving like every other Event so far");
+        Accept(e,new GameCommand("harshChoices",1,e.Version,Choice:"destroy"));
+        Check(e.State.Players[1].Provinces[0].Destroyed,"Province destroyed");
+        Equal(e.State.Cards[card.Id].Zone,Zone.DynastyDiscard);
+        Equal(e.State.Players[1].Hand.Count,handBefore+3);
+        Equal(e.State.Phase,Phase.Action,"Events Phase resumes and completes normally afterward");
+    }
+    // Decline: resolves as an ordinary Event -- discarded, province refills, no draw.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var card=Add(s,"oracle-l5r-2978",1,Zone.Province,province:0);
+        card.FaceUp=false;
+        s.Players[1].Provinces[0].CardId=card.Id;
+        var handBefore=s.Players[1].Hand.Count;
+        var e=MatchEngine.FromTestState(s);
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Accept(e,new GameCommand("harshChoices",1,e.Version,Choice:"decline"));
+        Check(!e.State.Players[1].Provinces[0].Destroyed,"Province not destroyed");
+        Equal(e.State.Cards[card.Id].Zone,Zone.DynastyDiscard);
+        Check(e.State.Players[1].Provinces[0].CardId!=card.Id,"Refilled face down");
+        Equal(e.State.Players[1].Hand.Count,handBefore,"No draw when declined");
+    }
+}
+static void RebuildingKyudenHidaDuration()
+{
+    // Its own restriction needs no enforcement code: verified already the engine's unconditional
+    // default (SelectBattle's one and only SetPhase(Phase.Battle,...) call always seeds the
+    // Defender's own priority first, so the Attacker can never act before the Defender's first
+    // opportunity regardless of this card). This test exercises only the bounded duration itself --
+    // "your second turn from now begins" -- counted in the CONTROLLER's own turns (TurnsTaken), not
+    // raw shared TurnNumber (four raw turns pass here for two of the controller's own).
+    var s=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(s,"oracle-l5r-6200",1,Zone.Province,province:0);
+    card.FaceUp=false;
+    s.Players[1].Provinces[0].CardId=card.Id;
+    var e=MatchEngine.FromTestState(s);
+    EndTurnFully(e); // player 0's turn ends -> player 1's turn (reveal)
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+    EndTurnFully(e); // player 1's turn ends -> player 0's turn
+    EndTurnFully(e); // player 0's turn ends -> player 1's own NEXT turn
+    Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay,"Still active through the controller's own next turn (\"your first turn from now\")");
+    EndTurnFully(e); // player 1's turn ends -> player 0's turn
+    EndTurnFully(e); // player 0's turn ends -> player 1's SECOND-next turn
+    Equal(e.State.Cards[card.Id].Zone,Zone.DynastyDiscard,"Effect ended: the controller's second turn from now has begun");
+}
+static void TimesOfStrifeProvinceClampAndDiscard()
+{
+    // Province-strength clamp: a global CEILING (either side's provinces, not scoped to "your own"),
+    // never a floor -- Ring of Earth's own +3 raise is capped back down to the province's own printed
+    // strength while Times of Strife is active.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        Add(s,"oracle-l5r-8494",0,Zone.EventInPlay); // Times of Strife
+        var printed=s.Players[1].Provinces[0].PrintedStrength;
+        var ring=Add(s,"training-ring-of-earth-stub",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-raise",TargetPlayerId:1,Province:0));
+        Equal(e.State.Players[1].Provinces[0].Strength,printed+3,"The raw raise still applies underneath");
+        Equal(e.GetView(0).Players[1].Provinces[0].Strength,printed,"But the EFFECTIVE (client-visible) strength is clamped back down to printed");
+    }
+    // Discard trigger: "another player who controls no units at the current battlefield announces a
+    // Battle action" -- Ring of Earth's own "even with no units present" exemption from the ordinary
+    // blanket Battle-timing presence Require is the only currently reachable path to this (every
+    // other Battle-timed ability requires the acting player's own presence already). Queued and
+    // drained through the existing Overconfident-draw window rather than a bespoke one.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.UnresolvedBattlefields=[0]; s.PriorityPlayerId=1; s.ActivePlayerId=0;
+        Add(s,"oracle-l5r-8494",0,Zone.EventInPlay); // player 0 controls Times of Strife
+        var ring=Add(s,"training-ring-of-earth-stub",1,Zone.Home); // player 1: no units anywhere at this battlefield
+        var handCard=Add(s,"training-farm",1,Zone.Hand).Id;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0));
+        Check(e.State.PendingChoice?.Type=="timesOfStrifeDiscard","Queued, then opened as a deferred window");
+        Equal(e.State.PendingChoice!.PlayerId,1);
+        Accept(e,new GameCommand("timesOfStrifeDiscard",1,e.Version,TargetId:handCard));
+        Check(!e.State.Players[1].Hand.Contains(handCard),"Discarded");
+        Equal(e.State.Cards[handCard].Zone,Zone.FateDiscard);
+    }
+}
+static void WarWearinessFirstActionPerPhaseBows()
+{
+    var s=StrongholdBattle("oracle-l5r-1218");
+    Add(s,"oracle-l5r-9222",0,Zone.EventInPlay); // War Weariness
+    var first=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+    first.GrantedKeywords=[new("Tactician","test-fixture","Permanent")];
+    var second=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+    second.GrantedKeywords=[new("Tactician","test-fixture","Permanent")];
+    var hand1=Add(s,"training-farm",0,Zone.Hand).Id;
+    var hand2=Add(s,"training-marketplace",0,Zone.Hand).Id;
+    var e=MatchEngine.FromTestState(s);
+    // Tactical Advantage never bows its own performer (no "unbowed" qualifier printed) -- any bow
+    // here is War Weariness's own doing.
+    Accept(e,new GameCommand("useAbility",0,e.Version,TargetId:hand1,AbilityId:"tactical-advantage",PerformerId:first.Id));
+    Check(e.State.Cards[first.Id].Bowed,"War Weariness bows the first Personality-performed action's performer this phase");
+    // Priority passed to player 1 after player 0's own action, same as any ordinary action -- player
+    // 1 passes it straight back so player 0 can act again this same Battle phase.
+    Accept(e,Cmd(e,"pass"));
+    Accept(e,new GameCommand("useAbility",0,e.Version,TargetId:hand2,AbilityId:"tactical-advantage",PerformerId:second.Id));
+    Check(!e.State.Cards[second.Id].Bowed,"Only the FIRST action each phase bows its performer -- the once-per-phase trigger is already spent");
 }
 static void ChooseStraightenDecline()
 {

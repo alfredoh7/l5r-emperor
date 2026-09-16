@@ -73,7 +73,7 @@ public sealed partial class MatchEngine
             }
             random.Shuffle(player.DynastyDeck);
             random.Shuffle(player.FateDeck);
-            player.Provinces = Enumerable.Range(0,4).Select(i => new ProvinceState { Index=i,Strength=6 }).ToList();
+            player.Provinces = Enumerable.Range(0,4).Select(i => new ProvinceState { Index=i,Strength=6,PrintedStrength=6 }).ToList();
         }
         var engine = new MatchEngine(state,seed,scenario);
         foreach (var player in state.Players)
@@ -139,6 +139,8 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
+            if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
+            if (_state.PendingChoice.Type=="timesOfStrifeDiscard") { ResolveTimesOfStrifeDiscard(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -352,6 +354,27 @@ public sealed partial class MatchEngine
         // (they may keep buying) -- so unlike RecruitReserve below, an Overconfident window opened
         // here must resume back to the SAME purchasing player, not their opponent.
         else if(!OpenEntryReactionWindow(command.PlayerId,card)) OpenOverconfidentDrawWindow(command.PlayerId);
+    }
+    // Kitsu Akai's own Limited action, "Create a ... Personality" (issue #257): mints a brand-new
+    // CardInstance from a CardDefinition that was never drawn from a deck or a Province -- the
+    // engine's first "create a card" primitive (CreateToken only ever adds a stat marker to an
+    // EXISTING card). Enters play through the same shared entry sequence Purchase above funnels
+    // through (FaceUp, own entry-reaction window, Overconfident) but skips every purchase-specific
+    // step (QuotePurchase's Gold cost, Proclaim eligibility, Refill) since nothing was recruited
+    // from a province -- "created, not recruited," the user's own phrase. Returns true exactly when
+    // OpenEntryReactionWindow/OpenOverconfidentDrawWindow returns true, mirroring their own bool
+    // convention so the calling ExecuteAbilityEffects case can decide whether to return early, the
+    // same shape low-market-equip/equip-battle already use. Only a Personality is implemented; a
+    // created Holding/Region/Attachment is recorded as accepted future scope, not built until a
+    // real card needs it (see docs/decisions).
+    private bool CreatePersonality(int ownerId, string definitionId)
+    {
+        var definition=CardCatalog.Get(definitionId);
+        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definitionId,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        _state.Cards.Add(card.Id,card);
+        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
+        QueueOverconfidentDraw(card);
+        return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
     }
 
     /// <summary>Checks the special free recruitment of a higher-Experienced Personality over a
@@ -1270,8 +1293,23 @@ public sealed partial class MatchEngine
     // back normally, whether because no other reaction window ever opened here, or because one that
     // did just closed (see PassReaction). closesTo is where control resumes once the WHOLE queue (not
     // just this one offer) is empty.
+    // Times of Strife (issue #259): drains PendingTimesOfStrifeDiscards FIRST, before the
+    // Overconfident queue below -- both are simple "queue of player ids owed a deferred window"
+    // drains sharing this one function rather than needing their own copy of every call site (there
+    // are around a dozen), so a Times of Strife discard composes for free with every existing point
+    // that already calls this to hand priority back normally.
     private bool OpenOverconfidentDrawWindow(int closesTo)
     {
+        if(_state.PendingTimesOfStrifeDiscards.Count>0)
+        {
+            var discardPlayerId=_state.PendingTimesOfStrifeDiscards[0];
+            _state.PendingTimesOfStrifeDiscards.RemoveAt(0);
+            if(Player(discardPlayerId).Hand.Count==0) return OpenOverconfidentDrawWindow(closesTo);
+            _state.PendingChoice=new("timesOfStrifeDiscard",discardPlayerId,null,"Times of Strife: discard a card.",closesTo);
+            _state.PriorityPlayerId=discardPlayerId;
+            Emit("timesOfStrifeDiscardOffered",$"{Player(discardPlayerId).Name} must discard a card (Times of Strife).",discardPlayerId);
+            return true;
+        }
         if(_state.PendingOverconfidentDraws.Count==0) return false;
         var playerId=_state.PendingOverconfidentDraws[0];
         _state.PendingOverconfidentDraws.RemoveAt(0);
@@ -1286,7 +1324,24 @@ public sealed partial class MatchEngine
         Require(command.Type=="overconfidentDraw" && command.PlayerId==pending.PlayerId && command.Choice is "draw" or "decline","Choose whether to draw a card.");
         if(command.Choice=="draw") Draw(Player(command.PlayerId));
         _state.PendingChoice=null;
-        var resumeTo=pending.ActingPlayerId!.Value;
+        ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
+    }
+    private void ResolveTimesOfStrifeDiscard(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="timesOfStrifeDiscard" && command.PlayerId==pending.PlayerId && command.TargetId is not null && Player(command.PlayerId).Hand.Contains(command.TargetId),"Choose a card from your hand to discard.");
+        var player=Player(command.PlayerId);
+        player.Hand.Remove(command.TargetId!); var card=Card(command.TargetId); card.Zone=Zone.FateDiscard; card.FaceUp=true;
+        Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name} (Times of Strife).",player.Id,card.Id);
+        _state.PendingChoice=null;
+        ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
+    }
+    // Shared tail for both deferred-window resolvers above: try the next queued window, then the
+    // FinishBattleResolution special case, then hand priority back normally. Factored out once a
+    // second resolver (ResolveTimesOfStrifeDiscard) needed the identical sequence ResolveOverconfidentDraw
+    // already had inline.
+    private void ResumeAfterDeferredWindow(int resumeTo)
+    {
         if(OpenOverconfidentDrawWindow(resumeTo)) return;
         // FinishBattleResolution's own tail (FinishBattleReturnHomeAndTransition) defers itself for
         // this window -- recognized generically by the state shape a resolved-but-not-yet-transitioned
@@ -1356,7 +1411,17 @@ public sealed partial class MatchEngine
             // Overconfident), still fully happens -- Lady Matsu's Rage only overrides where the
             // Personality ends UP afterward. Attachments are unaffected (her own text names only the
             // Personality itself), so the attachment-discard loop above is left untouched.
-            if(actingPlayerId is int aid && Definition(card).Type==CardType.Personality && ControlsCelestialEffect(aid,"lady-matsus-rage"))
+            // A created card (Kitsu Akai's Lion Ancestor, issue #257) has no physical printed card
+            // to return to any discard pile -- checked first and unconditionally (not gated on
+            // actingPlayerId like Lady Matsu's Rage below), since battle resolution's own casualty
+            // sweep -- the most common way one actually dies -- calls this with no actingPlayerId at
+            // all.
+            if(Definition(card).CreatedOnly)
+            {
+                card.Zone=Zone.RemovedFromGame;
+                Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game.",card.OwnerId,card.Id);
+            }
+            else if(actingPlayerId is int aid && Definition(card).Type==CardType.Personality && ControlsCelestialEffect(aid,"lady-matsus-rage"))
             {
                 card.Zone=Zone.RemovedFromGame;
                 Emit("removedFromGame",$"{Definition(card).Name} was destroyed and removed from the game (Lady Matsu's Rage).",card.OwnerId,card.Id);
@@ -1467,6 +1532,17 @@ public sealed partial class MatchEngine
         player.MayNotAttackThisTurn=false;
         player.FavorActionsThisTurn=0;
         player.DestroyedEnemyPersonalityActionsThisTurn=0;
+        // "Until your second turn from now begins" (issue #259): the one place a turn begins for
+        // THIS specific player, so the one place their own bounded-duration ongoing Event's own
+        // effect can end -- moved to DynastyDiscard the same way an ordinary Event's own resolve-
+        // once-then-discard already does (Zone.EventInPlay's own doc comment names this as the
+        // intended future shape). Scoped to c.OwnerId==player.Id: only THIS player's own TurnsTaken
+        // just advanced, so only their own cards' expiry could possibly be reached right now.
+        foreach(var expired in _state.Cards.Values.Where(c=>c.OwnerId==player.Id && c.Zone==Zone.EventInPlay && c.ExpiresAtTurnsTaken==player.TurnsTaken).ToArray())
+        {
+            expired.Zone=Zone.DynastyDiscard;
+            Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
+        }
         StraightenPhase(player);
     }
     private static readonly string[] RingElements=["Fire","Water","Air","Earth","Void"];
@@ -1507,6 +1583,15 @@ public sealed partial class MatchEngine
     private void EventsPhase(PlayerState player)
     {
         SetPhase(Phase.Events,player.Id);
+        ContinueEventsReveal(player);
+    }
+    // Split from EventsPhase (issue #259, Harsh Choices) so a reveal that needs a genuine player
+    // decision (destroy this province or not) can defer through a PendingChoice mid-loop, then resume
+    // with whatever provinces remain, instead of forcing every revealed Event to resolve unconditionally
+    // and synchronously the way Suspicions' shape always could. ResolveHarshChoices calls back in here
+    // once its own choice resolves.
+    private void ContinueEventsReveal(PlayerState player)
+    {
         foreach(var province in player.Provinces.Where(p=>!p.Destroyed && p.CardId is not null))
         {
             var card=Card(province.CardId);
@@ -1514,7 +1599,7 @@ public sealed partial class MatchEngine
             {
                 card.FaceUp=true;
                 Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
-                if(Definition(card).Type==CardType.Event) ResolveEvent(player,province,card);
+                if(Definition(card).Type==CardType.Event) { if(ResolveEvent(player,province,card)) return; }
                 else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
@@ -1526,12 +1611,21 @@ public sealed partial class MatchEngine
         SetPhase(Phase.Action,player.Id);
     }
     // An Event (core rules Glossary): removed from its province and resolved immediately upon reveal --
-    // before refilling -- then discarded, unless its own printed text is an ongoing "until the end of
-    // the game" effect (Suspicions' shape), in which case it goes to Zone.EventInPlay instead of the
-    // discard pile, as a physical reminder that the effect is still active. Effect-keyed, the same
-    // convention every other one-off card behavior in this file already uses.
-    private void ResolveEvent(PlayerState player,ProvinceState province,CardInstance card)
+    // before refilling -- then discarded, unless its own printed text is an ongoing effect (Suspicions'
+    // "until the end of the game" shape, or issue #259's own newer "until your second turn from now
+    // begins" bounded shape -- see CardInstance.ExpiresAtTurnsTaken), in which case it goes to
+    // Zone.EventInPlay instead of the discard pile, as a physical reminder that the effect is still
+    // active. Effect-keyed, the same convention every other one-off card behavior in this file already
+    // uses. Returns true when resolution instead deferred to a PendingChoice (Harsh Choices' own "you
+    // may destroy this province" -- the only one of these needing a genuine decision at reveal time),
+    // in which case ContinueEventsReveal's own loop must stop here; ResolveHarshChoices resumes it.
+    private bool ResolveEvent(PlayerState player,ProvinceState province,CardInstance card)
     {
+        if(Definition(card).Effect=="harsh-choices")
+        {
+            _state.PendingChoice=new("harshChoices",player.Id,card.Id,"Harsh Choices: you may destroy this province to draw 3 cards.");
+            return true;
+        }
         province.CardId=null; card.ProvinceIndex=null;
         switch(Definition(card).Effect)
         {
@@ -1539,12 +1633,54 @@ public sealed partial class MatchEngine
                 card.Zone=Zone.EventInPlay;
                 Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play: each player loses 1 Honor at the end of every Events Phase until the effect ends.",player.Id,card.Id);
                 break;
+            case "formal-apology":
+                card.Zone=Zone.EventInPlay;
+                Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play: watching for {player.Name}'s Honor to fall below its starting value.",player.Id,card.Id);
+                CheckFormalApology(player.Id);
+                break;
+            case "rebuilding-kyuden-hida" or "times-of-strife" or "war-weariness":
+                card.Zone=Zone.EventInPlay;
+                // player.TurnsTaken already reflects THIS turn's own increment (StartTurn, before
+                // EventsPhase ever runs) -- +2 lands on this same player's own second-next turn, not
+                // +4, since TurnsTaken only counts their own turns (see the field's own doc comment).
+                card.ExpiresAtTurnsTaken=player.TurnsTaken+2;
+                Emit("eventEnteredPlay",$"{Definition(card).Name} stays in play until {player.Name}'s second turn from now begins.",player.Id,card.Id);
+                break;
             default:
                 card.Zone=Zone.DynastyDiscard;
                 Emit("eventResolved",$"{Definition(card).Name} resolved and was discarded.",player.Id,card.Id);
                 break;
         }
         Refill(player,province);
+        return false;
+    }
+    // Harsh Choices (issue #259): resolves the "you may destroy this province" choice ResolveEvent
+    // deferred -- the province and card are still exactly as ResolveEvent left them (neither ever
+    // cleared province.CardId/card.ProvinceIndex when deferring), so DestroyProvince's own normal
+    // behavior (it discards whatever card currently sits at province.CardId itself) handles discarding
+    // Harsh Choices for free on the destroy branch; the decline branch discards/refills it manually,
+    // the same as ResolveEvent's own default case.
+    private void ResolveHarshChoices(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="harshChoices" && command.PlayerId==pending.PlayerId && command.Choice is "destroy" or "decline","Choose whether to destroy this province.");
+        var card=Card(pending.CardId!);
+        var province=Player(pending.PlayerId).Provinces[card.ProvinceIndex!.Value];
+        var player=Player(pending.PlayerId);
+        _state.PendingChoice=null;
+        if(command.Choice=="destroy")
+        {
+            Emit("eventResolved",$"{Definition(card).Name}: {player.Name} destroys the province to draw 3 cards.",player.Id,card.Id);
+            DestroyProvince(player.Id,province);
+            Draw(player); Draw(player); Draw(player);
+        }
+        else
+        {
+            province.CardId=null; card.ProvinceIndex=null; card.Zone=Zone.DynastyDiscard;
+            Emit("eventResolved",$"{Definition(card).Name} resolved and was discarded.",player.Id,card.Id);
+            Refill(player,province);
+        }
+        ContinueEventsReveal(player);
     }
     // A Region (core rules Glossary): attaches to the province it was revealed in -- unless that
     // province already has a Region attached, in which case (like any Region that fails to attach for
@@ -1594,6 +1730,14 @@ public sealed partial class MatchEngine
     // is, checked from DestroyUnits' own single shared choke point (see its own doc comment).
     private bool ControlsCelestialEffect(int playerId,string effect) =>
         _state.Cards.Values.Any(c=>c.OwnerId==playerId && c.Zone==Zone.Celestial && Definition(c).Effect==effect);
+    // Same idea, for a bounded-duration ongoing Event sitting in Zone.EventInPlay (issue #259:
+    // Formal Apology's own watch, Times of Strife/War Weariness's own "is either player's copy
+    // currently active" checks). Unlike ControlsCelestialEffect, callers needing a GLOBAL check
+    // (Times of Strife's province clamp, War Weariness's bow -- neither is scoped to "your own"
+    // anywhere in its printed text) pass either player id explicitly rather than this helper trying
+    // to guess which side's copy should count.
+    private bool ControlsEventEffect(int playerId,string effect) =>
+        _state.Cards.Values.Any(c=>c.OwnerId==playerId && c.Zone==Zone.EventInPlay && Definition(c).Effect==effect);
     // Fallow Lands' shape (the first Region carrying a static province-strength bonus): live-
     // recomputed from whichever Region is currently attached, the same "read live off Attachments()"
     // approach PersonalityForce uses for an Item's own Force convey to its wielder -- NOT a one-shot
@@ -1606,8 +1750,16 @@ public sealed partial class MatchEngine
     {
         ["fallow-lands"] = 2,
     };
-    private int EffectiveProvinceStrength(ProvinceState province) =>
-        province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0);
+    private int EffectiveProvinceStrength(ProvinceState province)
+    {
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0);
+        // Times of Strife (issue #259): "all Provinces have a maximum strength equal to their base
+        // strength" -- global (either player's, printed with no "your" of its own), and a CEILING
+        // only: a province already at or below PrintedStrength (Ring of Earth's own lower, say) is
+        // untouched, matching the card's own clarification that this never raises anything, only caps.
+        if(ControlsEventEffect(0,"times-of-strife") || ControlsEventEffect(1,"times-of-strife")) strength=Math.Min(strength,province.PrintedStrength);
+        return strength;
+    }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in
@@ -1674,6 +1826,29 @@ public sealed partial class MatchEngine
         var player=Player(playerId); player.Honor+=amount;
         if(player.Honor<=-20) player.DishonorLossPending=true;
         Emit("honorChanged",$"{player.Name}: {amount:+#;-#;0} Honor ({reason}).",playerId,Amount:amount);
+        // Formal Apology (issue #259): checked after EVERY Honor change, gain or loss alike, since the
+        // single shared choke point every Honor change already funnels through here means "may be
+        // negated, modified, or redirected by cards that affect honor gains" (the user's own
+        // clarification) is automatically true for this trigger's own +5 -- it is just another
+        // GainHonor call, subject to whatever future hook applies to any other one. Re-entrant safe:
+        // CheckFormalApology discards its own watch card before calling GainHonor for the +5, so the
+        // recursive call here finds nothing left to trigger.
+        CheckFormalApology(playerId);
+    }
+    // Formal Apology (issue #259): "After the next time this game your Honor is below its starting
+    // value, you have a tea ceremony; gain 5 Honor" -- a one-shot watch, stateless beyond the card's
+    // own presence in Zone.EventInPlay (no separate MatchState list needed, unlike Lady Matsu's
+    // Rage's own multi-step delayed watch): the FIRST card of this Effect still sitting there for this
+    // player is, by definition, still un-triggered, since triggering immediately discards it. Checked
+    // both here (every Honor change) and once immediately when the card itself enters play (ResolveEvent),
+    // since Honor could already be below starting the moment it resolves.
+    private void CheckFormalApology(int playerId)
+    {
+        var watch=_state.Cards.Values.FirstOrDefault(c=>c.OwnerId==playerId && c.Zone==Zone.EventInPlay && Definition(c).Effect=="formal-apology");
+        if(watch is null || Player(playerId).Honor>=Definition(Card(Player(playerId).StrongholdId)).StartingHonor) return;
+        watch.Zone=Zone.DynastyDiscard;
+        Emit("eventResolved",$"{Definition(watch).Name}: {Player(playerId).Name} has a tea ceremony.",playerId,watch.Id);
+        GainHonor(playerId,5,"Formal Apology",watch);
     }
     // Dishonor/Rehonor (core rules Glossary, issue #186): "if one or more personalities are the
     // performer of an action that would grant its controller Honor, the gain is negated and the
@@ -1698,7 +1873,17 @@ public sealed partial class MatchEngine
         else GainHonor(targetPlayerId,amount,Definition(performer).Name,performer);
     }
     private void Win(int winner,string reason) { _state.WinnerId=winner; _state.VictoryReason=reason; _state.Phase=Phase.Finished; _state.PendingChoice=null; Emit("matchFinished",$"{Player(winner).Name} wins: {reason}.",winner); }
-    private void SetPhase(Phase phase,int priority) { _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}."); }
+    private void SetPhase(Phase phase,int priority)
+    {
+        // War Weariness (issue #259): reset only on the three phases that genuinely begin once per
+        // turn -- NOT Phase.Battle, which this same function re-enters once per battlefield (see
+        // SelectBattle); the user's own clarification is that the whole Attack-Declaration-through-
+        // battle-resolution stretch counts as a single "battle phase" for this effect, so Phase.
+        // AttackDeclaration's own once-per-turn entry (Pass, Phase.Action case) is the correct reset
+        // point for it, not Phase.Battle itself.
+        if(phase is Phase.Action or Phase.AttackDeclaration or Phase.Dynasty) _state.WarWearinessBowedThisPhase=false;
+        _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
+    }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];
     private CardInstance Card(string? id) { Require(id is not null && _state.Cards.ContainsKey(id),"Unknown card."); return _state.Cards[id!]; }

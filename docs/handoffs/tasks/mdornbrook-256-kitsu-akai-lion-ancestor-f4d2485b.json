@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Kitsu Akai and the Lion Ancestor (issue #257): the engine's first 'create a card' primitive (MatchEngine.CreatePersonality), a new CardDefinition.CreatedOnly flag (DeckWorkshop.Review warns, never hard-blocks), and DestroyUnits' new created-card-to-RemovedFromGame redirect.",
+  "validation": "dotnet build (Core + Client): 0 warnings/errors. dotnet run L5R.Core.Tests: 235/235 passed (3 new: KitsuAkaiCreatesLionAncestor, KitsuAkaiBattleAncestorCost, LionAncestorDestructionRemovedFromGame). bash tools/check.sh --skip-client: all core/published/deck-format/deck-workshop/ai/server/client-transport suites passed.",
+  "remaining": "None; ready for review. Lane is shared only because of one mechanical constructor-argument edit in DeckBuilderScreen.NewDraft (threading CreatedOnly through) -- no UI/layout/interaction change.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/257",
+  "branch": "mdornbrook/256-kitsu-akai-lion-ancestor",
+  "updated": "2026-09-16T17:45:50.155812+00:00"
+}

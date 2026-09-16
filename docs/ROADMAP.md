@@ -4,7 +4,7 @@ A living checklist of missing rules-engine mechanics and open visual/UI feature 
 
 Update this file as part of the PR that ships (or meaningfully advances) an item: move it to Done with the issue/PR that closed it, or add a new row when a gap is identified. Issue: [#86](https://github.com/alfredoh7/l5r-emperor/issues/86).
 
-**Card inventory:** [docs/CARD_INVENTORY.xlsx](CARD_INVENTORY.xlsx) lists every card in the reference catalogue (`content/deck-pool.json`) with its Type and Wired/Unwired status. It's generated, not hand-edited — regenerate it with `python3 tools/content/build_card_inventory.py` as part of any PR that ships a new content wave (a new `content/published/*.json` file).
+**Card inventory:** [docs/CARD_INVENTORY.xlsx](CARD_INVENTORY.xlsx) lists every card in the reference catalogue (`content/deck-pool.json`), plus any wired card absent from that pool entirely (e.g. a created-only card like the Lion Ancestor), with its Set, Type and Wired/Unwired status. It's generated, not hand-edited — regenerate it with `python3 tools/content/build_card_inventory.py` as part of any PR that ships a new content wave (a new `content/published/*.json` file).
 
 Status values: **Not started** / **In progress** / **Done**.
 
