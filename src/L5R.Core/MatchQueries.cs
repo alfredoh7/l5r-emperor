@@ -34,7 +34,8 @@ public sealed partial class MatchEngine
                 // own convention; a placeholder would need its own stable-but-anonymous id scheme,
                 // unlike a face-down province card's ProvinceIndex-keyed one, since a duel's own
                 // focused-card list has no comparable positional slot).
-                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray());
+                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
+                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray());
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
