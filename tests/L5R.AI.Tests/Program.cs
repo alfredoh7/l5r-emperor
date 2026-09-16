@@ -35,6 +35,14 @@ Run("resolves purchase and Proclaim with alternating reaction priority",()=>
     }
     Check(game.GetView(0).PendingChoice is null,"Reaction window stuck");
 });
+Run("chooses an offered free Experienced Overlay",()=>
+{
+    var game=MatchEngine.CreateEconomyScenario();var view=game.GetView(0);
+    var higher=view.Players[0].Provinces[0].Card!;
+    var action=new ActionOption("overlay","Overlay",true,null,new("overlay",0,view.Version,higher.Id,TargetId:"lower"),higher.Id,["lower"]);
+    var decision=TrainingOpponent.Choose(view,[action]);
+    Check(decision.Command is {Type:"overlay",TargetId:"lower"},"AI did not choose the offered free Overlay");
+});
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})

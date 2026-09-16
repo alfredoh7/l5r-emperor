@@ -11,9 +11,9 @@ public partial class DeckBuilderScreen
         foreach(var state in new[]{"normal","hover","pressed"})name.AddThemeStyleboxOverride(state,new StyleBoxEmpty());
         row.AddChild(name);var note=CatalogueArt.Label(string.Join(" · ",card.Types),collection?18:13);row.AddChild(note);
         var support=CatalogueArt.Label(card.Playable?"":"Not implemented",16);row.AddChild(support);support.Visible=collection;
-        var minus=CatalogueArt.Button("−",()=>Adjust(card,-1));minus.Disabled=Draft.Count(card.Name)==0;minus.AccessibilityName="Remove "+card.Name;row.AddChild(minus);
-        var count=CatalogueArt.Label(Draft.Count(card.Name).ToString(),20);count.HorizontalAlignment=HorizontalAlignment.Center;
-        if(Draft.Review().OverLimit.Contains(card.Name))count.AddThemeColorOverride("font_color",new Color("f37c64"));row.AddChild(count);
+        var minus=CatalogueArt.Button("−",()=>Adjust(card,-1));minus.Disabled=Draft.Count(card.Id)==0;minus.AccessibilityName="Remove "+card.Name;row.AddChild(minus);
+        var count=CatalogueArt.Label(Draft.Count(card.Id).ToString(),20);count.HorizontalAlignment=HorizontalAlignment.Center;
+        if(Draft.Review().OverLimit.Contains(new L5R.Core.DeckCardInfo(card.Id,card.Name,card.Types,card.DeckTypes,card.Keywords,card.Playable).DeckName))count.AddThemeColorOverride("font_color",new Color("f37c64"));row.AddChild(count);
         var plus=CatalogueArt.Button("+",()=>Adjust(card,1));plus.AccessibilityName="Add "+card.Name;row.AddChild(plus);
         void Layout()
         {
@@ -33,13 +33,13 @@ public partial class DeckBuilderScreen
     private Control MakeTile(CatalogueData.Card card)
     {
         if(_list&&_setupSlot.Length==0)return MakeRow(card,false);
-        var item=new Control();var face=new DeckFace(card,Scans){Copies=Draft.Count(card.Name),Selected=_compare.Contains(card.Id)||(_setupSlot.Length>0&&Draft.Count(card.Name)==1)};item.AddChild(face);
+        var item=new Control();var face=new DeckFace(card,Scans){Copies=Draft.Count(card.Id),Selected=_compare.Contains(card.Id)||(_setupSlot.Length>0&&Draft.Count(card.Id)==1)};item.AddChild(face);
         face.MouseEntered+=()=>Hover(card,face);face.MouseExited+=HideHover;face.FocusEntered+=()=>Hover(card,face);face.FocusExited+=HideHover;face.Pressed+=()=>ShowComparison([card]);
         var note=CatalogueArt.Label(card.Playable?"":"Not implemented",13);note.HorizontalAlignment=HorizontalAlignment.Center;item.AddChild(note);
         if(_setupSlot.Length>0)
         {
-            var selected=Draft.Count(card.Name)==1;var select=CatalogueArt.Button(selected?"Selected":"Select",()=>{
-                Draft.SelectSetup(card.Name);Dirty=true;HideHover();BuildSetupStrip();BuildSetupChoices();UpdateStatus();
+            var selected=Draft.Count(card.Id)==1;var select=CatalogueArt.Button(selected?"Selected":"Select",()=>{
+                Draft.SelectSetup(card.Id);Dirty=true;HideHover();BuildSetupStrip();BuildSetupChoices();UpdateStatus();
             });select.AccessibilityName="Select "+card.Name;select.Disabled=selected;select.Icon=DeckSkin.Icon(selected?"selected":"radio");select.AddThemeConstantOverride("h_separation",12);
             foreach(var state in new[]{"normal","disabled","hover"})select.AddThemeStyleboxOverride(state,new StyleBoxEmpty());
             select.AddThemeColorOverride("font_disabled_color",new Color("edca79"));select.AddThemeColorOverride("icon_disabled_color",Colors.White);select.AddThemeFontSizeOverride("font_size",22);item.AddChild(select);
@@ -48,7 +48,7 @@ public partial class DeckBuilderScreen
         else
         {
             var minus=CatalogueArt.Button("−",()=>Adjust(card,-1));minus.AccessibilityName="Remove "+card.Name;item.AddChild(minus);
-            var count=CatalogueArt.Label(Draft.Count(card.Name).ToString(),22);count.HorizontalAlignment=HorizontalAlignment.Center;if(Draft.Review().OverLimit.Contains(card.Name))count.AddThemeColorOverride("font_color",new Color("f37c64"));item.AddChild(count);
+            var count=CatalogueArt.Label(Draft.Count(card.Id).ToString(),22);count.HorizontalAlignment=HorizontalAlignment.Center;if(Draft.Review().OverLimit.Contains(new L5R.Core.DeckCardInfo(card.Id,card.Name,card.Types,card.DeckTypes,card.Keywords,card.Playable).DeckName))count.AddThemeColorOverride("font_color",new Color("f37c64"));item.AddChild(count);
             var plus=CatalogueArt.Button("+",()=>Adjust(card,1));plus.AccessibilityName="Add "+card.Name;item.AddChild(plus);
             var check=new CheckBox{Text="Compare",ButtonPressed=_compare.Contains(card.Id)};foreach(var state in new[]{"normal","hover","pressed","hover_pressed","focus"})check.AddThemeStyleboxOverride(state,new StyleBoxEmpty());check.AddThemeFontSizeOverride("font_size",15);check.Toggled+=value=>{
 
@@ -98,11 +98,11 @@ public partial class DeckBuilderScreen
             var face=new DeckFace(card,Scans){MouseFilter=MouseFilterEnum.Ignore};Put(panel,face,center-faceW/2,faceY,faceW,faceH);
             if(new L5R.Core.DeckCardInfo(card.Id,card.Name,card.Types,card.DeckTypes,card.Keywords,card.Playable).SetupSlot.Length==0)
             {
-                var y=faceY+faceH+5;var count=CatalogueArt.Label(Draft.Count(card.Name).ToString(),22);count.HorizontalAlignment=HorizontalAlignment.Center;
+                var y=faceY+faceH+5;var count=CatalogueArt.Label(Draft.Count(card.Id).ToString(),22);count.HorizontalAlignment=HorizontalAlignment.Center;
                 Put(panel,CatalogueArt.Label("In deck",18),center-132,y,78,32);
-                Put(panel,CatalogueArt.Button("−",()=>{Adjust(card,-1);count.Text=Draft.Count(card.Name).ToString();}),center-45,y,32,32);
+                Put(panel,CatalogueArt.Button("−",()=>{Adjust(card,-1);count.Text=Draft.Count(card.Id).ToString();}),center-45,y,32,32);
                 Put(panel,count,center-7,y,38,32);
-                Put(panel,CatalogueArt.Button("+",()=>{Adjust(card,1);count.Text=Draft.Count(card.Name).ToString();}),center+37,y,32,32);
+                Put(panel,CatalogueArt.Button("+",()=>{Adjust(card,1);count.Text=Draft.Count(card.Id).ToString();}),center+37,y,32,32);
             }
             var paper=new Panel{Name="RulesParchment"+i};paper.AddThemeStyleboxOverride("panel",DeckSkin.Parchment());Put(panel,paper,x+12,paperY,cell-24,paperH);
             var material=new ShaderMaterial{Shader=GD.Load<Shader>("res://Art/DeckBuilder/parchment-clip.gdshader")};material.SetShaderParameter("panel_size",paper.Size);paper.Material=material;

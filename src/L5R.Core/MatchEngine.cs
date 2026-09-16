@@ -239,6 +239,7 @@ public sealed partial class MatchEngine
         {
             case "pass": Pass(); break;
             case "purchase": Purchase(command); break;
+            case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
             case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard,"Not in the Dynasty Phase."); EndTurn(); break;
             case "attack": DeclareAttack(command); break;
@@ -351,6 +352,97 @@ public sealed partial class MatchEngine
         // (they may keep buying) -- so unlike RecruitReserve below, an Overconfident window opened
         // here must resume back to the SAME purchasing player, not their opponent.
         else if(!OpenEntryReactionWindow(command.PlayerId,card)) OpenOverconfidentDrawWindow(command.PlayerId);
+    }
+
+    /// <summary>Checks the special free recruitment of a higher-Experienced Personality over a
+    /// lower-level Personality with the same title. Honor Requirement and Gold are deliberately not
+    /// consulted; normal control restrictions still apply.</summary>
+    public OverlayQuote QuoteOverlay(int playerId, string cardId, string targetId)
+    {
+        if (playerId is < 0 or > 1 || !_state.Cards.TryGetValue(cardId, out var card) || !_state.Cards.TryGetValue(targetId, out var target))
+            return new(cardId, targetId, 0, 0, "Unknown card, target, or player.");
+        var higherLevel = ExperienceLevel(card);
+        var lowerLevel = ExperienceLevel(target);
+        string? error = null;
+        if (_state.Phase != Phase.Dynasty) error = "Overlay recruitment is only available during the Dynasty Phase.";
+        else if (card.OwnerId != playerId || card.Zone != Zone.Province || !card.FaceUp || Definition(card).Type != CardType.Personality)
+            error = "Choose your own face-up Personality in a province.";
+        else if (target.OwnerId != playerId || !InPlay(target) || Definition(target).Type != CardType.Personality)
+            error = "Choose your Personality in play.";
+        else if (!string.Equals(Experienced.BaseTitle(Definition(card).Name), Experienced.BaseTitle(Definition(target).Name), StringComparison.OrdinalIgnoreCase))
+            error = "Experienced Personalities may only overlay a Personality with the same title.";
+        else if (higherLevel <= lowerLevel)
+            error = "The overlaying Personality must have a higher Experience Level.";
+        else if (!LoyaltyAllowsControl(card, Player(playerId).Clan))
+            error = "Loyal Personalities can only be recruited by a Clan they are aligned with.";
+        else if ((Keyword(card, "Unique") || Keyword(card, "Singular")) && _state.Cards.Values.Any(c => c.Id != target.Id && c.OwnerId == playerId && InPlay(c)
+            && string.Equals(Experienced.BaseTitle(Definition(c).Name), Experienced.BaseTitle(Definition(card).Name), StringComparison.OrdinalIgnoreCase)))
+            error = $"You already control this {(Keyword(card, "Unique") ? "Unique" : "Singular")} card.";
+        return new(cardId, targetId, higherLevel, lowerLevel, error);
+    }
+
+    private void Overlay(GameCommand command)
+    {
+        Require(command.TargetId is not null, "Choose the lower-Experience Personality to overlay.");
+        var card = Card(command.CardId);
+        var target = Card(command.TargetId);
+        var quote = QuoteOverlay(command.PlayerId, card.Id, target.Id);
+        Require(quote.Error is null, quote.Error ?? "");
+        Require((command.SourceIds ?? []).Length == 0, "No Gold sources are needed for an Overlay.");
+
+        var player = Player(command.PlayerId);
+        var province = player.Provinces.Single(p => p.CardId == card.Id);
+        province.CardId = null;
+
+        // The old Personality leaves play and the new one enters. Queue keyword triggers while each
+        // card still has the state that determines its own trigger.
+        QueueOverconfidentDraw(target);
+        TransferOverlayState(target, card);
+        RemoveFromGame(target);
+        Emit("personalityOverlayed", $"{player.Name} overlayed {Definition(target).Name} with Experience Level {quote.HigherLevel}.", player.Id, card.Id, quote.HigherLevel);
+        QueueOverconfidentDraw(card);
+        Refill(player, province);
+        if (!OpenEntryReactionWindow(player.Id, card)) OpenOverconfidentDrawWindow(player.Id);
+    }
+
+    private void TransferOverlayState(CardInstance lower, CardInstance higher)
+    {
+        higher.Zone = lower.Zone;
+        higher.ProvinceIndex = lower.ProvinceIndex;
+        higher.FaceUp = true;
+        higher.Bowed = lower.Bowed || Definition(higher).Effect == "enters-bowed";
+        higher.Dishonorable = lower.Dishonorable || Definition(higher).Effect == "enters-dishonored";
+        higher.StraightenBlockedTurn = Math.Max(higher.StraightenBlockedTurn, lower.StraightenBlockedTurn);
+        higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
+
+        higher.Modifiers.AddRange(lower.Modifiers);
+        higher.GrantedKeywords.AddRange(lower.GrantedKeywords);
+        higher.RemovedKeywords.AddRange(lower.RemovedKeywords.Where(k => !higher.RemovedKeywords.Contains(k, StringComparer.Ordinal)));
+        higher.RemovedClanAffiliations.AddRange(lower.RemovedClanAffiliations.Where(c => !higher.RemovedClanAffiliations.Contains(c, StringComparer.Ordinal)));
+        higher.Protections.AddRange(lower.Protections);
+        higher.Tokens.AddRange(lower.Tokens);
+        foreach (var use in lower.AbilityUses)
+            if (!higher.AbilityUses.TryGetValue(use.Key, out var current) || use.Value > current) higher.AbilityUses[use.Key] = use.Value;
+
+        foreach (var attachment in _state.Cards.Values.Where(c => c.AttachedTo == lower.Id))
+        {
+            attachment.AttachedTo = higher.Id;
+            attachment.ProvinceIndex = higher.ProvinceIndex;
+        }
+
+        // The transferred state belongs only to the replacement. Clearing the terminal card avoids
+        // retaining a second, stale copy in Removed from Game.
+        lower.Modifiers.Clear();
+        lower.GrantedKeywords.Clear();
+        lower.RemovedKeywords.Clear();
+        lower.RemovedClanAffiliations.Clear();
+        lower.Protections.Clear();
+        lower.Tokens.Clear();
+        lower.AbilityUses.Clear();
+        lower.Bowed = false;
+        lower.Dishonorable = false;
+        lower.StraightenBlockedTurn = -1;
+        lower.AssignedToAttackTurn = -1;
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an

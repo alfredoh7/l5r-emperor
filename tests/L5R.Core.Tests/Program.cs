@@ -105,6 +105,7 @@ var tests = new (string Name, Action Run)[]
     ("Equip (Battle) attaches a Spell to an opposed unbowed Shugenja, opens a bounded immediate follow-up window for its Battle ability, and is usable any number of times per turn", SpellsAndShugenja),
     ("Unique/Singular (issue #202): both restrict simultaneous in-play copies of the same-named card to one per controller (Unique's own in-play restriction had no test before this), checked at all three entry-into-play paths -- Purchase, ordinary Equip (a real pre-existing gap for both keywords, fixed here), and Equip (Battle)", UniqueAndSingularInPlayRestriction),
     ("Loyal follows effective Clan affiliations; a Personality with none remaining is Unaligned and controllable by any Clan", LoyalKeyword),
+    ("Experienced levels and Overlay recruitment: any higher level replaces the same-titled Personality for free, ignores Honor Requirement, transfers its complete state, and removes the lower level", ExperiencedKeywordAndOverlay),
     ("A keyword with no mechanical ability of its own still satisfies a generic 'choose your performing/target [Keyword] Personality' condition, on both Target and Performer selection", KeywordSatisfaction),
     ("Strategy wave 1: Immovable Object (Battle/Open dual timing, both abilities), Blind Rage, Chokehold, and Unorthodox Attack", StrategyWave1KeywordCards),
     ("Follower wave 2: 11 cards found by auditing every not-yet-imported Follower for ones needing nothing beyond already-built engine pieces", FollowerWave2Cards),
@@ -2068,6 +2069,66 @@ static void LoyalKeyword()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:dairuko.Id,TargetId:target.Id,AbilityId:"dairuko-exp-bow"));
         Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"A Personality with no Clan affiliations has the Unaligned keyword");
     }
+}
+static void ExperiencedKeywordAndOverlay()
+{
+    Equal(Experienced.Level([]),0,"No Experienced keyword means level 0");
+    Equal(Experienced.Level(["Experienced"]),1,"Experienced without a number means level 1");
+    Equal(Experienced.Level(["Experienced 5"]),5,"Experienced N supplies level N");
+    Equal(Experienced.Level(["Inexperienced"]),0,"Inexperienced is not the Experienced keyword");
+    Equal(Experienced.BaseTitle("Mirumoto Yozo - exp2"),"Mirumoto Yozo","Imported Experience suffixes are not part of the in-game title");
+
+    var s=MatchEngine.CreateEconomyScenario().State;
+    s.Phase=Phase.Dynasty; s.ActivePlayerId=0; s.PriorityPlayerId=0; s.Players[0].Clan="Scorpion"; s.Players[0].Honor=0;
+    var higherId=s.Players[0].Provinces[0].CardId!;var higher=s.Cards[higherId];
+    higher.DefinitionId="training-paneki-exp3";higher.FaceUp=true;
+    var lower=Add(s,"training-paneki-base",0,Zone.Home,bowed:true);
+    lower.Dishonorable=true;lower.StraightenBlockedTurn=s.TurnNumber;lower.AssignedToAttackTurn=s.TurnNumber;
+    lower.Modifiers=[new("old-effect","ongoing","Force",2)];
+    lower.GrantedKeywords=[new("Cavalry","old-effect","Permanent")];
+    lower.RemovedKeywords=["Samurai"];
+    lower.RemovedClanAffiliations=["Scorpion"];
+    lower.Protections=[new("old-effect","Turn")];
+    lower.Tokens=[new("token-overlay","Fire","old-effect","Force",1)];
+    lower.AbilityUses["old-once-per-turn"]=s.TurnNumber;
+    var follower=Add(s,"training-follower",0,Zone.Attached,attachedTo:lower.Id);
+    var item=Add(s,"training-item",0,Zone.Attached,attachedTo:lower.Id);
+    var initiallyUnbowed=s.Cards.Values.Where(c=>c.OwnerId==0 && !c.Bowed && CardCatalog.Get(c.DefinitionId).GoldProduction>0).Select(c=>c.Id).Order().ToArray();
+
+    var e=MatchEngine.FromTestState(s);
+    var quote=e.QuoteOverlay(0,higher.Id,lower.Id);
+    Check(quote.Error is null,quote.Error??"Overlay should be legal");
+    Equal(quote.HigherLevel,3);Equal(quote.LowerLevel,0);
+    Check(e.QueryActions(0).Any(a=>a.Type=="overlay" && a.Enabled && a.Command?.CardId==higher.Id && a.Command.TargetId==lower.Id),"Overlay is offered as an executable Dynasty action");
+    Accept(e,new GameCommand("overlay",0,e.Version,CardId:higher.Id,TargetId:lower.Id,SourceIds:[]));
+
+    var state=e.State;var replacement=state.Cards[higher.Id];var removed=state.Cards[lower.Id];
+    Equal(replacement.Zone,Zone.Home);Check(replacement.Bowed,"Bowed state transfers");Check(replacement.Dishonorable,"Dishonorable state transfers");
+    Equal(replacement.Modifiers.Single().Amount,2);Equal(replacement.Tokens.Single().Id,"token-overlay");
+    Check(replacement.GrantedKeywords.Any(k=>k.Keyword=="Cavalry"&&k.Duration=="Permanent"),"Granted keyword transfers");
+    Check(replacement.RemovedKeywords.Contains("Samurai"),"Removed keyword transfers");
+    Check(replacement.RemovedClanAffiliations.Contains("Scorpion"),"Removed Clan affiliation transfers");
+    Check(replacement.Protections.Any(p=>p.Source=="old-effect"),"Protection transfers");
+    Equal(replacement.StraightenBlockedTurn,state.TurnNumber);Equal(replacement.AssignedToAttackTurn,state.TurnNumber);
+    Equal(replacement.AbilityUses["old-once-per-turn"],state.TurnNumber);
+    Check(state.Cards[follower.Id].AttachedTo==higher.Id&&state.Cards[item.Id].AttachedTo==higher.Id,"Every attachment moves to the overlaying Personality");
+    Equal(removed.Zone,Zone.RemovedFromGame);Check(removed.Tokens.Count==0&&removed.Modifiers.Count==0&&removed.GrantedKeywords.Count==0,"Transferred state is not duplicated on the removed card");
+    Check(initiallyUnbowed.SequenceEqual(state.Cards.Values.Where(c=>c.OwnerId==0 && !c.Bowed && CardCatalog.Get(c.DefinitionId).GoldProduction>0).Select(c=>c.Id).Order()),"No Gold source was bowed");
+
+    // Levels need only be higher, not sequential: Experience 5 may replace Experience 3 directly.
+    var exp5Id=state.Players[0].Provinces[1].CardId!;state.Cards[exp5Id].DefinitionId="training-paneki-exp5";state.Cards[exp5Id].FaceUp=true;
+    e=MatchEngine.FromTestState(state);quote=e.QuoteOverlay(0,exp5Id,higher.Id);
+    Check(quote.Error is null,quote.Error??"Experience 5 should overlay Experience 3");Equal(quote.LowerLevel,3);Equal(quote.HigherLevel,5);
+    Accept(e,new GameCommand("overlay",0,e.Version,CardId:exp5Id,TargetId:higher.Id,SourceIds:[]));
+    state=e.State;Equal(state.Cards[exp5Id].Zone,Zone.Home);Equal(state.Cards[higher.Id].Zone,Zone.RemovedFromGame);
+    Check(state.Cards[follower.Id].AttachedTo==exp5Id&&state.Cards[item.Id].AttachedTo==exp5Id,"Attachments follow repeated non-sequential overlays");
+
+    // Real imported catalogue names keep their -exp notation for deck construction, while Overlay
+    // still recognizes them as versions of the same titled Personality.
+    var legacyHigherId=state.Players[0].Provinces[2].CardId!;state.Cards[legacyHigherId].DefinitionId="oracle-l5r-10287";state.Cards[legacyHigherId].FaceUp=true;
+    var legacyLower=Add(state,"oracle-l5r-5178",0,Zone.Home);
+    e=MatchEngine.FromTestState(state);quote=e.QuoteOverlay(0,legacyHigherId,legacyLower.Id);
+    Check(quote.Error is null,quote.Error??"Imported Experienced titles should overlay");Equal(quote.LowerLevel,1);Equal(quote.HigherLevel,2);
 }
 static void KeywordSatisfaction()
 {

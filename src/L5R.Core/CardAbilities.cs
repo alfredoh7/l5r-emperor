@@ -606,6 +606,9 @@ public sealed partial class MatchEngine
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
     private bool Keyword(CardInstance card, string keyword)
     {
+        if (KeywordRemoved(card, keyword)) return false;
+        // Experienced is one levelled keyword: Experienced N satisfies a generic Experienced check.
+        if (keyword == "Experienced") return ExperienceLevel(card) > 0;
         if (keyword == "Unaligned" && Definition(card).Type == CardType.Personality && ClanAlignments(card).Length == 0)
             return true;
         var printedOrGranted = (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword)).Contains(keyword, StringComparer.Ordinal);
@@ -620,6 +623,13 @@ public sealed partial class MatchEngine
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
         return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
     }
+    private static bool KeywordRemoved(CardInstance card, string keyword) =>
+        card.RemovedKeywords.Contains(keyword, StringComparer.Ordinal)
+        || keyword.StartsWith("Experienced", StringComparison.Ordinal)
+            && card.RemovedKeywords.Contains("Experienced", StringComparer.Ordinal);
+    private static int ExperienceLevel(CardInstance card) => Experienced.Level(
+        (Definition(card).Keywords ?? []).Concat(card.GrantedKeywords.Select(g => g.Keyword))
+            .Where(keyword => !KeywordRemoved(card, keyword)));
     // Multi-keyword requirement (issue #190): "a Dragon Clan Kensai", "a Crane Clan Magistrate" -- any
     // number of keywords, independently present, order irrelevant. A null/empty list is deliberately
     // false, not vacuously true: every RequiredKeywords-gated category exists specifically because it
@@ -2362,7 +2372,7 @@ public sealed partial class MatchEngine
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
         card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
-        card.Tokens.Clear(); card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedClanAffiliations.Clear(); card.AbilityUses.Clear();
+        card.Tokens.Clear(); card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear(); card.AbilityUses.Clear();
         card.Zone = dynasty ? Zone.DynastyDeck : Zone.FateDeck;
         var deck = dynasty ? owner.DynastyDeck : owner.FateDeck;
         if (position == "Bottom") deck.Add(card.Id); else deck.Insert(0, card.Id);

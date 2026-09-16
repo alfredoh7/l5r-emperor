@@ -118,6 +118,8 @@ public static class TrainingOpponent
                 if(command.ClanAllegiance && self.Honor>=def.HonorRequirement) baseScore-=20;
                 if(command.ClanDiscount && !self.ProclaimUsedThisTurn) baseScore-=15;
                 return baseScore-(action.Quote?.Cost??def.GoldCost);
+            case "overlay":
+                return card?.Definition is null ? -100 : 180+card.Definition.Force*2;
             case "discardProvince": return card?.Definition?.Type==CardType.Holding && self.Home.Count(c=>c.Definition?.Type==CardType.Holding)>=8?40:20;
             case "endDynasty": return 0;
             case "equip":
@@ -176,6 +178,7 @@ public static class TrainingOpponent
     private static string Explain(string type)=>type switch
     {
         "purchase"=>"Develop Gold production early, then recruit Personalities and preserve a useful Proclaim opportunity.",
+        "overlay"=>"Recruit the higher-Experience Personality for free while preserving the existing unit.",
         "proclaim"=>"Take the available once-per-turn Honor gain after the Personality enters play.",
         "attack"=>"Commit the offered unbowed army when visible Force can threaten a province.",
         "assignDefense"=>"Defend the battlefield with the largest visible attacking army.",
