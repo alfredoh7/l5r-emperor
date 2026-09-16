@@ -59,7 +59,7 @@ public partial class PermanentGrantProbe : Control
                     GrantedEffects:[new("Action protection","Effects of actions this card performs will not be negated.","oracle-l5r-7420","Permanent")]),new Vector2(660,side+260),side,36);
                 var host=Face(_hero with {Id="attachment-host",GrantedEffects=null,Tokens=Tokens(1)},new Vector2(660,side+320),side);
                 child.TokenRail!.Companions=[host,child];host.TokenRail!.Companions=[host,child];
-                Caption("Bowed attachment · owns its seal",new Vector2(660,side*2+360),17);
+                if(!_perspective)Caption("Bowed attachment · owns its seal",new Vector2(660,side*2+360),17);
             }
             if(!_perspective)
             {
@@ -68,11 +68,16 @@ public partial class PermanentGrantProbe : Control
                 var factor=Math.Min(1,available/_detail.Size.X);_detail.Scale=Vector2.One*factor;
                 _detail.Position=new Vector2(30+3*spacing,140);
             }
-            Caption("One grant",new Vector2(55,side+155),18);
-            Caption("Four token types",new Vector2(55+spacing,side+155),18);
-            Caption("Six token types",new Vector2(55+spacing*2,side+155),18);
-            Caption("Bowed · five token types",new Vector2(45,side*2+280),18);
-            Caption("Opponent · permanent + attached",new Vector2(45+spacing,side*2+280),18);
+            if(_perspective)
+                Caption("Projected card rails · both seats, crowded tokens and independently bowed attachments",new Vector2(55,size.Y-70),18);
+            else
+            {
+                Caption("One grant",new Vector2(55,side+155),18);
+                Caption("Four token types",new Vector2(55+spacing,side+155),18);
+                Caption("Six token types",new Vector2(55+spacing*2,side+155),18);
+                Caption("Bowed · five token types",new Vector2(45,side*2+280),18);
+                Caption("Opponent · permanent + attached",new Vector2(45+spacing,side*2+280),18);
+            }
         }
         ValidateProjection();
     }
