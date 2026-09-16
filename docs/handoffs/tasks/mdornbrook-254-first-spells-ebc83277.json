@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire the first three real Spell cards (issue #254): Suitengu's Path (pure AttachGrantsKeyword carrier, Naval), Scouring Flood (exposed and fixed a real PersonalityForce gap -- a Spell's own text-described Force bonus was never summed into its wielder; added a new Effect-keyed term mirroring ItemForceToWielder's shape, plus its Battle move-home ability reusing existing primitives), and The Earth's Hunger (a new cost-choice Performer category, own-wielder-or-source-with-wielder-keyword, Xijkt's own shape mirrored the other way round). Also records, but does not implement, two 'not yet needed' design boundaries: Elemental Keywords as a future any-of-five grouping primitive, and a Naval-count-in-army effect. Marked shared only because the packaging script copies scans into src/L5R.Client/Content/Published/ (the same data-asset path every other wave already writes to) -- no actual client/UI code changed.",
+  "validation": "bash tools/check.sh --skip-client: 161/161 core (3 new regression tests), 52/52 published (bumped the pinned catalog-size assertion 277->280), 9/9 deck-format, 10/10 deck-workshop, 14/14 AI, 5/5 server, 4/4 client-transport, plus both Python content/collaboration unittest suites -- all green. dotnet build of src/L5R.Core/L5R.Core.csproj and src/L5R.Client/L5R.Client.csproj also succeed.",
+  "remaining": "None for the three cards themselves. The Elemental Keyword grouping primitive and the Naval-count effect are both recorded as future scope, not implemented, per the decision doc.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/254",
+  "branch": "mdornbrook/254-first-spells",
+  "updated": "2026-09-16T14:40:30.687251+00:00"
+}

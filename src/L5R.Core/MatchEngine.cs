@@ -1068,6 +1068,12 @@ public sealed partial class MatchEngine
         // is bowed or not -- unlike a Follower's own Force, which stays with the Follower itself (see
         // FollowerForce) and only joins the unit total in BattleForce when unbowed or Elite.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Item).Sum(c=>Definition(c).Force+ItemForceToWielder(c,card))
+        // Scouring Flood (the first Spell wired with a static Force bonus): unlike an Item, a Spell
+        // never prints its own numeric Force stat box -- "This Personality has +2F" is purely a text
+        // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
+        // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
+        // bowed or not, every phase -- since no published Spell needs a conditional version yet.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"?2:0)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
