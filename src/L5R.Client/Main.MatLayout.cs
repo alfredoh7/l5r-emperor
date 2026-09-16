@@ -180,6 +180,8 @@ public partial class Main
             }
         }
 
+        MeasureRemovedPiles();
+
         // Keep a player's camera steady while ink and cards change positions.
         // An overview stays fitted when the contextual Home area appears or grows,
         // so a newly gained Favor cannot appear behind the sidebar. A manually

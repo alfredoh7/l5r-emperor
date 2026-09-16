@@ -11,6 +11,7 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null ? "Review the highlighted target and any payment. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
+        if (RenderBattleFlow()) return;
         if (PresentationBusy)
         {
             _guide.Visible = false;
@@ -80,7 +81,7 @@ public partial class Main
         // An inspected reminder must never hide a new engine decision (e.g. hand limit).
         if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
-        if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment)
+        if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (action is not null) _inspector.AddChild(SidebarSkin.Button("Assign units…", () => Choose(action), true));
@@ -273,7 +274,7 @@ public partial class Main
 
     private void RenderPhaseActions()
     {
-        if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(SidebarSkin.Button("View battle details", ShowHistory)); return; }
+        if (PresentationBusy) { Palette.Clear(_phaseActions); _phaseActions.AddChild(SidebarSkin.Button("Review battle", ShowBattleHistory)); return; }
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
@@ -288,6 +289,8 @@ public partial class Main
         {
             _phaseActions.AddChild(Palette.Wrapped($"Room {_session.Snapshot.RoomCode}\nWaiting for your opponent to connect.", 16, Palette.Crane)); return;
         }
+        if (View.Phase==Phase.Battle && View.PendingChoice is null && View.PriorityPlayerId==View.ViewerId && View.Events.LastOrDefault()?.Type=="passed")
+            _phaseActions.AddChild(Palette.Wrapped("Passing now ends Battle actions.",16,Palette.PaperDim));
         foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(SidebarSkin.Button("Pass device to other player", SwitchSeat));

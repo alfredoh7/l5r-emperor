@@ -12,8 +12,7 @@ public partial class Main
     private readonly Dictionary<int,double> _bloodStarts=[];
     private readonly Dictionary<int,CrimsonCourt> _bloodCourts=[];
     private (int Turn,int Attacker)? _bloodBattle;
-    // The left journal was withdrawn by Alfredo. Keep public outcome data for
-    // existing presentation checks and a future history design, but mount no UI.
+    // Keep the table announcement separate from the right-sidebar battle history.
     private void BuildBattleFeedback()
     {
         _defeatBanner=new BattleDefeatBanner(); _root.AddChild(_defeatBanner);
@@ -77,7 +76,10 @@ public partial class BattleDefeatBanner : Control
     public override void _Draw()
     {
         DrawTextureRect(BattleEscalationArt.Announcement,new Rect2(Vector2.Zero,Size),false);
-        _headline.Text=Headline; _headline.Position=new Vector2(40,15); _headline.Size=new Vector2(Size.X-80,58);
+        var fontSize=28;
+        while(fontSize>18 && Palette.Title.GetStringSize(Headline,fontSize:fontSize).X>(Size.X-80)*1.85f)fontSize--;
+        _headline.AddThemeFontSizeOverride("font_size",fontSize);
+        _headline.Text=Headline; _headline.Position=new Vector2(40,10); _headline.Size=new Vector2(Size.X-80,62);
         _cause.Text=Cause; _cause.Position=new Vector2(45,75); _cause.Size=new Vector2(Size.X-90,34);
     }
 }
