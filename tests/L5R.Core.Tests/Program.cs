@@ -5,6 +5,7 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
     ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
@@ -5938,4 +5939,36 @@ static void BrashForceRedirectAndBowReactions()
         var quote=e.QuotePurchase(0,cardId);
         Equal(quote.Cost,8,"No Reserve-while-Defender discount on an ordinary Purchase");
     }
+}
+
+static void GrantedEffectPresentationView()
+{
+    var state=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(state,"training-crane-samurai",0,Zone.Home);
+    card.GrantedKeywords=[new("Berserker","source","Permanent")];
+    card.Protections=[new("source","Permanent"),new("temporary-source","Turn")];
+    var hidden=state.Cards.Values.First(c=>c.Zone==Zone.Province&&!c.FaceUp);
+    hidden.Protections=[new("hidden-source","Permanent")];
+    var engine=MatchEngine.FromTestState(state);
+    foreach(var viewer in new[]{0,1})
+    {
+        var view=engine.GetView(viewer);
+        var visible=view.Players[0].Home.Single(c=>c.Id==card.Id);
+        Equal(visible.GrantedEffects!.Length,2);
+        Check(visible.GrantedEffects.Any(e=>e.Duration=="Permanent"&&e.Source=="source"));
+        Check(visible.GrantedEffects.All(e=>e.Text.Contains("will not be negated")));
+        Check(view.Players.SelectMany(p=>p.Provinces).Where(p=>p.Card?.Definition is null).All(p=>p.Card?.GrantedEffects is null),"Hidden provinces never carry metadata");
+        visible.GrantedEffects[0]=new("Changed","Not engine text","x","Turn");
+        Check(engine.GetView(viewer).Players[0].Home.Single(c=>c.Id==card.Id).GrantedEffects![0].Name=="Action protection","Detached view does not mutate the engine");
+    }
+    var snapshot=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    var encoded=JsonSerializer.Serialize(snapshot);
+    var decoded=JsonSerializer.Deserialize<CardView>(encoded)!;
+    Equal(decoded.GrantedEffects!.Length,2);
+    var old=System.Text.Json.Nodes.JsonNode.Parse(encoded)!.AsObject();old.Remove("GrantedEffects");
+    Check(JsonSerializer.Deserialize<CardView>(old.ToJsonString())!.GrantedEffects is null,"Older snapshots remain readable");
+    SkipToDynasty(engine);Accept(engine,Cmd(engine,"endDynasty"));
+    var after=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    Equal(after.GrantedEffects!.Length,1);Equal(after.GrantedEffects[0].Duration,"Permanent");
+    Equal(after.GrantedKeywords!.Single().Duration,"Permanent");
 }

@@ -47,6 +47,9 @@ public partial class Main
             var details = new VBoxContainer(); details.AddThemeConstantOverride("separation", 12); panel.AddChild(details); _inspector.AddChild(panel);
             AddInspectionCaption("Card details", details);
             var name = Palette.Wrapped(def.Name, 24); name.AddThemeFontOverride("font", SidebarSkin.Bold); details.AddChild(name);
+            if(CardChanges.Entries(_selected).Length>0)
+                details.AddChild(CardChangePanel.Create(_selected,id=>FindCard(id)?.Definition?.Name,compact:true,
+                    inspectSource:id=> { if(FindCard(id) is { } source)SelectCard(source); }));
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
@@ -54,8 +57,6 @@ public partial class Main
                 details.AddChild(preview);
             }
             if (_selected.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
-            foreach (var grant in _selected.GrantedKeywords ?? [])
-                details.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
             if (_selected.StraightenBlocked) details.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) details.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) details.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
