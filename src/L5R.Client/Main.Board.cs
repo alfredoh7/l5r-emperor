@@ -22,7 +22,7 @@ public partial class Main
             _previousBows.Clear(); foreach (var pair in _currentBows) _previousBows[pair.Key] = pair.Value;
             _bowVersion = View.Version; _bowChangedAt = Time.GetTicksMsec();
         }
-        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
+        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear(); _homeReminders.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover:true);
@@ -30,6 +30,7 @@ public partial class Main
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         AddHoldings(enemy); AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self); AddHoldings(Self);
+        AddPersistentHome(enemy); AddPersistentHome(Self); HighlightHomeReminders();
         // A shallow physical fan, with complete scans and space for a modest hover lift.
         var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
         var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
@@ -76,7 +77,7 @@ public partial class Main
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
-        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding).ToArray();
+        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding && !IsPersistentHomeCard(c)).ToArray();
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);

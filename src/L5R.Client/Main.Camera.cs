@@ -308,6 +308,7 @@ public partial class Main
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
         _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :
+            hovered is HomeReminder reminder ? reminder.CreateReadingPreview() :
             hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
         _root.AddChild(_tableTooltip);
         _tableTooltip.Scale = Vector2.One / _root.Scale.X;

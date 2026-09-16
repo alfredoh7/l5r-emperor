@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire the Suspicions Event: Events-Phase reveal/resolve dispatch (ResolveEvent), a new Zone.EventInPlay ongoing-effect zone (ResolveOngoingEvents), and the first CardType.Event catalog entry (Event wave 1, oracle-l5r-7675) via the standard content-wave pipeline. Marked shared only because the content pipeline copies the card's scan into src/L5R.Client/Content/Published/oracle-l5r-7675.jpg (the same data-asset path every other wave's packaging script already writes to) -- no actual UI/client code changed, and no new UI rendering exists for the new zone yet (explicitly deferred to Alfredo/UI lane, see the decision doc).",
+  "validation": "bash tools/check.sh --skip-client: 152/152 core, 52/52 published, 9/9 deck-format, 10/10 deck-workshop, 14/14 AI, 5/5 server, 4/4 client-transport, plus the two Python content/collaboration unittest suites, all passing. Separately confirmed dotnet build of src/L5R.Client/L5R.Client.csproj succeeds (no Godot editor available for the full headless import/smoke check).",
+  "remaining": "None for the engine mechanic itself. UI rendering of the new EventInPlay 'sideboard' zone is explicitly deferred to Alfredo (UI lane) per the decision doc; the reshuffle-while-active-copy case is recorded as a design note only, not implemented, since no published card needs it yet.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/241",
+  "branch": "mdornbrook/241-suspicions-event",
+  "updated": "2026-09-16T06:30:41.603826+00:00"
+}

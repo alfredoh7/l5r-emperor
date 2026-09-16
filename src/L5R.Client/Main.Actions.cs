@@ -39,7 +39,8 @@ public partial class Main
             _inspector.AddChild(Palette.Wrapped(pending.Prompt, 20));
             if (pending.Type == "proclaim") _inspector.AddChild(Palette.Wrapped("Honor updates when Proclaim resolves. Each player then gets an opportunity to pass.", 14, Palette.PaperDim));
         }
-        if (_selected?.Definition is { } def)
+        if (RenderHomeReminderInspection()) { }
+        else if (_selected?.Definition is { } def)
         {
             var panel = new PanelContainer(); panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             var details = new VBoxContainer(); details.AddThemeConstantOverride("separation", 12); panel.AddChild(details); _inspector.AddChild(panel);
@@ -76,6 +77,7 @@ public partial class Main
         if (_chosen is { Type: "useAbility", Command.CardIds: not null }) { RenderProvinceRefresh(); return; }
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); return; }
         if (_chosen is { Type: "discardHand" }) { RenderHandDiscard(); return; }
+        if (_selectedHomeReminder is not null) { AddHomeReminderActions(); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
         if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment)
         {

@@ -122,6 +122,7 @@ public partial class Main : Node
             {
                 _capturePrepared = true;
                 _captureClock = 0;
+                if (_captureMode.StartsWith("published-home", StringComparison.Ordinal)) PreparePersistentHomeCapture();
                 if (_captureMode is "published-choice" or "published-choice-confirm")
                 {
                     for (var fixtureAttempt = 0; fixtureAttempt < 6 && View.PendingChoice?.Type != "shinden"; fixtureAttempt++)
@@ -457,6 +458,7 @@ public partial class Main : Node
         // A misclick during a reviewed action must not silently discard its target or payment.
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
         if (_selected?.Id == card.Id) { DeselectCard(); return; }
+        _selectedHomeReminder = null; HighlightHomeReminders();
         _selected = card; _sources.Clear();
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }

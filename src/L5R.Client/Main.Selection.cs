@@ -10,6 +10,8 @@ public partial class Main
         // explicit Cancel action, so this cannot silently discard a draft.
         if (_chosen is not null || _session.Busy) return;
         _selected = null;
+        _selectedHomeReminder = null;
+        HighlightHomeReminders();
         _assignmentUnit = null;
         _sources.Clear();
         ReleaseTableFocus();
