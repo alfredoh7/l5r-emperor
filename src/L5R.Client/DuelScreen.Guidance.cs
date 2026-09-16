@@ -87,7 +87,7 @@ public partial class DuelScreen
         if(_helpContext!=context){_helpStep=0;_helpContext=context;_dontShowAgain=false;}
         var steps=GuidanceSteps();_helpStep=Math.Clamp(_helpStep,0,steps.Count-1);
         var current=steps[_helpStep];
-        var pos=_helpOpen?new Vector2(112,61):new Vector2(615,151);
+        var pos=_helpOpen?new Vector2(112,112):new Vector2(615,151);
         var extent=_helpOpen?new Vector2(495,220):new Vector2(442,125);
         _guidanceRect=new Rect2(_offset+pos*_scale,extent*_scale);
         var panel=new PanelContainer{Name=_helpOpen?"AnchoredGuidance":"QuietCoaching",Position=_guidanceRect.Position,Size=_guidanceRect.Size,MouseFilter=MouseFilterEnum.Stop};
@@ -130,7 +130,8 @@ public partial class DuelScreen
     private void GuideText(string title,string body,VBoxContainer column,bool centered)
     {
         GuidanceTitle=title;GuidanceBody=body;
-        var heading=DuelUi.Text(title,Math.Max(22,(int)(43*_scale)),Palette.Paper,true);
+        var heading=DuelUi.Text(title,Math.Max(22,(int)((centered?34:28)*_scale)),Palette.Paper,true);
+        heading.AddThemeFontOverride("font",centered?DuelUi.Prompt:DuelUi.UiHeading);
         var text=DuelUi.Wrapped(body,Math.Max(14,(int)((centered?16:18)*_scale)),Palette.Paper);
         if(centered){heading.HorizontalAlignment=HorizontalAlignment.Center;text.HorizontalAlignment=HorizontalAlignment.Center;}
         column.AddChild(heading);column.AddChild(text);

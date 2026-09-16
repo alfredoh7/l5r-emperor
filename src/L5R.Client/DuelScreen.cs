@@ -22,6 +22,8 @@ public partial class DuelScreen : Control
     private VBoxContainer _actions=null!;
     private Label _status=null!;
     private Control? _reading;
+    private string? _pinnedInspectionId;
+    private CardTile? _inspectionFace;
     private readonly Dictionary<string,CardTile> _tiles=[];
     private readonly Queue<DuelReveal> _revealQueue=[];
     private readonly HashSet<long> _seenReveals=[];
@@ -69,7 +71,7 @@ public partial class DuelScreen : Control
     }
     public void ResetPresentation()
     {
-        ResetCinema();HideCardHover();Snapshot=null;ResetGuidance();_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
+        ResetCinema();HideCardHover();Snapshot=null;PlaceMasthead();ResetGuidance();_duelId=null;_seenReveals.Clear();_revealQueue.Clear();_shownReveal=null;_revealClock=0;_aftermathPlayed=false;
         _selectedHand=null;_selectedFocus=null;_selectedInspection=null;_selectedDeck=false;_dragCard=null;_cleanupClock=0;_effectOrder=[];_commandCooldown=0;_animateEntry=false;ClearReading();
     }
     private void Layout()
@@ -89,14 +91,18 @@ public partial class DuelScreen : Control
     private static Vector2 ToPlane(Vector2 point)=>TableSurface.UnprojectOffset((point+new Vector2(0,DuelCinematicStage.MatLift)-DuelCinematicStage.StageCanvas/2)/DuelCinematicStage.Density,DuelCinematicStage.Pitch,DuelCinematicStage.Depth);
     private void Select(CardView card)
     {
-        if(card.Definition is null||PresentationBusy||InputLocked)return;
+        if(card.Definition is null||PresentationBusy||InputLocked||_commandCooldown>0)return;
         _selectedDeck=false;
-        _selectedInspection=card.Id;
-        if(card.Zone==Zone.Hand && card.OwnerId==Snapshot!.View.ViewerId){_selectedHand=card.Id;_coachingDismissed.Add(Snapshot.View.ViewerId);_dontShowAgain=false;}
-        else if(card.Zone==Zone.Focused && card.OwnerId==Snapshot!.View.ViewerId)_selectedFocus=card.Id;
+        if(card.Zone==Zone.Hand && card.OwnerId==Snapshot!.View.ViewerId){_selectedHand=_selectedHand==card.Id?null:card.Id;_selectedInspection=_selectedHand;_coachingDismissed.Add(Snapshot.View.ViewerId);_dontShowAgain=false;}
+        else if(card.Zone==Zone.Focused && card.OwnerId==Snapshot!.View.ViewerId){_selectedFocus=_selectedFocus==card.Id?null:card.Id;_selectedInspection=_selectedFocus;}
         else {Inspect(card);return;}
-        foreach(var tile in _tiles.Values){tile.Highlighted=tile.Card.Id==_selectedHand||tile.Card.Id==_selectedFocus;tile.QueueRedraw();}
+        RefreshSelection();
         RenderLanding();RenderActions();
+    }
+    private void RefreshSelection()
+    {
+        foreach(var tile in _tiles.Values){tile.Highlighted=tile.Card.Id==_selectedHand||tile.Card.Id==_selectedFocus;if(!tile.Highlighted)tile.ReleaseFocus();tile.QueueRedraw();}
+        foreach(var pile in _piles.Values){pile.Selected=_selectedDeck&&pile.OwnerId==Snapshot!.View.ViewerId;if(!pile.Selected)pile.ReleaseFocus();pile.QueueRedraw();}
     }
     private IEnumerable<ActionOption> Legal=>Snapshot?.Actions.Where(a=>a.Enabled&&a.Command is not null)??[];
     private void RenderActions()
@@ -109,6 +115,7 @@ public partial class DuelScreen : Control
         ClearReading();
         foreach(var c in _hud.GetChildren()){_hud.RemoveChild(c);c.QueueFree();}_reading=null;
         if(Snapshot is null)return;
+        PlaceMasthead();
         var view=Snapshot.View;var stage=view.PendingDuel?.Stage;
         var ribbon=new Control{Position=_offset+new Vector2(640,290)*_scale,Size=new Vector2(392,42)*_scale,MouseFilter=MouseFilterEnum.Ignore};
         _hud.AddChild(ribbon);ribbon.Visible=view.LastDuel is not null;
@@ -116,6 +123,12 @@ public partial class DuelScreen : Control
         _status.VerticalAlignment=VerticalAlignment.Center;_status.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);ribbon.AddChild(_status);
         _status.AddThemeColorOverride("font_shadow_color",Colors.Black);_status.AddThemeConstantOverride("shadow_offset_x",1);_status.AddThemeConstantOverride("shadow_offset_y",2);
         _status.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(19*_scale)));
+        if(stage=="Focusing")
+        {
+            _status.Text=view.PriorityPlayerId==view.ViewerId?"YOUR MOVE":"OPPONENT’S MOVE";
+            _status.AddThemeFontOverride("font",DuelUi.Prompt);_status.AddThemeFontSizeOverride("font_size",Math.Max(22,(int)(36*_scale)));
+            ribbon.Position=_offset+new Vector2(606,280)*_scale;ribbon.Size=new Vector2(460,56)*_scale;
+        }
         _controlsRect=new Rect2(_offset+new Vector2(1350,760)*_scale,new Vector2(295,150)*_scale);
         Control? inspectionParent=null;
         RenderTableLabels();if(_cinema!=Cinema.Opening)RenderDuelValues();
@@ -126,11 +139,10 @@ public partial class DuelScreen : Control
             var record=view.LastDuel;
             var outcome=result.Kind=="Refused"?"Challenge refused":result.WinnerId is null?"Equal totals · both lose":$"{(result.WinnerId==record.Challenger.Id?record.Challenger:record.Challenged).Definition!.Name} wins";
             _status.Text=outcome;
-            ribbon.Position=_offset+new Vector2(300,28)*_scale;
-            ribbon.Size=new Vector2(1072,135)*_scale;
+            ribbon.Position=_offset+new Vector2(644,170)*_scale;
+            ribbon.Size=new Vector2(384,136)*_scale;
             _status.AddThemeFontOverride("font",DuelUi.Heading);
-            var headingSize=Math.Max(28,(int)(104*_scale));
-            while(headingSize>28&&DuelUi.Heading.GetStringSize(outcome,fontSize:headingSize).X>ribbon.Size.X-32*_scale)headingSize--;
+            var headingSize=Math.Max(28,(int)(48*_scale));
             _status.AddThemeFontSizeOverride("font_size",headingSize);
             _status.AutowrapMode=TextServer.AutowrapMode.WordSmart;
             if(!record.Complete)
@@ -237,14 +249,17 @@ public partial class DuelScreen : Control
     {
         if(card.Definition is null)return;
         HideCardHover();ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);RenderGuidance();
-        // Exactly the main game's full-face + rules component, including its theme.
+        // Shared full-face + rules component, with the approved lacquer shell.
         var preview=CardPreview.Create(card,InspectionContext(card),null,Math.Min(Size.Y/1080f,Math.Min((Size.X-48)/750f,(Size.Y-130)/558f)));
+        DuelUi.SkinInspection(preview);_pinnedInspectionId=card.Id;_selectedInspection=card.Id;
+        _inspectionFace=FindFace(preview);
         preview.Size=preview.CustomMinimumSize;preview.Position=(Size-preview.Size)/2;
         shade.AddChild(preview);
         var close=Button("Close inspection",ClearReading,shade);close.Position=new Vector2(Size.X/2-120,preview.Position.Y+preview.Size.Y+18);close.Size=new Vector2(240,38);
 
     }
-    public void ClearReading(){if(_reading is null)return;_hud.GetNodeOrNull<Control>("DuelResultFooter")?.Show();_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);RenderGuidance();}
+    private static CardTile? FindFace(Node node)=>node as CardTile ?? node.GetChildren().Select(FindFace).FirstOrDefault(c=>c is not null);
+    public void ClearReading(){_pinnedInspectionId=null;_inspectionFace=null;if(_reading is null)return;_hud.GetNodeOrNull<Control>("DuelResultFooter")?.Show();_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);RenderGuidance();}
     public override void _Input(InputEvent e)
     {
         if(!IsVisibleInTree()||InputLocked)return;
@@ -271,6 +286,12 @@ public partial class DuelScreen : Control
         if(e is InputEventMouse m)
         {
             _lastHoverPointer=m.Position;
+            if(m is InputEventMouseButton{Pressed:true,ButtonIndex:MouseButton.Left} && _pinnedInspectionId is {} pinned &&
+                (_inspectionFace?.GetGlobalRect().HasPoint(m.Position)==true || UprightAt(m.Position)?.Card.Id==pinned))
+            {
+                ClearReading();if(_selectedHand==pinned)_selectedHand=null;if(_selectedFocus==pinned)_selectedFocus=null;
+                _selectedInspection=null;RefreshSelection();RenderLanding();RenderActions();GetViewport().SetInputAsHandled();return;
+            }
             if(m is InputEventMouseButton)HideCardHover();
             if(_guidanceRect.HasPoint(m.Position)||DuelValueAt(m.Position) is not null||UprightAt(m.Position) is not null){_table.ExitMouse();return;}
             if(_reading is null&&HandlePlacement(m))return;

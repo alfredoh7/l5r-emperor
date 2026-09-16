@@ -5,7 +5,7 @@ namespace L5R.Client;
 
 public partial class DuelScreen
 {
-    private readonly Dictionary<(int,Zone),TablePile> _piles=[];
+    private readonly Dictionary<(int,Zone),DuelFatePile> _piles=[];
     private readonly List<(Vector2 Point,string Text,float Width,Action? Open)> _tableLabels=[];
     private Button? _landing;
     private bool _selectedDeck;
@@ -44,7 +44,7 @@ public partial class DuelScreen
         foreach(var player in view.Players)
         {
             var side=player.Id==view.ViewerId?0:1;
-            var deck=new TablePile(player,Zone.FateDeck,()=>SelectPile(player.Id,Zone.FateDeck)){Size=new Vector2(260,270),Material=CardPaper.FixedTable};
+            var deck=new DuelFatePile(player,()=>SelectPile(player.Id,Zone.FateDeck)){Size=new Vector2(190,222),Material=CardPaper.FixedTable,Selected=_selectedDeck&&side==0};
             deck.Position=PlanePoint(PilePoint(side,Zone.FateDeck))-new Vector2(deck.Size.X/2,deck.Size.Y/2+17);
             deck.SetMeta("flat_tooltip",deck.TooltipText);deck.TooltipText="";_plane.AddChild(deck);_piles[(player.Id,Zone.FateDeck)]=deck;
             if(counts.TryGetValue((player.Id,Zone.FateDeck),out var before))deck.SettleFrom(before,ReducedMotion||!animate);
@@ -146,22 +146,24 @@ public partial class DuelScreen
         if(_landing is not null&&GodotObject.IsInstanceValid(_landing)){_plane.RemoveChild(_landing);_landing.QueueFree();}_landing=null;
         if(Snapshot is null||InputLocked||PresentationBusy||SelectedFocusCommand() is not {} command)return;
         var count=Snapshot.View.Players[Snapshot.View.ViewerId].FocusCount;
-        _landing=new Button{Name=_selectedDeck?"Focus from deck":"Focus selected card",Text="Place\nfocus",TooltipText=_selectedDeck?"Commit the top Fate card without looking. Enter also commits.":"Commit the selected hand card. Enter also commits.",Size=new Vector2(102,150),MouseDefaultCursorShape=CursorShape.PointingHand};
+        _landing=new Button{Name=_selectedDeck?"Focus from deck":"Focus selected card",Text="PLACE\nFOCUS",TooltipText=_selectedDeck?"Commit the top Fate card without looking. Enter also commits.":"Commit the selected hand card. Enter also commits.",Size=new Vector2(112,156),MouseDefaultCursorShape=CursorShape.PointingHand};
         _landing.Position=PlanePoint(FocusPoint(0,count%4)+Vector2.Down*(count/4)*76)-_landing.Size/2;
-        _landing.AddThemeStyleboxOverride("normal",Palette.Box(new Color(.07f,.09f,.12f,.35f),new Color(.8f,.7f,.45f,.65f),1,3));
-        _landing.AddThemeStyleboxOverride("hover",Palette.Box(new Color(.15f,.17f,.18f,.55f),Palette.Gold,2,3));
-        _landing.AddThemeColorOverride("font_color",Palette.Paper);_landing.AddThemeFontSizeOverride("font_size",21);
+        foreach(var state in new[]{"normal","hover","pressed","disabled"})_landing.AddThemeStyleboxOverride(state,DuelUi.FocusFrame(state=="hover"));
+        _landing.AddThemeStyleboxOverride("focus",Palette.Box(Colors.Transparent,Palette.Paper,1,0));
+        _landing.AddThemeFontOverride("font",DuelUi.Prompt);
+        _landing.AddThemeColorOverride("font_color",Palette.Paper);_landing.AddThemeFontSizeOverride("font_size",27);
         _landing.Disabled=_submitted||_commandCooldown>0;_landing.Pressed+=()=>Submit(command);_plane.AddChild(_landing);
     }
     private void SelectPile(int owner,Zone zone)
     {
-        if(InputLocked||PresentationBusy)return;
+        if(InputLocked||PresentationBusy||_commandCooldown>0)return;
         if(zone==Zone.FateDeck)
         {
             if(owner!=Snapshot!.View.ViewerId)return;
             if(!Legal.Any(a=>a.Type=="focus"&&a.Command!.Choice=="deck"))return;
             _coachingDismissed.Add(Snapshot!.View.ViewerId);_dontShowAgain=false;
-            _selectedDeck=true;_selectedHand=null;_selectedInspection=null;RenderLanding();RenderActions();
+            _selectedDeck=!_selectedDeck;_selectedHand=null;_selectedInspection=null;
+            RefreshSelection();RenderLanding();RenderActions();
         }
         else ShowPile(owner,zone);
     }

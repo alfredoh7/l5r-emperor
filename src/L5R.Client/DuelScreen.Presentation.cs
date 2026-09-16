@@ -48,6 +48,7 @@ public partial class DuelScreen
         if(_hoverCardId!=identity){HideCardHover();_hoverCardId=identity;}
         if(_cardHover is not null || (_hoverTime+=delta)<.5)return;
         _cardHover=tile is not null ? tile.CreateReadingPreview() : ReadingTooltip.Create(pile!,pile!.GetMeta("flat_tooltip").AsString());
+        if(tile is not null)DuelUi.SkinInspection(_cardHover);
         AddChild(_cardHover);_cardHover.ZIndex=90;
         _cardHover.Size=_cardHover.CustomMinimumSize;
         // Same bounded, pointer-adjacent full-card preview as the main table.
@@ -99,7 +100,7 @@ public partial class DuelScreen
         var next=DuelUi.Button("Continue",()=>{if(!InputLocked&&!_submitted&&CanContinue)PresentationFinished?.Invoke();},true,_scale,50);
         next.Position=_controlsRect.Position;next.Size=_controlsRect.Size;_hud.AddChild(next);
         var details=DuelUi.Button("Duel details",()=>ShowConsequences(record),scale:_scale,fontSize:18);
-        details.Position=_offset+new Vector2(155,22)*_scale;details.Size=new Vector2(150,40)*_scale;_hud.AddChild(details);
+        details.Position=new Vector2(Math.Max(160,_offset.X+155*_scale),16);details.Size=new Vector2(150,40)*_scale;_hud.AddChild(details);
     }
 
     private VBoxContainer RecapPanel(out HBoxContainer actions)
@@ -116,7 +117,7 @@ public partial class DuelScreen
         var surface=DuelUi.Surface(shell,28);surface.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         var layout=new VBoxContainer();layout.AddThemeConstantOverride("separation",12);surface.AddChild(layout);
         var header=new HBoxContainer();layout.AddChild(header);
-        var title=DuelUi.Text("Aftermath",38,Palette.Paper,true);title.SizeFlagsHorizontal=SizeFlags.ExpandFill;header.AddChild(title);
+        var title=DuelUi.Text("Aftermath",38,Palette.Paper,true);title.AddThemeFontOverride("font",DuelUi.UiHeading);title.SizeFlagsHorizontal=SizeFlags.ExpandFill;header.AddChild(title);
         header.AddChild(DuelUi.Button("Back",ClearReading,fontSize:18));
         var scroll=new ScrollContainer{HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled,SizeFlagsVertical=SizeFlags.ExpandFill};layout.AddChild(scroll);
         var column=new VBoxContainer{SizeFlagsHorizontal=SizeFlags.ExpandFill};column.AddThemeConstantOverride("separation",10);scroll.AddChild(column);

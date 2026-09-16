@@ -14,6 +14,18 @@ public partial class DuelScreen
     private ColorRect _cinemaShade=null!;
     private TextureRect _cinemaSlash=null!;
     private Button _skipCinema=null!;
+    private DuelIntroStage? _introStage;
+    private TextureRect? _masthead;
+    private void PlaceMasthead()
+    {
+        if(_masthead is null){_masthead=new TextureRect{Name="Duel masthead",Texture=GD.Load<Texture2D>("res://Art/DuelUi/duel-wordmark.png"),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,MouseFilter=MouseFilterEnum.Ignore};AddChild(_masthead);}
+        _masthead.Position=_offset+new Vector2(616,15)*_scale;_masthead.Size=new Vector2(440,147)*_scale;
+        _masthead.Visible=Snapshot?.View.LastDuel is not null;_masthead.MoveToFront();
+    }
+    private void ClearIntro()
+    {
+        if(_introStage is null)return;_cinemaLayer.RemoveChild(_introStage);_introStage.QueueFree();_introStage=null;
+    }
     private AudioStreamPlayer _cinemaSound=null!,_windSound=null!;
     private static AudioStreamWav? _windClip;
     public bool SoundEnabled {get;set;}=true;
@@ -45,7 +57,7 @@ public partial class DuelScreen
     private void ResetCinema()
     {
         _cinema=Cinema.None;_cinemaTime=0;_openingSeen=false;_cutPlayed=false;OpeningRuns=EndingRuns=0;
-        ResetCamera();_cinemaLayer?.Hide();_cinemaSound?.Stop();_windSound?.Stop();
+        ClearIntro();ResetCamera();_cinemaLayer?.Hide();_cinemaSound?.Stop();_windSound?.Stop();
         if(_flights is not null)foreach(var child in _flights.GetChildren()){_flights.RemoveChild(child);child.QueueFree();}
     }
     private void StartOpening()
@@ -53,6 +65,9 @@ public partial class DuelScreen
         _openingSeen=true;OpeningRuns++;
         if(ReducedMotion)return;
         _cinema=Cinema.Opening;_cinemaTime=0;HideCardHover();CloseGuidance();
+        ClearIntro();_introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
+        _introStage.Build(Snapshot!.View.LastDuel!,Snapshot.View.ViewerId);
+        _introStage.Advance(0,Size,Snapshot.View.LastDuel!.Challenger.OwnerId,Snapshot.View.LastDuel.Challenged.OwnerId);
         _cinemaLayer.Show();PlayCinemaSound(false);
     }
     private void StartEnding()
@@ -66,7 +81,7 @@ public partial class DuelScreen
     {
         if(!CinematicBusy)return;
         if(_cinema==Cinema.Ending){_aftermathPlayed=true;_cleanupClock=0;}
-        _cinema=Cinema.None;ResetCamera();_cinemaLayer.Hide();_cinemaSound.Stop();
+        _cinema=Cinema.None;ClearIntro();ResetCamera();_cinemaLayer.Hide();_cinemaSound.Stop();
         foreach(var c in _flights.GetChildren()){_flights.RemoveChild(c);c.QueueFree();}
         RenderCards(false);RenderActions();
     }
@@ -81,40 +96,27 @@ public partial class DuelScreen
         if(InputLocked||_reading is not null)return;
         if(ReducedMotion){SkipCinematic();return;}
         _cinemaTime+=delta;var t=_cinemaTime;
-        _cinemaLayer.MoveToFront();_cinemaLayer.Size=Size;_cinemaShade.Size=Size;
+        _cinemaLayer.MoveToFront();_masthead?.MoveToFront();_cinemaLayer.Size=Size;_cinemaShade.Size=Size;
         _skipCinema.Position=_offset+new Vector2(1500,24)*_scale;_skipCinema.Size=new Vector2(120,40)*_scale;
         _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(30,(int)(75*_scale)));
         _cinemaSlash.Visible=false;_cinemaTitle.Text="";_cinemaShade.Color=Colors.Transparent;
         if(_cinema==Cinema.Opening)
         {
-            var center=DuelCinematicStage.Design/2;var left=new Vector2(700,325);var right=new Vector2(975,325);
-            if(t<.7)
-            {CameraAt(center+Vector2.Down*20,1.035f);_uprights.Position=_offset+Vector2.Down*(1-Ease(t/.7))*65*_scale;}
+            var challenger=Snapshot!.View.LastDuel!.Challenger;var challenged=Snapshot.View.LastDuel.Challenged;
+            if(t<2.5)_introStage?.Advance(t,Size,challenger.OwnerId,challenged.OwnerId);
             else
             {
-                _uprights.Position=_offset;
-                var challenger=Snapshot!.View.LastDuel!.Challenger;var challenged=Snapshot.View.LastDuel.Challenged;
-                var first=challenger.OwnerId==Snapshot.View.ViewerId?left:right;
-                var second=challenged.OwnerId==Snapshot.View.ViewerId?left:right;
-                Vector2 target;float zoom;
-                if(t<1.6){var p=Ease((t-.7)/.28);target=center.Lerp(first,p);zoom=Mathf.Lerp(1.035f,1.55f,p);Title(challenger,first==left,t-.7);}
-                else if(t<2.5){var p=Ease((t-1.6)/.30);target=first.Lerp(second,p);zoom=1.55f;Title(challenged,second==left,t-1.6);}
-                else{var p=Ease((t-2.5)/.65);target=second.Lerp(center,p);zoom=Mathf.Lerp(1.55f,1,p);}
-                CameraAt(target,zoom);
+                // A film cut to the exact playable composition avoids superimposed card faces.
+                ClearIntro();CameraAt(DuelCinematicStage.Design/2,Mathf.Lerp(1.035f,1,Ease((t-2.5)/.9)));
             }
-            var active=t is >=.7 and <1.6?Snapshot!.View.LastDuel!.Challenger.OwnerId:t is >=1.6 and <2.5?Snapshot!.View.LastDuel!.Challenged.OwnerId:-1;
-            foreach(var tile in _tiles.Values.Where(c=>c.HasMeta("upright")))
-            {
-                var emphasis=active<0||tile.Card.OwnerId==active?1f:.72f;tile.PivotOffset=tile.Size/2;
-                tile.Scale=Vector2.One*Mathf.Lerp(tile.Scale.X,emphasis,Math.Min(1,(float)delta*10));
-                var light=active<0||tile.Card.OwnerId==active?1f:.57f;tile.Modulate=new Color(light,light,light,1);
-            }
-            foreach(var tile in _tiles.Values.Where(c=>c.Card.Zone==Zone.Hand))tile.Modulate=new Color(1,1,1,Ease((t-2.8)/.5));
+            if(t is >=.7 and <1.6)Title(challenger,challenger.OwnerId==Snapshot.View.ViewerId,t-.7);
+            if(t is >=1.6 and <2.5)Title(challenged,challenged.OwnerId==Snapshot.View.ViewerId,t-1.6);
+            foreach(var tile in _tiles.Values.Where(c=>c.Card.Zone==Zone.Hand))tile.Modulate=new Color(1,1,1,Ease((t-2.65)/.5));
             if(t>=3.4)SkipCinematic();
             void Title(CardView card,bool leftSide,double elapsed)
             {
-                _cinemaTitle.Text=card.Definition!.Name;_cinemaTitle.Position=_offset+new Vector2(leftSide?990:140,120)*_scale;
-                _cinemaTitle.Size=new Vector2(540,185)*_scale;_cinemaTitle.Modulate=new Color(1,1,1,Ease(elapsed/.25));
+                _cinemaTitle.Text=card.Definition!.Name;_cinemaTitle.Position=_offset+new Vector2(leftSide?1050:80,168)*_scale;
+                _cinemaTitle.Size=new Vector2(530,180)*_scale;_cinemaTitle.Modulate=new Color(1,1,1,Ease(elapsed/.25));
                 _cinemaSlash.Visible=true;_cinemaSlash.Position=_cinemaTitle.Position+new Vector2(90,78)*_scale;
                 _cinemaSlash.Size=new Vector2(210,32)*_scale;_cinemaSlash.Modulate=_cinemaTitle.Modulate;
             }

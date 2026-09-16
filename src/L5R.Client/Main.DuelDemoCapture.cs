@@ -11,7 +11,7 @@ public partial class Main
     private string _preservedPractice="";
     private Vector2 _duelLastPlacement;
     private string? _deferredDuelButton;
-    private int _focusInspectionStep,_resultPileStep,_uprightProbe;
+    private int _focusInspectionStep,_resultPileStep,_uprightProbe,_selectionProbe;
     private readonly HashSet<string> _cinemaCaptures=[];
     private int _openingMovieFrame,_endingMovieFrame;
     private string? _inspectionBeforeOpponentClick;
@@ -38,9 +38,15 @@ public partial class Main
         var host=_duelDemo;
         IEnumerable<Node> Descendants(Node n) {foreach(var child in n.GetChildren()){yield return child;foreach(var item in Descendants(child))yield return item;}}
         Button Find(string text)=>Descendants(host!).OfType<Button>().First(b=>(b.Text==text||b.Name==text)&&b.IsVisibleInTree());
+        void Move(Vector2 point)
+        {
+            // Keep native and injected pointer coordinates aligned during windowed probes.
+            GetViewport().WarpMouse(point);
+            Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});
+        }
         void Native(Vector2 point)
         {
-            Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});
+            Move(point);
             Input.ParseInputEvent(new InputEventMouseButton{Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=true});
             Input.ParseInputEvent(new InputEventMouseButton{Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=false});
         }
@@ -77,16 +83,17 @@ public partial class Main
                 Check(host.Screen.OpeningRuns==1,"opening plays once and submits no extra command");
                 Check(host.Screen.UprightCount==2&&host.Screen.VisibleDiscardPiles==0,"upright champions with no decorative corner discard piles");
                 var champion=host.Session.Snapshot.View.LastDuel!.Challenger;
-                if(_uprightProbe==0){var point=host.Screen.CardClickPoint(champion.Id);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_uprightProbe++;return;}
+                if(_uprightProbe==0){var point=host.Screen.CardClickPoint(champion.Id);Move(point);_uprightProbe++;return;}
                 if(_uprightProbe==1){Check(host.Screen.HoverPreviewId==champion.Id,"upright champion hover reuses main-game card inspection");Capture("upright-hover");Native(host.Screen.CardClickPoint(champion.Id));_uprightProbe++;return;}
-                if(_uprightProbe==2){Check(host.Screen.HasPrivateInspection,"upright champion click opens full inspection");Press("Close inspection");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_uprightProbe++;return;}
+                if(_uprightProbe==2){Check(host.Screen.HasPrivateInspection,"upright champion click opens full inspection");Native(host.Screen.CardClickPoint(champion.Id));Move(new Vector2(20,200));_uprightProbe++;return;}
+                Check(!host.Screen.HasPrivateInspection&&host.Session.Snapshot.View.Version==1,"second champion click dismisses inspection without a command");
                 Capture("challenge");Press("Switch seat");break;
             case 5:
                 Check(!host!.Screen.Visible&&host.Screen.HoverPreviewId is null,"private handoff hides the table and hover preview");Capture("handoff");Press("Reveal this seat");break;
             case 6:Press("Focus from deck");Native(_duelLastPlacement);break;
             case 7:
                 Check(host!.Session.Snapshot!.View.Version==2,"rapid duplicate focus advances once");
-                if(_focusInspectionStep==0){var point=host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_focusInspectionStep++;return;}
+                if(_focusInspectionStep==0){Check(host.Screen.SelectedInspectionId is null,"duplicate placement does not select the newly committed card");var point=host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId);Move(point);_focusInspectionStep++;return;}
                 if(_focusInspectionStep==1){Check(host.Screen.HoverPreviewId is not null,"hover restores the main-game preview for own committed focus");Check(new Rect2(Vector2.Zero,host.Screen.Size).Encloses(host.Screen.HoverPreviewRect),"hover preview stays within the viewport");Capture("own-focus-hover");Native(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
                 if(_focusInspectionStep==2){Press("Inspect selected card");_focusInspectionStep++;return;}
                 if(_focusInspectionStep==3){Check(host.Screen.HasPrivateInspection,"blind focus is privately inspectable after commitment");Capture("own-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
@@ -97,6 +104,10 @@ public partial class Main
                 var courtesy=host!.Session.Snapshot!.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
                 Native(host.Screen.CardClickPoint(courtesy.Id));break;
             case 10:
+                var selected=host!.Session.Snapshot!.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
+                if(_selectionProbe==0){Native(host.Screen.CardClickPoint(selected.Id));_selectionProbe++;return;}
+                if(_selectionProbe==1){Check(host.Screen.SelectedInspectionId is null&&host.Screen.LandingClickPoint==Vector2.Zero&&host.Session.Snapshot.View.Version==2,"second hand click deselects and removes placement without a command");Native(host.Screen.CardClickPoint(selected.Id));_selectionProbe++;return;}
+                if(_selectionProbe==2){Move(new Vector2(20,200));_selectionProbe++;return;}
                 Check(!Find("Focus selected card").Disabled,"projected card input selects a legal hand card");Capture("placement-target");Press("Inspect selected card");break;
             case 11:Capture("inspection");Press("Close inspection");break;
             case 12:
@@ -118,7 +129,7 @@ public partial class Main
                 Native(_duelLastPlacement);break;
             case 13:
                 Check(host!.Session.Snapshot!.View.Version==3,"drag/keyboard focus and duplicate click advance once");
-                if(_focusInspectionStep==4){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;var point=host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_focusInspectionStep++;return;}
+                if(_focusInspectionStep==4){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;var point=host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId);Move(point);_focusInspectionStep++;return;}
                 if(_focusInspectionStep==5){Check(host.Screen.HoverPreviewId is null,"hover never inspects an anonymous opponent focus");Native(host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
                 Check(host.Screen.SelectedInspectionId==_inspectionBeforeOpponentClick&&!host.Screen.HasPrivateInspection,"opponent focused backs expose no inspection");
                 Capture("focused");Press("Switch seat");break;
@@ -134,8 +145,8 @@ public partial class Main
                 if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
                 if(_resultPileStep==4){Native(host.Screen.FallenClickPoint(host.Session.Snapshot.View.ViewerId));_resultPileStep++;return;}
                 if(_resultPileStep==5){Check(host.Screen.HasPrivateInspection,"dead personalities remain separate from Fate discards");Capture("fallen-spread");Press("Back");_resultPileStep++;return;}
-                if(_resultPileStep==6){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_resultPileStep++;return;}
-                if(_resultPileStep==7){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_resultPileStep++;return;}
+                if(_resultPileStep==6){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Move(point);_resultPileStep++;return;}
+                if(_resultPileStep==7){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Move(new Vector2(20,200));_resultPileStep++;return;}
                 Check(result.ChallengerTotal==8&&result.ChallengedTotal==7,"native UI reproduces canonical 8–7");
                 var left=host.Session.Snapshot.View.LastDuel.Challenger.OwnerId==host.Session.Snapshot.View.ViewerId;
                 Check(host.Screen.VisibleDuelValues.SequenceEqual(new[]{(left?result.ChallengerTotal:result.ChallengedTotal).ToString(),(left?result.ChallengedTotal:result.ChallengerTotal).ToString()}),"large result numerals match authoritative totals for this seat");

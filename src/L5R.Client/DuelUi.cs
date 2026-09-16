@@ -2,11 +2,13 @@ using Godot;
 
 namespace L5R.Client;
 
-/// <summary>Duel-only ink surfaces and original Musashi headings; card faces stay untouched.</summary>
+/// <summary>Shared lacquer menus with duel brush accents and Satoshi prompts; card faces stay untouched.</summary>
 internal static class DuelUi
 {
     private static Font Body => GD.Load<FontFile>("res://Art/Fonts/Caudex-Regular.ttf");
     internal static Font Heading => GD.Load<FontFile>("res://Art/Fonts/MusashiBrush.otf");
+    internal static Font Prompt => GD.Load<FontFile>("res://Art/Fonts/Satoshi-Bold.otf");
+    internal static Font UiHeading => GD.Load<FontFile>("res://Art/Fonts/WeatheredQuill-Regular.ttf");
 
     public static Theme Theme()
     {
@@ -50,18 +52,24 @@ internal static class DuelUi
         var label=Text(text,size,color);label.AutowrapMode=TextServer.AutowrapMode.WordSmart;
         label.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;return label;
     }
-    private static StyleBox ButtonStyle(string state,float scale)
+    private static StyleBox ButtonStyle(string state,float scale,bool ink=false)
     {
         // Keyboard focus remains a functional outline, separate from decorative art.
         if(state=="focus")return Palette.Box(Colors.Transparent,Palette.Paper,1,0);
         var tint=state switch {"hover"=>new Color(1.35f,1.3f,1.25f),"pressed"=>new Color(.75f,.75f,.75f),"disabled"=>new Color(.7f,.7f,.7f,.45f),_=>Colors.White};
-        var box=Plaque(scale,tint);box.ContentMarginLeft=box.ContentMarginRight=18*scale;
+        var box=ink?Ink(scale,tint):SidebarSkin.Surface(true,tint:tint);box.ContentMarginLeft=box.ContentMarginRight=18*scale;
         box.ContentMarginTop=box.ContentMarginBottom=9*scale;return box;
     }
     private static Texture2D? _wash;
-    // Imagegen-derived transparent ink from the approved concept, with only the plain
-    // center stretched. Names retained for the existing contextual result labels.
+    // Reuse the approved main-game lacquer atlas; stretch only the plain center.
     public static StyleBoxTexture Plaque(float scale=1,Color? tint=null)
+    {
+        var box=SidebarSkin.Surface(tint:tint);
+        foreach(var side in new[]{Side.Left,Side.Right,Side.Top,Side.Bottom})box.SetTextureMargin(side,27*scale);
+        box.ContentMarginLeft=box.ContentMarginRight=24*scale;box.ContentMarginTop=box.ContentMarginBottom=18*scale;
+        return box;
+    }
+    private static StyleBoxTexture Ink(float scale=1,Color? tint=null)
     {
         if(_wash is null)
         {
@@ -83,11 +91,12 @@ internal static class DuelUi
         button.Pressed+=action;button.SetMeta("flat_tooltip",true);
         button.CustomMinimumSize=new Vector2(0,Math.Max(30,40*scale));
         button.AddThemeFontSizeOverride("font_size",Math.Max(primary?24:14,(int)(fontSize*scale)));
-        button.AddThemeFontOverride("font",primary||text=="Menu"?Heading:Body);
+        var ink=text is "Strike" or "Continue";
+        button.AddThemeFontOverride("font",ink?Heading:text=="Menu"?UiHeading:Body);
         foreach(var state in new[]{"font_color","font_hover_color","font_pressed_color","font_focus_color"})button.AddThemeColorOverride(state,Palette.Paper);
         button.AddThemeColorOverride("font_disabled_color",Palette.PaperDim);
-        foreach(var state in new[]{"normal","hover","pressed","disabled","focus"})button.AddThemeStyleboxOverride(state,ButtonStyle(state,scale));
-        if(primary)
+        foreach(var state in new[]{"normal","hover","pressed","disabled","focus"})button.AddThemeStyleboxOverride(state,ButtonStyle(state,scale,ink));
+        if(ink)
         {
             var slash=new TextureRect{Texture=GD.Load<Texture2D>("res://Art/DuelUi/red-slash.png"),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,MouseFilter=Control.MouseFilterEnum.Ignore};
             button.AddChild(slash);
@@ -110,6 +119,24 @@ internal static class DuelUi
         var panel=Surface(shell,32);panel.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         var scroll=new ScrollContainer{HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};panel.AddChild(scroll);
         var box=new VBoxContainer{SizeFlagsHorizontal=Control.SizeFlags.ExpandFill};box.AddThemeConstantOverride("separation",12);scroll.AddChild(box);
-        box.AddChild(Text(title,34,Palette.Paper,true));return box;
+        var heading=Text(title,34,Palette.Paper);heading.AddThemeFontOverride("font",UiHeading);box.AddChild(heading);return box;
+    }
+    public static void SkinInspection(Control preview)
+    {
+        // Retain the main game's card/rules component, adapting only its surrounding skin.
+        void Skin(Node node)
+        {
+            if(node is PanelContainer panel){panel.Theme=Theme();var box=Plaque();box.ContentMarginLeft=box.ContentMarginRight=14;box.ContentMarginTop=box.ContentMarginBottom=14;panel.AddThemeStyleboxOverride("panel",box);}
+            if(node is Label label)label.AddThemeFontOverride("font",Body);
+            foreach(var child in node.GetChildren())Skin(child);
+        }
+        Skin(preview);
+    }
+    public static StyleBoxTexture FocusFrame(bool hover=false)
+    {
+        // Dedicated imagegen frame; crop only the empty exterior using native UVs.
+        var box=new StyleBoxTexture{Texture=new AtlasTexture{Atlas=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png"),Region=new Rect2(30,57,964,1420)},ModulateColor=hover?new Color(1.2f,1.14f,1.05f):Colors.White};
+        foreach(var side in new[]{Side.Left,Side.Top,Side.Right,Side.Bottom})box.SetTextureMargin(side,18);
+        box.ContentMarginLeft=box.ContentMarginRight=8;box.ContentMarginTop=box.ContentMarginBottom=16;return box;
     }
 }
