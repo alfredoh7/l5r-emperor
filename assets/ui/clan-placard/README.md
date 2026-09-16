@@ -12,7 +12,7 @@ Production scope: preserve the approved proportions and texture, use Meshy mater
 
 The hand/fan/blank-coin atlas is an imagegen derivative; digits are live text. The existing clan medallions remain in use. Headings use the actual WeatheredQuill file and body/numerals use Caudex, with local MSDF copies for crisp scaling. These fonts and existing emblems intentionally differ from the generated illustrative lettering/emblem; the comparison is not a claim of pixel equivalence across the entire panel.
 
-The 310 × 108 logical-pixel plaque preserves the shallow source proportions and makes room for three readable values. The phase track moves 44 logical pixels right to maintain clearance. The artwork has mipmaps, and tooltip frames preserve their corners through nine-patch scaling. `HandLimit` is optional for old snapshots: those display `—` rather than invent a limit.
+The 310 × 108 logical-pixel plaque preserves the shallow source proportions and makes room for three readable values. Following Alfredo's spacing feedback, the clan heading, turn cue and player name occupy separate rows with clear vertical gaps; the heading is slightly smaller and the stats sit lower. The phase track moves 44 logical pixels right to maintain clearance. The artwork has mipmaps, and tooltip frames preserve their corners through nine-patch scaling. `HandLimit` is optional for old snapshots: those display `—` rather than invent a limit.
 
 ## Editable sources
 
