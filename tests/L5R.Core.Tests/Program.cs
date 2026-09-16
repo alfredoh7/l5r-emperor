@@ -5,6 +5,7 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
@@ -1636,6 +1637,43 @@ static void OverconfidentPrimitive()
         Equal(e.State.Players[0].Hand.Count,9);
     }
 }
+static void PublicHandLimitView()
+{
+    var state = MatchEngine.CreateEconomyScenario().State;
+    var tsugio = PublishedContent.PersonalityWave13.Cards.Single(c => c.Name == "Asahina Tsugio").Id;
+    var baseline = MatchEngine.FromTestState(state).GetView(0);
+    Check(baseline.Players.All(p => p.HandLimit is { Base: 8, Maximum: 8, Modifiers.Length: 0 }));
+    var first = Add(state, tsugio, 1, Zone.Home);
+    var second = Add(state, tsugio, 1, Zone.Battlefield, province: 0);
+    Add(state, tsugio, 1, Zone.Hand); // Concealed copies neither modify the limit nor leak into sources.
+    var engine = MatchEngine.FromTestState(state);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        Equal(view.Players[0].HandLimit!.Maximum, 10);
+        Equal(view.Players[1].HandLimit!.Maximum, 8, "The controller does not gain their own modifier");
+        Equal(view.Players[0].HandLimit!.Modifiers.Length, 2);
+        Check(view.Players[0].HandLimit!.Modifiers.All(m => m.CardId == first.Id || m.CardId == second.Id));
+        Equal(view.Players[1-viewer].Hand.Length, 0, "Public counts must not reveal concealed cards");
+        var roundTrip = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(view))!;
+        Equal(roundTrip.Players[0].HandLimit!.Maximum, 10);
+        Equal(roundTrip.Players[0].HandLimit!.Modifiers[0].CardName, "Asahina Tsugio");
+    }
+    // Leaving play updates both public presentation and the very same End Phase threshold.
+    state.Cards[first.Id].Zone = Zone.Dead;
+    state.Cards[second.Id].Zone = Zone.DynastyDiscard;
+    engine = MatchEngine.FromTestState(state);
+    Equal(engine.GetView(0).Players[0].HandLimit!.Maximum, 8);
+    while (state.Players[0].Hand.Count < 9) Add(state, "training-rally", 0, Zone.Hand);
+    engine = MatchEngine.FromTestState(state);
+    Accept(engine, Cmd(engine, "endDynasty"));
+    var maximum = engine.GetView(0).Players[0].HandLimit!.Maximum;
+    Equal(engine.State.PendingChoice!.Prompt, $"Discard {engine.State.Players[0].Hand.Count-maximum} card(s) to return to {maximum}.");
+    var legacy = System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(baseline.Players[0]))!.AsObject();
+    legacy.Remove("HandLimit");
+    Check(JsonSerializer.Deserialize<PlayerView>(legacy.ToJsonString())!.HandLimit is null, "Old snapshots report an unknown limit");
+}
+
 static void CarpenterCastleAttack()
 {
     {

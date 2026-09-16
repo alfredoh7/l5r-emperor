@@ -400,7 +400,13 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     CardView Stronghold, CardView[] Home, CardView[] Army, ProvinceView[] Provinces,
     CardView[] Hand, int HandCount, int DynastyDeckCount, int FateDeckCount, CardView[] Discard,
     bool ProclaimUsedThisTurn, bool DishonorLossPending, CardView[] RemovedFromGame,
-    int DeadCount, CardView[]? Focused = null);
+    int DeadCount, CardView[]? Focused = null)
+{
+    // Optional for older snapshots/replays. A missing value means unknown, not the printed base.
+    public HandLimitView? HandLimit { get; init; }
+}
+public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
+public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

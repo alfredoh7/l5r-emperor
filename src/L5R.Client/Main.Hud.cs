@@ -16,8 +16,9 @@ public partial class Main
                 View.ActivePlayerId == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
             var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
             Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead),
-                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id)
-                { ReducedMotion = _reducedMotion },16,own?938:14,270,120);
+                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id,
+                player.HandCount, player.HandLimit)
+                { ReducedMotion = _reducedMotion },16,own?950:14,ClanPlaque.DesignWidth,ClanPlaque.DesignHeight);
         }
     }
     private readonly Dictionary<(int,Zone), CardView> _discardPreview = [];

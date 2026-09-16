@@ -1385,7 +1385,14 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
-    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
+    private HandLimitView HandLimitFor(int playerId)
+    {
+        var modifiers = _state.Cards.Values
+            .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect == "increase-other-hand-size")
+            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, 1)).ToArray();
+        return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
+    }
+    private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
     private void EndTurn()
     {
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1

@@ -273,7 +273,7 @@ public partial class Main : Node
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         _status.Visible = false;
-        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - 660, 100);
+        _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - 704, 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
         _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
         _unitDetail.Size = DesignSize;
@@ -299,7 +299,7 @@ public partial class Main : Node
         _status = Place(_root, Palette.Text("", 17, Palette.PaperDim), 295, 15, 750, 26);
         _status.HorizontalAlignment = HorizontalAlignment.Center;
         _status.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
-        _timeline = Place(_root, new PhaseTrack(), 300, 12, 1000, 100);
+        _timeline = Place(_root, new PhaseTrack(), 344, 12, 956, 100);
         _menu = Place(_root, new HBoxContainer { Alignment = BoxContainer.AlignmentMode.End }, 1345, 27, 549, 35);
         _menu.AddThemeConstantOverride("separation", 7);
         _menu.AddChild(new TableIconButton(TableGlyph.Menu, ShowTableMenu, "Menu"));

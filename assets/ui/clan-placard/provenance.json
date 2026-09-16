@@ -1,0 +1,53 @@
+{
+  "asset": "Placard A",
+  "issue": 243,
+  "approval": "Alfredo approved Placard A, 2026-09-16",
+  "meshy_task_id": "01a0a92a-9a18-7286-b6fa-e0bc80c48343",
+  "operation_id": "l5r-243-placard-a-v1",
+  "cli": "@meshy-ai/cli@0.3.0",
+  "resource": "retexture",
+  "settings": {
+    "enable_original_uv": false,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": [
+      "glb"
+    ]
+  },
+  "estimated_credits": 10,
+  "reported_consumed_credits": 10,
+  "balance_before": 1465,
+  "notes": [
+    "Measured Blender geometry preserves approved dimensions.",
+    "Meshy normal/roughness and 12% generated base color retained. Approved derived face is projected at 88% to restore lacquer contrast and brass ornament.",
+    "Production frame is an orthographic Blender bake used by native Godot; UI does not load a live 3D model.",
+    "Existing clan medallions retained; heading uses real WeatheredQuill and values use Caudex, so this is not full pixel identity to the generated lettering."
+  ],
+  "files": {
+    "assets/ui/clan-placard/approved-a.png": {
+      "sha256": "fbdfce5802506d0e4878e8efea7880e52d0a70e39b9009667feee58c51a97967",
+      "bytes": 1840472
+    },
+    "assets/ui/clan-placard/blank-reference.png": {
+      "sha256": "a7edba3d4eb643bc25cd57a39a31305c77cb15b42eee69d5c69ea21a69081973",
+      "bytes": 1907674
+    },
+    "artifacts/meshy/placard-a-v1/download/model.glb": {
+      "sha256": "bedc3bf0234c5d62b81b7408779be0032d788fad6de6e70a39e04cf18a202322",
+      "bytes": 15166324
+    },
+    "artifacts/meshy/placard-a-v1/production-frame.blend": {
+      "sha256": "13b2389f432e280956485537f11a1dbb812451f0fe1e00c0020d8f2ecb1e4cdc",
+      "bytes": 15216427
+    },
+    "src/L5R.Client/Art/ClanPlacard/frame.png": {
+      "sha256": "573a25821d1cbbceaa33b2503ccecfbc8b60c97bb7a38a49184880cd69de765f",
+      "bytes": 1542604
+    },
+    "src/L5R.Client/Art/ClanPlacard/stats.png": {
+      "sha256": "ead9d984bb40fed24994a6a4b88e4475c0994c4d7a18f0b836a3f8309e6db235",
+      "bytes": 1251681
+    }
+  }
+}
