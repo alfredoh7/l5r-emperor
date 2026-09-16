@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved Fallen UI: A counter and B inspection panel for issues 21 and 221; based on latest main plus approved presentation dependency PR 256.",
+  "validation": "Design approval received. Implementation and native validation in progress.",
+  "remaining": "Implement source-art counter, inspection gallery and dishonor orientation; compare native captures and run relevant checks. Parent UI PRs 248 and 256 remain separate review dependencies.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/21",
+  "branch": "codex/21-fallen-dishonor",
+  "updated": "2026-09-16T19:22:37.432430+00:00"
+}
