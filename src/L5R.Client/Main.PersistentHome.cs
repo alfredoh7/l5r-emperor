@@ -50,7 +50,7 @@ public partial class Main
         if (View.FavorPlayerId == player.Id)
         {
             var favor = new HomeReminder(player.Id, player.Clan, null, () => SelectHomeReminder(player.Id, null));
-            Place(group, favor, x, MatHeader, FavorWidth, FavorHeight); _homeReminders.Add(favor);
+            StyleHomeReminder(favor); Place(group, favor, x, MatHeader, FavorWidth, FavorHeight); _homeReminders.Add(favor);
             x += FavorWidth + PersistentGap;
         }
         var cards = PersistentCards(player); var columns = View.FavorPlayerId == player.Id ? 2 : 3;
@@ -65,9 +65,21 @@ public partial class Main
         foreach (var effect in EffectReminders(player))
         {
             var reminder = new HomeReminder(player.Id, player.Clan, effect, () => SelectHomeReminder(player.Id, effect.Id));
-            Place(group, reminder, x, y, Math.Max(300, Math.Min(columns, cards.Length) * (width + PersistentGap) - PersistentGap), EffectHeight);
+            StyleHomeReminder(reminder); Place(group, reminder, x, y, Math.Max(300, Math.Min(columns, cards.Length) * (width + PersistentGap) - PersistentGap), EffectHeight);
             _homeReminders.Add(reminder); y += EffectHeight + 8;
         }
+    }
+
+    private void StyleHomeReminder(HomeReminder reminder)
+    {
+        // Inherit the current menu system rather than embedding a second, stale skin.
+        for (Node? node = _inspector; node is not null; node = node.GetParent())
+            if (node is PanelContainer panel)
+            {
+                reminder.InspectionTheme = panel.Theme;
+                reminder.InspectionSurface = panel.GetThemeStylebox("panel");
+                return;
+            }
     }
 
     private void SelectHomeReminder(int owner, string? effectId)
@@ -75,7 +87,8 @@ public partial class Main
         if (_session.Busy || PresentationBusy) return;
         if (_chosen is not null) { SetNotice("This is a reminder. Cancel the current action to inspect it."); return; }
         if (_selectedHomeReminder == (owner, effectId)) { DeselectCard(); return; }
-        _selected = null; _sources.Clear(); _selectedHomeReminder = (owner, effectId);
+        _selected = null; _assignmentUnit = null; _sources.Clear(); _selectedHomeReminder = (owner, effectId);
+        ReleaseTableFocus(); HideTableTooltip(); Highlight();
         RenderInspector(); RenderPhaseActions(); HighlightHomeReminders();
     }
     private void HighlightHomeReminders()
@@ -89,7 +102,7 @@ public partial class Main
         var owner = View.Players.Single(p => p.Id == selected.Owner);
         var effect = selected.EffectId is null ? null : EffectReminders(owner).FirstOrDefault(c => c.Id == selected.EffectId);
         if (selected.EffectId is null ? View.FavorPlayerId != selected.Owner : effect is null)
-        { _selectedHomeReminder = null; return false; }
+        { _selectedHomeReminder = null; HighlightHomeReminders(); return false; }
         AddInspectionCaption(selected.EffectId is null ? "IMPERIAL FAVOR · " + owner.Clan.ToUpperInvariant() : "ONGOING EFFECT · " + owner.Clan.ToUpperInvariant());
         if (effect is null)
         {

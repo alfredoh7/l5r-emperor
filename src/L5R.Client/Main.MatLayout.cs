@@ -43,6 +43,7 @@ public partial class Main
     private void MeasureTableLayout()
     {
         var oldSize = new Vector2(WorldWidth, _worldHeight);
+        var oldPersistentExtent = new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1));
         if (!_tableLayoutSeen)
         {
             _matMatchEpoch++; _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths);
@@ -180,8 +181,11 @@ public partial class Main
         }
 
         // Keep a player's camera steady while ink and cards change positions.
-        // Fit/Home remains explicit and always frames the complete new layout.
-        if (_tableLayoutSeen && _cameraFitted && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        // An overview stays fitted when the contextual Home area appears or grows,
+        // so a newly gained Favor cannot appear behind the sidebar. A manually
+        // positioned camera remains under player control.
+        var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
+        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }
