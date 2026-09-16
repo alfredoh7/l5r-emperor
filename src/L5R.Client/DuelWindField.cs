@@ -1,12 +1,12 @@
 using Godot;
 namespace L5R.Client;
 
-/// <summary>Presentation-only instanced vegetation; both duel cameras share its wind clock.</summary>
+/// <summary>Presentation-only instanced vegetation for the playable duel camera.</summary>
 public partial class DuelWindField : Node3D
 {
     private readonly List<ShaderMaterial> _materials=[];
     public int Instances {get;private set;}
-    public void Build(bool portraitStage=false)
+    public void Build()
     {
         var random=new Random(2050916);
         float R(float a,float b)=>a+(float)random.NextDouble()*(b-a);
@@ -29,7 +29,6 @@ public partial class DuelWindField : Node3D
                 var width=art?height*R(.8f,1.25f):R(.010f,.022f);
                 var y=6.12f+depth*.16f+Mathf.Sin(x*1.7f)*.06f;
                 var z=depth;
-                if(portraitStage){x*=1.8f;y=-.12f;z=R(-17f,-5.0f);height*=1.8f;width*=1.8f;}
                 var basis=Basis.FromEuler(new Vector3(R(-.09f,.09f),R(-.52f,.52f),R(-.15f,.15f)))*Basis.FromScale(new Vector3(width,height,1));
                 multi.SetInstanceTransform(i,new Transform3D(basis,new Vector3(x,y,z)));
                 multi.SetInstanceCustomData(i,new Color(R(0,1),R(0,1),R(0,1),1));

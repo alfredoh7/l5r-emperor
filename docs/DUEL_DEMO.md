@@ -74,7 +74,7 @@ Native Windows graphical acceptance remains open. Local Mac frame samples are ev
 
 The latest presentation follows the approved close composition: upright original champion cards with attachment headers behind, flat focus lanes/hand, original Fate backs, with no redundant stat numerals on the mat; final totals remain in Duel details. Menu → Public piles retains actual public discards without decorative corner cards. The bottom result strip is removed; Continue sits on the mat and aftermath details remain optional. Main-game `CardPreview` still handles all permitted inspection.
 
-The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics; Cinematic sound controls paper/air accents; Field ambience separately controls the prototype wind bed. See [the accepted motion decision](decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/duel-demo/cinema/index.html).
+The opening introduces each champion once after engine acceptance/reactions reach focusing. The result presents legal reveal frames, a restrained ink cut, actual destinations and a held verdict. Skip/Space/Escape and reduced motion never submit game commands. The menu pauses cinematics. Duels are silent, and introductions omit the extra 3D grass behind the champions. See [the accepted motion decision](decisions/2026-09-16-duel-cinema.md) and [native/source evidence](screenshots/duel-demo/cinema/index.html).
 
 ## September 16 UI and camera follow-up
 
@@ -100,4 +100,4 @@ Native coverage includes the canonical path, full-motion additional scenarios, c
 
 ## Atmosphere prototype
 
-The native atmosphere review adds shared wind timing, instanced segmented grass, slowly moving painted sky bands and independently controlled wind/effects. See [the prototype, reproduction steps and acceptance limits](DUEL_ATMOSPHERE.md). It does not change authoritative dueling behavior or close the mechanical review.
+The native atmosphere review adds shared wind timing, instanced segmented grass, slowly moving painted sky bands and visual wind modulation. Extra 3D grass appears only in the playable view; duel audio is removed. See [the prototype, reproduction steps and acceptance limits](DUEL_ATMOSPHERE.md). It does not change authoritative dueling behavior or close the mechanical review.

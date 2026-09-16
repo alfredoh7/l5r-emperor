@@ -10,7 +10,7 @@ public partial class DuelAtmosphereReview : Control
     private readonly MatchSession _session=new();
     private DuelScreen _screen=null!;
     private DuelCinematicStage? _scenery;
-    private bool _reduced,_light,_benchmark,_sceneOnly,_mute;
+    private bool _reduced,_light,_benchmark,_sceneOnly;
     private string _output="",_phase="";
     private double _elapsed,_actionClock,_fixedTime;
     private ulong _stamp;
@@ -26,7 +26,7 @@ public partial class DuelAtmosphereReview : Control
         {
             if(a.StartsWith("--capture="))_output=a[10..];
             if(a.StartsWith("--time="))_fixedTime=double.Parse(a[7..],CultureInfo.InvariantCulture);
-            _reduced|=a=="--reduced-motion";_light|=a=="--light";_benchmark|=a=="--benchmark";_sceneOnly|=a=="--scenery";_mute|=a=="--mute";
+            _reduced|=a=="--reduced-motion";_light|=a=="--light";_benchmark|=a=="--benchmark";_sceneOnly|=a=="--scenery";
         }
         if(string.IsNullOrEmpty(_output))_output=ProjectSettings.GlobalizePath("res://../../artifacts/duel-atmosphere/review");
         System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(_output)!);
@@ -37,7 +37,7 @@ public partial class DuelAtmosphereReview : Control
             _scenery=new DuelCinematicStage{ReducedMotion=_reduced};AddChild(_scenery);_scenery.DetailedAtmosphere=!_light;
             _scenery.Resize(GetViewportRect().Size);_scenery.Advance(_fixedTime);return;
         }
-        _screen=new DuelScreen{ReducedMotion=_reduced,OpeningLeadIn=_reduced?2:6,SoundEnabled=!_mute,AmbienceEnabled=!_mute};AddChild(_screen);
+        _screen=new DuelScreen{ReducedMotion=_reduced,OpeningLeadIn=_reduced?2:6};AddChild(_screen);
         _screen.DetailedAtmosphere=!_light;_screen.SetGuidanceEnabled(false);
         _screen.CommandRequested+=command=>_ = Submit(command);
         _session.Changed+=()=>_screen.Present(_session.Snapshot!);
@@ -128,7 +128,7 @@ public partial class DuelAtmosphereReview : Control
             Mode=OS.HasFeature("movie")?"offline movie; not a performance benchmark":_benchmark?"real-time native benchmark; completed rendered frames; monotonic wall clock":"native review",
             Frames=Metrics(_frames.Values.SelectMany(v=>v)),ByPhase=_frames.ToDictionary(k=>k.Key,k=>Metrics(k.Value)),SlowFrames=_slowFrames,Timeline=_timeline,
             DrawCalls=RenderingServer.GetRenderingInfo(RenderingServer.RenderingInfo.TotalDrawCallsInFrame),Gpu=RenderingServer.GetVideoAdapterName(),
-            Notes="Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."};
+            Notes="Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Duels are silent; 3D grass is confined to the playable camera. Native Windows/AAA human acceptance not implied."};
         System.IO.File.WriteAllText(_output+".json",JsonSerializer.Serialize(report,Json));
         System.IO.File.WriteAllText(_output+"-replay.json",_session.ExportPracticeReplay());
     }
