@@ -21,7 +21,7 @@ public partial class Main
         bool Saved(){var preferences=new MenuPreferences(_preferencesProfile);preferences.Load();return preferences.DuelGuidance;}
         if(_cinemaSkipVersion is {} skippedVersion)
         {
-            Check(!host!.Screen.CinematicBusy&&host.Session.Snapshot!.View.Version==skippedVersion,"Skip ends the cinematic without submitting a command");_cinemaSkipVersion=null;
+            Check(!host!.Screen.CinematicBusy&&!host.Screen.MastheadVisible&&host.Session.Snapshot!.View.Version==skippedVersion,"Skip ends the cinematic and removes the DUEL title without submitting a command");_cinemaSkipVersion=null;
         }
         if(host?.Screen.CinematicBusy==true)
         {

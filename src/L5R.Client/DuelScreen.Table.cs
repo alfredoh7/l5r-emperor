@@ -8,6 +8,9 @@ public partial class DuelScreen
     private readonly Dictionary<(int,Zone),DuelFatePile> _piles=[];
     private readonly List<(Vector2 Point,string Text,float Width,Action? Open)> _tableLabels=[];
     private Button? _landing;
+    private Panel? _landingCue;
+    private int _landingCueState=-1;
+    internal bool LandingArmed {get;private set;}
     private bool _selectedDeck;
     private Dictionary<string,Zone> _previousZones=[];
     private string? _dragCard;
@@ -143,16 +146,38 @@ public partial class DuelScreen
     private GameCommand? SelectedFocusCommand()=>Legal.FirstOrDefault(a=>a.Type=="focus"&&(_selectedDeck?a.Command!.Choice=="deck":a.Command!.CardId==_selectedHand&&a.Command.Choice is null&&_selectedHand is not null))?.Command;
     private void RenderLanding()
     {
-        if(_landing is not null&&GodotObject.IsInstanceValid(_landing)){_plane.RemoveChild(_landing);_landing.QueueFree();}_landing=null;
+        if(_landing is not null&&GodotObject.IsInstanceValid(_landing)){_plane.RemoveChild(_landing);_landing.QueueFree();}_landing=null;_landingCue=null;_landingCueState=-1;LandingArmed=false;
         if(Snapshot is null||InputLocked||PresentationBusy||SelectedFocusCommand() is not {} command)return;
         var count=Snapshot.View.Players[Snapshot.View.ViewerId].FocusCount;
-        _landing=new Button{Name=_selectedDeck?"Focus from deck":"Focus selected card",Text="PLACE\nFOCUS",TooltipText=_selectedDeck?"Commit the top Fate card without looking. Enter also commits.":"Commit the selected hand card. Enter also commits.",Size=new Vector2(112,156),MouseDefaultCursorShape=CursorShape.PointingHand};
+        _landing=new Button{Name=_selectedDeck?"Focus from deck":"Focus selected card",Text="PLACE\nFOCUS",TooltipText=_selectedDeck?"Commit the top Fate card without looking. Enter also commits.":"Commit the selected hand card. Enter also commits.",Size=new Vector2(120,166),ZIndex=3,MouseDefaultCursorShape=CursorShape.PointingHand};
         _landing.Position=PlanePoint(FocusPoint(0,count%4)+Vector2.Down*(count/4)*76)-_landing.Size/2;
         foreach(var state in new[]{"normal","hover","pressed","disabled"})_landing.AddThemeStyleboxOverride(state,DuelUi.FocusFrame(state=="hover"));
         _landing.AddThemeStyleboxOverride("focus",Palette.Box(Colors.Transparent,Palette.Paper,1,0));
         _landing.AddThemeFontOverride("font",DuelUi.Prompt);
-        _landing.AddThemeColorOverride("font_color",Palette.Paper);_landing.AddThemeFontSizeOverride("font_size",27);
+        foreach(var state in new[]{"font_color","font_hover_color","font_pressed_color","font_focus_color"})_landing.AddThemeColorOverride(state,Palette.Paper);
+        _landing.AddThemeFontSizeOverride("font_size",29);
         _landing.Disabled=_submitted||_commandCooldown>0;_landing.Pressed+=()=>Submit(command);_plane.AddChild(_landing);
+        _landingCue=new Panel{Position=new Vector2(-6,-6),Size=_landing.Size+new Vector2(12,12),ShowBehindParent=true,MouseFilter=MouseFilterEnum.Ignore};_landing.AddChild(_landingCue);
+        UpdateLandingCue(_lastHoverPointer);
+    }
+    private void UpdateLandingCue(Vector2 pointer)
+    {
+        if(_landing is null||_landingCue is null)return;
+        // Explicit inverse projection works for native hover and a captured card drag alike.
+        LandingArmed=!InputLocked&&!PresentationBusy&&_reading is null&&!_landing.Disabled&&_landing.GetRect().HasPoint(_table.ScreenToCanvas(pointer));
+        var hot=LandingArmed;
+        if(_dragGhost is not null)_dragGhost.Modulate=new Color(1,1,1,hot?.2f:.82f);
+        var stateKey=(hot?1:0)+(_dragging?2:0);
+        if(_landingCueState==stateKey)return;
+        _landingCueState=stateKey;
+        var edge=hot?new Color(1,.91f,.66f):new Color(.75f,.52f,.22f,.85f);
+        var cue=new StyleBoxFlat{BgColor=hot?new Color(.28f,.07f,.035f,.94f):new Color(.08f,.035f,.025f,.85f),
+            BorderColor=edge,BorderWidthLeft=hot?3:2,BorderWidthRight=hot?3:2,BorderWidthTop=hot?3:2,BorderWidthBottom=hot?3:2,
+            ShadowColor=new Color(.94f,.42f,.10f,hot?.6f:.22f),ShadowSize=hot?16:7};
+        _landingCue.AddThemeStyleboxOverride("panel",cue);
+        foreach(var state in new[]{"normal","hover","pressed"})_landing.AddThemeStyleboxOverride(state,DuelUi.FocusFrame(hot));
+        _landing.Text=hot&&_dragging?"RELEASE\nTO\nFOCUS":"PLACE\nFOCUS";
+        _landing.AddThemeFontSizeOverride("font_size",hot&&_dragging?20:29);
     }
     private void SelectPile(int owner,Zone zone)
     {
@@ -224,6 +249,7 @@ public partial class DuelScreen
                 _plane.AddChild(_dragGhost);
             }
             _dragGhost.Position=_table.ScreenToCanvas(mouse.Position)-_dragGhost.Size/2;
+            UpdateLandingCue(mouse.Position);
         }
         else if(mouse is InputEventMouseButton{ButtonIndex:MouseButton.Left,Pressed:false})
         {
@@ -231,6 +257,7 @@ public partial class DuelScreen
             if(_dragGhost is not null){_plane.RemoveChild(_dragGhost);_dragGhost.QueueFree();_dragGhost=null;}
             if(dragging&&_landing is not null&&_landing.GetRect().HasPoint(_table.ScreenToCanvas(mouse.Position))&&SelectedFocusCommand() is {} command)
             {Submit(command);GetViewport().SetInputAsHandled();return true;}
+            UpdateLandingCue(mouse.Position);
         }
         return false;
     }

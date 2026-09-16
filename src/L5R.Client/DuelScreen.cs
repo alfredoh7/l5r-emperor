@@ -119,19 +119,19 @@ public partial class DuelScreen : Control
         var view=Snapshot.View;var stage=view.PendingDuel?.Stage;
         var ribbon=new Control{Position=_offset+new Vector2(640,290)*_scale,Size=new Vector2(392,42)*_scale,MouseFilter=MouseFilterEnum.Ignore};
         _hud.AddChild(ribbon);ribbon.Visible=view.LastDuel is not null;
-        _status=DuelUi.Text(Status(),19,Palette.Paper);_status.HorizontalAlignment=HorizontalAlignment.Center;
+        _status=DuelUi.Text(Status(),19,Palette.Paper);_status.Name="Duel status";_status.HorizontalAlignment=HorizontalAlignment.Center;
         _status.VerticalAlignment=VerticalAlignment.Center;_status.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);ribbon.AddChild(_status);
         _status.AddThemeColorOverride("font_shadow_color",Colors.Black);_status.AddThemeConstantOverride("shadow_offset_x",1);_status.AddThemeConstantOverride("shadow_offset_y",2);
         _status.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(19*_scale)));
         if(stage=="Focusing")
         {
             _status.Text=view.PriorityPlayerId==view.ViewerId?"YOUR MOVE":"OPPONENT’S MOVE";
-            _status.AddThemeFontOverride("font",DuelUi.Prompt);_status.AddThemeFontSizeOverride("font_size",Math.Max(22,(int)(36*_scale)));
+            _status.AddThemeFontOverride("font",DuelUi.Prompt);_status.AddThemeFontSizeOverride("font_size",Math.Max(22,(int)((view.PriorityPlayerId==view.ViewerId?40:32)*_scale)));
             ribbon.Position=_offset+new Vector2(606,280)*_scale;ribbon.Size=new Vector2(460,56)*_scale;
         }
         _controlsRect=new Rect2(_offset+new Vector2(1350,760)*_scale,new Vector2(295,150)*_scale);
         Control? inspectionParent=null;
-        RenderTableLabels();if(_cinema!=Cinema.Opening)RenderDuelValues();
+        RenderTableLabels();
         _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",Math.Max(2,(int)(4*_scale)));_hud.AddChild(_actions);
         if(PresentationBusy){ribbon.Visible=false;return;}
         if(view.LastDuel?.Result is {} result)
@@ -285,7 +285,7 @@ public partial class DuelScreen : Control
         }
         if(e is InputEventMouse m)
         {
-            _lastHoverPointer=m.Position;
+            _lastHoverPointer=m.Position;UpdateLandingCue(m.Position);
             if(m is InputEventMouseButton{Pressed:true,ButtonIndex:MouseButton.Left} && _pinnedInspectionId is {} pinned &&
                 (_inspectionFace?.GetGlobalRect().HasPoint(m.Position)==true || UprightAt(m.Position)?.Card.Id==pinned))
             {
@@ -293,7 +293,7 @@ public partial class DuelScreen : Control
                 _selectedInspection=null;RefreshSelection();RenderLanding();RenderActions();GetViewport().SetInputAsHandled();return;
             }
             if(m is InputEventMouseButton)HideCardHover();
-            if(_guidanceRect.HasPoint(m.Position)||DuelValueAt(m.Position) is not null||UprightAt(m.Position) is not null){_table.ExitMouse();return;}
+            if(_guidanceRect.HasPoint(m.Position)||UprightAt(m.Position) is not null){_table.ExitMouse();return;}
             if(_reading is null&&HandlePlacement(m))return;
             if(_reading is null&&!_controlsRect.HasPoint(m.Position)&&m.Position.Y>_offset.Y+340*_scale)
             {

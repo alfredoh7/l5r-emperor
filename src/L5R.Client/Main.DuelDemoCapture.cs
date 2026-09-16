@@ -11,7 +11,7 @@ public partial class Main
     private string _preservedPractice="";
     private Vector2 _duelLastPlacement;
     private string? _deferredDuelButton;
-    private int _focusInspectionStep,_resultPileStep,_uprightProbe,_selectionProbe;
+    private int _focusInspectionStep,_resultPileStep,_uprightProbe,_selectionProbe,_placementProbe;
     private readonly HashSet<string> _cinemaCaptures=[];
     private int _openingMovieFrame,_endingMovieFrame;
     private string? _inspectionBeforeOpponentClick;
@@ -81,6 +81,9 @@ public partial class Main
             case 4:
                 Check(host!.Session.Snapshot!.View.PendingDuel?.Stage=="Focusing","Begin Duel submits the real challenge");
                 Check(host.Screen.OpeningRuns==1,"opening plays once and submits no extra command");
+                Check(!host.Screen.MastheadVisible,"DUEL title is gone when the introduction finishes");
+                var status=Descendants(host.Screen).OfType<Label>().Single(l=>l.Name=="Duel status");
+                Check(status.GetThemeFont("font").GetFontName().Contains("Satoshi"),"turn prompt uses the actual Satoshi typeface");
                 Check(host.Screen.UprightCount==2&&host.Screen.VisibleDiscardPiles==0,"upright champions with no decorative corner discard piles");
                 var champion=host.Session.Snapshot.View.LastDuel!.Challenger;
                 if(_uprightProbe==0){var point=host.Screen.CardClickPoint(champion.Id);Move(point);_uprightProbe++;return;}
@@ -119,9 +122,20 @@ public partial class Main
                 }
                 else
                 {
-                    var from=host.Screen.CardClickPoint(host.Screen.SelectedInspectionId!);
-                    Input.ParseInputEvent(new InputEventMouseButton{Position=from,GlobalPosition=from,ButtonIndex=MouseButton.Left,Pressed=true});
-                    Input.ParseInputEvent(new InputEventMouseMotion{Position=_duelLastPlacement,GlobalPosition=_duelLastPlacement,Relative=_duelLastPlacement-from});
+                    if(_placementProbe==0)
+                    {
+                        var from=host.Screen.CardClickPoint(host.Screen.SelectedInspectionId!);
+                        Input.ParseInputEvent(new InputEventMouseButton{Position=from,GlobalPosition=from,ButtonIndex=MouseButton.Left,Pressed=true});
+                        Move(_duelLastPlacement+new Vector2(0,120)*host.Screen.Size.Y/941);
+                        Input.FlushBufferedEvents();_placementProbe++;return;
+                    }
+                    if(_placementProbe==1)
+                    {
+                        Check(!host.Screen.LandingArmed&&host.Session.Snapshot!.View.Version==2,"drag outside target does not arm or submit focus");Capture("drag-approach");
+                        Move(_duelLastPlacement);Input.FlushBufferedEvents();_placementProbe++;return;
+                    }
+                    Check(host.Screen.LandingArmed&&Find("Focus selected card").Text=="RELEASE\nTO\nFOCUS","legal drag target clearly signals release to focus");
+                    Check(Find("Focus selected card").GetThemeFont("font").GetFontName().Contains("Satoshi"),"focus target uses the actual Satoshi typeface");Capture("drag-ready");
                     Input.ParseInputEvent(new InputEventMouseButton{Position=_duelLastPlacement,GlobalPosition=_duelLastPlacement,ButtonIndex=MouseButton.Left,Pressed=false});
                 }
                 Input.FlushBufferedEvents();
@@ -145,17 +159,16 @@ public partial class Main
                 if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
                 if(_resultPileStep==4){Native(host.Screen.FallenClickPoint(host.Session.Snapshot.View.ViewerId));_resultPileStep++;return;}
                 if(_resultPileStep==5){Check(host.Screen.HasPrivateInspection,"dead personalities remain separate from Fate discards");Capture("fallen-spread");Press("Back");_resultPileStep++;return;}
-                if(_resultPileStep==6){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Move(point);_resultPileStep++;return;}
-                if(_resultPileStep==7){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Move(new Vector2(20,200));_resultPileStep++;return;}
                 Check(result.ChallengerTotal==8&&result.ChallengedTotal==7,"native UI reproduces canonical 8–7");
-                var left=host.Session.Snapshot.View.LastDuel.Challenger.OwnerId==host.Session.Snapshot.View.ViewerId;
-                Check(host.Screen.VisibleDuelValues.SequenceEqual(new[]{(left?result.ChallengerTotal:result.ChallengedTotal).ToString(),(left?result.ChallengedTotal:result.ChallengerTotal).ToString()}),"large result numerals match authoritative totals for this seat");
                 host.Screen.Present(host.Session.Snapshot);
                 Check(!host.Screen.PresentationBusy,"repeated snapshots do not replay the reveal");
                 Check(host.Screen.EndingRuns==1,"victory sequence plays once and holds the authoritative result");
                 Check(host.Screen.UprightCount==1,"destroyed participant settles out of the upright champion position");
                 Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("Duel details");break;
-            case 17:Capture("consequences");Press("Back");break;
+            case 17:
+                var resultText=string.Join("\n",Descendants(host!.Screen).OfType<Label>().Select(l=>l.Text));
+                Check(resultText.Contains("→ 8")&&resultText.Contains("→ 7"),"Duel details retain authoritative final totals without extra mat numerals");
+                Capture("consequences");Press("Back");break;
             case 18:Press("Continue");break;
             case 19:
                 Check(host!.Session.Snapshot!.View.LastDuel is null,"Continue returns to prepared setup");Press("Return to menu");break;

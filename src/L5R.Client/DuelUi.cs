@@ -135,7 +135,7 @@ internal static class DuelUi
     public static StyleBoxTexture FocusFrame(bool hover=false)
     {
         // Dedicated imagegen frame; crop only the empty exterior using native UVs.
-        var box=new StyleBoxTexture{Texture=new AtlasTexture{Atlas=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png"),Region=new Rect2(30,57,964,1420)},ModulateColor=hover?new Color(1.2f,1.14f,1.05f):Colors.White};
+        var box=new StyleBoxTexture{Texture=new AtlasTexture{Atlas=GD.Load<Texture2D>("res://Art/DuelUi/focus-frame.png"),Region=new Rect2(30,57,964,1420)},ModulateColor=hover?new Color(1.7f,1.5f,1.14f):Colors.White};
         foreach(var side in new[]{Side.Left,Side.Top,Side.Right,Side.Bottom})box.SetTextureMargin(side,18);
         box.ContentMarginLeft=box.ContentMarginRight=8;box.ContentMarginTop=box.ContentMarginBottom=16;return box;
     }

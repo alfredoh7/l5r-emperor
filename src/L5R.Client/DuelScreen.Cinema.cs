@@ -16,11 +16,14 @@ public partial class DuelScreen
     private Button _skipCinema=null!;
     private DuelIntroStage? _introStage;
     private TextureRect? _masthead;
+    internal bool MastheadVisible=>_masthead?.Visible==true && _masthead.Modulate.A>.01f;
     private void PlaceMasthead()
     {
         if(_masthead is null){_masthead=new TextureRect{Name="Duel masthead",Texture=GD.Load<Texture2D>("res://Art/DuelUi/duel-wordmark.png"),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,MouseFilter=MouseFilterEnum.Ignore};AddChild(_masthead);}
         _masthead.Position=_offset+new Vector2(616,15)*_scale;_masthead.Size=new Vector2(440,147)*_scale;
-        _masthead.Visible=Snapshot?.View.LastDuel is not null;_masthead.MoveToFront();
+        // The title belongs to the introduction, never to the interactive arena/result.
+        var alpha=_cinema==Cinema.Opening&&!ReducedMotion?1-Ease((_cinemaTime-2.5)/.75):0;
+        _masthead.Modulate=new Color(1,1,1,alpha);_masthead.Visible=alpha>0;_masthead.MoveToFront();
     }
     private void ClearIntro()
     {
@@ -96,7 +99,7 @@ public partial class DuelScreen
         if(InputLocked||_reading is not null)return;
         if(ReducedMotion){SkipCinematic();return;}
         _cinemaTime+=delta;var t=_cinemaTime;
-        _cinemaLayer.MoveToFront();_masthead?.MoveToFront();_cinemaLayer.Size=Size;_cinemaShade.Size=Size;
+        _cinemaLayer.MoveToFront();PlaceMasthead();_cinemaLayer.Size=Size;_cinemaShade.Size=Size;
         _skipCinema.Position=_offset+new Vector2(1500,24)*_scale;_skipCinema.Size=new Vector2(120,40)*_scale;
         _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(30,(int)(75*_scale)));
         _cinemaSlash.Visible=false;_cinemaTitle.Text="";_cinemaShade.Color=Colors.Transparent;
@@ -109,16 +112,21 @@ public partial class DuelScreen
                 // A film cut to the exact playable composition avoids superimposed card faces.
                 ClearIntro();CameraAt(DuelCinematicStage.Design/2,Mathf.Lerp(1.035f,1,Ease((t-2.5)/.9)));
             }
-            if(t is >=.7 and <1.6)Title(challenger,challenger.OwnerId==Snapshot.View.ViewerId,t-.7);
-            if(t is >=1.6 and <2.5)Title(challenged,challenged.OwnerId==Snapshot.View.ViewerId,t-1.6);
+            if(t is >=.7 and <1.6)Title(challenger,t-.7);
+            if(t is >=1.6 and <2.5)Title(challenged,t-1.6);
             foreach(var tile in _tiles.Values.Where(c=>c.Card.Zone==Zone.Hand))tile.Modulate=new Color(1,1,1,Ease((t-2.65)/.5));
             if(t>=3.4)SkipCinematic();
-            void Title(CardView card,bool leftSide,double elapsed)
+            void Title(CardView card,double elapsed)
             {
-                _cinemaTitle.Text=card.Definition!.Name;_cinemaTitle.Position=_offset+new Vector2(leftSide?1050:80,168)*_scale;
-                _cinemaTitle.Size=new Vector2(530,180)*_scale;_cinemaTitle.Modulate=new Color(1,1,1,Ease(elapsed/.25));
-                _cinemaSlash.Visible=true;_cinemaSlash.Position=_cinemaTitle.Position+new Vector2(90,78)*_scale;
-                _cinemaSlash.Size=new Vector2(210,32)*_scale;_cinemaSlash.Modulate=_cinemaTitle.Modulate;
+                _cinemaTitle.Text=card.Definition!.Name;
+                _cinemaTitle.Size=new Vector2(540,110)*_scale;
+                var anchor=_introStage!.NameAnchor(card.OwnerId)+Vector2.Right*(card.OwnerId==Snapshot!.View.ViewerId?-90:90)*_scale;
+                _cinemaTitle.Position=(anchor-_cinemaTitle.Size/2).Clamp(_offset+new Vector2(30,110)*_scale,Size-_cinemaTitle.Size-Vector2.One*30*_scale);
+                _cinemaTitle.HorizontalAlignment=HorizontalAlignment.Center;
+                _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(30,(int)(68*_scale)));
+                _cinemaTitle.Modulate=new Color(1,1,1,Ease((elapsed-.12)/.18));
+                _cinemaSlash.Visible=true;_cinemaSlash.Position=_cinemaTitle.Position+new Vector2(165,74)*_scale;
+                _cinemaSlash.Size=new Vector2(210,28)*_scale;_cinemaSlash.Modulate=_cinemaTitle.Modulate;
             }
         }
         else

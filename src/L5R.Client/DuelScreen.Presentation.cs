@@ -9,9 +9,6 @@ public partial class DuelScreen
     private string? _hoverCardId;
     private double _hoverTime;
     private Vector2 _lastHoverPointer = new(-1000,-1000);
-    private Label? DuelValueAt(Vector2 point)=>_hud.GetChildren().OfType<Label>().FirstOrDefault(l=>l.Name.ToString().StartsWith("DuelValue")&&l.GetGlobalRect().HasPoint(point));
-    internal Vector2 DuelValuePoint(int side)=>_hud.GetNode<Label>($"DuelValue{side}").GetGlobalRect().GetCenter();
-    internal string[] VisibleDuelValues => _hud.GetChildren().OfType<Label>().Where(l=>l.Name.ToString().StartsWith("DuelValue")).OrderBy(l=>l.Name.ToString()).Select(l=>l.Text).ToArray();
     internal string? HoverPreviewId => _cardHover?.HasMeta("card_preview")==true ? _cardHover.GetMeta("card_preview").AsString() : null;
     internal Rect2 HoverPreviewRect => _cardHover?.GetGlobalRect() ?? new Rect2();
 
@@ -37,7 +34,7 @@ public partial class DuelScreen
     private void ProcessCardHover(double delta)
     {
         if(Snapshot is null || InputLocked || PresentationBusy || _reading is not null || _dragging ||
-           _controlsRect.HasPoint(_lastHoverPointer) || _guidanceRect.HasPoint(_lastHoverPointer) || DuelValueAt(_lastHoverPointer) is not null)
+           _controlsRect.HasPoint(_lastHoverPointer) || _guidanceRect.HasPoint(_lastHoverPointer))
         {HideCardHover();return;}
         var point=_table.ScreenToCanvas(_lastHoverPointer);
         var tile=UprightAt(_lastHoverPointer) ?? _plane.GetChildren().OfType<CardTile>().OrderByDescending(t=>t.ZIndex).FirstOrDefault(t=>t._HasPoint(point-t.Position));
@@ -59,39 +56,6 @@ public partial class DuelScreen
     {
         if(node is Control control)control.MouseFilter=MouseFilterEnum.Ignore;
         foreach(var child in node.GetChildren())IgnoreHover(child);
-    }
-
-    private void RenderDuelValues()
-    {
-        if(Snapshot?.View.LastDuel is not {} record)return;
-        var result=(_aftermathPlayed||_cinema==Cinema.Ending) ? record.Result : null;
-        if(result?.Kind=="Refused")return;
-        foreach(var card in new[]{record.Challenger,record.Challenged})
-        {
-            var side=card.OwnerId==Snapshot.View.ViewerId?0:1;
-            var challenger=card.Id==record.Challenger.Id;
-            var current=Snapshot.View.Players.SelectMany(p=>p.Army.Concat(p.Home)).FirstOrDefault(c=>c.Id==card.Id) ?? card;
-            var value=result is {Kind:"Resolved"} ? (challenger?result.ChallengerTotal:result.ChallengedTotal)
-                : record.Stat switch {"Force"=>current.Force,"PersonalHonor"=>current.Definition!.PersonalHonor,_=>current.Chi};
-            var label=DuelUi.Text(value.ToString(System.Globalization.CultureInfo.InvariantCulture),Math.Max(28,(int)((result is null?46:70)*_scale)),Palette.Paper,true);
-            label.MouseFilter=MouseFilterEnum.Stop;label.Name=$"DuelValue{side}";label.HorizontalAlignment=HorizontalAlignment.Center;
-            label.VerticalAlignment=VerticalAlignment.Center;
-            label.Position=_offset+new Vector2((side==0?465:1205)-90,612)*_scale;
-            label.Size=new Vector2(180,65)*_scale;
-            label.AddThemeColorOverride("font_shadow_color",Colors.Black);
-            label.AddThemeConstantOverride("shadow_offset_y",2);
-            label.TooltipText=result is {Kind:"Resolved"}
-                ? $"{card.Definition!.Name}\nFinal duel total: {value}\n{record.Stat} contribution: {(challenger?result.ChallengerStat:result.ChallengedStat)}\nFocus cards and effects are recorded in Duel details."
-                : $"{card.Definition!.Name} · {record.Stat}: {value}";
-            _hud.AddChild(label);
-            if(result?.WinnerId==card.Id)
-            {
-                var slash=new TextureRect{Texture=GD.Load<Texture2D>("res://Art/DuelUi/red-slash.png"),
-                    ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,
-                    Position=_offset+new Vector2((side==0?465:1205)-47,675)*_scale,Size=new Vector2(94,20)*_scale,MouseFilter=MouseFilterEnum.Ignore};
-                _hud.AddChild(slash);
-            }
-        }
     }
 
     private void RenderResultFooter(DuelRecord record)

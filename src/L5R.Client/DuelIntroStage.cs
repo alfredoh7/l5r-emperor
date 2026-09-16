@@ -11,6 +11,8 @@ public partial class DuelIntroStage : Control
     private TextureRect _background=null!;
     private readonly List<(int Owner,ShaderMaterial Material)> _faces=[];
     private int _viewer;
+    private ShaderMaterial _vignette=null!;
+    public Vector2 NameAnchor(int owner)=>_camera.UnprojectPosition(new Vector3(owner==_viewer?-3.15f:3.15f,5.35f,0));
     private Vector2I _lastSize;
     public void Build(DuelRecord record,int viewer)
     {
@@ -25,6 +27,9 @@ public partial class DuelIntroStage : Control
         _camera=new Camera3D{Fov=48,Near=.05f,Far=100,Current=true};_view.AddChild(_camera);
         var output=new TextureRect{Texture=_view.GetTexture(),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,MouseFilter=MouseFilterEnum.Ignore};AddChild(output);
         output.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
+        _vignette=new ShaderMaterial{Shader=GD.Load<Shader>("res://Art/CrimsonDuel/intro-vignette.gdshader")};
+        var shade=new ColorRect{Color=Colors.White,Material=_vignette,MouseFilter=MouseFilterEnum.Ignore};AddChild(shade);
+        shade.SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);
         AddPlane(GD.Load<Texture2D>("res://Art/CrimsonDuel/campaign-mat-filigree.png"),new Vector2(16,9),new Vector3(0,-.04f,1.4f));
         foreach(var hero in new[]{record.Challenger,record.Challenged})
         {
@@ -59,14 +64,18 @@ public partial class DuelIntroStage : Control
         var pixels=new Vector2I(Math.Max(1,(int)size.X),Math.Max(1,(int)size.Y));
         if(pixels!=_lastSize){_view.Size=pixels;_lastSize=pixels;}
         var wide=new Vector3(0,2.15f,10.4f);var wideAim=new Vector3(0,2,0);
-        Vector3 Eye(int owner)=>new(owner==_viewer?-4.2f:4.2f,2.25f,6.2f);
-        Vector3 Aim(int owner)=>new(owner==_viewer?-.95f:.95f,2.28f,0);
+        Vector3 Eye(int owner)=>new(owner==_viewer?-4.2f:4.2f,2.9f,7.5f);
+        Vector3 Aim(int owner)=>new(owner==_viewer?-.95f:.95f,2.9f,0);
         float Smooth(double v){var p=Math.Clamp((float)v,0,1);return p*p*(3-2*p);}
         Vector3 eye,aim;int active;
         if(time<.7){eye=wide+Vector3.Back*(1-Smooth(time/.7))*.3f;aim=wideAim;active=-1;}
         else if(time<1.6){var p=Smooth((time-.7)/.26);eye=wide.Lerp(Eye(challenger),p);aim=wideAim.Lerp(Aim(challenger),p);active=challenger;}
         else if(time<2.5){var p=Smooth((time-1.6)/.26);eye=Eye(challenger).Lerp(Eye(challenged),p);aim=Aim(challenger).Lerp(Aim(challenged),p);active=challenged;}
         else {eye=wide;aim=wideAim;active=-1;}
+        var amount=active<0?0:Smooth((time-.7)/.26);
+        var direction=time<1.6?(challenger==_viewer?1f:0f):Mathf.Lerp(challenger==_viewer?1f:0f,challenged==_viewer?1f:0f,Smooth((time-1.6)/.26));
+        _vignette.SetShaderParameter("opponent_on_right",direction);
+        _vignette.SetShaderParameter("strength",amount);
         _camera.Position=eye;_camera.LookAt(aim);
         foreach(var face in _faces)face.Material.SetShaderParameter("softness",active<0||face.Owner==active?0f:1f);
         var blur=(ShaderMaterial)_background.Material;blur.SetShaderParameter("softness",active<0?.2f:1f);
