@@ -4,6 +4,7 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 
 ## Current checkpoint
 
+- Approved UI consolidation: [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) is the current combined review build. Read [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) for source branches, integration fixes and validation. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. The separate Duel Demo #220 remains excluded until Alfredo and Mendon accept it.
 - Desktop presentation: **0.3.10**.
 - Playable content: **`lion-crane-v1`**, content version **`emperor-lion-crane-0.2.0`**.
 - Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.
@@ -18,7 +19,7 @@ This is a new standalone **Emperor Edition** game, not Imperial Edition and not 
 
 The engine enforces rules and bookkeeping. Gold is produced for a particular payment, with excess discarded; it is not an automatically accumulating wallet. Preserve optional choices such as payment sources, Clan purchase choices, Proclaim, targets and assignments.
 
-The current UI is a 2.5D table with a shared perspective projection, full uncropped card scans, sideways bowing, attachment stacks, physical draw/discard piles, pan/zoom, fixed hand/HUD, Musashi Brush headings, and upright lantern sprites with shader lighting. The phase bar is bitmap lacquer/brass art with live labels and a subdued glow. Windowed play is allowed; F11 toggles fullscreen. Reduced motion freezes ambient animation and makes transfers immediate.
+The UI uses a shared perspective projection, full uncropped card scans, sideways bowing, attachment stacks, physical draw/discard piles, pan/zoom and a fixed hand/HUD. The approved integration replaces the earlier Musashi headings with uppercase WeatheredQuill and uses Caudex for body text. The phase bar is bitmap lacquer/brass art with live labels and a subdued glow. The fortress hall supplies the surrounding room and lighting. Windowed play is allowed; F11 toggles fullscreen. Reduced motion freezes ambient animation and makes transfers immediate.
 
 The user explicitly rejected website/dashboard styling and the Impeccable UI skill for this game. Preserve the navy mat's padding, complete artwork, clear stacks and sparse board labels. Do not restore persistent Force totals, card IDs, attacker/defender summaries or destroyed-province placeholders as unsolicited UI help. The tutorial may explain rules without exposing private cards or prescribing optimal competitive decisions.
 

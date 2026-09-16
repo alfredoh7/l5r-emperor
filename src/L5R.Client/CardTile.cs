@@ -60,7 +60,7 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
-        if (ShowTokenRail && CardTokenRail.HasTokens(Card))
+        if (ShowTokenRail && CardTokenRail.HasRail(Card))
         {
             AlignUnitRightEdge = true;
             TokenRail = new CardTokenRail { CardAnchor = this, Offset = TokenRailOffset, Companions = TokenRailCompanions };
@@ -74,7 +74,9 @@ public partial class CardTile : Button
     public override void _Process(double delta)
     {
         AdvanceStatFeedback(delta);
-        var inspecting = IsInspectionHover;
+        // The rail cap must stay under the pointer. Enlarging its parent moves this
+        // small target into/out of the card face and repeatedly restarts the tooltip.
+        var inspecting = IsInspectionHover && TokenRail?.GrantSeal?.IsHovered()!=true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -177,7 +179,7 @@ public partial class CardTile : Button
 
     public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
         (Card.Dishonorable ? new[]{ "Dishonorable" } : Array.Empty<string>())
-        .Concat((Card.GrantedKeywords ?? []).Select(k => "+ " + k.Keyword).Distinct()).ToArray();
+        .Concat((Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)).Select(k => "+ " + k.Keyword).Distinct()).ToArray();
     private void DrawPublicStatus()
     {
         var labels = PublicStatusLabels;
@@ -228,7 +230,7 @@ public partial class CardTile : Button
     public Control CreateReadingPreview()
     {
         LastPreviewCardId = Card.Id;
-        return LastPreviewControl = CardPreview.Create(Card, ContextHelp, ContextualGoldProduction, GetTree().Root.GetVisibleRect().Size.Y / 1080f);
+        return LastPreviewControl = CardPreview.Create(Card, ContextHelp, ContextualGoldProduction, GetTree().Root.GetVisibleRect().Size.Y / 1080f, TokenSourceName);
     }
 
     public override void _Draw()

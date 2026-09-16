@@ -1,0 +1,35 @@
+{
+  "date": "2026-09-16",
+  "generator": "Built-in imagegen, per latest explicit user request",
+  "room_reference": "assets/table/war-room/approved-fortress-hall-b3.png",
+  "room_reference_sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+  "approved_layout": "Chair-free sparse hall; existing inventory and card camera retained.",
+  "assets": [
+    {
+      "role": "Isolated brazier reconstruction",
+      "file": "assets/table/war-room/meshy/brazier-v2/source.png",
+      "prompt": "assets/table/war-room/meshy/brazier-v2/imagegen-prompt.txt",
+      "sha256": "d5e632b328cb59a627403f2c68a0f5298fd9b83e6a14b9a0f2ee48fd6f7727db"
+    },
+    {
+      "role": "Transparent native fire artwork",
+      "file": "src/L5R.Client/Art/WarRoom/brazier-fire.png",
+      "prompt": "assets/table/war-room/polish-m6/fire-imagegen-prompt.txt",
+      "sha256": "66644b3f91964c023435c718852b3b85b8b6830c673f680c5b1aae5aee2537aa"
+    },
+    {
+      "role": "Distant dusk panorama for existing open bays",
+      "file": "assets/table/war-room/polish-m6/dusk-panorama.png",
+      "prompt": "assets/table/war-room/polish-m6/vista-imagegen-prompt.txt",
+      "sha256": "f60dc8604d0ce5308aecb33156854e1313ea89a222c6a6bb1078ce71fc324fd3"
+    }
+  ],
+  "meshy": {
+    "replacement_jobs": 1,
+    "consumed_credits": 35,
+    "balance_before": 1655,
+    "balance_after": 1620,
+    "task_id": "01a0a75f-ef87-7167-b855-805ec52011cf"
+  },
+  "remaining": "Human visual milestone review. No claim of literal pixel equivalence, fully volumetric fire or real-time global illumination."
+}

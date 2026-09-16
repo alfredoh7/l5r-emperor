@@ -15,7 +15,7 @@ public partial class Main
         var actual=_session.Snapshot!.View;
         InkRequire(actual.Version==old.Version+1 && actual.Events.Any(e=>e.Sequence>(old.Events.LastOrDefault()?.Sequence??0) && e.Type=="attachmentDestroyed"),"Actual ability did not destroy its attachment.");
         if(!_reducedMotion) InkRequire(PresentationBusy && _defeatBanner.Visible,"Action destruction had no immediate named announcement.");
-        if(!_reducedMotion) InkRequire(_inspector.GetChildren().OfType<BattleTracker>().All(t=>t.Stage==1 && t.Status=="Applying battle action"),"Individual action death incorrectly advanced the battle tracker to resolution.");
+        if(!_reducedMotion) InkRequire(_sidebarHeader.GetChildren().OfType<BattleTracker>().All(t=>t.Stage==1 && t.Status=="Applying battle action"),"Individual action death incorrectly advanced the battle tracker to resolution.");
         await SaveBattleFrame("named-action-defeat");
         await ToSignal(GetTree().CreateTimer(5),SceneTreeTimer.SignalName.Timeout);
         InkRequire(!PresentationBusy && View.Version==actual.Version,"Action announcement did not restore decisions.");

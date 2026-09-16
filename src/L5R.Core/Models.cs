@@ -114,6 +114,10 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
 public sealed record GrantedKeyword(string Keyword, string Source, string Duration);
 
+/// <summary>Read-only explanation of an already enforced granted effect. This is not an
+/// executable ability definition. Older snapshots may omit it; the client must not invent one.</summary>
+public sealed record GrantedEffectView(string Name, string Text, string Source, string Duration, string Kind = "Ability");
+
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
 /// will not be negated") -- while any Protection sits in a card's own list, no card of the
 /// opposing kind (Effortless Counterattack's own Additional-Action negation, Attack-strength
@@ -471,7 +475,7 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
-    CardToken[]? Tokens = null);
+    CardToken[]? Tokens = null, GrantedEffectView[]? GrantedEffects = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
@@ -487,7 +491,12 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null);
+    CardView[]? Celestials = null)
+{
+    public HandLimitView? HandLimit { get; init; }
+}
+public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
+public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>

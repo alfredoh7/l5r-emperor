@@ -1,0 +1,20 @@
+{
+  "date": "2026-09-15",
+  "approved_milestone": "ca9f0523b848d41e438e7836b0188acbc81aca60",
+  "user_message": "looks great - please continue",
+  "meaning": "Native milestone-3 room accepted as the basis for continued refinement; this is not an agent assertion of pixel equivalence.",
+  "continued_scope": [
+    "Floor illumination and contact shadows",
+    "Timber/specular response",
+    "Room candle seating and wick",
+    "Dusk colour/filtering"
+  ],
+  "unchanged": [
+    "Approved room layout and furnishing inventory",
+    "Existing Meshy bodies and source files",
+    "Mat/frame and card/input camera",
+    "Rules and state"
+  ],
+  "animation": "Deferred per prior user instruction",
+  "new_meshy_jobs": 0
+}
