@@ -60,13 +60,14 @@ public partial class Main
             case 4:
                 Check(host!.Session.Snapshot!.View.PendingDuel?.Stage=="Focusing","Begin Duel submits the real challenge");Capture("challenge");Press("Switch seat");break;
             case 5:
-                Check(!host!.Screen.Visible,"private handoff hides the complete table");Capture("handoff");Press("Reveal this seat");break;
+                Check(!host!.Screen.Visible&&host.Screen.HoverPreviewId is null,"private handoff hides the table and hover preview");Capture("handoff");Press("Reveal this seat");break;
             case 6:Press("Focus from deck");Native(_duelLastPlacement);break;
             case 7:
                 Check(host!.Session.Snapshot!.View.Version==2,"rapid duplicate focus advances once");
-                if(_focusInspectionStep==0){Native(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
-                if(_focusInspectionStep==1){Press("Inspect selected card");_focusInspectionStep++;return;}
-                if(_focusInspectionStep==2){Check(host.Screen.HasPrivateInspection,"blind focus is privately inspectable after commitment");Capture("own-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
+                if(_focusInspectionStep==0){var point=host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_focusInspectionStep++;return;}
+                if(_focusInspectionStep==1){Check(host.Screen.HoverPreviewId is not null,"hover restores the main-game preview for own committed focus");Check(new Rect2(Vector2.Zero,host.Screen.Size).Encloses(host.Screen.HoverPreviewRect),"hover preview stays within the viewport");Capture("own-focus-hover");Native(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
+                if(_focusInspectionStep==2){Press("Inspect selected card");_focusInspectionStep++;return;}
+                if(_focusInspectionStep==3){Check(host.Screen.HasPrivateInspection,"blind focus is privately inspectable after commitment");Capture("own-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
                 Press("Switch seat");break;
             case 8:Press("Reveal this seat");break;
             case 9:
@@ -95,7 +96,8 @@ public partial class Main
                 Native(_duelLastPlacement);break;
             case 13:
                 Check(host!.Session.Snapshot!.View.Version==3,"drag/keyboard focus and duplicate click advance once");
-                if(_focusInspectionStep==3){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;Native(host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
+                if(_focusInspectionStep==4){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;var point=host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_focusInspectionStep++;return;}
+                if(_focusInspectionStep==5){Check(host.Screen.HoverPreviewId is null,"hover never inspects an anonymous opponent focus");Native(host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
                 Check(host.Screen.SelectedInspectionId==_inspectionBeforeOpponentClick&&!host.Screen.HasPrivateInspection,"opponent focused backs expose no inspection");
                 Capture("focused");Press("Switch seat");break;
             case 14:Press("Reveal this seat");break;
@@ -106,12 +108,16 @@ public partial class Main
                 Check(host.Screen.VisibleFocusedCount==0,"resolved commitments leave the focus rows");
                 if(_resultPileStep==0){Native(host.Screen.PileClickPoint(host.Session.Snapshot.View.ViewerId,Zone.FateDiscard));_resultPileStep++;return;}
                 if(_resultPileStep==1){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
-                if(_resultPileStep==2){Press("Fallen · 1");_resultPileStep++;return;}
+                if(_resultPileStep==2){Native(host.Screen.FallenClickPoint(host.Session.Snapshot.View.ViewerId));_resultPileStep++;return;}
                 if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"dead personalities remain separate from Fate discards");Capture("fallen-spread");Press("Back");_resultPileStep++;return;}
+                if(_resultPileStep==4){ReadingTooltip.LastText=null;var point=host.Screen.DuelValuePoint(0);Input.ParseInputEvent(new InputEventMouseMotion{Position=point,GlobalPosition=point});_resultPileStep++;return;}
+                if(_resultPileStep==5){Check(ReadingTooltip.LastText?.Contains("Final duel total:")==true,"brush numeral hover explains final total versus stat contribution");Capture("stat-breakdown");Input.ParseInputEvent(new InputEventMouseMotion{Position=new Vector2(20,200),GlobalPosition=new Vector2(20,200)});_resultPileStep++;return;}
                 Check(result.ChallengerTotal==8&&result.ChallengedTotal==7,"native UI reproduces canonical 8–7");
+                var left=host.Session.Snapshot.View.LastDuel.Challenger.OwnerId==host.Session.Snapshot.View.ViewerId;
+                Check(host.Screen.VisibleDuelValues.SequenceEqual(new[]{(left?result.ChallengerTotal:result.ChallengedTotal).ToString(),(left?result.ChallengedTotal:result.ChallengerTotal).ToString()}),"large result numerals match authoritative totals for this seat");
                 host.Screen.Present(host.Session.Snapshot);
                 Check(!host.Screen.PresentationBusy,"repeated snapshots do not replay the reveal");
-                Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("View consequences");break;
+                Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("Duel details");break;
             case 17:Capture("consequences");Press("Back");break;
             case 18:Press("Continue");break;
             case 19:

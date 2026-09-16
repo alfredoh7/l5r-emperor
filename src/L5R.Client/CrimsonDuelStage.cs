@@ -4,7 +4,7 @@ namespace L5R.Client;
 /// <summary>Reusable scenery only. Owns no cards, rules, decisions or match state.</summary>
 public partial class CrimsonDuelStage : Control
 {
-    public const float Pitch = .566f, Depth = .00030f, Unit = 100, Density = .93f;
+    public const float Pitch = .46f, Depth = .00026f, Unit = 100, Density = .85f;
     public static readonly Vector2 Design = new(1672,941);
     public static readonly Vector2 StageCanvas = new(1672,1304);
     public static float CameraDistance => Mathf.Sqrt(1-Pitch*Pitch)/(Depth*Unit);
@@ -40,9 +40,9 @@ public partial class CrimsonDuelStage : Control
         Model=GD.Load<PackedScene>("res://Art/CrimsonDuel/crimson-duel.glb").Instantiate<Node3D>();World.AddChild(Model);
         var mat=(MeshInstance3D)Model.FindChild("CampaignMat",true,false);
         var material=new ShaderMaterial {Shader=GD.Load<Shader>("res://Art/DuelArena/approved-mat.gdshader")};
-        material.SetShaderParameter("artwork",GD.Load<Texture2D>("res://Art/CrimsonDuel/campaign-mat-albedo.png"));
+        material.SetShaderParameter("artwork",GD.Load<Texture2D>("res://Art/CrimsonDuel/campaign-mat-filigree.png"));
         mat.MaterialOverride=material;
-        if(MatLift>0){mat.Scale=new Vector3(1,1,1.14f);mat.Position+=new Vector3(0,0,.7f);}
+        // Keep the whole 16 × 10 mat inside the camera, including its near hem.
         _vegetation=new Node3D {Name="WindField"};World.AddChild(_vegetation);
         _grass=new ShaderMaterial {Shader=GD.Load<Shader>("res://Art/CrimsonDuel/grass.gdshader")};
         var random=new Random(2050915);

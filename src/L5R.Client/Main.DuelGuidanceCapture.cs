@@ -35,7 +35,7 @@ public partial class Main
             case 10:
                 Check(host!.Screen.CoachingVisible,"quiet coaching appears for the active seat");
                 Capture("quiet");GD.Print("GUIDANCE_RECT: "+host.Screen.GuidanceRect);
-                Check(host.Screen.GuidanceRect.Size.Y<200&&host.Screen.GuidanceRect.Position.Y>GetViewport().GetVisibleRect().Size.Y*.5f,"quiet coaching stays compact above the hand");
+                Check(host.Screen.GuidanceRect.Size.Y<200&&host.Screen.GuidanceRect.Position.Y>GetViewport().GetVisibleRect().Size.Y*.5f,"quiet coaching stays compact outside the card surface");
                 Check(!Find("HideDuelGuidance").ButtonPressed,"do not show again starts unchecked");
                 _guidanceVersion=host.Session.Snapshot!.View.Version;Capture("quiet");Press("HideDuelGuidance");break;
             case 11:

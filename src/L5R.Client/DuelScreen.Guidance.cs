@@ -87,7 +87,7 @@ public partial class DuelScreen
         if(_helpContext!=context){_helpStep=0;_helpContext=context;_dontShowAgain=false;}
         var steps=GuidanceSteps();_helpStep=Math.Clamp(_helpStep,0,steps.Count-1);
         var current=steps[_helpStep];
-        var pos=_helpOpen?new Vector2(112,61):new Vector2(530,_scale<.85f?638:652);
+        var pos=_helpOpen?new Vector2(112,61):new Vector2(520,780);
         var extent=_helpOpen?new Vector2(495,220):new Vector2(612,112);
         _guidanceRect=new Rect2(_offset+pos*_scale,extent*_scale);
         var panel=new PanelContainer{Name=_helpOpen?"AnchoredGuidance":"QuietCoaching",Position=_guidanceRect.Position,Size=_guidanceRect.Size,MouseFilter=MouseFilterEnum.Stop};

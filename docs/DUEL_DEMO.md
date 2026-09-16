@@ -72,6 +72,8 @@ The native suite enters through Play, submits commands using actual mouse/button
 
 Native Windows graphical acceptance remains open. Local Mac frame samples are evidence for this machine only. Grass/cloud animation quality remains its own visual acceptance track; the current detailed sky is an animated matte, not volumetric clouds.
 
+The latest presentation refinement uses Musashi Brush numerals without coins, the main game’s `CardPreview` for hover and pinned inspection, a more receding mat with Japanese filigree, and a separate result footer with optional aftermath recap. See [native/source comparison](screenshots/duel-demo/brush-results/index.html) and [the five native probe outcomes](screenshots/duel-demo/brush-results/validation.json). Opponent anonymous focus cards never enter the inspector; number hover distinguishes the stat contribution from the final duel total.
+
 ## After demo acceptance
 
 Wire the same `DuelScreen` to the existing normal session when a challenge appears. Continue will restore the board and engine-provided priority instead of returning to demo setup. Automatic normal-match activation is intentionally deferred until Alfredo accepts the demo and mdornbrook confirms the mechanics; the reusable screen and public contract are in place for that step.
