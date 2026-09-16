@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Consolidating approved UI branches into one current-main build; duel demo explicitly excluded.",
+  "validation": "Fresh main and branch ancestry inventoried; integrated approved preview merge completed. Native and deterministic validation pending.",
+  "remaining": "Integrate catalogue and battle-flow branch deltas; validate combined appearance, input, offline launcher, CI and shared review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/247",
+  "branch": "codex/247-ui-consolidation",
+  "updated": "2026-09-16T11:22:25.904865+00:00"
+}
