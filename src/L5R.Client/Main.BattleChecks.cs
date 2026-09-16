@@ -116,7 +116,7 @@ public partial class Main
                 if (!_reducedMotion)
                 {
                     InkRequire(PresentationBusy && _battlePresentationStage == 1 && View.Version < actual.Version && Actions.Length == 0, "Outcome beat did not hold the permitted old view with actions unavailable.");
-                    InkRequire(_inspector.GetChildren().OfType<BattleTracker>().All(t => t.Stage == 2 && t.Status == "Resolving battle"), "Resolution still invites a battle action.");
+                    InkRequire(_sidebarHeader.GetChildren().OfType<BattleTracker>().All(t => t.Stage == 2 && t.Status == "Resolving battle"), "Resolution still invites a battle action.");
                     await SaveBattleFrame("outcome");
                     await ToSignal(GetTree().CreateTimer(_outcomeHold+.08), SceneTreeTimer.SignalName.Timeout);
                     await SaveBattleFrame("transfers");

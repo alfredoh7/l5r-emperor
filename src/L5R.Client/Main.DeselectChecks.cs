@@ -43,6 +43,10 @@ public partial class Main
             var hand = Self.Hand.First(c => c.Definition?.Type == CardType.Strategy);
             await ClickInspectionCard(hand);
             if (_selected?.Id != hand.Id) throw new Exception("Native hand click did not inspect the card.");
+            var headerRect = _sidebarHeader.GetGlobalRect();
+            var footerRect = _phaseActions.GetGlobalRect();
+            if (!_inspectorPanel.GetGlobalRect().Encloses(headerRect) || !_inspectorPanel.GetGlobalRect().Encloses(footerRect) || headerRect.End.Y > footerRect.Position.Y)
+                throw new Exception("Inspection obscured the fixed header or decision footer.");
             RenderingServer.ForceDraw(); GetViewport().GetTexture().GetImage().SavePng(_capturePath + ".selected.png");
             await ClickInspectionCard(hand);
             if (_selected is not null || _chosen is not null) throw new Exception("Second click did not deselect the inspected hand card.");
@@ -61,13 +65,13 @@ public partial class Main
             GetViewport().PushInput(new InputEventMouseButton { Position = p, GlobalPosition = p, ButtonIndex = MouseButton.Left, Pressed = false }, true);
             await SettleInspection();
             if (_selected is not null || View.Version != version) throw new Exception("Close did not deselect without issuing a game command.");
-            var tracker = _inspector.GetChildren().OfType<BattleTracker>().Single();
-            if (tracker.Compact || tracker.Size.Y < 490 || !_inspectorPanel.GetGlobalRect().Encloses(tracker.GetGlobalRect()))
-                throw new Exception("Full battle tracker was not restored visibly.");
+            var tracker = _sidebarHeader.GetChildren().OfType<BattleTracker>().Single();
+            if (tracker.Size.Y < 120 || tracker.Size.Y > 180 || !_inspectorPanel.GetGlobalRect().Encloses(tracker.GetGlobalRect()))
+                throw new Exception("Fixed battle header was not restored visibly.");
             GetViewport().PushInput(new InputEventMouseMotion { Position = new Vector2(15,140), GlobalPosition = new Vector2(15,140) }, true);
             ReleaseTableFocus(); HideTableTooltip();
             await SettleInspection();
-            GD.Print("DESELECT_PASS: native hand/board repeat clicks, switching inspection and Close; full battle tracker restored; match version unchanged; assignment drafts preserved.");
+            GD.Print("DESELECT_PASS: native hand/board repeat clicks, switching inspection and Close; fixed battle header restored; match version unchanged; assignment drafts preserved.");
         }
         catch (Exception e) { _deselectProbeError = e.ToString(); }
         _deselectProbeDone = true;

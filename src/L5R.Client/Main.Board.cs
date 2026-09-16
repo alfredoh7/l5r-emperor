@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
     private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
-    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
@@ -22,7 +22,7 @@ public partial class Main
             _previousBows.Clear(); foreach (var pair in _currentBows) _previousBows[pair.Key] = pair.Value;
             _bowVersion = View.Version; _bowChangedAt = Time.GetTicksMsec();
         }
-        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
+        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear(); _homeReminders.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover:true);
@@ -30,6 +30,7 @@ public partial class Main
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         AddHoldings(enemy); AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self); AddHoldings(Self);
+        AddPersistentHome(enemy); AddPersistentHome(Self); HighlightHomeReminders();
         // A shallow physical fan, with complete scans and space for a modest hover lift.
         var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
         var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
@@ -76,7 +77,7 @@ public partial class Main
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
-        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding).ToArray();
+        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding && !IsPersistentHomeCard(c)).ToArray();
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
@@ -136,8 +137,8 @@ public partial class Main
         {
             // Inspect the whole unit at useful size, instead of forcing six cards into
             // one narrow battlefield. These are the actual live tiles, not extra copies.
-            var panel = Place(_unitDetail, new LacquerPanel(), 238, 342, BoardWidth, 320);
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.04f, .037f, .025f, .98f), Palette.Gold, 16, 3));
+            var panel = Place(_unitDetail, new PanelContainer { Theme = SidebarSkin.Theme() }, 238, 342, BoardWidth, 320);
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             panel.SetMeta("battle_province", personality.ProvinceIndex ?? -1);
             panel.SetMeta("home_owner", personality.OwnerId);
             var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 6); panel.AddChild(content);

@@ -1,0 +1,80 @@
+{
+  "milestone": 2,
+  "date": "2026-09-15",
+  "engine": "Godot 4.7.2 .NET, macOS M1 Max, Compatibility",
+  "base_commit": "6a2250ee5e4d64df3ac362044316c953fa132bf6",
+  "build": "passed; zero warnings/errors",
+  "headless_import_and_startup": "passed",
+  "native_cases": [
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/playable.png",
+      "native_projection_samples": 150,
+      "max_projection_error_px": 0.000173,
+      "native_input_assertions": true,
+      "snapshot_fps_not_benchmark": 88
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/battle-focus.png",
+      "native_projection_samples": 150,
+      "max_projection_error_px": 0.000193,
+      "native_input_assertions": true,
+      "snapshot_fps_not_benchmark": 79
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/max-zoom.png",
+      "native_projection_samples": 155,
+      "max_projection_error_px": 0.000978,
+      "native_input_assertions": true,
+      "snapshot_fps_not_benchmark": 85
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/wide.png",
+      "native_projection_samples": 150,
+      "max_projection_error_px": 0.000252,
+      "native_input_assertions": true,
+      "snapshot_fps_not_benchmark": 87
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/compact.png",
+      "native_projection_samples": 150,
+      "max_projection_error_px": 0.000386,
+      "native_input_assertions": true,
+      "snapshot_fps_not_benchmark": 88
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/expanded.png",
+      "native_projection_samples": 50,
+      "max_projection_error_px": 0.000193,
+      "native_input_assertions": false,
+      "snapshot_fps_not_benchmark": 18
+    },
+    {
+      "capture": "docs/screenshots/war-room/milestone-2/reduced-motion.png",
+      "native_projection_samples": 55,
+      "max_projection_error_px": 0.000732,
+      "native_input_assertions": false,
+      "snapshot_fps_not_benchmark": 72
+    }
+  ],
+  "full_launcher": "Play Latest.command builds, verifies catalogue installation and captures live room successfully; requested 1672x941 rendered 1672x942",
+  "legacy_environment_and_menu_captures": "passed",
+  "static_source_meshes": 1326,
+  "material_batches": 9,
+  "reduced_motion": "phases 0 and 4 render byte-identical full frames",
+  "unchanged_asset_sha256": {
+    "assets/table/war-room/approved-command-chamber.png": "df88548cc42b99252951966e4baf5b8f1c8ac47b4d05eaac809cc8f2266f3cfb",
+    "src/L5R.Client/Art/navy-mat-topaz-4x.webp": "932b3cadd4deea8352fe37b90b01e15b1e833f2d7757a773cbc23a172b47bc32",
+    "src/L5R.Client/Art/LacquerFrame/lacquer-frame-a.glb": "f5099c4f67c77c4d7dfbf97450eb8adeb6f4998d1ed5ec4e0aeea4ef853d8136",
+    "src/L5R.Client/Art/LacquerFrame/approved-frame-a.png": "c246f80b95b00f13ed23198d13639e6e324151f9a4c35205bf67974cd1e02fe4",
+    "src/L5R.Client/Art/WarRoom/war-room-m1.glb": "09efec7ce8188599aa15f8f48cd2fb8bd79a6be8680c76a6b7cc38721d66de02"
+  },
+  "gallery_local_references_checked": 23,
+  "limitations": [
+    "Architecture/material study, not final concept fidelity; Meshy furnishings and room wear remain later.",
+    "Initial native input attempt failed for absent window focus; the final full suite passed with focus and all assertions enabled.",
+    "FPS values are isolated snapshots, not a sustained benchmark; final prop performance remains unmeasured.",
+    "No native Windows, manual full-match or expert rules acceptance claimed.",
+    "Gallery links statically checked; browser interaction not claimed. No browser file-policy workaround used.",
+    "No Meshy jobs or credits used."
+  ]
+}

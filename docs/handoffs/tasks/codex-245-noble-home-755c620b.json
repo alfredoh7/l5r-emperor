@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Complete Meshy/Blender Noble Crest, native persistent Home/Favor interactions and approved lacquer/Caudex previews. Fix reminder decision/hover/selection and fitted-view clipping. Refresh mandatory WebP pack so the final launcher includes current pinned published scans including Suspicions. Record Meshy-first 3D production.",
+  "validation": "Deterministic suites passed (43 collaboration, 130 content, 152 core, 52 published, 9 format, 10 workshop, 14 AI, 5 server, 4 transport); 6 Meshy wrapper tests. Native engine/input checks passed 1920x1080 reduced + 1440x900 normal motion; final mipmapped native captures and source comparison passed. Versioned 2736-scan WebP85 pack built from verified sources, installed/integrity checked; integrated Play Latest.command smoke passed. Evidence and limits in docs/screenshots/persistent-home/VALIDATION.md.",
+  "remaining": "Ready for Alfredo native appearance review and Mendon shared review. PR246 stacked on open dependency242; wait for review/CI before merge. Combined local preview 5415e0a plus final pack preserves room/placards/lacquer. No native Windows or expert rules acceptance claimed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/245",
+  "branch": "codex/245-noble-home",
+  "updated": "2026-09-16T11:07:27.761076+00:00"
+}

@@ -1,0 +1,67 @@
+{
+  "milestone": 1,
+  "approval_sha256": "df88548cc42b99252951966e4baf5b8f1c8ac47b4d05eaac809cc8f2266f3cfb",
+  "scope": "Editable architecture and preliminary material/light composition. Detailed props and live game integration pending.",
+  "mat_m": [
+    1.8,
+    1.0130382775119617
+  ],
+  "floor_height_m": -0.58,
+  "room_width_m": 4.3,
+  "room_depth_m": 5.45,
+  "main_room_depth_m": 4.35,
+  "revision": "Alfredo requested a larger room; side walls widened and rear wall moved back, furniture distributed at the perimeter. Table dimensions unchanged.",
+  "mesh_objects": 1326,
+  "triangles": 135104,
+  "glb_bytes": 9694216,
+  "camera": {
+    "position": [
+      0.0,
+      -1.7518948316574097,
+      1.4592000246047974
+    ],
+    "lens_mm": 30.5,
+    "shift_x": 0.061000000685453415,
+    "shift_y": -0.04699999839067459,
+    "pitch": 0.64
+  },
+  "props": {
+    "FutureHelmet": [
+      -1.17,
+      1.65,
+      -0.12
+    ],
+    "FutureLeftRoomLantern": [
+      -1.59,
+      1.28,
+      -0.23499999999999996
+    ],
+    "FutureRightRoomLantern": [
+      1.57,
+      1.46,
+      -0.21499999999999997
+    ],
+    "FutureMapAndTea": [
+      -1.76,
+      0.15,
+      -0.168
+    ],
+    "FutureScroll": [
+      1.76,
+      0.15,
+      -0.168
+    ],
+    "TableLanternNear": [
+      -0.82,
+      -0.4,
+      0.003
+    ],
+    "TableLanternFar": [
+      0.78,
+      0.4,
+      0.003
+    ]
+  },
+  "meshy_credits_spent": 0,
+  "material_status": "Procedural timber study. Cabinets are placement proxies; detailed furnishings/props use the connected Meshy API after layout review. Final distressed finish and relighting remain later milestones."
+}

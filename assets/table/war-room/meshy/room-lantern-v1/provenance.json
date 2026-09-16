@@ -1,0 +1,68 @@
+{
+  "task_id": "01a0a606-57a3-713f-9f03-03b0ec75134a",
+  "approval": "Alfredo approved B3 and explicitly requested separate table/room Meshy lanterns on 2026-09-15. Table uses previously approved high-resolution artwork; room uses an unaltered crop of the approved B3 fixture.",
+  "source_sha256": "3fc49c1c4cc00a14fe569179e3df68ef5d651cca34deea2dd427d677fc9fbd42",
+  "source_region_px": [
+    592,
+    143,
+    38,
+    76
+  ],
+  "cli": "@meshy-ai/cli 0.3.0",
+  "settings": {
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": "glb",
+    "ultra_mode": false,
+    "image_enhancement": true
+  },
+  "estimated_credits": 30,
+  "pricing_checked": "2026-09-15 https://docs.meshy.ai/en/api/pricing",
+  "downloads": [
+    {
+      "file": "model.glb",
+      "sha256": "a18f4d29778ffbd16e2dae2edf2f50cc6258b6de21ce132562c8a8743b885d5f",
+      "bytes": 35984916
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "sha256": "b5acea9c8eb0f6dea61415a83cc98ebdf0eef4a8434982fc712d6f5738124624",
+      "bytes": 20061611
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "sha256": "727a2b8475e0e1aa9bcf81b276900e33d223442ca6b8d77783d189726f2806c5",
+      "bytes": 19762
+    },
+    {
+      "file": "texture_0_normal.png",
+      "sha256": "fce266e6cdeeb9384ce49829becd14986beb6918816b044ae48e1c3a34757252",
+      "bytes": 15521886
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "sha256": "c121a23aac6ae16593a91beb9ee551b3ca969d4b1d6e827b81afe770ebb04324",
+      "bytes": 1342185
+    },
+    {
+      "file": "thumbnail.png",
+      "sha256": "bf2fe1ca65a6c660be579f6af4101477d2ce8e9071a0e2fdb3ac4b7e047f368f",
+      "bytes": 88355
+    }
+  ],
+  "raw_storage": "Ignored artifacts/meshy/room-lantern-v1/download. No credentials or signed URLs retained here.",
+  "remaining": "Alfredo visual acceptance; new animation deferred. Native composition and close-up checks provided.",
+  "consumed_credits_reported_by_task": 30,
+  "timestamps_ms": {
+    "created_at": 1789491831641,
+    "started_at": 1789491831643,
+    "finished_at": 1789491964495
+  },
+  "texture_prompt": "One complete Japanese rectangular hanging candle lantern matching the reference: slender blackened metal frame, warm aged translucent amber paper, vertical ribs and two horizontal window crossbars, small loop finial, aged dark bronze foot. Antique soot, scratches, patina. No wall, mount, scenery, light halo, or background. Relightable PBR surface.",
+  "balance_before_both_lanterns": 1805,
+  "balance_after_both_lanterns": 1745,
+  "returned_model_version": "Not supplied in task response; standard CLI route requests Meshy-7."
+}

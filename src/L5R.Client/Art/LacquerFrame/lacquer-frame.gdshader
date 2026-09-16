@@ -4,6 +4,7 @@ render_mode unshaded, cull_disabled, fog_disabled;
 uniform sampler2D source_art : filter_linear_mipmap_anisotropic, repeat_disable;
 uniform sampler2D lantern_texture : filter_linear_mipmap, repeat_disable;
 uniform bool project_to_table = false;
+uniform bool native_candlelight = false;
 uniform vec2 screen_size = vec2(1920.0,1080.0);
 uniform vec2 screen_center;
 uniform float display_density = 1.0;
@@ -72,7 +73,7 @@ void fragment() {
         if(max(lantern_coverage(left_lamp,candle_phase,SCREEN_UV*screen_size),lantern_coverage(right_lamp,candle_phase+1.8,SCREEN_UV*screen_size))>.018) discard;
     }
     vec3 wood=mix(texture(source_art,UV).rgb,texture(source_art,UV2).rgb,COLOR.r);
-    if(project_to_table) {
+    if(project_to_table || native_candlelight) {
         vec2 dl=(frame_uv-left_lamp)/vec2(.24,.31);
         vec2 dr=(frame_uv-right_lamp)/vec2(.24,.31);
         float warmth=exp(-dot(dl,dl)*1.5)*candle_energy(candle_phase,candle_motion)

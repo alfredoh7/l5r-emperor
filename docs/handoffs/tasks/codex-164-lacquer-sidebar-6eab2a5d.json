@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved A worn black lacquer right sidebar: source-derived nine-slice materials, fixed heading and decision footer, framed full-card inspection, Caudex body/bold/rich-text family, existing WeatheredQuill spacing. Shared-file scope is client Main action presentation and capture checks only; no authoritative rules/interfaces changed. Preserves PR99 heading conventions in combined preview.",
+  "validation": "Client build zero warnings/errors. Native card deselection suite passed on feature branch and final combined preview; battle/assignment/defense native clicks, Close, draft preservation, fixed header/footer, target confirmation. Payment/purchase and published Shinden choice captures passed at 1440x900. 1280x800 inspection reviewed. Source/native materials and full gameplay captures reviewed. Corrected capture assertion to use authoritative version during held defeat announcement. Launcher target and shell syntax verified.",
+  "remaining": "CI and shared-file review pending; no native Windows graphical playtest. Other menu layouts remain future pass.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/164",
+  "branch": "codex/164-lacquer-sidebar",
+  "updated": "2026-09-10T17:28:42.970513+00:00"
+}

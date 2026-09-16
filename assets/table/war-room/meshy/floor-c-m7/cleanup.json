@@ -1,0 +1,48 @@
+{
+  "source_sha256": "bb817f795782157d0e7c2ffdb92cc682a57d10a5b2281310c783e6b3567d1602",
+  "raw_triangles": 188,
+  "raw_bounds": [
+    [
+      -1.0,
+      -0.08852999657392502,
+      -0.03117999993264675
+    ],
+    [
+      1.0,
+      0.08852999657392502,
+      0.03117999993264675
+    ]
+  ],
+  "source_images": [
+    {
+      "name": "Image_0",
+      "size": [
+        4096,
+        4096
+      ]
+    },
+    {
+      "name": "Image_1",
+      "size": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "name": "Image_2",
+      "size": [
+        4096,
+        4096
+      ]
+    }
+  ],
+  "normalized_size": [
+    0.8980000019073486,
+    0.0794999971985817,
+    0.02800000086426735
+  ],
+  "runtime_max_texture_edge": 2048,
+  "cleanup": "Original UVs/PBR preserved; source 4K results retained separately. Ground-contact pivot, 2K runtime maps, local decimation only. Fitted floorboards retain exact dimensions.",
+  "cleaned_triangles": 188,
+  "cleaned_sha256": "bef86bdacfd15d19b18905dd85ee446e2aa6634d82246159a184d067f54e7869"
+}

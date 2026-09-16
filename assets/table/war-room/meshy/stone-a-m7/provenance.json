@@ -1,0 +1,75 @@
+{
+  "asset": "stone-a-m7",
+  "task_id": "01a0a78c-df9e-7735-9288-01d8b575ebaf",
+  "resource": "image-to-3d",
+  "request": {
+    "resource": "image-to-3d",
+    "arguments": [
+      "image-to-3d",
+      "create",
+      "--image-url",
+      "assets/table/war-room/polish-m7/stone-reference.png",
+      "--model-type",
+      "standard",
+      "--ultra-mode",
+      "true",
+      "--should-texture",
+      "true",
+      "--enable-pbr",
+      "true",
+      "--texture-resolution",
+      "4k",
+      "--remove-lighting",
+      "true",
+      "--image-enhancement",
+      "false",
+      "--target-formats",
+      "glb",
+      "--operation-id",
+      "l5r-stone-a-m7",
+      "--async"
+    ]
+  },
+  "texture_prompt_returned": "Hand-dressed square volcanic basalt footing. Real dry dark gray stone with dense fine mineral grains, old shallow chisel marks, small irregular corner chips and subtle dirt at the base. Matte nonmetallic porous stone, no polish, no gloss, no plastic, no carved veins. Single low square structural plinth, flat top and bottom. Neutral relightable PBR, no baked shadows or lights. Preserve silhouette and understated wear of the reference.",
+  "source_reference": "assets/table/war-room/polish-m7/stone-reference.png",
+  "status": "SUCCEEDED",
+  "consumed_credits": 35,
+  "timestamps": {
+    "created_at": 1789517428222,
+    "started_at": 1789517428229,
+    "finished_at": 1789517706163
+  },
+  "raw_downloads": [
+    {
+      "file": "model.glb",
+      "bytes": 75659328,
+      "sha256": "d3004c1ac7cd509a97dbdc461f4f999c48b676bcac0041105bb1f189d0164175"
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "bytes": 29250460,
+      "sha256": "6c6f8509d82ee747175aa61a665cfdfd1d51e6db0ebdd2ee01cf0f89d8e1528d"
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "bytes": 18419,
+      "sha256": "2cbfdcc220386e9983908dd867180997a47473d0deb978b3f11a948ef5e1f9c8"
+    },
+    {
+      "file": "texture_0_normal.png",
+      "bytes": 27717097,
+      "sha256": "b3fc740a7a176c1dd96e9ad2fd129ef3bd6c8e1fe1fe62b6fe3c707e019af790"
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "bytes": 1504847,
+      "sha256": "a7a2aaee356ce0a33ce4a4f795192b279d08845550bc8d11e5a964521aa269aa"
+    },
+    {
+      "file": "thumbnail.png",
+      "bytes": 264957,
+      "sha256": "b2e8212fb81be48a815d1b73a7b3b1a2a06b04293615edd0244b504a50f0a2a2"
+    }
+  ],
+  "disposition": "Inspected original, then prepared in Blender for native review."
+}
