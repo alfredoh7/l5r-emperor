@@ -94,7 +94,16 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // Personality, once per duel, you may focus from your discard pile instead (revealed to the
     // opponent immediately; removed from the game after the duel ends)" -- same reasoning as above,
     // separate from her own entry trait.
-    bool GrantsDiscardPileFocus = false);
+    bool GrantsDiscardPileFocus = false,
+    // Kitsu Akai's own Limited action (issue #257): this definition is minted at runtime by a card
+    // effect (MatchEngine.CreatePersonality), never drawn from a deck or a Province -- the Lion
+    // Ancestor's own printed text, "May not be included in decks." DeckWorkshop.Review flags a
+    // CreatedOnly card if one somehow ends up selected anyway (the same soft-warning convention
+    // every other deck-legality rule in this engine already uses, never a hard block). Also the
+    // signal MatchEngine.DestroyUnits reads to redirect a destroyed created card to
+    // Zone.RemovedFromGame instead of an ordinary discard pile once destruction otherwise finishes,
+    // since a created card has no physical printed card to return to any pile.
+    bool CreatedOnly = false);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -319,6 +328,11 @@ public sealed class MatchState
 {
     public long Version { get; set; }
     public int TokenSequence { get; set; }
+    // Kitsu Akai's own Limited action (issue #257): a persistent sequence for minting fresh
+    // CardInstance.Id values at runtime, the same replay-determinism reasoning as TokenSequence
+    // above -- match setup's own local `nextId` closure only ever runs once, at Create(), and does
+    // not survive into gameplay.
+    public int CreatedCardSequence { get; set; }
     public int? FavorPlayerId { get; set; }
     public int TurnNumber { get; set; } = 1;
     public int ActivePlayerId { get; set; }
