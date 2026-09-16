@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Consolidating approved UI branches into one current-main build; duel demo explicitly excluded.",
-  "validation": "Fresh main and branch ancestry inventoried; integrated approved preview merge completed. Native and deterministic validation pending.",
-  "remaining": "Integrate catalogue and battle-flow branch deltas; validate combined appearance, input, offline launcher, CI and shared review.",
+  "summary": "Consolidate seven approved UI branches on current main; preserve the separate Duel Demo. Integrate catalogue/deck builder, lacquer menus, battle flow, room, placards and Noble Home; repair battle inspection/Reserve presentation, defender destination query and Cavalry phase mapping.",
+  "validation": "421 deterministic checks passed (154 Core plus content/collaboration/published/deck/AI/server/transport); final client builds with zero warnings/errors; native Mac 20 full-game and four compact modes, catalogue/deck-builder/placard probes, Home at two sizes/motion settings, phase rail at two sizes; launcher startup passed. Fresh evidence: docs/screenshots/ui-consolidation/VALIDATION.md.",
+  "remaining": "Ready for shared review in PR #248. Mendon review and current-head CI required before main merge. Initial review-routing CI failed on GitHub changed-file metadata mismatch; guard not bypassed. Native Windows and two-machine/human rules acceptance remain separate. Duel Demo #220 remains excluded.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/247",
   "branch": "codex/247-ui-consolidation",
-  "updated": "2026-09-16T11:22:25.904865+00:00"
+  "updated": "2026-09-16T12:03:42.397186+00:00"
 }

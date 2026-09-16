@@ -83,12 +83,16 @@ public partial class Main
                 var planned = new Dictionary<string, int>(_assignments);
                 _decisionActions.GetChildren().OfType<Button>().Single(b => b.Text == "Confirm assignments").EmitSignal(Button.SignalName.Pressed);
                 _uiQueue.Clear(); Render();
-                if (View.Version != version + 1) throw new InvalidOperationException("Assignment confirmation was rejected.");
+                // Animation can retain an earlier displayed snapshot. Verify the
+                // actual session result, as the targeted-action probe does below.
+                var committed = _session.Snapshot!.View;
+                if (committed.Version != version + 1) throw new InvalidOperationException($"Assignment confirmation was rejected: expected {version + 1}, session {committed.Version}, displayed {View.Version}.");
+                var committedCards = committed.Players.SelectMany(p => p.Home.Concat(p.Army)).ToArray();
                 foreach (var (id, province) in planned)
                 {
-                    var unit = FindCard(id)!;
+                    var unit = committedCards.Single(c => c.Id == id);
                     if (unit.Zone != Zone.Battlefield || unit.ProvinceIndex != province) throw new InvalidOperationException("Unit did not arrive in its assigned lane.");
-                    if (Self.Army.Where(c => c.AttachedTo == id).Any(c => c.ProvinceIndex != province)) throw new InvalidOperationException("Attachments did not travel with their parent.");
+                    if (committedCards.Where(c => c.AttachedTo == id).Any(c => c.ProvinceIndex != province)) throw new InvalidOperationException("Attachments did not travel with their parent.");
                 }
             }
             GD.Print($"UI_SMOKE_PASS: {assignmentType}, {ids.Length} independent unit/province drafts, preserved panel selection, cancel; confirmed={_captureMode.EndsWith("confirm", StringComparison.Ordinal)}.");

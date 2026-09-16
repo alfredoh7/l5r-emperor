@@ -94,6 +94,7 @@ var tests = new (string Name, Action Run)[]
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
     ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
     ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
+    ("Infantry and Cavalry defender queries only offer existing battlefields, and every offered assignment executes", DefenderAssignmentQueries),
     ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama),
     ("Daigotsu Kendo's Conqueror keeps him unbowed after a win; Ikoma Natsu's Cavalry assigns during Cavalry Maneuvers", DaigotsuKendoConquerorAndIkomaNatsuCavalry),
     ("Mirumoto Reiyu gives an enemy Force/Follower a Force penalty equal to her own current Force", MirumotoReiyuForcePenalty),
@@ -1371,6 +1372,38 @@ static void CavalryManeuversSegment()
 
     Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
     Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
+}
+static void DefenderAssignmentQueries()
+{
+    foreach(var cavalry in new[]{false,true})
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        s.Phase=cavalry?Phase.CavalryDeclaration:Phase.AttackDeclaration;
+        s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var attacker=Add(s,cavalry?"training-cavalry":"training-crane-samurai",0,Zone.Home);
+        var defender=Add(s,cavalry?"training-cavalry":"training-lion-veteran",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Where(a=>a.Type=="attack" && a.Enabled)
+            .SelectMany(a=>a.Provinces!).Distinct().Order().SequenceEqual(new[]{0,1,2,3}),"An attacker may create a battlefield at any surviving province");
+        Accept(e,Cmd(e,"attack",assignments:new(){[attacker.Id]=2}));
+        Equal(e.State.Phase,cavalry?Phase.CavalryDefense:Phase.DefenseAssignment);
+        var options=e.QueryActions(1).Where(a=>a.Type=="assignDefense" && a.Enabled).ToArray();
+        Check(options.Length>0,"The available defender must be offered an assignment");
+        foreach(var option in options)
+        {
+            Check(option.Provinces!.SequenceEqual(new[]{2}),"Defenders cannot be offered an unattacked province");
+            var replay=MatchEngine.FromTestState(e.State);
+            Accept(replay,option.Command!);
+            Equal(replay.State.Cards[defender.Id].Zone,Zone.Battlefield);
+            Equal(replay.State.Cards[defender.Id].ProvinceIndex,2);
+        }
+        var empty=s;
+        empty.Phase=cavalry?Phase.CavalryDefense:Phase.DefenseAssignment; empty.PriorityPlayerId=1;
+        empty.UnresolvedBattlefields=[];
+        var noBattle=MatchEngine.FromTestState(empty);
+        Check(!noBattle.QueryActions(1).Any(a=>a.Type=="assignDefense"),"No battlefield means no destination to defend");
+        Accept(noBattle,noBattle.QueryActions(1).Single(a=>a.Type=="pass" && a.Enabled).Command!);
+    }
 }
 static void TwoHandedWeaponOverridesKensaiAndKama()
 {

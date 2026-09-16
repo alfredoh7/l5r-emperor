@@ -10,7 +10,8 @@ public partial class Main
     private bool RenderBattleFlow()
     {
         if (View.WinnerId is not null || !BattleTracker.InBattle(View.Phase) && _resolutionMessage is null && !PresentationBusy) return false;
-        if (!PresentationBusy && (_selected is not null || _chosen is not null)) return false;
+        if (!PresentationBusy && (_selected is not null || _chosen is not null ||
+            _selectedHomeReminder is not null && View.PendingChoice is null)) return false;
         _guide.Visible = false;
         _sidebarHeader.AddChild(new BattleTracker { Snapshot=View, ReducedMotion=_reducedMotion,
             PresentationInProgress=PresentationBusy, ActionOutcome=PresentationBusy && _actionOutcome,
@@ -70,7 +71,11 @@ public partial class Main
         else if(View.Phase==Phase.Battle)
         {
             FlowText("Choose a Battle action or pass.",22,Palette.Paper);
-            var options=Actions.Where(a=>a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction") && a.Type is "useAbility" or "playStrategy" or "equip").ToArray();
+            // The engine's action set can grow (for example Reserve recruitment).
+            // Omit controls already in the fixed footer and the menu's confirmed
+            // Concede flow; conceding is not a Battle action.
+            var options=Actions.Where(a=>a.Enabled && a.Command is not null &&
+                a.Type is not ("pass" or "endDynasty" or "declineReaction" or "proclaim" or "chooseShinden" or "concede")).ToArray();
             RenderBattleExchanges(1);
             foreach(var option in options) AddBattleAction(option);
             if(options.Length==0) FlowText("No Battle action is currently available.",17,Palette.PaperDim);

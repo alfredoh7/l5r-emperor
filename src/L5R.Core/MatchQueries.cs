@@ -172,8 +172,9 @@ public sealed partial class MatchEngine
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
-                var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
                 var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
+                var provinces=Player(1-_state.ActivePlayerId).Provinces
+                    .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index).ToArray();
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",

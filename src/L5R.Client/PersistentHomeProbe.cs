@@ -27,6 +27,7 @@ public partial class PersistentHomeProbe : Node
         var point = (Vector2)Call("ScreenCenter", control)!;
         Require(new Rect2(Vector2.Zero, GetViewport().GetVisibleRect().Size).HasPoint(point), $"Control is outside viewport: {control.Name} {point}");
         Input.ParseInputEvent(new InputEventMouseMotion { Position = point }); await Settle(.06);
+        GD.Print($"HOME_CLICK: {control.GetPath()} at {point}; root hover {GetViewport().GuiGetHoveredControl()?.GetPath()}; plane hover {Field<TableSurface>("_tableSurface").Canvas.GuiGetHoveredControl()?.GetPath()}; on table {Call("PointerOnTable",point)}");
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = true });
         Input.ParseInputEvent(new InputEventMouseButton { Position = point, GlobalPosition = point, ButtonIndex = MouseButton.Left, Pressed = false }); await Settle();
     }
@@ -137,7 +138,9 @@ public partial class PersistentHomeProbe : Node
             await Capture("opponent-inspection");
 
             state = State(true); state.FavorPlayerId = 1; var attacker = state.Cards.Values.First(c => c.Zone == Zone.Battlefield && c.OwnerId == 0);
-            await Load(state, 1); await Click(Reminders.Single(r => r.IsFavor)); await Ability("favor-battle");
+            await Load(state, 1); await Click(Reminders.Single(r => r.IsFavor));
+            Require(Descendants<Button>(Field<VBoxContainer>("_inspector")).Any(b => b.Text.Contains("Discard Favor") && !b.Disabled), "Battle flow swallowed the selected Favor action");
+            await Ability("favor-battle");
             Require(Engine.State.Cards[attacker.Id].Zone == Zone.Home && !Engine.State.Cards[attacker.Id].Bowed, "Battle Favor did not return attacker home unbowed");
             Require(Reminders.All(r => !r.IsFavor), "Battle spend left Favor visible");
             state = State(true); state.FavorPlayerId = 1; state.Cards.Values.First(c => c.Zone == Zone.Battlefield && c.OwnerId == 1).Zone = Zone.Home;
@@ -146,6 +149,18 @@ public partial class PersistentHomeProbe : Node
             state = State(); state.FavorPlayerId = 0; Add(state, 2158); await Load(state); await Ability("shunya-honor");
             Require(Engine.State.FavorPlayerId is null && Reminders.All(r => !r.IsFavor), "Card effect spending Favor left stale display");
             GD.Print("HOME_PASS: transfer, opponent inspection, Battle spend/presence, card-effect loss");
+
+            // Consolidation regression: newer engine commands must remain reachable
+            // through the older battle-flow UI, without re-creating legality here.
+            state = State(true); var reserve = Add(state, 10832, 1, Zone.Province, province: 0); Add(state, 6086, 1);
+            await Load(state, 1);
+            var reserveOption = _session.Snapshot!.Actions.First(a => a.Enabled && a.Type == "recruitReserve");
+            Require(!Descendants<Button>(Field<VBoxContainer>("_inspector")).Any(b => b.Text == "Concede"), "Concede bypassed the table menu's confirmation flow");
+            var reserveButton = Descendants<Button>(Field<VBoxContainer>("_inspector")).FirstOrDefault(b => b.Text.EndsWith(reserveOption.Label) && !b.Disabled);
+            Require(reserveButton is not null, "Battle flow hid engine-provided Reserve recruitment");
+            reserveButton!.EmitSignal(BaseButton.SignalName.Pressed); await Settle(.4);
+            Require(Engine.State.Cards[reserve.Id].Zone == Zone.Battlefield, "Reserve button did not submit the engine action");
+            GD.Print("HOME_PASS: consolidated battle flow exposes and executes authoritative Reserve recruitment");
 
             state = State(); var air = Add(state, 6333); var bowed = Add(state, 521, bowed: true); state.FavorPlayerId = 0;
             await Load(state); await Click(Tiles.Single(t => t.Card.Id == air.Id));
@@ -187,7 +202,12 @@ public partial class PersistentHomeProbe : Node
             // Capacity fixture, explicitly not a claim that these duplicate Rings were recruited legally.
             state = State(); state.FavorPlayerId = 0;
             foreach (var owner in new[] { 0, 1 }) { for (var i = 0; i < 6; i++) Add(state, i % 2 == 0 ? 6333 : 6339, owner); Add(state, 7675, owner, Zone.EventInPlay); }
+            foreach (var owner in new[] { 0, 1 }) { Add(state, 521, owner, Zone.RemovedFromGame); Add(state, 2619, owner, Zone.RemovedFromGame); }
             await Load(state); await Capture("crowded-overview");
+            var removed = Field<Dictionary<int, Rect2>>("_removedBounds");
+            Require(removed.Count == 2, "Consolidation lost one of the removed-card piles");
+            foreach (var home in Field<Dictionary<int, Rect2>>("_persistentBounds").Values)
+                Require(removed.Values.All(pile => !pile.Intersects(home)), "Removed-card pile overlaps persistent Home");
             foreach (var seat in new[] { 0, 1 })
             {
                 if (_session.Snapshot!.View.ViewerId != seat) { _session.SwitchPracticeSeat(); await Settle(.4); }
