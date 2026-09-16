@@ -16,6 +16,10 @@ Click hand/focused cards to select them. **Inspect selected card** shows a full 
 
 An existing offline practice remains paused and unchanged. An active private table requires the existing style of leave confirmation; leaving disconnects without conceding and the saved room seat can still reconnect.
 
+## Approved menu presentation
+
+Duel setup, seat handoff, toolbar, decision controls, inspection controls and outcome/ordering panels use the approved worn black lacquer and aged-brass menu family from PRs #165/#169. The original `SidebarSkin`, lacquer atlas and licensed Caudex font files are reused unchanged from `5f438d427467d7e2f0e87c6c789b3c00377eecca`. `DuelUi` adapts their spacing to the mat and compact windows; it scopes Caudex to this screen while the menu rollout remains on its own branch. Existing display headings and printed card faces are retained. Gold marks primary actions, with distinct disabled/hover/focus states.
+
 ## Prepared positions
 
 | Setup | Coverage |

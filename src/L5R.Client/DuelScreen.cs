@@ -8,6 +8,7 @@ public partial class DuelScreen : Control
 {
     public event Action<GameCommand>? CommandRequested;
     public event Action? PresentationFinished;
+    public event Action<bool>? ReadingChanged;
     public bool InputLocked { get; set; }
     public bool ReducedMotion { get; set; }
     public bool PresentationBusy => _revealQueue.Count>0 || _revealClock>0;
@@ -34,7 +35,7 @@ public partial class DuelScreen : Control
 
     public override void _Ready()
     {
-        Theme=Palette.MakeTheme();SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);MouseFilter=MouseFilterEnum.Ignore;
+        Theme=DuelUi.Theme();SetAnchorsAndOffsetsPreset(LayoutPreset.FullRect);MouseFilter=MouseFilterEnum.Ignore;
         _stage=new CrimsonDuelStage{ReducedMotion=ReducedMotion};AddChild(_stage);
         _table=new TableSurface{PlanePitch=CrimsonDuelStage.Pitch,PlaneDepth=CrimsonDuelStage.Depth};AddChild(_table);
         _plane=new Control();_table.Canvas.AddChild(_plane);
@@ -141,16 +142,20 @@ public partial class DuelScreen : Control
     private void RenderActions()
     {
         if(_hud is null)return;
+        ClearReading();
         foreach(var c in _hud.GetChildren()){_hud.RemoveChild(c);c.QueueFree();}_reading=null;
         if(Snapshot is null)return;
         var view=Snapshot.View;var stage=view.PendingDuel?.Stage;
-        _status=Palette.Text(Status(),20,Palette.Paper);_status.Position=_offset+new Vector2(335,370)*_scale;
-        _status.Size=new Vector2(1020,35)*_scale;_status.HorizontalAlignment=HorizontalAlignment.Center;
+        var ribbon=DuelUi.Surface(_hud,6,true);ribbon.Position=_offset+new Vector2(335,354)*_scale;
+        ribbon.Size=new Vector2(1020,46)*_scale;
+        ribbon.Visible=view.LastDuel is not null;
+        _status=DuelUi.Text(Status(),20,Palette.Paper);_status.HorizontalAlignment=HorizontalAlignment.Center;
+        _status.VerticalAlignment=VerticalAlignment.Center;ribbon.AddChild(_status);
         _status.AddThemeColorOverride("font_shadow_color",Colors.Black);_status.AddThemeConstantOverride("shadow_offset_x",1);_status.AddThemeConstantOverride("shadow_offset_y",2);
-        _status.AddThemeFontSizeOverride("font_size",Math.Max(14,(int)(20*_scale)));_hud.AddChild(_status);
-        _controlsRect=new Rect2(_offset+new Vector2(1080,785)*_scale,new Vector2(340,155)*_scale);
+        _status.AddThemeFontSizeOverride("font_size",Math.Max(14,(int)(20*_scale)));
+        _controlsRect=new Rect2(_offset+new Vector2(1070,773)*_scale,new Vector2(390,165)*_scale);
         Control? inspectionParent=null;
-        _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",4);_hud.AddChild(_actions);
+        _actions=new VBoxContainer{Position=_controlsRect.Position,Size=_controlsRect.Size};_actions.AddThemeConstantOverride("separation",Math.Max(2,(int)(4*_scale)));_hud.AddChild(_actions);
         if(PresentationBusy){Text(_shownReveal?.Kind=="Replacement"?"Duelist replacement":"Revealing focused cards…");return;}
         if(view.LastDuel?.Result is {} result)
         {
@@ -191,7 +196,7 @@ public partial class DuelScreen : Control
         }
         else foreach(var option in Legal.Where(a=>a.Type is "acceptDuel" or "declineDuel" or "declineReaction" or "useAbility" or "overconfidentDraw"))
             if(view.LastDuel is not null)SubmitButton(option.Label,option.Command);
-        if(_selectedInspection is {} selected && _tiles.TryGetValue(selected,out var tile))Button("Inspect selected card",()=>Inspect(tile.Card),inspectionParent);
+        if(_selectedInspection is {} selected && _tiles.TryGetValue(selected,out var tile))Button(inspectionParent is null?"Inspect selected card":"Inspect",()=>Inspect(tile.Card),inspectionParent);
     }
     private string Status()
     {
@@ -200,16 +205,21 @@ public partial class DuelScreen : Control
             "AwaitingAccept"=>$"{v.Players[v.PriorityPlayerId].Name} · accept or refuse the challenge", "Focusing"=>$"{v.Players[v.PriorityPlayerId].Name} · Focus or Strike",
             "DuelistRefocus"=>$"{v.Players[v.PriorityPlayerId].Name} · Duelist: select a focus card and its replacement, or keep your focus", "OrderingEffects"=>$"{v.Players[v.PriorityPlayerId].Name} · choose the order of Focus Effects", _=>"" };
     }
-    private void Text(string text){var label=Palette.Wrapped(text,Math.Max(13,(int)(16*_scale)),Palette.Paper);_actions.AddChild(label);}
+    private void Text(string text){var label=DuelUi.Wrapped(text,Math.Max(13,(int)(16*_scale)),Palette.Paper);_actions.AddChild(label);}
     private Button Button(string text,Action pressed,Control? parent=null)
     {
-        var b=new Button{Text=text,CustomMinimumSize=new Vector2(0,Math.Max(26,32*_scale)),TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis,TooltipText=text};
-        b.AddThemeFontSizeOverride("font_size",Math.Max(13,(int)(17*_scale)));foreach(var state in new[]{"normal","hover","pressed","disabled","focus"})
-            b.AddThemeStyleboxOverride(state,Palette.Box(new Color(state=="disabled"?"252326":"17120f"),new Color(state=="disabled"?"5c5650":"ba9658"),4));
-        (parent??_actions).AddChild(b);b.Pressed+=()=>{if(!_submitted&&_commandCooldown<=0)pressed();};return b;
+        var primary=text is "Strike" or "Continue" or "Resolve in this order";
+        var buttonScale=_reading is null?_scale:1;
+        var b=DuelUi.Button(text,()=>{if(!_submitted&&_commandCooldown<=0)pressed();},primary,buttonScale,17);
+        b.CustomMinimumSize=new Vector2(0,Math.Max(25,34*buttonScale));
+        foreach(var state in new[]{"normal","hover","pressed","disabled"})
+        {
+            var style=(StyleBoxTexture)b.GetThemeStylebox(state);style.ContentMarginTop=style.ContentMarginBottom=4*buttonScale;
+        }
+        b.TooltipText=text;(parent??_actions).AddChild(b);return b;
     }
-    private void SubmitButton(string text,GameCommand? command,Control? parent=null)
-    {var b=Button(text,()=>Submit(command!),parent);b.Disabled=command is null||_submitted||_commandCooldown>0;}
+    private Button SubmitButton(string text,GameCommand? command,Control? parent=null)
+    {var b=Button(text,()=>Submit(command!),parent);b.Disabled=command is null||_submitted||_commandCooldown>0;return b;}
     private void Submit(GameCommand command)
     {
         if(_submitted||_commandCooldown>0||PresentationBusy||Snapshot?.View.Version!=command.ExpectedVersion)return;
@@ -217,28 +227,25 @@ public partial class DuelScreen : Control
         CommandRequested?.Invoke(command);
     }
     public void SubmissionFinished(){_submitted=false;RenderActions();}
-    private VBoxContainer Panel(string title)
+    private VBoxContainer Panel(string title,float height=620)
     {
-        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;
-        var panel=new PanelContainer{Position=Size/2-new Vector2(300,280),Size=new Vector2(600,560)};shade.AddChild(panel);
-        panel.AddThemeStyleboxOverride("panel",Palette.Box(new Color("16151b"),Palette.Gold,16));
-        var scroll=new ScrollContainer{HorizontalScrollMode=ScrollContainer.ScrollMode.Disabled};panel.AddChild(scroll);
-        var box=new VBoxContainer{SizeFlagsHorizontal=SizeFlags.ExpandFill};scroll.AddChild(box);box.AddChild(Palette.Text(title,25,Palette.Gold));return box;
+        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);
+        return DuelUi.Modal(shade,Size,new Vector2(690,height),title);
     }
     private void ChoicePanel(string title,ActionOption[] choices)
     {
-        var box=Panel(title);
+        var box=Panel(title,Math.Clamp(160+choices.Length*70,280,620));
         foreach(var a in choices)
         {
-            var row=new HBoxContainer();box.AddChild(row);SubmitButton(a.Label,a.Command,row);
+            var row=new HBoxContainer();box.AddChild(row);SubmitButton(a.Label,a.Command,row).SizeFlagsHorizontal=SizeFlags.ExpandFill;
             var card=Snapshot!.View.Players.SelectMany(p=>p.Discard).FirstOrDefault(c=>c.Id==a.CardId);
-            if(card is not null)Button("Inspect",()=>Inspect(card),row);
+            if(card is not null)Button("Inspect",()=>Inspect(card),row).AutowrapMode=TextServer.AutowrapMode.Off;
         }
         Button("Back",ClearReading,box);
     }
     private void ShowOrder()
     {
-        var box=Panel("Focus Effect order");
+        var box=Panel("Focus Effect order",Math.Min(620,230+_effectOrder.Length*54));
         var cards=Snapshot!.View.LastDuel!.Reveals.Last().Cards.ToDictionary(c=>c.Id);
         for(var i=0;i<_effectOrder.Length;i++)
         {var index=i;var id=_effectOrder[i];Button($"{i+1}. {Snapshot.View.Players[cards[id].OwnerId].Name} · {cards[id].Definition!.Name} · move earlier",()=>{if(index>0)(_effectOrder[index-1],_effectOrder[index])=(_effectOrder[index],_effectOrder[index-1]);ShowOrder();},box);}
@@ -248,21 +255,21 @@ public partial class DuelScreen : Control
     private void ShowConsequences(DuelRecord record)
     {
         var box=Panel("Duel outcome");var result=record.Result!;
-        if(result.Kind=="Resolved")box.AddChild(Palette.Wrapped($"{record.Challenger.Definition!.Name}: {result.ChallengerStat} {record.Stat} → {result.ChallengerTotal}\n{record.Challenged.Definition!.Name}: {result.ChallengedStat} {record.Stat} → {result.ChallengedTotal}",19));
-        foreach(var e in result.Consequences)box.AddChild(Palette.Wrapped(e.Message,17));
-        foreach(var p in result.Provinces.Where(p=>p.After!=p.Before))box.AddChild(Palette.Wrapped($"{Snapshot!.View.Players[p.PlayerId].Name} · province {p.Index+1}: {p.Before} → {p.After} strength",17));
-        foreach(var id in result.EffectOrder){var card=record.Reveals.Last().Cards.First(c=>c.Id==id);box.AddChild(Palette.Wrapped($"Focus Effect: {card.Definition!.Name}",17));}
-        box.AddChild(Palette.Wrapped($"Returns to {result.ReturnPhase} · {Snapshot!.View.Players[result.ReturnPriority].Name} has priority.",17));Button("Back",ClearReading,box);
+        if(result.Kind=="Resolved")box.AddChild(DuelUi.Wrapped($"{record.Challenger.Definition!.Name}: {result.ChallengerStat} {record.Stat} → {result.ChallengerTotal}\n{record.Challenged.Definition!.Name}: {result.ChallengedStat} {record.Stat} → {result.ChallengedTotal}",19));
+        foreach(var e in result.Consequences)box.AddChild(DuelUi.Wrapped(e.Message,17));
+        foreach(var p in result.Provinces.Where(p=>p.After!=p.Before))box.AddChild(DuelUi.Wrapped($"{Snapshot!.View.Players[p.PlayerId].Name} · province {p.Index+1}: {p.Before} → {p.After} strength",17));
+        foreach(var id in result.EffectOrder){var card=record.Reveals.Last().Cards.First(c=>c.Id==id);box.AddChild(DuelUi.Wrapped($"Focus Effect: {card.Definition!.Name}",17));}
+        box.AddChild(DuelUi.Wrapped($"Returns to {result.ReturnPhase} · {Snapshot!.View.Players[result.ReturnPriority].Name} has priority.",17));Button("Back",ClearReading,box);
     }
     private void Inspect(CardView card)
     {
         if(card.Definition is null)return;
-        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;
+        ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);
         var h=Math.Min(700,Size.Y*.78f);var tile=new CardTile(card with{Bowed=false},true,_=>ClearReading(),_=>{})
         {FaceHeight=h,Size=Vector2.One*(h+12),Position=Size/2-Vector2.One*(h+12)/2,ReducedMotion=true,ShowTokenRail=false,Material=CardPaper.Reading};shade.AddChild(tile);
         var close=Button("Close inspection",ClearReading,shade);close.Position=new Vector2(Size.X/2-100,Size.Y*.92f);close.Size=new Vector2(200,35);
     }
-    public void ClearReading(){if(_reading is null)return;_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;}
+    public void ClearReading(){if(_reading is null)return;_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);}
     public override void _Input(InputEvent e)
     {
         if(!IsVisibleInTree()||InputLocked)return;
