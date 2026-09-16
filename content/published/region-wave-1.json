@@ -1,0 +1,55 @@
+{
+  "Profile": "region-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4777",
+      "Name": "Low Market",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Bow this card, choose your performing Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to a minimum of 1.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4777.jpg",
+      "Keywords": [
+        "Market"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "low-market-equip"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9865",
+      "Name": "Fallow Lands",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "This province has +2 strength.\nReaction: After a Melee or Ranged Attack is targeted: Give it -2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9865.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "fallow-lands-reaction"
+      ],
+      "Effect": "fallow-lands"
+    }
+  ],
+  "Decks": []
+}

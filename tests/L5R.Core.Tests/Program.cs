@@ -156,7 +156,10 @@ var tests = new (string Name, Action Run)[]
     ("Protection (issue #212): a general action-effect negation-immunity status (Tamori Takeshi's 'effects of actions the target performs will not be negated'), checked at the point a negation would otherwise apply -- the same 'still legal to play, its own effect just becomes a no-op' shape StalwartNegatesBow already uses -- against both existing negation points in the engine (Effortless Counterattack's Additional-Action negation; the Attack-strength-negation Reaction), generalizing PendingAttack's own performer-tracking (an attached Weapon resolves to its wielder) along the way so every Attack, not just the two cards that needed it before, records who actually performed it. Cleared at FinishTurn, the same as a Turn-duration GrantedKeyword, and Tamori Takeshi's own real Open ability grants it", ProtectionPrimitive),
     ("Issue #216: Brash (the Defender may draw a card, once per Brash card assigned to attack); Force redirection (Togashi Noboru -- a targeted enemy Personality's own Force, never its Followers', counts toward Noboru's controller's army instead, live-rechecked at resolution against 'while you have at least one unit in your current army'); the new 'after a bow resolves' Reaction trigger family (Togashi Hizumi -- location-scoped on the trigger, negating that same Personality's own next straightening, which Straighten() now correctly clears once consumed rather than blocking every attempt the rest of the turn; Tamori Ruya -- actor-scoped on the trigger instead, bowing an unrelated Personality at her own location, Home or a battlefield); Tamori Yayu (a bow-or-destroy dual-cost Ranged Attack restricted to his own attached Spells); Mirumoto Katagi and Tamori Shinji (single-card Gold discounts -- a Non-Unique Weapon attaching to Katagi, and Shinji's own Reserve-while-Defender recruit)", BrashForceRedirectAndBowReactions),
     ("Overconfident (issue #223): each other player may optionally draw a card after an Overconfident card enters OR leaves play -- a queue (PendingOverconfidentDraws) populated from the single MarkDead choke point (leaving play; 'leaves' means dying while actually InPlay, excluding both a province/deck discard via DestroyProvince and MakeDead applied to a card already sitting in a discard pile) and from Purchase/RecruitReserve (entering play), drained at every point the engine would otherwise hand back priority (PassReaction's own window-close, Purchase, RecruitReserve, ExecuteAbilityEffects, FinishBattleResolution via the new FinishBattleReturnHomeAndTransition split, ResolveDuel, OrderSeppuku), including a tie battle queuing separate sequential offers for both sides. Kitsuki Minori's live Keyword() suppression (no Overconfident at all, in or out of play, while the other player is Lion Clan); Asahina Tsugio/Asako Kijo's MaxHandSize (raises only an opponent's own hand-size threshold, never the controller's own); Bayushi Mugoshi's own entering-play Reaction chaining into the Overconfident offer once its own window closes", OverconfidentPrimitive),
-    ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect keeps firing every subsequent Events Phase, on either player's turn, with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay)
+    ("Event wave 1: Suspicions, the first Event resolved through the Events-Phase dispatch (ResolveEvent) -- revealed, removed from its province and refilled immediately, both players lose 1 Honor (revealing player first) the same turn it is revealed; the ongoing effect keeps firing every subsequent Events Phase, on either player's turn, with the card never leaving the new public Zone.EventInPlay/PlayerView.EventsInPlay for the discard pile", SuspicionsEventInPlay),
+    ("Region primitive: a Region attaches to a PROVINCE (the new Zone.Region/ProvinceState.RegionId), not to a card; a second Region revealed at an already-regioned province is discarded instead of replacing the first; destroying a province discards whichever Region was attached to it and clears the pointer", RegionAttachmentPrimitive),
+    ("Region wave 1: Fallow Lands -- a static province-strength bonus live-recomputed from the attached Region (EffectiveProvinceStrength), applied immediately without respect to presence; reveal/attach/refill mechanics; its Reaction weakens a Melee/Ranged Attack by 2, usable the same turn it enters play, gated on the Attack actually being at Fallow Lands' own province with its controller's own presence there (a Region never satisfies presence itself)", FallowLandsRegion),
+    ("Region wave 1: Low Market -- an Open ability (not the ordinary Limited-only Equip() command, not a PlayerAbility like Equip (Battle)) that bows itself as its entire cost/limiter, Equips a targeted Item/Follower/Spell from hand to a chosen Personality at a genuine 2-Gold discount floored at a minimum of 1", LowMarketEquip)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -390,6 +393,145 @@ static void SuspicionsEventInPlay()
     Equal(e.State.Players[0].Honor,honor0-2);
     Equal(e.State.Players[1].Honor,honor1-2);
     Equal(e.State.Cards[card.Id].Zone,Zone.EventInPlay);
+}
+static void RegionAttachmentPrimitive()
+{
+    // A second Region revealed at an already-regioned province is discarded instead of replacing it;
+    // the existing Region stays untouched and the province still refills immediately.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var first=Add(s,"oracle-l5r-4777",1,Zone.Region,province:0);
+        s.Players[1].Provinces[0].RegionId=first.Id;
+        var second=Add(s,"oracle-l5r-9865",1,Zone.Province,province:0);
+        second.FaceUp=false;
+        s.Players[1].Provinces[0].CardId=second.Id;
+        var e=MatchEngine.FromTestState(s);
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Cards[second.Id].Zone,Zone.DynastyDiscard,"A second Region revealed at an already-regioned province is discarded, not attached");
+        Equal(e.State.Players[1].Provinces[0].RegionId,first.Id,"The existing Region stays attached, untouched");
+        Check(e.State.Players[1].Provinces[0].CardId!=second.Id,"Province still refilled face down immediately");
+        Check(!e.State.Cards[e.State.Players[1].Provinces[0].CardId!].FaceUp);
+    }
+    // A Region attaches to the province itself, so it cannot outlive it: destroying the province
+    // discards whichever Region was attached, and clears the province's own pointer to it.
+    {
+        var bs=Battle(attackForce:10,defenseForce:0,provinceStrength:1).State;
+        var region=Add(bs,"oracle-l5r-4777",1,Zone.Region,province:0);
+        bs.Players[1].Provinces[0].RegionId=region.Id;
+        var be=MatchEngine.FromTestState(bs);
+        Resolve(be);
+        Check(be.State.Players[1].Provinces[0].Destroyed,"Province destroyed as usual (10 Force vs. 1 strength)");
+        Equal(be.State.Cards[region.Id].Zone,Zone.DynastyDiscard,"Region discarded along with its destroyed province");
+        Check(be.State.Players[1].Provinces[0].RegionId is null,"Province's own pointer to it is cleared");
+    }
+}
+static void FallowLandsRegion()
+{
+    // Static +2 province strength (core rules: applied immediately, without respect to presence) is
+    // live-recomputed from the attached Region, not a one-shot mutation -- an un-boosted 6-strength
+    // province falls to a Force-8 attack; the same setup with Fallow Lands attached does not.
+    {
+        var baseline=Battle(attackForce:8,defenseForce:0,provinceStrength:6);
+        Resolve(baseline);
+        Check(baseline.State.Players[1].Provinces[0].Destroyed,"Baseline: Force 8 destroys an un-boosted 6-strength province");
+    }
+    {
+        var s=Battle(attackForce:8,defenseForce:0,provinceStrength:6).State;
+        var fallowLands=Add(s,"oracle-l5r-9865",1,Zone.Region,province:0);
+        s.Players[1].Provinces[0].RegionId=fallowLands.Id;
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[1].Provinces[0].Strength,8,"The view exposes EFFECTIVE strength (6 printed + 2 from Fallow Lands), not the raw field");
+        Resolve(e);
+        Check(!e.State.Players[1].Provinces[0].Destroyed,"Fallow Lands' +2 raises the province to 8, so a Force-8 attack no longer exceeds it");
+    }
+    // Reveal/attach mechanics: removed from its province, attached, and the province refills face
+    // down immediately -- same shape as an Event, but it never resolves-and-discards afterward.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var region=Add(s,"oracle-l5r-9865",1,Zone.Province,province:0);
+        region.FaceUp=false;
+        s.Players[1].Provinces[0].CardId=region.Id;
+        var e=MatchEngine.FromTestState(s);
+        SkipToDynasty(e); Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Cards[region.Id].Zone,Zone.Region);
+        Equal(e.State.Players[1].Provinces[0].RegionId,region.Id);
+        Equal(e.State.Cards[region.Id].ProvinceIndex,0);
+        Check(e.State.Players[1].Provinces[0].CardId!=region.Id,"Province refilled face down immediately");
+        Check(!e.State.Cards[e.State.Players[1].Provinces[0].CardId!].FaceUp);
+    }
+    // The Reaction is usable the very turn Fallow Lands enters play, weakening an Attack at its own
+    // province while its controller has presence there.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // Attacker's own presence (Carpenter Castle's requirement)
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); enemy.Modifiers=[new("test-fixture","test-fixture","Force",1)]; // Force 4: defender's own presence too
+        var fallowLands=Add(s,"oracle-l5r-9865",1,Zone.Region,province:0);
+        s.Players[1].Provinces[0].RegionId=fallowLands.Id;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Equal(e.State.PendingAttack?.Strength,5);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:fallowLands.Id,AbilityId:"fallow-lands-reaction"));
+        Equal(e.State.PendingAttack?.Strength,3);
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"Force 4 vs. reduced strength 3 no longer destroys -- worked the very turn Fallow Lands entered play");
+    }
+    // Rejected when its own province is not the one under attack, even though the window still opens
+    // (a Reaction-eligible card merely existing in play is enough for that, regardless of whether its
+    // own Require would actually pass).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var fallowLands=Add(s,"oracle-l5r-9865",1,Zone.Region,province:1); // attached to a DIFFERENT province
+        s.Players[1].Provinces[1].RegionId=fallowLands.Id;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:fallowLands.Id,AbilityId:"fallow-lands-reaction"));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Check(e.State.Cards[enemy.Id].Zone==Zone.Dead,"Attack resolved at full strength -- Fallow Lands never reacted");
+    }
+}
+static void LowMarketEquip()
+{
+    // "Attach it to him, paying 2 less Gold" -- a genuine reduction (4 -> 2), not a no-op; bowing
+    // itself is the entire cost/limiter (no separate UsageKey), so a second use this turn is rejected.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Action; // CreateEconomyScenario defaults to Phase.Dynasty; Open needs Action.
+        var lowMarket=Add(s,"oracle-l5r-4777",0,Zone.Region,province:0);
+        s.Players[0].Provinces[0].RegionId=lowMarket.Id;
+        var performer=Add(s,"training-crane-clan-samurai",0,Zone.Home); // Crane Clan keyword, Personal Honor 3
+        var attachment=Add(s,"training-follower-crane-guard",0,Zone.Hand); // GoldCost 4, requires Crane Clan + Honor >= 2
+        var second=Add(s,"training-follower-crane-guard",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,2).FirstOrDefault();
+        Check(payment is not null,"Enough Gold to cover the discounted cost of 2 (4 - 2)");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:lowMarket.Id,SourceIds:payment!.SourceIds,TargetId:attachment.Id,AbilityId:"low-market-equip",PerformerId:performer.Id));
+        Check(e.State.Cards[lowMarket.Id].Bowed,"Bowing itself is the cost");
+        Equal(e.State.Cards[attachment.Id].Zone,Zone.Attached);
+        Equal(e.State.Cards[attachment.Id].AttachedTo,performer.Id);
+        Check(!e.State.Players[0].Hand.Contains(attachment.Id));
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:lowMarket.Id,TargetId:second.Id,AbilityId:"low-market-equip",PerformerId:performer.Id));
+    }
+    // "... to a minimum of 1": a cheap attachment's discount floors at 1, never 0 or negative.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Action;
+        var lowMarket=Add(s,"oracle-l5r-4777",0,Zone.Region,province:0);
+        s.Players[0].Provinces[0].RegionId=lowMarket.Id;
+        var performer=Add(s,"training-crane-samurai",0,Zone.Home);
+        var item=Add(s,"training-item",0,Zone.Hand); // GoldCost 2 -- 2-2=0, floored to 1
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,1).FirstOrDefault();
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:lowMarket.Id,SourceIds:payment!.SourceIds,TargetId:item.Id,AbilityId:"low-market-equip",PerformerId:performer.Id));
+        Equal(e.State.Cards[item.Id].Zone,Zone.Attached);
+    }
 }
 static void ChooseStraightenDecline()
 {
@@ -649,7 +791,7 @@ static void Detached()
 {
     var e=MatchEngine.CreateStarterMatch(); var state=e.State; state.Players[0].Honor=200; state.Cards.Clear();
     Equal(e.State.Players[0].Honor,8); Check(e.State.Cards.Count>0);
-    var view=e.GetView(0); view.Players[0].Provinces[0]=new(0,0,true,null); Check(!e.GetView(0).Players[0].Provinces[0].Destroyed);
+    var view=e.GetView(0); view.Players[0].Provinces[0]=new(0,0,true,null,null); Check(!e.GetView(0).Players[0].Provinces[0].Destroyed);
 }
 static void EmptyDecks()
 {

@@ -778,7 +778,7 @@ public sealed partial class MatchEngine
             var destroyedDefenders=DestroyUnits(d);
             if(!RehonorWinners(a)) GainHonor(attacker,destroyedDefenders*2,"Battle victory");
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
-            var destroyedProvince=af>df+province.Strength;
+            var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
             // Ring recruitment (issue #194): checked with this resolution's own facts, before the
@@ -1363,6 +1363,9 @@ public sealed partial class MatchEngine
         province.Destroyed=true;
         if(province.CardId is string id) { var card=Card(id); card.Zone=Zone.DynastyDiscard; card.FaceUp=true; card.ProvinceIndex=null; }
         province.CardId=null;
+        // A Region attaches to the province itself -- it cannot outlive the province it is attached to.
+        if(province.RegionId is string regionId) { var region=Card(regionId); region.Zone=Zone.DynastyDiscard; region.ProvinceIndex=null; }
+        province.RegionId=null;
         Emit("provinceDestroyed",$"{Player(owner).Name}'s province {province.Index+1} was destroyed.",owner);
         if(Player(owner).Provinces.All(p=>p.Destroyed)) Win(1-owner,"Military victory");
     }
@@ -1482,6 +1485,7 @@ public sealed partial class MatchEngine
                 card.FaceUp=true;
                 Emit("provinceRevealed",$"{player.Name} revealed {Definition(card).Name} in province {province.Index+1}.",player.Id,card.Id);
                 if(Definition(card).Type==CardType.Event) ResolveEvent(player,province,card);
+                else if(Definition(card).Type==CardType.Region) ResolveRegion(player,province,card);
             }
         }
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
@@ -1511,6 +1515,41 @@ public sealed partial class MatchEngine
         }
         Refill(player,province);
     }
+    // A Region (core rules Glossary): attaches to the province it was revealed in -- unless that
+    // province already has a Region attached, in which case (like any Region that fails to attach for
+    // any reason) it is simply discarded -- then the province refills immediately, same as an Event.
+    // Unlike Event, a Region that DOES attach never moves on from Zone.Region on its own; there is no
+    // "resolve once, then discard" step, since its whole printed effect (a standing trait, a Reaction,
+    // or both) lives for as long as it stays attached.
+    private void ResolveRegion(PlayerState player,ProvinceState province,CardInstance card)
+    {
+        province.CardId=null; card.ProvinceIndex=null;
+        if(province.RegionId is not null)
+        {
+            card.Zone=Zone.DynastyDiscard;
+            Emit("regionDiscarded",$"{Definition(card).Name} was discarded: {player.Name}'s province {province.Index+1} already has a Region attached.",player.Id,card.Id);
+        }
+        else
+        {
+            card.Zone=Zone.Region; card.ProvinceIndex=province.Index; province.RegionId=card.Id;
+            Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
+        }
+        Refill(player,province);
+    }
+    // Fallow Lands' shape (the first Region carrying a static province-strength bonus): live-
+    // recomputed from whichever Region is currently attached, the same "read live off Attachments()"
+    // approach PersonalityForce uses for an Item's own Force convey to its wielder -- NOT a one-shot
+    // mutation the way Ring of Earth's raise/lower or a Dueling win bonus apply directly to
+    // province.Strength, so it automatically reverses the moment the Region is no longer attached
+    // (e.g. its province is destroyed -- see DestroyProvince), with no separate cleanup needed here.
+    // Every read of a province's actual strength (battle resolution, the client view, False Ring of
+    // Water's own threshold check) must go through this, never the raw province.Strength field alone.
+    private static readonly Dictionary<string,int> RegionStrengthBonus = new(StringComparer.Ordinal)
+    {
+        ["fallow-lands"] = 2,
+    };
+    private int EffectiveProvinceStrength(ProvinceState province) =>
+        province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0);
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
     // approach GrantedKeyword.Duration "Permanent" uses for a keyword grant -- a card sitting in

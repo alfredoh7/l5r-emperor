@@ -591,12 +591,33 @@ public static class AbilityCatalog
         // "for not accepting the teachings of Fudo" is flavor folded into the choice, not a separate
         // condition.
         ["mugoshi-slander"] = new("Reaction", "Political: after Mugoshi enters play, choose a player: he loses 1 Honor", "player", Trigger: "own-enters-play"),
+        // Low Market (the first Region, Embers of War): "Open: Bow this card, choose your performing
+        // Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to
+        // a minimum of 1." Not PlayerAbility -- it has a real source card, unlike Equip (Battle) --
+        // and not the ordinary Equip() command (which is hardcoded Limited-on-your-turn and has no
+        // per-card discount hook), so it's its own Open ability with its own Target category
+        // ("attachment-in-hand", broader than Equip (Battle)'s own "spell-or-reserve-in-hand": any
+        // Item/Follower/Spell, mirroring the ordinary Equip() command's own type filter). Bowing
+        // itself is the entire cost/limiter -- the shared "abilities on bowed cards cannot be used"
+        // rule already makes this usable at most once between straightens, no separate UsageKey
+        // needed, same convention as e.g. "hired-legion-draw".
+        ["low-market-equip"] = new("Open", "Open: Bow this card, choose your performing Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to a minimum of 1", "attachment-in-hand", Performer: "own-personality"),
+        // Fallow Lands (the first Region with a static trait, The Shadow's Embrace): "This province
+        // has +2 strength" (EffectiveProvinceStrength, live off ProvinceState.RegionId -- applies
+        // immediately on attach, without respect to presence, per its own printed wording) plus
+        // "Reaction: After a Melee or Ranged Attack is targeted: Give it -2 strength" -- Khol
+        // Regulars' own shape (case "khol-regulars-reaction" negates a Ranged Attack by +2), but for
+        // either Attack kind, and gated on its own province (not a battlefield-zone card's ordinary
+        // AtBattle()) actually being the one under attack, with its controller still having Personality
+        // presence there -- see its own Require below (id == "fallow-lands-reaction"). Usable the same
+        // turn Fallow Lands enters play: nothing about entry timing blocks a same-turn Reaction here.
+        ["fallow-lands-reaction"] = new("Reaction", "If this Region's own province is under attack and its controller has presence there, after a Melee or Ranged Attack is targeted: -2 strength", "none", Trigger: "before-attack-resolves"),
     });
 }
 
 public sealed partial class MatchEngine
 {
-    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached;
+    private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached or Zone.Region;
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
@@ -1179,7 +1200,7 @@ public sealed partial class MatchEngine
         // usable any time it holds, like an ordinary Battle ability. The current battlefield's own
         // province always belongs to the Defender.
         if (id == "false-ring-of-water-recruit")
-            Require(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength >= 11,
+            Require(EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)) >= 11,
                 "The current battlefield's Province Strength must be 11 or greater.");
         if (id == "kano-destroy-token") Require(source!.Tokens.Any(t => t.Type == "Master"), "Akodo Kano needs a Master token.");
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
@@ -1192,6 +1213,17 @@ public sealed partial class MatchEngine
         // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
         // with every other attack-boosting Reaction.
         if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
+        // Fallow Lands: unlike an ordinary Zone.Battlefield/Attached Reaction card, AtBattle() does not
+        // apply -- it never moves, it just sits at its own home province forever. "The province to which
+        // it is attached" is under attack only when the CURRENT active player is someone else (their own
+        // opponent, i.e. the attacker) attacking that exact province index of Fallow Lands' own
+        // controller -- province indices are not globally unique across players, so both halves of this
+        // check are needed. "The controlling player has presence" reuses Army() (a Region itself never
+        // satisfies presence, since it never sits in Zone.Battlefield).
+        if (id == "fallow-lands-reaction")
+            Require(_state.CurrentBattleProvince is not null && _state.ActivePlayerId != source!.OwnerId && _state.CurrentBattleProvince == source.ProvinceIndex
+                && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
+                "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
@@ -1363,6 +1395,20 @@ public sealed partial class MatchEngine
                     // Unique/Singular (issue #202): Equip (Battle)'s own Spell/Reserve attach is a
                     // third entry-into-play path (alongside Purchase and the ordinary Equip()) that
                     // needed this check.
+                    Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
+                        $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
+                }
+                // Low Market's own Target category: broader than "spell-or-reserve-in-hand" above (any
+                // Item/Follower/Spell, matching the ordinary Equip() command's own type filter), reusing
+                // the same shared attach-legality helpers Equip() itself uses (AttachmentLegalTarget
+                // already folds in AttachRequiresKeyword/Excludes/Name AND a Follower's Honor
+                // Requirement; AttachmentAllowed is the Armor/Weapon-cap check).
+                else if (ability.Target == "attachment-in-hand")
+                {
+                    Require(target.OwnerId == player.Id && target.Zone == Zone.Hand && type is CardType.Item or CardType.Follower or CardType.Spell,
+                        "Choose an Item, Follower, or Spell from your hand.");
+                    Require(AttachmentLegalTarget(Definition(target), Card(command.PerformerId!)), "This attachment will not attach to that Personality.");
+                    Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
                     Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
                         $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
                 }
@@ -1538,6 +1584,9 @@ public sealed partial class MatchEngine
         // attachment, not a Strategy's own GoldCost.
         var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
             : ability.Target == "spell-or-reserve-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
+            // Low Market: "paying 2 less Gold, to a minimum of 1" -- its own printed discount on the
+            // targeted attachment's own GoldCost, the same per-candidate-cost shape as Equip (Battle).
+            : ability.Target == "attachment-in-hand" && command.TargetId is not null ? Math.Max(1, Definition(Card(command.TargetId)).GoldCost - 2)
             // Singh Remnants' shape: attaching itself, paying all costs -- its own GoldCost, already
             // separately validated above against the just-entered Personality's own restrictions.
             : ability.Trigger == "any-personality-enters-play" ? Definition(source!).GoldCost
@@ -1781,6 +1830,20 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
+            case "fallow-lands-reaction": _state.PendingAttack!.Strength -= 2; break;
+            case "low-market-equip":
+            {
+                source!.Bowed = true;
+                var performer = Card(command.PerformerId!);
+                var attachment = target!;
+                Pay(player.Id, attachment, Math.Max(1, Definition(attachment).GoldCost - 2), command.SourceIds);
+                player.Hand.Remove(attachment.Id);
+                attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
+                if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
+                Emit("equipped", $"{Definition(attachment).Name} attached to {Definition(performer).Name} via Low Market.", player.Id, attachment.Id);
+                if (OpenEntryReactionWindow(player.Id, attachment, 1 - player.Id)) return;
+                break;
+            }
             case "cavalry-flankers-attack": case "murderous-thieves-attack":
                 source!.Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -2489,16 +2552,22 @@ public sealed partial class MatchEngine
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
                 string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
+                    // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
+                    // Spell, matching the ordinary Equip() command's own type filter).
+                    "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
                     "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
                 {
-                    // Equip (Battle)'s cost is the targeted Spell/Reserve card's own GoldCost, not a
-                    // fixed per-performer cost -- each candidate needs its own payment recomputed.
+                    // Equip (Battle)/Low Market's cost is the targeted attachment's own (possibly
+                    // discounted) GoldCost, not a fixed per-performer cost -- each candidate needs its
+                    // own payment recomputed.
                     var command = ability.Target == "spell-or-reserve-in-hand" && target is not null
                         ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
+                        : ability.Target == "attachment-in-hand" && target is not null
+                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(1, Definition(Card(target)).GoldCost - 2)).FirstOrDefault()?.SourceIds }
                         : prototype with { TargetId = target };
                     try { ValidateAbility(command); legal.Add(command); }
                     catch (RuleViolation e) { error ??= e.Message; }
