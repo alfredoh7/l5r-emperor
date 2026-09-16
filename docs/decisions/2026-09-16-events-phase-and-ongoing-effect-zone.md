@@ -42,6 +42,19 @@ not the ordinary discard path. Nothing in the engine implements this yet — rec
 re-derived (or re-specified differently) whenever a card actually forces it, the same discipline as the
 [Unique/Singular control-transfer decision](2026-09-12-unique-singular-control-transfer.md).
 
+**A third design note, recorded but not implemented (no card needs it yet):** some Events' printed
+text opens with an action-style "Limited:" precursor — the same prefix ordinary Limited-timing
+abilities use elsewhere in this engine (`AbilityDefinition.Timing`, gated in `ExecuteAbilityEffects`).
+On an Event, that precursor is decorative template text only: the Event still resolves automatically
+and unconditionally when revealed during the Events Phase, exactly like every other Event (through
+`ResolveEvent`/`ResolveOngoingEvents`), never as a player-activated `Timing:"Limited"` ability the way
+a real `AbilityCatalog` entry would be. When such a card is eventually wired, its own dispatch case in
+`ResolveEvent`'s switch should simply ignore the "Limited:" precursor (no activation command, no
+once-per-turn gate, no `AbilityCatalog` entry at all) rather than route it through the Limited-ability
+machinery. Its `CardDefinition.Text` should still transcribe the printed "Limited:" wording verbatim,
+matching every other card's convention of keeping scanned text as-is — only the *runtime* behavior
+ignores it, not the displayed card text.
+
 **Reason and evidence:** User spec (2026-09-16), on Suspicions specifically: "Events are cards that
 resolve when they are revealed during the Events phase and are then discarded. Some events have an
 effect that is recurring or permanent however, unless the event says, 'place this card in play' it is
@@ -54,6 +67,10 @@ states that the event should be reshuffled into the Dynasty deck (another event 
 an ongoing effect that is not ended or negated, create a copy of the card and place it in the dynasty
 deck. If anything ends the effect from that point forward, remove the Event that is in the play area
 from the game."
+
+User spec (2026-09-16), on the "Limited:" precursor generally: "Some events read like an action card
+and have 'Limited:' to start them. These events resolve as normal during the events phase and the
+'Limited:' precursors is ignored."
 
 No Event/ongoing-effect/in-play-zone infrastructure of any kind existed before this — `CardType.Event`
 and `Phase.Events` were both pre-built placeholders (issue #10) with an explicit comment marking
@@ -71,10 +88,13 @@ UI-lane work, flagged rather than built here per the collaboration split.
 `MatchEngine.cs` (`EventsPhase`, `ResolveEvent`, `ResolveOngoingEvents`), `MatchQueries.cs` (`GetView`),
 `PublishedContent.cs`/`CardCatalog.cs`/`L5R.Core.csproj` (`EventWave1`), new
 `tools/content/package_event_wave_1.py`. Future reshuffle-copy work (not yet needed): wherever a card's
-own "reshuffle this Event into the Dynasty deck" text is eventually wired.
+own "reshuffle this Event into the Dynasty deck" text is eventually wired. Future "Limited:"-prefixed
+Event work (not yet needed): the new card's own case inside `ResolveEvent`'s switch, plus whichever
+`package_*.py` wave script packages it (Text transcribed verbatim; no `Abilities`/`AbilityCatalog`
+entry).
 
 **Issue:** https://github.com/alfredoh7/l5r-emperor/issues/241
 
 **Status:** Accepted and implemented for Suspicions itself (the dispatch, the zone, the ongoing-effect
-recheck). The reshuffle-copy design note is accepted but not implemented — no card exists yet that
-needs it.
+recheck). The reshuffle-copy and "Limited:"-precursor design notes are both accepted but not
+implemented — no card exists yet that needs either.
