@@ -78,6 +78,7 @@ public partial class DuelScreen : Control
     {
         if(_stage is null)return;
         HideCardHover();
+        ClearStory();
         var size=GetViewportRect().Size;
         _stage.Resize(size);_scale=_stage.ContentScale;_offset=_stage.ContentOffset;
         var density=_scale*DuelCinematicStage.Density;
@@ -107,7 +108,9 @@ public partial class DuelScreen : Control
     private IEnumerable<ActionOption> Legal=>Snapshot?.Actions.Where(a=>a.Enabled&&a.Command is not null)??[];
     private void RenderActions()
     {
+        if(!CinematicBusy)ClearStory();
         RenderActionsCore();RenderGuidance();
+        if(!PresentationBusy && _reading is null && Snapshot?.View.PendingDuel?.Stage is "AwaitingAccept" or "Reaction")ShowStakes(true);
     }
     private void RenderActionsCore()
     {
@@ -211,7 +214,7 @@ public partial class DuelScreen : Control
     public void SubmissionFinished(){_submitted=false;RenderActions();}
     private VBoxContainer Panel(string title,float height=620)
     {
-        HideCardHover();ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);RenderGuidance();
+        HideCardHover();ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.68f),Size=Size,MouseFilter=MouseFilterEnum.Stop};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);_hud.ZIndex=60;_cinemaLayer.Hide();RenderGuidance();
         return DuelUi.Modal(shade,Size,new Vector2(690,height),title);
     }
     private void ChoicePanel(string title,ActionOption[] choices)
@@ -227,10 +230,21 @@ public partial class DuelScreen : Control
     }
     private void ShowOrder()
     {
-        var box=Panel("Focus Effect order",Math.Min(620,230+_effectOrder.Length*54));
+        var box=Panel("Focus Effect order",690);
+        box.AddChild(DuelUi.Wrapped("Move a card earlier, then resolve the complete order.",18,Palette.PaperDim));
         var cards=Snapshot!.View.LastDuel!.Reveals.Last().Cards.ToDictionary(c=>c.Id);
+        var grid=new GridContainer{Columns=Math.Clamp(_effectOrder.Length,1,3),SizeFlagsHorizontal=SizeFlags.ExpandFill};
+        grid.AddThemeConstantOverride("h_separation",18);box.AddChild(grid);
         for(var i=0;i<_effectOrder.Length;i++)
-        {var index=i;var id=_effectOrder[i];Button($"{i+1}. {Snapshot.View.Players[cards[id].OwnerId].Name} · {cards[id].Definition!.Name} · move earlier",()=>{if(index>0)(_effectOrder[index-1],_effectOrder[index])=(_effectOrder[index],_effectOrder[index-1]);ShowOrder();},box);}
+        {
+            var index=i;var card=cards[_effectOrder[i]];
+            var column=new VBoxContainer{SizeFlagsHorizontal=SizeFlags.ExpandFill};column.AddThemeConstantOverride("separation",8);grid.AddChild(column);
+            var face=new CardTile(card with {Bowed=false},true,Inspect,_=>{}){CustomMinimumSize=new Vector2(185,205),FaceHeight=190,ShowTokenRail=false,ReducedMotion=true,Material=CardPaper.Reading};column.AddChild(face);
+            column.AddChild(DuelUi.Wrapped(card.Definition!.Name,19));
+            column.AddChild(DuelUi.Text(Snapshot.View.Players[card.OwnerId].Name,16,Palette.PaperDim));
+            var button=Button($"{i+1}. Move earlier",()=>{if(index>0)(_effectOrder[index-1],_effectOrder[index])=(_effectOrder[index],_effectOrder[index-1]);ShowOrder();},column);
+            button.Disabled=index==0;
+        }
         var action=Legal.Single(a=>a.Type=="orderDuelFocusEffects").Command!;
         SubmitButton("Resolve in this order",action with{CardIds=_effectOrder.ToArray()},box);Button("Back",ClearReading,box);
     }
@@ -238,7 +252,15 @@ public partial class DuelScreen : Control
     {
         var box=RecapPanel(out var actions);var result=record.Result!;
         if(result.Kind=="Resolved")box.AddChild(DuelUi.Wrapped($"{record.Challenger.Definition!.Name}: {result.ChallengerStat} {record.Stat} → {result.ChallengerTotal}\n{record.Challenged.Definition!.Name}: {result.ChallengedStat} {record.Stat} → {result.ChallengedTotal}",19));
-        foreach(var e in result.Consequences)box.AddChild(DuelUi.Wrapped(e.Message,17));
+        if(record.Beats is {Length:>0} beats)
+            foreach(var beat in beats)
+            {
+                var title=beat.Kind=="FocusEffect"?"Focus Effect":beat.Kind=="Aftermath"?"After the duel":"Consequence";
+                box.AddChild(DuelUi.Wrapped($"{title} · {beat.Source?.Definition?.Name??beat.SourceLabel??"Duel"}",21));
+                foreach(var line in beat.Lines)box.AddChild(DuelUi.Wrapped(line,18));
+                if(beat.Source is {} source)Button($"Inspect {source.Definition!.Name}",()=>Inspect(source),box);
+            }
+        else foreach(var e in result.Consequences)box.AddChild(DuelUi.Wrapped(e.Message,17));
         foreach(var p in result.Provinces.Where(p=>p.After!=p.Before))box.AddChild(DuelUi.Wrapped($"{Snapshot!.View.Players[p.PlayerId].Name} · province {p.Index+1}: {p.Before} → {p.After} strength",17));
         foreach(var id in result.EffectOrder){var card=record.Reveals.Last().Cards.First(c=>c.Id==id);box.AddChild(DuelUi.Wrapped($"Focus Effect: {card.Definition!.Name}",17));}
         box.AddChild(DuelUi.Wrapped($"Returns to {result.ReturnPhase} · {Snapshot!.View.Players[result.ReturnPriority].Name} has priority.",17));
@@ -248,7 +270,7 @@ public partial class DuelScreen : Control
     private void Inspect(CardView card)
     {
         if(card.Definition is null)return;
-        HideCardHover();ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);RenderGuidance();
+        HideCardHover();ClearReading();var shade=new ColorRect{Color=new Color(0,0,0,.65f),Size=Size};_hud.AddChild(shade);_reading=shade;ReadingChanged?.Invoke(true);_hud.ZIndex=60;_cinemaLayer.Hide();RenderGuidance();
         // Shared full-face + rules component, with the approved lacquer shell.
         var preview=CardPreview.Create(card,InspectionContext(card),null,Math.Min(Size.Y/1080f,Math.Min((Size.X-48)/750f,(Size.Y-130)/558f)));
         DuelUi.SkinInspection(preview);_pinnedInspectionId=card.Id;_selectedInspection=card.Id;
@@ -259,11 +281,11 @@ public partial class DuelScreen : Control
 
     }
     private static CardTile? FindFace(Node node)=>node as CardTile ?? node.GetChildren().Select(FindFace).FirstOrDefault(c=>c is not null);
-    public void ClearReading(){_pinnedInspectionId=null;_inspectionFace=null;if(_reading is null)return;_hud.GetNodeOrNull<Control>("DuelResultFooter")?.Show();_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);RenderGuidance();}
+    public void ClearReading(){_pinnedInspectionId=null;_inspectionFace=null;if(_reading is null)return;_hud.GetNodeOrNull<Control>("DuelResultFooter")?.Show();_hud.RemoveChild(_reading);_reading.QueueFree();_reading=null;ReadingChanged?.Invoke(false);_hud.ZIndex=0;_cinemaLayer.Visible=CinematicBusy;RenderGuidance();}
     public override void _Input(InputEvent e)
     {
         if(!IsVisibleInTree()||InputLocked)return;
-        if(CinematicBusy)
+        if(CinematicBusy&&_reading is null)
         {
             if(e is InputEventKey{Pressed:true,Echo:false,Keycode:Key.Space or Key.Escape}){SkipCinematic();GetViewport().SetInputAsHandled();}
             return;
@@ -309,6 +331,7 @@ public partial class DuelScreen : Control
         if(_commandCooldown>0){_commandCooldown-=delta;if(_commandCooldown<=0){RenderLanding();RenderActions();}}
         _stage.ReducedMotion=ReducedMotion;_stage.Advance(delta);AdvanceCinemaSound(delta);
         if(CinematicBusy){AdvanceCinema(delta);return;}
+        if(InputLocked||_reading is not null)return;
         if(_cleanupClock>0){_cleanupClock-=delta;if(_cleanupClock<=0){RenderCards(false);RenderActions();}}
         if(_revealClock>0){_revealClock-=delta;if(_revealClock<=0){RenderCards();RenderActions();}}
         if(_revealClock<=0&&_revealQueue.TryDequeue(out var reveal))
@@ -317,5 +340,6 @@ public partial class DuelScreen : Control
         {
             StartEnding();
         }
+        else if(!PresentationBusy && _aftermathPlayed)StartAftermathStory();
     }
 }

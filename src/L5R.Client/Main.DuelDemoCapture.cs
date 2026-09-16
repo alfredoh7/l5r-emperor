@@ -18,17 +18,18 @@ public partial class Main
     private void ProcessDuelDemoCapture(double delta)
     {
         if(_captureMode.StartsWith("menu-duel-guidance")) { ProcessDuelGuidanceCapture(delta); return; }
-        if(_captureMode=="menu-duel-stages") { ProcessDuelStageCapture(delta); return; }
+        if(_captureMode.StartsWith("menu-duel-stages")) { ProcessDuelStageCapture(delta); return; }
         if(_duelDemo?.Screen is {} cinema && cinema.CinematicBusy)
         {
             var phase=cinema.CinematicPhase;
+            if(cinema.StoryText.Contains("all provinces +2")&&_cinemaCaptures.Add("courtesy-effect"))GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-courtesy-effect.png");
             if(System.Environment.GetEnvironmentVariable("L5R_DUEL_MOVIE")=="1")
             {
                 var opening=phase.StartsWith("opening");var directory=_capturePath+(opening?"-opening-frames":"-ending-frames");System.IO.Directory.CreateDirectory(directory);
                 var index=opening?_openingMovieFrame++:_endingMovieFrame++;
                 GetViewport().GetTexture().GetImage().SaveJpg(System.IO.Path.Combine(directory,$"{index:D5}.jpg"),.95f);
             }
-            var threshold=phase switch {"opening-hush"=>.35,"opening-challenger"=>1.12,"opening-answer"=>2.05,"opening-standoff"=>3.18,"ending-reveal"=>.35,"ending-cut"=>.76,_=>1.38};
+            var threshold=(phase.StartsWith("opening-")&&phase!="opening-stakes"?3.4:0)+(phase switch {"opening-hush"=>.35,"opening-challenger"=>1.12,"opening-answer"=>2.05,"opening-standoff"=>3.18,"ending-reveal"=>.35,"ending-cut"=>.76,_=>1.38});
             if(cinema.CinematicTime>=threshold && _cinemaCaptures.Add(phase))GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+phase+".png");
         }
         var stamp=Time.GetTicksUsec();
@@ -162,6 +163,7 @@ public partial class Main
                 Check(result.ChallengerTotal==8&&result.ChallengedTotal==7,"native UI reproduces canonical 8–7");
                 host.Screen.Present(host.Session.Snapshot);
                 Check(!host.Screen.PresentationBusy,"repeated snapshots do not replay the reveal");
+                Check(host.Screen.PresentedBeatCount==host.Session.Snapshot.View.LastDuel!.Beats!.Length,"all source-linked consequences presented once");
                 Check(host.Screen.EndingRuns==1,"victory sequence plays once and holds the authoritative result");
                 Check(host.Screen.UprightCount==1,"destroyed participant settles out of the upright champion position");
                 Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("Duel details");break;

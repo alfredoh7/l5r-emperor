@@ -26,7 +26,7 @@ Select a hand card, then click **Place focus**, press **Enter**, or drag it to t
 
 Fate discards open a public card spread. The on-demand spread contains actual public cards; the interface does not invent a chronological pile order. Dynasty discards, dead Personalities (shown sideways under **Fallen**), and removed cards stay distinct. Other destinations are accessible when relevant. Discard focusing remains available only when Core grants it.
 
-Reveals stay in their focus positions. After resolution, presentation transfers cards to their engine-provided destinations and clears the focus rows. **Review revealed cards** opens explicitly labeled history; it does not leave duplicate cards on the table. Totals remain beside their owners; **Continue** still holds the result and returns to setup. Reduced motion performs the same transfers immediately.
+Reveals stay in their focus positions. After resolution, presentation transfers cards to their engine-provided destinations and clears the focus rows. **Review revealed cards** opens explicitly labeled history; it does not leave duplicate cards on the table. Final arithmetic remains available in Duel details; **Continue** still holds the result and returns to setup. Reduced motion performs the same transfers immediately.
 
 ## Guidance
 
@@ -87,3 +87,13 @@ Source prompts/font provenance are in [duel-ui-polish](../assets/ui/duel-ui-poli
 ## After demo acceptance
 
 Wire the same `DuelScreen` to the existing normal session when a challenge appears. Continue will restore the board and engine-provided priority instead of returning to demo setup. Automatic normal-match activation is intentionally deferred until Alfredo accepts the demo and mdornbrook confirms the mechanics; the reusable screen and public contract are in place for that step.
+
+## Stakes and source-linked resolution
+
+The accepted layout now has a brief opening explanation using the actual public challenge source, the duel stat, refusal terms and loss terms. It precedes the existing champion introductions. Refusable challenges show their terms while the player decides. **Menu → Challenge details…** retains the explanation and opens the source in the same full-card inspector used by the main game, including after Skip or coaching opt-out.
+
+Core supplies optional `DuelRecord.Challenge` and `Beats`; old snapshots still deserialize with null defaults. Each beat observes an actual engine operation and records its public source, changes and affected public cards. The client does not infer winners, effect order or outcomes. The current engine applies the challenge outcome before ordered Focus Effects; presentation preserves that order. Courtesy's province changes are captured even though that operation emits no legacy event. Aftermath draw explanations contain counts only, never drawn-card identities.
+
+The ending keeps the verdict visible while showing one source and consequence at a time. Later aftermath reactions append their own explanations once. Focus Effect ordering now includes full card faces. Skip makes no game command, and the complete ordered account remains in **Duel details**. Reduced motion uses a static challenge introduction, instant card transfers and the same on-demand account. The optional story does not restore permanent Chi counters or a bottom recap.
+
+Native coverage includes the canonical path, full-motion additional scenarios, compact reduced motion and source inspection after Skip. Current findings and evidence are recorded in `docs/screenshots/duel-demo/stakes/validation.json`. Native Windows and Mendon's shared-interface/mechanical acceptance remain separate.

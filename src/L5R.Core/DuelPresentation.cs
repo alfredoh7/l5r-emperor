@@ -3,7 +3,11 @@ namespace L5R.Core;
 // Retained, public evidence of one duel. Nothing from a hidden hand/deck is captured here.
 // Defaults on MatchView/PlayerView keep older transport snapshots readable.
 public sealed record DuelRecord(string Id, string Stat, CardView Challenger, CardView Challenged,
-    CardView[] Attachments, DuelReveal[] Reveals, DuelResult? Result, bool Complete);
+    CardView[] Attachments, DuelReveal[] Reveals, DuelResult? Result, bool Complete,
+    DuelChallenge? Challenge = null, DuelBeat[]? Beats = null);
+public sealed record DuelChallenge(CardView? Source, string AbilityId, string AbilityLabel, bool Refusable, string LossTerms, string RefusalTerms);
+// Public explanations captured around actual engine operations, in their execution order.
+public sealed record DuelBeat(int Index, string Kind, CardView? Source, string[] Lines, string[] AffectedCardIds, string? SourceLabel = null);
 public sealed record DuelReveal(long Sequence, string Kind, CardView[] Cards);
 public sealed record DuelProvince(int PlayerId, int Index, int Before, int After);
 public sealed record DuelResult(string Kind, string? WinnerId, string[] LoserIds,
@@ -13,6 +17,72 @@ public sealed record DuelResult(string Kind, string? WinnerId, string[] LoserIds
 
 public sealed partial class MatchEngine
 {
+    private DuelChallenge DescribeChallenge(string abilityId, CardInstance? source, bool refusable)
+    {
+        var loss = abilityId switch {
+            "steel-on-steel-duel" or "ichizo-exp-duel" or "shikei-duel" => "Defeat: the losing unit is destroyed.",
+            "daisuke-duel" => "Defeat: the losing unit moves home.",
+            "training-duel-force" or "training-duel-honor" or "training-duel-open" or "training-duel-challenge" => "Defeat: the losing Personality gets −1 Force this turn.",
+            _ => "The challenge card defines the consequences."
+        };
+        return new(source is null ? null : ViewCard(source), abilityId, AbilityCatalog.All[abilityId].Label,
+            refusable, loss, refusable ? "Refusal ends this challenge without a duel." : "This challenge cannot be refused.");
+    }
+
+    private sealed record DuelEvidence(Dictionary<string, CardView> Cards, int[][] Provinces, int[] Honor, int EventCount, int? Favor);
+    private DuelEvidence CaptureDuelEvidence() => new(
+        _state.Cards.Values.Where(c => c.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) && c.FaceUp)
+            .ToDictionary(c => c.Id, c => ViewCard(c)),
+        _state.Players.Select(p => p.Provinces.Select(v => v.Strength).ToArray()).ToArray(),
+        _state.Players.Select(p => p.Honor).ToArray(), _state.Events.Count, _state.FavorPlayerId);
+
+    private void ExplainDuelEffect(string kind, CardView? source, Action apply)
+    {
+        var before = CaptureDuelEvidence();
+        apply();
+        RecordDuelChanges(before, kind, source, recordNoChange: true);
+    }
+
+    private void RecordDuelChanges(DuelEvidence before, string kind, CardView? source, bool recordNoChange = false, string? sourceLabel = null)
+    {
+        if (_state.LastDuel is not {} record) return;
+        var lines = new List<string>(); var affected = new List<string>();
+        foreach (var (id, prior) in before.Cards)
+        {
+            if (!_state.Cards.TryGetValue(id, out var current)) continue;
+            if (prior.Zone == current.Zone) continue;
+            var destination = current.Zone switch {
+                Zone.Dead => "is destroyed", Zone.FateDiscard or Zone.DynastyDiscard => "is discarded",
+                Zone.Home => "moves home", Zone.RemovedFromGame => "is removed from the game", _ => null };
+            if (destination is not null) { lines.Add($"{prior.Definition!.Name} {destination}."); affected.Add(id); }
+        }
+        foreach (var player in _state.Players)
+        {
+            var changes = player.Provinces.Select((p,i) => p.Strength-before.Provinces[player.Id][i]).ToArray();
+            if (changes.Length>0 && changes.All(d => d==changes[0]) && changes[0]!=0)
+                lines.Add($"{player.Name}: all provinces {changes[0]:+0;−0} strength.");
+            else for (var i=0;i<changes.Length;i++) if (changes[i]!=0)
+                lines.Add($"{player.Name}: province {i+1} {changes[i]:+0;−0} strength.");
+            var honor=player.Honor-before.Honor[player.Id];
+            if (honor!=0) lines.Add($"{player.Name}: {honor:+0;−0} Honor.");
+            var draws=_state.Events.Skip(before.EventCount).Count(e=>e.Type=="cardDrawn"&&e.PlayerId==player.Id);
+            if (draws>0) lines.Add($"{player.Name} draws {draws} {(draws==1?"card":"cards")}.");
+        }
+        if (before.Favor!=_state.FavorPlayerId)
+            lines.Add(_state.FavorPlayerId is {} owner ? $"{Player(owner).Name} takes the Imperial Favor." : "The Imperial Favor is relinquished.");
+        // Public modifiers may change without moving a card (training penalties / Iaijutsu bonus).
+        foreach (var (id, prior) in before.Cards)
+        {
+            if (!_state.Cards.TryGetValue(id, out var card) || card.Zone is Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) continue;
+            var now=ViewCard(card);
+            if (now.Zone==prior.Zone && now.Force!=prior.Force) { lines.Add($"{prior.Definition!.Name}: Force {prior.Force} → {now.Force}."); affected.Add(id); }
+        }
+        if (lines.Count==0 && !recordNoChange) return;
+        if (lines.Count==0) lines.Add("No change from this effect.");
+        var beats=record.Beats??[];
+        _state.LastDuel=record with { Beats=[..beats,new(beats.Length,kind,source,lines.ToArray(),affected.Distinct().ToArray(),sourceLabel)] };
+    }
+
     private void RecordDuelReveal(string kind)
     {
         var duel = _state.PendingDuel!;

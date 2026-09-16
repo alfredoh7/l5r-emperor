@@ -41,6 +41,51 @@ static class DuelDemoTests
         record.Reveals[0].Cards[0]=record.Challenger;
         Check(e.GetView(0).LastDuel!.Reveals[0].Cards.All(c=>c.Zone==Zone.Focused),"record detached");
     }
+    public static void Story()
+    {
+        var e=MatchEngine.CreateDuelDemo();Begin(e);
+        var challenge=e.GetView(0).LastDuel!.Challenge!;
+        Equal(challenge.Source!.Definition!.Id,"oracle-l5r-7483");
+        Check(!challenge.Refusable&&challenge.LossTerms.Contains("destroyed"),"challenge uses the real played source and Core stakes");
+        Send(e,Action(e,"focus",c=>c.Choice=="deck"));
+        Send(e,Action(e,"focus",c=>c.CardId is {} id&&e.State.Cards[id].DefinitionId=="oracle-l5r-7996"));
+        Send(e,Action(e,"strike"));
+        var record=e.GetView(0).LastDuel!;var beats=record.Beats!;
+        Equal(beats.Length,2);Equal(beats[0].Kind,"Outcome");Equal(beats[1].Kind,"FocusEffect");
+        Equal(beats[0].Source!.Definition!.Id,"oracle-l5r-7483");Equal(beats[1].Source!.Definition!.Id,"oracle-l5r-7996");
+        Check(beats[0].AffectedCardIds.Contains(record.Challenged.Id)&&beats[0].Lines.Any(l=>l.Contains("destroyed")),"actual destroyed participant attributed to the challenge");
+        Check(beats[1].Lines.Single().Contains("all provinces +2 strength"),"Courtesy delta attributed even without a legacy event");
+        Equal(JsonSerializer.Serialize(e.State),JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State));
+        beats[0].Lines[0]="tampered";Check(e.GetView(0).LastDuel!.Beats![0].Lines[0]!="tampered","story arrays detached from engine state");
+        var node=System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(record))!.AsObject();node.Remove("Challenge");node.Remove("Beats");
+        var legacy=JsonSerializer.Deserialize<DuelRecord>(node.ToJsonString())!;Check(legacy.Challenge is null&&legacy.Beats is null,"old presentation snapshots remain readable");
+        foreach(var scenario in new[]{"duelist","aftermath"})
+        {
+            e=MatchEngine.CreateDuelDemo(scenario);Begin(e,scenario);
+            if(scenario=="duelist")Equal(e.GetView(0).LastDuel!.Challenge!.Source!.Id,e.State.PendingDuel!.ChallengerId);
+            Send(e,Action(e,"focus",c=>c.Choice=="deck"));
+            Send(e,Action(e,"focus",c=>c.CardId is {} id&&e.State.Cards[id].DefinitionId=="oracle-l5r-7996"));
+            Send(e,Action(e,"strike"));
+            var privateDeck=e.State.Players.SelectMany(p=>p.FateDeck).ToArray();
+            for(var i=0;i<20&&!e.GetView(0).LastDuel!.Complete;i++)
+            {
+                var actions=e.QueryActions(e.State.PriorityPlayerId).Where(a=>a.Enabled&&a.Command is not null).ToArray();
+                var action=actions.FirstOrDefault(a=>a.Type=="useAbility")??actions.FirstOrDefault(a=>a.Command!.Choice=="draw")
+                    ??actions.FirstOrDefault(a=>a.Type=="duelistRefocus"&&a.Command!.CardId is null)??actions.First();
+                Send(e,action.Command!);
+            }
+            record=e.GetView(0).LastDuel!;Check(record.Complete,$"{scenario} completes");
+            if(scenario=="duelist")Check(record.Beats!.Any(b=>b.Lines.Any(l=>l.Contains("moves home"))),"movement consequence captured");
+            else
+            {
+                Check(record.Beats!.Any(b=>b.Kind=="Aftermath"&&b.Lines.Any(l=>l.Contains("draws 1 card"))),"aftermath draw count has a visible explanation");
+                Check(record.Beats!.Any(b=>b.SourceLabel=="Overconfident"&&b.Lines.Any(l=>l.Contains("draws 1 card"))),"source-less Overconfident queue is identified by the actual keyword, not an invented card");
+                var json=JsonSerializer.Serialize(record);
+                foreach(var id in privateDeck)Check(!json.Contains(id),"reaction story must not disclose drawn or unseen deck identities");
+            }
+            Equal(JsonSerializer.Serialize(e.State),JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State));
+        }
+    }
     public static void Decisions()
     {
         foreach(var s in DuelDemoScenarios.All)
@@ -63,6 +108,7 @@ static class DuelDemoTests
         Send(order,Action(order,"strike"));var arrange=Action(order,"orderDuelFocusEffects");
         Check(!order.Execute(arrange with {CardIds=[arrange.CardIds![0],arrange.CardIds[0]]}).Accepted,"bad permutation rejected");
         Send(order,arrange with {CardIds=arrange.CardIds!.Reverse().ToArray()});Equal(order.GetView(0).LastDuel!.Result!.EffectOrder[0],arrange.CardIds[1]);
+        Check(order.GetView(0).LastDuel!.Beats!.Where(b=>b.Kind=="FocusEffect").Select(b=>b.Source!.Id).SequenceEqual(arrange.CardIds.Reverse()),"explanations preserve the selected Focus Effect order");
         var discard=MatchEngine.CreateDuelDemo("discard");Begin(discard,"discard");Send(discard,Action(discard,"focus",c=>c.Choice=="deck"));
         var dc=Action(discard,"focus",c=>c.Choice=="discard");Send(discard,dc);Check(discard.GetView(1).Players[0].Focused!.Any(c=>c.Id==dc.CardId),"discard focus public");
         Send(discard,Action(discard,"strike"));while(discard.State.PendingDuel is not null)Send(discard,Action(discard,"duelistRefocus",c=>c.CardId is null));

@@ -88,9 +88,10 @@ public partial class DuelDemoHost : Control
         menu.Position=new Vector2(18,16);menu.Size=new Vector2(115,42)*scale;_overlay.AddChild(menu);
         if(!_menuOpen)return;
         var veil=new ColorRect{Color=new Color(0,0,0,.55f),Size=size};_overlay.AddChild(veil);
-        var tools=DuelUi.Modal(veil,size,new Vector2(510,730),"Duel Demo");
+        var tools=DuelUi.Modal(veil,size,new Vector2(510,790),"Duel Demo");
         tools.AddChild(DuelUi.Wrapped($"{DuelDemoScenarios.Get(_scenario).Name} · seed {_seed}",16,Palette.PaperDim));
         AddButton(tools,"Resume",()=>{_menuOpen=false;BuildOverlay();},true);
+        AddButton(tools,"Challenge details…",()=>{_menuOpen=false;BuildOverlay();Screen.OpenChallenge();});
         AddButton(tools,"Duel guidance…",()=>{_menuOpen=false;BuildOverlay();Screen.OpenGuidance();});
         var guidance=new CheckBox{Text="Show quiet coaching",ButtonPressed=Screen.GuidanceEnabled};tools.AddChild(guidance);
         guidance.Toggled+=value=>{if(!Screen.SetGuidanceEnabled(value,true))guidance.SetPressedNoSignal(Screen.GuidanceEnabled);};

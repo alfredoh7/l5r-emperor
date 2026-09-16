@@ -1760,7 +1760,7 @@ public sealed partial class MatchEngine
             // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
             // performer. ability.Performer null means exactly this: the source card is the challenger.
             var challengerId = ability.Performer is not null ? command.PerformerId! : source!.Id;
-            IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable);
+            IssueChallenge(id, player.Id, challengerId, target!.Id, ability.DuelStat, ability.DuelRefusable, source);
             return;
         }
         switch (id)

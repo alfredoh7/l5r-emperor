@@ -91,6 +91,17 @@ public partial class Main
                 Check(host!.Screen.AnchoredHelpVisible&&!host.Screen.GuidanceEnabled,"manual help works again after reopening the demo");Press("Close duel guidance");break;
             case 39:
                 Check(host!.Session.Snapshot!.View.Version==1,"help, settings and restart perform no extra game commands");
+                Press("Menu");break;
+            case 40:Press("Challenge details…");break;
+            case 41:
+                var text=string.Join("\n",Descendants(host!).OfType<Label>().Select(l=>l.Text));
+                Check(text.Contains("cannot be refused")&&text.Contains("losing unit is destroyed"),"challenge facts remain available after Skip and guidance opt-out");
+                Capture("challenge-details");Press("Inspect Steel on Steel");break;
+            case 42:
+                Check(Descendants(host!).OfType<CardTile>().Any(c=>c.Card.Definition?.Id=="oracle-l5r-7483"),"challenge source opens the shared full-card inspection");
+                Capture("challenge-source");Press("Close inspection");break;
+            case 43:
+                Check(host!.Session.Snapshot!.View.Version==1,"challenge and source inspection submit no command");
                 System.IO.File.WriteAllText(_capturePath+".json",JsonSerializer.Serialize(new{Passed=true,Steps=_guidanceProbe,ReducedMotion=_preferences.ReducedMotion,Resolution=GetViewportRectSize(),ProfileIsolated=_preferencesProfile.StartsWith("menu-capture-")}));
                 GetTree().Quit();return;
         }

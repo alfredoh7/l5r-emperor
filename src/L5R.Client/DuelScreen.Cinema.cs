@@ -5,7 +5,7 @@ namespace L5R.Client;
 
 public partial class DuelScreen
 {
-    private enum Cinema {None,Opening,Ending}
+    private enum Cinema {None,Opening,Ending,Aftermath}
     private Cinema _cinema;
     private double _cinemaTime;
     private bool _openingSeen,_cutPlayed;
@@ -22,7 +22,7 @@ public partial class DuelScreen
         if(_masthead is null){_masthead=new TextureRect{Name="Duel masthead",Texture=GD.Load<Texture2D>("res://Art/DuelUi/duel-wordmark.png"),ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,StretchMode=TextureRect.StretchModeEnum.KeepAspectCentered,MouseFilter=MouseFilterEnum.Ignore};AddChild(_masthead);}
         _masthead.Position=_offset+new Vector2(616,15)*_scale;_masthead.Size=new Vector2(440,147)*_scale;
         // The title belongs to the introduction, never to the interactive arena/result.
-        var alpha=_cinema==Cinema.Opening&&!ReducedMotion?1-Ease((_cinemaTime-2.5)/.75):0;
+        var alpha=_cinema==Cinema.Opening&&!ReducedMotion&&_cinemaTime>=StakesDuration?1-Ease((_cinemaTime-StakesDuration-2.5)/.75):0;
         _masthead.Modulate=new Color(1,1,1,alpha);_masthead.Visible=alpha>0;_masthead.MoveToFront();
     }
     private void ClearIntro()
@@ -35,7 +35,8 @@ public partial class DuelScreen
     internal bool CinematicBusy=>_cinema!=Cinema.None;
     internal double CinematicTime=>_cinemaTime;
     internal string CinematicPhase=>_cinema switch {
-        Cinema.Opening=>_cinemaTime<.7?"opening-hush":_cinemaTime<1.6?"opening-challenger":_cinemaTime<2.5?"opening-answer":"opening-standoff",
+        Cinema.Opening=>_cinemaTime<StakesDuration?"opening-stakes":_cinemaTime-StakesDuration<.7?"opening-hush":_cinemaTime-StakesDuration<1.6?"opening-challenger":_cinemaTime-StakesDuration<2.5?"opening-answer":"opening-standoff",
+        Cinema.Aftermath=>"aftermath-effect",
         Cinema.Ending=>_cinemaTime<.7?"ending-reveal":_cinemaTime<.9?"ending-cut":"ending-consequence",_=>"idle"};
     internal int OpeningRuns {get;private set;}
     internal int EndingRuns {get;private set;}
@@ -59,6 +60,7 @@ public partial class DuelScreen
     }
     private void ResetCinema()
     {
+        ClearStory();_seenBeats.Clear();_activeBeats=[];
         _cinema=Cinema.None;_cinemaTime=0;_openingSeen=false;_cutPlayed=false;OpeningRuns=EndingRuns=0;
         ClearIntro();ResetCamera();_cinemaLayer?.Hide();_cinemaSound?.Stop();_windSound?.Stop();
         if(_flights is not null)foreach(var child in _flights.GetChildren()){_flights.RemoveChild(child);child.QueueFree();}
@@ -66,25 +68,22 @@ public partial class DuelScreen
     private void StartOpening()
     {
         _openingSeen=true;OpeningRuns++;
-        if(ReducedMotion)return;
         _cinema=Cinema.Opening;_cinemaTime=0;HideCardHover();CloseGuidance();
-        ClearIntro();_introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
-        _introStage.Build(Snapshot!.View.LastDuel!,Snapshot.View.ViewerId);
-        _introStage.Advance(0,Size,Snapshot.View.LastDuel!.Challenger.OwnerId,Snapshot.View.LastDuel.Challenged.OwnerId);
+        ClearIntro();
         _cinemaLayer.Show();PlayCinemaSound(false);
     }
     private void StartEnding()
     {
-        EndingRuns++;
+        EndingRuns++;PrepareBeats();
         if(ReducedMotion||Snapshot!.View.LastDuel!.Result!.Kind!="Resolved")
-        {_aftermathPlayed=true;RenderCards(false);RenderActions();return;}
+        {_aftermathPlayed=true;FinishBeats();RenderCards(false);RenderActions();return;}
         _cinema=Cinema.Ending;_cinemaTime=0;_cutPlayed=false;HideCardHover();CloseGuidance();_cinemaLayer.Show();RenderActions();
     }
     public void SkipCinematic()
     {
         if(!CinematicBusy)return;
         if(_cinema==Cinema.Ending){_aftermathPlayed=true;_cleanupClock=0;}
-        _cinema=Cinema.None;ClearIntro();ResetCamera();_cinemaLayer.Hide();_cinemaSound.Stop();
+        FinishBeats();_cinema=Cinema.None;ClearIntro();ResetCamera();_cinemaLayer.Hide();_cinemaSound.Stop();
         foreach(var c in _flights.GetChildren()){_flights.RemoveChild(c);c.QueueFree();}
         RenderCards(false);RenderActions();
     }
@@ -97,7 +96,7 @@ public partial class DuelScreen
     private void AdvanceCinema(double delta)
     {
         if(InputLocked||_reading is not null)return;
-        if(ReducedMotion){SkipCinematic();return;}
+        if(ReducedMotion&&_cinema!=Cinema.Opening){SkipCinematic();return;}
         _cinemaTime+=delta;var t=_cinemaTime;
         _cinemaLayer.MoveToFront();PlaceMasthead();_cinemaLayer.Size=Size;_cinemaShade.Size=Size;
         _skipCinema.Position=_offset+new Vector2(1500,24)*_scale;_skipCinema.Size=new Vector2(120,40)*_scale;
@@ -105,6 +104,15 @@ public partial class DuelScreen
         _cinemaSlash.Visible=false;_cinemaTitle.Text="";_cinemaShade.Color=Colors.Transparent;
         if(_cinema==Cinema.Opening)
         {
+            if(t<StakesDuration){ShowStakes();return;}
+            ClearStory();
+            if(ReducedMotion){SkipCinematic();return;}
+            t-=StakesDuration;
+            if(_introStage is null&&t<2.5)
+            {
+                _introStage=new DuelIntroStage();_cinemaLayer.AddChild(_introStage);_cinemaLayer.MoveChild(_introStage,0);
+                _introStage.Build(Snapshot!.View.LastDuel!,Snapshot.View.ViewerId);
+            }
             var challenger=Snapshot!.View.LastDuel!.Challenger;var challenged=Snapshot.View.LastDuel.Challenged;
             if(t<2.5)_introStage?.Advance(t,Size,challenger.OwnerId,challenged.OwnerId);
             else
@@ -129,6 +137,12 @@ public partial class DuelScreen
                 _cinemaSlash.Size=new Vector2(210,28)*_scale;_cinemaSlash.Modulate=_cinemaTitle.Modulate;
             }
         }
+        else if(_cinema==Cinema.Aftermath)
+        {
+            var index=(int)(t/BeatDuration);
+            if(index>=_activeBeats.Length){SkipCinematic();return;}
+            ShowBeat(_activeBeats[index]);
+        }
         else
         {
             if(t>=.7&&!_cutPlayed){_cutPlayed=true;PlayCinemaSound(true);}
@@ -141,7 +155,19 @@ public partial class DuelScreen
             }
             if(t>=.9&&!_aftermathPlayed)
             {_aftermathPlayed=true;_cleanupClock=.8;RenderCards();RenderActions();}
-            if(t>=1.8){_cleanupClock=0;SkipCinematic();}
+            if(t>=.9)
+            {
+                var record=Snapshot!.View.LastDuel!;var result=record.Result!;
+                _cinemaTitle.Text=result.WinnerId is null?"Both lose":$"{(result.WinnerId==record.Challenger.Id?record.Challenger:record.Challenged).Definition!.Name} wins";
+                _cinemaTitle.Position=_offset+new Vector2(606,315)*_scale;_cinemaTitle.Size=new Vector2(460,112)*_scale;
+                _cinemaTitle.HorizontalAlignment=HorizontalAlignment.Center;_cinemaTitle.Modulate=Colors.White;
+                _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(28,(int)(50*_scale)));
+            }
+            if(t>=1.0&&_activeBeats.Length>0)
+            {
+                var index=Math.Min((int)((t-1.0)/BeatDuration),_activeBeats.Length-1);ShowBeat(_activeBeats[index]);
+            }
+            if(t>=1.8+_activeBeats.Length*BeatDuration){_cleanupClock=0;SkipCinematic();}
         }
     }
     private void AdvanceCinemaSound(double delta)

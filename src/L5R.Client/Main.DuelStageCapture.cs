@@ -10,7 +10,7 @@ public partial class Main
     private void ProcessDuelStageCapture(double delta)
     {
         _captureClock+=delta;if(_captureClock<(_scenarioPhase<=0?1.0:.45))return;_captureClock=0;
-        if(++_scenarioMoves>650)throw new Exception("Duel stage probe stalled.");
+        if(++_scenarioMoves>200)throw new Exception("Duel stage probe stalled.");
         IEnumerable<Node> Descendants(Node n){foreach(var c in n.GetChildren()){yield return c;foreach(var d in Descendants(c))yield return d;}}
         var host=_duelDemo;
         Button? Find(string text)=>host is null?null:Descendants(host).OfType<Button>().FirstOrDefault(b=>(b.Text==text||b.Name==text)&&b.IsVisibleInTree());
@@ -23,7 +23,7 @@ public partial class Main
         void Capture(string suffix){GetViewport().GetTexture().GetImage().SavePng(_capturePath+"-"+_stageScenarios[_scenarioProbe]+"-"+suffix+".png");}
         if(_scenarioPhase==0)
         {
-            _preferences.ReducedMotion=true;_preferences.DuelGuidance=false;ApplyPreferences(false);_titleMenu!.ShowPlay();_scenarioPhase=-1;return;
+            _preferences.ReducedMotion=!_captureMode.EndsWith("-motion");_preferences.DuelGuidance=false;ApplyPreferences(false);_titleMenu!.ShowPlay();_scenarioPhase=-1;return;
         }
         if(_scenarioPhase==-1)
         {
@@ -40,7 +40,11 @@ public partial class Main
             var check=Find("Manual · control both seats")!;if(!check.ButtonPressed)Native(check.GetGlobalRect().GetCenter());_scenarioPhase=3;return;
         }
         if(_scenarioPhase==3){Press("Begin Duel");_scenarioPhase=4;return;}
-        if(host!.Screen.PresentationBusy)return;
+        if(host!.Screen.PresentationBusy)
+        {
+            if(!string.IsNullOrEmpty(host.Screen.StoryText))Capture("story-"+host.Screen.PresentedBeatCount);
+            return;
+        }
         if(Find("Reveal this seat") is not null){Press("Reveal this seat");return;}
         var v=host.Session.Snapshot!.View;
         if(host.Screen.CoachingVisible)throw new Exception("Suppressed coaching reappeared in a required stage.");
@@ -48,7 +52,7 @@ public partial class Main
         if(v.LastDuel!.Complete)
         {
             Capture("result");GD.Print($"DUEL_STAGE_CHECK: {_stageScenarios[_scenarioProbe]} complete through native controls, {v.Version} commands");
-            Press("Continue");_scenarioProbe++;_scenarioPhase=1;
+            Press("Continue");_scenarioProbe++;_scenarioPhase=1;_scenarioMoves=0;
             if(_scenarioProbe==_stageScenarios.Length){System.IO.File.WriteAllText(_capturePath+".json","{\"passed\":true,\"scenarios\":13}");GetTree().Quit();}return;
         }
         if(v.PriorityPlayerId!=v.ViewerId){Press("Switch seat");return;}

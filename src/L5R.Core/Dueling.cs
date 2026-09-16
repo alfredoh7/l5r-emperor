@@ -21,7 +21,7 @@ public sealed partial class MatchEngine
     // Called from ExecuteAbilityEffects for any ability with IssuesDuel set, after the card's own
     // cost/discard has already happened -- everything from here on is the deferred EFFECT (the duel
     // itself), paused without ceding priority, the same shape ResolveOrDeferAttack already uses.
-    private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable)
+    private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable, CardInstance? source = null)
     {
         var challenger = Card(challengerId); var challenged = Card(challengedId);
         _state.PendingDuel = new PendingDuel
@@ -34,7 +34,7 @@ public sealed partial class MatchEngine
         var duelId = $"duel-{_state.Events[^1].Sequence}";
         _state.PendingDuel.DuelId = duelId;
         _state.LastDuel = new(duelId, stat, ViewCard(challenger), ViewCard(challenged),
-            Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray(), [], null, false);
+            Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray(), [], null, false, DescribeChallenge(abilityId, source, refusable), []);
         if (refusable) { _state.PriorityPlayerId = challenged.OwnerId; _state.ConsecutivePasses = 0; }
         else OpenDuelReactionWindowOrBeginFocusing();
     }
@@ -292,11 +292,13 @@ public sealed partial class MatchEngine
         // Focus-Effect-driven outcome layers on top, in the active player's own chosen order -- e.g.
         // a Focus Effect that dishonors the loser, resolved before the duel's own "destroy the
         // loser," makes that death a dishonorable one instead of an honorable one.
-        ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId);
+        ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
+            () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
         foreach (var focusedId in duel.OrderedFocusEffects)
         {
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
-            ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds);
+            ExplainDuelEffect("FocusEffect", ViewCard(Card(focusedId)),
+                () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds));
         }
         // Every focused card is spent, win or lose (a card destroyed as part of the outcome above is
         // simply skipped here -- Card() would still resolve it, but it is no longer in Zone.Focused).
@@ -316,7 +318,8 @@ public sealed partial class MatchEngine
         // the same one more than once) receives the bonus again each time.
         var performer = Card(duel.ChallengerId);
         if (IsIaijutsuAction(duel.AbilityId) && _state.Cards.Values.Any(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus))
-            ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2);
+            ExplainDuelEffect("Aftermath", ViewCard(_state.Cards.Values.First(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus)),
+                () => ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2));
         _state.LastDuel = _state.LastDuel! with { Result = new("Resolved", winnerId, loserIds.ToArray(),
             challengerStat, challengedStat, challengerTotal, challengedTotal, duel.OrderedFocusEffects.ToArray(),
             _state.Events.Skip(resultStart).ToArray(), strengthsBefore.Select(p => p with { After = Player(p.PlayerId).Provinces[p.Index].Strength }).ToArray(),
