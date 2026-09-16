@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Work in progress: Noble Crest Favor and D lacquer reminders rendered from public state in a persistent right-side Home area. Preparing requested native screenshot milestone; not final gameplay validation.",
-  "validation": "Client compiles with zero warnings/errors before screenshot fixture. Exact sources retained; nine clan Favor scans plus neutral fallback converted locally to full-resolution WebP q85. Native visual/layout validation in progress.",
-  "remaining": "Requested native preview capture, fidelity iteration, reminder/Favor input and transfer tests, crowded/seat/reduced-motion verification, final integration and review. #246 stacked on #242; no engine changes.",
+  "summary": "Finish Noble Crest Home: Meshy 7 Ultra ivory frame, Blender finish, native original Favor faces, D effect reminders, active lacquer/Caudex tooltip skin, visible pending decisions and fitted-view clearance. Record Meshy during initial production of all new 3D assets.",
+  "validation": "All deterministic checks passed (43 collaboration, 130 content, 152 core, 52 published, 9 format, 10 workshop, 14 AI, 5 server, 4 transport); 6 Meshy wrapper tests. Task/integrated builds 0 warnings/errors. Native actual-engine and projected-input checks passed 1920x1080 reduced and 1440x900 normal motion. Final mipmap import and native overview/detail capture passed; source/native comparison in docs/screenshots/persistent-home/index.html; private Meshy/Blender source archived.",
+  "remaining": "Ready for Alfredo visual review and Mendon shared review. PR 246 is stacked on open dependency 242; integrate after dependency review/merge. Local combined preview preserves room, placards and black lacquer/Caudex menus. No native Windows or expert rules acceptance claimed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/245",
   "branch": "codex/245-noble-home",
-  "updated": "2026-09-16T09:45:52.038927+00:00"
+  "updated": "2026-09-16T11:00:39.739621+00:00"
 }
