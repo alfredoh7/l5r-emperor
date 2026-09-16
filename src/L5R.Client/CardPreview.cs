@@ -11,7 +11,7 @@ public static class CardPreview
         var face = new CardTile(card with { Bowed = false }, true, _ => { }, _ => { })
         {
             CustomMinimumSize = new Vector2(width, height), ReducedMotion = true,
-            ShowTokenRail = false, Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
+            ShowTokenRail = false, UprightPreview = true, Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
             FocusMode = Control.FocusModeEnum.None
         };
         face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };

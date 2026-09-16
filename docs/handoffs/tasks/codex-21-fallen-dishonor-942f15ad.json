@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved Fallen UI: A counter and B inspection panel for issues 21 and 221; based on latest main plus approved presentation dependency PR 256.",
-  "validation": "Design approval received. Implementation and native validation in progress.",
-  "remaining": "Implement source-art counter, inspection gallery and dishonor orientation; compare native captures and run relevant checks. Parent UI PRs 248 and 256 remain separate review dependencies.",
+  "summary": "Implement approved A Fallen counter and B inspection using actual source ornaments, public DeadCount, original upright scans and explicit death status; compose table dishonor with bowing. Update to the existing verified v4 WebP pack for seven newer main printings.",
+  "validation": "439 deterministic checks pass; client build zero warnings/errors and Godot import; 14 native cases passed including source comparison, both seats, 720p, empty/24-card piles, real pointer/keyboard navigation, oriented cards, crowded token/grant rails and existing attachment/projection regressions. Real Play Latest preflight, build and capture pass. Final art-only tab/empty refinements recaptured in the same native checks. Evidence: docs/screenshots/fallen/index.html and validation.md.",
+  "remaining": "Implementation ready for visual/shared review. PR 261 is stacked on approved presentation dependencies 256 and 248; current-head CI and Mendon shared review required before merge. No native Windows or two-machine playtest, expert rules acceptance, or full-screen pixel-equivalence claim. Separate Duel Demo 220 excluded. Board token unavailable; GitHub ownership recorded.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/21",
   "branch": "codex/21-fallen-dishonor",
-  "updated": "2026-09-16T19:22:37.432430+00:00"
+  "updated": "2026-09-16T20:04:13.489715+00:00"
 }
