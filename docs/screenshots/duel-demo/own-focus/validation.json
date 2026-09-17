@@ -1,0 +1,21 @@
+{
+  "date": "2026-09-17",
+  "automated_checks": 495,
+  "client_build": "0 warnings/errors",
+  "native": "20-step normal and compact reduced; 13 special scenarios including Duelist replacement and discard focus; 43-step guidance normal/reduced; all pass",
+  "inspection": "Direct click shows full permitted face/rules/Focus Value for deck and hand off-turn, and public discard; no command/reveal; opponent hidden-card click and hover rejected",
+  "privacy": "Both owners hand/deck views, blind pre-commit deck privacy, public discard, serialized session views, seat changes and replay verified",
+  "visual": "Native deck, hand and discard full-face inspectors inspected; approved shared lacquer UI preserved",
+  "launcher": "Refreshed app; v5 archive local install, strict artwork coverage, build and headless startup pass",
+  "artwork": {
+    "schema_version": 1,
+    "repository": "alfredoh7/l5r-emperor",
+    "tag": "catalogue-art-webp-v5-20260917",
+    "asset": "L5R-Catalogue-WebP85.zip",
+    "sha256": "5f926ac3f95cb8d7bf6d8036bc23e6eedd112044fae4e5e6f901aecb205233fd",
+    "bytes": 379336012,
+    "images": 2777,
+    "quality": 85
+  },
+  "remaining": "Normal-match transition remains separate; Mendon broader mechanical review, Times of Strife effective province reporting, outcome/effect timing and native Windows acceptance remain open. Prior verdict/motion is now user-approved."
+}

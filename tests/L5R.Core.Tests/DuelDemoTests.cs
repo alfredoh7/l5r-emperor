@@ -10,6 +10,43 @@ static class DuelDemoTests
         .Where(a=>a.Enabled && a.Type==type).Select(a=>a.Command!).First(c=>predicate?.Invoke(c)??true);
     static void Send(MatchEngine e,GameCommand c)=>Check(e.Execute(c).Accepted,$"Rejected {c.Type}");
     static void Begin(MatchEngine e,string scenario="steel") => Send(e,Action(e,"useAbility",c=>c.AbilityId==DuelDemoScenarios.Get(scenario).ChallengeAbility));
+    public static void OwnFocusViews()
+    {
+        var e=MatchEngine.CreateDuelDemo();Begin(e);
+        foreach(var source in new[]{"deck","hand","hand","deck"})
+        {
+            var owner=e.State.PriorityPlayerId;
+            var command=Action(e,"focus",c=>source=="deck"?c.Choice=="deck":c.Choice is null&&c.CardId is not null);
+            var id=command.CardId??e.State.Players[owner].FateDeck[0];
+            if(source=="deck")
+            {
+                Check(command.CardId is null,"deck commitment cannot choose or inspect a card first");
+                Check(!JsonSerializer.Serialize(e.GetView(owner)).Contains(id),"uncommitted deck identity stays hidden from owner");
+            }
+            Send(e,command);Verify(e,owner,id,false);
+        }
+        var replayed=MatchEngine.Replay(e.ExportReplay());
+        for(var seat=0;seat<2;seat++)
+            foreach(var card in e.GetView(seat).Players[seat].Focused!)Verify(replayed,seat,card.Id,false);
+        var discard=MatchEngine.CreateDuelDemo("discard");Begin(discard,"discard");
+        Send(discard,Action(discard,"focus",c=>c.Choice=="deck"));
+        var publicFocus=Action(discard,"focus",c=>c.Choice=="discard");Send(discard,publicFocus);
+        Verify(discard,publicFocus.PlayerId,publicFocus.CardId!,true);
+
+        static void Verify(MatchEngine engine,int owner,string id,bool isPublic)
+        {
+            var version=engine.Version;
+            var view=JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(engine.GetView(owner)))!;
+            var card=view.Players[owner].Focused!.Single(c=>c.Id==id);
+            var definition=CardCatalog.Get(engine.State.Cards[id].DefinitionId);
+            Check(card.Definition is {} face&&face.Id==definition.Id&&face.Text==definition.Text&&face.Focus==definition.Focus,"owner receives full identity, rules and Focus Value through serialized view");
+            Equal(card.FaceUp,isPublic);
+            var opponent=engine.GetView(1-owner);
+            Equal(opponent.Players[owner].Focused!.Any(c=>c.Id==id),isPublic);
+            if(!isPublic)Check(!JsonSerializer.Serialize(opponent).Contains(id),"private focus identity absent from opponent view/events");
+            Equal(engine.Version,version);
+        }
+    }
     public static void Canonical()
     {
         var e=MatchEngine.CreateDuelDemo();Begin(e);

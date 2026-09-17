@@ -11,6 +11,7 @@ public partial class DuelScreen
     private Vector2 _lastHoverPointer = new(-1000,-1000);
     internal string? HoverPreviewId => _cardHover?.HasMeta("card_preview")==true ? _cardHover.GetMeta("card_preview").AsString() : null;
     internal Rect2 HoverPreviewRect => _cardHover?.GetGlobalRect() ?? new Rect2();
+    internal CardView? InspectedCard=>_inspectionFace?.Card;
 
     private string InspectionContext(CardView card)
     {
@@ -21,7 +22,9 @@ public partial class DuelScreen
             return $"Duel participant · recorded for this result. Current location: {actual?.Zone.ToString() ?? "see aftermath"}.";
         }
         if(_resultArranged&&card.Zone==Zone.Focused)return "Revealed focus · retained duel evidence. This card has already left the focus pool; see Public piles for its current location.";
-        return card.Zone==Zone.Focused&&!card.FaceUp ? "Your committed focus · privately inspectable."
+        return card.Zone==Zone.Focused ? card.FaceUp
+            ? $"Revealed focus · Focus Value {card.Definition?.Focus}."
+            : $"Your committed focus · Focus Value {card.Definition?.Focus}. Only you can inspect this card before the reveal."
             : card.Zone==Zone.Hand ? "In your hand. Select a card to focus."
             : "Public card · click to inspect.";
     }

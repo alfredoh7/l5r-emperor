@@ -108,7 +108,11 @@ public partial class DuelScreen : Control
         if(card.Definition is null||PresentationBusy||InputLocked||_commandCooldown>0)return;
         _selectedDeck=false;
         if(card.Zone==Zone.Hand && card.OwnerId==Snapshot!.View.ViewerId){_selectedHand=_selectedHand==card.Id?null:card.Id;_selectedInspection=_selectedHand;_coachingDismissed.Add(Snapshot.View.ViewerId);_dontShowAgain=false;}
-        else if(!_resultArranged && card.Zone==Zone.Focused && card.OwnerId==Snapshot!.View.ViewerId){_selectedFocus=_selectedFocus==card.Id?null:card.Id;_selectedInspection=_selectedFocus;}
+        // A commitment is readable immediately, even off-turn and after a blind deck focus.
+        // Keep selection only when the engine offers a replacement for this particular card.
+        else if(!_resultArranged && card.Zone==Zone.Focused && card.OwnerId==Snapshot!.View.ViewerId &&
+                Legal.Any(a=>a.Type=="duelistRefocus"&&a.Command!.CardId==card.Id))
+        {_selectedFocus=_selectedFocus==card.Id?null:card.Id;_selectedInspection=_selectedFocus;}
         else {Inspect(card);return;}
         RefreshSelection();
         RenderLanding();RenderActions();

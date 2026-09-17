@@ -99,8 +99,8 @@ public partial class Main
                 Check(host!.Session.Snapshot!.View.Version==2,"rapid duplicate focus advances once");
                 if(_focusInspectionStep==0){Check(host.Screen.SelectedInspectionId is null,"duplicate placement does not select the newly committed card");var point=host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId);Move(point);_focusInspectionStep++;return;}
                 if(_focusInspectionStep==1){Check(host.Screen.HoverPreviewId is not null,"hover restores the main-game preview for own committed focus");Check(new Rect2(Vector2.Zero,host.Screen.Size).Encloses(host.Screen.HoverPreviewRect),"hover preview stays within the viewport");Check(!host.Screen.HoverPreviewRect.HasPoint(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId)),"hover inspector leaves its source card clickable");Capture("own-focus-hover");Native(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
-                if(_focusInspectionStep==2){Press("Inspect selected card");_focusInspectionStep++;return;}
-                if(_focusInspectionStep==3){Check(host.Screen.HasPrivateInspection,"blind focus is privately inspectable after commitment");Capture("own-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
+                if(_focusInspectionStep==2){var own=host.Session.Snapshot.View.Players[1].Focused!.Single();Check(host.Screen.InspectedCard is {} face&&face.Id==own.Id&&face.Definition==own.Definition,"one click privately opens the full blind-focused card without priority");Check(host.Session.Snapshot.View.Version==2&&!own.FaceUp,"inspection neither submits a command nor reveals the focus");Capture("own-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
+                if(_focusInspectionStep==3){Check(!host.Screen.HasPrivateInspection,"private focus inspection closes cleanly");_focusInspectionStep++;}
                 Press("Switch seat");break;
             case 8:Press("Reveal this seat");break;
             case 9:
@@ -144,8 +144,10 @@ public partial class Main
                 Native(_duelLastPlacement);break;
             case 13:
                 Check(host!.Session.Snapshot!.View.Version==3,"drag/keyboard focus and duplicate click advance once");
-                if(_focusInspectionStep==4){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;var point=host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId);Move(point);_focusInspectionStep++;return;}
-                if(_focusInspectionStep==5){Check(host.Screen.HoverPreviewId is null,"hover never inspects an anonymous opponent focus");Native(host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
+                if(_focusInspectionStep==4){Native(host.Screen.FocusedClickPoint(host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
+                if(_focusInspectionStep==5){var own=host.Session.Snapshot.View.Players[0].Focused!.Single();Check(host.Screen.InspectedCard is {} face&&face.Id==own.Id&&face.Definition==own.Definition&&host.Session.Snapshot.View.Version==3,"hand-focused card opens the same inspector without a command");Capture("hand-focus-inspection");Press("Close inspection");_focusInspectionStep++;return;}
+                if(_focusInspectionStep==6){_inspectionBeforeOpponentClick=host.Screen.SelectedInspectionId;var point=host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId);Move(point);_focusInspectionStep++;return;}
+                if(_focusInspectionStep==7){Check(host.Screen.HoverPreviewId is null,"hover never inspects an anonymous opponent focus");Native(host.Screen.FocusedClickPoint(1-host.Session.Snapshot.View.ViewerId));_focusInspectionStep++;return;}
                 Check(host.Screen.SelectedInspectionId==_inspectionBeforeOpponentClick&&!host.Screen.HasPrivateInspection,"opponent focused backs expose no inspection");
                 Capture("focused");Press("Switch seat");break;
             case 14:Press("Reveal this seat");break;

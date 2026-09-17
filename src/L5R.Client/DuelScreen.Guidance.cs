@@ -56,7 +56,7 @@ public partial class DuelScreen
         {
             var hand=actions.FirstOrDefault(a=>a.Type=="focus"&&a.Command!.Choice is null&&a.Command.CardId is not null);
             if(hand?.Command?.CardId is {} id&&_tiles.ContainsKey(id))steps.Add(new("Choose your focus","Select a hand card, then place it in the open focus position. You can also drag it there.",CardClickPoint(id)));
-            if(actions.Any(a=>a.Type=="focus"&&a.Command!.Choice=="deck"))steps.Add(new("Focus unseen","Select your deck, then place its top card without looking.",PileClickPoint(view.ViewerId,Zone.FateDeck)));
+            if(actions.Any(a=>a.Type=="focus"&&a.Command!.Choice=="deck"))steps.Add(new("Focus unseen","Select your deck, then place its top card without looking. Once committed, click or hover over it to inspect it privately.",PileClickPoint(view.ViewerId,Zone.FateDeck)));
             if(actions.Any(a=>a.Type=="focus"&&a.Command!.Choice=="discard"))steps.Add(new("From the discard","Open ‘Focus from discard’ to choose one of the public cards offered for this duel.",_controlsRect.GetCenter()));
             if(actions.Any(a=>a.Type=="strike"))steps.Add(new("Make your stand","Choose Strike to end focusing and reveal the committed cards.",_controlsRect.Position+new Vector2(_controlsRect.Size.X/2,42*_scale)));
         }

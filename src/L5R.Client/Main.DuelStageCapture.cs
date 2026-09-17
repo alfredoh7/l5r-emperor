@@ -7,6 +7,8 @@ public partial class Main
     private readonly string[] _stageScenarios=["refusal","reaction","duelist","effects","discard","aftermath","force","honor","open","duelist-tie","four","empty","tie"];
     private int _scenarioProbe,_scenarioPhase,_scenarioMoves,_pendingStep;
     private GameCommand? _pendingDemoCommand;
+    private string? _discardInspectionId;
+    private long _discardInspectionVersion;
     private void ProcessDuelStageCapture(double delta)
     {
         _captureClock+=delta;if(_captureClock<(_scenarioPhase<=0?1.0:.45))return;_captureClock=0;
@@ -47,6 +49,17 @@ public partial class Main
         }
         if(Find("Reveal this seat") is not null){Press("Reveal this seat");return;}
         var v=host.Session.Snapshot!.View;
+        if(_stageScenarios[_scenarioProbe]=="discard"&&v.PendingDuel?.Stage=="Focusing")
+        {
+            if(_discardInspectionId is null&&v.Players[v.ViewerId].Focused?.FirstOrDefault(c=>c.FaceUp) is {} focused)
+            {_discardInspectionId=focused.Id;_discardInspectionVersion=v.Version;Native(host.Screen.CardClickPoint(focused.Id));return;}
+            if(_discardInspectionId is not null&&host.Screen.HasPrivateInspection)
+            {
+                if(host.Screen.InspectedCard is not {Definition:{}} face||face.Id!=_discardInspectionId||v.Version!=_discardInspectionVersion)
+                    throw new Exception("Discard-focused card did not open the shared full-face inspector without a command.");
+                Capture("focused-inspection");Press("Close inspection");return;
+            }
+        }
         if(host.Screen.CoachingVisible)throw new Exception("Suppressed coaching reappeared in a required stage.");
         if(v.PendingDuel is not null&&string.IsNullOrEmpty(host.Screen.EssentialStatus))throw new Exception("Required stage lost its essential status.");
         if(v.LastDuel!.Complete)

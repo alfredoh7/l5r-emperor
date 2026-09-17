@@ -48,11 +48,17 @@ static async Task DemoSession()
     var command=demo.Snapshot.Actions.Single(a=>a.Command?.Choice=="deck").Command!;
     await Task.WhenAll(demo.Submit(command),demo.Submit(command));
     Check(demo.Snapshot!.View.Version==2,"Rapid stale command is rejected");
+    var privateCopy=System.Text.Json.JsonSerializer.Deserialize<SessionSnapshot>(System.Text.Json.JsonSerializer.Serialize(demo.Snapshot))!;
+    var ownFocus=privateCopy.View.Players[1].Focused!.Single();
+    Check(ownFocus.Definition is not null&&!ownFocus.FaceUp,"Serialized owner session exposes committed blind focus while it stays face down");
     demo.SwitchPracticeSeat();
     Check(demo.Snapshot!.View.Players[1].Focused!.Length==0&&demo.Snapshot.View.Players[1].FocusCount==1,"Counts cross session without hidden identities");
     var card=demo.Snapshot.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
     await demo.Submit(demo.Snapshot.Actions.First(a=>a.Command?.Type=="focus"&&a.Command.CardId==card.Id).Command!);
-    demo.SwitchPracticeSeat();await demo.Submit(demo.Snapshot!.Actions.Single(a=>a.Type=="strike").Command!);
+    Check(demo.Snapshot!.View.Players[0].Focused!.Single().Definition!.Id==card.Definition!.Id,"Hand focus remains privately readable off-turn");
+    demo.SwitchPracticeSeat();
+    Check(demo.Snapshot!.View.Players[1].Focused!.Single().Definition!.Id==ownFocus.Definition!.Id&&demo.Snapshot.View.Players[0].Focused!.Length==0,"Returning to the owner restores its focus without the other seat identity");
+    await demo.Submit(demo.Snapshot.Actions.Single(a=>a.Type=="strike").Command!);
     var json=System.Text.Json.JsonSerializer.Serialize(demo.Snapshot);
     var copy=System.Text.Json.JsonSerializer.Deserialize<SessionSnapshot>(json)!;
     Check(copy.View.LastDuel is {Complete:true,Result.ChallengerTotal:8,Result.ChallengedTotal:7},"Retained result survives typed transport envelope");

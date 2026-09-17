@@ -6,6 +6,7 @@ using L5R.Client;
 var tests = new (string Name, Action Run)[]
 {
     ("Duel Demo canonical commands, privacy and retained result", DuelDemoTests.Canonical),
+    ("Own focused cards are inspectable from every source without opponent disclosure", DuelDemoTests.OwnFocusViews),
     ("Duel Demo scenarios and legal decisions", DuelDemoTests.Decisions),
     ("Duel stakes and source-linked public consequences", DuelDemoTests.Story),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
