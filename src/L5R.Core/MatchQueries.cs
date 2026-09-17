@@ -128,6 +128,33 @@ public sealed partial class MatchEngine
                     cardId:card.Id);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"battleActionReaction" } battleActionPending)
+        {
+            // Stormless Fury (issue #269 follow-up): scoped to the one specific offered card by id,
+            // same single-watcher shape as entryReaction/bowReaction above.
+            if(battleActionPending.PlayerId==playerId)
+            {
+                var card=Card(battleActionPending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="after-battle-action-resolves"))
+                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                        cardId:card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"announceReaction" } announcePending)
+        {
+            // Tsuruchi Yakusho (issue #269 follow-up): scoped to the one specific offered card by id.
+            if(announcePending.PlayerId==playerId)
+            {
+                var card=Card(announcePending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
+                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
+                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
+                        cardId:card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"shinden" })
         {
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});

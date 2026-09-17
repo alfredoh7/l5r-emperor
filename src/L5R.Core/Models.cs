@@ -429,6 +429,30 @@ public sealed class MatchState
     // clarification is that the whole Attack-Declaration-through-battle-resolution sequence counts as
     // one "battle phase" for this purpose, not each battlefield separately.
     public bool WarWearinessBowedThisPhase { get; set; }
+    // Stormless Fury (issue #269 follow-up): the general "after a Battle action resolves" primitive.
+    // The just-resolved Battle action's own performer, valid only while a "battleActionReaction"
+    // window is open -- stormless-fury-bow's own implicit Target (no separate selection needed, since
+    // there is only ever one performer to name).
+    public string? BattleActionReactionPerformerId { get; set; }
+    // Which Stormless-Fury-shaped card ids already used their own out-of-play "attach as Reaction"
+    // half (stormless-fury-attach) against the CURRENTLY open battleActionReaction window's own
+    // action -- the same card's own in-play "bow" half (stormless-fury-bow) may not also fire against
+    // that same action (the card owner's own errata ruling). Overwritten (cleared) every time a fresh
+    // battleActionReaction window opens for a new action, so it never leaks into a later, unrelated
+    // one -- the small transient piece of state the primitive needs, nothing more.
+    public List<string> BattleActionReaction1UsedCardIds { get; set; } = [];
+    // Tsuruchi Yakusho (issue #269 follow-up): the general "after you announce an action" primitive.
+    // The whole triggering command, stashed here (never partially applied) while an "announceReaction"
+    // window offers the one eligible watching card's own controller a chance to react before
+    // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility
+    // already uses for beforeActionReaction.
+    public GameCommand? PendingAnnouncedAction { get; set; }
+    // True for the remainder of the currently-resolving Ranged Attack's own resolution once Tsuruchi
+    // Yakusho's Reaction fires -- checked by every existing Attack-strength-reducing Reaction (Fallow
+    // Lands, Training's own negate) before it applies, and cleared unconditionally once that specific
+    // Attack actually resolves (ResolveAttackNow). A single flag, not a per-attack set, is correct and
+    // sufficient here: only one PendingAttack is ever open at a time in this engine.
+    public bool RangedAttackStrengthReductionImmune { get; set; }
     // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed Personality
     // controlled by the active player: before the turn ends, gain 1 Honor if he was not assigned to
     // attack your provinces this turn" -- a delayed, mandatory (no further choice) check, queued
