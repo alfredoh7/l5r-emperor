@@ -81,6 +81,7 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
         _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
@@ -91,6 +92,7 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if(_transitionReview){try{ProcessTransitionReview(delta);}catch(Exception e){GD.PushError(e.ToString());GetTree().Quit(1);}return;}
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
         if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
@@ -276,6 +278,7 @@ public partial class Main : Node
 
     private void FitPresentation()
     {
+        if(_transitionReview && _transitionRoom is not null)return;
         var available = GetViewport().GetVisibleRect().Size;
         var scale = available.Y / 1080f;
         // Root controls use an explicit scale, so rasterize system fonts at the
@@ -373,7 +376,7 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
+        else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview) return;
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -383,6 +386,7 @@ public partial class Main : Node
 
     private void Render()
     {
+        if(_transitionReview && _transitionRoom is not null)return;
         Interlocked.Exchange(ref _renderQueued, 0);
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
         if (MenuVisible || DuelDemoOpen || PracticeVisible) return;

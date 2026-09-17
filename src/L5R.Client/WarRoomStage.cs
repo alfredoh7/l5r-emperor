@@ -55,18 +55,18 @@ public partial class WarRoomStage : Node3D
     }
 
     public void SetTableCamera(Vector2 screenCenter, float density, Vector2 center, float zoom,
-        Vector2 boardSize, Vector2 extent, Vector2 leftLamp, Vector2 rightLamp)
+        Vector2 boardSize, Vector2 extent, Vector2 leftLamp, Vector2 rightLamp, float pitch=TableSurface.Pitch, float depth=TableSurface.Depth)
     {
         var size = GetViewport().GetVisibleRect().Size;
         var units = extent.X / MatWidth;
-        var cosine = Mathf.Sqrt(1 - TableSurface.Pitch * TableSurface.Pitch);
-        var distance = cosine / (TableSurface.Depth * units * zoom);
+        var cosine = Mathf.Sqrt(1 - pitch * pitch);
+        var distance = cosine / (depth * units * zoom);
         var target = new Vector3((center.X - boardSize.X / 2) / units, 0, (center.Y - boardSize.Y / 2) / units);
-        _camera.Position = target + new Vector3(0, distance * TableSurface.Pitch, distance * cosine);
+        _camera.Position = target + new Vector3(0, distance * pitch, distance * cosine);
         _camera.LookAt(target);
         // An off-axis frustum follows the board viewport (which excludes hand and
         // sidebar) without changing the user's pan, zoom, fit or input inverse.
-        var focalPixels = cosine * density / TableSurface.Depth;
+        var focalPixels = cosine * density / depth;
         var nearPerPixel = _camera.Near / focalPixels;
         _camera.SetFrustum(size.Y * nearPerPixel,
             new Vector2(size.X / 2 - screenCenter.X, screenCenter.Y - size.Y / 2) * nearPerPixel,
@@ -84,10 +84,10 @@ public partial class WarRoomStage : Node3D
             material.SetShaderParameter("right_lamp", rightLamp);
         }
         _hall.SetTableLanterns(leftLamp, rightLamp);
-        if (_diagnostics) CheckProjection(screenCenter, density, center, zoom, boardSize, units);
+        if (_diagnostics) CheckProjection(screenCenter, density, center, zoom, boardSize, units, pitch, depth);
     }
 
-    private void CheckProjection(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float units)
+    private void CheckProjection(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float units, float pitch, float depth)
     {
         // Zoom can put the far-off board corners arbitrarily close to/behind
         // the eye plane. Absolute pixel error there is not a visible alignment
@@ -100,9 +100,9 @@ public partial class WarRoomStage : Node3D
             var uv = new Vector2(col / 4f, row / 4f);
             var world = uv * boardSize;
             var p = (world - center) * zoom;
-            var depth = 1 - TableSurface.Depth * p.Y;
-            var expected = screenCenter + new Vector2(p.X, p.Y * TableSurface.Pitch) * density / depth;
-            if (depth <= 0 || !expected.IsFinite() || !visible.HasPoint(expected))
+            var divisor = 1 - depth * p.Y;
+            var expected = screenCenter + new Vector2(p.X, p.Y * pitch) * density / divisor;
+            if (divisor <= 0 || !expected.IsFinite() || !visible.HasPoint(expected))
             { _offscreenProjectionSamples++; continue; }
             var actual = _camera.UnprojectPosition(new((world.X - boardSize.X / 2) / units, 0, (world.Y - boardSize.Y / 2) / units));
             var error = expected.DistanceTo(actual);
@@ -110,7 +110,7 @@ public partial class WarRoomStage : Node3D
             if (error > .1f)
             {
                 _projectionFailed = true;
-                throw new InvalidOperationException($"War room and card projections differ by {error:F4} px; expected={expected}, actual={actual}, depth={1-TableSurface.Depth*p.Y}, zoom={zoom}, viewport={GetViewport().GetVisibleRect().Size}.");
+                throw new InvalidOperationException($"War room and card projections differ by {error:F4} px; expected={expected}, actual={actual}, depth={1-depth*p.Y}, zoom={zoom}, viewport={GetViewport().GetVisibleRect().Size}.");
             }
         }
     }

@@ -178,7 +178,7 @@ public partial class TableArtStage : Node3D
         return new Rect2(boardSize / 2 - extent / 2 + extent * FabricInset, extent * (1 - 2 * FabricInset));
     }
 
-    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom)
+    public void SetPlaneCamera(Vector2 screenCenter, float density, Vector2 center, float zoom, Vector2 boardSize, float fitZoom, float pitch=TableSurface.Pitch, float depth=TableSurface.Depth)
     {
         // Expand the environment around the playable area, keeping its native
         // aspect instead of stretching edge pixels into an infinite surface.
@@ -203,14 +203,14 @@ public partial class TableArtStage : Node3D
             material.SetShaderParameter("display_density", density);
             material.SetShaderParameter("camera_center", center);
             material.SetShaderParameter("camera_zoom", zoom);
-            material.SetShaderParameter("plane_pitch", TableSurface.Pitch);
-            material.SetShaderParameter("plane_depth", TableSurface.Depth);
+            material.SetShaderParameter("plane_pitch", pitch);
+            material.SetShaderParameter("plane_depth", depth);
             material.SetShaderParameter("environment_origin", origin);
             material.SetShaderParameter("environment_size", extent);
             material.SetShaderParameter("left_lamp", leftLamp);
             material.SetShaderParameter("right_lamp", RightLamp);
         }
-        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp);
+        _warRoom?.SetTableCamera(screenCenter, density, center, zoom, boardSize, extent, leftLamp, RightLamp, pitch, depth);
         CardPaper.Table.SetShaderParameter("light_radius", extent * new Vector2(.24f, .31f));
         CardPaper.Table.SetShaderParameter("light_origin", leftWorld);
         CardPaper.Table.SetShaderParameter("light_origin_right", origin + extent * RightLamp);

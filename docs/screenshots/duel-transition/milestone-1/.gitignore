@@ -1,0 +1,7 @@
+transition.mp4
+*.png
+*.json
+!final-*.png
+!final.json
+!concept-*.png
+!validation.json
