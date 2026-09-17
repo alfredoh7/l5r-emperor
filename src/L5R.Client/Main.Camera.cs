@@ -171,6 +171,11 @@ public partial class Main
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
         { GetViewport().SetInputAsHandled(); return; }
+        // The acceptance probes supply tagged viewport mouse events. Ignore
+        // unrelated live desktop gestures only in those explicit capture modes;
+        // focus checks and ordinary game input routing remain in force.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
+        { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input

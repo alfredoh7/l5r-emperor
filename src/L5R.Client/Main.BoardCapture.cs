@@ -12,6 +12,7 @@ public partial class Main
         _boardFixtureAttempts++;
         var compactMode = _captureMode.Contains("courts-compact", StringComparison.Ordinal);
         var defenseMode = _captureMode.Contains("defense", StringComparison.Ordinal);
+        var cavalryMode = _captureMode.Contains("cavalry", StringComparison.Ordinal);
         var assignmentMode = defenseMode || _captureMode.Contains("assignment", StringComparison.Ordinal);
         var assignmentType = defenseMode ? "assignDefense" : "attack";
         var minimumUnits = defenseMode ? 1 : 2;
@@ -21,7 +22,9 @@ public partial class Main
         while (View.WinnerId is null && steps++ < 1200)
         {
             _session.FollowPracticePriority();
-            var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
+            var assignment = Actions.FirstOrDefault(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits
+                && (!cavalryMode || View.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense
+                    && View.Players.Any(p => p.Army.Length > 0)));
             var targeted = Actions.FirstOrDefault(a => a.Enabled && a.Type == "useAbility" && a.CardId is not null && a.Command?.CardIds is null && a.TargetIds?.Length > 0 && a.Command?.PerformerId != a.Command?.TargetId && a.CardId != a.Command?.TargetId);
             // Fixture selection uses public engine-provided unit force only. The
             // eventual assertion checks actual resolution events, not this estimate.
@@ -57,6 +60,7 @@ public partial class Main
         {
             var action = Actions.First(a => a.Enabled && a.Type == assignmentType && a.TargetIds?.Length >= minimumUnits);
             var ids = action.TargetIds!.Take(2).ToArray(); var provinces = action.Provinces!; var version = View.Version;
+            var committedArrows = IntentArrows().Count();
             // Enter assignment by pressing the actual Personality tile, then province controls.
             _tiles.Single(t => t.Card.Id == ids[0]).EmitSignal(Button.SignalName.Pressed);
             _provinceButtons[(1 - View.ActivePlayerId, provinces[0])].EmitSignal(Button.SignalName.Pressed);
@@ -70,7 +74,12 @@ public partial class Main
             RenderInspector();
             if (_assignments[ids[0]] != provinces[0]) throw new InvalidOperationException("Inspector erased an assignment.");
             CancelChoice();
-            if (_assignments.Count != 0 || IntentArrows().Any() || View.Version != version) throw new InvalidOperationException("Cancel did not clear the draft cleanly.");
+            // Cavalry maneuvers retain reminders for already-committed Infantry.
+            // Cancel removes the local draft, not those public-state reminders.
+            if (_assignments.Count != 0 || _chosen is not null || _assignmentUnit is not null
+                || IntentArrows().Count() != committedArrows || View.Version != version)
+                throw new InvalidOperationException($"Cancel did not restore the pre-draft state: phase={View.Phase}, baselineArrows={committedArrows}, afterArrows={IntentArrows().Count()}, drafts={_assignments.Count}.");
+            GD.Print($"ASSIGNMENT_CANCEL: phase={View.Phase}; committedArrows={committedArrows}; drafts=0; versionUnchanged=True");
             _tiles.Single(t => t.Card.Id == ids[0]).EmitSignal(Button.SignalName.Pressed);
             _provinceButtons[(1 - View.ActivePlayerId, provinces[0])].EmitSignal(Button.SignalName.Pressed);
             if (ids.Length > 1)
