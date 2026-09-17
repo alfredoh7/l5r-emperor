@@ -1,0 +1,55 @@
+{
+  "Profile": "follower-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10897",
+      "Name": "Front Rank Troops",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card dies.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10897.jpg",
+      "Keywords": [
+        "Expendable"
+      ],
+      "Focus": 4,
+      "Abilities": [],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10514",
+      "Name": "Fudo's Fiends",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Expendable card is destroyed.)",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10514.jpg",
+      "Keywords": [
+        "Expendable",
+        "Fudo",
+        "Monk"
+      ],
+      "Focus": 3,
+      "Abilities": [],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
