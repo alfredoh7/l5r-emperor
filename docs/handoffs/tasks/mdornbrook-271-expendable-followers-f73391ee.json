@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Front Rank Troops and Fudo's Fiends (issue #271): both cards' BLOCKERS notes were stale -- MatchEngine.ExpendableDraw already exists and is already generically correct for any card carrying the Expendable keyword (checked at every real destroy path). Zero AbilityCatalog wiring needed; packaged as textful-but-ability-free Followers (Follower wave 10). Crosses into src/L5R.Client/Content/Published/ only for the standard content-pipeline artwork copy; no UI code touched.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 174/174 core, 52/52 published, 9/9 deck-format, 10/10 deck-workshop passed. bash tools/check.sh --skip-client: all checks passed.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/271",
+  "branch": "mdornbrook/271-expendable-followers",
+  "updated": "2026-09-17T13:34:21.548755+00:00"
+}
