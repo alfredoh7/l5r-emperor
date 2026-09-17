@@ -1089,7 +1089,7 @@ public static class PublishedContent
         return snapshot;
     }
 
-    /// <summary>Spell wave 3 (issue #269 follow-up): Stormless Fury, the first card to exercise the
+    /// <summary>Spell wave 3 (issue #276 follow-up): Stormless Fury, the first card to exercise the
     /// general "after a Battle action resolves" Reaction primitive -- see
     /// CardAbilities.OpenBattleActionReactionWindow's own doc comment.</summary>
     public static PublishedSnapshot SpellWave3 { get; } = LoadSpellWave3();
@@ -1108,7 +1108,7 @@ public static class PublishedContent
         return snapshot;
     }
 
-    /// <summary>Personality wave 19 (issue #269 follow-up): Tsuruchi Yakusho, the first card to
+    /// <summary>Personality wave 19 (issue #276 follow-up): Tsuruchi Yakusho, the first card to
     /// exercise the general "after you announce an action" Reaction primitive -- see
     /// CardAbilities.ResolveOrDeferAnnounceReaction's own doc comment.</summary>
     public static PublishedSnapshot PersonalityWave19 { get; } = LoadPersonalityWave19();

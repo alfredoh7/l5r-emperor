@@ -116,17 +116,16 @@ Both cards' printed text was verified against `content/deck-pool.json`'s own tra
 source every prior wave's `package_*_wave_*.py` reads from) and matches the task's own authoritative
 rules ruling exactly.
 
-**Known gap, art:** the underlying scan pixels for `oracle-l5r-7512`/`oracle-l5r-8895` are not
-present in this worktree -- only the committed receipts under
-`assets/reference/oracle/second-city/receipts/` exist; the actual images live in a private art
-release/webp bundle per `docs/ART_IMPLEMENTATION.md` that was not fetched here (fetching an external
-image also needs the user's own explicit download approval, which this pass did not have). This
-means `content/published/spell-wave-3.json`/`personality-wave-19.json` were hand-authored from the
-verified `deck-pool.json` text/stats rather than produced by running
-`tools/content/package_spell_wave_3.py`/`package_personality_wave_19.py` (both written and included
-for the future re-run once the scan is available), and `src/L5R.Client/Content/Published/oracle-l5r-7512.jpg`/
-`oracle-l5r-8895.jpg` are not yet added. Rules/engine behavior for both cards is complete and fully
-tested regardless; this is a pure art follow-up.
+**Art follow-up, resolved:** the scan pixels for `oracle-l5r-7512`/`oracle-l5r-8895` were absent from
+this isolated worktree (a `git worktree` does not inherit the main checkout's gitignored local scan
+cache under `assets/reference/oracle/*/images|webp/`, even though the committed receipts under
+`assets/reference/oracle/second-city/receipts/` were present). `content/published/spell-wave-3.json`/
+`personality-wave-19.json` were initially hand-authored from `deck-pool.json`'s own text/stats as a
+result. Once the scan cache was copied in from the main checkout, `tools/content/package_spell_wave_3.py`/
+`package_personality_wave_19.py` were run for real: both produced byte-identical `Cards` data to the
+hand-authored version (confirming the hand-authored transcription was accurate), with the correct
+webp-working-copy provenance now recorded in the `-sources.json` manifests and
+`src/L5R.Client/Content/Published/oracle-l5r-{7512,8895}.jpg` added. No further art gap remains.
 
 **Lane:** Rules (mdornbrook). Crosses into `src/L5R.Client/Content/Published/` only in the sense that
 the normal content-wave pipeline would place art there once available -- no UI/interaction code

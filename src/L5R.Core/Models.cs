@@ -429,7 +429,7 @@ public sealed class MatchState
     // clarification is that the whole Attack-Declaration-through-battle-resolution sequence counts as
     // one "battle phase" for this purpose, not each battlefield separately.
     public bool WarWearinessBowedThisPhase { get; set; }
-    // Stormless Fury (issue #269 follow-up): the general "after a Battle action resolves" primitive.
+    // Stormless Fury (issue #276 follow-up): the general "after a Battle action resolves" primitive.
     // The just-resolved Battle action's own performer, valid only while a "battleActionReaction"
     // window is open -- stormless-fury-bow's own implicit Target (no separate selection needed, since
     // there is only ever one performer to name).
@@ -441,7 +441,7 @@ public sealed class MatchState
     // battleActionReaction window opens for a new action, so it never leaks into a later, unrelated
     // one -- the small transient piece of state the primitive needs, nothing more.
     public List<string> BattleActionReaction1UsedCardIds { get; set; } = [];
-    // Tsuruchi Yakusho (issue #269 follow-up): the general "after you announce an action" primitive.
+    // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" primitive.
     // The whole triggering command, stashed here (never partially applied) while an "announceReaction"
     // window offers the one eligible watching card's own controller a chance to react before
     // ExecuteAbilityEffects actually runs -- the same defer-then-reexecute shape PendingNegatableAbility

@@ -130,7 +130,7 @@ public sealed partial class MatchEngine
         }
         else if(_state.PendingChoice is { Type:"battleActionReaction" } battleActionPending)
         {
-            // Stormless Fury (issue #269 follow-up): scoped to the one specific offered card by id,
+            // Stormless Fury (issue #276 follow-up): scoped to the one specific offered card by id,
             // same single-watcher shape as entryReaction/bowReaction above.
             if(battleActionPending.PlayerId==playerId)
             {
@@ -144,7 +144,7 @@ public sealed partial class MatchEngine
         }
         else if(_state.PendingChoice is { Type:"announceReaction" } announcePending)
         {
-            // Tsuruchi Yakusho (issue #269 follow-up): scoped to the one specific offered card by id.
+            // Tsuruchi Yakusho (issue #276 follow-up): scoped to the one specific offered card by id.
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);

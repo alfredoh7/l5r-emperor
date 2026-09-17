@@ -70,10 +70,10 @@ public static class CardCatalog
             new("training-token-master", "Training token master", CardType.Personality, "Phoenix", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-create-token","training-move-token","training-destroy-token","training-make-dead"], Text:"Synthetic token-primitive fixture: creates, moves and destroys tokens. Never included in a playable deck."),
             new("training-tattooed", "Training tattooed personality", CardType.Personality, "Dragon", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Tattooed"], Text:"Synthetic Monastery of New Thought fixture: carries the Tattooed keyword. Never included in a playable deck."),
             new("training-attack-reactor", "Training attack reactor", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-attack-boost","training-attack-negate"], Text:"Synthetic Ranged/Melee Attack reaction-window fixture. Never included in a playable deck."),
-            // Stormless Fury (issue #269 follow-up): a Thunder Shugenja performer, for the general
+            // Stormless Fury (issue #276 follow-up): a Thunder Shugenja performer, for the general
             // "after a Battle action resolves" out-of-play attach-as-Reaction primitive.
             new("training-thunder-shugenja", "Training Thunder Shugenja", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Thunder","Shugenja"], Abilities:["training-weapon-attack"], Text:"Synthetic Stormless Fury fixture: a Thunder Shugenja performer with a plain Melee Battle action. Never included in a playable deck."),
-            // Tsuruchi Yakusho (issue #269 follow-up): a performer with both a Ranged and a Melee
+            // Tsuruchi Yakusho (issue #276 follow-up): a performer with both a Ranged and a Melee
             // Battle action, for the general "after you announce an action" primitive's own Ranged-
             // only offering gate.
             new("training-dual-attacker", "Training dual attacker", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Abilities:["training-honor-cost-attack","training-weapon-attack"], Text:"Synthetic announce-reaction fixture: carries both a Ranged (training-honor-cost-attack) and a Melee (training-weapon-attack) Battle action. Never included in a playable deck."),

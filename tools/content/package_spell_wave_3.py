@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Spell wave 3 (issue #269 follow-up): Stormless Fury, the first card to exercise the general
+"""Build Spell wave 3 (issue #276 follow-up): Stormless Fury, the first card to exercise the general
 "after a Battle action resolves" Reaction primitive -- an out-of-play half (stormless-fury-attach,
 reusing Equip (Limited)'s own attach mechanism as a Reaction, deliberately without granting Equip
 (Battle)'s Additional Action) and an in-play half (stormless-fury-bow, bowing the Personality who
@@ -7,14 +7,6 @@ performed the just-resolved action). See MatchEngine.OpenBattleActionReactionWin
 
 Same discipline as every other wave: curated Effect/Ability mapping, hand-verified against the
 card's own scanned image, never inferred from prose.
-
-NOTE: as of this wave the underlying scan for oracle-l5r-7512 is only present in this checkout as a
-committed receipt (assets/reference/oracle/second-city/receipts/oracle-l5r-7512-printing-1-image-1.json)
--- the actual pixels live in the private art release/webp bundle per docs/ART_IMPLEMENTATION.md and
-were not fetched into this worktree. Running this script therefore requires that release (or a
-synced webp working copy) to be present locally first; content/published/spell-wave-3.json and
-src/L5R.Client/Content/Published/oracle-l5r-7512.jpg were hand-authored/left pending for this same
-reason -- see the issue #269 decision doc for the exact gap.
 """
 from __future__ import annotations
 
