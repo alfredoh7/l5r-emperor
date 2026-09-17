@@ -1,0 +1,52 @@
+{
+  "source_sha256": "9063f46431fd0dc2f4af4775d886ea15e35604452b0bf511d77472922db16a34",
+  "raw_triangles": 344296,
+  "raw_bounds": [
+    [
+      -0.9510639905929565,
+      -0.9504280090332031,
+      -0.6990230083465576
+    ],
+    [
+      0.9505569934844971,
+      0.951528012752533,
+      0.6973659992218018
+    ]
+  ],
+  "normalized_size": [
+    1.3618131875991821,
+    1.3620531558990479,
+    1.0
+  ],
+  "materials": [
+    {
+      "name": "Material_0",
+      "images": [
+        {
+          "name": "Image_0",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "name": "Image_1",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "name": "Image_2",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "cleaned_triangles": 120000,
+  "cleaned_sha256": "f7dba92bbf45d1232f6f1fbf7bf4b75b8e320d7a3844b74183fadc0e4b965c7c",
+  "cleanup": "Unit height/ground pivot; original UV/PBR maps retained; 120k triangle silhouette reduction; smooth normals. Empty pan retained. Coal bed and fire are separate assets."
+}

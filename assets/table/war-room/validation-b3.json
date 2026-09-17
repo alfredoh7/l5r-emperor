@@ -1,0 +1,195 @@
+{
+  "milestone": "B3 static fortress hall and separate Meshy props",
+  "date": "2026-09-15",
+  "base": "11d79d9b5e752325aa4cd1b213c046f0eba469f8",
+  "build": {
+    "result": "passed",
+    "warnings": 0,
+    "errors": 0,
+    "runtime": "Godot 4.7.2 .NET Compatibility; native Mac M1 Max; .NET 10.0.400"
+  },
+  "godot_import": "passed",
+  "native_cases": [
+    {
+      "case": "playable",
+      "result": "passed",
+      "visible_projection_samples": 750,
+      "max_visible_projection_error_px": 0.000252,
+      "log_sha256": "2fdbe6cf53d946047b736e5a6443f064fac20e6e2c2316b1d811fc52d71357db",
+      "captured_utc": "2026-09-15T18:16:06.045104+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/playable.png"
+    },
+    {
+      "case": "battle-focus",
+      "result": "passed",
+      "visible_projection_samples": 772,
+      "max_visible_projection_error_px": 0.000281,
+      "log_sha256": "83f78bfe885f8ed8da4a696a2da375f5c4121864f35c58af263bf6ccefc63df6",
+      "captured_utc": "2026-09-15T18:16:21.447423+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/battle-focus.png"
+    },
+    {
+      "case": "max-zoom",
+      "result": "passed",
+      "visible_projection_samples": 701,
+      "max_visible_projection_error_px": 0.000195,
+      "log_sha256": "d939d266aaa5de47f821ffe836a5aa10a377af6bc1db200b62896c4810804f01",
+      "captured_utc": "2026-09-15T18:16:39.070070+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/max-zoom.png"
+    },
+    {
+      "case": "wide",
+      "result": "passed",
+      "visible_projection_samples": 700,
+      "max_visible_projection_error_px": 0.000252,
+      "log_sha256": "819f8b593ddd6eea9f793e5e0b2583ddb53a880e2c518c03e51bed474a77b276",
+      "captured_utc": "2026-09-15T18:16:55.422464+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/wide.png"
+    },
+    {
+      "case": "compact",
+      "result": "passed",
+      "visible_projection_samples": 750,
+      "max_visible_projection_error_px": 0.000246,
+      "log_sha256": "3aad04f47db0c335e9cea03ffe28c85f98b45c3a1911fb5b02eb1411a96f539c",
+      "captured_utc": "2026-09-15T18:17:10.612464+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/compact.png"
+    },
+    {
+      "case": "expanded",
+      "result": "passed",
+      "visible_projection_samples": 217,
+      "max_visible_projection_error_px": 0.000222,
+      "log_sha256": "9517c943fc2dda739c48d8d04149e8c54f44eed67e91c896da32718e66cb774f",
+      "captured_utc": "2026-09-15T18:17:24.816954+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/expanded.png"
+    },
+    {
+      "case": "reduced-motion",
+      "result": "passed",
+      "visible_projection_samples": 275,
+      "max_visible_projection_error_px": 0.000173,
+      "log_sha256": "7c2f6de87fe1e10d5ad1e8d0784ca4408cd1172e61582dda6fe71fc7b9b6e186",
+      "captured_utc": "2026-09-15T18:17:38.840692+00:00",
+      "capture": "docs/screenshots/war-room/milestone-3/reduced-motion.png"
+    }
+  ],
+  "suite_scope": "Existing native mouse/keyboard/camera and card-edge targeting probes; expanded unit/inspector and reduced-motion checks. Final room-pane containment adjustment followed this suite and was rechecked with native room/fixture captures and the normal launcher.",
+  "projection_scope": "25-point grid checked only for visible, in-front-of-eye samples. Offscreen/behind-eye points excluded from absolute pixel accuracy claims. A prior whole-board-corner diagnostic reported 12.662 px at maximum zoom; a subsequent unmodified diagnostic run passed. Camera matrices/input behavior were not changed. Diagnostics now report FAIL on failure rather than unconditionally reporting PASS on exit.",
+  "iteration_findings": [
+    "Earlier battle-focus wheel test failed once; subsequent native battle-focus test passed without camera/input implementation changes.",
+    "Meshy room lamp generated an electric bulb; it was removed and a native wax/flame interior installed.",
+    "Native close-up exposed oversized flame and protruding room panes; their placement/containment was corrected.",
+    "Final launcher check initially picked macOS Python 3.9 and failed on hashlib.file_digest; run.sh now selects installed Python >=3.12, retaining the explicit L5R_PYTHON override and catalogue validation."
+  ],
+  "meshy": {
+    "tasks": 5,
+    "credits_reported": 150,
+    "balance_before": 1805,
+    "balance_after": 1655,
+    "raw_downloads": "Ignored artifacts/meshy; public receipts under assets/table/war-room/meshy",
+    "paid_addons": "None"
+  },
+  "artifacts": {
+    "assets/table/war-room/approved-fortress-hall-b3.png": {
+      "sha256": "a12b4e6350268639f5670bc45b923a7c2b1bac14572adf283afab1c247c46059",
+      "bytes": 2257949
+    },
+    "assets/table/war-room/fortress-hall-b3.blend": {
+      "sha256": "bdfdcda2a1a2b9fea918181aaed2ac1ea288d99bd522d978a4cdd3f7d741bebe",
+      "bytes": 6478862
+    },
+    "src/L5R.Client/Art/navy-mat-topaz-4x.webp": {
+      "sha256": "932b3cadd4deea8352fe37b90b01e15b1e833f2d7757a773cbc23a172b47bc32",
+      "bytes": 19905220
+    },
+    "src/L5R.Client/Art/LacquerFrame/lacquer-frame-a.glb": {
+      "sha256": "f5099c4f67c77c4d7dfbf97450eb8adeb6f4998d1ed5ec4e0aeea4ef853d8136",
+      "bytes": 819332
+    },
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3.glb": {
+      "sha256": "9103294064476728b7de954254215a694ace1d49a84be0de277f0c569ef9889a",
+      "bytes": 9779640
+    }
+  },
+  "limits": [
+    "This is a visual-review milestone, not accepted 1:1 artwork.",
+    "Scanned timber, source-crop vista resolution, fixture material finish and exact light distribution differ from the illustration.",
+    "Native Compatibility direct practical/ambient lighting; no baked global illumination.",
+    "Fixed-pitch optical stage; arbitrary orbit is not supported by this composition.",
+    "Room animation deferred. Existing cloth/card reduced-motion behavior preserved.",
+    "No native Windows, sustained performance profile or human full-match acceptance claimed."
+  ],
+  "coordination": "GitHub #233 and draft #234; board token unavailable. Checked PR #124 tools/run.sh overlap: retained identical existing catalogue-install invocation; only Python runtime selection changed.",
+  "launcher": {
+    "result": "passed",
+    "command": "env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash Play Latest.command --resolution 1672x941 -- --capture=... --capture-mode=published-board",
+    "python_selected": "Homebrew Python 3.14.6; Apple Python 3.9 rejected as below project minimum",
+    "native_viewport": [
+      1672,
+      942
+    ],
+    "capture": "docs/screenshots/war-room/milestone-3/launcher.png",
+    "log_sha256": "07e3d9a7bc746d22fe5d39ad2583a514ce5a262f9dd872e594177568c8b24b59"
+  },
+  "captures": {
+    "battle-focus.png": {
+      "sha256": "8e0e270dccd5e02cbccf0d812324a48614aa22e67307d17be396f5b8e703e9a8",
+      "bytes": 3123467
+    },
+    "room-lantern.png": {
+      "sha256": "b2ac1d2a98972110b7ad2b7446412c7d40d2f4e94ea179290ae4f879bb5bd6a4",
+      "bytes": 486222
+    },
+    "launcher.png": {
+      "sha256": "4f96a9ea1c73fdbd2f4ac18728997c3e30cade5e77a79ef05401c1e70bf0d447",
+      "bytes": 2505702
+    },
+    "wide.png": {
+      "sha256": "0deded5acb20523867b1deb10420629f162ac0473d9b39fa13e99743fb9c622e",
+      "bytes": 4132777
+    },
+    "max-zoom.png": {
+      "sha256": "a78bce99690de66a14f15839680ba689fa35a668ada6fb466b8629f2fcd9b445",
+      "bytes": 2542070
+    },
+    "compact.png": {
+      "sha256": "5a3aac54d99f2763274a4e5653f78bfa74d7728055b09891caa11fd10136293c",
+      "bytes": 2056795
+    },
+    "playable.png": {
+      "sha256": "02449fe43cede91f1b8d44160cc8510a1d5fd0f5e6ba13c994e789a44b2c5f53",
+      "bytes": 3260691
+    },
+    "reduced-motion.png": {
+      "sha256": "f26e002b1eef1d1eae11a329c044605b92c0af2540801f896106753061b7dc96",
+      "bytes": 3262661
+    },
+    "composition.png": {
+      "sha256": "19cd192996a15afb081aeabe58d1ee7fbf36555e3ce291b63cec2692d4170aba",
+      "bytes": 2008270
+    },
+    "table-lantern.png": {
+      "sha256": "644978aaf261c948f34c00706f973db8469f90e41e72f68b3d96ddebb8cb8748",
+      "bytes": 1525800
+    },
+    "expanded.png": {
+      "sha256": "5635dcf1ee33d0b4e7a1c8b356907c24ff57df6f3336d4757c7c86fcbd293658",
+      "bytes": 3110706
+    }
+  },
+  "isolated_render_smoke": {
+    "result": "passed",
+    "forced_draw_sync_frames": 60,
+    "capture_result": "OK",
+    "log_sha256": "8560fb82c289e602a4e50a1222103597858125654b9a0c192a51db9668630572",
+    "scope": "Short isolated render/capture smoke only. Process-frame timing was discarded because it did not guarantee a rendered frame. No sustained FPS or gameplay performance claim."
+  },
+  "blender_reopen": {
+    "result": "passed",
+    "linked_asset_libraries": 5,
+    "missing_libraries": 0,
+    "assembly_bytes": 6478862,
+    "log_sha256": "a6974ccbb201ee65530c8fa5677e846270372283e62333fabb918dd86e06cc4c"
+  }
+}

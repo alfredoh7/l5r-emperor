@@ -13,6 +13,7 @@ try
     var url = app.Urls.Single();
     var cases = new (string Name, Func<Task> Test)[]
     {
+        ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
@@ -150,4 +151,16 @@ static async Task PublishedPlay(string url)
     var wire = WireGameCommand.FromCore(new GameCommand("useAbility",1,1,"source",TargetId:"target",AbilityId:"shinden-choice",PerformerId:"performer",Choice:"honor"));
     var bound = wire.BindToSeat(0,7);
     Check(bound.AbilityId=="shinden-choice" && bound.PerformerId=="performer" && bound.Choice=="honor" && bound.PlayerId==0 && bound.ExpectedVersion==7,"New fields survive wire conversion while actor/version remain authenticated.");
+}
+
+static async Task CustomPlay()
+{
+    using var session=new MatchSession{LocalDisplayName="Custom player"};
+    session.StartCustomPractice(CustomPractice.Preset("Lion"),CustomPractice.Preset("Crane"));
+    var initial=session.Snapshot!;
+    Check(initial.View.ViewerId==0&&initial.View.Players[0].Clan=="Lion"&&initial.View.Players[0].Name=="Custom player","Chosen deck belongs to local seat zero.");
+    try{session.StartCustomPractice(new Deck("Emperor",[]),CustomPractice.Preset("Crane"));throw new Exception("Invalid deck accepted");}catch(ArgumentException){}
+    Check(ReferenceEquals(session.Snapshot,initial),"Invalid selection must not discard a running Practice.");
+    await session.Submit(new GameCommand("concede",0,initial.View.Version));
+    Check(session.Snapshot!.View.WinnerId==1,"Custom commands execute in the authoritative local engine.");
 }

@@ -1,0 +1,6 @@
+{
+  "tool": "image_gen.imagegen",
+  "source": "src/L5R.Client/Art/Practice/approved-A.png",
+  "output": "src/L5R.Client/Art/Practice/button-plate.png",
+  "prompt": "Edit the attached approved Practice setup screenshot. Make one precisely localized change only: in the large gold START PRACTICE button at bottom right, erase the words START PRACTICE and the black right arrow completely. Reconstruct the same beautiful textured hammered gold leaf material underneath. Leave the gold button border, corners, relief, bevels, patina and all other pixels of the full screenshot exactly unchanged. Button stays in identical position and size. Do not change or remove any other text or any other element. The button interior should be entirely blank golden material with natural mottling, no glyphs. Preserve original 1672x941 composition."
+}

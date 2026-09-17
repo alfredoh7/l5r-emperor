@@ -15,10 +15,16 @@ public partial class Main
             var turn = View.WinnerId is int winner ? (winner == player.Id ? "VICTORY" : "MATCH ENDED") :
                 View.ActivePlayerId == player.Id ? (own ? "YOUR TURN" : "OPPONENT'S TURN") : "";
             var action = own ? player.Name : player.Name == player.Clan ? "Opponent" : player.Name;
-            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowPile(player.Id,Zone.Dead),
-                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id)
-                { ReducedMotion = _reducedMotion },16,own?938:14,270,120);
+            var plaqueY=own?950-FallenCounter.DesignHeight-4:14;
+            Place(_clanHud,new ClanPlaque(player.Clan,player.Honor,production,View.FavorPlayerId==player.Id,()=>ShowFallenGallery(player.Id),
+                action, turn, View.WinnerId is null && View.PriorityPlayerId == player.Id, View.WinnerId is null && View.ActivePlayerId == player.Id,
+                player.HandCount, player.HandLimit)
+                { ReducedMotion = _reducedMotion },16,plaqueY,ClanPlaque.DesignWidth,ClanPlaque.DesignHeight);
+            var fallen=new FallenCounter { Player=player };
+            fallen.Pressed+=()=>ShowFallenGallery(player.Id);
+            Place(_clanHud,fallen,16,plaqueY+ClanPlaque.DesignHeight+4,ClanPlaque.DesignWidth,FallenCounter.DesignHeight);
         }
+        if(IsInstanceValid(_fallenGallery))_fallenGallery!.Refresh(View.Players);
     }
     private readonly Dictionary<(int,Zone), CardView> _discardPreview = [];
     private void RenderPiles()
@@ -44,18 +50,27 @@ public partial class Main
                 Place(_pileHud,new TablePile(player,zone,()=>ShowPile(player.Id,zone),_discardPreview.GetValueOrDefault(key)?.Definition),SlotX(player,slots[i])+31,y+2,142,PlaneHeight(CardHeight)-4);
             }
         }
+        RenderRemovedPiles();
     }
     private void ShowTableMenu()
     {
-        var (dialog,body)=Dialog("The table",500,780);
+        var (dialog,body)=Dialog("The table",560,720);
+        dialog.GetOkButton().Hide();
+        body.AddThemeConstantOverride("separation", 9);
         body.AddChild(Palette.Text("Emperor",32,Palette.Gold,true));
         body.AddChild(Palette.Wrapped(_status.Text,16,Palette.PaperDim));
         foreach(var (text,action) in new (string,Action)[]{("Practice",ShowPractice),("Private match",ShowOnline),("Card library",()=>LibraryDialog.Show(this)),("Match history",ShowHistory),("Settings",ShowSettings),("Main menu",ShowMainMenu),("Export practice replay",ExportReplay),("Rules coverage",ShowCoverage),("Concede…",ShowConcede)})
-            body.AddChild(Palette.Button(text,()=>{dialog.QueueFree(); action();}));
-        body.AddChild(Palette.Button("Return to game",dialog.QueueFree));
+            {
+            var button = SidebarSkin.Button(text,()=>{dialog.QueueFree(); action();});
+            button.CustomMinimumSize = new Vector2(0,48);
+            foreach(var state in new[]{"normal","hover","pressed"}) { var skin = SidebarSkin.Surface(true); skin.ContentMarginTop=skin.ContentMarginBottom=8; button.AddThemeStyleboxOverride(state,skin); }
+            body.AddChild(button);
+        }
+        body.AddChild(SidebarSkin.Button("Return to game",dialog.QueueFree,true));
     }
     private void ShowPile(int owner, Zone zone)
     {
+        if(zone==Zone.Dead){ShowFallenGallery(owner);return;}
         var player=View.Players.Single(p=>p.Id==owner);
         var deck=zone is Zone.FateDeck or Zone.DynastyDeck;
         var name=zone switch { Zone.FateDeck=>"Fate deck",Zone.DynastyDeck=>"Dynasty deck",Zone.FateDiscard=>"Fate discard",Zone.DynastyDiscard=>"Dynasty discard",_=>"Fallen cards" };
@@ -66,11 +81,6 @@ public partial class Main
             body.AddChild(Palette.Wrapped($"{(zone==Zone.FateDeck?player.FateDeckCount:player.DynastyDeckCount)} cards remain. Deck contents and order are hidden.",19));
             if(zone==Zone.FateDeck) body.AddChild(Palette.Text($"{player.HandCount} cards in hand",18));
             return;
-        }
-        if(zone==Zone.Dead)
-        {
-            var lost=player.Provinces.Where(p=>p.Destroyed).Select(p=>(p.Index+1).ToString()).ToArray();
-            body.AddChild(Palette.Wrapped(lost.Length==0?"No provinces lost.":"Lost provinces: "+string.Join(", ",lost),17,Palette.PaperDim));
         }
         var cards=player.Discard.Where(c=>c.Zone==zone).ToArray();
         body.AddChild(Palette.Text(cards.Length==0?"No cards in this pile.":$"{cards.Length} cards · hover to read",16,Palette.PaperDim));

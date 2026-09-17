@@ -1,0 +1,22 @@
+{
+  "date": "2026-09-15",
+  "platform": "macOS / Godot 4.7.2 Compatibility / Apple M1 Max",
+  "build": "C# build passed with 0 warnings and 0 errors; full launcher also passed",
+  "native_captures": [
+    "composition",
+    "overview",
+    "joinery"
+  ],
+  "capture_status": "All three native renders completed without script/shader/runtime errors and were visually inspected. Capture input is disabled and the source overlay hidden.",
+  "blender": "5.2.1 editable model, GLB export and Cycles composition render passed",
+  "triangles": 135104,
+  "glb_bytes": 9694216,
+  "source_sha256": "df88548cc42b99252951966e4baf5b8f1c8ac47b4d05eaac809cc8f2266f3cfb",
+  "preserved_by_hash": [
+    "approved source",
+    "Topaz mat",
+    "existing lacquer-frame GLB"
+  ],
+  "static_checks": "HTML local links resolved; Python and shell syntax and git diff checks passed.",
+  "boundaries": "Architecture milestone only. Live match input/camera checks and native Windows playtest not performed. Furniture/materials preliminary, no Meshy spend. Browser preview was blocked by local file URL policy; gallery browser interaction was not tested."
+}
