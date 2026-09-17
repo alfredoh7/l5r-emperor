@@ -34,7 +34,7 @@ public partial class EventDecisionSidebar : Control
         var harsh=pending.Type=="harshChoices";var strife=pending.Type=="timesOfStrifeDiscard";
         var column=_column=new VBoxContainer();column.AddThemeConstantOverride("separation",7);Content().AddChild(column);
         if(harsh)column.AddChild(Centered(own?"EVENT · YOUR CHOICE":"EVENT · OPPONENT’S CHOICE",17,Palette.PaperDim));
-        column.AddChild(Centered(harsh?"HARSH CHOICES":strife?"TIMES OF STRIFE":"OVERCONFIDENT",30,Palette.Paper,true));
+        column.AddChild(Centered(harsh?"HARSH CHOICES":strife?"TIMES OF STRIFE":pending.Type=="brashDraw"?"BRASH":"OVERCONFIDENT",30,Palette.Paper,true));
         column.AddChild(new DecisionRule());
         if(harsh && source?.ProvinceIndex is int province)
             column.AddChild(Centered($"{(own?"Your":"Opponent’s")} Province {province+1}",19,Palette.Paper));
@@ -72,7 +72,7 @@ public partial class EventDecisionSidebar : Control
         else
         {
             column.AddChild(Centered(own?"You may draw 1 card.":"Your opponent is deciding whether to draw a card.",24,Palette.Paper));
-            if(own)foreach(var option in actions.Where(a=>a.Type=="overconfidentDraw"))
+            if(own)foreach(var option in actions.Where(a=>a.Type==pending.Type))
             {
                 var b=SidebarSkin.Button(option.Label,()=>submit(option),option.Command?.Choice=="draw");b.Disabled=!canCommit||!option.Enabled;column.AddChild(b);
             }

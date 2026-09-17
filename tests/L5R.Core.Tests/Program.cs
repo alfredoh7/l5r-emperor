@@ -5,6 +5,15 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Stabilization/Brash", StabilizationTests.Brash),
+    ("Stabilization/BowReactions", StabilizationTests.BowReactions),
+    ("Stabilization/BeforeAction", StabilizationTests.BeforeAction),
+    ("Stabilization/HoldingProduction", StabilizationTests.HoldingProduction),
+    ("Stabilization/WeaknessTarget", StabilizationTests.WeaknessTarget),
+    ("Stabilization/Shadowlands", StabilizationTests.Shadowlands),
+    ("Stabilization/FateCosts", StabilizationTests.FateCosts),
+    ("Stabilization/EquipQuotes", StabilizationTests.EquipQuotes),
+    ("Stabilization/EarthFlows", StabilizationTests.EarthFlows),
     ("Harsh Choices: query offers both legal choices and resumes Events", EventDecisionTests.HarshQueries),
     ("Harsh Choices: last-province defeat stays finished", EventDecisionTests.LastProvince),
     ("Times of Strife: legal hand choices, privacy and exact public discard", EventDecisionTests.StrifeQueries),
@@ -184,7 +193,7 @@ var tests = new (string Name, Action Run)[]
     ("Second City unwired-card audit, Strategy wave 6: five Battle-timed Strategy cards (Dispensing Justice, Bow Before My Will, Surety of Purpose, Unexpected Support, Wrathful Ancestor) found fully buildable with pre-existing primitives -- the generic RequiredKeywords Performer shape, exemption-by-omission from Tamoko's own curated negation list, and one new enemy-scoped Follower-count Target category", SecondCityStrategyWave6),
     ("Second City unwired-card audit, Personality wave 18: ten Personalities found fully buildable with pre-existing primitives -- Keppo's own Reconnaissance-gated fizzle, Kuronada's own attachment-restricted destroy, Matsu Kasei reusing 'incapacitated' verbatim, Moto Ming-Gwok's own dead-Personality-gated Attack, Shiba Kudome's own Bow-the-loser self-performer duel, Shosuro Ritoru's own compound bow-then-conditional-destroy, Takasho's own reinforce-and-grant plus separate Attack, and Yogo Adi's own dishonorable-or-bulk-province-boost choice", SecondCityPersonalityWave18),
     ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
-    ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive)
+    ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the target's own base Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -958,10 +967,8 @@ static void SecondCityStrategyWave6()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
         Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Not eligible for destruction (Honorable, no qualifying keyword): moved home instead");
     }
-    // Bow Before My Will: bows the target and costs 2 Honor; no wired Shadowlands-clan card exists
-    // yet to exercise the conditional negated-straightening half, so this only confirms the
-    // baseline (non-Shadowlands performer) case -- HasClanAffiliation itself is already proven
-    // correct elsewhere (e.g. kamina-exp-attack).
+    // Bow Before My Will: baseline without the Shadowlands keyword. StabilizationTests
+    // also covers its conditional straightening block with a Shadowlands performer.
     {
         var s=StrongholdBattle("oracle-l5r-1218");
         var strat=Add(s,"oracle-l5r-1121",0,Zone.Hand);
@@ -1412,7 +1419,8 @@ static void BattleOpenPresencePrimitive()
         var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
         var performer=Add(s,"training-crane-samurai",0,Zone.Home); // base Force 3
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
-        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Force 4, different from the performer's base Force
+        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Modified below its own printed Force
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
         Check(e.State.Cards[target.Id].Bowed,"Was unbowed: toggled to bowed, via the Open route with no battle in progress at all");
@@ -1424,7 +1432,8 @@ static void BattleOpenPresencePrimitive()
         var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
         var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // base Force 3
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
-        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0); // Force 4
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0); // Modified below its own printed Force
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
         Check(!e.State.Cards[target.Id].Bowed,"Was bowed: toggled to straightened, via the Battle route with the performer present");
@@ -1435,10 +1444,11 @@ static void BattleOpenPresencePrimitive()
         var performer=Add(s,"training-crane-samurai",0,Zone.Home); // NOT at the current battlefield
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
         var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
     }
-    // The Target's own comparison is against the performer's BASE Force (the printed stat), and the
+    // The target's current Force must differ from that same target's printed Force, and the
     // target itself must also be at the current battlefield during the Battle half.
     {
         var s=StrongholdBattle("oracle-l5r-1218");
@@ -1489,6 +1499,7 @@ static void BattleOpenPresencePrimitive()
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"improved-defenses-strength",PerformerId:artisan.Id));
     }
 }
+
 static void ChooseStraightenDecline()
 {
     var e=MatchEngine.CreateEconomyScenario(); var s=e.State;

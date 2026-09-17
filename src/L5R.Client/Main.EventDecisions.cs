@@ -8,7 +8,7 @@ public partial class Main
     private EventDecisionHandBar _eventHandBar=null!;
     private string? _eventDiscardId;
     private long _eventSelectionVersion=-1;
-    private bool EventDecisionActive=>View.WinnerId is null && View.PendingChoice?.Type is "harshChoices" or "timesOfStrifeDiscard" or "overconfidentDraw";
+    private bool EventDecisionActive=>View.WinnerId is null && View.PendingChoice?.Type is "harshChoices" or "timesOfStrifeDiscard" or "overconfidentDraw" or "brashDraw";
     private bool OwnEventDecision=>EventDecisionActive && View.PendingChoice!.PlayerId==View.ViewerId && View.PriorityPlayerId==View.ViewerId;
     private bool CanCommitEvent=>_session.Snapshot is not null && !_session.Busy && !PresentationBusy && (!_session.Online || _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p=>!p)??false));
     private ActionOption? SelectedEventDiscard=>OwnEventDecision?Actions.FirstOrDefault(a=>a.Enabled && a.Type=="timesOfStrifeDiscard" && a.Command?.TargetId==_eventDiscardId):null;

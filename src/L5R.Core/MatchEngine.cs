@@ -801,7 +801,7 @@ public sealed partial class MatchEngine
         if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
-            if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
+            if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); if(destroyedDefenders>0) CheckEarthFlowsBonus(attacker,a); }
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
@@ -817,7 +817,7 @@ public sealed partial class MatchEngine
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
-            if(!RehonorWinners(d)) { GainHonor(defender,destroyedAttackers*2,"Battle victory"); CheckEarthFlowsBonus(defender,d); }
+            if(!RehonorWinners(d)) { GainHonor(defender,destroyedAttackers*2,"Battle victory"); if(destroyedAttackers>0) CheckEarthFlowsBonus(defender,d); }
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
             GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(defender),destroyedAttackers>0);
@@ -952,6 +952,11 @@ public sealed partial class MatchEngine
             GainHonor(winnerId,2,"The Earth Flows",spell);
     }
 
+    // Shared by command validation and legal-action discovery; target-specific discounts stay in Core.
+    private int EquipCost(int playerId,CardInstance card,CardInstance target) => Math.Max(0,
+        Definition(card).GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
+        -(Definition(card).Effect=="lion-clan-discount" && Player(playerId).Clan=="Lion"?1:0));
+
     private void Equip(GameCommand command)
     {
         Require(_state.Phase==Phase.Action && command.PlayerId==_state.ActivePlayerId,"Equip is a Limited action on your turn.");
@@ -976,8 +981,7 @@ public sealed partial class MatchEngine
         // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
         // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
         // folded into that one).
-        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
-            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0));
+        var cost=EquipCost(command.PlayerId,card,target);
         Pay(command.PlayerId,card,cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;

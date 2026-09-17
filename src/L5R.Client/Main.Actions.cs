@@ -82,6 +82,11 @@ public partial class Main
         if (_chosen is { Type: "discardHand" }) { RenderHandDiscard(); return; }
         // An inspected reminder must never hide a new engine decision (e.g. hand limit).
         if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
+        if(View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction")
+        {
+            foreach(var reaction in Actions.Where(a=>a.Type=="useAbility")) AddAction(_inspector,reaction);
+            return;
+        }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
         if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
@@ -206,7 +211,7 @@ public partial class Main
             _inspector.AddChild(picker);
         }
         var definition = action.CardId is null ? null : FindCard(action.CardId)?.Definition;
-        var cost = action.Type == "equip" || definition?.Type == CardType.Strategy ? definition?.GoldCost ?? 0 : 0;
+        var cost = action.GoldCost ?? (action.Type == "equip" || definition?.Type == CardType.Strategy ? definition?.GoldCost ?? 0 : 0);
         if (cost > 0) RenderSources(cost);
         var confirm = SidebarSkin.Button(cost > 0 ? $"Confirm action · {cost} Gold" : "Confirm action", () => Submit(command with { SourceIds = _sources.ToArray(), TargetId = target }), true);
         confirm.Disabled = !action.Enabled || _session.Busy || cost > 0 && SelectedProduction() < cost;
@@ -264,7 +269,8 @@ public partial class Main
         var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type == "purchase" ? "Review payment…" : option.Label;
         var button = SidebarSkin.Button(label, () =>
         {
-            if (option.Type is "purchase" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
+            if (option.Type=="useAbility" && View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction" && option.TargetIds is {Length:0} && option.Command is { } reaction) Submit(reaction);
+            else if (option.Type is "purchase" or "equip" or "playStrategy" or "attack" or "assignDefense" or "discardHand" or "useAbility") Choose(option);
             else if (option.Type == "discardProvince") Confirm("Discard this province card?", "Discarding starts the Dynasty discard step. You cannot recruit more cards this phase.", () => Submit(option.Command!));
             else if (option.Command is { } command) Submit(command);
         }, option.Type is "pass" or "endDynasty" or "declineReaction");

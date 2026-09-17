@@ -670,7 +670,7 @@ public static class AbilityCatalog
         // The Weakness of Man (issue #267): the proof case for the general Battle/Open presence
         // primitive -- Open half performed from Home with no presence check, Battle half needing the
         // performer's own AtBattle presence exactly like an ordinary Battle ability.
-        ["weakness-of-man-toggle"] = new("BattleOrOpen", "Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him", "personality-force-neq-performer-base", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
+        ["weakness-of-man-toggle"] = new("BattleOrOpen", "Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him", "personality-force-neq-own-base", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
         // Improved Defenses (issue #267): the proof case for the "at any location" presence
         // exemption -- an ordinary "Battle"-Timing ability whose own printed Performer text softens
         // the usual at-this-battlefield requirement without removing it outright.
@@ -1323,6 +1323,8 @@ public sealed partial class MatchEngine
         }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
+        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3,"Discarding three Fate cards is a required cost.");
+        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1,"Discarding a Fate card is a required cost.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         if (id == "tamoko-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         if (id == "shosei-honor") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")), "You must control a Temple.");
@@ -1746,13 +1748,9 @@ public sealed partial class MatchEngine
                         // lookup false-ring-of-water-recruit's own Require already uses.
                         "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
                             CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
-                        // The Weakness of Man (issue #267): "Force is different from his [the
-                        // performer's] own BASE Force" -- the performer's side of the comparison is
-                        // its own printed Force (Definition(...).Force), not CardForce's live value, so
-                        // a Force-modifying effect on the performer never changes who is a legal target
-                        // mid-battle. The target's own side is its live Force, same as every other
-                        // Force-comparison Target category here.
-                        "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
+                        // The Weakness of Man compares the target with its own printed Force;
+                        // the performing Monk's Force does not affect target eligibility.
+                        "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
                         // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
@@ -1952,7 +1950,7 @@ public sealed partial class MatchEngine
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonorFromPerformer(Card(command.PerformerId!), 2, "Shamate Keep"); break;
             // Second City unwired-card audit (issue #264):
             case "dispensing-justice-destroy":
-                if (!HasAttachments(target!) && (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands")))
+                if (!HasAttachments(target!) && (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || Keyword(target, "Shadowlands")))
                     DestroyUnits([target!], false, player.Id);
                 else MoveHome(target!, false);
                 break;
@@ -1960,7 +1958,7 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id))
                 {
                     target!.Bowed = true;
-                    if (HasClanAffiliation(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
+                    if (Keyword(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
                 }
                 GainHonor(player.Id, -2, "Bow Before My Will", source);
                 break;
@@ -2048,7 +2046,7 @@ public sealed partial class MatchEngine
             }
             case "winds-of-dismissal-choice":
                 Card(source!.AttachedTo!).Bowed = true;
-                if (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands"))
+                if (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || Keyword(target, "Shadowlands"))
                     GainHonor(target.OwnerId, -Definition(target).PersonalHonor, "Winds of Dismissal", source);
                 if (Keyword(Card(source.AttachedTo!), "Air")) GainHonor(player.Id, 1, "Winds of Dismissal", source);
                 break;
@@ -2895,7 +2893,7 @@ public sealed partial class MatchEngine
     private static int TokenCount(CardInstance card, string type) => card.Tokens.Count(t => t.Type == type);
     private static bool HasToken(CardInstance card, string type) => card.Tokens.Any(t => t.Type == type);
 
-    private IEnumerable<ActionOption> AbilityActions(int playerId)
+    private IEnumerable<ActionOption> AbilityActions(int playerId,bool reactionsOnly=false)
     {
         var player = Player(playerId);
         // Discipline (issue #184): a discard-pile card is only a candidate source at all if it carries
@@ -2910,7 +2908,8 @@ public sealed partial class MatchEngine
         foreach (var (source, id) in sources)
         {
             var ability = AbilityCatalog.All[id];
-            var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
+            if(reactionsOnly && ability.Timing != "Reaction") continue;
+            var phaseOk = ability.Timing == "Reaction" ? _state.PendingChoice is not null : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization

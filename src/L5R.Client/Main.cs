@@ -114,6 +114,7 @@ public partial class Main : Node
             _session.StepPracticeReaction();
         }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-events",StringComparison.Ordinal)) { ProcessEventCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-tactile") { ProcessTactileCapture(); return; }
         if (_capturePath is not null)

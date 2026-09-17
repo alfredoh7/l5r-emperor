@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Start authorized non-duel stabilization: three existing decision flows and six PR270 card/data/query findings. Current origin/main and approved Event UI dependency integrated; separate duel work excluded.",
-  "validation": "Initial scope and concurrent PR paths inspected; implementation and regression checks not yet run.",
-  "remaining": "Implementation, regression/native checks, review and final handoff pending.",
+  "summary": "Implement three non-duel continuations and six PR270 card/data/query fixes in issue274; native probe and validation in progress. Preserve approved UI and separate duel work.",
+  "validation": "All nine new regression groups reproduced failures before fixes and pass afterward; full deterministic/content/AI/server/transport suite passed 476 checks. Client build clean. Native Brash draw, decline and opponent view passed; reaction probe needs the pass-device privacy confirmation handled correctly. These results precede the new origin/main follower integration.",
+  "remaining": "Integrate current main, update required artwork pack, complete native regression captures and Event rerun, final checks and mdornbrook review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/274",
   "branch": "codex/274-stabilization",
-  "updated": "2026-09-17T16:18:48.922284+00:00"
+  "updated": "2026-09-17T16:34:04.957393+00:00"
 }

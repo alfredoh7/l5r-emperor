@@ -467,9 +467,11 @@ public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, i
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
     bool ProclaimEligible, string? Error, PaymentOption[] Payments);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
+/// <param name="GoldCost">Authoritative cost for this action's offered targets. Null in older
+/// snapshots or for actions without a quoted Gold cost; clients must not infer card discounts.</param>
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
-    int[]? Provinces = null, PurchaseQuote? Quote = null);
+    int[]? Provinces = null, PurchaseQuote? Quote = null, int? GoldCost = null);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
