@@ -753,6 +753,24 @@ public static class AbilityCatalog
         // now checks before applying, cleared once that specific Attack's own resolution completes
         // (ResolveAttackNow) -- never carried into a later, unrelated Attack.
         ["tsuruchi-yakusho-immunity"] = new("Reaction", "After you announce an action, if Yakusho is at the current battlefield: Ranged Attacks from the action's effects will not have their strength reduced", "none", Trigger: "own-ranged-action-announced"),
+        // Legion of the Bat (issue #279): "Reaction: After the resolution of an action that moved a
+        // target enemy Infantry Personality to this card's battlefield: Bow the Personality." Target
+        // "none" -- the affected card is auto-determined from MoveReactionTargetId (set by
+        // OpenMoveReactionWindow), not separately chosen by the reacting player, the same shape
+        // Rokai/Tamoko's own before-action-resolves Reactions already use for a similarly
+        // context-determined card. See MoveToBattlefield's own doc comment for what counts as "moved."
+        ["legion-of-bat-bow"] = new("Reaction", "After the resolution of an action that moved a target enemy Infantry Personality to this card's battlefield: Bow the Personality.", "none", Trigger: "moved-enemy-infantry-to-own-battlefield"),
+        // Nikutai (issue #279): "Reaction: Even if this card is bowed, after a Follower in this unit
+        // bows: Straighten it." "It" is the sibling Follower that just bowed, not Nikutai itself --
+        // confirmed directly against the card's own scan, since the local catalogue's own paraphrase
+        // ("Tireless Reaction") could otherwise be misread either way. Target "none" -- the affected
+        // Follower is auto-determined from NikutaiReactionTargetId (set by OpenNikutaiReactionWindow),
+        // the same shape legion-of-bat-bow above uses. "Even if this card is bowed" is the plain-
+        // English printing of this engine's own established "Tireless"/bowed-source exemption (see
+        // ValidateAbility's own exemption list) -- Nikutai needs it because the SAME bow-sweep that
+        // bows a sibling Follower could, in principle, have bowed Nikutai itself first.
+        ["nikutai-straighten"] = new("Reaction", "Even if this card is bowed, after a Follower in this unit bows: Straighten it.", "none", Trigger: "sibling-follower-bowed"),
+        ["nikutai-attack"] = new("Battle", "Melee 5 Attack", "attack"),
     });
 }
 
@@ -1285,6 +1303,13 @@ public sealed partial class MatchEngine
                 // primitive's own window, same single-watcher shape.
                 "own-ranged-action-announced" => _state.PendingChoice.Type == "announceReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Legion of the Bat / Nikutai (issue #279): both scoped to the one specific watching
+                // card by id, the same shape as every other single-card Reaction window above -- see
+                // OpenMoveReactionWindow/OpenNikutaiReactionWindow for how each is actually opened.
+                "moved-enemy-infantry-to-own-battlefield" => _state.PendingChoice.Type == "moveReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                "sibling-follower-bowed" => _state.PendingChoice.Type == "nikutaiReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 _ => false
             },
             _ => false
@@ -1323,9 +1348,11 @@ public sealed partial class MatchEngine
                 : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
                 "The ability's source is not in the required zone.");
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
-            // Dragon Clan review (issue #207) adds three more real "even if bowed" cards.
+            // Dragon Clan review (issue #207) adds three more real "even if bowed" cards. Nikutai
+            // (issue #279) adds a fourth: "Even if this card is bowed, after a Follower in this unit
+            // bows: Straighten it."
             Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten"
-                or "houken-exp-straighten" or "michi-move" or "rikyou-move" or "fubatsu-plate-straighten" or "fubatsu-plate-move", "Abilities on bowed cards cannot be used.");
+                or "houken-exp-straighten" or "michi-move" or "rikyou-move" or "fubatsu-plate-straighten" or "fubatsu-plate-move" or "nikutai-straighten", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
@@ -2335,7 +2362,7 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
-            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack":
+            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "nikutai-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
@@ -2769,6 +2796,12 @@ public sealed partial class MatchEngine
             // again later the same turn.
             case "hizumi-negate-straighten": target!.StraightenBlockedTurn = _state.TurnNumber; break;
             case "ruya-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            // Legion of the Bat / Nikutai (issue #279): both Target "none" -- the affected card is
+            // read from the state field OpenMoveReactionWindow/OpenNikutaiReactionWindow stashed when
+            // the window opened, the same auto-determined shape rokai-negate-destruction/tamoko-negate
+            // already use for MatchState.PendingNegatableAbility's own target.
+            case "legion-of-bat-bow": if (!StalwartNegatesBow(Card(_state.MoveReactionTargetId!), player.Id)) Card(_state.MoveReactionTargetId!).Bowed = true; break;
+            case "nikutai-straighten": Straighten(Card(_state.NikutaiReactionTargetId!)); break;
             case "yayu-bow-attack":
                 Card(command.PerformerId!).Bowed = true;
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
@@ -2780,6 +2813,21 @@ public sealed partial class MatchEngine
             case "mugoshi-slander": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+        // Apprentice Shinobi (issue #279): "After the resolution of a Ninja action: Give this card
+        // +1F" -- unconditional and universal (every in-play copy, regardless of controller or
+        // whether Apprentice Shinobi itself took part), checked here at the single shared execution
+        // funnel every ability (Battle/Open/Limited/BattleOrOpen/Reaction/Discipline) already passes
+        // through. "Ninja Battle" et al. (Goju House Guard, issue #192) is a plain printed-keyword
+        // classification, not a distinct engine Timing -- the prefix itself is never retained in
+        // ability.Timing, so the resolving ability's own SOURCE card carrying the Ninja keyword is
+        // the only structural signal available, and the only one needed. Applies to a Reaction's own
+        // resolution too (unlike OpenBowReactionWindow below): nothing about "a Ninja action
+        // resolved" is specific to how the window that led to it opened. Reset for free by
+        // FinishTurn's own unconditional Modifiers.Clear() sweep -- "until the end of the turn" needs
+        // no separate tracked flag.
+        if (source is not null && Keyword(source, "Ninja"))
+            foreach (var shinobi in _state.Cards.Values.Where(c => InPlay(c) && Definition(c).Effect == "apprentice-shinobi-ninja-bonus"))
+                ApplyModifier(shinobi, shinobi.Id, "apprentice-shinobi-ninja-bonus", "Force", 1);
         // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
         // actions in one turn" -- every Favor-consuming ability shares this one shared Require
         // (see above), so the counter and the grant-check are shared here too, rather than
@@ -2819,6 +2867,13 @@ public sealed partial class MatchEngine
         // resolved with an identifiable performer -- same "never for a Reaction's own resolution"
         // exclusion as OpenBowReactionWindow above.
         if (ability.Timing != "Reaction" && OpenBattleActionReactionWindow(command, ability, source, 1 - player.Id)) return;
+        // Legion of the Bat (issue #279): same "after this action" timing as OpenBowReactionWindow
+        // above, checked right after it. Never re-triggered by a Reaction's own resolution, same
+        // reasoning as Hizumi/Ruya above.
+        if (ability.Timing != "Reaction" && OpenMoveReactionWindow(1 - player.Id)) return;
+        // Nikutai (issue #279): same "after this action" timing, reusing the SAME bowedBeforeAction
+        // snapshot OpenBowReactionWindow already computed rather than a second diff pass.
+        if (ability.Timing != "Reaction" && OpenNikutaiReactionWindow(bowedBeforeAction, 1 - player.Id)) return;
         // Overconfident (issue #223): a chance to react to anything this ability's own resolution
         // just destroyed or recruited (MarkDead/Purchase/RecruitReserve already queued it) -- but
         // only when this action is actually about to hand priority back the ordinary way. A Reaction
@@ -2867,6 +2922,56 @@ public sealed partial class MatchEngine
             return true;
         }
         return false;
+    }
+    private static string? MovedEnemyInfantryReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "moved-enemy-infantry-to-own-battlefield");
+    // Legion of the Bat (issue #279): unlike OpenBowReactionWindow above (a battlefield-wide search
+    // across every candidate reacting card), the reacting card here is uniquely determined by
+    // location -- MoveToBattlefield already queued the ONE card that just arrived (if any), so this
+    // only needs to check whether an enemy Legion of the Bat happens to share its destination
+    // province. "Infantry" reuses IsCavalryUnit (already the engine's own Cavalry-unit test); "enemy"
+    // is relative to Legion's own controller, not the acting player, matching the printed text
+    // exactly ("a target enemy Infantry Personality").
+    private bool OpenMoveReactionWindow(int closesTo)
+    {
+        var cardId = _state.PendingMoveReactionCardId;
+        _state.PendingMoveReactionCardId = null;
+        if (cardId is null || !_state.Cards.ContainsKey(cardId)) return false;
+        var personality = Card(cardId);
+        if (Definition(personality).Type != CardType.Personality || IsCavalryUnit(personality)) return false;
+        var legion = _state.Cards.Values.FirstOrDefault(c => c.Zone == Zone.Attached && c.ProvinceIndex == personality.ProvinceIndex
+            && c.OwnerId != personality.OwnerId && MovedEnemyInfantryReactionAbility(c) is not null);
+        if (legion is null) return false;
+        _state.MoveReactionTargetId = personality.Id;
+        _state.PendingChoice = new("moveReaction", legion.OwnerId, legion.Id, "After the resolution of an action that moved an enemy Infantry Personality to this card's battlefield: you may use this card's own reaction, or pass.", closesTo);
+        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = legion.OwnerId;
+        Emit("reactionWindow", "Move-reaction window opened.", legion.OwnerId, legion.Id);
+        return true;
+    }
+    private static string? SiblingFollowerBowedReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "sibling-follower-bowed");
+    // Nikutai (issue #279): a narrow in-play Reaction scoped to Nikutai's own host unit rather than a
+    // battlefield (OpenBowReactionWindow's own scope) or the acting player (Ruya's shape) -- kept as
+    // its own function rather than folded into OpenBowReactionWindow, since both its own card-type
+    // filter (Follower, not Personality) and its own reactor lookup (by shared host, not battlefield/
+    // actor) genuinely differ from every existing case there. Reuses the SAME bowedBeforeAction
+    // snapshot OpenBowReactionWindow already computes (the shared "what changed this action"
+    // primitive) rather than a second diff pass -- just filtered to Followers instead of
+    // Personalities. Excludes Nikutai's own bow (only ANOTHER Follower in the unit counts, per the
+    // card's own controller's rule) and a Follower with no host at all (never true for an in-play
+    // Follower, but AttachedTo is nullable).
+    private bool OpenNikutaiReactionWindow(HashSet<string> bowedBeforeAction, int closesTo)
+    {
+        var newlyBowedFollowers = _state.Cards.Values.Where(c => c.Bowed && !bowedBeforeAction.Contains(c.Id) && Definition(c).Type == CardType.Follower && c.Zone == Zone.Attached).ToArray();
+        if (newlyBowedFollowers.Length == 0) return false;
+        var nikutai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && c.Zone == Zone.Attached && SiblingFollowerBowedReactionAbility(c) is not null
+            && newlyBowedFollowers.Any(f => f.Id != c.Id && f.AttachedTo == c.AttachedTo));
+        if (nikutai is null) return false;
+        _state.NikutaiReactionTargetId = newlyBowedFollowers.First(f => f.Id != nikutai.Id && f.AttachedTo == nikutai.AttachedTo).Id;
+        _state.PendingChoice = new("nikutaiReaction", nikutai.OwnerId, nikutai.Id, "Even if this card is bowed, after a Follower in this unit bowed: you may straighten it, or pass.", closesTo);
+        _state.ConsecutivePasses = 0; _state.PriorityPlayerId = nikutai.OwnerId;
+        Emit("reactionWindow", "Nikutai reaction window opened.", nikutai.OwnerId, nikutai.Id);
+        return true;
     }
 
     private void ResolveShinden(GameCommand command)
@@ -2949,6 +3054,22 @@ public sealed partial class MatchEngine
     {
         Straighten(card);
         foreach (var attachment in Attachments(card.Id)) Straighten(attachment);
+    }
+    // Wave Man (issue #279): "After an Attack Phase ends: Straighten this unit" -- automatic and
+    // unconditional, fired for EVERY in-play Wave Man every time the Attack Phase ends (see
+    // SetPhase), not a player-chosen target the way StraightenUnit's own callers always are. Unlike
+    // StraightenUnit above, this only actually calls Straighten() on a card that IS currently bowed:
+    // Straighten() itself unconditionally consumes a live StraightenBlockedTurn the moment it is
+    // called at all (core to Hizumi/Ruya's own "negate his NEXT straightening" shape, which needs an
+    // attempt to exist to negate), so calling it on an already-unbowed card here would spuriously
+    // burn a block meant for a later, real bow-then-straighten this same turn. "card" may be the
+    // Follower itself (Zone.Attached) -- resolved to its own host first, since "this unit" always
+    // means the host's whole unit, never just the one Follower carrying the trait.
+    private void StraightenBowedUnit(CardInstance card)
+    {
+        var host = card.Zone == Zone.Attached ? Card(card.AttachedTo) : card;
+        if (host.Bowed) Straighten(host);
+        foreach (var attachment in Attachments(host.Id)) if (attachment.Bowed) Straighten(attachment);
     }
     private void MoveHome(CardInstance card, bool bow)
     {

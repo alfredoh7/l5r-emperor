@@ -180,7 +180,8 @@ var tests = new (string Name, Action Run)[]
     ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive),
     ("Front Rank Troops / Fudo's Fiends (issue #271): both cards' own BLOCKERS notes were stale -- MatchEngine.ExpendableDraw already exists and is already generically correct for any card carrying the Expendable keyword, checked at every real destroy path. Zero AbilityCatalog wiring needed; this proves the existing, previously-untested helper actually fires for a real published card", ExpendableFollowers),
     ("Stormless Fury (issue #276 follow-up): the general 'after a Battle action resolves' Reaction primitive (OpenBattleActionReactionWindow) -- its own out-of-play half reuses Equip (Limited)'s own attach mechanism as a Reaction, deliberately granting no Additional Action (unlike Equip (Battle)); its own in-play half bows the just-resolved action's own performer, excluded (BattleActionReaction1UsedCardIds) from firing against the SAME action that triggered the first half, but firing normally against a later, different action", StormlessFuryBattleActionReaction),
-    ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity)
+    ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity),
+    ("Follower wave 11 (issue #279): four small, mostly-independent primitives -- Apprentice Shinobi's universal 'after any Ninja action resolves, +1F' trait (Keyword(source,\"Ninja\") alone, since a printed 'Ninja Battle' prefix is never retained in ability.Timing; reset for free by FinishTurn's own Modifiers.Clear()); Legion of the Bat's new 'after an action moves a card to this battlefield' Reaction (MoveToBattlefield itself queues the candidate; RecruitReserve is explicitly excluded, proven negative) plus its own Crane Clan Equip discount; Nikutai's new 'after a sibling Follower in this unit bows' Reaction (Even if bowed; straightens the OTHER Follower, not itself; proven scoped to its own unit only); and Wave Man's new automatic 'after an Attack Phase ends, straighten this unit' trait, proven on both the 'last battlefield resolved' and 'declined to attack' paths, and proven NOT to spuriously consume an unrelated StraightenBlockedTurn on an already-unbowed card", FollowerWave11Primitives)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -1498,6 +1499,156 @@ static void ExpendableFollowers()
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:sentry.Id,TargetId:troops.Id,AbilityId:"elite-sentry-destroy"));
     Equal(e.State.Cards[troops.Id].Zone,Zone.FateDiscard,"Destroyed, into its own Fate discard pile (a Follower, not a Personality)");
     Equal(e.State.Players[1].Hand.Count,handBefore+1,"Expendable: its own controller drew a card");
+}
+static void FollowerWave11Primitives()
+{
+    {
+        // Apprentice Shinobi: unconditional and universal -- a Ninja action resolving anywhere,
+        // performed by the OPPONENT, unrelated to Shinobi's own controller or location, still gives
+        // +1F. training-ninja-source carries the Ninja keyword plus the plain training-bow-any
+        // ability; the classification is Keyword(source,"Ninja") alone (Goju House Guard's own
+        // "Ninja Battle" precedent: the prefix itself is never retained in ability.Timing).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var shinobi=Add(s,"oracle-l5r-419",0,Zone.Attached,attachedTo:host.Id);
+        var ninjaSource=Add(s,"training-ninja-source",1,Zone.Home);
+        var target=Add(s,"training-lion-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:ninjaSource.Id,TargetId:target.Id,AbilityId:"training-bow-any"));
+        Check(e.State.Cards[shinobi.Id].Modifiers.Any(m=>m.Effect=="apprentice-shinobi-ninja-bonus" && m.Stat=="Force" && m.Amount==1),
+            "Every in-play Apprentice Shinobi gets +1F after any Ninja action resolves, regardless of controller or location");
+        EndTurnFully(e);
+        Check(!e.State.Cards[shinobi.Id].Modifiers.Any(m=>m.Effect=="apprentice-shinobi-ninja-bonus"),
+            "Retained only until the end of the turn -- FinishTurn's own unconditional Modifiers.Clear() resets it");
+    }
+    {
+        // Negative: a non-Ninja action, the exact same ability/target shape (training-bow-any-source
+        // carries the identical training-bow-any ability but no Ninja keyword), gives no bonus at all.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var shinobi=Add(s,"oracle-l5r-419",0,Zone.Attached,attachedTo:host.Id);
+        var nonNinjaSource=Add(s,"training-bow-any-source",1,Zone.Home);
+        var target=Add(s,"training-lion-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:nonNinjaSource.Id,TargetId:target.Id,AbilityId:"training-bow-any"));
+        Check(!e.State.Cards[shinobi.Id].Modifiers.Any(m=>m.Effect=="apprentice-shinobi-ninja-bonus"),
+            "A non-Ninja action never gives Apprentice Shinobi its bonus");
+    }
+    {
+        // Legion of the Bat: a real "action moved a card to a battlefield" event -- Mirumoto Michi
+        // (Infantry, no Cavalry keyword) reinforcing an opposed battlefield -- opens Legion's own
+        // reaction, which bows the enemy Personality that just arrived at Legion's own battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var michi=Add(s,"oracle-l5r-10054",0,Zone.Home,bowed:true);
+        var legionHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var legion=Add(s,"oracle-l5r-4700",1,Zone.Attached,province:0,attachedTo:legionHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:michi.Id,AbilityId:"michi-move"));
+        Equal(e.State.Cards[michi.Id].Zone,Zone.Battlefield,"Michi moved to the battlefield");
+        Equal(e.State.PendingChoice?.Type,"moveReaction");
+        Equal(e.State.PendingChoice?.CardId,legion.Id);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:legion.Id,AbilityId:"legion-of-bat-bow"));
+        Check(e.State.Cards[michi.Id].Bowed,"Legion of the Bat bows the enemy Infantry Personality that just moved to its battlefield");
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Check(e.State.PendingChoice is null,"Two consecutive passes close the reaction window");
+    }
+    {
+        // Negative: RecruitReserve is explicitly excluded per the card's own rule ("Recruiting a
+        // personality with the Reserve Keyword is not considered moving the personality") -- it
+        // assigns Zone.Battlefield directly and never calls MoveToBattlefield, so Legion's own
+        // reaction never opens even though an enemy Infantry Personality lands at its battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=0;
+        var reserveId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[reserveId].DefinitionId="training-reserve-personality"; s.Cards[reserveId].FaceUp=true;
+        var legionHost=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var legion=Add(s,"oracle-l5r-4700",1,Zone.Attached,province:0,attachedTo:legionHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,3).First();
+        Accept(e,new GameCommand("recruitReserve",0,e.Version,CardId:reserveId,SourceIds:payment.SourceIds));
+        Equal(e.State.Cards[reserveId].Zone,Zone.Battlefield,"Recruited directly to the battlefield");
+        Check(e.State.PendingChoice is null,"RecruitReserve never opens Legion of the Bat's own move-reaction window");
+    }
+    {
+        // Nikutai: another Follower on the same host bows (here, via Nubane's plain nubane-bow, "Target
+        // an attachment: bow it") -- Nikutai, even though it is itself already bowed ("Even if this
+        // card is bowed"), may straighten the sibling Follower that just bowed. Confirms "it" is the
+        // Follower that bowed, not Nikutai itself.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var nikutai=Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id,bowed:true);
+        var sibling=Add(s,"training-follower",0,Zone.Attached,attachedTo:host.Id);
+        var nubane=Add(s,"oracle-l5r-4429",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nubane.Id,TargetId:sibling.Id,AbilityId:"nubane-bow"));
+        Check(e.State.Cards[sibling.Id].Bowed,"nubane-bow bowed the sibling Follower");
+        Equal(e.State.PendingChoice?.Type,"nikutaiReaction");
+        Equal(e.State.PendingChoice?.CardId,nikutai.Id);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,AbilityId:"nikutai-straighten"));
+        Check(!e.State.Cards[sibling.Id].Bowed,"Nikutai straightens the sibling Follower that just bowed");
+        Check(e.State.Cards[nikutai.Id].Bowed,"Nikutai itself stays bowed -- it straightens the OTHER Follower, not itself");
+    }
+    {
+        // Negative: a Follower outside Nikutai's own unit (a different host) bowing does not open its
+        // reaction at all.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id);
+        var otherHost=Add(s,"training-lion-samurai",0,Zone.Home);
+        var otherFollower=Add(s,"training-follower",0,Zone.Attached,attachedTo:otherHost.Id);
+        var nubane=Add(s,"oracle-l5r-4429",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nubane.Id,TargetId:otherFollower.Id,AbilityId:"nubane-bow"));
+        Check(e.State.Cards[otherFollower.Id].Bowed);
+        Check(e.State.PendingChoice is null,"A Follower outside Nikutai's own unit bowing does not open its reaction");
+    }
+    {
+        // Wave Man: the Attack Phase ends because the last battlefield resolved -- straightens
+        // automatically (a trait, not the ordinary Straighten Phase). Host is the winning ATTACKER
+        // (Force 4 vs. the defender's 3), so a decisive win destroys the losing army outright
+        // (ResolveBattle's own DestroyUnits) and FinishBattleReturnHomeAndTransition's own
+        // ReturnHome(card,true) unconditionally BOWS every returning attacker first -- Wave Man's own
+        // trait is what then straightens his unit right back, proven distinct from that mandatory bow.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var waveMan=Add(s,"oracle-l5r-9255",0,Zone.Attached,province:0,attachedTo:host.Id);
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[host.Id].Zone,Zone.Home,"Returned home (the winning side) after the last battlefield resolves");
+        Equal(e.State.Phase,Phase.Dynasty);
+        Check(!e.State.Cards[waveMan.Id].Bowed,"Wave Man straightens once the last battlefield resolves, even though attackers always return home bowed");
+        Check(!e.State.Cards[host.Id].Bowed,"His whole unit straightens, including the host");
+    }
+    {
+        // Wave Man: the Attack Phase also ends when a player declines to attack outright -- no
+        // battlefield is ever created (both Infantry and Cavalry Maneuvers empty), yet Wave Man still
+        // straightens.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.AttackDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home,bowed:true);
+        var waveMan=Add(s,"oracle-l5r-9255",0,Zone.Attached,attachedTo:host.Id,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"attack",player:0,assignments:new()));
+        Accept(e,Cmd(e,"assignDefense",player:1,assignments:new()));
+        Accept(e,Cmd(e,"attack",player:0,assignments:new()));
+        Accept(e,Cmd(e,"assignDefense",player:1,assignments:new()));
+        Equal(e.State.Phase,Phase.Dynasty,"No battlefields were ever created -- straight to Dynasty");
+        Check(!e.State.Cards[waveMan.Id].Bowed,"Wave Man straightens even though no battle ever happened");
+    }
+    {
+        // Negative: already unbowed, and a live StraightenBlockedTurn on the host (simulating Hizumi/
+        // Ruya's own "negate the next straightening") is left untouched -- proving the trait only ever
+        // calls Straighten() on a card that IS bowed, never spuriously consuming an unrelated block.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        host.StraightenBlockedTurn=s.TurnNumber;
+        Add(s,"oracle-l5r-9255",1,Zone.Attached,province:0,attachedTo:host.Id);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Check(!e.State.Cards[host.Id].Bowed,"Already unbowed, stays unbowed");
+        Equal(e.State.Cards[host.Id].StraightenBlockedTurn,e.State.TurnNumber,"Untouched -- Wave Man's trait never calls Straighten() on an already-unbowed card");
+    }
 }
 static void ChooseStraightenDecline()
 {
