@@ -135,6 +135,11 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
+            // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
+            // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
+            if (_state.PendingChoice.Type=="beforeBattleOrder") { ResolveBeforeBattleOrder(command); return; }
+            if (_state.PendingChoice.Type=="encircledOrder") { ResolveEncircledOrder(command); return; }
+            if (_state.PendingChoice.Type=="encircledSelect") { ResolveEncircledSelect(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
@@ -789,6 +794,122 @@ public sealed partial class MatchEngine
     {
         var provinceIndex=_state.CurrentBattleProvince!.Value;
         var attacker=_state.ActivePlayerId; var defender=1-attacker;
+        // Before This Battle Resolves (issue #272): "occur after all players have passed but before
+        // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
+        // Encircled Terrain's own effect (sending every other Personality home) changes who actually
+        // fights. See PendingBeforeBattleResolve's own doc comment for the full sequencing.
+        var sources=BeforeBattleResolveSourceIds(provinceIndex);
+        if(sources.Length>0)
+        {
+            _state.PendingBeforeBattleResolve=new PendingBeforeBattleResolve{ProvinceIndex=provinceIndex,Attacker=attacker,Defender=defender,RemainingSourceIds=sources.ToList()};
+            AdvanceBeforeBattleResolve();
+            return;
+        }
+        ContinueResolveBattle(provinceIndex,attacker,defender);
+    }
+    // Every in-play Terrain at this battlefield carrying a "before this battle resolves" effect --
+    // currently just Encircled Terrain, but a list (not a single nullable id) since the core rule
+    // itself is written for the general "multiple such effects" case (ordered by the active player;
+    // see AdvanceBeforeBattleResolve).
+    private string[] BeforeBattleResolveSourceIds(int provinceIndex) =>
+        _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Definition(c).Effect=="encircled-before-battle")
+            .Select(c=>c.Id).Order(StringComparer.Ordinal).ToArray();
+    // Drains PendingBeforeBattleResolve.RemainingSourceIds one at a time: zero left resumes ordinary
+    // resolution; exactly one left resolves it directly (no real choice to offer); two or more open
+    // "beforeBattleOrder" for the ACTIVE player (the core rule's own "whose turn it is") to pick which
+    // resolves next.
+    private void AdvanceBeforeBattleResolve()
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        if(pending.RemainingSourceIds.Count==0)
+        {
+            var (p,a,d)=(pending.ProvinceIndex,pending.Attacker,pending.Defender);
+            _state.PendingBeforeBattleResolve=null;
+            ContinueResolveBattle(p,a,d);
+            return;
+        }
+        if(pending.RemainingSourceIds.Count==1)
+        {
+            pending.ActiveSourceId=pending.RemainingSourceIds[0];
+            pending.RemainingSourceIds.RemoveAt(0);
+            StartBeforeBattleEffect(pending);
+            return;
+        }
+        _state.PendingChoice=new("beforeBattleOrder",_state.ActivePlayerId,null,"Choose which 'before this battle resolves' effect resolves next.");
+        _state.PriorityPlayerId=_state.ActivePlayerId;
+    }
+    private void ResolveBeforeBattleOrder(GameCommand command)
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        Require(command.Type=="beforeBattleOrder" && command.PlayerId==_state.ActivePlayerId && command.TargetId is not null && pending.RemainingSourceIds.Contains(command.TargetId),
+            "Choose one of the remaining 'before this battle resolves' effects.");
+        pending.RemainingSourceIds.Remove(command.TargetId!);
+        pending.ActiveSourceId=command.TargetId;
+        _state.PendingChoice=null;
+        StartBeforeBattleEffect(pending);
+    }
+    private void StartBeforeBattleEffect(PendingBeforeBattleResolve pending)
+    {
+        var source=Card(pending.ActiveSourceId!);
+        switch(Definition(source).Effect)
+        {
+            // Encircled Terrain (issue #272): "the Attacker and Defender, in the order of your
+            // choice" -- "your" is THIS card's own controller, who picks whether the Attacker or the
+            // Defender selects their own keeper Personality first.
+            case "encircled-before-battle":
+                pending.EncircledStage="ChooseOrder";
+                _state.PendingChoice=new("encircledOrder",source.OwnerId,source.Id,"Choose whether the Attacker or the Defender selects a Personality first.");
+                _state.PriorityPlayerId=source.OwnerId;
+                break;
+            default:
+                FinishBeforeBattleEffect(pending);
+                break;
+        }
+    }
+    private void FinishBeforeBattleEffect(PendingBeforeBattleResolve pending)
+    {
+        pending.ActiveSourceId=null; pending.EncircledStage=null; pending.EncircledFirstSelectedId=null;
+        AdvanceBeforeBattleResolve();
+    }
+    private void ResolveEncircledOrder(GameCommand command)
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        var choice=_state.PendingChoice!;
+        Require(command.Type=="encircledOrder" && command.PlayerId==choice.PlayerId && command.Choice is "attacker" or "defender",
+            "Choose the Attacker or the Defender to select first.");
+        var firstPlayer=command.Choice=="attacker"?pending.Attacker:pending.Defender;
+        pending.EncircledStage="FirstSelect";
+        _state.PendingChoice=new("encircledSelect",firstPlayer,choice.CardId,"Choose one of your Personalities at this battlefield to keep; every other Personality here will be sent home.");
+        _state.PriorityPlayerId=firstPlayer;
+    }
+    private void ResolveEncircledSelect(GameCommand command)
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        var choice=_state.PendingChoice!;
+        Require(command.Type=="encircledSelect" && command.PlayerId==choice.PlayerId && command.TargetId is not null,"Choose one of your Personalities at this battlefield.");
+        var card=Card(command.TargetId!);
+        Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Battlefield && card.ProvinceIndex==pending.ProvinceIndex && Definition(card).Type==CardType.Personality,
+            "Choose one of your own Personalities at this battlefield.");
+        if(pending.EncircledStage=="FirstSelect")
+        {
+            pending.EncircledFirstSelectedId=card.Id;
+            pending.EncircledStage="SecondSelect";
+            var secondPlayer=1-command.PlayerId;
+            _state.PendingChoice=new("encircledSelect",secondPlayer,choice.CardId,"Choose one of your Personalities at this battlefield to keep; every other Personality here will be sent home.");
+            _state.PriorityPlayerId=secondPlayer;
+            return;
+        }
+        var keepIds=new HashSet<string>(StringComparer.Ordinal){pending.EncircledFirstSelectedId!,card.Id};
+        foreach(var other in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==pending.ProvinceIndex && Definition(c).Type==CardType.Personality && !keepIds.Contains(c.Id)).ToArray())
+            ReturnHome(other,false);
+        Emit("encircledTerrainResolved","Encircled Terrain: every other Personality at this battlefield was sent home.",pending.Attacker,choice.CardId);
+        _state.PendingChoice=null;
+        FinishBeforeBattleEffect(pending);
+    }
+    // The original body of ResolveBattle, unchanged, now reached either directly (no "before this
+    // battle resolves" effects in play) or once PendingBeforeBattleResolve's own sequence empties.
+    private void ContinueResolveBattle(int provinceIndex,int attacker,int defender)
+    {
         var a=Army(attacker,provinceIndex).ToArray(); var d=Army(defender,provinceIndex).ToArray();
         var (af,df)=ArmyForces(a,d,attacker,defender);
         Emit("battleResolved",$"Province {provinceIndex+1}: attacking Force {af}, defending Force {df}.");
@@ -803,6 +924,14 @@ public sealed partial class MatchEngine
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
+            // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
+            // are the Attacker" -- checked here, at the actual moment of destruction, since
+            // DestroyProvince only ever runs in this same attacker-won branch and a later hook would
+            // be too late to reason about "was it destroyed by THIS resolution" cleanly. d is this
+            // resolution's own (pre-destruction) defending army snapshot, so d.Length>0 exactly
+            // captures "your current army was ever opposed during this battle" for a single-round
+            // battle engine.
+            if(destroyedProvince) ResolveVitalPathwaysDraw(provinceIndex,attacker,d.Length>0);
             if(destroyedDefenders>0 || destroyedProvince) AttackerDestructionBonus(attacker,a);
             // Ring recruitment (issue #194): checked with this resolution's own facts, before the
             // per-battle flags below reset. False Ring of Air and Ring of Earth require an outright
@@ -877,10 +1006,20 @@ public sealed partial class MatchEngine
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
         // ResolveBattle) but before the battlefield itself closes out -- never carried into a later
-        // battle at the same province, or across turns.
-        foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain")).ToArray())
+        // battle at the same province, or across turns. Looting the Ruins (issue #272) is the one
+        // exception: "After this battle resolves, if this Terrain is in play, put it into your hand"
+        // overrides the default discard fate, so it is left in play here and handled instead by the
+        // dedicated After This Battle Resolves hook below (ResolveAfterBattleResolveEffects), which
+        // runs strictly after this sweep -- exactly the "after this battle resolves" ordering its own
+        // printed text requires.
+        foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Keyword(c,"Terrain") && Definition(c).Effect!="looting-return-to-hand").ToArray())
             DiscardTerrain(terrain);
         _state.UnresolvedBattlefields.Remove(provinceIndex); _state.CurrentBattleProvince=null;
+        // After This Battle Resolves (issue #272): stashed here since CurrentBattleProvince is
+        // already cleared above, and the Overconfident draw window (below) may defer this whole tail
+        // across a command boundary before FinishBattleReturnHomeAndTransition ever reads it back --
+        // same reasoning PendingConqueror.ProvinceIndex already documents.
+        _state.ResolvedBattleProvinceIndex=provinceIndex;
         // Ashigaru Elite's boost is "for the remainder of the battle," not the turn -- a turn can
         // contain more than one battle (Infantry/Cavalry Maneuvers), so it must not carry into the next.
         _state.AshigaruBoost=new int[2];
@@ -909,12 +1048,43 @@ public sealed partial class MatchEngine
     // here once every queued Overconfident offer this battle produced has been resolved.
     private void FinishBattleReturnHomeAndTransition(int attacker)
     {
+        // After This Battle Resolves (issue #272): "after the resolution of the current battle but
+        // before the next battlefield is chosen. If it is the last battlefield to resolve, then
+        // return the card to the player's hand and then end the battle phase" -- run first, so the
+        // return-to-hand always happens before the UnresolvedBattlefields.Count==0 branch below ends
+        // the Battle phase, exactly the order Looting the Ruins' own printed text requires.
+        ResolveAfterBattleResolveEffects();
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
             SetPhase(Phase.Dynasty,attacker);
         }
         else SetPhase(Phase.BattleSelection,attacker);
+    }
+    // Looting the Ruins (issue #272): "After this battle resolves, if this Terrain is in play, put it
+    // into your hand" -- unconditional, no PendingChoice/Reaction window ("requires no interruption
+    // of play to execute"). Exempted from FinishBattleResolution's own generic Terrain-discard sweep
+    // above specifically so it can still be Zone.Battlefield here; any other Terrain at this same
+    // province is already gone by the time this runs.
+    private void ResolveAfterBattleResolveEffects()
+    {
+        var provinceIndex=_state.ResolvedBattleProvinceIndex;
+        _state.ResolvedBattleProvinceIndex=null;
+        if(provinceIndex is null) return;
+        foreach(var terrain in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex.Value && Definition(c).Effect=="looting-return-to-hand").ToArray())
+            ReturnToHand(terrain);
+    }
+    // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you are the
+    // Attacker: Draw a card, or two cards if your current army was ever opposed during this battle."
+    // Its own scan corrects the issue's paraphrase -- this is a Terrain (Zone.Battlefield), not a
+    // Region, and has no separate Defender clause at all.
+    private void ResolveVitalPathwaysDraw(int provinceIndex,int attacker,bool opposed)
+    {
+        var vitalPathways=_state.Cards.Values.FirstOrDefault(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && c.OwnerId==attacker && Definition(c).Effect=="vital-pathways-draw");
+        if(vitalPathways is null) return;
+        Draw(Player(attacker));
+        if(opposed) Draw(Player(attacker));
+        Emit("vitalPathwaysDraw",$"{Player(attacker).Name} drew {(opposed?"two cards":"a card")} (Vital Pathways).",attacker,vitalPathways.Id);
     }
     // Plains of the Maiden: after the Attacker destroys a province or army in resolution, gain Honor
     // equal to their surviving Battle Maidens at this battlefield. Checked against units still in the
@@ -997,8 +1167,16 @@ public sealed partial class MatchEngine
         if(Keyword(card,"Terrain"))
         {
             Require(command.TargetId is null,"Playing a Terrain does not target another card.");
-            Require(!_state.Cards.Values.Any(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Keyword(c,"Terrain")),
-                "This battlefield already has a Terrain in play.");
+            var existingTerrain=_state.Cards.Values.FirstOrDefault(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Keyword(c,"Terrain"));
+            if(existingTerrain is not null)
+            {
+                // Encircled Terrain / Looting the Ruins (issue #272): "Battle: Destroy a Terrain (if
+                // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
+                // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
+                // that default unchanged), these two may replace an already-in-play Terrain outright.
+                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand","This battlefield already has a Terrain in play.");
+                DiscardTerrain(existingTerrain);
+            }
             Player(command.PlayerId).Hand.Remove(card.Id);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
             Player(command.PlayerId).TerrainPlayedThisBattle=true; // Ring of Water's own recruitment condition (issue #194)
