@@ -268,6 +268,32 @@ public sealed class PendingConqueror
     public string[] CandidateIds { get; set; } = [];
 }
 
+/// <summary>Before This Battle Resolves (issue #272, Encircled Terrain's own printed timing): "occur
+/// after all players have passed but before resolution is determined... If there are multiple
+/// 'before this battle resolves' effects in play at a battlefield, the player whose turn it is
+/// chooses the order." Opened by ResolveBattle itself, before Army()/ArmyForces are ever computed --
+/// deliberately BEFORE the battle's own participants are read, since Encircled Terrain's own effect
+/// (sending every other Personality home) changes who actually fights. RemainingSourceIds holds every
+/// not-yet-resolved source's own card id, still to be ordered by the active player (via the
+/// "beforeBattleOrder" PendingChoice) whenever more than one remains; ActiveSourceId is whichever one
+/// is currently resolving. The Encircled* fields are that one source's own sub-stage -- a future
+/// second "before this battle resolves" card with a different shape gets its own such fields, never
+/// reusing these by coincidence of type.</summary>
+public sealed class PendingBeforeBattleResolve
+{
+    public int ProvinceIndex { get; set; }
+    public int Attacker { get; set; }
+    public int Defender { get; set; }
+    public List<string> RemainingSourceIds { get; set; } = [];
+    public string? ActiveSourceId { get; set; }
+    // Encircled Terrain's own sub-stage while ActiveSourceId is its id: "ChooseOrder" (its own
+    // controller picks who selects first) -> "FirstSelect" -> "SecondSelect" (each side chooses one
+    // Personality of their own at this battlefield to keep) -> resolved (every other Personality here
+    // sent home).
+    public string? EncircledStage { get; set; }
+    public string? EncircledFirstSelectedId { get; set; }
+}
+
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
 /// their opponent in between. ScopeCardIds null means any of the player's own cards (Again!'s
@@ -361,6 +387,19 @@ public sealed class MatchState
     public PendingDuel? PendingDuel { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
+    // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.
+    // Non-null only while ResolveBattle's own before-resolution sequence is still being sorted out
+    // (ordering choices, Encircled Terrain's own selection sub-stages); cleared before the battle's
+    // actual winner/casualties are ever computed.
+    public PendingBeforeBattleResolve? PendingBeforeBattleResolve { get; set; }
+    // After This Battle Resolves (issue #272, Looting the Ruins' own printed timing): "after the
+    // resolution of the current battle but before the next battlefield is chosen." FinishBattleResolution
+    // sets this to the province that just resolved (its own provinceIndex parameter, otherwise lost --
+    // CurrentBattleProvince is already cleared by the time this hook fires, and the Overconfident
+    // draw window may defer the whole tail across a command boundary first, same reasoning
+    // PendingConqueror.ProvinceIndex already documents). FinishBattleReturnHomeAndTransition reads and
+    // clears it once its own after-resolve effects have run.
+    public int? ResolvedBattleProvinceIndex { get; set; }
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
     // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
