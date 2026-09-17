@@ -1,0 +1,36 @@
+{
+  "Profile": "personality-wave-19",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9469",
+      "Name": "Yasuki Tsujiken",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Tsujiken enters play, target a Holding: Until Tsujiken leaves play, after each time its controller bows it, he loses 1 Honor.\nOpen: Bow Tsujiken and target a Holding: Straighten it. You may bow it if its base Gold Cost is 4 or lower.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9469.jpg",
+      "Keywords": [
+        "Courtier",
+        "Crab Clan",
+        "Crime Boss",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsujiken-watch-holding",
+        "tsujiken-straighten-holding"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

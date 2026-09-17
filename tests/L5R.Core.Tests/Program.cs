@@ -177,7 +177,11 @@ var tests = new (string Name, Action Run)[]
     ("Second City unwired-card audit, Strategy wave 6: five Battle-timed Strategy cards (Dispensing Justice, Bow Before My Will, Surety of Purpose, Unexpected Support, Wrathful Ancestor) found fully buildable with pre-existing primitives -- the generic RequiredKeywords Performer shape, exemption-by-omission from Tamoko's own curated negation list, and one new enemy-scoped Follower-count Target category", SecondCityStrategyWave6),
     ("Second City unwired-card audit, Personality wave 18: ten Personalities found fully buildable with pre-existing primitives -- Keppo's own Reconnaissance-gated fizzle, Kuronada's own attachment-restricted destroy, Matsu Kasei reusing 'incapacitated' verbatim, Moto Ming-Gwok's own dead-Personality-gated Attack, Shiba Kudome's own Bow-the-loser self-performer duel, Shosuro Ritoru's own compound bow-then-conditional-destroy, Takasho's own reinforce-and-grant plus separate Attack, and Yogo Adi's own dishonorable-or-bulk-province-boost choice", SecondCityPersonalityWave18),
     ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
-    ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive)
+    ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive),
+    ("Cultist Infiltrator (oracle-l5r-1595): may attach to a Personality its controller does not own (a new Effect-keyed exception on Equip's own ownership Require); after each Straighten Phase gives its host a persistent -1C token via the existing shared CreateToken Chi<=0 death check; is excluded from Overlay's own attachment-transfer loop (discarded instead); and, attached to an enemy Personality, is returned to its OWN original owner's discard pile when that Personality dies, since CardInstance.OwnerId is never reassigned", CultistInfiltratorPrimitive),
+    ("Unimpeachable Name (oracle-l5r-8989): a broad out-of-play \"before any action resolves\" Reaction -- reduces the reacting player's own Honor loss from that action by 3 (minimum 0) and/or rehonors a target Dishonorable Personality; NOT offered at all when neither condition could possibly apply; her own separate Battle ability bows a performing Shugenja and an enemy card for 2 Honor", UnimpeachableNamePrimitive),
+    ("Fields of Mercy (oracle-l5r-2530): a per-Terrain-instance, per-player destroyed-Personality counter that starts at 0 only once the card itself enters play (never retroactively) -- the first Personality destruction after entry still happens normally (and starts the count), every one after that has only the Personality-destruction component negated (attachments on that unit are still destroyed)", FieldsOfMercyPrimitive),
+    ("Yasuki Tsujiken (oracle-l5r-9469): his own entering-play Reaction marks a target Holding, independently stacking per copy of Tsujiken that marks it; every future bow of a marked Holding (by any cause) costs its controller 1 Honor per active mark, for as long as the marking Tsujiken remains in play; his separate Open half straightens a target Holding, only bowing himself as a cost when that Holding's base Gold Cost is above 4", YasukiTsujikenPrimitive)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -6679,5 +6683,252 @@ static void BrashForceRedirectAndBowReactions()
         e=MatchEngine.FromTestState(s);
         var quote=e.QuotePurchase(0,cardId);
         Equal(quote.Cost,8,"No Reserve-while-Defender discount on an ordinary Purchase");
+    }
+}
+static void CultistInfiltratorPrimitive()
+{
+    // "You may attach this card to a Personality you do not control" -- an Effect-keyed exception on
+    // Equip's own ordinary ownership Require.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var infiltrator=Add(s,"oracle-l5r-1595",0,Zone.Hand);
+        var enemy=Add(s,"training-lion-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"equip",id:infiltrator.Id,target:enemy.Id,sources:Sources(e,0)));
+        Equal(e.State.Cards[infiltrator.Id].Zone,Zone.Attached,"Attached to a Personality he does not control");
+        Equal(e.State.Cards[infiltrator.Id].AttachedTo,enemy.Id);
+        Equal(e.State.Cards[infiltrator.Id].OwnerId,0,"OwnerId stays with whoever equipped it (never reassigned)");
+    }
+    // An ordinary Follower is not granted this exception -- still restricted to your own Personality.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var follower=Add(s,"training-follower",0,Zone.Hand);
+        var enemy=Add(s,"training-lion-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:follower.Id,target:enemy.Id,sources:Sources(e,0)));
+    }
+    // "After each Straighten Phase: Give this Personality a -1C token" -- fires every Straighten
+    // Phase regardless of whose turn it is or who controls the host, routed through the existing
+    // shared CreateToken Chi<=0 death check.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-lion-samurai",1,Zone.Home); // enemy of the infiltrator's own owner
+        var infiltrator=Add(s,"oracle-l5r-1595",0,Zone.Attached,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        EndTurnFully(e);
+        Equal(e.State.Cards[host.Id].Tokens.Count(t=>t.Source==infiltrator.Id && t.Stat=="Chi" && t.Amount==-1),1,"One -1C token after one Straighten Phase");
+        Check(e.State.Cards[host.Id].Zone!=Zone.Dead,"Chi 3 - 1 is still alive");
+    }
+    // Chi<=0 death still fires immediately via the existing shared check, and -- attached to an
+    // ENEMY Personality -- the Follower is returned to its own original owner's discard pile when
+    // its host dies, not its host's owner's, since OwnerId is never reassigned.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-lion-samurai",1,Zone.Home); // Chi 3
+        host.Tokens=[new("pretest-token","TestChi","test-fixture","Chi",-2)]; // down to Chi 1 before the tick
+        var infiltrator=Add(s,"oracle-l5r-1595",0,Zone.Attached,attachedTo:host.Id); // owned by player 0
+        var e=MatchEngine.FromTestState(s);
+        EndTurnFully(e);
+        Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"Chi 1 - 1 = 0: destroyed immediately");
+        Equal(e.State.Cards[infiltrator.Id].Zone,Zone.FateDiscard,"Follower discarded along with its host");
+        Equal(e.State.Cards[infiltrator.Id].OwnerId,0,"Returned to its OWN original owner's discard pile, not the host's owner's (player 1)");
+    }
+    // "This card will not be transferred" -- excluded from Overlay's own attachment-transfer loop,
+    // discarded instead of left dangling on the removed lower-level card.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Dynasty; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var higherId=s.Players[0].Provinces[0].CardId!; var higher=s.Cards[higherId];
+        higher.DefinitionId="training-paneki-exp3"; higher.FaceUp=true;
+        var lower=Add(s,"training-paneki-base",0,Zone.Home);
+        var infiltrator=Add(s,"oracle-l5r-1595",1,Zone.Attached,attachedTo:lower.Id); // owned by the OTHER player
+        var ordinaryFollower=Add(s,"training-follower",0,Zone.Attached,attachedTo:lower.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("overlay",0,e.Version,CardId:higher.Id,TargetId:lower.Id,SourceIds:[]));
+        Equal(e.State.Cards[infiltrator.Id].Zone,Zone.FateDiscard,"Not transferred -- discarded instead");
+        Equal(e.State.Cards[infiltrator.Id].OwnerId,1,"Still its own original owner");
+        Check(e.State.Cards[infiltrator.Id].AttachedTo is null);
+        Equal(e.State.Cards[ordinaryFollower.Id].AttachedTo,higher.Id,"An ordinary Follower still transfers normally");
+    }
+}
+static void UnimpeachableNamePrimitive()
+{
+    // Reduces the reacting player's own Honor loss from another player's action by 3 (minimum 0) --
+    // offered because the triggering ability is in the curated Honor-loss list.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var striker=Add(s,"training-honor-strike-samurai",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var unimpeachable=Add(s,"oracle-l5r-8989",1,Zone.Hand);
+        s.Players[1].Honor=10;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:striker.Id,TargetId:target.Id,AbilityId:"training-honor-strike"));
+        Equal(e.State.PendingChoice?.Type,"unimpeachableNameReaction","Offered before the action resolves");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:unimpeachable.Id,AbilityId:"unimpeachable-name-reaction"));
+        Equal(e.State.Cards[unimpeachable.Id].Zone,Zone.FateDiscard,"Consumed");
+        Accept(e,Cmd(e,"declineReaction",player:0));
+        Accept(e,Cmd(e,"declineReaction",player:1));
+        Check(e.State.PendingChoice is null);
+        Equal(e.State.Players[1].Honor,10,"2-Honor loss reduced by 3, floored at 0 -- fully negated");
+    }
+    // Offered purely because the reacting player controls a Dishonorable Personality, even though
+    // this specific action causes no Honor loss at all -- and may rehonor instead.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var actor=Add(s,"training-harmless-battle-action",0,Zone.Battlefield,province:0);
+        var actorTarget=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var dishonorable=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true;
+        var unimpeachable=Add(s,"oracle-l5r-8989",1,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:actor.Id,TargetId:actorTarget.Id,AbilityId:"kouki-force"));
+        Equal(e.State.PendingChoice?.Type,"unimpeachableNameReaction","Offered: reactor controls a Dishonorable Personality");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:unimpeachable.Id,TargetId:dishonorable.Id,AbilityId:"unimpeachable-name-reaction"));
+        Check(!e.State.Cards[dishonorable.Id].Dishonorable,"Rehonored");
+        Accept(e,Cmd(e,"declineReaction",player:0));
+        Accept(e,Cmd(e,"declineReaction",player:1));
+        Check(e.State.PendingChoice is null);
+    }
+    // NOT offered when neither condition holds: a harmless action, and no Dishonorable Personality.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var actor=Add(s,"training-harmless-battle-action",0,Zone.Battlefield,province:0);
+        var actorTarget=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"oracle-l5r-8989",1,Zone.Hand); // held, but never offered
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:actor.Id,TargetId:actorTarget.Id,AbilityId:"kouki-force"));
+        Check(e.State.PendingChoice is null,"Not offered: kouki-force causes no Honor loss and player 1 controls no Dishonorable Personality");
+    }
+    // Her own separate Battle ability: bow a performing Shugenja and an enemy card, gain 2 Honor.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var un=Add(s,"oracle-l5r-8989",0,Zone.Hand);
+        var shugenja=Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var enemyCard=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        s.Players[0].Honor=0;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:un.Id,TargetId:enemyCard.Id,AbilityId:"unimpeachable-name-bow",PerformerId:shugenja.Id));
+        Check(e.State.Cards[enemyCard.Id].Bowed,"Bowed");
+        Equal(e.State.Players[0].Honor,2,"Gained 2 Honor");
+    }
+}
+static void FieldsOfMercyPrimitive()
+{
+    // The counter starts at 0 only once Fields of Mercy actually enters play -- a Personality
+    // destroyed BEFORE it entered is never counted retroactively.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var destroyer2=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var destroyer3=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var fomHand=Add(s,"oracle-l5r-2530",0,Zone.Hand);
+        var victim1=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:victim1.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e.State.Cards[victim1.Id].Zone,Zone.Dead,"Destroyed normally -- Fields of Mercy is not even in play yet");
+        Accept(e,Cmd(e,"pass",player:1));
+        Accept(e,Cmd(e,"playStrategy",player:0,id:fomHand.Id));
+        var state=e.State;
+        Check(state.FieldsOfMercyWatches.Any(w=>w.CardId==fomHand.Id && w.DestroyedCount[1]==0),"Counter starts at 0 on entry -- not retroactive to victim1's earlier destruction");
+        // The FIRST Personality destruction after entry still happens normally (and starts the count)...
+        var victim2=Add(state,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e2=MatchEngine.FromTestState(state);
+        Accept(e2,Cmd(e2,"pass",player:1));
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:destroyer2.Id,TargetId:victim2.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e2.State.Cards[victim2.Id].Zone,Zone.Dead,"First destruction after entry: not negated");
+        // ...but the SECOND is negated.
+        var state2=e2.State;
+        var victim3=Add(state2,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e3=MatchEngine.FromTestState(state2);
+        Accept(e3,Cmd(e3,"pass",player:1));
+        Accept(e3,new GameCommand("useAbility",0,e3.Version,CardId:destroyer3.Id,TargetId:victim3.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e3.State.Cards[victim3.Id].Zone,Zone.Battlefield,"Second destruction after entry: negated -- still alive");
+    }
+    // A destroy effect that would take out a whole unit still destroys every attached card even when
+    // the Personality herself is spared -- proven via an outright battle-resolution loss (which
+    // destroys the whole losing army in one DestroyUnits call, regardless of individual attachments).
+    {
+        var s=Battle(attackForce:8,defenseForce:0,provinceStrength:1).State; // attacker wins outright
+        var fom=Add(s,"oracle-l5r-2530",1,Zone.Battlefield,province:0);
+        s.FieldsOfMercyWatches.Add(new(){CardId=fom.Id}); // already in play, count starts at [0,0]
+        var firstDefender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield && CardCatalog.Get(c.DefinitionId).Type==CardType.Personality && c.Id!=fom.Id);
+        var secondDefender=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+        var followerOnSecond=Add(s,"training-follower",1,Zone.Attached,attachedTo:secondDefender.Id,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Cards[firstDefender.Id].Zone,Zone.Dead,"First Personality processed: destroyed normally, starts the count");
+        Check(e.State.Cards[secondDefender.Id].Zone!=Zone.Dead,"Second Personality processed: negated -- destruction did not apply (battle resolution's own post-battle move-home still applies normally, same as any other surviving unit)");
+        Equal(e.State.Cards[followerOnSecond.Id].Zone,Zone.FateDiscard,"Its attachment is still destroyed even though the Personality herself was spared");
+        Check(e.State.Cards[secondDefender.Id].AttachedTo is null,"The now-negated Personality has no dangling attachment reference left behind");
+    }
+}
+static void YasukiTsujikenPrimitive()
+{
+    // His own Reaction, exercised end to end via a real Purchase: marks a target Holding.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Dynasty; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var provinceCardId=s.Players[0].Provinces[0].CardId!;
+        s.Cards[provinceCardId].DefinitionId="oracle-l5r-9469"; s.Cards[provinceCardId].FaceUp=true;
+        var holding=Add(s,"training-farm",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,10).First();
+        Accept(e,new GameCommand("purchase",0,e.Version,CardId:provinceCardId,SourceIds:payment.SourceIds));
+        Equal(e.State.PendingChoice?.Type,"entryReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:provinceCardId,TargetId:holding.Id,AbilityId:"tsujiken-watch-holding"));
+        Check(e.State.TsujikenWatches.Any(w=>w.TsujikenId==provinceCardId && w.HoldingId==holding.Id),"Marked the target Holding");
+    }
+    // Bowing a marked Holding (any cause -- here, Ashigaru Elite's own Farm-bow cost, the one
+    // currently-real Holding-bowing path) costs its controller 1 Honor per active mark; two separate
+    // marks (from two copies of Tsujiken, owned by either player) on the SAME Holding stack.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var booster=Add(s,"training-ashigaru-boost-source",0,Zone.Battlefield,province:0);
+        var farm=Add(s,"training-farm",0,Zone.Home);
+        var tsujiken1=Add(s,"oracle-l5r-9469",1,Zone.Home);
+        var tsujiken2=Add(s,"oracle-l5r-9469",1,Zone.Home);
+        s.TsujikenWatches.Add(new(tsujiken1.Id,farm.Id));
+        s.TsujikenWatches.Add(new(tsujiken2.Id,farm.Id));
+        s.Players[0].Honor=10;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:booster.Id,TargetId:farm.Id,AbilityId:"training-ashigaru-boost"));
+        Check(e.State.Cards[farm.Id].Bowed,"Bowed as the ability's own cost");
+        Equal(e.State.Players[0].Honor,8,"Two active marks: 2 Honor lost on this one bow");
+    }
+    // The watch ends the moment Tsujiken himself leaves play -- destroy him, then bow the same
+    // Holding again: no further Honor loss from his own mark.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var booster=Add(s,"training-ashigaru-boost-source",0,Zone.Battlefield,province:0);
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var farm=Add(s,"training-farm",0,Zone.Home);
+        var tsujiken=Add(s,"oracle-l5r-9469",1,Zone.Battlefield,province:0);
+        s.TsujikenWatches.Add(new(tsujiken.Id,farm.Id));
+        s.Players[0].Honor=10;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:tsujiken.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e.State.Cards[tsujiken.Id].Zone,Zone.Dead,"Tsujiken destroyed");
+        Check(!e.State.TsujikenWatches.Any(w=>w.TsujikenId==tsujiken.Id),"His own watch was cleared when he left play");
+        Accept(e,Cmd(e,"pass",player:1));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:booster.Id,TargetId:farm.Id,AbilityId:"training-ashigaru-boost"));
+        Equal(e.State.Players[0].Honor,10,"No mark left active: no Honor lost bowing the same Holding again");
+    }
+    // Open half: bows Tsujiken (his own ability's usual cost) and straightens a target Holding.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var tsujiken=Add(s,"oracle-l5r-9469",0,Zone.Home);
+        var holding=Add(s,"training-expensive-holding",0,Zone.Home,bowed:true); // base Gold Cost 6, above 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tsujiken.Id,TargetId:holding.Id,AbilityId:"tsujiken-straighten-holding"));
+        Check(e.State.Cards[tsujiken.Id].Bowed,"Bowed as the mandatory cost -- the target's base Gold Cost (6) is above 4");
+        Check(!e.State.Cards[holding.Id].Bowed,"Straightened");
+    }
+    // The bow-Tsujiken cost is waived for a cheap target (base Gold Cost 4 or lower).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var tsujiken=Add(s,"oracle-l5r-9469",0,Zone.Home);
+        var holding=Add(s,"training-farm",0,Zone.Home,bowed:true); // base Gold Cost 2, 4 or lower
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tsujiken.Id,TargetId:holding.Id,AbilityId:"tsujiken-straighten-holding"));
+        Check(!e.State.Cards[tsujiken.Id].Bowed,"Cost waived -- the target's base Gold Cost (2) is 4 or lower");
+        Check(!e.State.Cards[holding.Id].Bowed,"Still straightened");
     }
 }
