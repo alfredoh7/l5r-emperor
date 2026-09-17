@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "M7 material/enclosure pass: imagegen references and eight Meshy jobs deliver three wood finishes, two stone-foot variants, chest retexture and a fitted Blender dais with Meshy textures; rejected the flattened generated dais. Added closed side shoji, removed tabletop lamps and spear racks, removed their residual card/mat/frame glow, corrected chest clearances, and rebuilt floor irradiance. Preserved original gameplay camera, cards and restored lacquer menus. Current changes are presentation only; cumulative PR includes earlier shared menu integration.",
+  "validation": "Client build: 0 warnings/errors; Godot import clean. Thirteen native Mac checks pass: seven camera/input/expanded/reduced-motion cases, three motion/freeze/resume sequences, menu, table guide and exact Play Latest entry. Six additional native still views and source/previous/current comparison inspected; corrected first-pass materials and chest intersections. Source/log hashes, gallery and limits: docs/screenshots/war-room/milestone-7. Python compile, shell syntax, git diff --check pass. Meshy: 155 credits consumed, balance 1620 to 1465. Fresh context complete, origin/main integrated.",
+  "remaining": "Pause for user visual milestone feedback; no pixel-identical claim. Draft PR234 awaits new-commit CI and applicable shared review before merge. Native Windows graphical testing and sustained performance profiling remain open. Room is a fixed-pitch art-directed stage; rear vista is a matte and floor lighting a local bake with native modulation. Relaunch the linked Latest app to load M7.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/233",
+  "branch": "codex/233-war-room",
+  "updated": "2026-09-16T00:50:55.738658+00:00"
+}

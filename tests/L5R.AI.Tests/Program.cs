@@ -47,6 +47,8 @@ foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: published abilities, complete match and replay",()=>Play(seed,true));
+foreach(var pair in new[]{("Crane","Lion"),("Lion","Crane"),("Crane","Crane"),("Lion","Lion")})
+    Run($"custom Practice {pair.Item1}/{pair.Item2}: complete match and replay",()=>Play(42,custom:pair));
 foreach(var scenario in DuelDemoScenarios.All)
 foreach(var seed in new ulong[]{1,205,9876})
     Run($"Duel {scenario.Id}, seed {seed}: permitted views, completion and replay",()=> {
@@ -69,9 +71,9 @@ return runner.Finish();
 void Run(string name,Action run) => tests.Add((name,run));
 
 static void Check(bool condition,string message) { if(!condition) throw new Exception(message); }
-static void Play(ulong seed,bool published=false)
+static void Play(ulong seed,bool published=false,(string Your,string Opponent)? custom=null)
 {
-    var game=published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;
+    var game=custom is {} pair?MatchEngine.CreateCustomMatch(seed,CustomPractice.Preset(pair.Your),CustomPractice.Preset(pair.Opponent)):published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;
     while(game.GetView(0).WinnerId is null && commands<1600)
     {
         var player=game.GetView(0).PriorityPlayerId;

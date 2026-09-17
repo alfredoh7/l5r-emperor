@@ -71,4 +71,14 @@ public partial class TableSurface : TextureRect
         Canvas.NotifyMouseExited(); _mouseInside = false;
     }
 
+    public void ReleaseMouseOutside(InputEventMouseButton mouse)
+    {
+        // Finish a table press released over fixed HUD/outside the table without
+        // re-entering the projection and activating a covered card or button.
+        ExitMouse();
+        var released = (InputEventMouseButton)mouse.Duplicate();
+        released.Position = released.GlobalPosition = new Vector2(-1, -1);
+        Canvas.PushInput(released, true);
+    }
+
 }

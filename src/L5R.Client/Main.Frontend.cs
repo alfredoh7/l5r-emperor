@@ -22,6 +22,7 @@ public partial class Main
         {
             Preferences = _preferences,
             StartMatch = StartFromMenu,
+            PracticeSetup = ShowPracticeSetup,
             DuelDemo = OpenDuelDemo,
             PrivateMatch = () => { _enteringPrivate = true; ShowOnline(); },
             Library = () => LibraryDialog.Show(this),
@@ -34,7 +35,7 @@ public partial class Main
         layer.AddChild(_titleMenu);
         InitializeTurnBloom();
         GetTree().AutoAcceptQuit = false;
-        GetWindow().CloseRequested += () => { CloseDuelDemo(); ShowMainMenu(); _titleMenu.ShowQuit(); };
+        GetWindow().CloseRequested += () => { if(PracticeVisible){Confirm("Quit the game?","Unsaved deck edits and Practice progress will be lost.",()=>GetTree().Quit());return;} CloseDuelDemo(); ShowMainMenu(); _titleMenu.ShowQuit(); };
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) ShowMainMenu();
         else _titleMenu.Hide();
     }
@@ -99,7 +100,7 @@ public partial class Main
         ResetStatHistory();
         _presentationSnapshot = null; _battlePresentationStage = 0; _motionView = null; _cameraGlide = false;
         _enteringPrivate = false; _tableLayoutSeen = false; _cameraFitted = true;
-        _selected = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
+        _selected = null; _selectedHomeReminder = null; _chosen = null; _expandedUnits.Clear(); _sources.Clear(); _assignments.Clear();
         _session.StartPractice(false, true, seat); EnterTable();
     }
 }

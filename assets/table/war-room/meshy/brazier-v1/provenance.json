@@ -1,0 +1,63 @@
+{
+  "task_id": "01a0a640-0205-766b-8b78-128cbc8833dc",
+  "source_sha256": "3e5d8cefd68eb34b9e40583ca19b16ac1456f06b1088f11673d7d7b062534be8",
+  "source_region_px": [
+    14,
+    287,
+    105,
+    124
+  ],
+  "approval": "brazier cropped from approved B3; replaces the same existing furnishing, no inventory added.",
+  "cli": "@meshy-ai/cli 0.3.0",
+  "settings": {
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": "glb",
+    "ultra_mode": false,
+    "image_enhancement": true
+  },
+  "texture_prompt": "One Japanese fortress freestanding iron brazier matching the reference. Dark worn hand-forged iron openwork bowl, thick hammered circular rims, eight curved ribs, sturdy splayed legs and lower cross bracing, soot and oxidized iron. Generate the metal fixture only, with an EMPTY dark bowl. No flames, no smoke, no sparks, no glowing parts, no floor, room or background. The game will add fire separately. Complete silhouette and grounded feet.",
+  "estimated_credits": 30,
+  "consumed_credits_reported_by_task": 30,
+  "timestamps_ms": {
+    "created_at": 1789495618149,
+    "started_at": 1789495618152,
+    "finished_at": 1789495833560
+  },
+  "downloads": [
+    {
+      "file": "model.glb",
+      "sha256": "bf339609fb7a2094cd9d3d776734b0bcb6ae22af0a6fb1a19a0530806bcc8acb",
+      "bytes": 91698476
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "sha256": "a6a56c1291da3791e94f0e6c1b3381cd33590930504b98d44d8a77626ff96633",
+      "bytes": 16419840
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "sha256": "2175f736a6acb240cd4d9c4067bb42c47bc800f0e9077f907973c603c68fe5a6",
+      "bytes": 21291
+    },
+    {
+      "file": "texture_0_normal.png",
+      "sha256": "d1c746ddfff0b663852e586033d629a60f5cfef66f0a4cabb65a51556521def3",
+      "bytes": 11131111
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "sha256": "8553360fd12e7c75c746b8b7b41a247f9aa992f0a49786dc0787c894f9a2e339",
+      "bytes": 1490868
+    },
+    {
+      "file": "thumbnail.png",
+      "sha256": "3d5984dd743fc138da6c3c943e1cfe6f67f36a20d5d5f2cf62fed18e31e24a53",
+      "bytes": 190316
+    }
+  ],
+  "returned_model_version": "Not supplied in task response; standard CLI route requests Meshy-7."
+}

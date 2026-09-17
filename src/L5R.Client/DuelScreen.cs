@@ -77,6 +77,7 @@ public partial class DuelScreen : Control
         if(_selectedFocus is {} focus && !(snapshot.View.Players[snapshot.View.ViewerId].Focused??[]).Any(c=>c.Id==focus))_selectedFocus=null;
         var order=snapshot.Actions.FirstOrDefault(a=>a.Type=="orderDuelFocusEffects")?.TargetIds??[];
         if(!_effectOrder.Order().SequenceEqual(order.Order()))_effectOrder=order.ToArray();
+        if(ExternalEntrance && record is not null) _openingSeen=true;
         if(!_openingSeen && record is {Result:null} && snapshot.View.PendingDuel?.Stage=="Focusing")StartOpening();
         RenderCards(!changedSeat);RenderActions();
     }

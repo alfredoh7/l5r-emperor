@@ -27,12 +27,12 @@ public sealed partial class MatchEngine
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
                 EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
                 Celestials:owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray(),
-                FocusCount:owned.Count(c=>c.Zone==Zone.Focused));
+                FocusCount:owned.Count(c=>c.Zone==Zone.Focused)) { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId,_state.VictoryReason,players,_state.Events.Select(e=>e.Type=="duelFocused" && e.PlayerId!=playerId ? e with {CardId=null} : e).ToArray(),_scenario.StartsWith("duel-demo/", StringComparison.Ordinal)?["Prepared Duel Demo position; not a playable deck profile.",DuelDemoScenarios.Get(_scenario[10..]).Description]:_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
+            _state.WinnerId,_state.VictoryReason,players,_state.Events.Select(e=>e.Type=="duelFocused" && e.PlayerId!=playerId ? e with {CardId=null} : e).ToArray(),_scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario.StartsWith("duel-demo/", StringComparison.Ordinal)?["Prepared Duel Demo position; not a playable deck profile.",DuelDemoScenarios.Get(_scenario[10..]).Description]:_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,_state.PriorityPlayerId,duel.Struck,duel.DuelId),_state.LastDuel is null?null:Copy(_state.LastDuel));
     }
 
@@ -43,7 +43,7 @@ public sealed partial class MatchEngine
         var def=Definition(card);
         var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
         return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-            def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray());
+            def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(), card.Protections.Select(p=>new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -175,8 +175,9 @@ public sealed partial class MatchEngine
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
-                var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
                 var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
+                var provinces=Player(1-_state.ActivePlayerId).Provinces
+                    .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index).ToArray();
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",

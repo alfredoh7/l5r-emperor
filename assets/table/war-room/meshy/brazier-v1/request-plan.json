@@ -1,0 +1,12 @@
+{
+  "asset": "brazier",
+  "region_px": [
+    14,
+    287,
+    105,
+    124
+  ],
+  "texture_prompt": "One Japanese fortress freestanding iron brazier matching the reference. Dark worn hand-forged iron openwork bowl, thick hammered circular rims, eight curved ribs, sturdy splayed legs and lower cross bracing, soot and oxidized iron. Generate the metal fixture only, with an EMPTY dark bowl. No flames, no smoke, no sparks, no glowing parts, no floor, room or background. The game will add fire separately. Complete silhouette and grounded feet.",
+  "estimated_credits": 30,
+  "source_sha256": "3e5d8cefd68eb34b9e40583ca19b16ac1456f06b1088f11673d7d7b062534be8"
+}

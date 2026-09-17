@@ -81,6 +81,7 @@ public partial class Main : Node
         _table = new TableArtStage { ReviewMode = false }; AddChild(_table);
         BuildShell();
         InitializeFrontend();
+        if(OS.GetCmdlineUserArgs().Contains("--duel-transition-review")){StartTransitionReview();return;}
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
         _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
@@ -91,14 +92,15 @@ public partial class Main : Node
     public override void _Process(double delta)
     {
         while (_uiQueue.TryDequeue(out var update)) update();
+        if(_transitionReview){try{ProcessTransitionReview(delta);}catch(Exception e){GD.PushError(e.ToString());GetTree().Quit(1);}return;}
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
-        if (MenuVisible || DuelDemoOpen) return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
-        foreach (var tracker in _inspector.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
+        foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
         foreach (var plaque in _clanHud.GetChildren().OfType<ClanPlaque>()) plaque.ReducedMotion = _reducedMotion;
         _fullscreenGate.Visible = false;
         if (_autoOpponent && !PresentationBusy && !_session.Online && _capturePath is null)
@@ -122,6 +124,9 @@ public partial class Main : Node
             {
                 _capturePrepared = true;
                 _captureClock = 0;
+                if (_captureMode.StartsWith("published-home", StringComparison.Ordinal)) PreparePersistentHomeCapture();
+                if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) PreparePermanentGrantCapture();
+                if (_captureMode.StartsWith("published-fallen", StringComparison.Ordinal)) PrepareFallenCapture();
                 if (_captureMode is "published-choice" or "published-choice-confirm")
                 {
                     for (var fixtureAttempt = 0; fixtureAttempt < 6 && View.PendingChoice?.Type != "shinden"; fixtureAttempt++)
@@ -174,6 +179,17 @@ public partial class Main : Node
                 }
                 if (_captureMode == "library") LibraryDialog.Show(this);
                 if (_captureMode == "published-rules") ShowRules();
+                if (_captureMode == "published-lacquer-menu") ShowTableMenu();
+                if (_captureMode == "published-lacquer-practice") ShowPractice();
+                if (_captureMode == "published-lacquer-private") ShowOnline();
+                if (_captureMode == "published-lacquer-coverage") ShowCoverage();
+                if (_captureMode == "published-lacquer-history") ShowHistory();
+                if (_captureMode == "published-lacquer-pile") ShowPile(View.ViewerId, Zone.Dead);
+                if (_captureMode == "published-lacquer-confirm") Confirm("Leave this table?", "Return to the main menu? Your current practice will end.", () => { });
+                if (_captureMode == "published-lacquer-tooltip")
+                    Place(_root, ReadingTooltip.Create(this, "Bowed / unbowed\nA sideways card is bowed. Each attachment keeps its own bowed state."), 600, 260, 460, 180);
+                if (_captureMode == "published-lacquer-card")
+                    Place(_root, CardPreview.Create(View.Players.SelectMany(p=>p.Home.Concat(p.Provinces.Where(x=>x.Card is not null).Select(x=>x.Card!))).First(c=>c.Definition is not null), "Your hand", null), 430, 200, 750, 558);
                 if (_captureMode is "payment" or "purchase")
                 {
                     var option = Actions.First(a => a.Type == "purchase" && a.Enabled && a.Quote is { ClanDiscount: false, ClanAllegiance: false, ProclaimEligible: true });
@@ -189,6 +205,7 @@ public partial class Main : Node
             }
             if (_capturePrepared) _captureFrames++;
             if (_captureMode.Contains("clarity", StringComparison.Ordinal)) MaintainClarityPointer();
+            if (_captureMode.StartsWith("published-grants", StringComparison.Ordinal)) MaintainGrantPointer();
             if (_capturePrepared && _captureMode.Contains("camera", StringComparison.Ordinal)) ProcessCameraCapture();
             if (_capturePath is null) return;
             if (_capturePrepared && _captureMode.EndsWith("piletip", StringComparison.Ordinal) && _captureClock > .4 && !_pileHoverSent)
@@ -227,7 +244,9 @@ public partial class Main : Node
                 GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = Vector2.One }, true);
                 GD.Print($"HOVER_PROBE: {point}, control={GetViewport().GuiGetHoveredControl()?.GetPath()}");
             }
-            if (_capturePrepared && (!_captureMode.Contains("courts", StringComparison.Ordinal) || _battleProbeDone) && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
+            // These fixtures review settled menus, after the startup turn announcement clears.
+            if ((_captureMode.StartsWith("published-lacquer-", StringComparison.Ordinal) || _captureMode.StartsWith("published-home", StringComparison.Ordinal) || _captureMode == "published-rules" || _captureMode.StartsWith("published-grants", StringComparison.Ordinal)) && _turnBloom.Playing) return;
+            if (_capturePrepared && (!_captureMode.StartsWith("published-fallen", StringComparison.Ordinal) || _fallenProbeDone) && (!_captureMode.StartsWith("published-grants", StringComparison.Ordinal) || _grantProbeDone) && (!_captureMode.Contains("courts", StringComparison.Ordinal) || _battleProbeDone) && (!_captureMode.Contains("ink", StringComparison.Ordinal) || _inkProbeDone) && (!_captureMode.Contains("deselect", StringComparison.Ordinal) || _deselectProbeDone) && (!_captureMode.Contains("standards", StringComparison.Ordinal) || _standardProbeDone) && (!_captureMode.Contains("hudicons", StringComparison.Ordinal) || _hudProbeDone) && (!_captureMode.Contains("clarity", StringComparison.Ordinal) || _clarityInputDone && _captureClock > _clarityReadyAt + 1) && (!_captureMode.Contains("camera", StringComparison.Ordinal) || _cameraProbeDone) && (!_captureMode.Contains("candle", StringComparison.Ordinal) || _filmFrames >= 72) && _captureClock > (_captureMode.Contains("gate", StringComparison.Ordinal) ? 3 : (_captureMode.Contains("clarity", StringComparison.Ordinal) || _captureMode.EndsWith("hover", StringComparison.Ordinal) || _captureMode.EndsWith("piletip", StringComparison.Ordinal)) ? 2 : 1) && _captureFrames >= 15)
             {
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
@@ -239,6 +258,8 @@ public partial class Main : Node
                 RenderingServer.ForceDraw(false);
                 RenderingServer.ForceSync();
                 var error = GetViewport().GetTexture().GetImage().SavePng(_capturePath);
+                try { ValidateLacquerMenus(); }
+                catch (Exception e) { GD.PushError(e.Message); error = Error.Failed; }
                 GD.Print($"CAPTURE_RESULT: {error} {_capturePath}");
                 GetTree().Quit(error == Error.Ok ? 0 : 1);
                 _capturePath = null;
@@ -249,7 +270,7 @@ public partial class Main : Node
     private Vector2 DesignSize => new(_layoutWidth, 1080);
     private float _layoutWidth = 1920;
     private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
-    private const float SidebarWidth = 300;
+    private const float SidebarWidth = 400;
     private const float HandCardSide = 284;
     private HBoxContainer _menu = null!;
     private Control _inspectorPanel = null!, _fullscreenGate = null!;
@@ -257,6 +278,7 @@ public partial class Main : Node
 
     private void FitPresentation()
     {
+        if(_transitionReview && _transitionRoom is not null)return;
         var available = GetViewport().GetVisibleRect().Size;
         var scale = available.Y / 1080f;
         // Root controls use an explicit scale, so rasterize system fonts at the
@@ -273,7 +295,7 @@ public partial class Main : Node
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         _status.Visible = false;
-        _timeline.Position = new Vector2(300, 12); _timeline.Size = new Vector2(_layoutWidth - 660, 100);
+        _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
         _notice.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 1060); _notice.Size = new Vector2(SidebarWidth, 19);
         _unitDetail.Size = DesignSize;
@@ -289,17 +311,18 @@ public partial class Main : Node
         return child;
     }
 
+    private VBoxContainer _sidebarHeader = null!;
+
     private void BuildShell()
     {
         var canvas = new CanvasLayer(); AddChild(canvas);
         _root = new Control { Theme = Palette.MakeTheme(), Size = DesignSize, MouseFilter = Control.MouseFilterEnum.Ignore };
         canvas.AddChild(_root);
-        _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, 1920, 1080);
         BuildTableViewport();
         _status = Place(_root, Palette.Text("", 17, Palette.PaperDim), 295, 15, 750, 26);
         _status.HorizontalAlignment = HorizontalAlignment.Center;
         _status.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis;
-        _timeline = Place(_root, new PhaseTrack(), 300, 12, 1000, 100);
+        _timeline = Place(_root, new PhaseTrack(), 344, 12, 956, 100);
         _menu = Place(_root, new HBoxContainer { Alignment = BoxContainer.AlignmentMode.End }, 1345, 27, 549, 35);
         _menu.AddThemeConstantOverride("separation", 7);
         _menu.AddChild(new TableIconButton(TableGlyph.Menu, ShowTableMenu, "Menu"));
@@ -310,11 +333,12 @@ public partial class Main : Node
         _board = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _pileHud = Place(_world, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 0, 0, WorldWidth, 1100);
         _hand = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, 250, 1060 - HandCardSide, BoardWidth - 12, HandCardSide);
-        var inspectorPanel = Place(_root, new LacquerPanel(), 1488, 94, SidebarWidth, 960);
+        var inspectorPanel = Place(_root, new PanelContainer { Theme = SidebarSkin.Theme() }, 1488, 94, SidebarWidth, 960);
         _inspectorPanel = inspectorPanel;
-        inspectorPanel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.045f, .043f, .033f, .96f), new Color("766341"), 18));
+        inspectorPanel.AddThemeStyleboxOverride("panel", SidebarSkin.Surface());
         var side = new VBoxContainer(); side.AddThemeConstantOverride("separation", 10); inspectorPanel.AddChild(side);
         _seatLabel = Palette.Text("", 13, Palette.Gold); _seatLabel.Visible = false; side.AddChild(_seatLabel);
+        _sidebarHeader = new VBoxContainer(); side.AddChild(_sidebarHeader);
         var scroll = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled }; side.AddChild(scroll);
         _inspector = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; _inspector.AddThemeConstantOverride("separation", 10); scroll.AddChild(_inspector);
         side.AddChild(new HSeparator());
@@ -325,6 +349,9 @@ public partial class Main : Node
         _notice.TextOverrunBehavior = TextServer.OverrunBehavior.TrimEllipsis; _notice.MouseFilter = Control.MouseFilterEnum.Stop;
         _intentOverlay = new BoardIntentOverlay { MouseFilter = Control.MouseFilterEnum.Ignore, Arrows = IntentArrows };
         _root.AddChild(_intentOverlay); _intentOverlay.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
+        // Fixed placards overlap the projected table and the hand. Keep both drawing
+        // and native GUI picking above those cards, but below expanded/modal views.
+        _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 45 }, 0, 0, 1920, 1080);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildCameraControls();
         BuildBattleFeedback();
@@ -349,7 +376,7 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || DuelDemoOpen) return;
+        else if (MenuVisible || DuelDemoOpen || PracticeVisible || _transitionReview) return;
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -359,9 +386,10 @@ public partial class Main : Node
 
     private void Render()
     {
+        if(_transitionReview && _transitionRoom is not null)return;
         Interlocked.Exchange(ref _renderQueued, 0);
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible || DuelDemoOpen) return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
@@ -384,7 +412,7 @@ public partial class Main : Node
         if (_selected is not null) _selected = FindCard(_selected.Id);
         _seatLabel.Text = _session.Online ? $"ROOM {_session.Snapshot.RoomCode} · {Self.Clan}" : $"PRACTICE · {Self.Clan}";
         _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
-        if (View.Scenario == PublishedContent.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
+        if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
         RenderBattleFeedback();
@@ -439,6 +467,7 @@ public partial class Main : Node
         // A misclick during a reviewed action must not silently discard its target or payment.
         if (_chosen is not null) { SetNotice("That card is not a legal target. Cancel the current action to inspect it."); return; }
         if (_selected?.Id == card.Id) { DeselectCard(); return; }
+        _selectedHomeReminder = null; HighlightHomeReminders();
         _selected = card; _sources.Clear();
         var assign = Actions.FirstOrDefault(a => a.Enabled && a.Type is "attack" or "assignDefense" && a.TargetIds?.Contains(card.Id) == true);
         if (assign is not null) { Choose(assign); _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
@@ -502,7 +531,7 @@ public partial class Main : Node
     private static string ShortName(CardView card) => card.Definition?.Name.Replace("training ", "").Replace("Training ", "") ?? "Hidden card";
     private static int Production(CardView card, PlayerView owner) => (card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0;
     private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
-    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
+    private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.RemovedFromGame).Concat(p.EventsInPlay??[]).Concat(p.Celestials??[]).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Concat(p.Provinces.Where(p=>p.Region is not null).Select(p=>p.Region!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
     private void SetNotice(string message) { _notice.Text = message; _notice.TooltipText = message; if (MenuVisible) _titleMenu!.Notify(message); }
     public override void _ExitTree() => _session.Dispose();

@@ -1,6 +1,6 @@
 # Art production with Meshy
 
-Accepted by Alfredo on 2026-09-14 after reviewing the supplied Meshy lantern. This is the default route for detailed 3D props, beginning with the duel arena in [#205](https://github.com/alfredoh7/l5r-emperor/issues/205). It supersedes the temporary manual-lantern experiment. Mechanics remain with Mendon.
+Accepted by Alfredo on 2026-09-14 after reviewing the supplied Meshy lantern. Expanded by Alfredo on 2026-09-16 to every new 3D asset (see ART_IMPLEMENTATION.md). This is the default production route, beginning with the duel arena in [#205](https://github.com/alfredoh7/l5r-emperor/issues/205). It supersedes the temporary manual-lantern experiment. Mechanics remain with Mendon.
 
 **External ChatGPT image generation → Alfredo's image approval → Blender layout → quick Godot camera check → Meshy props → Blender cleanup and assembly → Godot presentation → compare and iterate.**
 
@@ -12,7 +12,7 @@ Codex supplies prompts; Alfredo generates and approves the source images using h
 |---|---|
 | Composition, camera, card clearance and scale | Simple editable Blender layout, checked early with the actual Godot card camera |
 | Flat mat, painted ornament and other approved surface art | Use the actual approved pixels with correct proportions and UVs |
-| Rollers, plinth, beams, rail and shoji/architectural frames | Direct Blender geometry |
+| All new 3D objects, including rollers, plinths, beams, rails, shoji and ornamental UI frames | Approved reference → Meshy production → measured Blender cleanup/assembly; blockouts may precede Meshy for scale/camera checks |
 | Stone lanterns, garden rocks, pine trees and decorative props | Approved individual reference → Meshy → Blender cleanup |
 | Light sources, moving shadows, mist, sound and interaction | Native Godot, with reduced-motion and gameplay checks |
 

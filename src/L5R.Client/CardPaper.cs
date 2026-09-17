@@ -11,6 +11,7 @@ public static class CardPaper
         uniform float patina = 1.0;
         uniform float candle_phase = 0.0;
         uniform float candle_motion = 1.0;
+        uniform float table_light_strength = 1.0;
         uniform vec2 screen_size = vec2(1920.0,1080.0);
         uniform vec2 table_origin = vec2(0.0);
         uniform float table_scale = 1.0;
@@ -35,7 +36,7 @@ public static class CardPaper
             float light = exp(-dot(distance, distance) * 1.5) * candle_energy(candle_phase,candle_motion);
             vec2 right = (world-light_origin_right)/light_radius;
             light += exp(-dot(right,right)*1.5) * candle_energy(candle_phase+1.8,candle_motion);
-            result += vec3(0.090, 0.044, 0.013) * light;
+            result += vec3(0.090, 0.044, 0.013) * light * table_light_strength;
             COLOR = vec4(clamp(result, vec3(0.0), vec3(1.0)), ink.a);
         }
         """ };
@@ -56,10 +57,11 @@ public static class CardPaper
         // Reading popovers and the fixed hand have no moving environmental light.
         Reading.SetShaderParameter("candle_motion", 0f);
     }
-    public static void SetLight(float time, bool animate)
+    public static void SetLight(float time, bool animate, bool tableLamps = true)
     {
-        foreach (var material in new[] { Table, Reading })
+        foreach (var material in new[] { Table, Reading, FixedTable })
         {
+            material.SetShaderParameter("table_light_strength", tableLamps ? 1f : 0f);
             material.SetShaderParameter("candle_phase", time);
             material.SetShaderParameter("candle_motion", animate && material == Table ? 1 : 0);
         }

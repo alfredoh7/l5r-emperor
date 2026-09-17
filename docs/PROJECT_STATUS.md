@@ -2,6 +2,12 @@
 
 Updated: 2026-09-16. This is the current summary for human collaborators and AI sessions; historical documents describe earlier checkpoints.
 
+## Approved UI integration candidate
+
+Alfredo approved the Home/Favor presentation and requested consolidation of the existing UI branches. [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) combines the catalogue, lacquer/Caudex menus, WeatheredQuill headings, battle flow and removed-card gallery, current fortress hall/table, hand-limit placards and Noble Crest Home/Favor. Existing deck-builder functionality stays included. The branch manifest and review state are in [UI_CONSOLIDATION.md](UI_CONSOLIDATION.md); this is an integration candidate until shared review and CI are complete.
+
+The separate Duel Demo in #220 remains excluded for Alfredo and Mendon's own later acceptance. Main's existing duel mechanics are preserved. Do not launch older isolated UI worktrees as the latest full-game preview.
+
 ## Current playable baseline
 
 - Desktop **0.3.10**, content profile `lion-crane-v1`, content version `emperor-lion-crane-0.2.0`.

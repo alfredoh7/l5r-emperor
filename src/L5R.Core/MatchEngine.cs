@@ -29,11 +29,13 @@ public sealed partial class MatchEngine
     public static MatchEngine CreatePublishedTestMatch(ulong seed = 20260906) => Create(seed, PublishedContent.TestScenario);
     internal static MatchEngine FromTestState(MatchState state) => new(Copy(state), 1, "test-only");
 
-    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray());
+    public ReplayRecord ExportReplay() => new(ContentVersion, _scenario, _seed, _commands.Select(Copy).ToArray(), _customDecks?.Select(CustomPractice.CopyDeck).ToArray());
     public static MatchEngine Replay(ReplayRecord replay)
     {
         if (replay.ContentVersion != ContentVersion) throw new ArgumentException("Replay content version is not supported.");
-        var engine = Create(replay.Seed, replay.Scenario);
+        var engine = replay.Scenario == CustomPractice.Scenario
+            ? replay.CustomDecks is { Length: 2 } decks ? CreateCustomMatch(replay.Seed, decks[0], decks[1]) : throw new ArgumentException("Custom replay is missing its two deck snapshots.")
+            : Create(replay.Seed, replay.Scenario);
         foreach (var command in replay.Commands)
         {
             var result = engine.Execute(command);
@@ -1504,7 +1506,14 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
-    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
+    private HandLimitView HandLimitFor(int playerId)
+    {
+        var modifiers = _state.Cards.Values
+            .Where(c => c.OwnerId != playerId && InPlay(c) && Definition(c).Effect == "increase-other-hand-size")
+            .Select(c => new HandLimitModifier(c.Id, Definition(c).Name, 1)).ToArray();
+        return new(8, 8 + modifiers.Sum(m => m.Amount), modifiers);
+    }
+    private int MaxHandSize(int playerId) => HandLimitFor(playerId).Maximum;
     private void EndTurn()
     {
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1
