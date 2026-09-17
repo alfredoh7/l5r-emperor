@@ -1,0 +1,82 @@
+{
+  "Profile": "spell-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3788",
+      "Name": "Intervening Spirit",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this unit is not at the current battlefield, if any enemy units are there, target your Personality: Move him there. Straighten him if he moved. If he is an Ancestor and this Shugenja is Water, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3788.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "intervening-spirit-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8038",
+      "Name": "The Earth Flows",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After you gain Honor from destroying an army in battle resolution, if this Shugenja is Earth and in the winning army: Gain 2 Honor.\nBattle: If you are the Defender, target a Personality: Move him to the current battlefield. Straighten his unit if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8038.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "earth-flows-move"
+      ],
+      "Effect": "earth-flows-honor"
+    },
+    {
+      "Id": "oracle-l5r-9344",
+      "Name": "Winds of Dismissal",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja and target another player's Personality: If he is dishonorable, Kolat, Ninja, or Shadowlands, his controller loses Honor equal to his base Personal Honor. If this Shugenja is Air, gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9344.jpg",
+      "Keywords": [
+        "Air"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "winds-of-dismissal-choice"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

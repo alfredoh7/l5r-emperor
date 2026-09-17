@@ -1,0 +1,107 @@
+{
+  "Profile": "holding-wave-1",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-430",
+      "Name": "Archery Range",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nReaction: After a Ranged Attack is targeted, give it +1 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-430.jpg",
+      "Keywords": [
+        "Dojo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "archery-range-reaction"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7291",
+      "Name": "Slanderer",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 5 Gold. \nPolitical Limited, Bow this card: If you control a Courtier or Magistrate, dishonor a target Personality.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7291.jpg",
+      "Keywords": [
+        "Retainer"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "slanderer-dishonor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7875",
+      "Name": "Temple of Hotei",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nLimited: Bow your performing Shugenja to gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7875.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "temple-of-hotei-honor"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8721",
+      "Name": "Tranquil Garden",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold.\nOpen, Bow this card: Target a Ring in play or in your discard pile. If the Ring is in play, straighten it. Otherwise, put it into your hand and destroy this Holding.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8721.jpg",
+      "Keywords": [
+        "Temple"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tranquil-garden-ring"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

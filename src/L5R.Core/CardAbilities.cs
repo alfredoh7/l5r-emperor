@@ -650,6 +650,69 @@ public static class AbilityCatalog
         // Ancestor carries no mechanical rule of its own beyond this kind of qualification check
         // (issue #257's own user spec).
         ["kitsu-akai-battle"] = new("Battle", "Bow your performing Ancestor Personality and target an enemy card without attachments: Destroy it. Gain 1 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Ancestor"], RequireNoAttachments: true),
+        // Second City unwired-card audit (issue #264): five Strategy cards found buildable with
+        // existing primitives alone. All five reuse the generic RequiredKeywords Performer shape
+        // (own-unbowed-personality-at-battle-with-keyword / own-personality-with-keyword-at-battle) --
+        // Magistrate/Paragon/Commander/Spirit carry no mechanical rule of their own here either,
+        // exactly like Kitsu Akai's own Ancestor/Spirit precedent above.
+        ["dispensing-justice-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy Personality: If he has no attachments and is dishonorable, Kolat, Ninja, or Shadowlands, destroy him. Move him home", "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"]),
+        // Fear is a printed keyword with no mechanical rule of its own (confirmed against the card's
+        // own scan -- a separate keyword line, not a "Fear Battle:" compound timing prefix the way the
+        // local catalogue's own text paraphrase suggested), the same as Wrathful Ancestor's below.
+        ["bow-before-my-will"] = new("Battle", "Choose your performing unbowed Paragon and target an enemy card: Bow it. Negate its next straightening (this turn) if your Paragon is Shadowlands. Lose 2 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Paragon"]),
+        // No "unbowed" qualifier printed on the Performer -- same shape as Again!'s own precedent.
+        ["surety-of-purpose"] = new("Battle", "Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor", "lower-or-equal-honor-than-performer", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
+        ["unexpected-support"] = new("Battle", "Choose your performing unbowed Commander and target an enemy card with as many or fewer Followers than the performer: Bow it. Negate its next straightening (this turn)", "enemy-fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Commander"]),
+        // "This movement will not be negated": deliberately NOT added to MoveOrStraightenKind below,
+        // so Tamori Tamoko's own curated negation interrupt (which only ever recognizes ability ids
+        // listed there) can never apply to it -- exemption by omission, no new code needed.
+        ["wrathful-ancestor-move"] = new("Battle", "Choose your performing unbowed Spirit and target an enemy Personality: Move him home. This movement will not be negated", "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Spirit"]),
+        // Strategic Sacrifice (issue #264, Strategy wave 7): the one false-negative the BLOCKERS
+        // documentation pass itself caught -- a plain Siege Performer (RequiredKeywords' own already-
+        // common AtBattle-safe shape) and one new Force-vs-province-strength Target category.
+        ["strategic-sacrifice-toggle"] = new("Battle", "Choose your performing unbowed Siege Personality, and target a card with Force lower than or equal to the current battlefield's province's strength in a unit: Bow or straighten the card. Gain 2 Honor", "force-lte-province-strength", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Siege"]),
+        // Second City unwired-card audit (issue #264), Personality wave 18: nine cards found
+        // buildable with existing primitives alone -- self-printed abilities, no separate Performer
+        // (Matsu Kasei needs no entry here at all: Effect="attacking-two" plus reusing the existing
+        // "incapacitated" ability id verbatim, see package_personality_wave_18.py).
+        ["keppo-destroy"] = new("Battle", "If you have Reconnaissance, target an enemy attachment: Destroy it", "enemy-attachment"),
+        ["kuronada-destroy"] = new("Battle", "Target an enemy card without attachments: Destroy it", "enemy-card", RequireNoAttachments: true),
+        ["moto-ming-gwok-attack"] = new("Battle", "If there is a dead Personality in any player's discard pile: Ranged 5 Attack", "attack"),
+        ["shiba-kudome-duel"] = new("Battle", "Target an enemy Personality: Kudome duels him. Bow the duel's loser. Give Kudome a +1F Fire token if she won and you control a Shugenja", "enemy-personality", IssuesDuel: true),
+        ["shikaro-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
+        ["shosuro-ritoru-bow"] = new("Battle", "Target an enemy card: Bow it. Destroy it if it has no attachments and you control a Courtier", "enemy-card"),
+        // "You may take an additional Battle action which Takasho must perform" -- GrantAdditionalAction
+        // scoped to Takasho's own id, the same shape a Ring's own recruitment grant already uses.
+        ["takasho-move"] = new("Battle", "If any enemy units are at the current battlefield: Move Takasho there. You may take an additional Battle action which Takasho must perform", "none"),
+        ["takasho-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        ["yogo-adi-choice"] = new("Open", "Target another player's Personality: If he is dishonorable, his controller loses 1 Honor. Otherwise, give your provinces +2 strength", "enemy-personality"),
+        // Second City unwired-card audit (issue #264), wave of Holding/Item/Region/Spell cards found
+        // buildable with existing primitives. Archery Range's own Reaction needs no AtBattle Require
+        // at all (unlike Khol Regulars, a Personality, it's a Holding sitting in Zone.Home -- its
+        // printed text carries no location qualifier either).
+        ["archery-range-reaction"] = new("Reaction", "After a Ranged Attack is targeted: +1 strength", "none", Trigger: "before-attack-resolves"),
+        ["slanderer-dishonor"] = new("Limited", "Bow this card: If you control a Courtier or Magistrate, dishonor a target Personality", "personality"),
+        ["temple-of-hotei-honor"] = new("Limited", "Bow your performing Shugenja: Gain 1 Honor", "none", Performer: "shugenja"),
+        // "Target a Ring in play or in your discard pile": the first Target category spanning BOTH
+        // an ordinary in-play card and one sitting in a discard pile at once -- own-ring-in-discard's
+        // own special validation branch, generalized with an OR against the ordinary InPlay(target) path.
+        ["tranquil-garden-ring"] = new("Open", "Bow this card, and target a Ring in play or in your discard pile: If the Ring is in play, straighten it. Otherwise, put it into your hand and destroy this card", "ring-in-play-or-own-discard"),
+        ["flesh-cutter-arrows-reaction"] = new("Reaction", "After a Ranged Attack from an action performed by this Personality targets a card without an attached Armor, bow this card: +2 strength", "none", Trigger: "before-attack-resolves"),
+        // Dual-choice pair sharing one UsageKey (horibe-bow/horibe-straighten's own shape); "Even if
+        // this card is bowed" needs the existing bowed-source exemption list, and (since the source
+        // is an Item, not a Personality) an explicit AtBattle Require the blanket check never gives it.
+        ["fubatsu-plate-straighten"] = new("Battle", "Even if this card is bowed: Straighten this Personality", "none", UsageKey: "fubatsu-plate"),
+        ["fubatsu-plate-move"] = new("Battle", "Even if this card is bowed: Move this Personality home", "none", UsageKey: "fubatsu-plate"),
+        ["nightingale-blade-bow"] = new("Battle", "Bow this card and target an enemy card: Bow it. Destroy it if it is an attachment and this Personality is Dragon Clan or a Kensai", "enemy-card"),
+        ["satoshi-warfans-draw"] = new("Reaction", "After this card enters play from your hand: Draw a card", "none", Trigger: "own-enters-play"),
+        // Overgrown Grove: needs a new per-id Require scoping it to a battle at ITS OWN province --
+        // Regions sit in Zone.Region (never AtBattle-eligible), and the blanket Battle-timing presence
+        // check only auto-applies its "the source card itself must be at this battlefield" half to a
+        // Personality-type source, the same gap Scouring Flood/The Earth's Hunger needed for Spells.
+        ["overgrown-grove-move"] = new("Battle", "Discard the top 3 cards of your Fate deck and target an attacking Personality: Move him home", "attacking"),
+        ["intervening-spirit-move"] = new("Battle", "Even if this unit is not at the current battlefield, if any enemy units are there, target your Personality: Move him there. Straighten him if he moved. If he is an Ancestor and this Shugenja is Water, you may take an additional Battle action", "own-personality"),
+        ["earth-flows-move"] = new("Battle", "If you are the Defender, target a Personality: Move him to the current battlefield. Straighten his unit if he moved", "personality"),
+        ["winds-of-dismissal-choice"] = new("Limited", "Bow this Shugenja and target another player's Personality: If he is dishonorable, Kolat, Ninja, or Shadowlands, his controller loses Honor equal to his base Personal Honor. If this Shugenja is Air, gain 1 Honor", "enemy-personality"),
     });
 }
 
@@ -768,7 +831,7 @@ public sealed partial class MatchEngine
     // houken-exp-straighten, tsudoken-exp-straighten's own second straighten).
     private static bool DestroysTarget(string abilityId) => abilityId is "tetsuo-destroy-weaker-weaponed" or "training-destroy-no-attachments"
         or "elite-sentry-destroy" or "thunderous-legion-destroy" or "volcano-tattoo-destroy" or "ring-of-fire-destroy"
-        or "unseen-assassin-strike" or "kojinrue-destroy" or "dairuko-exp-bow" or "yozo-exp-destroy";
+        or "unseen-assassin-strike" or "kojinrue-destroy" or "dairuko-exp-bow" or "yozo-exp-destroy" or "dispensing-justice-destroy" or "kuronada-destroy";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -887,6 +950,9 @@ public sealed partial class MatchEngine
         // Cavalry rather than against non-Cavalry.
         "sankaku-yari-attack" => 4 + (target is not null && Keyword(target, "Cavalry") ? 1 : 0),
         "false-ring-of-water-attack" => 3,
+        "shikaro-attack" => 4,
+        "moto-ming-gwok-attack" => 5,
+        "takasho-attack" => 5,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -927,6 +993,7 @@ public sealed partial class MatchEngine
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
         "horseback-warriors-attack" or "sankaku-yari-attack" => "Melee",
         "false-ring-of-water-attack" or "sakata-attack" or "mitsu-fire-attack" => "Ranged",
+        "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -1188,7 +1255,7 @@ public sealed partial class MatchEngine
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
             // Dragon Clan review (issue #207) adds three more real "even if bowed" cards.
             Require(!source.Bowed || id is "shinden-choice" or "tsudoken-exp-bow" or "tsudoken-exp-straighten" or "tsudoken-exp2-straighten"
-                or "houken-exp-straighten" or "michi-move" or "rikyou-move", "Abilities on bowed cards cannot be used.");
+                or "houken-exp-straighten" or "michi-move" or "rikyou-move" or "fubatsu-plate-straighten" or "fubatsu-plate-move", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
         // "Any number of times per turn" (Tactical Advantage, Equip (Battle)), and "tireless" (Ashigaru
@@ -1210,16 +1277,20 @@ public sealed partial class MatchEngine
             // Earth (issue #194) waives the same presence check for an unrelated reason -- its own
             // printed "Even if you control no units at the current battlefield" -- but needs the
             // identical exemption from this one shared Require.
-            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower";
+            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move";
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
-            // The check above only ever applies to a Personality-type source -- a Spell's own Battle
-            // ability (Scouring Flood, The Earth's Hunger) needs its own equivalent: AtBattle(source)
-            // already resolves an ATTACHED card's own parent correctly (same helper Khol Regulars'
-            // own Reaction uses), so this is exactly "the Spell's own wielder is at this battlefield."
-            if (id is "scouring-flood-move-home" or "earths-hunger-destroy")
-                Require(AtBattle(source!), "This Spell's own wielder must be at the current battlefield.");
+            // The check above only ever applies to a Personality-type source -- a Spell/Item's own
+            // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
+            // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
+            // exactly "the attachment's own wielder is at this battlefield."
+            if (id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move" or "earth-flows-move")
+                Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
+            // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
+            // all (its own Zone check always fails) -- needs its own province-index comparison instead.
+            if (id == "overgrown-grove-move")
+                Require(source!.ProvinceIndex == _state.CurrentBattleProvince, "Overgrown Grove only affects a battle at its own province.");
         }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
@@ -1250,6 +1321,12 @@ public sealed partial class MatchEngine
         // Torazu's own ability, on Torazu, needs no separate Performer -- the shared Battle presence
         // check above already requires the source itself (a Personality) to be at this battlefield.
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
+        if (id == "moto-ming-gwok-attack") Require(DeadCount(0) > 0 || DeadCount(1) > 0, "Moto Ming-Gwok needs a dead Personality in some player's discard pile to attack.");
+        if (id == "archery-range-reaction") Require(_state.PendingAttack!.Kind == "Ranged", "Archery Range only boosts a Ranged Attack.");
+        if (id == "flesh-cutter-arrows-reaction")
+            Require(_state.PendingAttack!.Kind == "Ranged" && _state.PendingAttack.SourceId == Card(source!.AttachedTo!).Id
+                && !Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")), "Flesh Cutter Arrows needs a Ranged Attack from its own wielder, targeting a card without an attached Armor.");
+        if (id == "slanderer-dishonor") Require(ControlsKeyword(player.Id, "Courtier") || ControlsKeyword(player.Id, "Magistrate"), "Slanderer needs a Courtier or Magistrate in play.");
         if (id is "horibe-bow" or "horibe-straighten")
             Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Horibe must be opposed to use this ability.");
         if (id is "heavy-chargers-boost") Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Heavy Chargers must be opposed to use this ability.");
@@ -1488,14 +1565,26 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "own-ring-in-discard")
                     Require(target.OwnerId == player.Id && Definition(target).Type == CardType.Ring && target.Zone == Zone.FateDiscard,
                         "Choose a Ring from your Fate discard pile.");
+                // Tranquil Garden (issue #264): the first Target spanning both an ordinary in-play
+                // card (either side, matching "a Ring in play" with no "your own" qualifier) and one
+                // sitting in the player's own Fate discard pile at once.
+                else if (ability.Target == "ring-in-play-or-own-discard")
+                    Require(Definition(target).Type == CardType.Ring && (InPlay(target) || target.OwnerId == player.Id && target.Zone == Zone.FateDiscard),
+                        "Choose a Ring in play or in your own Fate discard pile.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
-                    // Two deliberate exceptions to "every Battle-timing target must be at the current
+                    // Deliberate exceptions to "every Battle-timing target must be at the current
                     // battlefield": "personality-at-adjacent-battlefield" (Moto Gunso's shape -- the
                     // whole point is a target away from the current battlefield) and "own-unbowed-farm"
-                    // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home).
-                    if (ability.Timing == "Battle" && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                    // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home) are exempt by
+                    // their own dedicated Target category. Intervening Spirit / The Earth Flows (issue
+                    // #261) reuse the ordinary "own-personality"/"personality" categories -- reused
+                    // elsewhere with the normal AtBattle expectation (e.g. Ring of Water's own
+                    // "move your target Personality home") -- so they are exempted by ability id
+                    // instead: their whole point is reinforcing a Personality who is NOT there yet.
+                    if (ability.Timing == "Battle" && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")
+                        && id is not ("intervening-spirit-move" or "earth-flows-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
@@ -1537,6 +1626,12 @@ public sealed partial class MatchEngine
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         "lobby" => personality && own && !target.Bowed && CardPersonalHonor(target) >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
+                            Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
+                        // Unexpected Support: the enemy-only counterpart to journeys-end-move's own
+                        // category above (which targets either side, per its own printed text) -- same
+                        // Follower-count comparison, just filtered to !own like every other paired
+                        // "X"/"enemy-X" Target category already in this switch.
+                        "enemy-fewer-or-equal-followers-than-performer" => personality && !own &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
                         "lower-or-equal-honor-than-performer" => personality && CardPersonalHonor(target) <= CardPersonalHonor(Card(command.PerformerId!)),
                         "own-personality-with-token" => personality && own && target.Tokens.Count > 0,
@@ -1599,6 +1694,12 @@ public sealed partial class MatchEngine
                         // Mirumoto Mitoshi: a Personality (either side) with strictly lower Force
                         // than the source's own.
                         "personality-force-lt-self" => personality && CardForce(target) < CardForce(source!),
+                        // Strategic Sacrifice (issue #264): a card in a unit (either side) with Force
+                        // at or below the current battlefield's own province's strength -- "the
+                        // current battlefield's province" is always the Defender's own, the same
+                        // lookup false-ring-of-water-recruit's own Require already uses.
+                        "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
+                            CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
                         // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
                         // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
@@ -1796,6 +1897,99 @@ public sealed partial class MatchEngine
             case "favor-cycle": DiscardFate(player, target!); Draw(player); break;
             case "journeys-end-move": MoveHome(target!, false); break;
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonorFromPerformer(Card(command.PerformerId!), 2, "Shamate Keep"); break;
+            // Second City unwired-card audit (issue #264):
+            case "dispensing-justice-destroy":
+                if (!HasAttachments(target!) && (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands")))
+                    DestroyUnits([target!], false, player.Id);
+                else MoveHome(target!, false);
+                break;
+            case "bow-before-my-will":
+                if (!StalwartNegatesBow(target!, player.Id))
+                {
+                    target!.Bowed = true;
+                    if (HasClanAffiliation(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
+                }
+                GainHonor(player.Id, -2, "Bow Before My Will", source);
+                break;
+            case "surety-of-purpose":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                GainHonorFromPerformer(Card(command.PerformerId!), 2, "Surety of Purpose");
+                break;
+            case "unexpected-support":
+                if (!StalwartNegatesBow(target!, player.Id))
+                {
+                    target!.Bowed = true;
+                    target.StraightenBlockedTurn = _state.TurnNumber;
+                }
+                break;
+            case "wrathful-ancestor-move": MoveHome(target!, false); break;
+            case "strategic-sacrifice-toggle":
+                if (target!.Bowed) Straighten(target);
+                else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                GainHonor(player.Id, 2, "Strategic Sacrifice", source);
+                break;
+            case "keppo-destroy":
+                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
+                break;
+            case "kuronada-destroy": DestroyUnits([target!], false, player.Id); break;
+            case "shosuro-ritoru-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (!HasAttachments(target!) && ControlsKeyword(player.Id, "Courtier")) DestroyUnits([target!], false, player.Id);
+                break;
+            case "takasho-move":
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Takasho may only reinforce a battlefield with enemy units present.");
+                MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
+                GrantAdditionalAction(player.Id, [source!.Id]);
+                break;
+            case "yogo-adi-choice":
+                if (target!.Dishonorable) GainHonor(target.OwnerId, -1, "Yogo Adi", source);
+                else foreach (var province in player.Provinces) province.Strength += 2;
+                break;
+            case "archery-range-reaction": _state.PendingAttack!.Strength += 1; break;
+            case "slanderer-dishonor": source!.Bowed = true; Dishonor(target!); break;
+            case "temple-of-hotei-honor": Card(command.PerformerId!).Bowed = true; GainHonor(player.Id, 1, "Temple of Hotei", source); break;
+            case "tranquil-garden-ring":
+                source!.Bowed = true;
+                if (target!.Zone == Zone.FateDiscard) { ReturnToHand(target); DestroyUnits([source], false, player.Id); }
+                else Straighten(target!);
+                break;
+            case "flesh-cutter-arrows-reaction": source!.Bowed = true; _state.PendingAttack!.Strength += 2; break;
+            case "fubatsu-plate-straighten": Straighten(Card(source!.AttachedTo!)); break;
+            case "fubatsu-plate-move": MoveHome(Card(source!.AttachedTo!), false); break;
+            case "nightingale-blade-bow":
+                source!.Bowed = true;
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (target!.Zone == Zone.Attached && (HasClanAffiliation(Card(source.AttachedTo!), "Dragon") || Keyword(Card(source.AttachedTo!), "Kensai")))
+                    DestroyUnits([target], false, player.Id);
+                break;
+            case "satoshi-warfans-draw": Draw(player); break;
+            case "overgrown-grove-move":
+                DiscardTopOfFateDeck(player); DiscardTopOfFateDeck(player); DiscardTopOfFateDeck(player);
+                MoveHome(target!, false);
+                break;
+            case "intervening-spirit-move":
+            {
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(), "Intervening Spirit may only move a Personality into a battlefield with enemy units present.");
+                var wasAtBattle = AtBattle(target!);
+                MoveToBattlefield(target!, _state.CurrentBattleProvince!.Value);
+                if (!wasAtBattle) StraightenUnit(target!);
+                if (Keyword(target!, "Ancestor") && Keyword(Card(source!.AttachedTo!), "Water")) GrantAdditionalAction(player.Id, null);
+                break;
+            }
+            case "earth-flows-move":
+            {
+                Require(player.Id == 1 - _state.ActivePlayerId, "The Earth Flows: only the Defender may use this.");
+                var wasAtBattle = AtBattle(target!);
+                MoveToBattlefield(target!, _state.CurrentBattleProvince!.Value);
+                if (!wasAtBattle) StraightenUnit(target!);
+                break;
+            }
+            case "winds-of-dismissal-choice":
+                Card(source!.AttachedTo!).Bowed = true;
+                if (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands"))
+                    GainHonor(target.OwnerId, -Definition(target).PersonalHonor, "Winds of Dismissal", source);
+                if (Keyword(Card(source.AttachedTo!), "Air")) GainHonor(player.Id, 1, "Winds of Dismissal", source);
+                break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable && !StalwartNegatesBow(target, player.Id)) target.Bowed = true; break;
             case "justice-of-crane-dishonor":
                 Dishonor(target!);
@@ -1917,6 +2111,7 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
+            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;

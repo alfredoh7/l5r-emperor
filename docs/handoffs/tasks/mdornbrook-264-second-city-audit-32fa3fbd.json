@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City unwired-card audit (issue #264): wired 28 cards across seven waves (Strategy 6/7, Personality 18, Holding 1, Item 3, Region 2, Spell 2) using only existing engine primitives; documented blockers for the remaining 99 unwired Second City cards in build_card_inventory.py's BLOCKERS dict, regenerated CARD_INVENTORY.xlsx (315 wired total). Crosses into src/L5R.Client/Content/Published/ only because the standard content-wave packaging pipeline copies each new card's own scan there as its artwork asset -- no UI/interaction code touched, same shape every prior wave's own PR already used. Mendon has standing cross-lane authority (.github/collaboration.json).",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 172/172 core, 52/52 published, 9/9 deck-format, 10/10 deck-workshop passed. bash tools/check.sh --skip-client: all core/published/AI/server/client-transport checks passed.",
+  "remaining": "None; ready for review. 99 unwired Second City cards remain, each with a documented blocker or scope-deferral note; no further wiring possible without new engine primitives (see docs/decisions/2026-09-17-second-city-unwired-audit.md for the blocker-category summary).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/264",
+  "branch": "mdornbrook/264-second-city-audit",
+  "updated": "2026-09-17T06:52:09.914313+00:00"
+}

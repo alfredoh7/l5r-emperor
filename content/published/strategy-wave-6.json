@@ -1,0 +1,126 @@
+{
+  "Profile": "strategy-wave-6",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2029",
+      "Name": "Dispensing Justice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Magistrate and target an enemy Personality: If he has no attachments and is dishonorable, Kolat, Ninja, or Shadowlands, destroy him. Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2029.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "dispensing-justice-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-1121",
+      "Name": "Bow Before My Will",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Paragon and target an enemy card: Bow it. Negate its next straightening (this turn) if your Paragon is Shadowlands. Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1121.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "bow-before-my-will"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7664",
+      "Name": "Surety of Purpose",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Paragon and target an enemy Personality with equal or lower Personal Honor: Bow him. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7664.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "surety-of-purpose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8977",
+      "Name": "Unexpected Support",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Commander and target an enemy card with as many or fewer Followers: Bow it. Negate its next straightening (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8977.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "unexpected-support"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9390",
+      "Name": "Wrathful Ancestor",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Spirit and target an enemy Personality: Move him home. This movement will not be negated.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9390.jpg",
+      "Keywords": [
+        "Fear"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "wrathful-ancestor-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

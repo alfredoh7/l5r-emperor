@@ -1,0 +1,309 @@
+{
+  "Profile": "personality-wave-18",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1765",
+      "Name": "Daigotsu Shikenuro",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Shikenuro enters play: Lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1765.jpg",
+      "Keywords": [
+        "Conqueror",
+        "Commander",
+        "Samurai",
+        "Shadowlands",
+        "Silk Fever",
+        "Spider Clan",
+        "Undead"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-4328",
+      "Name": "Keppo",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 2,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Keppo enters play: Lose 2 Honor.\nBattle: If you have Reconnaissance, target an enemy attachment: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4328.jpg",
+      "Keywords": [
+        "Goblin",
+        "Nonhuman",
+        "Scout",
+        "Shadowlands"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "keppo-destroy"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-4611",
+      "Name": "Kuronada",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will not gain a Clan alignment.\nIaijutsu Battle: Target an enemy card without attachments: Destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4611.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Kensai",
+        "Tactician",
+        "Unique",
+        "Hero",
+        "Ronin",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kuronada-destroy"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4937",
+      "Name": "Matsu Kasei",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kasei has +2F while attacking.\nBattle: Target a defending Personality: Move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4937.jpg",
+      "Keywords": [
+        "Unique",
+        "Artisan",
+        "Experienced",
+        "Lion Clan",
+        "Samurai",
+        "Turquoise Champion"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "incapacitated"
+      ],
+      "Effect": "attacking-two"
+    },
+    {
+      "Id": "oracle-l5r-5351",
+      "Name": "Moto Ming-Gwok",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If there is a dead Personality in any player's discard pile: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5351.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Death Priest",
+        "Moon-Blessed",
+        "Shugenja",
+        "Unicorn Clan",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "moto-ming-gwok-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6774",
+      "Name": "Shiba Kudome",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Iaijutsu Battle: Target an enemy Personality: Kudome duels him. Bow the duel's loser. Give Kudome a +1F Fire token if she won and you control a Shugenja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6774.jpg",
+      "Keywords": [
+        "Duelist",
+        "Fire",
+        "Legion of Flame",
+        "Phoenix Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shiba-kudome-duel"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6850",
+      "Name": "Shikaro",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6850.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Ronin",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shikaro-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7153",
+      "Name": "Shosuro Ritoru",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card: Bow it. Destroy it if it has no attachments and you control a Courtier.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7153.jpg",
+      "Keywords": [
+        "Kensai",
+        "Loyal",
+        "Bitter Lies",
+        "Paragon",
+        "Samurai",
+        "Scorpion Clan",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shosuro-ritoru-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7741",
+      "Name": "Takasho",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Takasho enters play: Lose 3 Honor.\nBattle: If any enemy units are at the current battlefield: Move Takasho there. You may take an additional Battle action which Takasho must perform.\nMaho Battle: Ranged 5 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7741.jpg",
+      "Keywords": [
+        "Unique",
+        "Air",
+        "Ninja",
+        "Onyx Champion",
+        "Shadowlands",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "takasho-move",
+        "takasho-attack"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-9485",
+      "Name": "Yogo Adi",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 5,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target another player's Personality: If he is dishonorable, his controller loses 1 Honor. Otherwise, give your provinces +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9485.jpg",
+      "Keywords": [
+        "Loyal",
+        "Air",
+        "Courtier",
+        "Scorpion Clan",
+        "Shugenja",
+        "Ward Master"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yogo-adi-choice"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
