@@ -58,8 +58,16 @@ public partial class Main
         ?? throw new Exception("Missing enabled native button: "+text);
     private async Task StabilizationClick(Control target)
     {
-        var p=target.GetGlobalRect().GetCenter();
+        var p=target.GetGlobalTransformWithCanvas()*(target.Size/2);
         var viewport=target.GetViewport();
+        if(viewport != GetViewport())
+        {
+            // Embedded modal windows have their own GUI focus and input viewport.
+            target.GrabFocus();
+            viewport.PushInput(new InputEventKey{Keycode=Key.Enter,Pressed=true},true);
+            viewport.PushInput(new InputEventKey{Keycode=Key.Enter,Pressed=false},true);
+            await EventFrames(12);return;
+        }
         void Push(InputEventMouse input){input.SetMeta(CaptureMouseTag,true);viewport.PushInput(input,true);}
         Push(new InputEventMouseMotion{Position=p,GlobalPosition=p});
         Push(new InputEventMouseButton{Position=p,GlobalPosition=p,ButtonIndex=MouseButton.Left,ButtonMask=MouseButtonMask.Left,Pressed=true});
@@ -113,7 +121,7 @@ public partial class Main
                 if(!_captureMode.Contains("pass"))
                 {
                     await StabilizationClick(StabilizationButton(option.Label));
-                    if(bow){Check(View.Version==before,"Target selection mutated the match");await StabilizationClick(StabilizationButton("Confirm action"));}
+                    if(bow){Check(View.Version==before,"Target selection mutated the match");GetViewport().GetTexture().GetImage().SavePng(_capturePath+".target.png");await StabilizationClick(StabilizationButton("Confirm action"));}
                     Check(View.Version==before+1,"Reaction did not execute exactly once");
                 }
                 for(var n=0;n<4&&View.PendingChoice is not null;n++)
