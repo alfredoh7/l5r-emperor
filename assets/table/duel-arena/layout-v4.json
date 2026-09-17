@@ -1,0 +1,127 @@
+{
+  "stage": "Iteration 4 \u2014 Meshy pine added to approved mat and lanterns",
+  "reference": "assets/ui/duel-arena/approved-generation-3.png",
+  "units_to_card_plane": 100,
+  "playing_surface": [
+    15.65,
+    7.45894331315355
+  ],
+  "anchors": {
+    "DuelLeft": {
+      "blender": [
+        -3.65,
+        1.7999999999999998,
+        0
+      ],
+      "card_plane": [
+        -365.0,
+        -179.99999999999997
+      ]
+    },
+    "DuelRight": {
+      "blender": [
+        3.65,
+        1.7999999999999998,
+        0
+      ],
+      "card_plane": [
+        365.0,
+        -179.99999999999997
+      ]
+    },
+    "FocusLeft": {
+      "blender": [
+        -3.65,
+        -1.05,
+        0
+      ],
+      "card_plane": [
+        -365.0,
+        105.0
+      ]
+    },
+    "FocusRight": {
+      "blender": [
+        3.65,
+        -1.05,
+        0
+      ],
+      "card_plane": [
+        365.0,
+        105.0
+      ]
+    },
+    "Center": {
+      "blender": [
+        0,
+        1.2,
+        0
+      ],
+      "card_plane": [
+        0,
+        -120.0
+      ]
+    }
+  },
+  "pitch": 0.64,
+  "depth": 0.00065,
+  "camera_distance": 11.821152438337567,
+  "meshes": 27,
+  "triangles": 451176,
+  "limitations": [
+    "Image reconstruction requires human visual review",
+    "Architecture and remaining environment stay blockout",
+    "No live duel integration"
+  ],
+  "mat_dimensions": [
+    1817,
+    866
+  ],
+  "mat_source_sha256": "6dd3fe31b810a37927e341360fed7bd91698d785e838f816d2a74944e1e4a649",
+  "lantern_source_sha256": "edf417c64fb12d0398a7f732716d5a0fab4ea5d184f2c6d7b3b19f4cf2579c9c",
+  "mat_mapping": "Unchanged complete artwork, original aspect ratio, UV 0..1",
+  "lantern_height": 2.574,
+  "lantern_scale_factor": 2.574,
+  "source_base_center": [
+    0.0,
+    0.0014650002121925354,
+    -0.5
+  ],
+  "lantern_vertices": 2335,
+  "lantern_triangles": 4407,
+  "source_lantern_triangles": 4051,
+  "cleanup": "Two crossed aperture cuts remove closed window panels; source files unchanged",
+  "window_rays_clear": true,
+  "pine_source_sha256": "fc949ede9a5bac9309948527434a9cd9d928cc4b9edbe1497b6a7d54d6c85911",
+  "pine_cleaned_sha256": "1f7ac6350df30b3a1bfd97e2005e6a41ab538efc9c2ae61cfe85684bccc45bba",
+  "pine_vertices": 340195,
+  "pine_triangles": 220000,
+  "pine_height": 3.05,
+  "pine_original_height": 1.9072614312171936,
+  "pine_root_pivot": [
+    0.22312788665294647,
+    0.030474230647087097,
+    -0.9525511264801025
+  ],
+  "pine_placements": [
+    {
+      "name": "PineLeft",
+      "location": [
+        -6.699999809265137,
+        7.849999904632568,
+        -0.3700000047683716
+      ],
+      "rotation_z": -0.13962633907794952
+    },
+    {
+      "name": "PineRight",
+      "location": [
+        6.699999809265137,
+        8.100000381469727,
+        -0.3700000047683716
+      ],
+      "rotation_z": 2.96705961227417
+    }
+  ],
+  "linked_pine_mesh": true
+}

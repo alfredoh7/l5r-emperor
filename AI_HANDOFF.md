@@ -55,6 +55,8 @@ On Windows use `python` instead of `python3` if needed. The bootstrap installs t
 
 Normal client builds use the committed runtime art and do not require Blender, image generation, the original Sun and Moon installation, or the optional bulk research scans. Existing Blender authoring scripts include historical machine-local paths; inspect their `ROOT`/MCP setup before an art rebuild on another machine. The runtime GLBs and source `.blend` files are committed.
 
+For detailed 3D props, follow [MESHY_WORKFLOW.md](docs/MESHY_WORKFLOW.md): external ChatGPT references and Alfredo's approval, Blender layout and early Godot camera check, Meshy generation, then Blender cleanup and native Godot review. Direct Meshy API access is configured on Alfredo's Mac through `python3 tools/meshy.py`; credentials stay in Keychain. The agent submits/retrieves approved assets without manual export transfers. Flat approved artwork and straight architecture remain direct Blender work.
+
 Private local server:
 
 ```sh

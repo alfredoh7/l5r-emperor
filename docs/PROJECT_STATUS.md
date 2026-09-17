@@ -22,6 +22,8 @@ Alfredo has paused broad battle presentation work. The current delivery plan is 
 
 mdornbrook has accepted repository access and is playing/reviewing mechanics. Alfredo owns UI/QoL improvements. Both lanes progress on separate task branches, coordinated through AGENTS.md and docs/COLLABORATION.md. Validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
 
+PR #220 now provides **Play → Duel Demo** inside the normal application: fourteen seeded positions, live Crimson Standoff controls, solo/manual seats and retained results. Alfredo approved the current presentation, including stakes/resolution, on September 16. Core/native validation is recorded in [DUEL_DEMO.md](DUEL_DEMO.md); mdornbrook's mechanical/shared-interface review is requested using [this review packet](DUEL_MECHANICAL_REVIEW.md). Normal-match activation follows that review, so this is not yet part of the merged playable baseline.
+
 ## Open acceptance gates
 
 1. Full human matches with both Clans; corrections to rules, timing and interaction flow.

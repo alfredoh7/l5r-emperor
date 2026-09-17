@@ -92,7 +92,7 @@ public partial class Main : Node
     {
         while (_uiQueue.TryDequeue(out var update)) update();
         if (_captureMode.StartsWith("menu", StringComparison.Ordinal) && _capturePath is not null) { try { ProcessMenuCapture(delta); } catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); } return; }
-        if (MenuVisible || PracticeVisible && _capturePath is null) return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible && _capturePath is null) return;
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
@@ -373,7 +373,7 @@ public partial class Main : Node
             if (MenuVisible && _titleMenu!.Page == "options") _titleMenu.ShowOptions();
             GetViewport().SetInputAsHandled();
         }
-        else if (MenuVisible || PracticeVisible) return;
+        else if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -385,7 +385,7 @@ public partial class Main : Node
     {
         Interlocked.Exchange(ref _renderQueued, 0);
         if (MenuVisible && _enteringPrivate && _session.Online && _session.Connected && _session.Snapshot is not null) { EnterTable(); return; }
-        if (MenuVisible || PracticeVisible) return;
+        if (MenuVisible || DuelDemoOpen || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";

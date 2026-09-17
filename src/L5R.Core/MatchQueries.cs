@@ -6,17 +6,6 @@ public sealed partial class MatchEngine
     public MatchView GetView(int playerId)
     {
         if(playerId is <0 or >1) throw new ArgumentOutOfRangeException(nameof(playerId));
-        CardView ViewCard(CardInstance card,bool visible=true)
-        {
-            if(!visible)
-                return new($"hidden-p{card.OwnerId}-province{card.ProvinceIndex}",null,card.OwnerId,card.Zone,false,false,card.ProvinceIndex,null,0);
-            var def=Definition(card);
-            var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
-            return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
-                card.Protections.Select(p=>new GrantedEffectView("Action protection",
-                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
-        }
         var players=_state.Players.Select(player=>
         {
             var owned=_state.Cards.Values.Where(c=>c.OwnerId==player.Id).ToArray();
@@ -33,21 +22,28 @@ public sealed partial class MatchEngine
                 player.ProclaimUsedTurn==_state.TurnNumber,player.DishonorLossPending,
                 owned.Where(c=>c.Zone==Zone.RemovedFromGame).Select(c=>ViewCard(c)).ToArray(),
                 DeadCount(player.Id),
-                // Dueling (issue #204): a Focused card is private to its own owner until the duel's
-                // own Struck reveal -- omitted entirely from an opponent's own view until then (Hand's
-                // own convention; a placeholder would need its own stable-but-anonymous id scheme,
-                // unlike a face-down province card's ProvinceIndex-keyed one, since a duel's own
-                // focused-card list has no comparable positional slot).
-                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray())
-                { HandLimit = HandLimitFor(player.Id) };
+                // Counts are public; identities are private unless already publicly focused from
+                // discard or revealed by Strike. Anonymous backs need no stable hidden card IDs.
+                owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || c.FaceUp)).Select(c=>ViewCard(c)).ToArray(),
+                EventsInPlay:owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
+                Celestials:owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray(),
+                FocusCount:owned.Count(c=>c.Zone==Zone.Focused)) { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
-            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck));
+            _state.WinnerId,_state.VictoryReason,players,_state.Events.Select(e=>e.Type=="duelFocused" && e.PlayerId!=playerId ? e with {CardId=null} : e).ToArray(),_scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario.StartsWith("duel-demo/", StringComparison.Ordinal)?["Prepared Duel Demo position; not a playable deck profile.",DuelDemoScenarios.Get(_scenario[10..]).Description]:_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
+            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,_state.PriorityPlayerId,duel.Struck,duel.DuelId),_state.LastDuel is null?null:Copy(_state.LastDuel));
+    }
+
+    private CardView ViewCard(CardInstance card,bool visible=true)
+    {
+        if(!visible)
+            return new($"hidden-p{card.OwnerId}-province{card.ProvinceIndex}",null,card.OwnerId,card.Zone,false,false,card.ProvinceIndex,null,0);
+        var def=Definition(card);
+        var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
+        return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
+            def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(), card.Protections.Select(p=>new GrantedEffectView("Action protection", "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -55,6 +51,8 @@ public sealed partial class MatchEngine
     {
         if(playerId is <0 or >1) return [];
         if(_state.WinnerId is not null) return [];
+        if (_state.PendingDuel is not null || _state.PendingChoice?.Type is "duelWonReaction" or "overconfidentDraw")
+            return QueryDuelActions(playerId);
         var result=new List<ActionOption>();
         GameCommand Command(string type,string? id=null,string[]? sources=null,int? province=null,bool discount=false,bool allegiance=false,
             Dictionary<string,int>? assignments=null,string[]? cardIds=null,string? target=null)

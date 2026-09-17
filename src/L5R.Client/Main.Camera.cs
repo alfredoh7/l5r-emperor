@@ -170,7 +170,7 @@ public partial class Main
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
         { GetViewport().SetInputAsHandled(); return; }
-        if (_tableSurface is null || MenuVisible) return;
+        if (_tableSurface is null || MenuVisible || DuelDemoOpen) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.

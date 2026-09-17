@@ -21,7 +21,7 @@ public sealed partial class MatchEngine
     // Called from ExecuteAbilityEffects for any ability with IssuesDuel set, after the card's own
     // cost/discard has already happened -- everything from here on is the deferred EFFECT (the duel
     // itself), paused without ceding priority, the same shape ResolveOrDeferAttack already uses.
-    private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable)
+    private void IssueChallenge(string abilityId, int challengerPlayerId, string challengerId, string challengedId, string stat, bool refusable, CardInstance? source = null)
     {
         var challenger = Card(challengerId); var challenged = Card(challengedId);
         _state.PendingDuel = new PendingDuel
@@ -31,6 +31,10 @@ public sealed partial class MatchEngine
             Stage = refusable ? "AwaitingAccept" : "Reaction",
         };
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
+        var duelId = $"duel-{_state.Events[^1].Sequence}";
+        _state.PendingDuel.DuelId = duelId;
+        _state.LastDuel = new(duelId, stat, ViewCard(challenger), ViewCard(challenged),
+            Attachments(challenger.Id).Concat(Attachments(challenged.Id)).Select(c => ViewCard(c)).ToArray(), [], null, false, DescribeChallenge(abilityId, source, refusable), []);
         if (refusable) { _state.PriorityPlayerId = challenged.OwnerId; _state.ConsecutivePasses = 0; }
         else OpenDuelReactionWindowOrBeginFocusing();
     }
@@ -64,6 +68,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         Emit("duelRefused", $"{Definition(Card(duel.ChallengedId)).Name} refuses the duel.", duel.ChallengedPlayerId, duel.ChallengedId);
+        _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], [_state.Events[^1]], [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         NextAction(challengerPlayerId);
@@ -105,6 +110,11 @@ public sealed partial class MatchEngine
     // (Struck), matching a Hand card's own private-until-shown convention rather than inventing a new
     // one; command.Choice=="deck" selects the top-of-deck source, otherwise command.CardId names a
     // hand card.
+    private bool CanFocusDiscard(int playerId, PendingDuel duel) =>
+        !duel.HikaroDiscardFocusUsed[playerId] &&
+        ClanAlignments(Card(playerId == duel.ChallengerPlayerId ? duel.ChallengerId : duel.ChallengedId)).Contains("Dragon") &&
+        _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).GrantsDiscardPileFocus);
+
     private void Focus(GameCommand command)
     {
         var duel = _state.PendingDuel!;
@@ -156,6 +166,7 @@ public sealed partial class MatchEngine
         foreach (var id in duel.ChallengerFocused) Card(id).FaceUp = true;
         foreach (var id in duel.ChallengedFocused) Card(id).FaceUp = true;
         Emit("duelStruck", "A Strike ends focusing; focused cards are revealed.", _state.PriorityPlayerId);
+        RecordDuelReveal("Strike");
         BeginDuelistRefocus();
     }
 
@@ -208,6 +219,7 @@ public sealed partial class MatchEngine
             list.Add(newId);
             Emit("duelistRefocused", $"{Player(playerId).Name} discarded a focused card to focus again.", playerId, newId);
         }
+        if (command.CardId is not null) RecordDuelReveal("Replacement");
         if (duel.PendingDuelistDecisions.Count == 0) BeginOrderingEffects(); else _state.PriorityPlayerId = duel.PendingDuelistDecisions[0];
     }
 
@@ -268,6 +280,10 @@ public sealed partial class MatchEngine
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
             else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; }
         }
+        var resultStart = _state.Events.Count;
+        var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, v.Strength, v.Strength))).ToArray();
+        var challengerStat = DuelStatValue(challenger, duel.Stat);
+        var challengedStat = DuelStatValue(challenged, duel.Stat);
         var winnerPlayerId = winnerId is null ? (int?)null : Card(winnerId).OwnerId;
         var loserPlayerIds = loserIds.Select(id => Card(id).OwnerId).ToList();
         Emit("duelResolved", winnerId is null ? "The duel is a tie; both personalities lose."
@@ -276,11 +292,13 @@ public sealed partial class MatchEngine
         // Focus-Effect-driven outcome layers on top, in the active player's own chosen order -- e.g.
         // a Focus Effect that dishonors the loser, resolved before the duel's own "destroy the
         // loser," makes that death a dishonorable one instead of an honorable one.
-        ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId);
+        ExplainDuelEffect("Outcome", _state.LastDuel!.Challenge?.Source,
+            () => ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId));
         foreach (var focusedId in duel.OrderedFocusEffects)
         {
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
-            ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds);
+            ExplainDuelEffect("FocusEffect", ViewCard(Card(focusedId)),
+                () => ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds));
         }
         // Every focused card is spent, win or lose (a card destroyed as part of the outcome above is
         // simply skipped here -- Card() would still resolve it, but it is no longer in Zone.Focused).
@@ -300,7 +318,12 @@ public sealed partial class MatchEngine
         // the same one more than once) receives the bonus again each time.
         var performer = Card(duel.ChallengerId);
         if (IsIaijutsuAction(duel.AbilityId) && _state.Cards.Values.Any(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus))
-            ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2);
+            ExplainDuelEffect("Aftermath", ViewCard(_state.Cards.Values.First(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus)),
+                () => ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2));
+        _state.LastDuel = _state.LastDuel! with { Result = new("Resolved", winnerId, loserIds.ToArray(),
+            challengerStat, challengedStat, challengerTotal, challengedTotal, duel.OrderedFocusEffects.ToArray(),
+            _state.Events.Skip(resultStart).ToArray(), strengthsBefore.Select(p => p with { After = Player(p.PlayerId).Provinces[p.Index].Strength }).ToArray(),
+            _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
@@ -350,6 +373,7 @@ public sealed partial class MatchEngine
         switch (abilityId)
         {
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            case "training-duel-force": case "training-duel-honor": case "training-duel-open":
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;

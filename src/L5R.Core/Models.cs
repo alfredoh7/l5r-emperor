@@ -313,6 +313,7 @@ public sealed record LadyMatsusRageWatch(string TargetId, int ActingPlayerId);
 public sealed class PendingDuel
 {
     public string AbilityId { get; set; } = "";
+    public string DuelId { get; set; } = "";
     // The player who issued the challenge -- NextAction is called with this once the duel fully
     // resolves, so priority returns exactly where it would have without the interjecting duel.
     public int ChallengerPlayerId { get; set; }
@@ -363,6 +364,7 @@ public sealed class MatchState
     public PendingAttack? PendingAttack { get; set; }
     public PendingConqueror? PendingConqueror { get; set; }
     public PendingDuel? PendingDuel { get; set; }
+    public DuelRecord? LastDuel { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
@@ -491,7 +493,7 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null)
+    CardView[]? Celestials = null, int FocusCount = 0)
 {
     public HandLimitView? HandLimit { get; init; }
 }
@@ -501,10 +503,10 @@ public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Mo
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
 public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, string ChallengerId,
-    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck);
+    string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck, string DuelId = "");
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
     PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null,
-    DuelView? PendingDuel = null);
+    DuelView? PendingDuel = null, DuelRecord? LastDuel = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

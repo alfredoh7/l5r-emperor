@@ -7,6 +7,9 @@ var tests = new (string Name, Action Run)[]
 {
     ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
     ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
+    ("Duel Demo canonical commands, privacy and retained result", DuelDemoTests.Canonical),
+    ("Duel Demo scenarios and legal decisions", DuelDemoTests.Decisions),
+    ("Duel stakes and source-linked public consequences", DuelDemoTests.Story),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),

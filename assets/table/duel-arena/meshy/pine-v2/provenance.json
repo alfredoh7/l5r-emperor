@@ -1,0 +1,90 @@
+{
+  "submitted_at_utc": "2026-09-15T06:07:06.940238+00:00",
+  "resource": "image-to-3d",
+  "operation_id": "l5r-205-pine-v2-20260915",
+  "cli_version": "0.3.0",
+  "estimated_credits": 30,
+  "settings": {
+    "ai_model": "meshy-7",
+    "should_remesh": true,
+    "target_polycount": 60000,
+    "topology": "triangle",
+    "save_pre_remeshed_model": true,
+    "multi_view_thumbnails": true,
+    "alpha_thumbnail": true,
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "image_enhancement": true,
+    "ultra_mode": false,
+    "target_formats": [
+      "glb"
+    ]
+  },
+  "references": [
+    {
+      "file": "assets/ui/duel-arena/approved-pine-primary.png",
+      "sha256": "742bb311b95f83b87175c08e567bb057fe53b345c63278446e7ddeed31d3aa2f"
+    }
+  ],
+  "reason": "First multi-view candidate lost foliage and trunk; try primary image alone with standard enhancement and remesh.",
+  "task_id": "01a0a3ad-2211-728b-9c46-fec5b52b79e5",
+  "status": "SUCCEEDED",
+  "consumed_credits": 30,
+  "completed_at_ms": 1789452951142,
+  "total_pine_attempt_credits": 60,
+  "source_model": {
+    "file": "pine-source.glb",
+    "sha256": "fc949ede9a5bac9309948527434a9cd9d928cc4b9edbe1497b6a7d54d6c85911",
+    "triangles": 59974
+  },
+  "prior_attempt": {
+    "task_id": "01a0a3a8-214f-76ea-b6d3-aa250eb29bf6",
+    "resource": "multi-image-to-3d",
+    "consumed_credits": 30,
+    "rejected_reason": "Lost foliage and most of the trunk; very flat branch mesh. Rejected after inspecting front/side/back previews.",
+    "originals_location": "artifacts/meshy/duel-pine-v1/download (ignored local recovery)"
+  },
+  "cleanup": {
+    "source_triangles": 7641180,
+    "runtime_triangles": 220000,
+    "vertices": 105436,
+    "uv_layers": 1,
+    "uv_finite": true,
+    "method": "Exact positional weld; decimate high Meshy source to 220k; nearest source face per target triangle and clamped barycentric UV interpolation; reuse original PBR maps.",
+    "source_sha256": "81c821e81645f3f41bb10fa93b6b24a8daceebff32d9fead67b71b9f81a46614",
+    "textured_source_sha256": "fc949ede9a5bac9309948527434a9cd9d928cc4b9edbe1497b6a7d54d6c85911",
+    "cleaned_sha256": "1f7ac6350df30b3a1bfd97e2005e6a41ab538efc9c2ae61cfe85684bccc45bba"
+  },
+  "cleaned_model": {
+    "file": "pine-cleaned.glb",
+    "sha256": "1f7ac6350df30b3a1bfd97e2005e6a41ab538efc9c2ae61cfe85684bccc45bba",
+    "triangles": 220000,
+    "vertices_before_export_splits": 105436
+  },
+  "high_source": {
+    "file": "model.pre_remeshed.glb",
+    "bytes": 374311972,
+    "sha256": "81c821e81645f3f41bb10fa93b6b24a8daceebff32d9fead67b71b9f81a46614",
+    "triangles": 7641180,
+    "vertices": 11775698,
+    "textures": false,
+    "archive": {
+      "tag": "art-source-205-pine-20260915",
+      "release_url": "https://github.com/alfredoh7/l5r-emperor/releases/tag/untagged-69b6f44ff90b9719289e",
+      "draft": true,
+      "filename": "l5r-duel-pine-v2-high-source.zip",
+      "sha256": "da01eba8ed4a8ef0607d125577a1a1da9af0fb457150bf397d254ace93d94a75",
+      "bytes": 256960365
+    }
+  },
+  "acceptance": {
+    "stage": "iteration 4, awaiting human visual review",
+    "limitations": [
+      "Some needle clusters remain solid leaf-like surfaces",
+      "UV transfer is approximate; original texture bytes do not imply identical surface mapping",
+      "Reverse generated image is a reference, not a measured multi-view capture"
+    ]
+  }
+}

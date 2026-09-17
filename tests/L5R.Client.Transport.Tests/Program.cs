@@ -14,6 +14,8 @@ try
     var cases = new (string Name, Func<Task> Test)[]
     {
         ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
+        ("Duel Demo isolates practice, serializes results and rejects stale commands", DemoSession),
+        ("Leaving a private table for Duel Demo disconnects without conceding", () => LeaveForDemo(url)),
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
@@ -35,6 +37,43 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static async Task DemoSession()
+{
+    using var practice=new MatchSession();practice.StartPractice(false,true);
+    var saved=practice.ExportPracticeReplay();
+    using var demo=new MatchSession();demo.StartDuelDemo("steel",205,1);
+    Check(demo.Snapshot!.Mode=="Duel Demo"&&demo.Snapshot.View.ViewerId==1,"Correct isolated demo seat");
+    await demo.BeginDuelDemo();await demo.BeginDuelDemo();
+    Check(demo.Snapshot!.View.Version==1,"Begin is idempotent");
+    var command=demo.Snapshot.Actions.Single(a=>a.Command?.Choice=="deck").Command!;
+    await Task.WhenAll(demo.Submit(command),demo.Submit(command));
+    Check(demo.Snapshot!.View.Version==2,"Rapid stale command is rejected");
+    demo.SwitchPracticeSeat();
+    Check(demo.Snapshot!.View.Players[1].Focused!.Length==0&&demo.Snapshot.View.Players[1].FocusCount==1,"Counts cross session without hidden identities");
+    var card=demo.Snapshot.View.Players[0].Hand.Single(c=>c.Definition!.Id=="oracle-l5r-7996");
+    await demo.Submit(demo.Snapshot.Actions.First(a=>a.Command?.Type=="focus"&&a.Command.CardId==card.Id).Command!);
+    demo.SwitchPracticeSeat();await demo.Submit(demo.Snapshot!.Actions.Single(a=>a.Type=="strike").Command!);
+    var json=System.Text.Json.JsonSerializer.Serialize(demo.Snapshot);
+    var copy=System.Text.Json.JsonSerializer.Deserialize<SessionSnapshot>(json)!;
+    Check(copy.View.LastDuel is {Complete:true,Result.ChallengerTotal:8,Result.ChallengedTotal:7},"Retained result survives typed transport envelope");
+    Check(copy.View.LastDuel!.Reveals[0].Cards.Length==2,"Reveal survives immediate resolution");
+    var replay=System.Text.Json.JsonSerializer.Deserialize<ReplayRecord>(demo.ExportPracticeReplay()!,new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web))!;
+    Check(MatchEngine.Replay(replay).GetView(0).LastDuel!.Result!.ChallengerTotal==8,"Export replays");
+    demo.StartDuelDemo("steel",205,0);Check(demo.Snapshot!.View.Version==0,"Restart returns prepared position");
+    Check(practice.ExportPracticeReplay()==saved,"Separate practice never advances or resets");
+}
+
+static async Task LeaveForDemo(string url)
+{
+    using var online=new MatchSession();await online.CreateOrJoin(url,null,true);
+    await WaitFor(()=>online.Snapshot is not null&&!online.Busy);
+    var seat=online.Seat!;var version=online.Snapshot!.View.Version;
+    online.LeavePrivateTable();Check(!online.Online&&online.Snapshot is null,"Private seat cleared");
+    using var demo=new MatchSession();demo.StartDuelDemo("steel",205);await demo.BeginDuelDemo();
+    await online.Resume(url,seat);await WaitFor(()=>online.Connected&&online.Snapshot is not null&&!online.Busy);
+    Check(online.Snapshot!.View.WinnerId is null&&online.Snapshot.View.Version==version,"Leaving did not concede or advance room");
+}
 
 static async Task LivePlay(string url)
 {

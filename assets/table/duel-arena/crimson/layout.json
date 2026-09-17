@@ -1,0 +1,16 @@
+{
+  "mat_world_size": [
+    16,
+    10
+  ],
+  "mat_height": -0.028,
+  "grass_variants": 3,
+  "grass_triangles": {
+    "GrassTuft0": 366,
+    "GrassTuft1": 366,
+    "GrassTuft2": 366
+  },
+  "source": "crimson-duel.blend",
+  "runtime": "crimson-duel.glb",
+  "notes": "Grass meshes are normalized exemplars; Godot instancing controls placement and wind. Cloth center aligned to projected card plane."
+}

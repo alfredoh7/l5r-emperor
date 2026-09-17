@@ -1,0 +1,48 @@
+{
+  "mat": {
+    "changed_pixels": 0,
+    "box": [
+      0,
+      470,
+      1920,
+      1080
+    ]
+  },
+  "sun_center": {
+    "changed_pixels": 0,
+    "box": [
+      1110,
+      54,
+      1190,
+      108
+    ]
+  },
+  "mountain": {
+    "changed_pixels": 0,
+    "box": [
+      460,
+      166,
+      640,
+      214
+    ]
+  },
+  "upper_sky": {
+    "changed_pixels": 65847,
+    "box": [
+      10,
+      0,
+      1000,
+      80
+    ]
+  },
+  "grass": {
+    "changed_pixels": 33956,
+    "box": [
+      20,
+      300,
+      420,
+      390
+    ]
+  },
+  "ReducedMotionExactMatch": true
+}

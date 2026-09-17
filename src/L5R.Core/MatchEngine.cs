@@ -46,6 +46,7 @@ public sealed partial class MatchEngine
 
     private static MatchEngine Create(ulong seed, string scenario)
     {
+        if (scenario.StartsWith("duel-demo/", StringComparison.Ordinal)) return CreateDuelDemoState(seed, scenario[10..]);
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
         if (scenario is not ("starter" or "economy")) throw new ArgumentException("Unknown scenario.");
@@ -108,8 +109,15 @@ public sealed partial class MatchEngine
         var firstEvent = _state.Events.Count;
         try
         {
+            var aftermath = _state.LastDuel is { Complete:false, Result:not null } ? CaptureDuelEvidence() : null;
+            var reactionSource = command.CardId ?? _state.PendingChoice?.CardId;
+            var reactionCard = aftermath is not null && reactionSource is not null && _state.Cards.TryGetValue(reactionSource, out var rc)
+                && rc.FaceUp && rc.Zone is not (Zone.Hand or Zone.FateDeck or Zone.DynastyDeck) ? ViewCard(rc) : null;
+            var reactionLabel = _state.PendingChoice?.Type=="overconfidentDraw" ? "Overconfident" : null;
             Apply(command);
+            if (aftermath is not null) RecordDuelChanges(aftermath, "Aftermath", reactionCard, sourceLabel: reactionLabel);
             _state.Version++;
+            RefreshDuelRecord();
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
         }

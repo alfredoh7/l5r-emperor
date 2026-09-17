@@ -1,0 +1,196 @@
+{
+  "Passed": true,
+  "ActualSessionCommands": 4,
+  "CanonicalResult": "8\u20137",
+  "OpeningRuns": 1,
+  "EndingRuns": 1,
+  "ReducedMotion": false,
+  "DetailedGrass": true,
+  "GrassInstances": 188,
+  "Resolution": "(1920, 1080)",
+  "DurationSeconds": 36.945520999999125,
+  "Mode": "real-time native benchmark; completed rendered frames; monotonic wall clock",
+  "Frames": {
+    "Samples": 4052,
+    "P50Ms": 8.067,
+    "P95Ms": 13.847,
+    "P99Ms": 13.991,
+    "MaxMs": 56.193,
+    "Over33Ms": 3
+  },
+  "ByPhase": {
+    "idle": {
+      "Samples": 360,
+      "P50Ms": 8.904,
+      "P95Ms": 13.765,
+      "P99Ms": 13.956,
+      "MaxMs": 25.248,
+      "Over33Ms": 0
+    },
+    "opening-stakes": {
+      "Samples": 408,
+      "P50Ms": 10.073,
+      "P95Ms": 13.809,
+      "P99Ms": 13.903,
+      "MaxMs": 15.124,
+      "Over33Ms": 0
+    },
+    "opening-hush": {
+      "Samples": 84,
+      "P50Ms": 10.926,
+      "P95Ms": 13.746,
+      "P99Ms": 13.77,
+      "MaxMs": 13.77,
+      "Over33Ms": 0
+    },
+    "opening-challenger": {
+      "Samples": 108,
+      "P50Ms": 7.52,
+      "P95Ms": 13.664,
+      "P99Ms": 13.908,
+      "MaxMs": 14.41,
+      "Over33Ms": 0
+    },
+    "opening-answer": {
+      "Samples": 108,
+      "P50Ms": 7.984,
+      "P95Ms": 13.668,
+      "P99Ms": 13.75,
+      "MaxMs": 14.583,
+      "Over33Ms": 0
+    },
+    "opening-standoff": {
+      "Samples": 108,
+      "P50Ms": 10.225,
+      "P95Ms": 13.852,
+      "P99Ms": 13.963,
+      "MaxMs": 56.193,
+      "Over33Ms": 1
+    },
+    "focusing": {
+      "Samples": 1043,
+      "P50Ms": 9.588,
+      "P95Ms": 13.871,
+      "P99Ms": 14.019,
+      "MaxMs": 54.298,
+      "Over33Ms": 2
+    },
+    "verdict": {
+      "Samples": 848,
+      "P50Ms": 8.59,
+      "P95Ms": 13.876,
+      "P99Ms": 13.992,
+      "MaxMs": 14.479,
+      "Over33Ms": 0
+    },
+    "ending-reveal": {
+      "Samples": 85,
+      "P50Ms": 8.064,
+      "P95Ms": 13.656,
+      "P99Ms": 13.954,
+      "MaxMs": 13.954,
+      "Over33Ms": 0
+    },
+    "ending-cut": {
+      "Samples": 24,
+      "P50Ms": 12.121,
+      "P95Ms": 13.68,
+      "P99Ms": 13.854,
+      "MaxMs": 13.854,
+      "Over33Ms": 0
+    },
+    "ending-consequence": {
+      "Samples": 876,
+      "P50Ms": 7.092,
+      "P95Ms": 13.859,
+      "P99Ms": 14.022,
+      "MaxMs": 18.84,
+      "Over33Ms": 0
+    }
+  },
+  "SlowFrames": [
+    {
+      "Time": 12.80796933333324,
+      "Phase": "opening-standoff",
+      "Milliseconds": 56.193,
+      "Step": 0
+    },
+    {
+      "Time": 16.659629666666394,
+      "Phase": "focusing",
+      "Milliseconds": 54.298,
+      "Step": 2
+    },
+    {
+      "Time": 21.62921999999947,
+      "Phase": "focusing",
+      "Milliseconds": 42.073,
+      "Step": 4
+    }
+  ],
+  "Timeline": [
+    {
+      "Time": 0.133,
+      "Phase": "idle",
+      "Version": 1
+    },
+    {
+      "Time": 6.009,
+      "Phase": "opening-stakes",
+      "Version": 1
+    },
+    {
+      "Time": 9.416,
+      "Phase": "opening-hush",
+      "Version": 1
+    },
+    {
+      "Time": 10.116,
+      "Phase": "opening-challenger",
+      "Version": 1
+    },
+    {
+      "Time": 11.016,
+      "Phase": "opening-answer",
+      "Version": 1
+    },
+    {
+      "Time": 11.916,
+      "Phase": "opening-standoff",
+      "Version": 1
+    },
+    {
+      "Time": 12.849,
+      "Phase": "focusing",
+      "Version": 1
+    },
+    {
+      "Time": 21.662,
+      "Phase": "verdict",
+      "Version": 4
+    },
+    {
+      "Time": 22.746,
+      "Phase": "ending-reveal",
+      "Version": 4
+    },
+    {
+      "Time": 23.454,
+      "Phase": "ending-cut",
+      "Version": 4
+    },
+    {
+      "Time": 23.654,
+      "Phase": "ending-consequence",
+      "Version": 4
+    },
+    {
+      "Time": 30.954,
+      "Phase": "verdict",
+      "Version": 4
+    }
+  ],
+  "DrawCalls": 101,
+  "Gpu": "Apple M1 Max",
+  "Notes": "Uses the production screen and MatchSession, a blind legal opponent focus, native local selection/placement, and authoritative resolution. Procedural prototype sound; native Windows/AAA human acceptance not implied."
+}

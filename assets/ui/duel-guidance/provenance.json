@@ -1,0 +1,63 @@
+{
+  "approved_by": "Alfredo",
+  "direction": "3 Quiet coaching; 2 Anchored guidance available for additional help; A Ink and silence styling",
+  "date": "2026-09-16",
+  "tool": "Built-in imagegen",
+  "files": [
+    {
+      "path": "assets/ui/duel-guidance/02-anchored-guidance.png",
+      "sha256": "adcdc0cabff1dad6c1d7f7cdcb4bd7c3627a4a81935fc46fc562a1aae4c85cd9",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "role": "exact approved concept"
+    },
+    {
+      "path": "assets/ui/duel-guidance/03-quiet-coaching.png",
+      "sha256": "97b0f429c402311486ea19a00cdcacb118a4045552a3f5a25332280dcdd4e613",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "role": "exact approved concept"
+    },
+    {
+      "path": "assets/ui/duel-guidance/04-guidance-hidden.png",
+      "sha256": "415e42476dba82c450457c6e0c29ccc9874ad16850dc2930eaa37c3c526861d4",
+      "dimensions": [
+        1672,
+        941
+      ],
+      "mode": "RGB",
+      "role": "exact approved concept"
+    },
+    {
+      "path": "src/L5R.Client/Art/DuelUi/ink-wash.png",
+      "sha256": "b5b21ac4498adfed4a706baeb4127455299f6b010df54b0c6bd0c7044e1df12b",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "mode": "RGBA",
+      "role": "imagegen-derived runtime sprite"
+    },
+    {
+      "path": "src/L5R.Client/Art/DuelUi/red-slash.png",
+      "sha256": "96a2992679fad51f1a09e0ec0e43c1fcac80a9535786f3d64d7ed7974fea9821",
+      "dimensions": [
+        2180,
+        721
+      ],
+      "mode": "RGBA",
+      "role": "imagegen-derived runtime sprite"
+    }
+  ],
+  "rendering": "Live Musashi/Caudex text, original published card scans, runtime nine-sliced RGBA ink and rotated RGBA red stroke. Functional checkbox/leader are native UI. No generated rules, totals or identities.",
+  "rejected": [
+    "Rectangular panel attempts with baked checkerboard were not integrated."
+  ],
+  "comparison": "docs/screenshots/duel-demo/quiet-guidance/index.html"
+}
