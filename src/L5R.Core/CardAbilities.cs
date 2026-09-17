@@ -671,6 +671,14 @@ public static class AbilityCatalog
         // documentation pass itself caught -- a plain Siege Performer (RequiredKeywords' own already-
         // common AtBattle-safe shape) and one new Force-vs-province-strength Target category.
         ["strategic-sacrifice-toggle"] = new("Battle", "Choose your performing unbowed Siege Personality, and target a card with Force lower than or equal to the current battlefield's province's strength in a unit: Bow or straighten the card. Gain 2 Honor", "force-lte-province-strength", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Siege"]),
+        // The Weakness of Man (issue #267): the proof case for the general Battle/Open presence
+        // primitive -- Open half performed from Home with no presence check, Battle half needing the
+        // performer's own AtBattle presence exactly like an ordinary Battle ability.
+        ["weakness-of-man-toggle"] = new("BattleOrOpen", "Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him", "personality-force-neq-performer-base", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
+        // Improved Defenses (issue #267): the proof case for the "at any location" presence
+        // exemption -- an ordinary "Battle"-Timing ability whose own printed Performer text softens
+        // the usual at-this-battlefield requirement without removing it outright.
+        ["improved-defenses-strength"] = new("Battle", "Bow your performing Artisan at any location and discard the top card of your Fate deck: Increase the current battlefield's province's strength by the card's Focus Value plus one", "none", Performer: "own-unbowed-personality-with-keyword-at-any-location", RequiredKeywords: ["Artisan"]),
         // Second City unwired-card audit (issue #264), Personality wave 18: nine cards found
         // buildable with existing primitives alone -- self-printed abilities, no separate Performer
         // (Matsu Kasei needs no entry here at all: Effect="attacking-two" plus reusing the existing
@@ -890,6 +898,16 @@ public sealed partial class MatchEngine
         ActionPerformer(AbilityCatalog.All[command.AbilityId!], command, command.CardId is null ? null : Card(command.CardId));
     private bool AtBattle(CardInstance card) => _state.CurrentBattleProvince is not null &&
         (card.Zone == Zone.Battlefield || card.Zone == Zone.Attached && Card(card.AttachedTo).Zone == Zone.Battlefield) && card.ProvinceIndex == _state.CurrentBattleProvince;
+    // "At any location" (issue #267): a printed presence exemption on a Battle-timing card, but not
+    // an unconditional one -- the performer must still be at Home, the current battlefield, or
+    // another battlefield that has not yet resolved THIS Battle phase (a Personality left behind at
+    // an already-resolved battlefield, or anywhere else -- Zone.Dead, a discard pile, Zone.Region,
+    // etc. -- does not qualify). UnresolvedBattlefields already includes the current battle's own
+    // province until it actually resolves (see FinishBattleResolution's own Remove), so checking it
+    // alone also covers "at the current battlefield" -- no separate CurrentBattleProvince comparison
+    // needed.
+    private bool AtAnyLocation(CardInstance card) =>
+        card.Zone == Zone.Home || card.Zone == Zone.Battlefield && card.ProvinceIndex is int p && _state.UnresolvedBattlefields.Contains(p);
     private bool HasHalls(int owner) => Definition(Card(Player(owner).StrongholdId)).Effect == "halls-memory";
     private bool ControlsKeyword(int owner, string keyword) => _state.Cards.Values.Any(c => c.OwnerId == owner && InPlay(c) && Keyword(c, keyword));
     // Unique/Singular (issue #202): both restrict simultaneous in-play copies of the SAME-NAMED card
@@ -1269,15 +1287,30 @@ public sealed partial class MatchEngine
             or "ring-of-air-straighten" or "ring-of-water-move-home"
             || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
-        if (ability.Timing == "Battle")
+        // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
+        // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
+        // core rules) -- but the SAME ability, used during the Battle phase, is a genuine Battle
+        // action and needs exactly the same presence rule an ordinary "Battle"-Timing ability already
+        // has. actingAsBattle is that single condition, reused everywhere presence is enforced below
+        // (the blanket army-presence/source-AtBattle Requires here, the Target-AtBattle Require
+        // further down, and every AtBattle-checking Performer category) instead of the literal
+        // Timing=="Battle" string. For an ordinary "Battle"-Timing ability this is unconditionally
+        // equivalent to the old check (Timing=="Battle" already implies Phase==Battle, checked above),
+        // so no existing card's behavior changes.
+        var actingAsBattle = ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle;
+        if (actingAsBattle)
         {
             // Mirumoto Michi / Togashi Rikyou (issue #207): reinforcing a battle from elsewhere
             // entirely -- the whole point is moving in, so neither the acting player's own existing
             // presence nor this card's own AtBattle status can be required the normal way. Ring of
             // Earth (issue #194) waives the same presence check for an unrelated reason -- its own
             // printed "Even if you control no units at the current battlefield" -- but needs the
-            // identical exemption from this one shared Require.
-            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move";
+            // identical exemption from this one shared Require. Mirumoto Houken, Experienced (issue
+            // #267's own actingAsBattle generalization surfaced this): his own "move to the current
+            // battlefield if he would be opposed there" is the exact same "the resolution moves the
+            // performer there" shape -- previously masked entirely, since a BattleOrOpen ability got
+            // no presence check of any kind before this issue.
+            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move" or "houken-exp-straighten";
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
@@ -1377,15 +1410,29 @@ public sealed partial class MatchEngine
                 // naming one or more keywords with no mechanical rule of their own (all independently
                 // required, order irrelevant -- see AbilityDefinition.RequiredKeywords), without adding
                 // a new hardcoded Performer category each time. Volcano Tattoo's "Tattooed Monk" is
-                // exactly this with two keywords instead of one.
-                "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
-                    HasKeywords(performer, ability.RequiredKeywords),
+                // exactly this with two keywords instead of one. Battle/Open presence primitive (issue
+                // #267): "at battle" here means "at battle, PROVIDED this ability is actually acting as
+                // a Battle action right now" -- actingAsBattle is false for a BattleOrOpen ability's own
+                // Open half, so this reduces to a plain unbowed-and-keyworded check there (performed
+                // from Home, no presence at all), exactly The Weakness of Man's own printed shape. For
+                // every existing "Battle"-only card this is unconditionally identical to the old
+                // AtBattle(performer) check, since actingAsBattle is always true when Timing=="Battle".
+                "own-unbowed-personality-at-battle-with-keyword" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
+                    HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
+                // "At any location" (issue #267, Improved Defenses): a printed exemption from the
+                // ordinary at-THIS-battlefield requirement, broadened instead of removed -- see
+                // AtAnyLocation's own doc comment (Home, the current battlefield, or another
+                // battlefield that has not yet resolved this Battle phase). Only meaningful while
+                // actingAsBattle; an Open-timed use has no presence requirement at all regardless.
+                "own-unbowed-personality-with-keyword-at-any-location" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
+                    HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtAnyLocation(performer)),
                 // No "unbowed" qualifier printed -- Monastery of New Thought's performer may be bowed.
                 "own-personality-with-fire-token-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && HasToken(performer, "Fire"),
                 // Again!'s shape: also no "unbowed" qualifier -- the whole point is straightening an
                 // already-bowed Kensai. Generic on RequiredKeywords like the unbowed variant above.
-                "own-personality-with-keyword-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) &&
-                    HasKeywords(performer, ability.RequiredKeywords),
+                // Same actingAsBattle generalization as own-unbowed-personality-at-battle-with-keyword.
+                "own-personality-with-keyword-at-battle" => Definition(performer).Type == CardType.Personality &&
+                    HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
                 // Equip (Battle): only a Shugenja Personality may ever hold a Spell -- a Follower with
@@ -1579,11 +1626,14 @@ public sealed partial class MatchEngine
                     // whole point is a target away from the current battlefield) and "own-unbowed-farm"
                     // (Ashigaru Elite's cost-target, a Farm to bow, lives in Zone.Home) are exempt by
                     // their own dedicated Target category. Intervening Spirit / The Earth Flows (issue
-                    // #261) reuse the ordinary "own-personality"/"personality" categories -- reused
+                    // #264) reuse the ordinary "own-personality"/"personality" categories -- reused
                     // elsewhere with the normal AtBattle expectation (e.g. Ring of Water's own
                     // "move your target Personality home") -- so they are exempted by ability id
                     // instead: their whole point is reinforcing a Personality who is NOT there yet.
-                    if (ability.Timing == "Battle" && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")
+                    // actingAsBattle (issue #267): the same generalization as the blanket block above --
+                    // a BattleOrOpen ability's Open half has no battlefield to validate a target
+                    // against at all, so this Require applies only while genuinely acting as Battle.
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")
                         && id is not ("intervening-spirit-move" or "earth-flows-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
@@ -1700,6 +1750,13 @@ public sealed partial class MatchEngine
                         // lookup false-ring-of-water-recruit's own Require already uses.
                         "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
                             CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
+                        // The Weakness of Man (issue #267): "Force is different from his [the
+                        // performer's] own BASE Force" -- the performer's side of the comparison is
+                        // its own printed Force (Definition(...).Force), not CardForce's live value, so
+                        // a Force-modifying effect on the performer never changes who is a legal target
+                        // mid-battle. The target's own side is its live Force, same as every other
+                        // Force-comparison Target category here.
+                        "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
                         // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
                         // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
@@ -1927,6 +1984,15 @@ public sealed partial class MatchEngine
                 if (target!.Bowed) Straighten(target);
                 else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
                 GainHonor(player.Id, 2, "Strategic Sacrifice", source);
+                break;
+            case "weakness-of-man-toggle":
+                if (target!.Bowed) Straighten(target);
+                else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                break;
+            case "improved-defenses-strength":
+                Card(command.PerformerId!).Bowed = true;
+                if (DiscardTopOfFateDeck(player) is int idFocus)
+                    Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += idFocus + 1;
                 break;
             case "keppo-destroy":
                 if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
@@ -2852,6 +2918,11 @@ public sealed partial class MatchEngine
             var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
+            // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
+            // ValidateAbility itself uses, mirrored here so an offered command is never one
+            // ValidateAbility would then reject (or, symmetrically, so a legal Open-phase performer
+            // is actually offered instead of silently requiring AtBattle year-round).
+            var actingAsBattle = ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle;
             string?[] performers = ability.Performer switch
             {
                 "shugenja" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Keyword(c, "Shugenja") && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
@@ -2859,7 +2930,9 @@ public sealed partial class MatchEngine
                 "own-unbowed-attacking-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && IsAttacking(c)).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-samurai-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-personality-at-battle-with-keyword" =>
-                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-with-keyword-at-any-location" =>
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && (!actingAsBattle || AtAnyLocation(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
                 "own-castle-or-siege" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && !c.Bowed && (Keyword(c, "Castle") || Keyword(c, "Siege"))).Select(c => (string?)c.Id).ToArray(),
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
                 "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
