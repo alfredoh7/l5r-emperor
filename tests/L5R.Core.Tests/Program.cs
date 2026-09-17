@@ -173,7 +173,10 @@ var tests = new (string Name, Action Run)[]
     ("Event wave 2: Harsh Choices -- the first Event needing a genuine player decision at reveal time (destroy this province for 3 cards, or resolve as an ordinary discard-and-refill Event), deferred through a new PendingChoice rather than resolving unconditionally", HarshChoicesProvinceDestroy),
     ("Event wave 2: Rebuilding Kyuden Hida -- exercises only the new bounded 'until your second turn from now begins' duration (counted in the controller's own TurnsTaken, not raw shared TurnNumber); its own restriction needs no enforcement code, verified already the engine's unconditional default", RebuildingKyudenHidaDuration),
     ("Event wave 2: Times of Strife -- a global province-strength CEILING (EffectiveProvinceStrength's own new clamp, live-visible through GetView) plus a discard trigger for 'another player who controls no units at the current battlefield announces a Battle action', queued through the existing Overconfident-draw drain", TimesOfStrifeProvinceClampAndDiscard),
-    ("Event wave 2: War Weariness -- bows the performer of the first Personality-performed action each phase even when that action's own printed text never bows its performer, but not a second one the same phase", WarWearinessFirstActionPerPhaseBows)
+    ("Event wave 2: War Weariness -- bows the performer of the first Personality-performed action each phase even when that action's own printed text never bows its performer, but not a second one the same phase", WarWearinessFirstActionPerPhaseBows),
+    ("Second City unwired-card audit, Strategy wave 6: five Battle-timed Strategy cards (Dispensing Justice, Bow Before My Will, Surety of Purpose, Unexpected Support, Wrathful Ancestor) found fully buildable with pre-existing primitives -- the generic RequiredKeywords Performer shape, exemption-by-omission from Tamoko's own curated negation list, and one new enemy-scoped Follower-count Target category", SecondCityStrategyWave6),
+    ("Second City unwired-card audit, Personality wave 18: ten Personalities found fully buildable with pre-existing primitives -- Keppo's own Reconnaissance-gated fizzle, Kuronada's own attachment-restricted destroy, Matsu Kasei reusing 'incapacitated' verbatim, Moto Ming-Gwok's own dead-Personality-gated Attack, Shiba Kudome's own Bow-the-loser self-performer duel, Shosuro Ritoru's own compound bow-then-conditional-destroy, Takasho's own reinforce-and-grant plus separate Attack, and Yogo Adi's own dishonorable-or-bulk-province-boost choice", SecondCityPersonalityWave18),
+    ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -919,6 +922,476 @@ static void WarWearinessFirstActionPerPhaseBows()
     Accept(e,Cmd(e,"pass"));
     Accept(e,new GameCommand("useAbility",0,e.Version,TargetId:hand2,AbilityId:"tactical-advantage",PerformerId:second.Id));
     Check(!e.State.Cards[second.Id].Bowed,"Only the FIRST action each phase bows its performer -- the once-per-phase trigger is already spent");
+}
+static void SecondCityStrategyWave6()
+{
+    // Dispensing Justice: destroys an eligible target (no attachments, and Dishonorable/Kolat/
+    // Ninja/Shadowlands), otherwise moves the target home instead.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-2029",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Magistrate","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        target.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"No attachments and Dishonorable: destroyed");
+        Equal(e.State.Cards[strat.Id].Zone,Zone.FateDiscard,"The Strategy card itself is discarded after use, played from hand");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-2029",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Magistrate","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Not eligible for destruction (Honorable, no qualifying keyword): moved home instead");
+    }
+    // Bow Before My Will: bows the target and costs 2 Honor; no wired Shadowlands-clan card exists
+    // yet to exercise the conditional negated-straightening half, so this only confirms the
+    // baseline (non-Shadowlands performer) case -- HasClanAffiliation itself is already proven
+    // correct elsewhere (e.g. kamina-exp-attack).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-1121",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"bow-before-my-will",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Target bowed");
+        Equal(e.State.Players[0].Honor,honorBefore-2,"Costs 2 Honor");
+        Check(e.State.Cards[target.Id].StraightenBlockedTurn!=e.State.TurnNumber,"No negated straightening -- the performer is not Shadowlands");
+    }
+    // Surety of Purpose: bows an enemy Personality with equal-or-lower Personal Honor than the
+    // performer (lower-or-equal-honor-than-performer, Shamate Keep's own existing Target category)
+    // and gains 2 Honor.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-7664",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"surety-of-purpose",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Bowed");
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Gains 2 Honor");
+    }
+    // Unexpected Support: bows an enemy card with as-many-or-fewer Followers than the performer
+    // (the new enemy-fewer-or-equal-followers-than-performer Target category) and negates its next
+    // straightening.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8977",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Commander","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"unexpected-support",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Bowed");
+        Equal(e.State.Cards[target.Id].StraightenBlockedTurn,e.State.TurnNumber,"Negated its next straightening");
+    }
+    // Wrathful Ancestor: moves an enemy Personality home. "This movement will not be negated" is
+    // exemption by omission -- wrathful-ancestor-move is deliberately never registered in
+    // MoveOrStraightenKind, so there is no separate negation path to test against; a plain MoveHome
+    // is already exhaustively tested elsewhere (journeys-end-move/shamate-move/mihato-move).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-9390",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Spirit","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"wrathful-ancestor-move",PerformerId:performer.Id));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Moved home");
+    }
+}
+static void SecondCityPersonalityWave18()
+{
+    // Keppo: "If you have Reconnaissance" fizzles the effect (like training-reconnaissance-strike's
+    // own precedent) rather than blocking the action outright -- separate MatchStates since the
+    // ability is limited to once per turn by default.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var keppo=Add(s,"oracle-l5r-4328",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var item=Add(s,"training-item",1,Zone.Attached,attachedTo:enemy.Id,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:keppo.Id,TargetId:item.Id,AbilityId:"keppo-destroy"));
+        Equal(e.State.Cards[item.Id].Zone,Zone.Attached,"No Reconnaissance: fizzles, nothing destroyed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var keppo=Add(s,"oracle-l5r-4328",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var item=Add(s,"training-item",1,Zone.Attached,attachedTo:enemy.Id,province:0);
+        s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:keppo.Id,TargetId:item.Id,AbilityId:"keppo-destroy"));
+        Check(e.State.Cards[item.Id].Zone!=Zone.Attached,"With Reconnaissance: destroyed");
+    }
+    // Kuronada: target an enemy card without attachments, destroy it (RequireNoAttachments at the
+    // ability level, the same shape as Kitsu Akai's own Battle ability).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var kuronada=Add(s,"oracle-l5r-4611",0,Zone.Battlefield,province:0);
+        var enemy=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kuronada.Id,TargetId:enemy.Id,AbilityId:"kuronada-destroy"));
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
+    }
+    // Matsu Kasei: +2F while attacking (Effect="attacking-two"), and her own Battle ability reuses
+    // "incapacitated" verbatim (Target a defending Personality: Move him home).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var kasei=Add(s,"oracle-l5r-4937",0,Zone.Battlefield,province:0);
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // opposed
+        var e=MatchEngine.FromTestState(s);
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kasei.Id).Force,CardCatalog.Get("oracle-l5r-4937").Force+2,"+2F while attacking");
+        var defender=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e2=MatchEngine.FromTestState(s);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kasei.Id,TargetId:defender.Id,AbilityId:"incapacitated"));
+        Equal(e2.State.Cards[defender.Id].Zone,Zone.Home,"Moved the defending Personality home");
+    }
+    // Moto Ming-Gwok: the Attack itself is gated on a dead Personality existing anywhere, not merely
+    // conditionally boosted -- rejected without one, accepted with one (the same Require shape
+    // Torazu's own Fire-token gate already uses).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var mingGwok=Add(s,"oracle-l5r-5351",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:mingGwok.Id,AbilityId:"moto-ming-gwok-attack"));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var mingGwok=Add(s,"oracle-l5r-5351",0,Zone.Battlefield,province:0);
+        var dead=Add(s,"training-crane-samurai",1,Zone.Dead);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mingGwok.Id,AbilityId:"moto-ming-gwok-attack"));
+    }
+    // Shiba Kudome: self-performer Iaijutsu duel -- bows the loser; grants herself a +1F Fire token
+    // only if she won AND her controller controls a Shugenja. Neither side focuses (daisuke-duel's
+    // own minimal test pattern): the challenged player strikes immediately, then -- since Kudome
+    // herself carries Duelist -- she declines her own extra refocus opportunity.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var kudome=Add(s,"oracle-l5r-6774",0,Zone.Battlefield,province:0); // Chi 4
+        Add(s,"training-shugenja",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Chi 3 -- Kudome wins
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kudome.Id,TargetId:target.Id,AbilityId:"shiba-kudome-duel"));
+        Accept(e,new GameCommand("strike",1,e.Version));
+        Accept(e,new GameCommand("duelistRefocus",0,e.Version));
+        Check(e.State.Cards[target.Id].Bowed,"Loser bowed");
+        Check(e.State.Cards[kudome.Id].Tokens.Count(t=>t.Type=="Fire")==1,"Won, and controls a Shugenja: +1F Fire token");
+    }
+    // Shosuro Ritoru: bows any enemy card; destroys it only when it also has no attachments AND
+    // Ritoru's own controller controls a (separate) Courtier.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var ritoru=Add(s,"oracle-l5r-7153",0,Zone.Battlefield,province:0);
+        var courtier=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        courtier.GrantedKeywords=[new("Courtier","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ritoru.Id,TargetId:target.Id,AbilityId:"shosuro-ritoru-bow"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"No attachments, and Ritoru's own controller controls a Courtier");
+    }
+    // Takasho: reinforces the current battlefield from elsewhere (rikyou-move's own exact shape) and
+    // grants himself a scoped Additional Battle action; separately, a plain Ranged 5 Attack.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var takasho=Add(s,"oracle-l5r-7741",0,Zone.Home);
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // enemy unit present
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:takasho.Id,AbilityId:"takasho-move"));
+        Equal(e.State.Cards[takasho.Id].Zone,Zone.Battlefield,"Reinforced the current battlefield");
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(takasho.Id)),"Granted an Additional Battle action scoped to Takasho himself");
+    }
+    // Yogo Adi: Political Open -- a dishonorable target's controller loses 1 Honor; otherwise every
+    // one of Adi's own provinces gains +2 strength.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var adi=Add(s,"oracle-l5r-9485",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",1,Zone.Home);
+        target.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:adi.Id,TargetId:target.Id,AbilityId:"yogo-adi-choice"));
+        Equal(e.State.Players[1].Honor,honorBefore-1,"Dishonorable target: controller loses 1 Honor");
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var adi=Add(s,"oracle-l5r-9485",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",1,Zone.Home);
+        var strengthBefore=s.Players[0].Provinces[0].Strength;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:adi.Id,TargetId:target.Id,AbilityId:"yogo-adi-choice"));
+        Check(e.State.Players[0].Provinces.All(p=>p.Strength==strengthBefore+2),"Not dishonorable: all of Adi's own provinces gain +2 strength instead");
+    }
+}
+static void SecondCityRestBatch()
+{
+    // Archery Range: a Holding (Zone.Province) boosting any Ranged Attack, no presence restriction
+    // of its own (unlike Khol Regulars' own AtBattle-gated precedent).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var shikaro=Add(s,"oracle-l5r-6850",0,Zone.Battlefield,province:0); // Shikaro: Ranged 4 Attack
+        var range=Add(s,"oracle-l5r-430",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shikaro.Id,TargetId:target.Id,AbilityId:"shikaro-attack"));
+        Equal(e.State.PendingAttack?.Strength,4,"Base Ranged 4");
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:range.Id,AbilityId:"archery-range-reaction"));
+        Equal(e.State.PendingAttack?.Strength,5,"4 base + 1 from Archery Range");
+    }
+    // Slanderer: bows itself as its own cost; dishonors the target only while its controller controls
+    // a Courtier or Magistrate.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var slanderer=Add(s,"oracle-l5r-7291",0,Zone.Home);
+        var target=Add(s,"training-crane-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:slanderer.Id,TargetId:target.Id,AbilityId:"slanderer-dishonor"));
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var slanderer=Add(s,"oracle-l5r-7291",0,Zone.Home);
+        var courtier=Add(s,"training-crane-samurai",0,Zone.Home);
+        courtier.GrantedKeywords=[new("Courtier","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:slanderer.Id,TargetId:target.Id,AbilityId:"slanderer-dishonor"));
+        Check(e.State.Cards[slanderer.Id].Bowed,"Bowed as cost");
+        Check(e.State.Cards[target.Id].Dishonorable,"Dishonored");
+    }
+    // Temple of Hotei: bows a performing Shugenja (the generic "shugenja" Performer category) to gain
+    // 1 Honor.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var temple=Add(s,"oracle-l5r-7875",0,Zone.Home);
+        var shugenja=Add(s,"training-shugenja",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:temple.Id,AbilityId:"temple-of-hotei-honor",PerformerId:shugenja.Id));
+        Check(e.State.Cards[shugenja.Id].Bowed,"Performer bowed");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Gained 1 Honor");
+    }
+    // Tranquil Garden: straightens a Ring already in play, or -- targeting one already in this
+    // player's own Fate discard pile instead -- returns it to hand and destroys itself.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var garden=Add(s,"oracle-l5r-8721",0,Zone.Home);
+        var ring=Add(s,"oracle-l5r-6333",0,Zone.Home,bowed:true); // Ring of Air, in play
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:garden.Id,TargetId:ring.Id,AbilityId:"tranquil-garden-ring"));
+        Check(e.State.Cards[garden.Id].Bowed,"Bowed as cost");
+        Check(!e.State.Cards[ring.Id].Bowed,"In-play Ring straightened");
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var garden=Add(s,"oracle-l5r-8721",0,Zone.Home);
+        var ring=Add(s,"oracle-l5r-6333",0,Zone.FateDiscard); // Ring of Air, in its own controller's Fate discard pile
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:garden.Id,TargetId:ring.Id,AbilityId:"tranquil-garden-ring"));
+        Check(e.State.Players[0].Hand.Contains(ring.Id),"Ring in own Fate discard: returned to hand instead");
+        Equal(e.State.Cards[garden.Id].Zone,Zone.DynastyDiscard,"Tranquil Garden destroyed itself, into its own Dynasty discard pile (a Holding, not a Personality)");
+    }
+    // Flesh Cutter Arrows: only reacts to a Ranged Attack performed by its OWN wielder, targeting a
+    // card with no attached Armor.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"oracle-l5r-6850",0,Zone.Battlefield,province:0); // Shikaro: Ranged 4 Attack
+        var arrows=Add(s,"oracle-l5r-2608",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:host.Id,TargetId:target.Id,AbilityId:"shikaro-attack"));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:arrows.Id,AbilityId:"flesh-cutter-arrows-reaction"));
+        Check(e.State.Cards[arrows.Id].Bowed,"Bowed as cost");
+        Equal(e.State.PendingAttack?.Strength,6,"4 base + 2 from Flesh Cutter Arrows");
+    }
+    // Fubatsu Plate: two mutually-exclusive-per-battle (shared UsageKey) "even if bowed" Battle
+    // abilities on its own wielder.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,bowed:true,province:0);
+        var plate=Add(s,"oracle-l5r-2719",0,Zone.Attached,bowed:true,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:plate.Id,AbilityId:"fubatsu-plate-straighten"));
+        Check(!e.State.Cards[host.Id].Bowed,"Straightened its own bowed wielder, even though Fubatsu Plate itself is bowed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,bowed:true,province:0);
+        var plate=Add(s,"oracle-l5r-2719",0,Zone.Attached,bowed:true,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:plate.Id,AbilityId:"fubatsu-plate-move"));
+        Equal(e.State.Cards[host.Id].Zone,Zone.Home,"Moved its own wielder home, even though Fubatsu Plate itself is bowed");
+    }
+    // Nightingale Blade: bows itself and target; destroys the target only when it is an attachment AND
+    // its own wielder is Dragon Clan or a Kensai.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var blade=Add(s,"oracle-l5r-5556",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemy=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:blade.Id,TargetId:enemy.Id,AbilityId:"nightingale-blade-bow"));
+        Check(e.State.Cards[blade.Id].Bowed && e.State.Cards[enemy.Id].Bowed,"Both bowed");
+        Check(e.State.Cards[enemy.Id].Zone!=Zone.Dead,"Not an attachment: not destroyed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); host.GrantedKeywords=[new("Kensai","test-fixture","Permanent")];
+        var blade=Add(s,"oracle-l5r-5556",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var enemyHost=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var enemyItem=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:enemyHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:blade.Id,TargetId:enemyItem.Id,AbilityId:"nightingale-blade-bow"));
+        Equal(e.State.Cards[enemyItem.Id].Zone,Zone.FateDiscard,"An attachment, and the wielder is a Kensai: destroyed, into its own Fate discard pile (an Item, not a Personality)");
+    }
+    // Satoshi's Dual Warfans: entering play draws a card; the equipping player's own Clan discounts
+    // its Gold cost by 1 only when Lion.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0; s.Players[0].Clan="Lion";
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var warfans=Add(s,"oracle-l5r-6481",0,Zone.Hand); // GoldCost 3
+        var e=MatchEngine.FromTestState(s);
+        var payment=e.PaymentOptions(0,2).First(); // 3 - 1 (Lion Clan discount)
+        Accept(e,Cmd(e,"equip",id:warfans.Id,sources:payment.SourceIds,target:host.Id));
+        Equal(e.State.Cards[warfans.Id].Zone,Zone.Attached,"Equipped at the discounted cost of 2");
+        Equal(e.State.PendingChoice?.Type,"entryReaction","Entering play opens its own Reaction window");
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:warfans.Id,AbilityId:"satoshi-warfans-draw"));
+        Equal(e.State.Players[0].Hand.Count,handBefore+1,"Drew a card");
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0; s.Players[0].Clan="Crane";
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var warfans=Add(s,"oracle-l5r-6481",0,Zone.Hand); // GoldCost 3
+        var e=MatchEngine.FromTestState(s);
+        // Not Lion Clan: the discounted (2 Gold) payment is short of the real (3 Gold) cost by 1.
+        Reject(e,Cmd(e,"equip",id:warfans.Id,sources:e.PaymentOptions(0,2).First().SourceIds,target:host.Id));
+    }
+    // Overgrown Grove: a Region (never AtBattle-eligible) restricted instead to its own province;
+    // discards the top 3 cards of its controller's own Fate deck and moves an attacking Personality
+    // home.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; // player 1 is the Attacker
+        var grove=Add(s,"oracle-l5r-5841",0,Zone.Region,province:0);
+        var fateDeck=s.Players[0].FateDeck; for(var i=0;i<5;i++) fateDeck.Add(Add(s,"training-item",0,Zone.FateDeck).Id);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Grove's own controller needs presence to take a Battle action
+        var attacker=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var deckBefore=e.State.Players[0].FateDeck.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:grove.Id,TargetId:attacker.Id,AbilityId:"overgrown-grove-move"));
+        Equal(e.State.Players[0].FateDeck.Count,deckBefore-3,"Discarded the top 3 cards of its own controller's Fate deck");
+        Equal(e.State.Cards[attacker.Id].Zone,Zone.Home,"Moved the attacking Personality home");
+    }
+    // Intervening Spirit: reinforces an own Personality into the current battlefield from elsewhere,
+    // even when its own wielder is not there, gated on enemy presence; grants an additional Battle
+    // action only for an Ancestor moved by a Water-keyword Shugenja.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var host=Add(s,"training-crane-samurai",0,Zone.Home); // Intervening Spirit's own wielder, not at the battlefield
+        var spirit=Add(s,"oracle-l5r-3788",0,Zone.Attached,attachedTo:host.Id);
+        var mover=Add(s,"training-lion-samurai",0,Zone.Home);
+        Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // enemy presence
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spirit.Id,TargetId:mover.Id,AbilityId:"intervening-spirit-move"));
+        Equal(e.State.Cards[mover.Id].Zone,Zone.Battlefield,"Moved into the current battlefield");
+        Check(!e.State.Cards[mover.Id].Bowed,"Straightened since it was not already at the battlefield");
+        Check(!e.State.AdditionalActions.Any(g=>g.PlayerId==0),"Not an Ancestor: no additional Battle action granted");
+    }
+    // The Earth Flows: Defender-only; reinforces a Personality into the current battlefield; its own
+    // passive Honor bonus (a new Effect="earth-flows-honor" checked from CheckEarthFlowsBonus) fires
+    // only for the winning side, keyed off an Earth-keyword wielder.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=1; // player 0 is the Attacker; player 1 is the Defender
+        // Unlike Intervening Spirit's own reinforce-from-elsewhere exemption, Earth Flows' own wielder
+        // must be at the current battlefield already (no "even if" clause of its own, so it falls back
+        // to the ordinary attached-Spell-source AtBattle Require -- Scouring Flood/Earth's Hunger's
+        // own precedent), which also doubles as the Defender's own presence for this Battle action.
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var flows=Add(s,"oracle-l5r-8038",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var mover=Add(s,"training-lion-samurai",1,Zone.Home);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:flows.Id,TargetId:mover.Id,AbilityId:"earth-flows-move"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:flows.Id,TargetId:mover.Id,AbilityId:"earth-flows-move"));
+        Equal(e.State.Cards[mover.Id].Zone,Zone.Battlefield,"Moved into the current battlefield");
+    }
+    {
+        // Battle resolution's own +2 Honor bonus: the wielder needs the Earth keyword, and must end up
+        // on the winning side. Defender's Force (6) beats the Attacker's (2), so player 1 wins;
+        // isolate the bonus itself by diffing against an identical battle with no Earth Flows attached.
+        var baseline=Battle(2,6); Resolve(baseline);
+        var baselineHonor=baseline.State.Players[1].Honor;
+        var s=Battle(2,6).State;
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield);
+        defender.GrantedKeywords=[new("Earth","test-fixture","Permanent")];
+        Add(s,"oracle-l5r-8038",1,Zone.Attached,province:0,attachedTo:defender.Id);
+        var e=MatchEngine.FromTestState(s);
+        Resolve(e);
+        Equal(e.State.Players[1].Honor,baselineHonor+2,"The Earth Flows: +2 Honor on top of ordinary battle-victory Honor, for the winning Defender's own Earth-keyword wielder");
+    }
+    // Winds of Dismissal: bows its own wielder as its cost; an eligible (Dishonorable/Kolat/Ninja/
+    // Shadowlands) target's controller loses Honor equal to the target's own base Personal Honor; a
+    // second, independent +1 Honor for the caster when the wielder is Air.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var host=Add(s,"training-shugenja",0,Zone.Home); host.GrantedKeywords=[new("Air","test-fixture","Permanent")];
+        var winds=Add(s,"oracle-l5r-9344",0,Zone.Attached,attachedTo:host.Id);
+        var target=Add(s,"training-crane-samurai",1,Zone.Home);
+        target.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        var casterHonorBefore=e.State.Players[0].Honor;
+        var targetHonorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:winds.Id,TargetId:target.Id,AbilityId:"winds-of-dismissal-choice"));
+        Check(e.State.Cards[host.Id].Bowed,"Bowed its own wielder as cost");
+        Equal(e.State.Players[1].Honor,targetHonorBefore-CardCatalog.Get("training-crane-samurai").PersonalHonor,"Dishonorable target: controller loses Honor equal to its base Personal Honor");
+        Equal(e.State.Players[0].Honor,casterHonorBefore+1,"Wielder is Air: +1 Honor too");
+    }
+    // Strategic Sacrifice: the one false negative the BLOCKERS documentation pass itself caught. A
+    // plain Siege Performer, a new Force-vs-province-strength Target, and "Bow or straighten" as an
+    // unconditional toggle (straighten if already bowed, bow otherwise).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.Players[1].Provinces[0].Strength=4;
+        var strat=Add(s,"oracle-l5r-7524",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Siege","test-fixture","Permanent")];
+        var tooStrong=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, above the province's 4
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:tooStrong.Id,AbilityId:"strategic-sacrifice-toggle",PerformerId:performer.Id));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.Players[1].Provinces[0].Strength=4;
+        var strat=Add(s,"oracle-l5r-7524",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Siege","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 3, at or below the province's 4
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strategic-sacrifice-toggle",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Was unbowed: toggled to bowed");
+        Equal(e.State.Players[0].Honor,honorBefore+2,"Gained 2 Honor");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.Players[1].Provinces[0].Strength=4;
+        var strat=Add(s,"oracle-l5r-7524",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        performer.GrantedKeywords=[new("Siege","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strategic-sacrifice-toggle",PerformerId:performer.Id));
+        Check(!e.State.Cards[target.Id].Bowed,"Was bowed: toggled to straightened");
+    }
 }
 static void ChooseStraightenDecline()
 {

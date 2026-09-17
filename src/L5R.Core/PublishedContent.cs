@@ -900,6 +900,159 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Strategy wave 6 (issue #264, the Second City unwired-card audit): five Battle-timed
+    /// Strategy cards found fully buildable with primitives that already existed before this wave --
+    /// Dispensing Justice, Bow Before My Will, Surety of Purpose, Unexpected Support, and Wrathful
+    /// Ancestor. All five reuse the generic RequiredKeywords Performer shape
+    /// (own-unbowed-personality-at-battle-with-keyword / own-personality-with-keyword-at-battle);
+    /// Magistrate/Paragon/Commander/Spirit carry no mechanical rule of their own here, the same as
+    /// Kitsu Akai's own Ancestor/Spirit precedent. Wrathful Ancestor's own "will not be negated" is
+    /// exemption by omission (not registered in MoveOrStraightenKind); Unexpected Support needed one
+    /// new Target category (enemy-fewer-or-equal-followers-than-performer, the enemy-only counterpart
+    /// to journeys-end-move's own unrestricted one).</summary>
+    public static PublishedSnapshot StrategyWave6 { get; } = LoadStrategyWave6();
+
+    private static PublishedSnapshot LoadStrategyWave6()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave6.json", "strategy-wave-6", requireDecks: false);
+        if(snapshot.Cards.Length != 5)
+            throw new InvalidOperationException("Unexpected strategy-wave-6 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-6 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-6 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Personality wave 18 (issue #264, the Second City unwired-card audit): ten
+    /// Personalities found fully buildable with primitives that already existed before this wave --
+    /// Daigotsu Shikenuro, Keppo, Kuronada, Matsu Kasei, Moto Ming-Gwok, Shiba Kudome, Shikaro,
+    /// Shosuro Ritoru, Takasho, and Yogo Adi. Matsu Kasei needed no new AbilityCatalog entry at all
+    /// (Effect="attacking-two" plus reusing the existing "incapacitated" ability id verbatim); Shiba
+    /// Kudome is the first self-performer duel whose own win consequence is a Bow rather than
+    /// Destroy/MoveHome. Takasho's own Clan is hand-corrected (his local catalogue record lists two
+    /// raw clan values; his own scan shows no clan mon at all, confirming he is genuinely
+    /// clanless -- see package_personality_wave_18.py's own CLAN_OVERRIDE).</summary>
+    public static PublishedSnapshot PersonalityWave18 { get; } = LoadPersonalityWave18();
+
+    private static PublishedSnapshot LoadPersonalityWave18()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave18.json", "personality-wave-18", requireDecks: false);
+        if(snapshot.Cards.Length != 10)
+            throw new InvalidOperationException("Unexpected personality-wave-18 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-18 card is not a textful Personality: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("personality-wave-18 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Holding wave 1 (issue #264, the Second City unwired-card audit): four Holdings found
+    /// fully buildable with primitives that already existed before this wave -- Archery Range,
+    /// Slanderer, Temple of Hotei, and Tranquil Garden. First Holding wave to carry curated
+    /// Effect/Ability data (every prior published Holding was ability-free).</summary>
+    public static PublishedSnapshot HoldingWave1 { get; } = LoadHoldingWave1();
+
+    private static PublishedSnapshot LoadHoldingWave1()
+    {
+        var snapshot = Load("L5R.Published.HoldingWave1.json", "holding-wave-1", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected holding-wave-1 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Holding || card.Text.Length == 0)
+                throw new InvalidOperationException($"holding-wave-1 card is not a textful Holding: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("holding-wave-1 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Item wave 3 (issue #264, the Second City unwired-card audit): four Items found fully
+    /// buildable with primitives that already existed before this wave -- Flesh Cutter Arrows,
+    /// Fubatsu Plate, Nightingale Blade, and Satoshi's Dual Warfans. Satoshi's Dual Warfans needed
+    /// one new Effect term ("lion-clan-discount") on Equip()'s own existing cost-discount formula.</summary>
+    public static PublishedSnapshot ItemWave3 { get; } = LoadItemWave3();
+
+    private static PublishedSnapshot LoadItemWave3()
+    {
+        var snapshot = Load("L5R.Published.ItemWave3.json", "item-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected item-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Item || card.Text.Length == 0)
+                throw new InvalidOperationException($"item-wave-3 card is not a textful Item: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("item-wave-3 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Region wave 2 (issue #264, the Second City unwired-card audit): Overgrown Grove, the
+    /// one Region found fully buildable with primitives that already existed before this wave. Not a
+    /// Personality source, so it needed a bespoke standalone Require (own ProvinceIndex ==
+    /// CurrentBattleProvince) rather than reusing AtBattle, which structurally can never be true for
+    /// a Zone.Region card.</summary>
+    public static PublishedSnapshot RegionWave2 { get; } = LoadRegionWave2();
+
+    private static PublishedSnapshot LoadRegionWave2()
+    {
+        var snapshot = Load("L5R.Published.RegionWave2.json", "region-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected region-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Region || card.Text.Length == 0)
+                throw new InvalidOperationException($"region-wave-2 card is not a textful Region: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("region-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Spell wave 2 (issue #264, the Second City unwired-card audit): three Spells found
+    /// fully buildable with primitives that already existed before this wave -- Intervening Spirit,
+    /// The Earth Flows, and Winds of Dismissal. The Earth Flows' own passive Honor clause is keyed by
+    /// a new Effect term ("earth-flows-honor") that MatchEngine.CheckEarthFlowsBonus reads from the
+    /// winning army's own attached Spells after an outright battle win.</summary>
+    public static PublishedSnapshot SpellWave2 { get; } = LoadSpellWave2();
+
+    private static PublishedSnapshot LoadSpellWave2()
+    {
+        var snapshot = Load("L5R.Published.SpellWave2.json", "spell-wave-2", requireDecks: false);
+        if(snapshot.Cards.Length != 3)
+            throw new InvalidOperationException("Unexpected spell-wave-2 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Spell || card.Text.Length == 0)
+                throw new InvalidOperationException($"spell-wave-2 card is not a textful Spell: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("spell-wave-2 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Strategy wave 7 (issue #264, the Second City unwired-card audit): Strategic
+    /// Sacrifice, the one false negative the BLOCKERS documentation pass itself caught -- a plain
+    /// Siege Performer plus one new Force-vs-province-strength Target category
+    /// ("force-lte-province-strength").</summary>
+    public static PublishedSnapshot StrategyWave7 { get; } = LoadStrategyWave7();
+
+    private static PublishedSnapshot LoadStrategyWave7()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave7.json", "strategy-wave-7", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected strategy-wave-7 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-7 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-7 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

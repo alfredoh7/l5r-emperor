@@ -52,5 +52,12 @@
     <EmbeddedResource Include="../../content/published/spell-wave-1.json" LogicalName="L5R.Published.SpellWave1.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-17.json" LogicalName="L5R.Published.PersonalityWave17.json" />
     <EmbeddedResource Include="../../content/published/event-wave-2.json" LogicalName="L5R.Published.EventWave2.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-6.json" LogicalName="L5R.Published.StrategyWave6.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-18.json" LogicalName="L5R.Published.PersonalityWave18.json" />
+    <EmbeddedResource Include="../../content/published/holding-wave-1.json" LogicalName="L5R.Published.HoldingWave1.json" />
+    <EmbeddedResource Include="../../content/published/item-wave-3.json" LogicalName="L5R.Published.ItemWave3.json" />
+    <EmbeddedResource Include="../../content/published/region-wave-2.json" LogicalName="L5R.Published.RegionWave2.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-2.json" LogicalName="L5R.Published.SpellWave2.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-7.json" LogicalName="L5R.Published.StrategyWave7.json" />
   </ItemGroup>
 </Project>

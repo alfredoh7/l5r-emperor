@@ -354,6 +354,14 @@ public sealed partial class MatchEngine
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
             case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
             case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
+            // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
+            // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her
+            // with, so checking the winner's OWNER matches the printed text precisely.
+            case "shiba-kudome-duel":
+                foreach (var id in loserIds) if (!StalwartNegatesBow(Card(id), challengerPlayerId)) Card(id).Bowed = true;
+                if (winnerId is not null && Card(winnerId).OwnerId == challengerPlayerId && ControlsKeyword(challengerPlayerId, "Shugenja"))
+                    CreateToken(Card(winnerId), "Fire", abilityId, "Force", 1);
+                break;
         }
     }
 

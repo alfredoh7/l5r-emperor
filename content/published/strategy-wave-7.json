@@ -1,0 +1,32 @@
+{
+  "Profile": "strategy-wave-7",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7524",
+      "Name": "Strategic Sacrifice",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Siege Personality, and target a card with Force lower than or equal to the current battlefield's province's strength in a unit: Bow or straighten the card. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7524.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "strategic-sacrifice-toggle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
