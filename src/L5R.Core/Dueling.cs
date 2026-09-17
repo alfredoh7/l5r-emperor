@@ -68,7 +68,7 @@ public sealed partial class MatchEngine
     {
         var duel = _state.PendingDuel!;
         Emit("duelRefused", $"{Definition(Card(duel.ChallengedId)).Name} refuses the duel.", duel.ChallengedPlayerId, duel.ChallengedId);
-        _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], [_state.Events[^1]], [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
+        _state.LastDuel = _state.LastDuel! with { Result = new("Refused", null, [], 0, 0, 0, 0, [], [_state.Events[^1]], [], _state.Version + 1, _state.Phase, _state.PriorityPlayerId, "Challenge refused") };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         NextAction(challengerPlayerId);
@@ -270,15 +270,17 @@ public sealed partial class MatchEngine
         var challengerTotal = DuelStatValue(challenger, duel.Stat) + duel.ChallengerFocused.Sum(id => Definition(Card(id)).Focus);
         var challengedTotal = DuelStatValue(challenged, duel.Stat) + duel.ChallengedFocused.Sum(id => Definition(Card(id)).Focus);
         string? winnerId; List<string> loserIds;
+        var resolutionReason = "Higher duel total";
         if (challengerTotal > challengedTotal) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
         else if (challengedTotal > challengerTotal) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
         else
         {
+            resolutionReason = "Duelist breaks the tie";
             // A tie: a Duelist on exactly one side wins; on neither side (or both) both sides lose.
             var challengerDuelist = Keyword(challenger, "Duelist"); var challengedDuelist = Keyword(challenged, "Duelist");
             if (challengerDuelist && !challengedDuelist) { winnerId = duel.ChallengerId; loserIds = [duel.ChallengedId]; }
             else if (challengedDuelist && !challengerDuelist) { winnerId = duel.ChallengedId; loserIds = [duel.ChallengerId]; }
-            else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; }
+            else { winnerId = null; loserIds = [duel.ChallengerId, duel.ChallengedId]; resolutionReason = "Equal totals · both lose"; }
         }
         var resultStart = _state.Events.Count;
         var strengthsBefore = _state.Players.SelectMany(p => p.Provinces.Select(v => new DuelProvince(p.Id, v.Index, v.Strength, v.Strength))).ToArray();
@@ -323,7 +325,7 @@ public sealed partial class MatchEngine
         _state.LastDuel = _state.LastDuel! with { Result = new("Resolved", winnerId, loserIds.ToArray(),
             challengerStat, challengedStat, challengerTotal, challengedTotal, duel.OrderedFocusEffects.ToArray(),
             _state.Events.Skip(resultStart).ToArray(), strengthsBefore.Select(p => p with { After = Player(p.PlayerId).Provinces[p.Index].Strength }).ToArray(),
-            _state.Version + 1, _state.Phase, _state.PriorityPlayerId) };
+            _state.Version + 1, _state.Phase, _state.PriorityPlayerId, resolutionReason) };
         var challengerPlayerId = duel.ChallengerPlayerId;
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):

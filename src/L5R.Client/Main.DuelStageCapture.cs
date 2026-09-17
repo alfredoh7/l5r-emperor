@@ -51,6 +51,11 @@ public partial class Main
         if(v.PendingDuel is not null&&string.IsNullOrEmpty(host.Screen.EssentialStatus))throw new Exception("Required stage lost its essential status.");
         if(v.LastDuel!.Complete)
         {
+            var result=v.LastDuel.Result!;
+            var evidence=v.LastDuel.Reveals.LastOrDefault()?.Cards.Length??0;
+            if(host.Screen.RetainedFocusCount!=evidence||v.Players.Any(p=>p.FocusCount!=0))throw new Exception("Result evidence disagrees with retained engine revelation/current empty focus pools.");
+            if(result.Kind=="Refused"&&host.Screen.ResultExplanation.Contains("0 to 0"))throw new Exception("Refusal invented final totals.");
+            if(result.Kind=="Resolved"&&!host.Screen.ResultExplanation.Contains(result.ResolutionReason!))throw new Exception("Result explanation lost the engine-recorded reason.");
             Capture("result");GD.Print($"DUEL_STAGE_CHECK: {_stageScenarios[_scenarioProbe]} complete through native controls, {v.Version} commands");
             Press("Continue");_scenarioProbe++;_scenarioPhase=1;_scenarioMoves=0;
             if(_scenarioProbe==_stageScenarios.Length){System.IO.File.WriteAllText(_capturePath+".json","{\"passed\":true,\"scenarios\":13}");GetTree().Quit();}return;

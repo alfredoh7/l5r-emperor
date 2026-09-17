@@ -39,7 +39,7 @@ public partial class DuelScreen
     internal string CinematicPhase=>_cinema switch {
         Cinema.Opening=>_cinemaTime<StakesDuration?"opening-stakes":_cinemaTime-StakesDuration<.7?"opening-hush":_cinemaTime-StakesDuration<1.6?"opening-challenger":_cinemaTime-StakesDuration<2.5?"opening-answer":"opening-standoff",
         Cinema.Aftermath=>"aftermath-effect",
-        Cinema.Ending=>_cinemaTime<.7?"ending-reveal":_cinemaTime<.9?"ending-cut":"ending-consequence",_=>"idle"};
+        Cinema.Ending=>_cinemaTime<VerdictCut?"ending-totals":_cinemaTime<ConsequencesStart?"ending-verdict":"ending-consequence",_=>"idle"};
     internal int OpeningRuns {get;private set;}
     internal int EndingRuns {get;private set;}
 
@@ -67,7 +67,7 @@ public partial class DuelScreen
     }
     private void ResetCinema()
     {
-        ClearStory();_seenBeats.Clear();_activeBeats=[];
+        ClearStory();ResetVerdict();_resultArranged=false;_seenBeats.Clear();_activeBeats=[];
         _cinema=Cinema.None;_cinemaTime=0;_openingSeen=false;OpeningRuns=EndingRuns=0;
         ClearIntro();ResetCamera();_cinemaLayer?.Hide();
         if(_flights is not null)foreach(var child in _flights.GetChildren()){_flights.RemoveChild(child);child.QueueFree();}
@@ -90,10 +90,10 @@ public partial class DuelScreen
     }
     private void StartEnding()
     {
-        EndingRuns++;PrepareBeats();
+        EndingRuns++;PrepareBeats();_resultArranged=true;
         if(ReducedMotion||Snapshot!.View.LastDuel!.Result!.Kind!="Resolved")
         {_aftermathPlayed=true;FinishBeats();RenderCards(false);RenderActions();return;}
-        _cinema=Cinema.Ending;_cinemaTime=0;HideCardHover();CloseGuidance();_cinemaLayer.Show();RenderActions();
+        _cinema=Cinema.Ending;_cinemaTime=0;HideCardHover();CloseGuidance();_cinemaLayer.Show();RenderCards();RenderActions();RefreshVerdict();
     }
     public void SkipCinematic()
     {
@@ -121,7 +121,7 @@ public partial class DuelScreen
         if(_cinema==Cinema.Opening)
         {
             if(t<0)return;
-            if(t<StakesDuration){ShowStakes();return;}
+            if(t<StakesDuration){ShowStakes();if(_story is not null)_story.Modulate=new Color(1,1,1,ReducedMotion?1:Ease(Math.Min(t/.28,(StakesDuration-t)/.28)));return;}
             ClearStory();
             if(ReducedMotion){SkipCinematic();return;}
             t-=StakesDuration;
@@ -164,37 +164,33 @@ public partial class DuelScreen
             var index=(int)(t/BeatDuration);
             if(index>=_activeBeats.Length){SkipCinematic();return;}
             ShowBeat(_activeBeats[index]);
+            if(_story is not null){var local=t-index*BeatDuration;_story.Modulate=new Color(1,1,1,Ease(Math.Min(local/.28,(BeatDuration-local)/.28)));}
         }
         else
         {
-            if(t>=.7&&t<.9)
+            if(t>=VerdictCut&&t<VerdictCut+.30)
             {
-                var opacity=Mathf.Sin((float)((t-.7)/.2)*Mathf.Pi);
-                _cinemaShade.Color=new Color(0,0,0,opacity*.22f);
-                _cinemaSlash.Visible=true;_cinemaSlash.Position=_offset+new Vector2(704,360)*_scale;
-                _cinemaSlash.Size=new Vector2(280,235)*_scale;_cinemaSlash.Modulate=new Color(1,1,1,opacity);
+                var opacity=Mathf.Sin((float)((t-VerdictCut)/.30)*Mathf.Pi);
+                _cinemaShade.Color=new Color(0,0,0,opacity*.12f);
+                _cinemaSlash.Visible=true;_cinemaSlash.Position=_offset+new Vector2(735,375)*_scale;
+                _cinemaSlash.Size=new Vector2(202,148)*_scale;_cinemaSlash.Modulate=new Color(1,1,1,opacity*.8f);
             }
-            if(t>=.9&&!_aftermathPlayed)
-            {_aftermathPlayed=true;_cleanupClock=.8;RenderCards();RenderActions();}
-            if(t>=.9)
+            if(t>=VerdictCut&&!_aftermathPlayed)
+            {_aftermathPlayed=true;RenderCards();RenderActions();}
+            if(t>=ConsequencesStart&&_activeBeats.Length>0)
             {
-                var record=Snapshot!.View.LastDuel!;var result=record.Result!;
-                _cinemaTitle.Text=result.WinnerId is null?"Both lose":$"{(result.WinnerId==record.Challenger.Id?record.Challenger:record.Challenged).Definition!.Name} wins";
-                _cinemaTitle.Position=_offset+new Vector2(606,315)*_scale;_cinemaTitle.Size=new Vector2(460,112)*_scale;
-                _cinemaTitle.HorizontalAlignment=HorizontalAlignment.Center;_cinemaTitle.Modulate=Colors.White;
-                _cinemaTitle.AddThemeFontSizeOverride("font_size",Math.Max(28,(int)(50*_scale)));
+                var index=Math.Min((int)((t-ConsequencesStart)/BeatDuration),_activeBeats.Length-1);
+                var beat=_activeBeats[index];_seenBeats.Add(beat.Index);
+                StoryText=(beat.Source?.Definition?.Name??beat.SourceLabel??beat.Kind)+"\n"+string.Join("\n",beat.Lines);
             }
-            if(t>=1.0&&_activeBeats.Length>0)
-            {
-                var index=Math.Min((int)((t-1.0)/BeatDuration),_activeBeats.Length-1);ShowBeat(_activeBeats[index]);
-            }
-            if(t>=1.8+_activeBeats.Length*BeatDuration){_cleanupClock=0;SkipCinematic();}
+            RefreshVerdict();
+            if(t>=EndingDuration)SkipCinematic();
         }
     }
     private void AdvanceWind(double delta)
     {
         var paused=InputLocked||_reading is not null;
-        var hush=_cinema==Cinema.Opening&&_cinemaTime>=0||(_cinema==Cinema.Ending&&_cinemaTime<1.5);
+        var hush=_cinema==Cinema.Opening&&_cinemaTime>=0||(_cinema==Cinema.Ending&&_cinemaTime<ConsequencesStart);
         if(!paused)_windStrength=Mathf.MoveToward(_windStrength,hush?.28f:1,(float)delta*.65f);
         _stage.WindStrength=_windStrength;
     }

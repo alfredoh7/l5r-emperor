@@ -33,6 +33,7 @@ static class DuelDemoTests
         Send(e,Action(e,"strike"));
         var view=e.GetView(0);var record=view.LastDuel!;var result=record.Result!;
         Check(record.Complete && view.PendingDuel is null,"immediate result retained");
+        Equal(result.ResolutionReason,"Higher duel total");
         Equal(result.ChallengerTotal,8);Equal(result.ChallengedTotal,7);Equal(result.WinnerId,record.Challenger.Id);
         Check(view.Players[1].Discard.Any(c=>c.Id==record.Challenged.Id&&c.Zone==Zone.Dead),"loser destroyed");
         Check(result.Provinces.Where(p=>p.PlayerId==0).All(p=>p.After==p.Before+2),"Courtesy recorded");
@@ -58,7 +59,9 @@ static class DuelDemoTests
         Equal(JsonSerializer.Serialize(e.State),JsonSerializer.Serialize(MatchEngine.Replay(e.ExportReplay()).State));
         beats[0].Lines[0]="tampered";Check(e.GetView(0).LastDuel!.Beats![0].Lines[0]!="tampered","story arrays detached from engine state");
         var node=System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(record))!.AsObject();node.Remove("Challenge");node.Remove("Beats");
-        var legacy=JsonSerializer.Deserialize<DuelRecord>(node.ToJsonString())!;Check(legacy.Challenge is null&&legacy.Beats is null,"old presentation snapshots remain readable");
+        node["Result"]!.AsObject().Remove("ResolutionReason");
+        var legacy=JsonSerializer.Deserialize<DuelRecord>(node.ToJsonString())!;
+        Check(legacy.Result!.ResolutionReason is null,"old result snapshots have no invented reason");Check(legacy.Challenge is null&&legacy.Beats is null,"old presentation snapshots remain readable");
         foreach(var scenario in new[]{"duelist","aftermath"})
         {
             e=MatchEngine.CreateDuelDemo(scenario);Begin(e,scenario);
@@ -98,6 +101,26 @@ static class DuelDemoTests
         }
         var refused=MatchEngine.CreateDuelDemo("refusal");Begin(refused,"refusal");Send(refused,Action(refused,"declineDuel"));
         Check(refused.GetView(0).LastDuel is {Complete:true,Result.Kind:"Refused"},"refusal retained");
+        foreach(var scenario in new[]{"tie","duelist-tie","duelist"})
+        {
+            var tie=MatchEngine.CreateDuelDemo(scenario);
+            if(scenario=="duelist")
+            {
+                var state=tie.State;
+                var champions=state.Cards.Values.Where(c=>CardCatalog.Get(c.DefinitionId).Type==CardType.Personality&&c.DefinitionId!="oracle-l5r-5095").ToArray();
+                // Set an authoritative equal-Chi position; exactly one side is a Duelist.
+                var target=champions.Single(c=>c.OwnerId==1);
+                var source=champions.Single(c=>c.OwnerId==0);
+                target.Modifiers.Add(new("result-reason-test","equal-chi","Chi",CardCatalog.Get(source.DefinitionId).Chi-CardCatalog.Get(target.DefinitionId).Chi));
+                tie=MatchEngine.FromTestState(state);
+            }
+            Begin(tie,scenario);Send(tie,Action(tie,"strike"));
+            while(tie.State.PendingDuel is not null)Send(tie,Action(tie,"duelistRefocus",c=>c.CardId is null));
+            var result=tie.GetView(0).LastDuel!.Result!;
+            Equal(result.ChallengerTotal,result.ChallengedTotal);
+            Equal(result.ResolutionReason,scenario=="duelist"?"Duelist breaks the tie":"Equal totals · both lose");
+            Equal(JsonSerializer.Deserialize<DuelResult>(JsonSerializer.Serialize(result))!.ResolutionReason,result.ResolutionReason);
+        }
         var empty=MatchEngine.CreateDuelDemo("empty");Begin(empty,"empty");Equal(empty.QueryActions(1).Length,1);Send(empty,Action(empty,"strike"));
         var cap=MatchEngine.CreateDuelDemo("four");Begin(cap,"four");for(var i=0;i<8;i++)Send(cap,Action(cap,"focus",c=>c.Choice=="deck"));
         Equal(cap.QueryActions(1).Single().Type,"strike");Check(!cap.Execute(new("focus",1,cap.Version,Choice:"deck")).Accepted,"fifth rejected");

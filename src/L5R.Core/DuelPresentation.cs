@@ -13,7 +13,7 @@ public sealed record DuelProvince(int PlayerId, int Index, int Before, int After
 public sealed record DuelResult(string Kind, string? WinnerId, string[] LoserIds,
     int ChallengerStat, int ChallengedStat, int ChallengerTotal, int ChallengedTotal,
     string[] EffectOrder, GameEvent[] Consequences, DuelProvince[] Provinces,
-    long ResolutionVersion, Phase ReturnPhase, int ReturnPriority);
+    long ResolutionVersion, Phase ReturnPhase, int ReturnPriority, string? ResolutionReason = null);
 
 public sealed partial class MatchEngine
 {

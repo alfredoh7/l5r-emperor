@@ -20,6 +20,7 @@ public partial class DuelScreen
             var actual=Snapshot.View.Players.SelectMany(p=>p.Army.Concat(p.Home).Concat(p.Discard).Concat(p.RemovedFromGame)).FirstOrDefault(c=>c.Id==card.Id);
             return $"Duel participant · recorded for this result. Current location: {actual?.Zone.ToString() ?? "see aftermath"}.";
         }
+        if(_resultArranged&&card.Zone==Zone.Focused)return "Revealed focus · retained duel evidence. This card has already left the focus pool; see Public piles for its current location.";
         return card.Zone==Zone.Focused&&!card.FaceUp ? "Your committed focus · privately inspectable."
             : card.Zone==Zone.Hand ? "In your hand. Select a card to focus."
             : "Public card · click to inspect.";
@@ -93,7 +94,8 @@ public partial class DuelScreen
         var next=DuelUi.Button("Continue",()=>{if(!InputLocked&&!_submitted&&CanContinue)PresentationFinished?.Invoke();},true,_scale,50);
         next.Position=_controlsRect.Position;next.Size=_controlsRect.Size;_hud.AddChild(next);
         var details=DuelUi.Button("Duel details",()=>ShowConsequences(record),scale:_scale,fontSize:18);
-        details.Position=new Vector2(Math.Max(160,_offset.X+155*_scale),16);details.Size=new Vector2(150,40)*_scale;_hud.AddChild(details);
+        details.TooltipText="Read every source, consequence and revealed card in the complete account.";
+        details.Position=_offset+new Vector2(755,883)*_scale;details.Size=new Vector2(162,39)*_scale;_hud.AddChild(details);
     }
 
     private VBoxContainer RecapPanel(out HBoxContainer actions)

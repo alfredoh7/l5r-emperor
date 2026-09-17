@@ -5,7 +5,7 @@ namespace L5R.Client;
 
 public partial class Main
 {
-    private int _guidanceProbe;
+    private int _guidanceProbe,_guidanceMenuWait;
     private long _guidanceVersion;
     private long? _cinemaSkipVersion;
     private string? _guidanceDeferredButton;
@@ -45,7 +45,14 @@ public partial class Main
         switch(_guidanceProbe)
         {
             case 0:_preferences.ReducedMotion=_captureMode.Contains("reduced");ApplyPreferences(false);_titleMenu!.ShowPlay();break;
-            case 1:Native(_titleMenu!.Entries.GetChildren().OfType<Button>().Single(b=>b.Text=="DUEL DEMO").GetGlobalRect().GetCenter());break;
+            case 1:
+                var entry=_titleMenu!.Entries.GetChildren().OfType<Button>().FirstOrDefault(b=>b.Text.Equals("DUEL DEMO",StringComparison.OrdinalIgnoreCase));
+                if(entry is null)
+                {
+                    if(++_guidanceMenuWait>8)throw new Exception($"Duel Demo entry never became ready (menu {_titleMenu.Page}).");
+                    _titleMenu.ShowPlay();return;
+                }
+                Native(entry.GetGlobalRect().GetCenter());break;
             case 2:Press("Manual · control both seats");break;
             case 3:Press("Begin Duel");break;
             case 4:Press("Menu");break;

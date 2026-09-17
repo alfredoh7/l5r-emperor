@@ -8,6 +8,7 @@ public partial class DuelCardTile : CardTile
     public bool Upright {get;set;}
     public bool Grounded {get;set;}
     public bool FaceDown {get;set;}
+    public float WinnerGlow {get;set;}
     public DuelCardTile() { }
     public DuelCardTile(CardView card,Action<CardView> clicked):base(card,true,clicked,_=>{}) { }
     public override void _Draw()
@@ -16,6 +17,15 @@ public partial class DuelCardTile : CardTile
         var inverse=GetGlobalTransform().AffineInverse();
         var quad=FaceCornersInCanvas().Select(p=>inverse*p).ToArray();
         var center=quad.Aggregate(Vector2.Zero,(a,b)=>a+b)/4;
+        if(WinnerGlow>0)
+        {
+            for(var layer=18;layer>=1;layer--)
+            {
+                var expanded=quad.Select(p=>p+(p-center).Normalized()*layer*1.0f).ToArray();
+                DrawColoredPolygon(expanded,new Color(1,.63f,.16f,WinnerGlow*.021f*(1-layer/22f)));
+            }
+            DrawPolyline(quad.Append(quad[0]).ToArray(),new Color(1,.82f,.42f,WinnerGlow*.85f),2.0f,true);
+        }
         if(Grounded)
         {
             var foot=(quad[2]+quad[3])/2;
@@ -38,6 +48,7 @@ public partial class DuelCardTile : CardTile
                 DrawPolyline(quad.Append(quad[0]).ToArray(),Highlighted?SelectionColor:HoverColor,Highlighted?2.2f:1.2f,true);
         }
         else base._Draw();
+        if(WinnerGlow>0)DrawPolyline(quad.Append(quad[0]).ToArray(),new Color(1,.85f,.46f,WinnerGlow*.9f),2,true);
         // Fine warm paper edge, never an overlay over the printed information.
         DrawLine(quad[3]+Vector2.Down*1.1f,quad[2]+Vector2.Down*1.1f,new Color(.60f,.49f,.34f,.62f),.8f,true);
         DrawLine(quad[0],quad[1],new Color(.93f,.76f,.49f,.32f),.65f,true);

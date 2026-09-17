@@ -153,8 +153,11 @@ public partial class Main
             case 16:
                 if(host!.Screen.PresentationBusy)return;
                 var result=host.Session.Snapshot!.View.LastDuel!.Result!;
-                Check(host.Screen.VisibleFocusedCount==0,"resolved commitments leave the focus rows");
-                if(_resultPileStep==0){Press("Menu");_resultPileStep++;return;}
+                Check(host.Screen.RetainedFocusCount==2&&host.Session.Snapshot.View.Players.All(p=>p.FocusCount==0),"two revealed evidence cards remain visible after authoritative focus pools empty");
+                Check(host.Screen.ResultExplanation=="Higher duel total · 8 to 7","held result explains the recorded comparison");
+                if(_resultPileStep==0){Native(host.Screen.CardClickPoint(host.Session.Snapshot.View.LastDuel!.Reveals.Last().Cards[0].Id));_resultPileStep=-1;return;}
+                if(_resultPileStep==-1){Check(host.Screen.HasPrivateInspection,"retained revealed evidence opens the shared card inspector");Capture("result-focus-inspection");Press("Close inspection");_resultPileStep=-2;return;}
+                if(_resultPileStep==-2){Press("Menu");_resultPileStep=1;return;}
                 if(_resultPileStep==1){Press("Public piles…");_resultPileStep++;return;}
                 if(_resultPileStep==2){Press("Your Fate discard");_resultPileStep++;return;}
                 if(_resultPileStep==3){Check(host.Screen.HasPrivateInspection,"Fate discard opens an inspectable public spread");Capture("discard-spread");Press("Back");_resultPileStep++;return;}
@@ -169,7 +172,7 @@ public partial class Main
                 Check(host.Screen.CanContinue,"result held for Continue");Capture("result");Press("Duel details");break;
             case 17:
                 var resultText=string.Join("\n",Descendants(host!.Screen).OfType<Label>().Select(l=>l.Text));
-                Check(resultText.Contains("→ 8")&&resultText.Contains("→ 7"),"Duel details retain authoritative final totals without extra mat numerals");
+                Check(resultText.Contains("→ 8")&&resultText.Contains("→ 7"),"Duel details retain the authoritative final totals and breakdown");
                 Capture("consequences");Press("Back");break;
             case 18:Press("Continue");break;
             case 19:

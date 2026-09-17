@@ -10,8 +10,11 @@ public partial class DuelAtmosphereReview : Control
     private readonly MatchSession _session=new();
     private DuelScreen _screen=null!;
     private DuelCinematicStage? _scenery;
-    private bool _reduced,_light,_benchmark,_sceneOnly;
-    private string _output="",_phase="";
+    private bool _reduced,_light,_benchmark,_sceneOnly,_checkTransitions,_skipEnding,_endingSkipped,_mirrorResult,_resultMirrored;
+    private readonly HashSet<string> _pausedPhases=[];
+    private double _pauseRemaining,_pausedCinema;
+    private double[] _pausedCards=[];
+    private string _output="",_phase="",_scenario="steel";
     private double _elapsed,_actionClock,_fixedTime;
     private ulong _stamp;
     private int _step;
@@ -25,8 +28,9 @@ public partial class DuelAtmosphereReview : Control
         foreach(var a in OS.GetCmdlineUserArgs())
         {
             if(a.StartsWith("--capture="))_output=a[10..];
+            if(a=="--scenario=tie")_scenario="tie";
             if(a.StartsWith("--time="))_fixedTime=double.Parse(a[7..],CultureInfo.InvariantCulture);
-            _reduced|=a=="--reduced-motion";_light|=a=="--light";_benchmark|=a=="--benchmark";_sceneOnly|=a=="--scenery";
+            _reduced|=a=="--reduced-motion";_light|=a=="--light";_benchmark|=a=="--benchmark";_sceneOnly|=a=="--scenery";_checkTransitions|=a=="--check-transitions";_skipEnding|=a=="--skip-ending";_mirrorResult|=a=="--mirror-result";
         }
         if(string.IsNullOrEmpty(_output))_output=ProjectSettings.GlobalizePath("res://../../artifacts/duel-atmosphere/review");
         System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(_output)!);
@@ -42,7 +46,7 @@ public partial class DuelAtmosphereReview : Control
         _screen.CommandRequested+=command=>_ = Submit(command);
         _session.Changed+=()=>_screen.Present(_session.Snapshot!);
         _session.Notice+=message=>throw new InvalidOperationException(message);
-        _session.StartDuelDemo("steel",205);_ = _session.BeginDuelDemo();
+        _session.StartDuelDemo(_scenario,205);_ = _session.BeginDuelDemo();
         GD.Print("DUEL_ATMOSPHERE: native production screen; permitted views and commands; seed 205.");
     }
     private async Task Submit(GameCommand command){await _session.Submit(command);_screen.SubmissionFinished();}
@@ -88,12 +92,36 @@ public partial class DuelAtmosphereReview : Control
         }
         var phase=_screen.CinematicBusy?(_screen.CinematicTime<0?"idle":_screen.CinematicPhase):_step<4?"focusing":"verdict";
         if(phase!=_phase){_phase=phase;_timeline.Add(new{Time=Math.Round(_elapsed,3),Phase=phase,Version=_session.Snapshot!.View.Version});GD.Print($"ATMOSPHERE_PHASE: {_elapsed:F2} {phase}");}
+        if(_pauseRemaining>0)
+        {
+            if(_screen.CinematicTime!=_pausedCinema||!_screen.CardTransitionTimes.SequenceEqual(_pausedCards)||_session.Snapshot!.View.Version!=4)
+                throw new Exception("Paused verdict/card transition changed behind the menu lock.");
+            _pauseRemaining-=delta;
+            if(_pauseRemaining<=0){_screen.InputLocked=false;GD.Print("VERDICT_CHECK: paused cinema and card transfer remain stationary without game commands.");}
+            return;
+        }
+        if(_checkTransitions&&phase is "ending-totals" or "ending-verdict"&&_pausedPhases.Add(phase))
+        {
+            _screen.InputLocked=true;_pauseRemaining=.45;_pausedCinema=_screen.CinematicTime;_pausedCards=_screen.CardTransitionTimes;
+            if(_pausedCards.Length==0)throw new Exception("Pause test missed the moving cards.");
+            return;
+        }
+        if(_skipEnding&&!_endingSkipped&&phase=="ending-verdict")
+        {
+            _endingSkipped=true;_screen.SkipCinematic();
+            if(!_screen.CanContinue||_screen.CardTransitionTimes.Length!=0||_screen.RetainedFocusCount!=2||_session.Snapshot!.View.Version!=4)
+                throw new Exception("Skipping the result left a hidden card, transfer or gameplay side effect.");
+            GD.Print("VERDICT_CHECK: skipping a moving result settles evidence and submits no command.");
+        }
         if(_screen.CinematicTime<0&&_elapsed>4)Capture("idle");
         if(phase=="opening-challenger"&&_screen.CinematicTime>4.6)Capture("introduction");
-        if(_screen.StoryText.Contains("all provinces +2"))Capture("courtesy");
+        if(_screen.StoryText.Contains("all provinces +2")&&_screen.CinematicTime>7.3)Capture("courtesy");
+        if(phase=="ending-totals"&&_screen.CinematicTime>1.7)Capture("totals");
+        if(phase=="ending-verdict"&&_screen.CinematicTime>3.15)Capture("victory");
         if(_elapsed>70)throw new Exception("Atmosphere native sequence stalled.");
         if(_screen.PresentationBusy){_actionClock=0;return;}
         _actionClock+=delta;
+        if(_step==4&&_mirrorResult&&!_resultMirrored&&_actionClock>2){_session.SwitchPracticeSeat();_resultMirrored=true;}
         switch(_step)
         {
             case 0 when _actionClock>1.8:
@@ -113,7 +141,7 @@ public partial class DuelAtmosphereReview : Control
                 Next();break;
             case 4 when _actionClock>6:
                 var record=_session.Snapshot!.View.LastDuel!;
-                if(!_screen.CanContinue||record.Result is not {ChallengerTotal:8,ChallengedTotal:7,ReturnPriority:1}||_screen.OpeningRuns!=1||_screen.EndingRuns!=1)throw new Exception("Canonical duel/one-shot presentation failed.");
+                if(!_screen.CanContinue||(record.Result!.ChallengerTotal!=(_scenario=="tie"?7:8)||record.Result.ChallengedTotal!=7||record.Result.ReturnPriority!=1)||_screen.OpeningRuns!=1||_screen.EndingRuns!=1)throw new Exception("Canonical duel/one-shot presentation failed.");
                 if(_reduced&&_screen.AtmosphereTime!=0)throw new Exception("Reduced motion advanced ambient time.");
                 Capture("result");SaveReport();GetTree().Quit();SetProcess(false);break;
         }
@@ -123,7 +151,9 @@ public partial class DuelAtmosphereReview : Control
     {
         object Metrics(IEnumerable<double> frames)
         {var v=frames.Order().ToArray();double P(double p)=>v.Length==0?0:v[Math.Min(v.Length-1,(int)(v.Length*p))];return new{Samples=v.Length,P50Ms=P(.50),P95Ms=P(.95),P99Ms=P(.99),MaxMs=P(1),Over33Ms=v.Count(x=>x>33.34)};}
-        var report=new{Passed=true,ActualSessionCommands=_session.Snapshot!.View.Version,CanonicalResult="8–7",OpeningRuns=_screen.OpeningRuns,EndingRuns=_screen.EndingRuns,
+        var view=_session.Snapshot!.View;var result=view.LastDuel!.Result!;
+        var report=new{Passed=true,ActualSessionCommands=view.Version,CanonicalResult=$"{result.ChallengerTotal}–{result.ChallengedTotal}",OpeningRuns=_screen.OpeningRuns,EndingRuns=_screen.EndingRuns,
+            TransitionPauseChecks=_pausedPhases.Count,EndingSkipped=_endingSkipped,ResultMirrored=_resultMirrored,
             ReducedMotion=_reduced,DetailedGrass=!_light,GrassInstances=_screen.GrassInstances,Resolution=GetViewportRect().Size.ToString(),DurationSeconds=_elapsed,
             Mode=OS.HasFeature("movie")?"offline movie; not a performance benchmark":_benchmark?"real-time native benchmark; completed rendered frames; monotonic wall clock":"native review",
             Frames=Metrics(_frames.Values.SelectMany(v=>v)),ByPhase=_frames.ToDictionary(k=>k.Key,k=>Metrics(k.Value)),SlowFrames=_slowFrames,Timeline=_timeline,
