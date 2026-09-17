@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Isolated preview integration of approved UI stack through PR263 and the pinned Crimson Duel Demo at 83231b1 for issue205 transition work. Additive conflict resolution preserves both public view extensions, tests, and practice/demo menu entries. No production activation yet.",
+  "validation": "Integrated client compiled with zero warnings/errors before new transition work. Full integration checks and native transition capture pending.",
+  "remaining": "Transition implementation, native movement/input review, dependency CI/mechanics review. This branch is not approved for main.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/205",
+  "branch": "codex/205-table-crimson-transition",
+  "updated": "2026-09-17T07:32:54.261262+00:00"
+}
