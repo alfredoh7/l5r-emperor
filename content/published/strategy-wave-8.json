@@ -1,0 +1,32 @@
+{
+  "Profile": "strategy-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-8425",
+      "Name": "The Weakness of Man",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8425.jpg",
+      "Keywords": [
+        "Kiho"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "weakness-of-man-toggle"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

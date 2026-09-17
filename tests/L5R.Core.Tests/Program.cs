@@ -176,7 +176,8 @@ var tests = new (string Name, Action Run)[]
     ("Event wave 2: War Weariness -- bows the performer of the first Personality-performed action each phase even when that action's own printed text never bows its performer, but not a second one the same phase", WarWearinessFirstActionPerPhaseBows),
     ("Second City unwired-card audit, Strategy wave 6: five Battle-timed Strategy cards (Dispensing Justice, Bow Before My Will, Surety of Purpose, Unexpected Support, Wrathful Ancestor) found fully buildable with pre-existing primitives -- the generic RequiredKeywords Performer shape, exemption-by-omission from Tamoko's own curated negation list, and one new enemy-scoped Follower-count Target category", SecondCityStrategyWave6),
     ("Second City unwired-card audit, Personality wave 18: ten Personalities found fully buildable with pre-existing primitives -- Keppo's own Reconnaissance-gated fizzle, Kuronada's own attachment-restricted destroy, Matsu Kasei reusing 'incapacitated' verbatim, Moto Ming-Gwok's own dead-Personality-gated Attack, Shiba Kudome's own Bow-the-loser self-performer duel, Shosuro Ritoru's own compound bow-then-conditional-destroy, Takasho's own reinforce-and-grant plus separate Attack, and Yogo Adi's own dishonorable-or-bulk-province-boost choice", SecondCityPersonalityWave18),
-    ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch)
+    ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
+    ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -1391,6 +1392,93 @@ static void SecondCityRestBatch()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strategic-sacrifice-toggle",PerformerId:performer.Id));
         Check(!e.State.Cards[target.Id].Bowed,"Was bowed: toggled to straightened");
+    }
+}
+static void BattleOpenPresencePrimitive()
+{
+    // The Weakness of Man (issue #267): the proof case for the general Battle/Open presence
+    // primitive. Open half: performed from Home, no presence check at all (the Monk performer is
+    // nowhere near a battlefield, and there isn't even one in progress).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Home); // base Force 3
+        performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Force 4, different from the performer's base Force
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Was unbowed: toggled to bowed, via the Open route with no battle in progress at all");
+    }
+    // Battle half: now a genuine Battle action -- the performing Monk must actually be at the
+    // current battlefield, exactly like an ordinary Battle ability.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // base Force 3
+        performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0); // Force 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
+        Check(!e.State.Cards[target.Id].Bowed,"Was bowed: toggled to straightened, via the Battle route with the performer present");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Home); // NOT at the current battlefield
+        performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
+    }
+    // The Target's own comparison is against the performer's BASE Force (the printed stat), and the
+    // target itself must also be at the current battlefield during the Battle half.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // base Force 3
+        performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
+        var sameForce=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // also base Force 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:sameForce.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
+    }
+    // Improved Defenses (issue #267): the proof case for "at any location" -- a broadened, not
+    // removed, presence requirement. The performing Artisan may be at Home...
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-3720",0,Zone.Hand);
+        var artisan=Add(s,"training-crane-samurai",0,Zone.Home);
+        artisan.GrantedKeywords=[new("Artisan","test-fixture","Permanent")];
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // the acting player's own presence at the battlefield, via a different unit
+        var fateDeck=s.Players[0].FateDeck; fateDeck.Insert(0,Add(s,"training-item",0,Zone.FateDeck).Id); // top card, Focus 0 by default
+        var e=MatchEngine.FromTestState(s);
+        var strengthBefore=e.State.Players[1].Provinces[0].Strength;
+        var deckBefore=e.State.Players[0].FateDeck.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"improved-defenses-strength",PerformerId:artisan.Id));
+        Check(e.State.Cards[artisan.Id].Bowed,"Bowed as cost");
+        Equal(e.State.Players[0].FateDeck.Count,deckBefore-1,"Discarded the top card of the Fate deck");
+        Equal(e.State.Players[1].Provinces[0].Strength,strengthBefore+1,"Focus Value 0 + 1");
+    }
+    // ...or at another battlefield that has not yet resolved this Battle phase...
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.UnresolvedBattlefields=[0,1];
+        var strat=Add(s,"oracle-l5r-3720",0,Zone.Hand);
+        var artisan=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:1); // a different, unresolved battlefield
+        artisan.GrantedKeywords=[new("Artisan","test-fixture","Permanent")];
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"improved-defenses-strength",PerformerId:artisan.Id));
+        Check(e.State.Cards[artisan.Id].Bowed,"Bowed as cost, performer at another unresolved battlefield");
+    }
+    // ...but not at an already-resolved battlefield, or anywhere else that isn't Home/current/
+    // unresolved.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.UnresolvedBattlefields=[0]; // province 1 already resolved
+        var strat=Add(s,"oracle-l5r-3720",0,Zone.Hand);
+        var artisan=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:1);
+        artisan.GrantedKeywords=[new("Artisan","test-fixture","Permanent")];
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"improved-defenses-strength",PerformerId:artisan.Id));
     }
 }
 static void ChooseStraightenDecline()
@@ -3202,6 +3290,24 @@ static void StrategyWave1KeywordCards()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:io.Id,TargetId:berserker.Id,AbilityId:"immovable-object-straighten"));
         Check(!e.State.Cards[berserker.Id].Bowed,"Straightened via the Open route, with no battle in progress");
+    }
+    {
+        // Battle/Open presence primitive (issue #267): the SAME first ability, used during the
+        // Battle phase instead, now behaves exactly like an ordinary Battle ability -- the performing
+        // Berserker must actually be at the current battlefield.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var io=Add(s,"oracle-l5r-3671",0,Zone.Hand);
+        var berserker=Add(s,"training-berserker",0,Zone.Home,bowed:true); // not at the battlefield
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:io.Id,TargetId:berserker.Id,AbilityId:"immovable-object-straighten"));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var io=Add(s,"oracle-l5r-3671",0,Zone.Hand);
+        var berserker=Add(s,"training-berserker",0,Zone.Battlefield,bowed:true,province:0); // at the battlefield
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:io.Id,TargetId:berserker.Id,AbilityId:"immovable-object-straighten"));
+        Check(!e.State.Cards[berserker.Id].Bowed,"Straightened via the Battle route, performer present");
     }
     {
         // Immovable Object's second ability: Battle-timing, bows an enemy card with lower Force.

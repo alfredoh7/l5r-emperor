@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build a general Battle/Open presence primitive (issue #267): generalized the presence-check Requires (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, keyword-Performer AtBattle) from a literal Timing==\"Battle\" check to actingAsBattle (Timing==\"Battle\" OR BattleOrOpen during Phase.Battle), mirrored in the offered-actions discovery layer too. Also built the sibling 'at any location' presence exemption (AtAnyLocation: Home, current battlefield, or another not-yet-resolved battlefield). Wired The Weakness of Man (Strategy wave 8, proof of the BattleOrOpen half) and Improved Defenses (Strategy wave 9, proof of at-any-location). Fixed a real pre-existing regression the generalization itself surfaced: Mirumoto Houken Experienced's own reinforce-to-battlefield text needed the existing reinforcesFromElsewhere exemption, previously masked because BattleOrOpen had no presence check at all before this issue. Crosses into src/L5R.Client/Content/Published/ only because the standard content-wave packaging pipeline copies each new card's own scan there as its artwork asset -- no UI/interaction code touched. Mendon has standing cross-lane authority (.github/collaboration.json).",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 173/173 core, 52/52 published, 9/9 deck-format, 10/10 deck-workshop passed. bash tools/check.sh --skip-client: all core/published/AI/server/client-transport checks passed.",
+  "remaining": "None; ready for review. Home Battle/Absent Battle Timing (a related but separate presence exemption) remains unbuilt for a future pass, noted in the decision doc.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/267",
+  "branch": "mdornbrook/267-battle-open-presence",
+  "updated": "2026-09-17T10:24:08.560640+00:00"
+}
