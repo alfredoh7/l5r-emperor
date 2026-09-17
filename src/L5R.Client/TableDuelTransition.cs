@@ -21,7 +21,7 @@ public partial class TableDuelTransition : Control
     private Label _challenge=null!;
     private PanelContainer _challengePanel=null!;
     private Button _skip=null!;
-    private bool _controlsRevealed;
+    private bool _controlsRevealed,_returning;
     private Vector2 _design;
     private ImageTexture? _fullTable,_destination;
     public void Build(Texture2D cleanRoom,Image fullTable,Image destination,IReadOnlyList<Card> cards,Vector2 size,string challenger,string challenged)
@@ -61,6 +61,11 @@ public partial class TableDuelTransition : Control
         }
         Present(0);
     }
+    public void BuildReturn(Image duel,Image cleanDuel,Image table,Texture2D liveTable,IReadOnlyList<Card> survivors,Vector2 size)
+    {
+        Build(ImageTexture.CreateFromImage(cleanDuel),duel,table,survivors,size,"","");
+        _returning=true;_reveal.SetShaderParameter("destination",liveTable);Present(0);
+    }
     private TextureRect ImageRect(Texture2D texture)=>new(){Texture=texture,Size=_design,ExpandMode=TextureRect.ExpandModeEnum.IgnoreSize,MouseFilter=MouseFilterEnum.Ignore,TextureFilter=TextureFilterEnum.LinearWithMipmaps};
     public void Start(){Running=true;Elapsed=0;Present(0);}
     public override void _Process(double delta)
@@ -68,7 +73,7 @@ public partial class TableDuelTransition : Control
         if(!Running)return;
         if(GetViewportRect().Size!=_design){Complete();return;}
         Elapsed+=delta;Present(Elapsed);
-        if(Elapsed>=(ReducedMotion?.3:Duration))Complete();
+        if(Elapsed>=(ReducedMotion?.3:_returning?2.4:Duration))Complete();
     }
     private static float Ease(double x){var t=Math.Clamp((float)x,0,1);return t*t*t*(t*(t*6-15)+10);}
     private static float Beat(double t,double start,double end)=>Ease((t-start)/(end-start));
@@ -77,9 +82,19 @@ public partial class TableDuelTransition : Control
         Elapsed=t;
         if(ReducedMotion)
         {
-            _reveal.SetShaderParameter("progress",1f);_reveal.SetShaderParameter("fade",1-Beat(t,0,.3));
+            _reveal.SetShaderParameter("progress",1f);_reveal.SetShaderParameter("fade",_returning?1f:1-Beat(t,0,.3));
             _hud.Modulate=new Color(1,1,1,1-Beat(t,0,.3));_wordmark.Hide();_challengePanel.Hide();_cardLayer.Hide();
             RevealControls();return;
+        }
+        if(_returning)
+        {
+            _hud.Modulate=new Color(1,1,1,1-Beat(t,0,.45));
+            _wordmark.Hide();_challengePanel.Hide();
+            CameraProgress?.Invoke(1-Beat(t,.35,2.0));
+            _reveal.SetShaderParameter("progress",Beat(t,.3,1.75));
+            _reveal.SetShaderParameter("fade",1f);
+            if(t>=2.0)RevealControls();
+            _cardLayer.QueueRedraw();return;
         }
         _hud.Modulate=new Color(1,1,1,1-Beat(t,.3,.85));
         CameraProgress?.Invoke(Beat(t,.55,1.9));
@@ -106,14 +121,14 @@ public partial class TableDuelTransition : Control
         var t=Elapsed;var lift=Beat(t,.8,1.9);var settle=Beat(t,2.65,3.95);var s=_design.Y/1080;
         foreach(var face in _faces)
         {
-            var quad=face.Data.Origin.Select((p,i)=>p.Lerp(face.Close[i],lift).Lerp(face.Data.Destination[i],settle)).ToArray();
+            var quad=face.Data.Origin.Select((p,i)=>_returning?p.Lerp(face.Data.Destination[i],Beat(t,.35,2.0)):p.Lerp(face.Close[i],lift).Lerp(face.Data.Destination[i],settle)).ToArray();
             // The last fraction settles without overshoot so live controls occupy the identical pixels.
-            var floatHeight=Mathf.Sin(lift*Mathf.Pi)*(1-settle)*_design.Y*.035f;
+            var floatHeight=(_returning?0:1)*Mathf.Sin(lift*Mathf.Pi)*(1-settle)*_design.Y*.035f;
             quad=quad.Select(p=>p-Vector2.Down*floatHeight).ToArray();
             var center=quad.Aggregate(Vector2.Zero,(a,b)=>a+b)/4;
             var foot=(quad[2]+quad[3])/2;
-            var alpha=Beat(t,.29,.82);
-            if(t<1.05)
+            var alpha=_returning?Beat(t,0,.35)*(1-Beat(t,2.0,2.3)):Beat(t,.29,.82);
+            if(!_returning&&t<1.05)
             {
                 var gold=new Color(.94f,.76f,.36f,Beat(t,.05,.3)*(1-Beat(t,.65,1.05)));
                 foreach(var width in new[]{12f,6f,2f})canvas.DrawPolyline(quad.Append(quad[0]).ToArray(),gold with {A=gold.A*(width==2?.7f:.12f)},width*s,true);

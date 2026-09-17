@@ -18,6 +18,8 @@ public sealed class MatchSession : IDisposable
     public event Action<string>? Notice;
     public event Action<RoomSeat, string>? SeatCreated;
     public SessionSnapshot? Snapshot { get; private set; }
+    // Local lifecycle identity, never serialized or sent as a rules command.
+    public long Generation { get; private set; }
     public bool Online => _socket is not null;
     public bool Connected => _socket?.State == WebSocketState.Open;
     public bool Busy { get; private set; }
@@ -34,7 +36,7 @@ public sealed class MatchSession : IDisposable
 
     public void StartPractice(bool economy, bool published = false, int seat = 0)
     {
-        Disconnect();
+        Generation++;Disconnect();
         // A fixed seed shuffled every deck identically, game after game — Practice looked unshuffled
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
@@ -48,7 +50,7 @@ public sealed class MatchSession : IDisposable
     public void StartDuelDemo(string scenario, ulong seed, int seat = 0)
     {
         if (seat is <0 or >1) throw new ArgumentOutOfRangeException(nameof(seat));
-        Disconnect();
+        Generation++;Disconnect();
         _engine = MatchEngine.CreateDuelDemo(scenario, seed);
         _localSeat = _practiceNameSeat = seat;
         RefreshLocal();
@@ -67,7 +69,7 @@ public sealed class MatchSession : IDisposable
     public void LeavePrivateTable()
     {
         if (!Online) return;
-        Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
+        Generation++;Disconnect(); Seat = null; Snapshot = null; _engine = null; Changed?.Invoke();
     }
 
     public void SwitchPracticeSeat()
@@ -82,7 +84,7 @@ public sealed class MatchSession : IDisposable
         // Construct and validate before disconnecting/replacing a running session.
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
-        Disconnect(); _engine = engine; _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
+        Generation++;Disconnect(); _engine = engine; _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
     }
 
     public void FollowPracticePriority()
@@ -194,6 +196,7 @@ public sealed class MatchSession : IDisposable
 
     private async Task Connect(Uri server, RoomSeat seat)
     {
+        if(_engine is not null||Seat?.RoomCode!=seat.RoomCode||Seat.PlayerId!=seat.PlayerId)Generation++;
         Disconnect();
         _engine = null;
         Snapshot = null;

@@ -151,7 +151,7 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => MatchDuelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 
@@ -170,7 +170,7 @@ public partial class Main
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
         { GetViewport().SetInputAsHandled(); return; }
-        if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview) return;
+        if (_tableSurface is null || MenuVisible || DuelDemoOpen || _transitionReview || MatchDuelOpen) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
         // The token buttons live above the projected viewport; let native GUI input
         // reach them instead of forwarding their clicks into the underlying table.

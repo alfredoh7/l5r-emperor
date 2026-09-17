@@ -1,5 +1,7 @@
 # Table to Crimson — first native milestone
 
+Superseded integration boundary: [live duel integration](DUEL_MATCH_INTEGRATION.md) / PR #268 restores the champion introductions after this entrance and adds the return to normal/private matches. The original milestone below records earlier validation only.
+
 Issue #205 · draft PR #266 · UI owner alfredoh7.
 
 Open **Review Duel Transition.command**, then **Preview duel transition**. After the entrance the real DuelScreen is interactive; the demo opponent uses only the existing permitted-action chooser. Replay returns to the same prepared encounter. This isolated preview does not replace the regular game launcher.

@@ -125,7 +125,7 @@ public partial class Main
             _tableDuelTransition.ControlsRevealed+=()=>_transitionDuel.RevealEntranceControls();
             _tableDuelTransition.Finished+=()=>
             {
-                _transitionDuel.SetEntranceCovered(false);_transitionDuel.InputLocked=false;
+                _transitionDuel.SetEntranceCovered(false);_transitionDuel.InputLocked=false;_transitionDuel.CompleteExternalEntrance(true);
                 _transitionReady=true;_tableDuelTransition=null;
                 _transitionRoom.RenderTargetUpdateMode=SubViewport.UpdateMode.Disabled;_tableSurface.Canvas.RenderTargetUpdateMode=SubViewport.UpdateMode.Disabled;
                 if(_session.Snapshot!.View.Version!=_transitionVersion||_session.ExportPracticeReplay()!=_transitionReplay)throw new InvalidOperationException("Presentation altered the match.");

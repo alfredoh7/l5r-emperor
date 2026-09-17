@@ -1,0 +1,359 @@
+{
+  "date": "2026-09-17T11:09:34.710244+00:00",
+  "branch": "codex/205-duel-match-integration",
+  "issue": 205,
+  "pr": 268,
+  "base_main": "eb0bffff29b96ec7dd1cd69ea30433bf2463c1e9",
+  "dependencies": {
+    "duel_220": "e16593c",
+    "transition_266": "1f5a916"
+  },
+  "video_review": {
+    "file": "transition.mp4",
+    "duration_seconds": 8.233,
+    "resolution": "1920x1080",
+    "finding": "Entrance ended at playable duel controls without the individual champion introductions; no live return host."
+  },
+  "deterministic": {
+    "command": "L5R_PYTHON=/opt/homebrew/bin/python3 bash tools/check.sh --skip-client",
+    "passed": true,
+    "total": 519,
+    "suites": {
+      "collaboration": 43,
+      "content": 132,
+      "meshy_tools": 6,
+      "core": 180,
+      "published": 52,
+      "deck_format": 9,
+      "deck_workshop": 10,
+      "custom_practice": 13,
+      "ai": 60,
+      "server": 5,
+      "client_transport": 9
+    }
+  },
+  "client_build": {
+    "warnings": 0,
+    "errors": 0
+  },
+  "native_round_trips": {
+    "normal": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "manual handoff covers all private cards before revealing the other seat",
+        "new seat can inspect its own blind focus through the main-game inspector",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": false,
+      "Resized": false,
+      "Skipped": false,
+      "Resolution": "(1920, 1080)"
+    },
+    "reduced": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "manual handoff covers all private cards before revealing the other seat",
+        "new seat can inspect its own blind focus through the main-game inspector",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": true,
+      "Resized": false,
+      "Skipped": false,
+      "Resolution": "(1920, 1080)"
+    },
+    "skip": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": false,
+      "Resized": false,
+      "Skipped": true,
+      "Resolution": "(1920, 1080)"
+    },
+    "compact": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": false,
+      "Resized": false,
+      "Skipped": false,
+      "Resolution": "(1440, 900)"
+    },
+    "wide": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": false,
+      "Resized": false,
+      "Skipped": false,
+      "Resolution": "(2560, 1080)"
+    },
+    "resize": {
+      "Passed": true,
+      "Checks": [
+        "challenge opens the shared live-match screen",
+        "entrance and both portraits submit no game commands",
+        "both champion introductions play once after table entry",
+        "real hand selection after the introductions",
+        "focus placement submits one command",
+        "authoritative verdict held until Continue",
+        "canonical 8\u20137 result preserved",
+        "resolution plays exactly once",
+        "returns to original table without reloading or replacing session",
+        "return changes no commands or rules state",
+        "engine priority restored to Lion in the battle",
+        "loser remains destroyed",
+        "casualties are not presented twice",
+        "normal table native card input restored",
+        "Play \u2192 Duel Demo remains available",
+        "sandbox and match use the identical screen",
+        "sandbox leaves the running match intact"
+      ],
+      "ReducedMotion": false,
+      "Resized": true,
+      "Skipped": false,
+      "Resolution": "(1440, 900)"
+    },
+    "lion": {
+      "Passed": true,
+      "Scenario": "steel",
+      "Seat": 1,
+      "Version": 2,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "refusal": {
+      "Passed": true,
+      "Scenario": "refusal",
+      "Seat": 0,
+      "Version": 2,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "reaction": {
+      "Passed": true,
+      "Scenario": "reaction",
+      "Seat": 0,
+      "Version": 4,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "empty": {
+      "Passed": true,
+      "Scenario": "empty",
+      "Seat": 0,
+      "Version": 2,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "open": {
+      "Passed": true,
+      "Scenario": "open",
+      "Seat": 0,
+      "Version": 2,
+      "Phase": "Action",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "aftermath": {
+      "Passed": true,
+      "Scenario": "aftermath",
+      "Seat": 0,
+      "Version": 6,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "concede": {
+      "Passed": true,
+      "Scenario": "concede",
+      "Seat": 0,
+      "Version": 2,
+      "Phase": "Finished",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    },
+    "tie": {
+      "Passed": true,
+      "Scenario": "tie",
+      "Seat": 0,
+      "Version": 2,
+      "Phase": "Battle",
+      "Priority": 1,
+      "UnchangedReturnReplay": true
+    }
+  },
+  "sandbox_regressions": {
+    "native": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "FrameCount": 1449,
+      "P50Ms": 9.559,
+      "P95Ms": 13.906,
+      "P99Ms": 824.35
+    },
+    "small-reduced": {
+      "Passed": true,
+      "Steps": 20,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "FrameCount": 924,
+      "P50Ms": 8.517,
+      "P95Ms": 14.494,
+      "P99Ms": 284.852
+    },
+    "stages": {
+      "passed": true,
+      "scenarios": 13
+    },
+    "guidance": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": false,
+      "Resolution": "(1920, 1080)",
+      "ProfileIsolated": true
+    },
+    "guidance-reduced": {
+      "Passed": true,
+      "Steps": 43,
+      "ReducedMotion": true,
+      "Resolution": "(1120, 700)",
+      "ProfileIsolated": true
+    }
+  },
+  "table_camera": {
+    "mode": "published-board-battle-camera",
+    "passed": true,
+    "projection_max_px": 0.000153,
+    "uncropped_card_nodes": 36
+  },
+  "launcher": {
+    "normal_menu_smoke": true,
+    "offline_art_preflight": true,
+    "art_pack": "catalogue-art-webp-v6-20260917",
+    "images": 2779,
+    "app": "artifacts/L5R Emperor - Latest.app",
+    "quick_review": "Review Duel Integration.command"
+  },
+  "validation_sequence": [
+    "All 12 original round-trip variants passed; the wrapper was edited while running and then hit a shell syntax error after those cases. Corrected wrapper passes bash -n.",
+    "Final normal and reduced paths include the additional 19-check private seat handoff and inspection flow. Concession and tie paths also passed.",
+    "All five existing sandbox runs and a general table camera/input probe passed.",
+    "After integrating new main #269, rebuilt and published v6 art, reran all 519 deterministic checks, zero-warning client/normal launcher, and final normal/tie native round trips."
+  ],
+  "issues_found_and_resolved": [
+    "Suppressed champion introductions at the external entrance.",
+    "Duplicate outgoing card copies during return.",
+    "Repeated generic battle casualty after an already-presented duel result.",
+    "Native fixed-FPS harness did not allow macOS focus events to settle; live match probes use real-time rendering.",
+    "Fresh headless editor import crashed; native import completed and subsequent headless import passed.",
+    "A check invocation picked Apple Python 3.9; reran with the project-compatible Homebrew Python.",
+    "Newly merged #269 added two scans; complete version-pinned v6 pack restores strict launcher coverage."
+  ],
+  "limits": [
+    "Source/native Mac evidence; no new Windows graphical playtest or human cross-platform private match.",
+    "Two-client WebSocket integration is automated; no internet server deployed.",
+    "Fixed-FPS sandbox timing samples are not a performance benchmark or AAA equivalence claim.",
+    "Mendon mechanical/shared review and required CI remain merge gates.",
+    "Large inherited PR diff prevents automatic file-list review routing; request the reviewer directly."
+  ],
+  "screenshots": {
+    "table-before.png": "59e8026203f5b69ed3c26d9b3deafe727200d4d26dd798a2d506689779264a7e",
+    "entrance.png": "03c113b37379af6cd6a3dd3e920fef6f8bc7d1fb4f6c5719c9053dce85f9adbf",
+    "opening-challenger.png": "f2fd4b2e380e7059a458b506000e41d97e15256e22d763c500e958d16b134225",
+    "opening-answer.png": "d1a16a9f4e2b814286ff5604d320d5c20268320e307cc462552f26e981f59dec",
+    "private-focus.png": "83f81f58f5b65100455375c79772ab432258d5b47e78de70b4e188f2755b864b",
+    "verdict.png": "15c081513c261f02adc153af8b88e2d737554ea8c2bb55619795a212395d77fe",
+    "return.png": "48426743ed3ebcdd551680a90f33502c714324480db9bc41cbd2c9c0d861982c",
+    "table-returned.png": "be5fdfe351ecd75cac816f71472544d2e18adac66d96871643040752ab14c855"
+  }
+}

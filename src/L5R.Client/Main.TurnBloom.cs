@@ -14,7 +14,7 @@ public partial class Main
     {
         _turnBloom.ReducedMotion = _reducedMotion;
         // Menu/dialogs remain usable. A menu interruption cancels instead of pausing the ink.
-        if (MenuVisible || _session.Snapshot is null || View.WinnerId is not null ||
+        if (MatchDuelOpen || MenuVisible || _session.Snapshot is null || View.WinnerId is not null ||
             _session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false)))
         { _turnBloom.Cancel(); return; }
         float width = Math.Min(1120, _tableViewport.Size.X * .84f);

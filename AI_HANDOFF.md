@@ -4,7 +4,7 @@ Start here when continuing this repository with Codex, Claude Code, or another c
 
 ## Current checkpoint
 
-- Approved UI consolidation: [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) is the current combined review build. Read [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) for source branches, integration fixes and validation. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. The separate Duel Demo #220 remains excluded until Alfredo and Mendon accept it.
+- Approved UI consolidation: [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) is the current combined review build. Read [UI_CONSOLIDATION.md](docs/UI_CONSOLIDATION.md) for source branches, integration fixes and validation. Preserve black lacquer/Caudex menus, uppercase WeatheredQuill headings, the fortress hall, placards and Home/Favor. Alfredo subsequently requested normal-match integration: PR #268 combines the latest duel #220 with transition #266 and preserves Play → Duel Demo as the shared sandbox. Read docs/DUEL_MATCH_INTEGRATION.md for the current combined candidate and remaining review gates.
 - Desktop presentation: **0.3.10**.
 - Playable content: **`lion-crane-v1`**, content version **`emperor-lion-crane-0.2.0`**.
 - Each Clan has 40 Dynasty and 40 Fate cards. The pool contains 40 distinct published definitions, including pregames, with implementations and original period scans.

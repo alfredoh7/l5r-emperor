@@ -1,5 +1,7 @@
 # Duel Demo within L5R
 
+Integration update: [PR #268](https://github.com/alfredoh7/l5r-emperor/pull/268) now uses this same screen in normal matches and preserves this isolated sandbox. See [live duel integration](DUEL_MATCH_INTEGRATION.md).
+
 Status: implemented on PR #220 for issue #205. Alfredo approved the current presentation, including stakes/resolution, on September 16, 2026. mdornbrook's mechanical/interface review remains open; [the review packet](DUEL_MECHANICAL_REVIEW.md) identifies decisions and reproducible cases. This is part of the normal application; there is no separate game, preferences profile or export preset.
 
 ## Play

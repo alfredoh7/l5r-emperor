@@ -1,12 +1,12 @@
 # Shared project status
 
-Updated: 2026-09-16. This is the current summary for human collaborators and AI sessions; historical documents describe earlier checkpoints.
+Updated: 2026-09-17. This is the current summary for human collaborators and AI sessions; historical documents describe earlier checkpoints.
 
 ## Approved UI integration candidate
 
 Alfredo approved the Home/Favor presentation and requested consolidation of the existing UI branches. [PR #248](https://github.com/alfredoh7/l5r-emperor/pull/248) combines the catalogue, lacquer/Caudex menus, WeatheredQuill headings, battle flow and removed-card gallery, current fortress hall/table, hand-limit placards and Noble Crest Home/Favor. Existing deck-builder functionality stays included. The branch manifest and review state are in [UI_CONSOLIDATION.md](UI_CONSOLIDATION.md); this is an integration candidate until shared review and CI are complete.
 
-The separate Duel Demo in #220 remains excluded for Alfredo and Mendon's own later acceptance. Main's existing duel mechanics are preserved. Do not launch older isolated UI worktrees as the latest full-game preview.
+Alfredo has now requested live duel integration. PR #268 combines the latest #220 with the approved UI/transition work from #266, restores champion introductions and returns to the same match. Play → Duel Demo remains the isolated shared-code sandbox. This is a review candidate, not merged main; see [DUEL_MATCH_INTEGRATION.md](DUEL_MATCH_INTEGRATION.md). Do not launch older isolated worktrees as the latest combined preview.
 
 ## Current playable baseline
 
@@ -22,7 +22,7 @@ Alfredo has paused broad battle presentation work. The current delivery plan is 
 
 mdornbrook has accepted repository access and is playing/reviewing mechanics. Alfredo owns UI/QoL improvements. Both lanes progress on separate task branches, coordinated through AGENTS.md and docs/COLLABORATION.md. Validate complete matches and disputed interactions. Use the rules-review issue template and `docs/RULES_REVIEW.md`. Reproduce each accepted discrepancy as a focused engine/client case before changing behavior.
 
-PR #220 now provides **Play → Duel Demo** inside the normal application: fourteen seeded positions, live Crimson Standoff controls, solo/manual seats and retained results. Alfredo approved the current presentation, including stakes/resolution, on September 16. Core/native validation is recorded in [DUEL_DEMO.md](DUEL_DEMO.md); mdornbrook's mechanical/shared-interface review is requested using [this review packet](DUEL_MECHANICAL_REVIEW.md). Normal-match activation follows that review, so this is not yet part of the merged playable baseline.
+PR #220 now provides **Play → Duel Demo** inside the normal application: fourteen seeded positions, live Crimson Standoff controls, solo/manual seats and retained results. Alfredo approved the current presentation, including stakes/resolution, on September 16. Core/native validation is recorded in [DUEL_DEMO.md](DUEL_DEMO.md); mdornbrook's mechanical/shared-interface review is requested using [this review packet](DUEL_MECHANICAL_REVIEW.md). Normal-match activation is now implemented for review in PR #268 at Alfredo’s request; required review and merge acceptance remain outstanding.
 
 ## Open acceptance gates
 
