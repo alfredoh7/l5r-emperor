@@ -799,7 +799,7 @@ public sealed partial class MatchEngine
         if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
-            if(!RehonorWinners(a)) GainHonor(attacker,destroyedDefenders*2,"Battle victory");
+            if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
@@ -815,7 +815,7 @@ public sealed partial class MatchEngine
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
-            if(!RehonorWinners(d)) GainHonor(defender,destroyedAttackers*2,"Battle victory");
+            if(!RehonorWinners(d)) { GainHonor(defender,destroyedAttackers*2,"Battle victory"); CheckEarthFlowsBonus(defender,d); }
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
             GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
             CheckRingOfWaterRecruit(Player(defender),destroyedAttackers>0);
@@ -829,6 +829,8 @@ public sealed partial class MatchEngine
             var attackerHadDishonorable=RehonorWinners(a);
             var defenderHadDishonorable=RehonorWinners(d);
             var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
+            // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
+            // being "in the WINNING army," which a tie -- by definition -- never has.
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
             if(!defenderHadDishonorable) GainHonor(defender,destroyedA,"Tied battle");
             if(destroyedD>0) AttackerDestructionBonus(attacker,a);
@@ -936,6 +938,17 @@ public sealed partial class MatchEngine
         foreach(var card in dishonorable) Rehonor(card);
         return dishonorable.Length>0;
     }
+    // The Earth Flows (issue #264): "After you gain Honor from destroying an army in battle
+    // resolution, if this Shugenja is Earth and in the winning army: Gain 2 Honor." Checked only from
+    // the two outright-win branches, immediately after their own GainHonor call actually fires (never
+    // the tie branch -- a tie has no "winning army" by definition). winningArmy is ResolveBattle's own
+    // pre-resolution snapshot (a/d), not re-derived, matching how every other post-battle bonus here
+    // already reads it.
+    private void CheckEarthFlowsBonus(int winnerId, CardInstance[] winningArmy)
+    {
+        foreach(var spell in winningArmy.SelectMany(c=>Attachments(c.Id)).Where(s=>Definition(s).Effect=="earth-flows-honor" && Keyword(Card(s.AttachedTo!),"Earth")))
+            GainHonor(winnerId,2,"The Earth Flows",spell);
+    }
 
     private void Equip(GameCommand command)
     {
@@ -957,7 +970,12 @@ public sealed partial class MatchEngine
         // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
         // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
         // formula directly rather than as a new command flag.
-        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0));
+        // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
+        // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
+        // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
+        // folded into that one).
+        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
+            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0));
         Pay(command.PlayerId,card,cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;

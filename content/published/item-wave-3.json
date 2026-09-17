@@ -1,0 +1,107 @@
+{
+  "Profile": "item-wave-3",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2608",
+      "Name": "Flesh Cutter Arrows",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Ranged Attack from an action performed by this Personality targets a card without an attached Armor, bow this card: Give the Ranged Attack +2 strength.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2608.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "flesh-cutter-arrows-reaction"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2719",
+      "Name": "Fubatsu Plate",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Even if this card is bowed: Straighten this Personality or move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2719.jpg",
+      "Keywords": [
+        "Armor"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "fubatsu-plate-straighten",
+        "fubatsu-plate-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5556",
+      "Name": "Nightingale Blade",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target an enemy card: Bow it. Destroy it if it is an attachment and this Personality is Dragon Clan or a Kensai.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5556.jpg",
+      "Keywords": [
+        "Weapon"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "nightingale-blade-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6481",
+      "Name": "Satoshi's Dual Warfans",
+      "Type": "Item",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 1,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 1 less Gold if you are a Lion Clan player.\nReaction: After this card enters play from your hand: Draw a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6481.jpg",
+      "Keywords": [
+        "Weapon",
+        "Tessen"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "satoshi-warfans-draw"
+      ],
+      "Effect": "lion-clan-discount"
+    }
+  ],
+  "Decks": []
+}
