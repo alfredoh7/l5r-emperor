@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Start authorized non-duel stabilization: three existing decision flows and six PR270 card/data/query findings. Current origin/main and approved Event UI dependency integrated; separate duel work excluded.",
+  "validation": "Initial scope and concurrent PR paths inspected; implementation and regression checks not yet run.",
+  "remaining": "Implementation, regression/native checks, review and final handoff pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/274",
+  "branch": "codex/274-stabilization",
+  "updated": "2026-09-17T16:18:48.922284+00:00"
+}
