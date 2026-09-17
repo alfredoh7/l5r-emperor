@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3720",
+      "Name": "Improved Defenses",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow your performing Artisan at any location and discard the top card of your Fate deck: Increase the current battlefield's province's strength by the card's Focus Value plus one.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3720.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "improved-defenses-strength"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
