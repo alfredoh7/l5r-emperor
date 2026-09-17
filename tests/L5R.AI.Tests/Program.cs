@@ -43,6 +43,17 @@ Run("chooses an offered free Experienced Overlay",()=>
     var decision=TrainingOpponent.Choose(view,[action]);
     Check(decision.Command is {Type:"overlay",TargetId:"lower"},"AI did not choose the offered free Overlay");
 });
+Run("pending Event choices use only offered commands and preserve provinces",()=>
+{
+    var e=MatchEngine.CreateEconomyScenario();var v=e.GetView(0);var version=v.Version;
+    var harsh=new ActionOption[]{new("harshChoices","Keep",true,null,new("harshChoices",0,version,Choice:"decline")),new("harshChoices","Destroy",true,null,new("harshChoices",0,version,Choice:"destroy"))};
+    Check(TrainingOpponent.Choose(v,harsh).Command?.Choice=="decline","Practice opponent risked a province");
+    var discards=v.Players[0].Hand.Select(c=>new ActionOption("timesOfStrifeDiscard","Discard",true,null,new("timesOfStrifeDiscard",0,version,TargetId:c.Id))).ToArray();
+    var move=TrainingOpponent.Choose(v,discards).Command;
+    Check(move is not null && discards.Any(a=>a.Command==move),"Discard did not come from offered local choices");
+    var draws=new ActionOption[]{new("overconfidentDraw","Draw",true,null,new("overconfidentDraw",0,version,Choice:"draw")),new("overconfidentDraw","Decline",true,null,new("overconfidentDraw",0,version,Choice:"decline"))};
+    Check(TrainingOpponent.Choose(v,draws).Command?.Choice=="draw","Optional draw stalled");
+});
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})

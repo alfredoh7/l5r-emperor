@@ -63,7 +63,7 @@ public sealed partial class MatchEngine
             =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote));
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action)
+        if(_state.Phase==Phase.Action && _state.PendingChoice is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
@@ -74,7 +74,25 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player=Player(playerId);
-        if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
+        if(_state.PendingChoice is { Type:"harshChoices" } harsh)
+        {
+            Add("harshChoices","Keep province",Command("harshChoices") with {Choice="decline"},cardId:harsh.CardId);
+            var last=player.Provinces.Count(p=>!p.Destroyed)==1;
+            Add("harshChoices",last?"Destroy last province · Defeat":"Destroy province · Draw 3",
+                Command("harshChoices") with {Choice="destroy"},cardId:harsh.CardId,
+                provinces:Card(harsh.CardId).ProvinceIndex is int province?[province]:[]);
+        }
+        else if(_state.PendingChoice is { Type:"timesOfStrifeDiscard" })
+        {
+            foreach(var id in player.Hand)
+                Add("timesOfStrifeDiscard",$"Discard {Definition(Card(id)).Name}",Command("timesOfStrifeDiscard",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"overconfidentDraw" })
+        {
+            Add("overconfidentDraw","Draw 1 card",Command("overconfidentDraw") with {Choice="draw"});
+            Add("overconfidentDraw","Decline draw",Command("overconfidentDraw") with {Choice="decline"});
+        }
+        else if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
         {
             if(pending.PlayerId==playerId)
             {

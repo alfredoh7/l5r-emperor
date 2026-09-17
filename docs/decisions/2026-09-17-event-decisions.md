@@ -8,4 +8,4 @@ Legality and consequences remain authoritative in Core. Add missing query action
 
 Dependency: approved non-duel UI through PR #263, combined with current main eb0bfff. Duel demo and transition work remain separate.
 
-Review references: artifacts/event-decisions-concepts/2026-09-17-v1/images/A1.png and B2.png (local concept gallery).
+Review references: `assets/ui/event-decisions/approved-harsh-sidebar.png` and `approved-strife-hand.png`. Original concept provenance is beside them.

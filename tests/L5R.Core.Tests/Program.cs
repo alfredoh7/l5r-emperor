@@ -5,6 +5,10 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Harsh Choices: query offers both legal choices and resumes Events", EventDecisionTests.HarshQueries),
+    ("Harsh Choices: last-province defeat stays finished", EventDecisionTests.LastProvince),
+    ("Times of Strife: legal hand choices, privacy and exact public discard", EventDecisionTests.StrifeQueries),
+    ("Deferred Events: empty hand skips and queued discards resume optional draw", EventDecisionTests.QueuedAndEmpty),
     ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
     ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),

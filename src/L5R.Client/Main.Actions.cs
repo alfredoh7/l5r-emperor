@@ -11,6 +11,7 @@ public partial class Main
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null ? "Review the highlighted target and any payment. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
+        if (RenderEventDecision()) return;
         if (RenderBattleFlow()) return;
         if (PresentationBusy)
         {
@@ -279,7 +280,7 @@ public partial class Main
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
-        if (_chosen is not null) return;
+        if (_chosen is not null || EventDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());
         if (_session.Online && !_session.Connected)
         {

@@ -114,6 +114,7 @@ public partial class Main : Node
             _session.StepPracticeReaction();
         }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-events",StringComparison.Ordinal)) { ProcessEventCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-tactile") { ProcessTactileCapture(); return; }
         if (_capturePath is not null)
         {
@@ -291,6 +292,7 @@ public partial class Main : Node
         _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
+        FitEventDecisions();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
         _menu.Position = new Vector2(_layoutWidth - 300, 28); _menu.Size = new Vector2(275, 40);
@@ -350,6 +352,7 @@ public partial class Main : Node
         // and native GUI picking above those cards, but below expanded/modal views.
         _clanHud = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 45 }, 0, 0, 1920, 1080);
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
+        BuildEventDecisions();
         BuildCameraControls();
         BuildBattleFeedback();
         BuildFullscreenGate();
@@ -388,6 +391,7 @@ public partial class Main : Node
         if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
+            _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
             _matSections.Sync([], true, "disconnected");
             Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_inspector); Palette.Clear(_phaseActions); Palette.Clear(_decisionActions);
@@ -418,6 +422,11 @@ public partial class Main : Node
     {
         _timeline.Present(View);
         _timeline.PresentActions(View, Actions, !_session.Busy && (!_session.Online || _session.Connected && !(_session.Snapshot!.PlayersConnected?.Any(p => !p) ?? false)));
+        if(EventDecisionActive)
+        {
+            _timeline.PriorityLabel.Text=OwnEventDecision?"YOUR DECISION":"Opponent is deciding";
+            _timeline.PriorityLabel.TooltipText=View.PendingChoice!.Prompt;
+        }
         if (PresentationBusy)
         {
             _timeline.PriorityLabel.Text = _battleOutcomeText;
@@ -444,6 +453,7 @@ public partial class Main : Node
     private void SelectCard(CardView card)
     {
         if (_session.Busy || PresentationBusy) return;
+        if (SelectEventCard(card)) return;
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
         {
             if (assignment.TargetIds?.Contains(card.Id) == true) { _selected = card; _assignmentUnit = card.Id; RenderInspector(); Highlight(); return; }
@@ -478,11 +488,15 @@ public partial class Main : Node
         var rootId = _selected?.AttachedTo ?? _assignmentUnit ?? _selected?.Id;
         var selectedUnit = rootId is null ? null : FindCard(rootId);
         var provinceIndex = rootId is not null && _assignments.TryGetValue(rootId, out var draftProvince) ? draftProvince : selectedUnit?.ProvinceIndex;
+        if(EventDecisionActive && View.PendingChoice is {Type:"harshChoices",CardId: { } eventId} && FindCard(eventId) is {ProvinceIndex: { } eventProvince} eventCard)
+            selectedProvince=$"province:{eventCard.OwnerId}:{eventProvince}";
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
         foreach (var tile in _tiles)
         {
+            tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type=="timesOfStrifeDiscard" && tile.Card.Id==_eventDiscardId;
+            tile.LegalTarget = EventDecisionActive && View.PendingChoice is {Type:"harshChoices",CardId: { } harshCard} && tile.Card.Id==harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
-            tile.LegalTarget = _chosen?.TargetIds?.Contains(tile.Card.Id) == true;
+            tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true;
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
         }

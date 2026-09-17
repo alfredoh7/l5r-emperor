@@ -158,6 +158,7 @@ public partial class Main
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
         // The Fallen strips can overlap the projection. Check only the visible
         // placards, not their full-screen parent, before forwarding root input.
         return !_clanHud.GetChildren().OfType<Control>().Any(c =>
