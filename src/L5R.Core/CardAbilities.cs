@@ -379,13 +379,13 @@ public static class AbilityCatalog
         // one of its own named effects" -- destruction (Rokai) or movement/straightening (Tamoko).
         // Target "none" for both: the affected card is auto-determined from the deferred command
         // itself (MatchState.PendingNegatableAbility), not separately chosen by the reacting player
-        // -- see FindBeforeActionReactionWatcher/ResolveOrDeferBeforeActionReaction.
+        // -- see BeforeActionReactionApplies/ResolveOrDeferBeforeActionReaction.
         ["rokai-negate-destruction"] = new("Reaction", "After another player's action targets your Personality at Rokai's location, destroy Rokai: Negate your Personality's destruction from the action's effects.", "none", Trigger: "before-action-resolves"),
         ["tamoko-negate"] = new("Reaction", "Before an action resolves, target a Personality: Negate either his movement or straightening from the action's effects.", "none", Trigger: "before-action-resolves"),
         ["tamoko-open"] = new("Open", "If it is not your turn, target an unbowed Personality controlled by the active player: Before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn.", "unbowed-personality-controlled-by-active-player"),
         // Champion of Thunder / Brothers of Goemon: the general in-play unit-targeting Reaction
         // primitive, reusing the same "before-action-resolves" Trigger/"beforeActionReaction" window
-        // Rokai/Tamoko already opened -- see FindBeforeActionReactionWatcher's own Champion/Brothers
+        // Rokai/Tamoko already opened -- see BeforeActionReactionApplies's own Champion/Brothers
         // branch for how each is actually found. Champion's own Target ("own-unit-member") lets its
         // controller choose ANY card in the unit to negate on (not auto-determined like Rokai/Tamoko),
         // matching the card owner's own ruling that "this card" means "any card in this unit" and
@@ -399,13 +399,14 @@ public static class AbilityCatalog
         // Kakihara: Give him a Force bonus equal to his Personal Honor." One printed ability, two
         // catalog entries because an ability carries exactly one Trigger and this card must react in
         // two different windows: a non-Attack action goes through the general in-play targeting
-        // primitive's "beforeActionReaction" window (FindBeforeActionReactionWatcher's own Kakihara
+        // primitive's "beforeActionReaction" window (BeforeActionReactionApplies's own Kakihara
         // branch), while a Ranged/Melee Attack has its own separately-orderable pipeline and is
         // reacted to in the existing "attackReaction" window (ResolveOrDeferAttack), Khol Regulars'
         // shape. Both share UsageKey "kakihara-force-bonus" so the one printed ability is used at most
         // once per turn across the two windows. Target "none" for both: the affected card is Kakihara
         // himself, fixed by the trigger, never a player choice.
         ["kakihara-force-bonus"] = new("Reaction", "After another player's action targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-action-resolves", UsageKey: "kakihara-force-bonus"),
+        ["training-before-action-suppress"] = new("Reaction", "Training: after another player's action targets a card of yours, bow this card and every other unbowed card of yours with a before-action reaction.", "none", Trigger: "before-action-resolves"),
         ["kakihara-attack-force-bonus"] = new("Reaction", "After another player's Ranged or Melee Attack targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-attack-resolves", UsageKey: "kakihara-force-bonus"),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
@@ -1145,7 +1146,7 @@ public static class AbilityCatalog
         // already RETURNS whether a bow was negated (every existing call site just discards that bool);
         // the move branch reuses MoveHome's own internal NegatesEffect("move") check directly (inlined,
         // so the negation result can be branched on) rather than calling MoveHome itself. This ability's
-        // own id is deliberately NOT added to FindBeforeActionReactionWatcher's curated lists (Rokai/
+        // own id is deliberately NOT added to BeforeActionReactionApplies's curated lists (Rokai/
         // Tamoko/Champion of Thunder/Brothers of Goemon): unlike every existing negatable ability, the
         // specific effect kind (bow or move) here is not known until the TARGET's controller answers the
         // PendingChoice, well after that window would need to have already opened. Stalwart remains the
@@ -1366,23 +1367,25 @@ public sealed partial class MatchEngine
         yield return host;
         foreach (var attachment in Attachments(host.Id)) yield return attachment;
     }
-    // The general in-play unit-targeting Reaction primitive's own negation signal (set by
-    // ResolveOrDeferBeforeActionReaction just before re-invoking the deferred command -- see
-    // FindBeforeActionReactionWatcher's own Champion/Brothers branch below). Champion of Thunder's
-    // "all" negates every effect an action applies to the chosen card and is deliberately NOT
-    // consumed here: a single re-invoked ability can apply more than one effect to the same chosen
-    // card (Brothers of Goemon's own worked example -- a Force penalty AND a resulting bow), so "all"
-    // stays active for the whole re-invocation and is cleared only once, defensively, right after
-    // ExecuteAbilityEffects(pending) returns (Apply()'s own "beforeActionReaction" case already does
-    // this unconditionally). A single-purpose kind ("bow" for Brothers, "destroy"/"move"/"straighten"
-    // for Rokai/Tamoko) only ever matches once per re-invocation, so it IS consumed immediately here,
-    // the original convention those three already established.
+    // The general in-play unit-targeting Reaction primitive's own negation signal: MatchState.NegatedEffects,
+    // one entry per negation a "before an action resolves" reaction has played for the deferred command
+    // (issue #318: several, of different kinds, may now stack on one command). Champion of Thunder's "all"
+    // negates every effect an action applies to the chosen card and is deliberately NOT consumed here: a
+    // single re-invoked ability can apply more than one effect to the same chosen card (Brothers of
+    // Goemon's own worked example -- a Force penalty AND a resulting bow), so "all" stays active for the
+    // whole re-invocation and is cleared only once, right after ExecuteAbilityEffects(pending) returns
+    // (Apply()'s own "beforeActionReaction" case does this unconditionally). A single-purpose kind ("bow"
+    // for Brothers, "destroy"/"move"/"straighten" for Rokai/Tamoko) only ever matches once per
+    // re-invocation, so its entry IS consumed immediately here, the original convention those three
+    // already established. Entries for different cards, or of different kinds on one card, never interfere;
+    // an "all" on a card is checked first, so it wins over (and leaves untouched) any narrower entry there.
     private bool NegatesEffect(CardInstance card, string kind)
     {
-        if (_state.NegatedEffectCardId != card.Id) return false;
-        if (_state.NegatedEffectKind == "all") return true;
-        if (_state.NegatedEffectKind != kind) return false;
-        _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
+        if (_state.NegatedEffects.Count == 0) return false;
+        if (_state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind == "all")) return true;
+        var match = _state.NegatedEffects.FirstOrDefault(n => n.CardId == card.Id && n.Kind == kind);
+        if (match is null) return false;
+        _state.NegatedEffects.Remove(match);
         return true;
     }
     // Stalwart (core rules, issue #184): "the first time on a turn an enemy's effect would bow a card
@@ -1472,7 +1475,7 @@ public sealed partial class MatchEngine
         // "destroy it if it is bowed" branch).
         or "strength-of-the-spider"
         // Hida Mimori / Isawa Mitsuko (issue #301): Mimori destroys her target outright (a Personality
-        // target reaches Rokai; an attachment target never does -- see FindBeforeActionReactionWatcher's
+        // target reaches Rokai; an attachment target never does -- see BeforeActionReactionApplies's
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
         or "mimori-destroy" or "mitsuko-bow-destroy";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
@@ -1489,7 +1492,7 @@ public sealed partial class MatchEngine
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
             or "ring-of-air-straighten" or "mitoshi-straighten"
             // Isawa Mitsuko (issue #301): straightens an Air Shugenja (a Personality, so negatable) or a
-            // Holding (never reaches Tamoko -- FindBeforeActionReactionWatcher's kind check is Personality-only).
+            // Holding (never reaches Tamoko -- BeforeActionReactionApplies's kind check is Personality-only).
             or "mitsuko-straighten" => "straighten",
         _ => null
     };
@@ -1530,8 +1533,13 @@ public sealed partial class MatchEngine
         // unconditionally. (Nori's attachments half bows the target's ATTACHMENTS, never the target
         // itself, so it is deliberately absent; Rin's bow happens later, after a choice.)
         or "nori-bow-personality" or "mitsuko-bow-destroy" or "sutigu-bow";
-    // Finds the one eligible in-play watcher for a just-submitted command, if any -- every branch is
-    // an "in play" Reaction (the user's own clarification), monitored live, never pre-registered.
+    // "Before an action resolves" reactions, in play (the user's own clarification: monitored live, never
+    // pre-registered). Every one that applies to a just-submitted command, on EITHER player's cards, is a
+    // reaction the window may offer -- issue #318 (Mendon's ruling: "if an action opens a reaction window and
+    // multiple reactions could be applied, they may all be taken"), replacing the old "the first eligible
+    // watcher takes the window". BeforeActionReactionApplies is the one place each card's own printed trigger
+    // lives; the window (ResolveOrDeferBeforeActionReaction), its listing (MatchQueries) and ValidateAbility's
+    // "before-action-resolves" case all ask it, so eligibility is re-evaluated live at every opportunity.
     // Rokai (a classified destroy) is scoped to "another player's action," "your Personality," and
     // "at Rokai's location"; Tamoko (a classified move/straighten) has no such restriction at all.
     // Champion of Thunder / Brothers of Goemon (the general in-play unit-targeting Reaction
@@ -1542,57 +1550,60 @@ public sealed partial class MatchEngine
     // command reaching this choke point, regardless of what kind of effect it turns out to apply;
     // Brothers' own narrower "bow" additionally requires BowsTarget (above) and Ring control, the
     // latter checked here -- BEFORE the reaction is even offered, exactly as the card owner's own
-    // ruling specifies. Deliberately excluded, the same "known scope limit, not a silent gap" as
-    // Rokai/Tamoko's own Attack exclusion: an Attack-classified ability (AttackKind non-empty) is
-    // left to the separate, already-established Attack pipeline (PendingAttack/attackReaction) --
-    // see A Close Call's own narrower negation there instead, reusing that existing window directly.
-    private (CardInstance Watcher, string Kind)? FindBeforeActionReactionWatcher(GameCommand command)
+    // ruling specifies. Akodo Kakihara (issue #305): the trigger is only "another player's action targets
+    // HIM" -- the affected card itself, never a card elsewhere in his unit. Deliberately excluded, the same
+    // "known scope limit, not a silent gap" as Rokai/Tamoko's own Attack exclusion: an Attack-classified
+    // ability (AttackKind non-empty) is left to the separate, already-established Attack pipeline
+    // (PendingAttack/attackReaction) -- see A Close Call's own narrower negation there instead, reusing
+    // that existing window directly.
+    // "Action" excludes a Reaction: a Reaction-timed ability that happens to name a card as its target is
+    // not "another player's action", and opening a nested window from inside an already-open reaction
+    // window would overwrite that window's own PendingChoice.
+    private bool BeforeActionReactionApplies(CardInstance card, string abilityId, GameCommand command)
     {
-        if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)) return null;
-        if (MovementCannotBeNegated(command)) return KakiharaWatcher(command, affected);
-        if (Definition(affected).Type == CardType.Personality)
+        if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)) return false;
+        if (!InPlay(card) || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || acting.Timing == "Reaction") return false;
+        var negatable = !MovementCannotBeNegated(command);
+        switch (abilityId)
         {
-            if (DestroysTarget(command.AbilityId))
-            {
-                var rokai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("rokai-negate-destruction")
-                    && c.OwnerId == affected.OwnerId && command.PlayerId != c.OwnerId && SameLocation(c, affected));
-                if (rokai is not null) return (rokai, "destroy");
-            }
-            if (MoveOrStraightenKind(command.AbilityId) is string kind)
-            {
-                var tamoko = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("tamoko-negate"));
-                if (tamoko is not null) return (tamoko, kind);
-            }
+            case "rokai-negate-destruction":
+                return negatable && Definition(affected).Type == CardType.Personality && DestroysTarget(command.AbilityId)
+                    && card.OwnerId == affected.OwnerId && command.PlayerId != card.OwnerId && SameLocation(card, affected);
+            case "tamoko-negate":
+                return negatable && Definition(affected).Type == CardType.Personality && MoveOrStraightenKind(command.AbilityId) is not null;
+            case "champion-of-thunder-negate":
+                return negatable && command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == ""
+                    && card.OwnerId == affected.OwnerId && UnitHostId(card) == UnitHostId(affected);
+            case "brothers-goemon-negate":
+                return negatable && command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "" && BowsTarget(command.AbilityId)
+                    && card.OwnerId == affected.OwnerId && UnitHostId(card) == UnitHostId(affected) && ControlsAnyRing(card.OwnerId);
+            // His reaction negates nothing, so "this movement will not be negated" does not stop him reacting
+            // to being targeted (unlike every negating reaction above).
+            case "kakihara-force-bonus":
+                return AttackKind(command.AbilityId) == "" && card.Id == affected.Id;
+            // Training fixture (issue #318): any card of the affected card's own controller, against another
+            // player's action -- see its execution case.
+            case "training-before-action-suppress":
+                return command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "" && card.OwnerId == affected.OwnerId;
+            default:
+                return false;
         }
-        if (command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "")
-        {
-            var affectedHostId = UnitHostId(affected);
-            var champion = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !c.Bowed && c.OwnerId == affected.OwnerId
-                && UnitHostId(c) == affectedHostId && (Definition(c).Abilities ?? []).Contains("champion-of-thunder-negate"));
-            if (champion is not null) return (champion, "all");
-            if (BowsTarget(command.AbilityId))
-            {
-                var brothers = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !c.Bowed && c.OwnerId == affected.OwnerId
-                    && UnitHostId(c) == affectedHostId && (Definition(c).Abilities ?? []).Contains("brothers-goemon-negate") && ControlsAnyRing(c.OwnerId));
-                if (brothers is not null) return (brothers, "bow");
-            }
-        }
-        return KakiharaWatcher(command, affected);
     }
-    // Akodo Kakihara (issue #305): unlike Champion/Brothers above, the trigger is only "another player's
-    // action targets HIM" -- the affected card itself, never a card elsewhere in his unit. Consulted LAST,
-    // so every earlier watcher keeps exactly the priority it already had (this primitive opens ONE window
-    // per command: if a Rokai/Tamoko/Champion/Brothers is also eligible, they take it and Kakihara's
-    // reaction is not offered for that command -- a documented known limit, see the decision doc). Also
-    // consulted when MovementCannotBeNegated already ruled out every NEGATING watcher: his reaction
-    // negates nothing, so "this movement will not be negated" does not stop him reacting to being targeted.
-    // "Action" excludes a Reaction: a Reaction-timed ability that happens to name Kakihara as its target
-    // is not "another player's action," and opening a nested window from inside an already-open reaction
-    // window would overwrite that window's own PendingChoice. An Attack (AttackKind non-empty) never
-    // reaches here: it reacts through the separate attackReaction window (AnyAttackReactionAvailable).
-    private (CardInstance Watcher, string Kind)? KakiharaWatcher(GameCommand command, CardInstance affected) =>
-        AttackKind(command.AbilityId!) == "" && AbilityCatalog.All.TryGetValue(command.AbilityId!, out var actingAbility) && actingAbility.Timing != "Reaction"
-            && KakiharaCanReact(affected, command.PlayerId) ? (affected, "force") : null;
+    // Applies AND is actually usable right now (unbowed -- ValidateAbility forbids any ability from a bowed
+    // source -- and its once-per-turn use unspent under the ability's own UsageKey). This is what decides
+    // whether a player holds an opportunity at all, and what the window listing offers; ValidateAbility
+    // remains the authority on a submitted command.
+    private bool BeforeActionReactionAvailable(CardInstance card, string abilityId, GameCommand command) =>
+        !card.Bowed && BeforeActionReactionApplies(card, abilityId, command)
+        && (abilityId != "kakihara-force-bonus" || KakiharaCanReact(card, command.PlayerId))
+        && (!card.AbilityUses.TryGetValue(AbilityCatalog.All[abilityId].UsageKey ?? abilityId, out var used) || used != _state.TurnNumber);
+    // Every before-action-resolves Reaction printed on an in-play card, on either side, paired with the card.
+    private IEnumerable<(CardInstance Card, string AbilityId)> BeforeActionReactionCandidates() =>
+        _state.Cards.Values.Where(InPlay).SelectMany(c => (Definition(c).Abilities ?? [])
+            .Where(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == "before-action-resolves")
+            .Select(id => (Card: c, AbilityId: id)));
+    private bool OwnsBeforeActionReaction(int playerId, GameCommand command) =>
+        BeforeActionReactionCandidates().Any(x => x.Card.OwnerId == playerId && BeforeActionReactionAvailable(x.Card, x.AbilityId, command));
     // "This movement will not be negated" (issue #299): the printed clause on Wrathful Ancestor and
     // Shinjo Kinto. A negating interrupt (Tamori Tamoko's move-negate, Champion of Thunder's own
     // "all") never even gets its window opened for such a command -- the movement is never offered
@@ -1611,24 +1622,43 @@ public sealed partial class MatchEngine
         _ => false
     };
     private bool ControlsAnyRing(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
+    // Who has the first opportunity in an alternating reaction window (issue #318, Mendon's ruling: "the
+    // player whose turn it is has the first opportunity to play a reaction followed by the other player,
+    // alternating until both pass"): the active player when they hold a reaction they could play, otherwise
+    // the other player. A player with nothing to play never holds a vacuous first opportunity, so a window
+    // whose only reactions belong to one player still opens for that player, exactly as every single-reactor
+    // window always did. The alternation itself after that is the engine's existing machinery: a reaction
+    // played resets ConsecutivePasses and flips PriorityPlayerId (NextAction), a pass flips it too
+    // (PassReaction), and two consecutive passes close the window. Reusable by any other window of this
+    // shape (the attack window below, and the battle-timing Engage window, issue #310).
+    private int FirstReactionOpportunity(Func<int, bool> canReact) =>
+        canReact(_state.ActivePlayerId) || !canReact(1 - _state.ActivePlayerId) ? _state.ActivePlayerId : 1 - _state.ActivePlayerId;
+    // Opens `choice` as an alternating reaction window (the shared opening half of that shape; see above).
+    private void OpenAlternatingReactionWindow(PendingChoice choice, int firstPlayerId, string message, int? eventPlayerId = null)
+    {
+        _state.PendingChoice = choice;
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = firstPlayerId;
+        Emit("reactionWindow", message, eventPlayerId ?? firstPlayerId);
+    }
     // Defers the WHOLE command (never partially applied), the same shape ResolveOrDeferAdditionalAction
-    // already uses, so MoveHome/Straighten/DestroyUnits are never even reached until the watcher's
-    // own controller has answered -- avoiding any need to "undo" an already-applied effect (which
-    // would risk double-firing an unrelated hook, e.g. Overconfident's own MarkDead-triggered queue).
+    // already uses, so MoveHome/Straighten/DestroyUnits are never even reached until the window has closed --
+    // avoiding any need to "undo" an already-applied effect (which would risk double-firing an unrelated
+    // hook, e.g. Overconfident's own MarkDead-triggered queue). The window offers EVERY applicable reaction of
+    // both players (issue #318); it opens only if at least one is usable right now, and the command
+    // re-executes when both players have passed consecutively (Apply()'s "beforeActionReaction" case).
     private bool ResolveOrDeferBeforeActionReaction(GameCommand command)
     {
-        if (FindBeforeActionReactionWatcher(command) is not (CardInstance watcher, _)) return false;
+        if (!OwnsBeforeActionReaction(0, command) && !OwnsBeforeActionReaction(1, command)) return false;
         _state.PendingNegatableAbility = command;
-        _state.PendingChoice = new("beforeActionReaction", watcher.OwnerId, watcher.Id, "Before this action resolves: you may use this card's own reaction, or pass.");
-        _state.ConsecutivePasses = 0;
-        _state.PriorityPlayerId = watcher.OwnerId;
-        Emit("reactionWindow", "Before-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        OpenAlternatingReactionWindow(new("beforeActionReaction", command.PlayerId, null, "Before this action resolves: either player may use a reaction, or pass."),
+            FirstReactionOpportunity(p => OwnsBeforeActionReaction(p, command)), "Before-action reaction window opened.");
         return true;
     }
     // Unimpeachable Name (oracle-l5r-8989): "Before the resolution of another player's action:
     // Reduce each Honor loss from its effects by 3 (minimum 0). You may target and rehonor a
     // dishonorable Personality." An out-of-play Reaction (hand or a discard pile) broader than
-    // FindBeforeActionReactionWatcher above -- that one only watches a curated destroy/move/
+    // BeforeActionReactionApplies above -- that one only watches a curated destroy/move/
     // straighten Target on an IN-PLAY card; this one is offered against ANY action. Whether an
     // action "causes an Honor loss" cannot be known before actually resolving it without re-running
     // every effect twice, so -- the same curated, extendable-by-id discipline DestroysTarget/
@@ -1841,12 +1871,17 @@ public sealed partial class MatchEngine
     // Akodo Kakihara (issue #305) is the first in-play before-attack-resolves reactor whose own trigger is
     // "this specific card is the Attack's target": only he is narrowed by the (attacker, target) pair, so a
     // Kakihara sitting in play never opens an Attack window that could not possibly matter to him.
+    // Per player (issue #318): who holds a reaction decides who has the first opportunity in the window
+    // (FirstReactionOpportunity), so availability is asked of one owner at a time.
+    private bool AttackReactionAvailableTo(int playerId, int attackerId, string? targetId) =>
+        AnyInPlayReactionAvailable("before-attack-resolves", (c, id) => c.OwnerId == playerId
+            && (id != "kakihara-attack-force-bonus" || targetId == c.Id && KakiharaCanReact(c, attackerId)))
+        || AnyOutOfPlayReactionAvailable(playerId, "before-attack-resolves");
     private bool AnyAttackReactionAvailable(int attackerId, string? targetId) =>
-        AnyInPlayReactionAvailable("before-attack-resolves", (c, id) => id != "kakihara-attack-force-bonus" || targetId == c.Id && KakiharaCanReact(c, attackerId))
-        || AnyOutOfPlayReactionAvailable(0, "before-attack-resolves") || AnyOutOfPlayReactionAvailable(1, "before-attack-resolves");
+        AttackReactionAvailableTo(0, attackerId, targetId) || AttackReactionAvailableTo(1, attackerId, targetId);
     // Akodo Kakihara (oracle-l5r-223, issue #305): "Reaction: After another player's action targets
     // Kakihara: Give him a Force bonus equal to his Personal Honor." Whether the reaction is worth offering
-    // at all, shared by both windows it can open (FindBeforeActionReactionWatcher's non-Attack branch and
+    // at all, shared by both windows it can open (BeforeActionReactionApplies's non-Attack branch and
     // AnyAttackReactionAvailable's Attack one): he must be in play and unbowed (ValidateAbility already
     // forbids using ANY ability from a bowed card, so this only avoids opening a window nobody could use),
     // the acting player must not be his own controller ("another player's action"), his one printed use
@@ -1975,10 +2010,13 @@ public sealed partial class MatchEngine
             return false;
         }
         _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, SourceId = sourceId, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId), Additional = additional };
-        _state.PendingChoice = new("attackReaction", attacker.Id, null, "An attack is pending: react or pass.");
-        _state.ConsecutivePasses = 0;
-        _state.PriorityPlayerId = 1 - attacker.Id;
-        Emit("reactionWindow", "Attack reaction window opened.", attacker.Id);
+        // Issue #318 (Mendon's ruling): the player whose turn it is has the first opportunity to react, then the
+        // other player, alternating until both pass -- the same rule as the before-action window. Previously the
+        // ATTACKED side always went first; that is still what happens whenever the active player has nothing
+        // they could react with (the usual case: the attacker is the active player and only reacts with
+        // something of their own when they actually hold such a card).
+        OpenAlternatingReactionWindow(new("attackReaction", attacker.Id, null, "An attack is pending: react or pass."),
+            FirstReactionOpportunity(p => AttackReactionAvailableTo(p, attacker.Id, targetId)), "Attack reaction window opened.", attacker.Id);
         return true;
     }
     // Called once both players pass consecutively in the attackReaction window (Apply()).
@@ -2089,8 +2127,11 @@ public sealed partial class MatchEngine
                 // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): both scoped to the one
                 // specific watching card by id, the same shape own-won-duel/bowed-personality-at-
                 // own-battlefield already use.
-                "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction"
-                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Open to either player (issue #318): any card of the acting player's own whose printed trigger
+                // applies to the deferred command right now (BeforeActionReactionApplies), not one watcher.
+                "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction" && _state.PendingNegatableAbility is { } deferredAction
+                    && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var reactingCard)
+                    && BeforeActionReactionApplies(reactingCard, id, deferredAction),
                 // Unimpeachable Name (oracle-l5r-8989): out-of-play, like any-personality-enters-play
                 // above -- no CardId match (it is not watching a specific OTHER card's own entry, it
                 // is reacting to an action), just the reacting player's own id.
@@ -3074,7 +3115,7 @@ public sealed partial class MatchEngine
         // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): checked after the Additional-Action
         // branch above, not before -- an eligible watcher whose triggering ability also happens to be
         // consumed as an Additional Action is a known, narrow scope limit this pass (see
-        // FindBeforeActionReactionWatcher's own comment), not silently mishandled.
+        // BeforeActionReactionApplies's own comment), not silently mishandled.
         // Tsuruchi Yakusho (issue #276 follow-up): "after you announce an action" -- earlier than
         // beforeActionReaction below (which reacts to an already-fully-formed, about-to-apply effect),
         // matching the printed ruling that announcing "technically occurs before performers are
@@ -4101,13 +4142,13 @@ public sealed partial class MatchEngine
                 // action resolves," so intentionally left without actingPlayerId here.
                 var pending = _state.PendingNegatableAbility!;
                 DestroyUnits([source!]); // Rokai's own cost -- destroying himself, unaffected by the negation signal set just below
-                _state.NegatedEffectKind = "destroy"; _state.NegatedEffectCardId = pending.TargetId;
+                _state.NegatedEffects.Add(new("destroy", pending.TargetId!));
                 break;
             }
             case "tamoko-negate":
             {
                 var pending = _state.PendingNegatableAbility!;
-                _state.NegatedEffectKind = MoveOrStraightenKind(pending.AbilityId!); _state.NegatedEffectCardId = pending.TargetId;
+                _state.NegatedEffects.Add(new(MoveOrStraightenKind(pending.AbilityId!)!, pending.TargetId!));
                 break;
             }
             case "tamoko-open": _state.PendingTamokoHonorChecks.Add(new(target!.Id, player.Id)); break;
@@ -4117,30 +4158,44 @@ public sealed partial class MatchEngine
             // affected by the same action. NegatedEffectKind "all" reaches every effect kind
             // (StalwartNegatesBow's own bow check, ApplyModifier, DestroyUnits, MoveHome, Straighten)
             // and is deliberately not consumed here (see NegatesEffect's own doc comment).
-            case "champion-of-thunder-negate": _state.NegatedEffectKind = "all"; _state.NegatedEffectCardId = target!.Id; break;
+            case "champion-of-thunder-negate": _state.NegatedEffects.Add(new("all", target!.Id)); break;
             // Brothers of Goemon: auto-determined from the deferred command's own TargetId, the same
             // shape Rokai/Tamoko already use (no separate choice of card -- Brothers' own Target is
             // "none"). Ring control was already checked before this reaction was even offered (see
-            // FindBeforeActionReactionWatcher); "bow" only ever reaches StalwartNegatesBow's own
+            // BeforeActionReactionApplies); "bow" only ever reaches StalwartNegatesBow's own
             // check, never ApplyModifier/DestroyUnits/MoveHome/Straighten -- the Force penalty in
             // costly-feud's own worked example still applies in full, only the resulting bow is
             // negated.
             case "brothers-goemon-negate":
             {
                 var pending = _state.PendingNegatableAbility!;
-                _state.NegatedEffectKind = "bow"; _state.NegatedEffectCardId = pending.TargetId;
+                _state.NegatedEffects.Add(new("bow", pending.TargetId!));
                 break;
             }
             // Akodo Kakihara (issue #305): "Give him a Force bonus equal to his Personal Honor." The Force
             // bonus convention is every other one-shot "give him +N Force" effect's (Banzai!, Pure Intent,
-            // Marshal Your Strength, Strength of Purity): ApplyModifier "Force", which lasts until the end
+            // Marshal Your Strength, Strength of Purity): an AppliedModifier "Force" that lasts until the end
             // of the turn (cleared in FinishTurn) and is a snapshot of his Personal Honor at the moment the
             // reaction resolves, not a live link. Either window's bonus lands BEFORE the deferred action
             // or Attack actually resolves, so an Attack's own strength-versus-Force comparison
-            // (ResolveAttackNow, re-read at resolution) sees the raised Force.
+            // (ResolveAttackNow, re-read at resolution) sees the raised Force. Added to Modifiers directly
+            // rather than through ApplyModifier (issue #318): ApplyModifier honors Champion of Thunder's "all"
+            // negation, and that negates the ACTION's effects on a card, not another reaction played in the
+            // same window -- with several reactions now takeable in either order, routing his bonus through
+            // it would let a Champion played first silently cancel it.
             case "kakihara-force-bonus":
             case "kakihara-attack-force-bonus":
-                ApplyModifier(source!, source!.Id, id, "Force", CardPersonalHonor(source));
+                source!.Modifiers.Add(new(source.Id, id, "Force", CardPersonalHonor(source)));
+                break;
+            // Training fixture (issue #318): "after another player's action targets a card of yours, bow this
+            // card and every other unbowed card you control that has a before-action reaction" -- a reaction
+            // whose own resolution removes other reactions' eligibility mid-window (a bowed source cannot be
+            // used), proving the window re-evaluates at every opportunity.
+            case "training-before-action-suppress":
+                foreach (var other in _state.Cards.Values.Where(c => c.OwnerId == player.Id && c.Id != source!.Id && InPlay(c) && !c.Bowed
+                    && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "before-action-resolves")).ToArray())
+                    other.Bowed = true;
+                source!.Bowed = true;
                 break;
             case "scholarly-hermit-search":
                 source!.Bowed = true;

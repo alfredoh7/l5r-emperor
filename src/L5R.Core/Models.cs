@@ -119,6 +119,11 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
 public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount);
 
+/// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
+/// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of
+/// Thunder: every effect the action applies to that card, live for the whole re-invocation).</summary>
+public sealed record NegatedEffect(string Kind, string CardId);
+
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
 /// (lasts until that attachment moves or is destroyed), "Turn" (cleared at turn end, the default
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
@@ -462,18 +467,19 @@ public sealed class MatchState
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
-    // "Before an action resolves, negate one of its own named effects" (Mirumoto Rokai's own
-    // destruction-negation; Tamori Tamoko's own movement-or-straightening-negation) -- the same
-    // defer-then-reexecute shape PendingAdditionalAction uses above: the whole triggering command is
-    // stashed here (never partially applied) while a "beforeActionReaction" window offers the one
-    // eligible watching card's controller a chance to use its own negating Reaction before
-    // re-invoking ExecuteAbilityEffects on the SAME command. NegatedEffectKind/NegatedEffectCardId
-    // (set by that Reaction's own execution, consumed -- read then cleared -- by whichever of
-    // MoveHome/Straighten/DestroyUnits actually runs first matching them) are the single shared
-    // negation signal; only one can ever be pending at a time, since resolution is synchronous.
+    // "Before an action resolves" reactions (Mirumoto Rokai's destruction-negation, Tamori Tamoko's
+    // movement-or-straightening-negation, Champion of Thunder, Brothers of Goemon, Akodo Kakihara's Force
+    // bonus): the whole triggering command is stashed here (never partially applied) while an alternating
+    // "beforeActionReaction" window lets EITHER player use any number of applicable reactions -- the active
+    // player first, then the other, alternating until both pass consecutively (issue #318) -- before
+    // re-invoking ExecuteAbilityEffects on the SAME command. NegatedEffects is the negation signal those
+    // reactions set: one entry per negation played, so several of different kinds compose on one command
+    // (Champion's "all" on one card, Rokai's "destroy" on another, Brothers' "bow"). An entry is consumed --
+    // read then removed -- by whichever of MoveHome/Straighten/DestroyUnits/StalwartNegatesBow actually runs
+    // first and matches it; "all" is never consumed (see NegatesEffect), and the whole list is wiped right
+    // after the re-invoked command returns.
     public GameCommand? PendingNegatableAbility { get; set; }
-    public string? NegatedEffectKind { get; set; }
-    public string? NegatedEffectCardId { get; set; }
+    public List<NegatedEffect> NegatedEffects { get; set; } = [];
     // Force redirection (issue #216, Togashi Noboru): "the target's Force contributes to [Noboru's
     // controller's] army instead of his own controller's" -- battle-scoped ("for the duration of the
     // battle," core rules' own default for an in-battle condition), so cleared at

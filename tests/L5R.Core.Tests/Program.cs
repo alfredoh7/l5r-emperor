@@ -179,14 +179,20 @@ var tests = new (string Name, Action Run)[]
     ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
     ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive),
     ("Front Rank Troops / Fudo's Fiends (issue #271): both cards' own BLOCKERS notes were stale -- MatchEngine.ExpendableDraw already exists and is already generically correct for any card carrying the Expendable keyword, checked at every real destroy path. Zero AbilityCatalog wiring needed; this proves the existing, previously-untested helper actually fires for a real published card", ExpendableFollowers),
-    ("General in-play unit-targeting Reaction primitive: Champion of Thunder negates an enemy action's effects on itself, on its host Personality, or on a sibling Follower, choosing which card in its own unit to negate on each time -- reuses the existing beforeActionReaction window (FindBeforeActionReactionWatcher's own Champion/Brothers branch), with NegatedEffectKind \"all\" reaching every effect sink (StalwartNegatesBow, ApplyModifier, DestroyUnits, MoveHome, Straighten)", ChampionOfThunderNegatesOnAnyUnitMember),
+    ("General in-play unit-targeting Reaction primitive: Champion of Thunder negates an enemy action's effects on itself, on its host Personality, or on a sibling Follower, choosing which card in its own unit to negate on each time -- reuses the existing beforeActionReaction window (BeforeActionReactionApplies's own Champion/Brothers case), with NegatedEffectKind \"all\" reaching every effect sink (StalwartNegatesBow, ApplyModifier, DestroyUnits, MoveHome, Straighten)", ChampionOfThunderNegatesOnAnyUnitMember),
     ("General in-play unit-targeting Reaction primitive: Champion of Thunder's own multi-affected-card case -- one action (a Force penalty) hits every card in the unit at once; Champion's controller chooses exactly one to negate on, leaving the rest penalized", ChampionOfThunderChoosesAmongMultipleAffectedCards),
     ("General in-play unit-targeting Reaction primitive: Brothers of Goemon requires controlling a Ring before the reaction is even offered, never triggers when the resolving effect could never bow the target (BowsTarget's own curated classification), and negates ONLY the bow when an effect both applies a Force penalty and conditionally bows off the post-penalty Force (costly-feud) -- the Force penalty still lands in full", BrothersOfGoemonRingGateAndPartialBowNegation),
     ("A Close Call reuses the existing before-attack-resolves Reaction window from hand (AnyAttackReactionAvailable's own new out-of-play check) rather than the new unit-targeting watcher, gated on an Armor-wearing Personality targeted by a Ranged or Melee Attack -- no Armor or a non-Attack ability never offers it, and negation zeroes the Attack's strength before it resolves, same shape as training-attack-negate", ACloseCallArmorAttackNegation),
     ("Personality wave 23 (issue #305): Akodo Kakihara is published with the scan's own colon-form text, two catalog entries sharing ONE UsageKey (one printed ability, two windows), and the stale 'broad targets-this-card trigger' blocker is gone", AkodoKakiharaPublishedShape),
     ("Akodo Kakihara (issue #305), non-Attack half: another player's Battle or Open action targeting HIM opens the general beforeActionReaction window for his controller; the bonus is his CURRENT Personal Honor (a PersonalHonor modifier counts), lands before the action resolves and does not negate it; never offered for his own controller's action, an action targeting a different card, a Dishonorable Kakihara (+0F: no window), a bowed one, one not in play, or once his single per-turn use is spent", AkodoKakiharaReactsToNonAttackActions),
     ("Akodo Kakihara (issue #305), Attack half: a Ranged or Melee Attack targeting HIM opens the existing attackReaction window and the Force bonus decides the outcome -- the same Attack destroys him when nobody reacts and fails against his raised Force when he does; no window opens for an Attack at another card, a Dishonorable/bowed/spent Kakihara, and when another reactor opens one anyway his reaction is disabled and rejected unless he is the target", AkodoKakiharaReactsToAttacks),
-    ("Akodo Kakihara (issue #305): the shared beforeActionReaction window now enumerates its watcher's own reactions through QueryActions (Kakihara's single option, Champion of Thunder's one option per unit member, Rokai's), and the documented single-window limit holds -- an earlier eligible watcher (Champion of Thunder in his unit) takes the window and Kakihara's own reaction is not offered for that command", AkodoKakiharaWindowListingAndSingleWindowLimit),
+    ("Multi-reaction before-action window (issue #318, Mendon's ruling): every applicable reaction of BOTH players is takeable -- the player whose turn it is has the first opportunity (only a player holding a reaction holds one), then the other, alternating; a reaction played resets the pass count and leaves the window open; it closes only when both pass consecutively and the deferred command then resolves; one player passing, the other reacting and the first reacting after all works; both passing at once resolves the command untouched", BeforeActionWindowAlternatesTurnPlayerFirst),
+    ("Multi-reaction before-action window (issue #318): several reactions of ONE player are all takeable in either order (Champion of Thunder + Kakihara in one unit; Rokai + Kakihara), each spent after use and never usable twice, and Kakihara's bonus survives a Champion played before it because it is not an effect of the action", BeforeActionWindowSamePlayerReactionsInEitherOrder),
+    ("Multi-reaction before-action window (issue #318): eligibility is re-evaluated at every opportunity -- a reaction that bows the other sources removes them from the window (listed disabled, rejected if submitted) while the window stays open", BeforeActionWindowReactionCanRemoveAnothersEligibility),
+    ("Multi-reaction before-action window (issue #318): negations compose (MatchState.NegatedEffects) -- Brothers of Goemon's bow negation on the host survives a Champion of Thunder negation on another card played before or after it, two Champions each negate a different card, all wiped when the command has resolved", BeforeActionWindowNegationsCompose),
+    ("Multi-reaction before-action window (issue #318): QueryActions offers each player only their own reactions at their own opportunity (Champion of Thunder one option per unit member; Rokai; the waiting player told to wait), every step is drivable by passing through the listing alone (no deadlock), and the same commands give byte-identical state", BeforeActionWindowListingAndDeterminism),
+    ("Multi-reaction before-action window (issue #318): only reactions that apply AND are usable count -- a spent, bowed or other-unit Champion of Thunder never opens a window, its own controller's action never does, and inside a window someone else's reaction opened an inapplicable reaction (Rokai elsewhere, a Champion in another unit) is neither offered nor accepted", BeforeActionWindowOnlyOffersUsableAndApplicableReactions),
+    ("Attack reaction window aligned with the same rule (issue #318): the player whose turn it is has the first opportunity when they hold a reaction (previously the attacked side always went first), then the other player, alternating -- an attacker's later boost after the defender's Kakihara bonus decides the Attack", AttackWindowTurnPlayerFirstThenAlternates),
     ("Stormless Fury (issue #276 follow-up): the general 'after a Battle action resolves' Reaction primitive (OpenBattleActionReactionWindow) -- its own out-of-play half reuses Equip (Limited)'s own attach mechanism as a Reaction, deliberately granting no Additional Action (unlike Equip (Battle)); its own in-play half bows the just-resolved action's own performer, excluded (BattleActionReaction1UsedCardIds) from firing against the SAME action that triggered the first half, but firing normally against a later, different action", StormlessFuryBattleActionReaction),
     ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity),
     ("Follower wave 12 (issue #279): four small, mostly-independent primitives -- Apprentice Shinobi's universal 'after any Ninja action resolves, +1F' trait (Keyword(source,\"Ninja\") alone, since a printed 'Ninja Battle' prefix is never retained in ability.Timing; reset for free by FinishTurn's own Modifiers.Clear()); Legion of the Bat's new 'after an action moves a card to this battlefield' Reaction (MoveToBattlefield itself queues the candidate; RecruitReserve is explicitly excluded, proven negative) plus its own Crane Clan Equip discount; Nikutai's new 'after a sibling Follower in this unit bows' Reaction (Even if bowed; straightens the OTHER Follower, not itself; proven scoped to its own unit only); and Wave Man's new automatic 'after an Attack Phase ends, straighten this unit' trait, proven on both the 'last battlefield resolved' and 'declined to attack' paths, and proven NOT to spuriously consume an unrelated StraightenBlockedTurn on an already-unbowed card", FollowerWave11Primitives),
@@ -224,6 +230,17 @@ static GameCommand Cmd(MatchEngine e,string type,int? player=null,string? id=nul
 static CardInstance Find(MatchEngine e,string definition,int owner=0,Zone? zone=null)=>e.State.Cards.Values.First(c=>c.DefinitionId==definition && c.OwnerId==owner && (zone is null || c.Zone==zone));
 static string[] Sources(MatchEngine e,int owner=0)=>e.State.Cards.Values.Where(c=>c.OwnerId==owner && c.Zone is Zone.Home or Zone.Stronghold && !c.Bowed && CardCatalog.Get(c.DefinitionId).GoldProduction>0).Select(c=>c.Id).ToArray();
 static string ProvinceCard(MatchEngine e,int index=0,int owner=0)=>e.State.Players[owner].Provinces[index].CardId!;
+// The before-action window (issue #318) is an alternating window open to either player, not scoped to one watching
+// card: what a single-reactor test can still assert is that the window is open, that the reaction's OWNER holds
+// priority (the only player with anything to play, so the active player's vacuous first opportunity is skipped),
+// and that the legal-action listing offers that card's reaction, enabled.
+static void ExpectBeforeActionOffer(MatchEngine e,string cardId,string message="The card's own reaction is offered")
+{
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+    var owner=e.State.Cards[cardId].OwnerId;
+    Equal(e.State.PriorityPlayerId,owner,"Priority sits with the reaction's owner");
+    Check(e.QueryActions(owner).Any(a=>a.Type=="useAbility" && a.Enabled && a.Command?.CardId==cardId),message);
+}
 static void SkipToDynasty(MatchEngine e) { while(e.State.Phase!=Phase.Dynasty) Accept(e,Cmd(e,"pass")); }
 // Ends the current turn all the way through, including a hand-limit discard should one come up (a
 // many-turns-in-a-row test otherwise stalls on it, since nothing else in a bare pass-only flow ever
@@ -1176,7 +1193,6 @@ static void SecondCityRestBatch()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shikaro.Id,TargetId:target.Id,AbilityId:"shikaro-attack"));
         Equal(e.State.PendingAttack?.Strength,4,"Base Ranged 4");
-        Accept(e,new GameCommand("declineReaction",1,e.Version));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:range.Id,AbilityId:"archery-range-reaction"));
         Equal(e.State.PendingAttack?.Strength,5,"4 base + 1 from Archery Range");
     }
@@ -1241,7 +1257,6 @@ static void SecondCityRestBatch()
         var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:host.Id,TargetId:target.Id,AbilityId:"shikaro-attack"));
-        Accept(e,new GameCommand("declineReaction",1,e.Version));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:arrows.Id,AbilityId:"flesh-cutter-arrows-reaction"));
         Check(e.State.Cards[arrows.Id].Bowed,"Bowed as cost");
         Equal(e.State.PendingAttack?.Strength,6,"4 base + 2 from Flesh Cutter Arrows");
@@ -2408,7 +2423,6 @@ static void AttackReactionWindow()
         var e=MatchEngine.FromTestState(s);
         var honorBefore=e.State.Players[0].Honor;
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
-        Accept(e,new GameCommand("declineReaction",1,e.Version)); // the opponent has nothing to react with
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reactor.Id,AbilityId:"training-attack-boost"));
         Equal(e.State.PendingAttack?.Strength,7,"5 base + 2 from the boost");
         Accept(e,new GameCommand("declineReaction",1,e.Version));
@@ -3967,7 +3981,6 @@ static void FollowerWave3Cards()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,TargetId:target.Id,AbilityId:"khol-regulars-attack"));
         Equal(e.State.PendingAttack?.Strength,4,"Base Ranged 4");
-        Accept(e,new GameCommand("declineReaction",1,e.Version));
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:regulars.Id,AbilityId:"khol-regulars-reaction"));
         Equal(e.State.PendingAttack?.Strength,6,"4 base + 2 from its own Reaction");
         Accept(e,new GameCommand("declineReaction",1,e.Version));
@@ -5091,7 +5104,7 @@ static void RokaiNegatesDestruction()
     var e=MatchEngine.FromTestState(s);
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:target.Id,AbilityId:"training-destroy-no-attachments"));
     Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-    Equal(e.State.PendingChoice?.CardId,rokai.Id);
+    ExpectBeforeActionOffer(e,rokai.Id);
     Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Not yet destroyed -- deferred until the choice is answered");
     Accept(e,new GameCommand("useAbility",1,e.Version,CardId:rokai.Id,AbilityId:"rokai-negate-destruction"));
     Equal(e.State.Cards[rokai.Id].Zone,Zone.Dead,"Rokai's own cost: destroying himself");
@@ -5113,7 +5126,7 @@ static void TamokoNegatesMovementOrStraightening()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:mihato.Id,TargetId:target.Id,AbilityId:"mihato-move"));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-        Equal(e.State.PendingChoice?.CardId,tamoko.Id);
+        ExpectBeforeActionOffer(e,tamoko.Id);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tamoko.Id,AbilityId:"tamoko-negate"));
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
@@ -5136,7 +5149,7 @@ static void TamokoNegatesMovementOrStraightening()
 static void ChampionOfThunderNegatesOnAnyUnitMember()
 {
     // General in-play unit-targeting Reaction primitive: Champion of Thunder reuses the same
-    // beforeActionReaction window Rokai/Tamoko already opened (FindBeforeActionReactionWatcher's own
+    // beforeActionReaction window Rokai/Tamoko already opened (BeforeActionReactionApplies's own
     // Champion/Brothers branch), but the affected card is a genuine player CHOICE ("own-unit-member"),
     // not auto-determined -- any card in Champion's own unit, not just the literal TargetId.
     {
@@ -5151,7 +5164,7 @@ static void ChampionOfThunderNegatesOnAnyUnitMember()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nagaRemnants.Id,TargetId:champion.Id,AbilityId:"naga-remnants-bow"));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        ExpectBeforeActionOffer(e,champion.Id);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:champion.Id,AbilityId:"champion-of-thunder-negate"));
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
@@ -5167,7 +5180,7 @@ static void ChampionOfThunderNegatesOnAnyUnitMember()
         var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:host.Id,AbilityId:"training-bow-at-battle"));
-        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        ExpectBeforeActionOffer(e,champion.Id);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:host.Id,AbilityId:"champion-of-thunder-negate"));
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
@@ -5185,7 +5198,7 @@ static void ChampionOfThunderNegatesOnAnyUnitMember()
         var sibling=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:host.Id);
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nagaRemnants.Id,TargetId:sibling.Id,AbilityId:"naga-remnants-bow"));
-        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        ExpectBeforeActionOffer(e,champion.Id);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:sibling.Id,AbilityId:"champion-of-thunder-negate"));
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
@@ -5209,7 +5222,7 @@ static void ChampionOfThunderChoosesAmongMultipleAffectedCards()
     var e=MatchEngine.FromTestState(s);
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:penalizer.Id,TargetId:host.Id,AbilityId:"training-unit-force-penalty"));
     Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-    Equal(e.State.PendingChoice?.CardId,champion.Id);
+    ExpectBeforeActionOffer(e,champion.Id);
     Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:sibling.Id,AbilityId:"champion-of-thunder-negate"));
     Accept(e,Cmd(e,"declineReaction"));
     Accept(e,Cmd(e,"declineReaction"));
@@ -5262,7 +5275,7 @@ static void BrothersOfGoemonRingGateAndPartialBowNegation()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:feud.Id,TargetId:host.Id,AbilityId:"costly-feud"));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-        Equal(e.State.PendingChoice?.CardId,brothers.Id);
+        ExpectBeforeActionOffer(e,brothers.Id);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:brothers.Id,AbilityId:"brothers-goemon-negate"));
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
@@ -5352,8 +5365,8 @@ static void AkodoKakiharaReactsToNonAttackActions()
         Equal(KakiharaForce(e,k.Id),4,"Printed Force before any reaction");
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-        Equal(e.State.PendingChoice?.CardId,k.Id);
-        Equal(e.State.PendingChoice?.PlayerId,1);
+        ExpectBeforeActionOffer(e,k.Id);
+        Equal(e.State.PendingChoice?.PlayerId,0,"The window records the acting player (whose action is deferred)");
         Check(!e.State.Cards[k.Id].Bowed,"Deferred: the bow has not applied yet");
         var options=e.QueryActions(1);
         Check(options.Any(a=>a.Command?.AbilityId=="kakihara-force-bonus" && a.Enabled),"The reaction is offered to his controller");
@@ -5475,7 +5488,7 @@ static void AkodoKakiharaReactsToNonAttackActions()
             if(actor==0)
             {
                 Equal(e.State.PendingChoice?.Type,"beforeActionReaction","Another player's Open action");
-                Equal(e.State.PendingChoice?.CardId,k.Id);
+                ExpectBeforeActionOffer(e,k.Id);
                 Check(!e.State.Cards[k.Id].Bowed);
             }
             else
@@ -5588,10 +5601,229 @@ static void AkodoKakiharaReactsToAttacks()
         }
     }
 }
-static void AkodoKakiharaWindowListingAndSingleWindowLimit()
+static string[] BeforeActionOffers(MatchEngine e,int playerId)=>e.QueryActions(playerId).Where(a=>a.Type=="useAbility" && a.Enabled).Select(a=>a.Command!.AbilityId!).Distinct().OrderBy(x=>x,StringComparer.Ordinal).ToArray();
+// Both players pass through the legal-action listing alone (never a hand-built command), the way a client or the AI
+// would: every step must offer the player holding priority a way to pass, and two consecutive passes close the window.
+static void PassBothThroughListing(MatchEngine e)
+{
+    for(var step=0;step<6 && e.State.PendingChoice is not null;step++)
+    {
+        var pass=e.QueryActions(e.State.PriorityPlayerId).SingleOrDefault(a=>a.Type=="declineReaction" && a.Enabled);
+        Check(pass?.Command is not null,"The player holding priority is always offered a pass -- no deadlock");
+        Accept(e,pass!.Command!);
+    }
+    Check(e.State.PendingChoice is null,"Both players passed: the window closed");
+}
+// Player 0 (the active player) straightens a bowed Personality of player 1's; player 0 holds Tamoko (negates a
+// straighten), player 1 holds a Champion of Thunder in that Personality's unit -- one applicable reaction each.
+static (MatchEngine Engine,CardInstance Tamoko,CardInstance Champion,CardInstance Target) StraightenWindow()
+{
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var straightener=Add(s,"training-battle-straightener",0,Zone.Battlefield,province:0);
+    var tamoko=Add(s,"training-tamoko",0,Zone.Battlefield,province:0);
+    var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+    var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:target.Id);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:straightener.Id,TargetId:target.Id,AbilityId:"training-straighten-at-battle"));
+    return (e,tamoko,champion,target);
+}
+static string BeforeActionTurnPlayerFirstScenario()
+{
+    var (e,tamoko,champion,target)=StraightenWindow();
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+    Equal(e.State.PendingChoice?.PlayerId,0,"The window records the acting player");
+    Equal(e.State.PriorityPlayerId,0,"Both players hold a reaction: the player whose turn it is has the first opportunity");
+    Check(BeforeActionOffers(e,0).SequenceEqual(["tamoko-negate"]),"The turn player is offered exactly their own reaction");
+    Check(!e.QueryActions(1).Any(a=>a.Type=="useAbility"),"The other player is not offered anything before their opportunity");
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:target.Id,AbilityId:"champion-of-thunder-negate")); // not their opportunity
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tamoko.Id,AbilityId:"tamoko-negate"));
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction","Playing a reaction leaves the window open");
+    Equal(e.State.PriorityPlayerId,1,"...and passes the opportunity to the other player");
+    Equal(e.State.ConsecutivePasses,0);
+    Check(BeforeActionOffers(e,1).SequenceEqual(["champion-of-thunder-negate"]),"Now the other player is offered theirs");
+    Check(!e.QueryActions(0).Any(a=>a.Type=="useAbility"),"and the first player waits");
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:target.Id,AbilityId:"champion-of-thunder-negate"));
+    Equal(e.State.PriorityPlayerId,0,"Alternating: back to the turn player");
+    Check(BeforeActionOffers(e,0).Length==0,"Their reaction is spent (once per turn): nothing left to play, only to pass");
+    Accept(e,Cmd(e,"declineReaction"));
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction","One pass does not close the window");
+    Equal(e.State.PriorityPlayerId,1);
+    Accept(e,Cmd(e,"declineReaction"));
+    Check(e.State.PendingChoice is null,"Both passed consecutively: it closed");
+    Check(e.State.Cards[target.Id].Bowed,"and the deferred straighten resolved -- negated");
+    return Json(e.State);
+}
+static void BeforeActionWindowAlternatesTurnPlayerFirst()
+{
+    BeforeActionTurnPlayerFirstScenario();
+    {
+        // One player passes, the other reacts, then the first reacts after all: a reaction resets the pass count, so
+        // an opportunity already passed on comes round again.
+        var (e,tamoko,champion,target)=StraightenWindow();
+        Accept(e,Cmd(e,"declineReaction"));
+        Equal(e.State.PriorityPlayerId,1); Equal(e.State.ConsecutivePasses,1);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:target.Id,AbilityId:"champion-of-thunder-negate"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PriorityPlayerId,0,"The first player's earlier pass is forgotten");
+        Equal(e.State.ConsecutivePasses,0);
+        Check(BeforeActionOffers(e,0).SequenceEqual(["tamoko-negate"]));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:tamoko.Id,AbilityId:"tamoko-negate"));
+        PassBothThroughListing(e);
+        Check(e.State.Cards[target.Id].Bowed,"Both negations were played; the straighten never applied");
+    }
+    {
+        // Both players pass immediately: the window closes and the deferred command resolves as if it had never opened.
+        var (e,_,_,target)=StraightenWindow();
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.PendingChoice is null && e.State.PendingNegatableAbility is null);
+        Check(!e.State.Cards[target.Id].Bowed,"The straighten applied");
+    }
+    {
+        // When only the NON-turn player holds a reaction the turn player has no vacuous first opportunity: the
+        // window opens for the only player who can act (every single-reactor window's long-standing behavior).
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var straightener=Add(s,"training-battle-straightener",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0,bowed:true);
+        Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:target.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:straightener.Id,TargetId:target.Id,AbilityId:"training-straighten-at-battle"));
+        Equal(e.State.PriorityPlayerId,1);
+    }
+    {
+        // The non-turn player is the one ACTING (an Open action): the window still goes to whoever holds a reaction,
+        // here the turn player (Kakihara's controller).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=0;
+        var source=Add(s,"training-bow-any-source",1,Zone.Home);
+        var target=Add(s,"training-crane-samurai",0,Zone.Home);
+        var kakihara=Add(s,"oracle-l5r-223",0,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:source.Id,TargetId:kakihara.Id,AbilityId:"training-bow-any"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PriorityPlayerId,0,"Player 0 holds the only reaction and is the turn player");
+    }
+}
+static void BeforeActionWindowSamePlayerReactionsInEitherOrder()
+{
+    // Champion of Thunder + Kakihara on ONE unit, both belonging to player 1 (the case the old one-window limit refused).
+    foreach(var kakiharaFirst in new[]{true,false})
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:k.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PriorityPlayerId,1);
+        Check(BeforeActionOffers(e,1).SequenceEqual(["champion-of-thunder-negate","kakihara-force-bonus"]),"Both are offered at once");
+        GameCommand Kakihara()=>new("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus");
+        GameCommand Champion()=>new("useAbility",1,e.Version,CardId:champion.Id,TargetId:k.Id,AbilityId:"champion-of-thunder-negate");
+        Accept(e,kakiharaFirst?Kakihara():Champion());
+        Accept(e,Cmd(e,"declineReaction")); // player 0 has nothing to play but still holds the opportunity
+        Equal(e.State.PriorityPlayerId,1);
+        Check(BeforeActionOffers(e,1).SequenceEqual([kakiharaFirst?"champion-of-thunder-negate":"kakihara-force-bonus"]),"Only the other one is left");
+        Reject(e,kakiharaFirst?Kakihara():Champion()); // a source is never usable twice beyond its own limit
+        Accept(e,kakiharaFirst?Champion():Kakihara());
+        Check(BeforeActionOffers(e,1).Length==0);
+        PassBothThroughListing(e);
+        Check(!e.State.Cards[k.Id].Bowed,"Champion's negation removed the bow");
+        Equal(KakiharaForce(e,k.Id),8,"and Kakihara's +4 survived a Champion played "+(kakiharaFirst?"after":"BEFORE")+" it: his bonus is not an effect of the action");
+    }
+    // Rokai + Kakihara: both belong to player 1, both applicable to a destroy targeting Kakihara.
+    foreach(var kakiharaFirst in new[]{true,false})
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var rokai=Add(s,"training-rokai",1,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:k.Id,AbilityId:"training-destroy-no-attachments"));
+        Check(BeforeActionOffers(e,1).SequenceEqual(["kakihara-force-bonus","rokai-negate-destruction"]));
+        var kakihara=new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus");
+        var rokaiUse=new GameCommand("useAbility",1,e.Version,CardId:rokai.Id,AbilityId:"rokai-negate-destruction");
+        Accept(e,kakiharaFirst?kakihara:rokaiUse);
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:(kakiharaFirst?rokai:k).Id,AbilityId:kakiharaFirst?"rokai-negate-destruction":"kakihara-force-bonus"));
+        PassBothThroughListing(e);
+        Equal(e.State.Cards[k.Id].Zone,Zone.Battlefield,"Rokai negated the destruction");
+        Equal(e.State.Cards[rokai.Id].Zone,Zone.Dead,"at the cost of Rokai");
+        Equal(KakiharaForce(e,k.Id),8,"and Kakihara has his bonus too");
+    }
+}
+static void BeforeActionWindowReactionCanRemoveAnothersEligibility()
+{
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+    var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+    var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:k.Id);
+    var suppressor=Add(s,"training-before-action-suppressor",1,Zone.Battlefield,province:0);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+    Check(BeforeActionOffers(e,1).SequenceEqual(["champion-of-thunder-negate","kakihara-force-bonus","training-before-action-suppress"]));
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:suppressor.Id,AbilityId:"training-before-action-suppress"));
+    Check(e.State.Cards[k.Id].Bowed && e.State.Cards[champion.Id].Bowed && e.State.Cards[suppressor.Id].Bowed,"Its resolution bowed every source");
+    Accept(e,Cmd(e,"declineReaction")); // player 0
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction","The window stays open");
+    Equal(e.State.PriorityPlayerId,1);
+    Check(BeforeActionOffers(e,1).Length==0,"What the played reaction changed is reflected at the very next opportunity: nothing is offered as usable");
+    Check(e.QueryActions(1).Any(a=>a.Command?.AbilityId=="kakihara-force-bonus" && !a.Enabled),"(the bowed reactions are listed, disabled)");
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:k.Id,AbilityId:"champion-of-thunder-negate"));
+    PassBothThroughListing(e);
+    Equal(e.State.Cards[k.Id].Modifiers.Count,0,"Kakihara never got his bonus");
+}
+static void BeforeActionWindowNegationsCompose()
+{
+    // Brothers of Goemon's "bow" negation on the host and Champion of Thunder's "all" on ANOTHER card, played in
+    // either order against one Costly Feud (a Force penalty plus a conditional bow): the second no longer
+    // overwrites the first, so the host takes the penalty but never bows.
+    foreach(var brothersFirst in new[]{true,false})
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var feud=Add(s,"oracle-l5r-1521",0,Zone.Hand);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3: the -3 penalty reaches 0 and would bow
+        var brothers=Add(s,"oracle-l5r-1167",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
+        Add(s,"training-ring-of-air",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:feud.Id,TargetId:host.Id,AbilityId:"costly-feud"));
+        Check(BeforeActionOffers(e,1).SequenceEqual(["brothers-goemon-negate","champion-of-thunder-negate"]));
+        var brothersUse=new GameCommand("useAbility",1,e.Version,CardId:brothers.Id,AbilityId:"brothers-goemon-negate");
+        var championUse=new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:champion.Id,AbilityId:"champion-of-thunder-negate");
+        Accept(e,brothersFirst?brothersUse:championUse);
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:(brothersFirst?champion:brothers).Id,TargetId:brothersFirst?champion.Id:null,AbilityId:brothersFirst?"champion-of-thunder-negate":"brothers-goemon-negate"));
+        Equal(e.State.NegatedEffects.Count,2,"Both negations are held at once");
+        PassBothThroughListing(e);
+        Check(e.State.NegatedEffects.Count==0,"and wiped once the command has resolved");
+        Check(!e.State.Cards[host.Id].Bowed,"Brothers' bow negation survived Champion's negation of a different card ("+(brothersFirst?"played after":"played before")+" it)");
+        Check(e.State.Cards[host.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-3),"and the Force penalty still landed in full");
+    }
+    {
+        // Two Champions of Thunder in one unit, each negating on a DIFFERENT card of an action that hits every card in it.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var penalizer=Add(s,"training-unit-penalty-personality",0,Zone.Home);
+        var host=Add(s,"training-crane-samurai",1,Zone.Home);
+        var champion1=Add(s,"oracle-l5r-1292",1,Zone.Attached,attachedTo:host.Id);
+        var champion2=Add(s,"oracle-l5r-1292",1,Zone.Attached,attachedTo:host.Id);
+        var sibling=Add(s,"training-follower",1,Zone.Attached,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:penalizer.Id,TargetId:host.Id,AbilityId:"training-unit-force-penalty"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion1.Id,TargetId:sibling.Id,AbilityId:"champion-of-thunder-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion2.Id,TargetId:host.Id,AbilityId:"champion-of-thunder-negate"));
+        PassBothThroughListing(e);
+        Equal(e.State.Cards[sibling.Id].Modifiers.Count,0,"The first Champion's choice held");
+        Equal(e.State.Cards[host.Id].Modifiers.Count,0,"and so did the second's");
+        Equal(e.State.Cards[champion1.Id].Modifiers.Count,1,"the cards nobody chose are still penalized");
+        Equal(e.State.Cards[champion2.Id].Modifiers.Count,1);
+    }
+}
+static void BeforeActionWindowListingAndDeterminism()
 {
     {
-        // Champion of Thunder lists one option per unit member (host + itself), each enabled.
+        // Champion of Thunder lists one option per unit member (host + itself), each enabled, to its own controller only.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
         var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
@@ -5602,10 +5834,11 @@ static void AkodoKakiharaWindowListingAndSingleWindowLimit()
         Equal(options.Length,2,"One option per card in the unit");
         Check(options.All(a=>a.Enabled) && options.Select(a=>a.Command!.TargetId).OrderBy(x=>x).SequenceEqual(new[]{host.Id,champion.Id}.OrderBy(x=>x)));
         Check(!e.QueryActions(0).Any(a=>a.Type=="useAbility"),"The acting player is offered nothing to use, only to pass");
+        Check(e.QueryActions(0).Any(a=>a.Type=="wait"),"(they are told to wait: it is not their opportunity)");
         Accept(e,options[0].Command!);
     }
     {
-        // Rokai: a single option, offered only to the watcher's own controller.
+        // Rokai: a single option, offered only to its own controller.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
         var rokai=Add(s,"training-rokai",1,Zone.Battlefield,province:0);
@@ -5615,19 +5848,94 @@ static void AkodoKakiharaWindowListingAndSingleWindowLimit()
         Check(e.QueryActions(1).Any(a=>a.Command?.AbilityId=="rokai-negate-destruction" && a.Command.CardId==rokai.Id && a.Enabled));
     }
     {
-        // Known limit, pinned so it cannot silently change: the primitive opens ONE window per command. Kakihara
-        // with a Champion of Thunder in his own unit: Champion (an earlier watcher) takes the window, Kakihara
-        // is not offered one for that command.
+        // Every step of the two-player window is drivable from the listing alone: never a state where the player
+        // holding priority has no legal move.
+        var (e,_,_,_)=StraightenWindow();
+        PassBothThroughListing(e);
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
         var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
-        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:k.Id);
-        var e=MatchEngine.FromTestState(s);
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
-        Equal(e.State.PendingChoice?.CardId,champion.Id,"Champion holds the window");
-        Check(!e.QueryActions(1).Any(a=>a.Command?.AbilityId=="kakihara-force-bonus"),"Kakihara's own reaction is not offered for this command");
-        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
+        Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:k.Id);
+        var e2=MatchEngine.FromTestState(s);
+        Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        PassBothThroughListing(e2);
+        Check(e2.State.Cards[k.Id].Bowed,"Passing on every reaction lets the action resolve normally");
     }
+    // Determinism: the same commands from the same state give byte-identical state (the negation set, the pass count and
+    // the alternating priority all live in MatchState, which every Execute round-trips through JSON).
+    Equal(BeforeActionTurnPlayerFirstScenario(),BeforeActionTurnPlayerFirstScenario(),"Deterministic");
+}
+static void BeforeActionWindowOnlyOffersUsableAndApplicableReactions()
+{
+    // A spent Champion of Thunder, a bowed one, and one in ANOTHER unit: none of them can open a window on its own.
+    foreach(var scenario in new[]{"spent","bowed","other-unit"})
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var otherHost=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:scenario=="other-unit"?otherHost.Id:host.Id);
+        if(scenario=="spent") champion.AbilityUses["champion-of-thunder-negate"]=s.TurnNumber;
+        if(scenario=="bowed") champion.Bowed=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:host.Id,AbilityId:"training-bow-at-battle"));
+        Check(e.State.PendingChoice is null,$"{scenario}: no window for a reaction nobody can use");
+        Check(e.State.Cards[host.Id].Bowed,$"{scenario}: the action simply resolved");
+    }
+    {
+        // Inside a window some OTHER reaction opened (Kakihara's), a reaction that does not apply to this action is neither
+        // offered nor accepted: Rokai at Home (not at Kakihara's location) and a Champion in another unit.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var rokai=Add(s,"training-rokai",1,Zone.Home);
+        var otherHost=Add(s,"training-crane-samurai",1,Zone.Home);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,attachedTo:otherHost.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:k.Id,AbilityId:"training-destroy-no-attachments"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Check(BeforeActionOffers(e,1).SequenceEqual(["kakihara-force-bonus"]),"Only the reaction that applies is offered");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:rokai.Id,AbilityId:"rokai-negate-destruction"));
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:champion.Id,AbilityId:"champion-of-thunder-negate"));
+    }
+    {
+        // The Champion's own controller acting on their own unit is not "another player's action".
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1; s.ActivePlayerId=1;
+        var source=Add(s,"training-bow-any-source",1,Zone.Home);
+        var host=Add(s,"training-crane-samurai",1,Zone.Home);
+        Add(s,"oracle-l5r-1292",1,Zone.Attached,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:source.Id,TargetId:host.Id,AbilityId:"training-bow-any"));
+        Check(e.State.PendingChoice is null && e.State.Cards[host.Id].Bowed,"Its own controller's action never opens a Champion window");
+    }
+}
+static void AttackWindowTurnPlayerFirstThenAlternates()
+{
+    // Ranged 5 (Carpenter Castle Siege) at Kakihara; player 0 (the active player, the attacker) holds a strength boost of
+    // their own, player 1 holds Kakihara's reaction. His Personal Honor is 3 (a -1 modifier): Force 4 -> 7 with his bonus.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+    var castle=Add(s,"training-castle",0,Zone.Home);
+    var reactor=Add(s,"training-attack-reactor",0,Zone.Home);
+    var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+    k.Modifiers.Add(new("test-source","test","PersonalHonor",-1));
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:k.Id,AbilityId:"carpenter-castle-siege"));
+    Equal(e.State.PendingChoice?.Type,"attackReaction");
+    Equal(e.State.PriorityPlayerId,0,"The turn player holds a reaction, so has the first opportunity (previously the attacked side always went first)");
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+    Accept(e,Cmd(e,"declineReaction"));
+    Equal(e.State.PriorityPlayerId,1);
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+    Equal(KakiharaForce(e,k.Id),7);
+    Equal(e.State.PriorityPlayerId,0,"Alternating: the attacker, who had passed, reacts after all");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reactor.Id,AbilityId:"training-attack-boost"));
+    Equal(e.State.PendingAttack?.Strength,7);
+    Accept(e,Cmd(e,"declineReaction"));
+    Equal(e.State.PendingChoice?.Type,"attackReaction","One pass does not close it");
+    Accept(e,Cmd(e,"declineReaction"));
+    Check(e.State.PendingChoice is null);
+    Check(e.State.Cards[k.Id].Zone!=Zone.Battlefield,"Strength 7 >= Force 7: the last reaction decided it");
 }
 static void TamokoOpenHonorGain()
 {
@@ -8956,7 +9264,7 @@ static void BatchEPrimitives()
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:kinto.Id,TargetId:target.Id,AbilityId:"kinto-move"));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction","No Reconnaissance: the movement is offered for negation");
-        Equal(e.State.PendingChoice?.CardId,tamoko.Id);
+        ExpectBeforeActionOffer(e,tamoko.Id);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:tamoko.Id,AbilityId:"tamoko-negate"));
         Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
         Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Negated: Kinto's movement never applied");
@@ -9013,7 +9321,7 @@ static void BatchEPrimitives()
                 Check(e.State.PendingChoice is null,"Reconnaissance: Champion of Thunder is never offered a window");
                 Equal(e.State.Cards[host.Id].Zone,Zone.Home);
             }
-            else Equal(e.State.PendingChoice?.CardId,champion.Id,"No Reconnaissance: Champion of Thunder may negate");
+            else ExpectBeforeActionOffer(e,champion.Id,"No Reconnaissance: Champion of Thunder may negate");
         }
     }
     {
@@ -9444,7 +9752,7 @@ static void BatchFStraightenAndHoldingTargets()
         var e=MatchEngine.FromTestState(s);
         Accept(e,UseF(e,0,"mitsuko-straighten",mitsuko.Id,airShugenja.Id));
         Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
-        Equal(e.State.PendingChoice?.CardId,tamoko.Id);
+        ExpectBeforeActionOffer(e,tamoko.Id);
         Accept(e,UseF(e,1,"tamoko-negate",tamoko.Id));
         Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
         Check(e.State.Cards[airShugenja.Id].Bowed,"Negated: the straightening never applied");

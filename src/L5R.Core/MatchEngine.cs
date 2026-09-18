@@ -224,9 +224,14 @@ public sealed partial class MatchEngine
             }
             if (_state.PendingChoice.Type=="beforeActionReaction")
             {
-                // Mirumoto Rokai / Tamori Tamoko (issue #207 follow-up): scoped to the one specific
-                // watching card by id, same shape as bowReaction/duelWonReaction above -- only that
-                // card's own controller may use it, or either side may pass to close the window.
+                // Rokai / Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara (issues #207,
+                // #278, #305, #318): an alternating window open to EITHER player -- the active player has the
+                // first opportunity when they hold a reaction, then the other player, alternating (a reaction
+                // played resets the pass count and flips priority, exactly like attackReaction above; a pass
+                // flips it too) until both pass consecutively. Any number of applicable reactions may be
+                // played, each re-checked live by ValidateAbility (BeforeActionReactionApplies) and limited
+                // by its own once-per-turn UsageKey. Only when the window closes does the deferred command
+                // actually resolve.
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
@@ -235,9 +240,9 @@ public sealed partial class MatchEngine
                     ExecuteAbilityEffects(pending);
                     // Defensive: a negation signal must never survive past the one re-invocation it
                     // was set for -- if the re-invoked ability did not actually reach a matching
-                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear it here
-                    // rather than risk it leaking into a later, unrelated one.
-                    _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
+                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear them here
+                    // rather than risk them leaking into a later, unrelated one.
+                    _state.NegatedEffects.Clear();
                 }
                 return;
             }

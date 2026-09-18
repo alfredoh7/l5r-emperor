@@ -133,24 +133,23 @@ public sealed partial class MatchEngine
         }
         else if(_state.PendingChoice is { Type:"beforeActionReaction" } beforeActionPending)
         {
-            // Mirumoto Rokai / Tamori Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara: the
-            // general in-play "before an action resolves" window is scoped to the one specific watching card by
-            // id (same single-watcher shape as announceReaction below), so only that card's own controller is
-            // offered its before-action-resolves reaction. A reaction whose own Target is a choice among the
-            // watcher's unit (Champion's "own-unit-member") gets one option per member; every other one is
-            // offered once. Each is validated exactly like a submitted command, so a reaction that cannot
-            // legally be used right now is listed disabled with its reason rather than hidden or offered blind.
-            if(beforeActionPending.PlayerId==playerId)
-            {
-                var card=Card(beforeActionPending.CardId!);
-                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="before-action-resolves"))
+            // Rokai / Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara, and any future watcher:
+            // the general in-play "before an action resolves" window is an alternating window open to EITHER
+            // player (issue #318), so whoever holds priority is offered every reaction of THEIR OWN that applies
+            // to the deferred action right now, from any number of cards, plus Pass. A reaction whose own
+            // Target is a choice among the watcher's unit (Champion's "own-unit-member") gets one option per
+            // member; every other one is offered once. Each is validated exactly like a submitted command, so a
+            // reaction that cannot legally be used right now (spent, bowed) is listed disabled with its reason
+            // rather than hidden or offered blind. Recomputed on every query, so what a played reaction changed
+            // (a bowed or destroyed source, a spent use) is already reflected at the next opportunity.
+            if(_state.PendingNegatableAbility is { } deferredAction)
+                foreach(var (card,reactionId) in BeforeActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && BeforeActionReactionApplies(x.Card,x.AbilityId,deferredAction)).ToArray())
                 {
                     var reaction=AbilityCatalog.All[reactionId];
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
-            }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"additionalActionReaction" })

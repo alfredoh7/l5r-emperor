@@ -1171,7 +1171,7 @@ public static class PublishedContent
     }
 
     /// <summary>Follower wave 11 (the general in-play unit-targeting Reaction primitive): Champion of
-    /// Thunder and Brothers of Goemon -- see CardAbilities.cs's own FindBeforeActionReactionWatcher
+    /// Thunder and Brothers of Goemon -- see CardAbilities.cs's own BeforeActionReactionApplies
     /// (the Champion/Brothers branch) and the NegatesEffect helper.</summary>
     public static PublishedSnapshot FollowerWave11 { get; } = LoadFollowerWave11();
 
@@ -1582,7 +1582,7 @@ public static class PublishedContent
     /// trigger") was stale -- the general in-play unit-targeting Reaction primitive (issue #278) already
     /// existed. One printed ability, two catalog entries sharing one UsageKey: a non-Attack action reaches
     /// him through that primitive's own "beforeActionReaction" window (a new Kakihara branch in
-    /// FindBeforeActionReactionWatcher), a Ranged/Melee Attack through the existing "attackReaction"
+    /// BeforeActionReactionApplies), a Ranged/Melee Attack through the existing "attackReaction"
     /// window (ResolveOrDeferAttack's gate now narrowed to the Attack that actually targets him).</summary>
     public static PublishedSnapshot PersonalityWave23 { get; } = LoadPersonalityWave23();
 

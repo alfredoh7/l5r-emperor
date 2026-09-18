@@ -180,3 +180,5 @@ other `BLOCKERS`-documented cards referencing "the same still-unbuilt gap as ora
 this primitive, but each also needs at least one more novel piece of its own (a twice-per-turn usage
 counter, negating two effects from one action at once, and so on) and was left out of this pass's own
 scope.
+
+**Amendment (issue #318):** the "one watcher takes the window" shape described above (`FindBeforeActionReactionWatcher` returning a single watcher, a single negation pair) was replaced by a multi-reaction alternating window and a composable negation set; see `2026-09-18-akodo-kakihara.md`. The primitive's classification lists, Target categories and negation semantics per kind are unchanged.
