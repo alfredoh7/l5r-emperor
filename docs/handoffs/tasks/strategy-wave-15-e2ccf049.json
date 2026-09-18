@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Batch D of the BLOCKERS audit: wired 9 deferred-scope cards (7 Strategies as strategy-wave-15, 1 Spell as spell-wave-4, 1 Ring as ring-wave-2). Bow Before My Will (oracle-l5r-1121) was found already published in strategy-wave-6; its stale BLOCKERS entry was removed without re-packaging. New primitives: own-personality-at-battle and own-shadowlands-personality-at-battle Performers; dead-personality-any-discard, unattached-unit-card, own-wielder-or-personality-with-wielder-keyword, and own-personality-in-province Targets; the preservingHonor and yourClanNeedsYouProvince PendingChoice flows; CheckYourClanNeedsYouReturn/ResolveYourClanNeedsYouProvince (a fourth caller into the shared Purchase/RecruitReserve/CreatePersonality entry sequence, plus a new province-placement primitive); Dueling.SharesNoKeywords feeding Ring recruitment's existing GrantRingRecruit; and the first negative-magnitude MaxHandSize use (decrease-other-hand-size).",
+  "validation": "dotnet run --project tests/L5R.Core.Tests (189/189 core, 57/57 published, 9/9 deck-format, 10/10 deck-workshop, including a new BatchDPrimitives regression test exercising every new primitive); bash tools/check.sh --skip-client (Python tools/content 43 tests + tools/collaboration 130 tests, L5R.AI.Tests 14/14, L5R.Server.Tests 5/5, L5R.Client.Transport.Tests 4/4) -- all green.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/295",
+  "branch": "strategy-wave-15",
+  "updated": "2026-09-18T15:27:14.133196+00:00"
+}
