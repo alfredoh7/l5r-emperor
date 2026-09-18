@@ -135,6 +135,9 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
+            // Asako Rikate / Shosuro Rin (issue #301): the targeted Personality's own controller answers.
+            if (_state.PendingChoice.Type=="rikateDetach") { ResolveRikateDetach(command); return; }
+            if (_state.PendingChoice.Type=="rinShame") { ResolveRinShame(command); return; }
             // Your Clan Needs You! (issue #295): the recruiting player chooses which province to place
             // the recruited Personality back into, once this battle ends.
             if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
@@ -462,6 +465,41 @@ public sealed partial class MatchEngine
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
     }
 
+    // The shared "bring a face-up province Personality into play, paying all costs" entry sequence
+    // (issue #301): Purchase and RecruitReserve above each inline their own copy (they are commands with
+    // their own priority rules); Your Clan Needs You! (issue #295, into the CURRENT BATTLEFIELD) and
+    // Shinden Shorai (issue #301, into HOME) are the two ABILITY callers and share this one body --
+    // pay, leave the province, enter play (bowed/dishonored only if the card's own Effect says so),
+    // queue Overconfident, refill the province, then open Proclaim / the entering card's own Reaction /
+    // the Overconfident draw. battlefield names the province index to enter at (null: Home, Purchase's
+    // own destination). Returns true exactly when a window was opened, so the calling execution case
+    // knows to `return` (leaving the action pending) rather than fall through to its own tail.
+    // proclaimResumesTo: who regains priority once an opened Proclaim window fully closes (null: the
+    // active player, Purchase's own convention; Shinden Shorai, a Limited ACTION, cedes to the opponent
+    // like every other Action-phase action).
+    private bool BringProvincePersonalityIntoPlay(PlayerState player,CardInstance card,PurchaseQuote quote,int cost,string[]? sourceIds,int? battlefield,string via,int? proclaimResumesTo=null)
+    {
+        Pay(player.Id,card,cost,sourceIds);
+        var province=player.Provinces.Single(p=>p.CardId==card.Id);
+        province.CardId=null;
+        card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
+        card.Bowed=Definition(card).Effect=="enters-bowed";
+        if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
+        Emit("cardEnteredPlay",$"{player.Name} brought {Definition(card).Name} into play via {via}{(card.Bowed?" bowed":"")}.",player.Id,card.Id);
+        QueueOverconfidentDraw(card);
+        Refill(player,province);
+        var reactionId=EntryReactionAbility(card);
+        if(quote.ProclaimEligible)
+        {
+            if(reactionId is not null) card.AbilityUses.Remove(reactionId);
+            _state.PendingChoice=new("proclaim",player.Id,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.",proclaimResumesTo);
+            _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Proclaim reaction window opened.",player.Id,card.Id);
+            return true;
+        }
+        return OpenEntryReactionWindow(player.Id,card,1-player.Id) || OpenOverconfidentDrawWindow(1-player.Id);
+    }
+
     /// <summary>Checks the special free recruitment of a higher-Experienced Personality over a
     /// lower-level Personality with the same title. Honor Requirement and Gold are deliberately not
     /// consulted; normal control restrictions still apply.</summary>
@@ -639,7 +677,12 @@ public sealed partial class MatchEngine
     // OWN province's card, and doing so requires the enemy already has presence there, i.e. they are
     // attacking YOUR province), so no separate "are you the Defender" check is needed. An ordinary
     // Dynasty-phase Purchase of the same card never qualifies.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false)
+    // ignoreHonorRequirementIfPersonalityClan (issue #301, Shinden Shorai): "You may ignore the
+    // Personality's Honor Requirement if he is Lion Clan" -- a waiver supplied by the RECRUITING ACTION
+    // and keyed on the RECRUITED Personality's own Clan alignment, the opposite axis from
+    // CardDefinition.HonorRequirementWaiverClan (a waiver printed on the Personality itself and keyed on
+    // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
@@ -658,7 +701,8 @@ public sealed partial class MatchEngine
         // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
         // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
-        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
+        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)
+            && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
             -(viaReserve && def.Effect=="reserve-defender-discount"?4:0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
@@ -1507,7 +1551,20 @@ public sealed partial class MatchEngine
         // ArmyBattleMaidenBoost's own established shape, plus a defending condition on the RECEIVING
         // card rather than the granter.
         +(IsDefendingUnit(card)&&Keyword(card,"Earth")?_state.Cards.Values.Count(c=>c.Id!=card.Id&&c.OwnerId==card.OwnerId&&c.Zone==Zone.Battlefield&&c.ProvinceIndex==card.ProvinceIndex&&Definition(c).Effect=="boost-earth-personalities-while-defending"&&Keyword(c,"Earth")):0)
+        // Yoritomo Minori (oracle-l5r-9605, issue #301): "+1F for each other Magistrate in her army" --
+        // a self-received, count-based bonus (unlike ArmyBattleMaidenBoost below, which a Battle
+        // Maiden receives FROM other cards' own Effect), so it is Effect-keyed on the receiving card
+        // itself, with no attacking/defending gate at all.
+        +(Definition(card).Effect=="force-per-other-magistrate-in-army"?OtherMagistratesInArmy(card):0)
         +AshigaruBattleBoost(card)+ArmyBattleMaidenBoost(card));
+    // "Her army" (Yoritomo Minori): every Personality the same owner has at the same battlefield --
+    // Army(), the engine's own definition -- so a card not at a battlefield has no army and no bonus.
+    // "Magistrate" is a Keyword() check (printed or granted -- Justice of the Crane grants it), and the
+    // card itself is excluded ("other"). Bowed ones still count: no "unbowed" is printed.
+    private int OtherMagistratesInArmy(CardInstance card) =>
+        card.Zone==Zone.Battlefield && card.ProvinceIndex is int province
+            ? Army(card.OwnerId,province).Count(c=>c.Id!=card.Id && Keyword(c,"Magistrate"))
+            : 0;
     // "Dead" (core rules Glossary): a status a card carries once it enters Zone.Dead, distinct from
     // merely being discarded (Zone.DynastyDiscard/FateDiscard) -- both live in the same client-facing
     // PlayerView.Discard array (see GetView), told apart there by each CardView's own Zone. This is
