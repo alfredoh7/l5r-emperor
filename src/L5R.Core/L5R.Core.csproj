@@ -67,5 +67,6 @@
     <EmbeddedResource Include="../../content/published/personality-wave-19.json" LogicalName="L5R.Published.PersonalityWave19.json" />
     <EmbeddedResource Include="../../content/published/follower-wave-11.json" LogicalName="L5R.Published.FollowerWave11.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-11.json" LogicalName="L5R.Published.StrategyWave11.json" />
+    <EmbeddedResource Include="../../content/published/follower-wave-12.json" LogicalName="L5R.Published.FollowerWave12.json" />
   </ItemGroup>
 </Project>

@@ -31,9 +31,7 @@
     "path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-419-printing-1-image-1.webp",
     "sha256": "47cfa8f988641a30c26143f332a5c70204be74ae0389831eb9bb9a3890e9d50b",
     "source": {
-      "asset": "L5R-Catalogue-WebP85.zip",
-      "matched_by": "original_sha256",
-      "release": "catalogue-art-webp-v1"
+      "note": "Re-derived locally from the verified Oracle-of-the-Void master (top-level path/sha256, untouched) via PIL WebP85 -- the catalogue-art-webp Release attachments available this session did not include this card."
     },
     "width": 750
   }

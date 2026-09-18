@@ -503,6 +503,23 @@ public sealed class MatchState
     // LadyMatsusRageWatch's own doc comment. Cleared unconditionally in EndTurn (same call site as
     // PendingTamokoHonorChecks above) for whichever entries never fired this turn.
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
+    // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy
+    // Infantry Personality to this card's battlefield" -- MoveToBattlefield itself (the sole "an
+    // action moved a card to a battlefield" primitive; ordinary Attack/Defense assignment goes
+    // through Assign() instead, and RecruitReserve is explicitly excluded per the card's own rule)
+    // queues the card that just arrived here; OpenMoveReactionWindow (the same "after this action"
+    // timing OpenBowReactionWindow already uses) drains it once the whole ability finishes
+    // resolving. MoveReactionTargetId is then the one card actually offered by the open window,
+    // read by legion-of-bat-bow's own execution (Target "none": the affected card is auto-
+    // determined, not separately chosen, the same shape PendingNegatableAbility's own resolution
+    // already uses).
+    public string? PendingMoveReactionCardId { get; set; }
+    public string? MoveReactionTargetId { get; set; }
+    // Nikutai (issue #279): "Even if this card is bowed, after a Follower in this unit bows:
+    // Straighten it" -- the one sibling Follower actually offered by an open "nikutaiReaction"
+    // window, read by nikutai-straighten's own execution (Target "none", same auto-determined shape
+    // as MoveReactionTargetId above).
+    public string? NikutaiReactionTargetId { get; set; }
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];

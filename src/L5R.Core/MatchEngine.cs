@@ -164,6 +164,23 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="moveReaction")
+            {
+                // Legion of the Bat (issue #279): same shape as bowReaction above -- this specific
+                // watching card's own reaction, or pass.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the move reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
+            if (_state.PendingChoice.Type=="nikutaiReaction")
+            {
+                // Nikutai (issue #279): same shape as bowReaction/moveReaction above -- this specific
+                // watching card's own reaction, or pass. "Even if this card is bowed" (ValidateAbility's
+                // own bowed-source exemption list) is what lets it actually use the reaction here.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the Nikutai reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="entryReaction")
             {
                 // Same window as "proclaim" above, but for a card that has its own entering-play
@@ -1167,11 +1184,15 @@ public sealed partial class MatchEngine
         // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
         // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
         // folded into that one).
+        // Legion of the Bat (issue #279): "Enters play paying 1 less Gold if you are a Crane Clan
+        // player" -- the exact same shape as Satoshi's Dual Warfans' own lion-clan-discount above,
+        // just a different Clan/term.
         // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
-        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape
-        // "lion-clan-discount" (Satoshi's Dual Warfans) already established, keyed off a different Clan.
+        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape,
+        // keyed off a different Clan.
         var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
             -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0)
+            -(def.Effect=="crane-clan-discount" && Player(command.PlayerId).Clan=="Crane"?1:0)
             -(def.Effect=="mantis-clan-discount" && Player(command.PlayerId).Clan=="Mantis"?1:0));
         Pay(command.PlayerId,card,cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
@@ -1693,8 +1714,18 @@ public sealed partial class MatchEngine
     // path (which brings a fresh card straight from its province, never a card already in play).
     private void MoveToBattlefield(CardInstance card,int province)
     {
+        // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
+        // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
+        // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
+        // Houken, Experienced) funnels through this one function, so queuing here, keyed on whether
+        // the card genuinely started somewhere else, IS "reuse MoveToBattlefield itself" rather than
+        // duplicating its logic at each of those call sites. Ordinary Attack/Defense assignment goes
+        // through Assign() instead, never this function; RecruitReserve moves a fresh card from its
+        // own province, also never through here -- both are excluded for free, no extra check needed.
+        var arrivedFromElsewhere=card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province;
         card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
+        if(arrivedFromElsewhere) _state.PendingMoveReactionCardId=card.Id;
     }
 
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
@@ -2102,6 +2133,17 @@ public sealed partial class MatchEngine
         // AttackDeclaration's own once-per-turn entry (Pass, Phase.Action case) is the correct reset
         // point for it, not Phase.Battle itself.
         if(phase is Phase.Action or Phase.AttackDeclaration or Phase.Dynasty) _state.WarWearinessBowedThisPhase=false;
+        // Wave Man (issue #279): "After an Attack Phase ends: Straighten this unit" -- a trait (no
+        // Action:/Reaction: prefix), so mandatory and automatic, never an optional choice, same
+        // convention as EntryHonorLoss/Destined above. The Attack Phase ends in exactly two places --
+        // AssignDefense (a player declined to attack outright: no battlefield was ever created) and
+        // FinishBattleReturnHomeAndTransition (the last battlefield resolved) -- and BOTH, and only
+        // those, ever call SetPhase(Phase.Dynasty, ...) (grep confirms it; CreateEconomyScenario's own
+        // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
+        // reaches here). One check here therefore covers both paths without needing two separate hooks.
+        if(phase==Phase.Dynasty)
+            foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
+                StraightenBowedUnit(waveMan);
         _state.Phase=phase; _state.PriorityPlayerId=priority; _state.ConsecutivePasses=0; Emit("phaseChanged",$"Phase: {phase}.");
     }
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));

@@ -1,0 +1,38 @@
+[
+  {
+    "card_id": "oracle-l5r-419",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=419",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-419-printing-1-image-1.webp",
+    "image_sha256": "47cfa8f988641a30c26143f332a5c70204be74ae0389831eb9bb9a3890e9d50b"
+  },
+  {
+    "card_id": "oracle-l5r-4700",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4700",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-4700-printing-1-image-1.webp",
+    "image_sha256": "dd36b79b0200fa54a64663517bfde57a0101cdd43a597a548e3401462412fc40"
+  },
+  {
+    "card_id": "oracle-l5r-9872",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9872",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9872-printing-1-image-1.webp",
+    "image_sha256": "b3b0b3f13bac1dc4a3872ee2b0eca23f82a21434b2b7cf0b002ae0a7f3daf124"
+  },
+  {
+    "card_id": "oracle-l5r-9255",
+    "printing_set": [
+      "Honor and Treachery"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9255",
+    "image_path": "assets/reference/oracle/honor-and-treachery/webp/oracle-l5r-9255-printing-2-image-1.webp",
+    "image_sha256": "c2e895a77fda96d9b8f751c97f6e175c9df694ba9e9fac58bf0e53d206a4bfd3"
+  }
+]
