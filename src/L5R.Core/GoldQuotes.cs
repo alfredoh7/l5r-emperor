@@ -1,0 +1,264 @@
+namespace L5R.Core;
+
+// Generalized Gold payment (issue #303). ONE place decides what an action costs in Gold.
+//
+// Before this file, an ability's cost was written down four times by hand (ValidateAbility's cost chain,
+// AbilityActions' parallel per-candidate chain, each ability's own Pay(...) call in the execution switch,
+// and the client re-deriving it for its panel) and they had drifted apart: an option could be offered with
+// sources that ValidateAbility then rejected (Kharmic, the Invest cards), Noritada's Invest and a non-
+// Strategy Discipline validated a payment and then never charged it, and only recruit/equip/Strategy ever
+// got a payment panel. Now every ability carries a GoldCostRule (AbilityDefinition.Cost), this file
+// interprets it into one AbilityCost, and validation, option generation, the GoldQuote shipped to the
+// client and the payment itself all read that same AbilityCost. Purchase, recruitReserve, equip and
+// playStrategy reuse the same GoldQuote shape so the client has exactly one payment panel.
+
+/// <summary>How a Gold cost is computed, on the wire as GoldQuote.Kind.</summary>
+public static class GoldCostKind
+{
+    /// <summary>Printed on the card or fixed in the ability text: the same whichever target is chosen.</summary>
+    public const string Fixed = "fixed";
+    /// <summary>Computed from the chosen target (another card's cost, a unit's grouped total, a recruit
+    /// quote), plus a modifier and a floor. Each legal target has its own quote.</summary>
+    public const string Derived = "derived";
+    /// <summary>The player chooses the amount within MinAmount..MaxAmount (GameCommand.GoldAmount).</summary>
+    public const string Variable = "variable";
+}
+
+/// <summary>What a rule's amount is computed from.</summary>
+public static class GoldCostBasis
+{
+    /// <summary>A constant written into the ability (Kharmic 2, Invest 3/5, "Pay 2 Gold: Draw a card").</summary>
+    public const string Fixed = "fixed";
+    /// <summary>The ability's own source card's printed Gold Cost (a Strategy, a Discipline, Singh Remnants).</summary>
+    public const string SourcePrinted = "source-printed";
+    /// <summary>The targeted card's own printed Gold Cost (Equip (Battle), Soshi Neiru, Low Market).</summary>
+    public const string TargetPrinted = "target-printed";
+    /// <summary>The targeted card's grouped total: a Personality plus everything attached to it (its unit),
+    /// or a single card's own cost when the target is not a Personality (Disgraceful Conduct, A Stain
+    /// Cleansed).</summary>
+    public const string TargetUnitTotal = "target-unit-total";
+    /// <summary>The recruit quote of a face-up province Personality, so every recruit discount and
+    /// surcharge QuotePurchase knows about applies (Your Clan Needs You!, Shinden Shorai).</summary>
+    public const string TargetRecruit = "target-recruit";
+    /// <summary>Chosen by the player between Amount (the minimum) and MaxAmount.</summary>
+    public const string Variable = "variable";
+}
+
+/// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
+/// amount = basis value + Modifier, raised to Floor when one is given, never below 0.</summary>
+/// <param name="Amount">The constant (Fixed basis) or the minimum (Variable basis).</param>
+/// <param name="Explicit">False only for the rules GoldQuotes synthesizes for abilities that carry no rule
+/// (a Strategy source paying its own printed cost): those charge nothing, and emit no payment event, when
+/// that cost is 0.</param>
+public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0, int? Floor = null,
+    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true)
+{
+    public static GoldCostRule Fixed(int amount) => new(GoldCostBasis.Fixed, amount);
+    public static GoldCostRule SourcePrinted() => new(GoldCostBasis.SourcePrinted);
+    public static GoldCostRule TargetPrinted(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetPrinted, Modifier: modifier, Floor: floor);
+    public static GoldCostRule TargetUnitTotal(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetUnitTotal, Modifier: modifier, Floor: floor);
+    public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null) =>
+        new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan);
+    public static GoldCostRule Variable(int min = 0, int? max = null) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max);
+
+    public string Kind => Basis switch
+    {
+        GoldCostBasis.Variable => GoldCostKind.Variable,
+        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit => GoldCostKind.Derived,
+        _ => GoldCostKind.Fixed
+    };
+}
+
+public sealed partial class MatchEngine
+{
+    /// <summary>The most alternatives shipped per amount of a variable quote (a fixed or derived quote
+    /// carries the ordinary PaymentOptions limit); bounds the wire size of "pay zero or more".</summary>
+    private const int VariablePaymentOptionsPerAmount = 8;
+
+    /// <summary>The resolved price of one ability command. Amount is what must be paid now; Subject is the
+    /// card named in the payment event; NeedsTarget means a target-derived rule has no target yet.</summary>
+    private sealed record AbilityCost(GoldCostRule Rule, int Amount, string Basis, string? Error, bool NeedsTarget,
+        CardInstance? Subject, int? Min = null, int? Max = null);
+
+    /// <summary>The rule for an ability that declares none: a Strategy source pays its own printed cost,
+    /// and a Discipline (played from a discard pile) pays its source's printed cost. Everything else is
+    /// free.</summary>
+    private static GoldCostRule? ImplicitGoldRule(AbilityDefinition ability, CardInstance? source)
+    {
+        if (source is null) return null;
+        if (Definition(source).Type == CardType.Strategy) return GoldCostRule.SourcePrinted() with { Explicit = false };
+        if (ability.Timing == "Discipline") return GoldCostRule.SourcePrinted();
+        return null;
+    }
+
+    private int UnitTotalGoldCost(CardInstance card, out string breakdown)
+    {
+        var parts = new List<int> { Definition(card).GoldCost };
+        if (Definition(card).Type == CardType.Personality)
+            parts.AddRange(Attachments(card.Id).OrderBy(a => a.Id, StringComparer.Ordinal).Select(a => Definition(a).GoldCost));
+        var total = parts.Sum();
+        breakdown = parts.Count > 1 ? $"{string.Join(" + ", parts)} = {total}" : total.ToString();
+        return total;
+    }
+
+    private static string Modified(int modifier, int? floor) =>
+        (modifier < 0 ? $" − {-modifier}" : modifier > 0 ? $" + {modifier}" : "") + (floor is int f ? $" (min {f})" : "");
+
+    private static int Clamp(int raw, int? floor) => Math.Max(0, floor is int f ? Math.Max(f, raw) : raw);
+
+    /// <summary>The single cost function for abilities. Null when the ability costs no Gold. Never throws
+    /// on an unknown or partial command: a target-derived rule with no target reports NeedsTarget, and a
+    /// rule that cannot be priced reports Error.</summary>
+    private AbilityCost? AbilityGoldCost(GameCommand command)
+    {
+        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return null;
+        var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
+        var target = command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var t) ? t : null;
+        var rule = ability.Cost ?? ImplicitGoldRule(ability, source);
+        if (rule is null) return null;
+        switch (rule.Basis)
+        {
+            case GoldCostBasis.Fixed:
+                return new(rule, rule.Amount, "Fixed by this ability", null, false, source ?? target);
+            case GoldCostBasis.SourcePrinted:
+                if (source is null) return new(rule, 0, "This ability has no source card to price.", "This ability has no source card to price.", false, null);
+                return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} cost {Definition(source).GoldCost}", null, false, source);
+            case GoldCostBasis.Variable:
+            {
+                var chosen = command.GoldAmount ?? rule.Amount;
+                var error = chosen < rule.Amount ? $"Choose at least {rule.Amount} Gold."
+                    : rule.MaxAmount is int cap && chosen > cap ? $"Choose at most {cap} Gold." : null;
+                var basis = rule.MaxAmount is int max ? $"You choose the amount ({rule.Amount} to {max} Gold)"
+                    : rule.Amount > 0 ? $"You choose the amount (at least {rule.Amount} Gold)" : "You choose the amount (zero or more Gold)";
+                return new(rule, chosen, basis, error, false, source ?? target, rule.Amount, rule.MaxAmount);
+            }
+        }
+        // Every remaining basis is derived from the chosen target.
+        if (target is null) return new(rule, 0, "Choose a target to see this cost.", null, true, null);
+        var name = Definition(target).Name;
+        switch (rule.Basis)
+        {
+            case GoldCostBasis.TargetPrinted:
+            {
+                var printed = Definition(target).GoldCost;
+                return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
+            }
+            case GoldCostBasis.TargetUnitTotal:
+            {
+                var total = UnitTotalGoldCost(target, out var breakdown);
+                var label = Definition(target).Type == CardType.Personality && breakdown.Contains('+') ? $"{name} unit total {breakdown}" : $"{name} total cost {total}";
+                return new(rule, Clamp(total + rule.Modifier, rule.Floor), label + Modified(rule.Modifier, rule.Floor), null, false, target);
+            }
+            case GoldCostBasis.TargetRecruit:
+            {
+                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan);
+                return new(rule, Clamp(recruit.Cost + rule.Modifier, rule.Floor), $"{name} recruit cost {recruit.Cost}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
+            }
+        }
+        return new(rule, 0, "Unsupported Gold cost rule.", "Unsupported Gold cost rule.", false, null);
+    }
+
+    /// <summary>The Gold an ability's own resolution must charge for this command (0 when it is free). The
+    /// effects of a variable-cost ability read the amount the player actually chose from here.</summary>
+    private int PaidGoldAmount(GameCommand command) => AbilityGoldCost(command)?.Amount ?? 0;
+
+    /// <summary>ValidateAbility's cost step: reject a rule that cannot be priced or a stray/out-of-range
+    /// chosen amount, then require that the offered sources actually produce it.</summary>
+    private void ValidateAbilityPayment(GameCommand command, int playerId)
+    {
+        var cost = AbilityGoldCost(command);
+        Require(command.GoldAmount is null || cost?.Rule.Basis == GoldCostBasis.Variable, "This action has no player-chosen Gold amount.");
+        if (cost is not null) Require(cost.Error is null, cost.Error ?? "");
+        ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds);
+    }
+
+    /// <summary>ExecuteAbilityEffects' payment step: charge exactly what validation priced, bowing exactly
+    /// the sources the player chose. A free implicit rule (a 0-cost Strategy) charges nothing and, as it
+    /// always has, leaves no payment event.</summary>
+    private void PayForAbility(GameCommand command, PlayerState player)
+    {
+        if (AbilityGoldCost(command) is not { } cost) return;
+        Require(cost.Error is null, cost.Error ?? "");
+        if (!cost.Rule.Explicit && cost.Amount <= 0) return;
+        Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds);
+    }
+
+    /// <summary>The quote the client renders for an ability command (full or partial: a target-derived cost
+    /// with no target yet reports an Error). Null when the ability costs no Gold. The acting player is
+    /// command.PlayerId.</summary>
+    public GoldQuote? QuoteAbilityGold(GameCommand command)
+    {
+        if (command.PlayerId is < 0 or > 1) return null;
+        var cost = AbilityGoldCost(command);
+        return cost is null ? null : BuildQuote(command.PlayerId, cost);
+    }
+
+    private GoldQuote BuildQuote(int playerId, AbilityCost cost)
+    {
+        var error = cost.Error ?? (cost.NeedsTarget ? cost.Basis : null);
+        if (cost.Rule.Basis != GoldCostBasis.Variable)
+            return new(cost.Amount, cost.Rule.Kind, cost.Basis, error, error is null ? PaymentOptions(playerId, cost.Amount) : []);
+        var min = cost.Min ?? 0;
+        var production = Producers(playerId).Sum(c => GoldProduced(c.Id, playerId));
+        var max = Math.Max(min, Math.Min(cost.Max ?? int.MaxValue, production));
+        var byAmount = new Dictionary<int, PaymentOption[]>();
+        for (var amount = min; amount <= max && error is null; amount++)
+        {
+            var options = PaymentOptions(playerId, amount).Take(VariablePaymentOptionsPerAmount).ToArray();
+            if (options.Length > 0) byAmount[amount] = options;
+        }
+        var payments = error is null && byAmount.TryGetValue(cost.Amount, out var chosen) ? chosen : [];
+        return new(cost.Amount, GoldCostKind.Variable, cost.Basis, error, payments, min, max, byAmount);
+    }
+
+    /// <summary>Wraps a purchase/recruit quote in the general shape the payment panel renders, so the
+    /// client has one panel for every Gold action. Recruiting is fixed: the card's printed cost adjusted by
+    /// the chosen Clan discount/allegiance, all decided by QuotePurchase.</summary>
+    private static GoldQuote ToGoldQuote(PurchaseQuote quote) =>
+        new(quote.Cost, GoldCostKind.Fixed, quote.Basis ?? $"Cost {quote.Cost}", quote.Error, quote.Payments);
+
+    // Equip (issue #303 folds Equip's own cost into the same quote shape): the attachment's printed cost
+    // less every discount that applies to THIS attachment, THIS wielder and THIS player. Katagi's is the
+    // one wielder-dependent term, so it alone makes an equip quote "derived"; the Clan discounts depend on
+    // the equipping player only.
+    private (int Cost, string Basis, string Kind) EquipGoldCost(int playerId, CardInstance card, CardInstance target)
+    {
+        var def = Definition(card); var player = Player(playerId);
+        var basis = $"{def.Name} cost {def.GoldCost}";
+        var raw = def.GoldCost; var kind = GoldCostKind.Fixed;
+        // Mirumoto Katagi (issue #216): "Non-Unique Weapons attaching to Katagi from your hand enter
+        // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
+        // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
+        // formula directly rather than as a new command flag.
+        if (Definition(target).Effect == "weapon-discount-non-unique" && Keyword(card, "Weapon") && !Keyword(card, "Unique"))
+        { raw -= 4; kind = GoldCostKind.Derived; basis += $" − 4 ({Definition(target).Name}, non-Unique Weapon)"; }
+        // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
+        // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
+        // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
+        // folded into that one).
+        // Legion of the Bat (issue #279): "Enters play paying 1 less Gold if you are a Crane Clan
+        // player" -- the exact same shape as Satoshi's Dual Warfans' own lion-clan-discount above,
+        // just a different Clan/term.
+        // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
+        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape,
+        // keyed off a different Clan.
+        if (def.Effect == "lion-clan-discount" && player.Clan == "Lion") { raw -= 1; basis += " − 1 (Lion Clan)"; }
+        if (def.Effect == "crane-clan-discount" && player.Clan == "Crane") { raw -= 1; basis += " − 1 (Crane Clan)"; }
+        if (def.Effect == "mantis-clan-discount" && player.Clan == "Mantis") { raw -= 1; basis += " − 1 (Mantis Clan)"; }
+        if (raw < 0) basis += " (min 0)";
+        return (Math.Max(0, raw), basis, kind);
+    }
+
+    private GoldQuote QuoteEquipGold(int playerId, CardInstance card, CardInstance target)
+    {
+        var (cost, basis, kind) = EquipGoldCost(playerId, card, target);
+        return new(cost, kind, basis, null, PaymentOptions(playerId, cost));
+    }
+
+    /// <summary>A Strategy played with the playStrategy command pays its own printed cost. Null when free.</summary>
+    private GoldQuote? QuoteStrategyGold(int playerId, CardInstance card)
+    {
+        var def = Definition(card);
+        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost)) : null;
+    }
+}
