@@ -6,6 +6,10 @@ do not ask either person to operate branches or build tools merely to playtest.
 Alfredo delegates human preview/playability review to Mendon. This does not imply
 Mendon's acceptance or replace the existing checks/review requirements for merging.
 
+Current delivery: [Regions and Celestials for Windows](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr292-7360ff1c17-r1-windows)
+— [Mendon's review notification](https://github.com/alfredoh7/l5r-emperor/pull/292#issuecomment-5732927474).
+This version is the combined non-duel UI preview at `7360ff1`, not a merged release.
+
 ## Mendon's path
 
 1. Open the GitHub notification **“Alfredo has built … and would like your review.”**

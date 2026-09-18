@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implemented reusable Windows preview packaging, isolated scenario launchers, private versioned downloads, Claude instructions and gated Mendon notifications. First PR292 candidate uploaded and verified.",
-  "validation": "Eight local regression groups passed. Strict Windows export and GitHub SHA-256/size verification passed. Actual exported game started successfully on Windows CI and created its isolated user-data directory. Launcher test invocation exposed PowerShell/cmd quote stripping in a path containing spaces and ampersands; fixed the test driver with exact CreateProcess arguments. Final Windows rerun pending.",
-  "remaining": "Pass all five actual Windows launcher checks and final CI, then publish the review-ready instructions and authorized notification. Mendon gameplay/graphical acceptance and shared tooling review remain pending.",
+  "summary": "Published the first portable Windows Regions/Celestials review and posted the authorized Mendon notification on PR292 (comment 5732927474). Added reusable exact-source packaging, isolated prepared launchers, feedback links, private-release verification, Claude instructions and notification gating. No game code or main merge.",
+  "validation": "Tooling commit 5989a73 passed Mac/Windows foundation CI, Context/handoff, routing and Windows review package CI. Eight local/Windows regression groups passed. Windows run 35367454230 downloaded the actual ZIP, verified SHA-256 465cdf25d4105d2876c0b1c79a2fc540b9e0f487de35ea81ca3b0feccfe72272 and 1300434321 bytes, started the bundled game runtime headlessly, verified isolated user data, and executed all five launchers including paths with spaces/ampersands/exclamations. Strict export and GitHub-upload digest passed. Final follow-up only records delivery URLs/evidence. Native Windows graphical/rules acceptance and email receipt are not claimed.",
+  "remaining": "Implementation and notification complete. PR298 shared tooling review from Mendon; PR292 gameplay review and its three automated findings remain open. Neither PR is merged. Published package: https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr292-7360ff1c17-r1-windows . Notification: https://github.com/alfredoh7/l5r-emperor/pull/292#issuecomment-5732927474 .",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-18T16:16:00.709174+00:00"
+  "updated": "2026-09-18T16:24:49.129874+00:00"
 }
