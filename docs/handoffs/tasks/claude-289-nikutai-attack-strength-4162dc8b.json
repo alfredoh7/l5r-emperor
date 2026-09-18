@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Fixed Nikutai's Battle ability (nikutai-attack): added its missing AttackStrength (5) and AttackKind (Melee) switch cases, plus three regression tests proving it now destroys a Force-5 target, cannot legally target a Force-6 target, and is correctly blocked by Seasoned Ashigaru's Melee immunity.",
+  "validation": "bash tools/check.sh --skip-client: all suites pass, including the new/previously-186/187 core suite now at 187/187.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/289",
+  "branch": "claude/289-nikutai-attack-strength",
+  "updated": "2026-09-18T13:33:02.802122+00:00"
+}

@@ -1655,6 +1655,38 @@ static void FollowerWave11Primitives()
         Check(e.State.PendingChoice is null,"A Follower outside Nikutai's own unit bowing does not open its reaction");
     }
     {
+        // Nikutai's own Battle ability (issue #289): "Melee 5 Attack" -- previously missing from both
+        // AttackStrength and AttackKind, so it silently resolved at strength 0 and could never
+        // legally target any card with positive Force. Force 5 is exactly lethal.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var nikutai=Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id,province:0);
+        var target=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,TargetId:target.Id,AbilityId:"nikutai-attack"));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Force-5 target destroyed by Melee 5 Attack (no reactor in play, so it resolves immediately)");
+    }
+    {
+        // Negative: a Force-6 target is above Nikutai's Melee 5 and survives.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var nikutai=Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id,province:0);
+        var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,TargetId:target.Id,AbilityId:"nikutai-attack"));
+        Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Force-6 target is above the Attack's strength and cannot even be legally targeted");
+    }
+    {
+        // AttackKind must classify as "Melee", not the missing-case default "": Seasoned Ashigaru is
+        // immune to Melee Attacks specifically, checked via AttackKind(id) != "Melee".
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var nikutai=Add(s,"oracle-l5r-9872",0,Zone.Attached,attachedTo:host.Id,province:0);
+        var seasoned=Add(s,"oracle-l5r-10901",1,Zone.Battlefield,province:0); // Force 1, melee-immune
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:nikutai.Id,TargetId:seasoned.Id,AbilityId:"nikutai-attack"));
+    }
+    {
         // Wave Man: the Attack Phase ends because the last battlefield resolved -- straightens
         // automatically (a trait, not the ordinary Straighten Phase). Host is the winning ATTACKER
         // (Force 4 vs. the defender's 3), so a decisive win destroys the losing army outright
