@@ -142,7 +142,6 @@ BLOCKERS: dict[str, str] = {
     # own scope bounded.
     "oracle-l5r-24": "Needs a Gold-Cost comparison Target category plus a Gold-Cost-reduction effect (both novel).",
     "oracle-l5r-634": "Needs a Retainer mechanic, movement to any location (not just home), and a province-card discard (three separate gaps).",
-    "oracle-l5r-1127": "Needs Regions (not built).",
     "oracle-l5r-1151": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-1522": "Needs an ability-lock mechanism (\"abilities on other cards in its unit may not be used\") -- not built.",
     "oracle-l5r-9900": "Needs a new Reaction trigger: \"after an action resolves that a Personality performed\" (the Terrain-play and additional-Battle-action halves are separately wirable).",

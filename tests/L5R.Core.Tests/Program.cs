@@ -199,7 +199,8 @@ var tests = new (string Name, Action Run)[]
     ("Personality wave 22 (issue #301): the Open straighteners and their new Holding-type Targets -- Agasha Kodo's any-holding (either side's, Open so usable by the non-active player, not a Battle action, once per turn), Asahina Munefusa's own-holding-with-keyword Temple (own only, keyword required, not a Personality), Isawa Mitsuko's air-shugenja-or-holding union (Air AND Shugenja both required, either side's, Holding half, and a Personality target reaching Tamori Tamoko's straighten-negation window while a Holding never does)", BatchFStraightenAndHoldingTargets),
     ("Personality wave 22 (issue #301): the Battle bow/destroy family -- Bayushi Nori's dual-choice shape (bow the Personality OR every attachment, Honor loss only when dishonorable, one shared use, enemy only, presence required); Hida Mimori's new enemy-bowed-card Target (a Personality with his attachments, or a lone Follower/Item, with every illegal shape rejected, plus Rokai's destruction-negation window); Isawa Mitsuko's bow-then-conditional-destroy (Shadowlands by Clan AND by the printed keyword Rikate carries, Ninja, Kolat, and a Stalwart target still destroyed); Sutigu's new own-source-or-unbowed-attached-with-keyword Performer (Sutigu or his own unbowed Weapon, straightening negated only on an attachment)", BatchFBattleBowAndDestroy),
     ("Personality wave 22 (issue #301): movement and opponent-choice cards -- Asahina Munefusa's Battle half (exempt from presence for a controller with no unit there, attacking Personalities only, Honor only if he really moved, Tamoko able to negate it); Shosuro Hawado (remove any Dynasty card in any discard pile as the cost, usable while bowed, home or a chosen battlefield with enemy units, straightening only if she really moved, one shared use); Asako Rikate's new rikateDetach PendingChoice (any subset of the unit's attachments returned to hand through the generalized ReturnToHand, THEN -2C, with the ordering proven lethal or not); Shosuro Rin's new rinShame PendingChoice (dishonor, or bow plus a negated straightening, Stalwart included)", BatchFMovementAndChoices),
-    ("Personality wave 22 / region-wave-3 (issue #301): passives, equip and recruit -- Isawa Kojiro's live conditional Naval (appears and disappears with an attached Spell, never a durable grant); Yoritomo Minori's self-received per-other-Magistrate Force bonus (army-scoped, printed or granted, bowed counting, attacking or defending); Soshi Neiru's Open-timed Air-Spell equip (fixed wielder, no once-per-turn limit, usable by the non-active player, never in Battle); Shinden Shorai as the fourth caller of the shared province-Personality entry sequence (the player's OWN turn count, the Lion-Clan-Personality Honor Requirement waiver keyed on the recruit rather than the player, same province, full cost, Proclaim resuming to the opponent)", BatchFPassivesEquipAndRecruit)
+    ("Personality wave 22 / region-wave-3 (issue #301): passives, equip and recruit -- Isawa Kojiro's live conditional Naval (appears and disappears with an attached Spell, never a durable grant); Yoritomo Minori's self-received per-other-Magistrate Force bonus (army-scoped, printed or granted, bowed counting, attacking or defending); Soshi Neiru's Open-timed Air-Spell equip (fixed wielder, no once-per-turn limit, usable by the non-active player, never in Battle); Shinden Shorai as the fourth caller of the shared province-Personality entry sequence (the player's OWN turn count, the Lion-Clan-Personality Honor Requirement waiver keyed on the recruit rather than the player, same province, full cost, Proclaim resuming to the opponent)", BatchFPassivesEquipAndRecruit),
+    ("Strategy wave 16 (issue #304): Brawl -- its \"Needs Regions (not built)\" blocker was stale. The destroy half's new region-or-terrain Target (a Region at ANY province, either owner's, destroyed to its owner's Dynasty discard with its static strength bonus going with it; a Terrain through the shared DiscardTerrain removal, meeting Ring of Water's destroyed-a-Terrain condition; never a Personality; offered targets exactly the Region and the Terrain; disabled with nothing to destroy), usable at Open timing outside a Battle while the Battle-only bow half is not, and the bow half's reuse of enemy-card-without-attachments (an unattached enemy bows; an attached one and your own card do not)", StrategyWave16Primitives)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -8316,6 +8317,121 @@ static void BatchDPrimitives()
         Equal(e.State.Players[0].Hand.Count,8,"One over the lowered threshold of 7 (8 printed - 1 from the opponent's False Ring of Earth) after the End Phase draw");
         Equal(e.State.PendingChoice!.Type,"discardHand");
         Equal(e.State.PendingChoice!.Prompt,"Discard 1 card(s) to return to 7.");
+    }
+}
+// Brawl (issue #304): its "Needs Regions (not built)" blocker was stale -- Regions and Terrains both
+// already existed. Two paired abilities of one Strategy (one shared UsageKey): the bow half reuses
+// enemy-card-without-attachments verbatim; the Battle/Open destroy half is the new region-or-terrain
+// Target (exempt from the shared "Battle-timing target must be at the current battlefield" Require) plus
+// DestroyRegion, and reuses DiscardTerrain and Ring of Water's own destroyed-a-Terrain flag.
+static void StrategyWave16Primitives()
+{
+    var definition=CardCatalog.Get("oracle-l5r-1127");
+    Equal(PublishedContent.StrategyWave16.Cards.Length,1,"Strategy wave 16 publishes exactly Brawl");
+    Equal(definition.Type,CardType.Strategy); Equal(definition.GoldCost,0); Equal(definition.Focus,1);
+    Check(definition.Abilities!.SequenceEqual(new[]{"brawl-bow","brawl-destroy"}),"Both printed halves are wired");
+    Check(AbilityCatalog.All["brawl-bow"].UsageKey is not null && AbilityCatalog.All["brawl-bow"].UsageKey==AbilityCatalog.All["brawl-destroy"].UsageKey,"The two halves share one UsageKey");
+    Equal(AbilityCatalog.All["brawl-bow"].Timing,"Battle"); Equal(AbilityCatalog.All["brawl-destroy"].Timing,"BattleOrOpen");
+
+    GameCommand Use(MatchEngine e,string ability,CardInstance brawl,CardInstance target)=>new("useAbility",0,e.Version,CardId:brawl.Id,TargetId:target.Id,AbilityId:ability);
+    MatchState Fixture(out CardInstance brawl)
+    {
+        var s=Battle(5,2).State; s.PriorityPlayerId=0;
+        brawl=Add(s,"oracle-l5r-1127",0,Zone.Hand);
+        return s;
+    }
+
+    // A Region at ANY province -- here the defender's province 1, not the battlefield (province 0) --
+    // is destroyed to its owner's Dynasty discard, and its static effect goes with it.
+    {
+        var s=Fixture(out var brawl);
+        var region=Add(s,"oracle-l5r-9865",1,Zone.Region,province:1);
+        s.Players[1].Provinces[1].RegionId=region.Id;
+        var e=MatchEngine.FromTestState(s);
+        var before=e.GetView(0).Players[1].Provinces[1].Strength;
+        Accept(e,Use(e,"brawl-destroy",brawl,region));
+        Equal(e.State.Cards[region.Id].Zone,Zone.DynastyDiscard,"The Region is destroyed to its owner's Dynasty discard");
+        Check(e.State.Cards[region.Id].ProvinceIndex is null,"A destroyed Region no longer names a province");
+        Check(e.State.Players[1].Provinces[1].RegionId is null,"The province's own pointer to the Region is cleared");
+        Equal(e.GetView(0).Players[1].Provinces[1].Strength,before-2,"Fallow Lands' +2 strength leaves with it");
+        Equal(e.State.Cards[brawl.Id].Zone,Zone.FateDiscard,"Brawl itself is spent");
+        Check(e.GetView(0).Events.Any(ev=>ev.Type=="regionDestroyed"),"A regionDestroyed event is emitted");
+    }
+    // Ownership is unrestricted: the acting player's own Region may be destroyed too.
+    {
+        var s=Fixture(out var brawl);
+        var region=Add(s,"oracle-l5r-9865",0,Zone.Region,province:0);
+        s.Players[0].Provinces[0].RegionId=region.Id;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Use(e,"brawl-destroy",brawl,region));
+        Equal(e.State.Cards[region.Id].Zone,Zone.DynastyDiscard); Check(e.State.Players[0].Provinces[0].RegionId is null);
+    }
+    // A Terrain in play is destroyed through the shared DiscardTerrain removal, and counts as Ring of
+    // Water's own "destroyed a Terrain" condition (issue #194) for the acting player.
+    {
+        var s=Fixture(out var brawl);
+        var terrain=Add(s,"training-terrain",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.State.Players[0].TerrainDestroyedThisBattle,"Baseline: no Terrain destroyed yet");
+        Accept(e,Use(e,"brawl-destroy",brawl,terrain));
+        Equal(e.State.Cards[terrain.Id].Zone,Zone.FateDiscard,"The Terrain leaves play");
+        Check(e.State.Cards[terrain.Id].ProvinceIndex is null);
+        Check(e.State.Players[0].TerrainDestroyedThisBattle,"Ring of Water's destroyed-a-Terrain condition is met");
+    }
+    // Only a Region or a Terrain is a legal destroy target -- never a Personality -- and the offered
+    // action lists exactly the Region and the Terrain (the candidates the client target picker shows).
+    {
+        var s=Fixture(out var brawl);
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield && CardCatalog.Get(c.DefinitionId).Type==CardType.Personality);
+        var region=Add(s,"oracle-l5r-9865",1,Zone.Region,province:1);
+        s.Players[1].Provinces[1].RegionId=region.Id;
+        var terrain=Add(s,"training-terrain",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Use(e,"brawl-destroy",brawl,defender));
+        var offered=e.QueryActions(0).Single(a=>a.Command?.AbilityId=="brawl-destroy");
+        Check(offered.Enabled,"Brawl's destroy half is offered when a Region and a Terrain are in play");
+        Check(offered.TargetIds!.OrderBy(x=>x).SequenceEqual(new[]{region.Id,terrain.Id}.OrderBy(x=>x)),"Offered targets are exactly the Region and the Terrain");
+    }
+    // With no Region or Terrain in play the destroy half is offered but disabled.
+    {
+        var s=Fixture(out var brawl);
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.QueryActions(0).Single(a=>a.Command?.AbilityId=="brawl-destroy" || a.Label.StartsWith("Target a Region")).Enabled,"Nothing to destroy: the destroy half is disabled");
+    }
+    // Battle/Open: the destroy half also works outside a Battle (a Region at any province), while the
+    // Battle-only bow half does not -- proven against the same enemy Personality that the bow half
+    // legally bows once a Battle is under way (the control just below).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        s.Phase=Phase.Action; s.PriorityPlayerId=0; // Open timing is the Action phase's own.
+        var brawl=Add(s,"oracle-l5r-1127",0,Zone.Hand);
+        var enemy=Add(s,"training-lion-veteran",1,Zone.Home);
+        var region=Add(s,"oracle-l5r-9865",1,Zone.Region,province:0);
+        s.Players[1].Provinces[0].RegionId=region.Id;
+        var e=MatchEngine.FromTestState(s);
+        Check(e.State.Phase!=Phase.Battle,"Not a Battle: the Open half is being exercised");
+        Reject(e,new GameCommand("useAbility",e.State.PriorityPlayerId,e.Version,CardId:brawl.Id,TargetId:enemy.Id,AbilityId:"brawl-bow"));
+        Accept(e,new GameCommand("useAbility",e.State.PriorityPlayerId,e.Version,CardId:brawl.Id,TargetId:region.Id,AbilityId:"brawl-destroy"));
+        Equal(e.State.Cards[region.Id].Zone,Zone.DynastyDiscard,"Destroyed at Open timing, outside any Battle");
+    }
+    // The bow half: an enemy card without attachments bows; one wearing an attachment does not qualify;
+    // and your own card is never a target.
+    {
+        var s=Fixture(out var brawl);
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield && CardCatalog.Get(c.DefinitionId).Type==CardType.Personality);
+        var attacker=s.Cards.Values.Single(c=>c.OwnerId==0 && c.Zone==Zone.Battlefield);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Use(e,"brawl-bow",brawl,attacker));
+        Accept(e,Use(e,"brawl-bow",brawl,defender));
+        Check(e.State.Cards[defender.Id].Bowed,"The unattached enemy Personality is bowed");
+    }
+    {
+        var s=Fixture(out var brawl);
+        var defender=s.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield && CardCatalog.Get(c.DefinitionId).Type==CardType.Personality);
+        Add(s,"training-follower-crane-guard",1,Zone.Attached,attachedTo:defender.Id);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Use(e,"brawl-bow",brawl,defender));
+        Check(!e.State.Cards[defender.Id].Bowed,"A Personality with an attachment is not a legal bow target");
     }
 }
 static void BatchEPrimitives()

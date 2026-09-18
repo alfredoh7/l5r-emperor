@@ -1256,6 +1256,14 @@ public static class AbilityCatalog
         // Shinden Shorai (oracle-l5r-6857, a Region): the fourth caller into the shared "bring a face-up
         // province Personality into play, paying all costs" entry sequence (BringProvincePersonalityIntoPlay).
         ["shinden-shorai-recruit"] = new("Limited", "If it is not your first or second turn: Bring a face-up Personality in this province into play, paying all costs. You may ignore the Personality's Honor Requirement if he is Lion Clan", "own-personality-in-province"),
+        // Brawl (oracle-l5r-1127, issue #304): two alternative effects of one Strategy -- the paired-
+        // ability shape sharing one UsageKey that Strength of the Divine/Horibe already use. The bow
+        // half reuses enemy-card-without-attachments verbatim (Masumi/Unexpected/Jinai). The destroy
+        // half is Battle/Open and targets a Region at ANY province or a Terrain -- a new Target
+        // category, exempt from the shared "Battle-timing target must be at the current battlefield"
+        // Require because a Region sits in Zone.Region, never AtBattle-eligible.
+        ["brawl-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments", UsageKey: "brawl"),
+        ["brawl-destroy"] = new("BattleOrOpen", "Target a Region (at any province) or a Terrain: Destroy it", "region-or-terrain", UsageKey: "brawl"),
     });
 }
 
@@ -1480,6 +1488,8 @@ public sealed partial class MatchEngine
         // target" at this ability-id level, the same "a specific instance might not end up bowing"
         // allowance costly-feud's own doc comment above already establishes.
         or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider"
+        // Brawl (issue #304): bows its enemy target unconditionally.
+        or "brawl-bow"
         // Fires of Turmoil (issue #295): the same conditional-bow-or-straighten shape as Strategic
         // Sacrifice/Weakness of Man above (here, gated by the discarded Fate card's own Focus parity
         // rather than the target's current bow state) -- still counts as "bows the target."
@@ -2718,7 +2728,10 @@ public sealed partial class MatchEngine
                     // actingAsBattle (issue #267): the same generalization as the blanket block above --
                     // a BattleOrOpen ability's Open half has no battlefield to validate a target
                     // against at all, so this Require applies only while genuinely acting as Battle.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")
+                    // Brawl (issue #304): "a Region (at any province)" -- a Region sits in Zone.Region and is
+                    // never AtBattle-eligible; a Terrain in play is always at the current battlefield anyway
+                    // (it is discarded when its battle resolves), so exempting the whole category is exact.
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
@@ -2850,6 +2863,10 @@ public sealed partial class MatchEngine
                         "enemy-personality-fewer-weapons-than-self" => personality && !own &&
                             Attachments(target.Id).Count(a => Keyword(a, "Weapon")) < Attachments(source!.Id).Count(a => Keyword(a, "Weapon")),
                         "terrain-at-battle" => type == CardType.Strategy && Keyword(target, "Terrain"),
+                        // Brawl (issue #304): a Region attached to any province (either player's), or a
+                        // Terrain in play. Neither restricts ownership.
+                        "region-or-terrain" => type == CardType.Region && target.Zone == Zone.Region
+                            || type == CardType.Strategy && target.Zone == Zone.Battlefield && Keyword(target, "Terrain"),
                         // Province adjacency (Moto Gunso's shape: "...at the current battlefield and
                         // at each adjacent battlefield"): the target's own province, not the current
                         // one, must be adjacent to it. See AdjacentProvinces.
@@ -3909,6 +3926,13 @@ public sealed partial class MatchEngine
             }
             case "ayumi-entry": GainHonor(player.Id, -2, "Ikoma Ayumi", source); break;
             case "masumi-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "brawl-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "brawl-destroy":
+                // A Terrain shares training-destroy-terrain's removal and Ring of Water's own
+                // "destroyed a Terrain" condition (issue #194); a Region leaves its province.
+                if (target!.Zone == Zone.Region) DestroyRegion(target);
+                else { DiscardTerrain(target); player.TerrainDestroyedThisBattle = true; }
+                break;
             case "tsukasa-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "tsukasa-straighten": Straighten(target!); break;
             case "arata-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(source)); GainHonor(player.Id, 1, "Matsu Arata"); break;
@@ -4725,6 +4749,14 @@ public sealed partial class MatchEngine
         // resume where this one left off. A no-op for every other Terrain (RemoveAll matches nothing).
         _state.FieldsOfMercyWatches.RemoveAll(w => w.CardId == terrain.Id);
         Emit("terrainDiscarded", $"{Definition(terrain).Name} was removed from play.", terrain.OwnerId, terrain.Id);
+    }
+    // Brawl (issue #304): a Region attached to a province leaves play for its owner's Dynasty discard,
+    // the same removal ResolveProvinceDestruction applies when the province itself is destroyed.
+    private void DestroyRegion(CardInstance region)
+    {
+        foreach (var province in _state.Players.SelectMany(p => p.Provinces).Where(p => p.RegionId == region.Id)) province.RegionId = null;
+        region.Zone = Zone.DynastyDiscard; region.ProvinceIndex = null; region.FaceUp = true;
+        Emit("regionDestroyed", $"{Definition(region).Name} was destroyed.", region.OwnerId, region.Id);
     }
     // Fields of Mercy (oracle-l5r-2530): the first currently-in-play copy's own watch (there is
     // realistically only ever one -- at most one Terrain per battlefield -- but this does not assume

@@ -1554,6 +1554,28 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Strategy wave 16 (issue #304): Brawl (oracle-l5r-1127). Its BLOCKERS note ("Needs
+    /// Regions (not built)") was stale -- Regions and Terrains were both already built. Two paired
+    /// abilities sharing one UsageKey: the bow half reuses enemy-card-without-attachments verbatim;
+    /// the Battle/Open destroy half adds one Target category (region-or-terrain, exempt from the
+    /// shared Battle-timing "target at the current battlefield" Require) and a small DestroyRegion
+    /// helper (a Terrain reuses DiscardTerrain and Ring of Water's destroyed-a-Terrain flag).</summary>
+    public static PublishedSnapshot StrategyWave16 { get; } = LoadStrategyWave16();
+
+    private static PublishedSnapshot LoadStrategyWave16()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave16.json", "strategy-wave-16", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected strategy-wave-16 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-16 card is not a textful Strategy: {card.Id}");
+        var others16 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others16).Any())
+            throw new InvalidOperationException("strategy-wave-16 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
