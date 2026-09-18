@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-807",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=807",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-807-printing-1-image-1.webp",
+    "image_sha256": "560b49ca63c65cc0626ad3748edb3a9749fe89094694c83c1d35af3ab95568d8"
+  },
+  {
+    "card_id": "oracle-l5r-9831",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9831",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9831-printing-1-image-1.webp",
+    "image_sha256": "165650265a59c4fbda5320995e3403f7a597715a2f7aedac5f097f6c27f26cba"
+  },
+  {
+    "card_id": "oracle-l5r-9832",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9832",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9832-printing-1-image-1.webp",
+    "image_sha256": "31d444dba0c2665b5560d63be10c3954247b08721df71faf4cb901b925615cb7"
+  },
+  {
+    "card_id": "oracle-l5r-4185",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4185",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-4185-printing-1-image-1.webp",
+    "image_sha256": "ceca8f2d2e86f07971a2e339af65f0b708af0372c8dce057cb7509263cdf309b"
+  },
+  {
+    "card_id": "oracle-l5r-3311",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3311",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-3311-printing-1-image-1.webp",
+    "image_sha256": "5f7d8488b99c4a9dd07e2a8626905d8d9813d2f7b1002fcc3e74e197f9fde7b7"
+  },
+  {
+    "card_id": "oracle-l5r-10276",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10276",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10276-printing-1-image-1.webp",
+    "image_sha256": "e2a5d8b7432b75b40fd9f95987dbb0a5c2ff6f1743770d3605aaf9bda75971d2"
+  }
+]

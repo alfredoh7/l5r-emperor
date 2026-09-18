@@ -86,6 +86,13 @@ var tests = new (string Name, Action Run)[]
     ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
     ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome),
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
+    ("Attack-vs-Followers exception, default rule (P1): a Personality with an attached Follower is untargetable by a Ranged AND a Melee Attack (with the rejection naming the Follower), an Item or Spell attachment never blocks, the lone Follower and a bare Personality stay legal targets, and an Item beside a Follower does not change the answer", AttackFollowersDefaultRuleBothKinds),
+    ("Attack-vs-Followers exception, shapes (P1): Tsuruchi Kosoko - exp's printed unconditional exception (whole unit destroyed with the Personality; the exception lifts only the Follower immunity, never the strength check; the Personality's OWN Force is compared -- the AttackComparedForce decision point); the exception evaluator over every kind (Ranged/Melee/Both) x condition (Reconnaissance at the CURRENT battlefield, the acting player's own) x target status (dishonorable) combination, granted exceptions belonging to their own player, an unknown condition failing loudly; and Ranged/Melee end to end through real commands with the grant spent by the Attack it covered", AttackFollowersExceptionShapes),
+    ("Attack-vs-Followers exception, printed conditional shapes (P1), end to end through a training fixture: a Ranged Attack printed with the Reconnaissance condition (only at the CURRENT battlefield) and a Melee Attack printed with the dishonorable-target condition, each scoped to its own ability and kind", AttackFollowersPrintedConditionalShapes),
+    ("Bayushi Kahoku - exp (oracle-l5r-807): the source-scoped, target-status-gated Follower exception (dishonorable followed Personalities only, honorable ones stay immune, status read live) and his two-selection Battle action (-4F on TargetId, the Ranged 3 Attack on CardIds: separate targets or the same one, the strength check seeing the same action's -4F, an optional Attack half, malformed selections rejected), no leak to Attacks performed by any other card (Asako Ume, the non-experienced Kahoku; the evaluator compares the PERFORMER; Ranged only), and the shared reaction window with the declared target fixed", BayushiKahokuExpTrait),
+    ("Yoritomo Ebumi (oracle-l5r-9832): the granted-exception hook (P1 shape (e)) -- a standing Ranged grant made by an action and spent by the player's NEXT Ranged Attack action (needed or not; a Melee action leaves it alone; a later Ranged Attack is back to the ordinary rule), an additional Battle action only with Reconnaissance at the current battlefield (not another province's, not the enemy's), an unused grant cleared when the battle resolves", YoritomoEbumiGrant),
+    ("Target-status predicate (P2): honorable/dishonorable (Personalities only, one representation), keyword-only, clan-only vs clan-or-keyword, any-of combinations counted once, none matching, an empty specification; as an EFFECT condition through Dispensing Justice, Winds of Dismissal (each old outcome kept, plus the intended fix for a Shadowlands-KEYWORD-only card, Asako Rikate) and the non-experienced Kahoku's +2 strength; and as a legality layer", TargetStatusPredicate),
+    ("Personality wave 24: Kakita Kazan's TargetMustBe legality layer (enemy dishonorable only) and rehonor/Stalwart interplay; Hiruma Nitani's Reconnaissance-conditional bow and Shadowlands +2 strength (clan and keyword); Kuni Shinoda - exp's bow-then-destroy-if-Shadowlands (Personality unit or lone attachment)", PersonalityWave24Cards),
     ("Import wave 2: Asako Ume's Force bonus keys off carrying a Spell; her Attack is unconditional", AsakoUmeAttack),
     ("Reconnaissance defaults to false per player per province, is granted independently of other players/provinces, and gates only the dependent portion of an effect", Reconnaissance),
     ("Reconnaissance persists through a province refill and clears only when its battle resolves, destroyed or not", ReconnaissanceOnlyClearsOnBattleResolution),
@@ -2477,6 +2484,665 @@ static void BayushiKahokuAttack()
     Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:kahoku2.Id,TargetId:dishonorable.Id,AbilityId:"bayushi-kahoku-attack"));
     Equal(e2.State.Cards[dishonorable.Id].Zone,Zone.Dead,"Strength 3+2=5 destroys the dishonorable Force-5 target");
 }
+// =====================================================================================================
+// Bayushi Kahoku - exp (oracle-l5r-807) and the two generalized primitives built for him:
+//   P1 -- the Attack-vs-Followers exception (AttackFollowerException, AttackTargeting.cs), and
+//   P2 -- the generalized target-status predicate (TargetStatus, TargetStatus.cs).
+// =====================================================================================================
+static MatchState FollowerAttackTable()
+{
+    var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+    return s;
+}
+static CardInstance WithFollower(MatchState s,CardInstance host)=>Add(s,"training-follower",host.OwnerId,Zone.Attached,province:host.ProvinceIndex,attachedTo:host.Id); // Force 2
+static GameCommand UseAtk(MatchEngine e,string ability,string card,string? target=null,string[]? cardIds=null,string? performer=null,int player=0)
+    =>new("useAbility",player,e.Version,CardId:card,TargetId:target,AbilityId:ability,CardIds:cardIds,PerformerId:performer);
+// A followed enemy Personality: the Personality (its own Force is Force(def)+extra) plus one Force-2 Follower.
+static (CardInstance Host,CardInstance Follower) Followed(MatchState s,string def="training-crane-samurai",bool dishonorable=false)
+{
+    var host=Add(s,def,1,Zone.Battlefield,province:0); host.Dishonorable=dishonorable;
+    return (host,WithFollower(s,host));
+}
+
+static void AttackFollowersDefaultRuleBothKinds()
+{
+    // The base rule, unchanged: a Personality with an attached FOLLOWER is untargetable by a Ranged AND by a Melee Attack;
+    // an Item or Spell attachment never blocks it; the Follower itself and a bare Personality are legal targets.
+    foreach(var (attackerDef,ability,kind) in new[]{("oracle-l5r-592","asako-ume-attack","Ranged"),("oracle-l5r-10290","chiyo-attack","Melee")})
+    {
+        var s=FollowerAttackTable();
+        var attacker=Add(s,attackerDef,0,Zone.Battlefield,province:0);
+        var (host,follower)=Followed(s); // Force 3 -- within the strength-4 Attack, so ONLY the Follower blocks it
+        var plain=Add(s,"training-crane-courtier",1,Zone.Battlefield,province:0); // Force 2
+        var armored=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:armored.Id); // Force 2 + Item 2 = 4
+        var spelled=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); Add(s,"training-spell",1,Zone.Attached,province:0,attachedTo:spelled.Id); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        var refused=e.Execute(UseAtk(e,ability,attacker.Id,host.Id));
+        Check(!refused.Accepted && refused.Error!.Contains("without an attached Follower"),$"{kind}: a followed Personality is immune ({refused.Error})");
+        Reject(e,UseAtk(e,ability,attacker.Id,host.Id));
+        foreach(var legal in new[]{follower.Id,plain.Id,armored.Id,spelled.Id})
+        {
+            var fresh=MatchEngine.FromTestState(s);
+            Accept(fresh,UseAtk(fresh,ability,attacker.Id,legal));
+        }
+        var hit=MatchEngine.FromTestState(s);
+        Accept(hit,UseAtk(hit,ability,attacker.Id,follower.Id));
+        Equal(hit.State.Cards[follower.Id].Zone,Zone.FateDiscard,$"{kind}: the lone Follower is destroyed");
+        Equal(hit.State.Cards[host.Id].Zone,Zone.Battlefield,$"{kind}: its Personality is untouched");
+        // Item + Follower together: the Follower alone is what blocks.
+        var s2=FollowerAttackTable();
+        var attacker2=Add(s2,attackerDef,0,Zone.Battlefield,province:0);
+        var (both,_)=Followed(s2,"training-crane-courtier"); Add(s2,"training-item",1,Zone.Attached,province:0,attachedTo:both.Id);
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,UseAtk(e2,ability,attacker2.Id,both.Id));
+    }
+}
+
+static void AttackFollowersExceptionShapes()
+{
+    // ---- (a) printed on the ability, unconditional: Tsuruchi Kosoko - exp, "Ranged 6 Attack that may target a Personality with Followers".
+    {
+        var s=FollowerAttackTable();
+        var kosoko=Add(s,"oracle-l5r-9831",0,Zone.Battlefield,province:0);
+        var (host,follower)=Followed(s); // Force 3
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"tsuruchi-kosoko-exp-attack",kosoko.Id,host.Id));
+        Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"The followed Personality is destroyed");
+        // Rules: a Personality leaving play takes his whole unit with him -- the attached Follower is destroyed too.
+        Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard,"His attached Follower is destroyed with the unit");
+    }
+    {
+        // The non-experienced Kosoko has no such exception -- the exception is the printed text of THAT ability, nobody else's.
+        var s=FollowerAttackTable();
+        var plainKosoko=Add(s,"oracle-l5r-8852",0,Zone.Battlefield,province:0);
+        var (host,_)=Followed(s);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"tsuruchi-kosoko-attack",plainKosoko.Id,host.Id));
+    }
+    {
+        // DECISION POINT (AttackComparedForce; open rules question -- see the decision note): the followed Personality's OWN Force is
+        // compared to the strength, never the unit's total. Force 5 + a Force-2 Follower = unit 7; strength 6 destroys him. If a ruling makes
+        // the unit total the comparison, THIS assertion flips (and AttackComparedForce is the one line to change).
+        var s=FollowerAttackTable();
+        var kosoko=Add(s,"oracle-l5r-9831",0,Zone.Battlefield,province:0);
+        var (host,_)=Followed(s,"training-crane-veteran"); // Force 5, unit total 7
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"tsuruchi-kosoko-exp-attack",kosoko.Id,host.Id));
+        Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"Personality Force 5 <= strength 6, whatever the unit total");
+        // The exception lifts the Follower immunity only -- never the strength check: an Item takes his own Force to 7 > 6.
+        var s2=FollowerAttackTable();
+        var kosoko2=Add(s2,"oracle-l5r-9831",0,Zone.Battlefield,province:0);
+        var (strong,_)=Followed(s2,"training-crane-veteran"); Add(s2,"training-item",1,Zone.Attached,province:0,attachedTo:strong.Id);
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,UseAtk(e2,"tsuruchi-kosoko-exp-attack",kosoko2.Id,strong.Id));
+    }
+
+    // ---- The exception evaluator over every kind/condition/target-status combination (shapes (b), (c) and (e)), through granted
+    // exceptions: printed-on-ability, static-trait and granted exceptions all funnel through the same AttackFollowerExceptionApplies.
+    MatchEngine Table(AttackFollowerException? grant,bool reconAtBattlefield=false,bool reconAtOtherProvince=false,bool reconEnemy=false)
+    {
+        var s=FollowerAttackTable();
+        Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0); // Ranged performer
+        Followed(s,"training-crane-samurai",dishonorable:false); // test-1.. honorable followed
+        Followed(s,"training-lion-samurai",dishonorable:true);   // dishonorable followed
+        if(grant is not null) s.AttackTargetGrants.Add(new(0,grant));
+        if(reconAtBattlefield) s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        if(reconAtOtherProvince) s.Players[1].Provinces[1].Reconnaissance[0]=true;
+        if(reconEnemy) s.Players[1].Provinces[0].Reconnaissance[1]=true;
+        return MatchEngine.FromTestState(s);
+    }
+    bool May(MatchEngine e,string ability,bool dishonorableTarget,int player=0)
+    {
+        var target=e.State.Cards.Values.Single(c=>c.OwnerId==1 && c.Zone==Zone.Battlefield && CardCatalog.Get(c.DefinitionId).Type==CardType.Personality && c.Dishonorable==dishonorableTarget);
+        return e.AttackMayTargetFollowedPersonality(ability,player,e.State.Cards.Values.First(c=>c.DefinitionId=="oracle-l5r-592"),target);
+    }
+    Check(!May(Table(null),"asako-ume-attack",false) && !May(Table(null),"asako-ume-attack",true) && !May(Table(null),"chiyo-attack",true),"No exception anywhere: nothing may target a followed Personality");
+    foreach(var (kind,ranged,melee) in new[]{("Ranged",true,false),("Melee",false,true),("Both",true,true)})
+    {
+        var e=Table(new(kind));
+        Equal(May(e,"asako-ume-attack",false),ranged,$"{kind} exception, a Ranged Attack");
+        Equal(May(e,"chiyo-attack",false),melee,$"{kind} exception, a Melee Attack");
+        Check(!May(e,"asako-ume-attack",false,player:1) && !May(e,"chiyo-attack",false,player:1),$"{kind}: a grant belongs to its own player only");
+        Check(!May(e,"training-item-not-an-attack",false),"An ability that is no Attack is never covered");
+    }
+    // (b) Reconnaissance at the CURRENT battlefield, held by the acting player.
+    {
+        var recon=new AttackFollowerException("Ranged",Condition:AttackFollowerException.Reconnaissance);
+        Check(!May(Table(recon),"asako-ume-attack",false),"No Reconnaissance: no exception");
+        Check(May(Table(recon,reconAtBattlefield:true),"asako-ume-attack",false),"Reconnaissance at the current battlefield: the exception applies");
+        Check(!May(Table(recon,reconAtOtherProvince:true),"asako-ume-attack",false),"Reconnaissance at a DIFFERENT province does not count");
+        Check(!May(Table(recon,reconEnemy:true),"asako-ume-attack",false),"The OTHER player's Reconnaissance does not count");
+        Check(!May(Table(recon,reconAtBattlefield:true),"chiyo-attack",false),"Kind still scopes a conditional exception");
+    }
+    // (c) conditional on the TARGET's status (P2): dishonorable only.
+    {
+        var dishonorableOnly=new AttackFollowerException("Ranged",TargetIs:TargetStatus.IsDishonorable);
+        Check(!May(Table(dishonorableOnly),"asako-ume-attack",false),"An honorable followed Personality stays untargetable");
+        Check(May(Table(dishonorableOnly),"asako-ume-attack",true),"A dishonorable followed Personality may be targeted");
+        // Combined conditions must ALL hold.
+        var both=new AttackFollowerException("Ranged",Condition:AttackFollowerException.Reconnaissance,TargetIs:TargetStatus.IsDishonorable);
+        Check(!May(Table(both),"asako-ume-attack",true) && !May(Table(both,reconAtBattlefield:true),"asako-ume-attack",false) && May(Table(both,reconAtBattlefield:true),"asako-ume-attack",true));
+    }
+    // A misconfigured condition fails loudly rather than silently reading as "never".
+    {
+        var threw=false;
+        try { May(Table(new("Ranged",Condition:"no-such-condition")),"asako-ume-attack",false); } catch(InvalidOperationException) { threw=true; }
+        Check(threw,"An unknown exception condition throws");
+    }
+
+    // ---- End to end through real commands, BOTH kinds: a granted Melee exception makes a Melee Attack (and only it) legal...
+    foreach(var (kind,ranged,melee) in new[]{("Ranged",true,false),("Melee",false,true)})
+    {
+        var s=FollowerAttackTable();
+        var rangedAttacker=Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0);  // Ranged 4
+        var meleeAttacker=Add(s,"oracle-l5r-10290",0,Zone.Battlefield,province:0); // Melee 4
+        var (host,follower)=Followed(s);
+        s.AttackTargetGrants.Add(new(0,new AttackFollowerException(kind)));
+        var e=MatchEngine.FromTestState(s);
+        var e2=MatchEngine.FromTestState(s);
+        if(ranged) Accept(e,UseAtk(e,"asako-ume-attack",rangedAttacker.Id,host.Id)); else Reject(e,UseAtk(e,"asako-ume-attack",rangedAttacker.Id,host.Id));
+        if(melee) Accept(e2,UseAtk(e2,"chiyo-attack",meleeAttacker.Id,host.Id)); else Reject(e2,UseAtk(e2,"chiyo-attack",meleeAttacker.Id,host.Id));
+        var hit=ranged?e:e2;
+        Equal(hit.State.Cards[host.Id].Zone,Zone.Dead,$"{kind} exception: the followed Personality is destroyed");
+        Equal(hit.State.Cards[follower.Id].Zone,Zone.FateDiscard,$"{kind} exception: his Follower goes with him");
+        Check(hit.State.AttackTargetGrants.Count==0,$"{kind} exception: the grant is spent by the Attack it covered");
+    }
+}
+
+
+static void AttackFollowersPrintedConditionalShapes()
+{
+    // The two printed shapes no published card exercises yet, end to end through real commands, via the training fixture that carries one of
+    // each: (b) a RANGED Attack printed with "if you have Reconnaissance", (c) a MELEE Attack printed with "dishonorable Personalities only".
+    foreach(var (recon,reconElsewhere,legal) in new[]{(false,false,false),(true,false,true),(false,true,false)})
+    {
+        var s=FollowerAttackTable();
+        var attacker=Add(s,"training-followed-attacker",0,Zone.Battlefield,province:0);
+        var (host,follower)=Followed(s); // Force 3 <= strength 3, so only the Follower could ever block it
+        if(recon) s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        if(reconElsewhere) s.Players[1].Provinces[1].Reconnaissance[0]=true;
+        var e=MatchEngine.FromTestState(s);
+        var command=UseAtk(e,"training-followed-recon-attack",attacker.Id,host.Id);
+        if(legal)
+        {
+            Accept(e,command);
+            Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"Reconnaissance at the current battlefield: the followed Personality may be Ranged-attacked");
+            Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard);
+        }
+        else Reject(e,command);
+    }
+    foreach(var (dishonorable,legal) in new[]{(false,false),(true,true)})
+    {
+        var s=FollowerAttackTable();
+        var attacker=Add(s,"training-followed-attacker",0,Zone.Battlefield,province:0);
+        var (host,follower)=Followed(s,"training-crane-samurai",dishonorable);
+        var e=MatchEngine.FromTestState(s);
+        var command=UseAtk(e,"training-followed-dishonorable-melee-attack",attacker.Id,host.Id);
+        if(legal)
+        {
+            Accept(e,command);
+            Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"A dishonorable followed Personality may be Melee-attacked");
+            Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard);
+        }
+        else Reject(e,command);
+    }
+    {
+        // Each printed exception belongs to its own ability and kind: Reconnaissance does not unlock the Melee Attack against an honorable
+        // followed Personality, and a dishonorable target does not unlock the Ranged one without Reconnaissance.
+        var s=FollowerAttackTable();
+        var attacker=Add(s,"training-followed-attacker",0,Zone.Battlefield,province:0);
+        var (honorable,_)=Followed(s); s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"training-followed-dishonorable-melee-attack",attacker.Id,honorable.Id));
+        var s2=FollowerAttackTable();
+        var attacker2=Add(s2,"training-followed-attacker",0,Zone.Battlefield,province:0);
+        var (dishonorable,_)=Followed(s2,"training-crane-samurai",dishonorable:true);
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,UseAtk(e2,"training-followed-recon-attack",attacker2.Id,dishonorable.Id));
+    }
+}
+
+static void BayushiKahokuExpTrait()
+{
+    // (d) + (c): "Ranged Attacks from actions performed by Kahoku may target dishonorable Personalities with attached Followers."
+    // Kahoku's own action: "Target an enemy Personality: Give him -4F. Ranged 3 Attack." -- TargetId is the -4F target, CardIds the Attack's own.
+    var definition=CardCatalog.Get("oracle-l5r-807");
+    Equal(definition.Effect,"ranged-attacks-may-target-dishonorable-with-followers"); Equal(definition.Force,5); Equal(definition.Chi,4); Equal(definition.GoldCost,9);
+    Check(definition.Abilities!.SequenceEqual(new[]{"kahoku-exp-attack"}));
+    // Kahoku (player 0) against: H = honorable followed (Force 3), D4 = dishonorable followed (Force 4), D3 = dishonorable followed (Force 3).
+    (MatchState S,CardInstance Kahoku,CardInstance H,CardInstance HFollower,CardInstance D4,CardInstance D3) Table()
+    {
+        var s=FollowerAttackTable();
+        var kahoku=Add(s,"oracle-l5r-807",0,Zone.Battlefield,province:0);
+        var (h,hf)=Followed(s,"training-crane-samurai",dishonorable:false);
+        var (d4,_)=Followed(s,"training-lion-samurai",dishonorable:true);
+        var (d3,_)=Followed(s,"training-crane-samurai",dishonorable:true);
+        return (s,kahoku,h,hf,d4,d3);
+    }
+    {
+        // A dishonorable followed Personality: the -4F (Force 4 -> 0) then the Ranged 3 Attack destroys him, Follower and all.
+        var (s,kahoku,_,_,d4,_)=Table();
+        var honorBefore=s.Players[1].Honor;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,d4.Id,[d4.Id]));
+        Equal(e.State.Cards[d4.Id].Zone,Zone.Dead,"The dishonorable followed Personality is destroyed by the weakened-then-attacked shot");
+        Equal(e.State.Cards.Values.Count(c=>c.OwnerId==1 && c.Zone==Zone.FateDiscard && c.DefinitionId=="training-follower"),1,"...and exactly his own Follower went with him");
+        Equal(e.State.Players[1].Honor,honorBefore-CardCatalog.Get("training-lion-samurai").PersonalHonor,"Dishonorable death: his controller loses his base Personal Honor");
+    }
+    {
+        // An HONORABLE followed Personality is still immune -- the exception is target-status-gated (P2).
+        var (s,kahoku,h,_,_,_)=Table();
+        var e=MatchEngine.FromTestState(s);
+        var refused=e.Execute(UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[h.Id]));
+        Check(!refused.Accepted && refused.Error!.Contains("without an attached Follower"),$"An honorable followed Personality is immune ({refused.Error})");
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[h.Id]));
+        // Status is read live: the very same Personality, rehonored, is immune again.
+        var (s2,kahoku2,_,_,_,d3b)=Table(); d3b.Dishonorable=false;
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,UseAtk(e2,"kahoku-exp-attack",kahoku2.Id,d3b.Id,[d3b.Id]));
+    }
+    {
+        // Two SEPARATE selections: -4F on one Personality (H), the Attack on another (D3, Force 3 <= 3).
+        var (s,kahoku,h,_,_,d3)=Table();
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[d3.Id]));
+        Check(e.State.Cards[h.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-4),"The -4F went to the TargetId Personality");
+        Equal(e.State.Cards[h.Id].Zone,Zone.Battlefield,"...who was not attacked");
+        Equal(e.State.Cards[d3.Id].Zone,Zone.Dead,"The Attack (CardIds) destroyed the other, dishonorable, Personality");
+        // The exception lifts the Follower immunity only, never the strength check: D4 (Force 4 > 3) is not made a legal target by the -4F on H.
+        var (s2,kahoku2,h2,_,d4,_)=Table();
+        var e2=MatchEngine.FromTestState(s2);
+        Reject(e2,UseAtk(e2,"kahoku-exp-attack",kahoku2.Id,h2.Id,[d4.Id]));
+        // ...but weakening D4 itself does bring him within reach (the strength check sees the -4F the same action applies).
+        var e3=MatchEngine.FromTestState(s2);
+        Accept(e3,UseAtk(e3,"kahoku-exp-attack",kahoku2.Id,d4.Id,[d4.Id]));
+    }
+    {
+        // Strength boundary with an Item AND a Follower attached: Force 5 + Item 2 = 7 -> 3 after the -4F (destroyed); a second Item -> 5 (rejected).
+        foreach(var (items,legal) in new[]{(1,true),(2,false)})
+        {
+            var s=FollowerAttackTable();
+            var kahoku=Add(s,"oracle-l5r-807",0,Zone.Battlefield,province:0);
+            var (host,_)=Followed(s,"training-crane-veteran",dishonorable:true);
+            for(var i=0;i<items;i++) Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id);
+            var e=MatchEngine.FromTestState(s);
+            var command=UseAtk(e,"kahoku-exp-attack",kahoku.Id,host.Id,[host.Id]);
+            if(legal) { Accept(e,command); Equal(e.State.Cards[host.Id].Zone,Zone.Dead); } else Reject(e,command);
+        }
+    }
+    {
+        // The Attack half is optional (targeting is its own step, "not required up front"): -4F alone is a legal action, destroying nothing.
+        var (s,kahoku,h,_,_,d3)=Table();
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id));
+        Check(e.State.Cards[h.Id].Modifiers.Any(m=>m.Amount==-4));
+        Equal(e.State.Cards[d3.Id].Zone,Zone.Battlefield,"No Attack target chosen: nothing is destroyed");
+        // A lone Follower is an ordinary Attack target, honorable host or not.
+        var (s2,kahoku2,h2,hf2,_,_)=Table();
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,UseAtk(e2,"kahoku-exp-attack",kahoku2.Id,h2.Id,[hf2.Id]));
+        Equal(e2.State.Cards[hf2.Id].Zone,Zone.FateDiscard); Equal(e2.State.Cards[h2.Id].Zone,Zone.Battlefield);
+    }
+    {
+        // Malformed selections: an own card as the Attack target, two Attack targets, a missing/own/Follower -4F target.
+        var (s,kahoku,h,hf,_,d3)=Table();
+        var own=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[own.Id]));
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[hf.Id,d3.Id]));
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,null,[d3.Id]));
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,own.Id,[d3.Id]));
+        Reject(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,hf.Id,[d3.Id]));
+    }
+    {
+        // SOURCE-SCOPED: the exception does not leak to Attacks performed by any other card, even with Kahoku in play at the same battlefield.
+        var (s,_,_,hf,_,d3)=Table();
+        var ume=Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0);                // Ranged 4, another card's own Attack
+        var plainKahoku=Add(s,"oracle-l5r-806",0,Zone.Battlefield,province:0);        // the non-experienced Kahoku: strength 3 (+2 vs dishonorable)
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"asako-ume-attack",ume.Id,d3.Id));
+        Reject(e,UseAtk(e,"bayushi-kahoku-attack",plainKahoku.Id,d3.Id));
+        var control=MatchEngine.FromTestState(s);
+        Accept(control,UseAtk(control,"asako-ume-attack",ume.Id,hf.Id)); // a lone Follower is fine: the rejection above is the Follower immunity, nothing else
+        // The evaluator itself: it is the PERFORMER that is compared. Any Ranged ability performed by Kahoku qualifies; the same ability
+        // performed by someone else, or a Melee Attack by Kahoku, does not; an honorable target never does.
+        var ev=MatchEngine.FromTestState(s); var st=ev.State;
+        var kahokuCard=st.Cards.Values.Single(c=>c.DefinitionId=="oracle-l5r-807"); var umeCard=st.Cards[ume.Id];
+        Check(ev.AttackMayTargetFollowedPersonality("asako-ume-attack",0,kahokuCard,st.Cards[d3.Id]),"Ranged ability performed by Kahoku, dishonorable followed target");
+        Check(!ev.AttackMayTargetFollowedPersonality("asako-ume-attack",0,umeCard,st.Cards[d3.Id]),"The same ability performed by another card: no exception");
+        Check(!ev.AttackMayTargetFollowedPersonality("chiyo-attack",0,kahokuCard,st.Cards[d3.Id]),"A Melee Attack performed by Kahoku: the trait names Ranged Attacks");
+        Check(!ev.AttackMayTargetFollowedPersonality("asako-ume-attack",0,kahokuCard,st.Cards.Values.Single(c=>c.OwnerId==1 && c.DefinitionId=="training-crane-samurai" && !c.Dishonorable)),"An honorable target: no exception");
+    }
+    {
+        // The Attack pipeline still runs through the shared reaction window: the declared target is fixed at declaration (PendingAttack),
+        // a Reaction can change strength but neither legalize nor re-target, and the followed Personality is destroyed on resolution.
+        MatchEngine Declared(out CardInstance d3,out CardInstance reactor)
+        {
+            var (s,kahoku,_,_,_,target)=Table(); d3=target;
+            reactor=Add(s,"training-attack-reactor",1,Zone.Home);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,target.Id,[target.Id]));
+            return e;
+        }
+        var e1=Declared(out var t1,out var reactor1);
+        Equal(e1.State.PendingChoice?.Type,"attackReaction"); Equal(e1.State.PendingAttack?.TargetId,t1.Id); Equal(e1.State.PendingAttack?.Strength,3); Equal(e1.State.PendingAttack?.Kind,"Ranged");
+        Accept(e1,new GameCommand("useAbility",1,e1.Version,CardId:reactor1.Id,AbilityId:"training-attack-negate"));
+        Accept(e1,new GameCommand("declineReaction",0,e1.Version)); Accept(e1,new GameCommand("declineReaction",1,e1.Version));
+        Equal(e1.State.Cards[t1.Id].Zone,Zone.Battlefield,"Negated in the window: the (legal) target survives");
+        var e2=Declared(out var t2,out _);
+        Accept(e2,new GameCommand("declineReaction",1,e2.Version)); Accept(e2,new GameCommand("declineReaction",0,e2.Version));
+        Equal(e2.State.Cards[t2.Id].Zone,Zone.Dead,"Not negated: destroyed on resolution, its Follower with it");
+    }
+    {
+        // Offered through QueryActions, and the offered command validates.
+        var (s,_,_,_,_,_)=Table();
+        var e=MatchEngine.FromTestState(s);
+        Check(OfferedFor(e,0,"kahoku-exp-attack").Length>=1,"Offered as an enabled action with a command that validates");
+    }
+}
+
+static void YoritomoEbumiGrant()
+{
+    // (e): "One Ranged Attack from your next Ranged Attack action this battle may target a Personality with attached Followers.
+    // If you have Reconnaissance, you may take an additional Battle action."
+    MatchState Table(bool recon,out CardInstance ebumi,out CardInstance ume,out CardInstance chiyo,out CardInstance isas,out CardInstance host,out CardInstance follower,out CardInstance host2)
+    {
+        var s=FollowerAttackTable();
+        ebumi=Add(s,"oracle-l5r-9832",0,Zone.Battlefield,province:0);
+        ume=Add(s,"oracle-l5r-592",0,Zone.Battlefield,province:0);   // Ranged 4
+        chiyo=Add(s,"oracle-l5r-10290",0,Zone.Battlefield,province:0); // Melee 4
+        isas=Add(s,"oracle-l5r-8840",0,Zone.Battlefield,province:0);  // Ranged 3
+        (host,follower)=Followed(s,"training-crane-samurai");         // Force 3
+        host2=Add(s,"training-crane-courtier",1,Zone.Battlefield,province:0); // Force 2, no Follower
+        if(recon) s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        return s;
+    }
+    var s0=Table(false,out var ebumi,out var ume,out var chiyo,out var isas,out var host,out var follower,out var host2);
+    Check(CardCatalog.Get("oracle-l5r-9832").Abilities!.SequenceEqual(new[]{"yoritomo-ebumi-grant"}));
+    {
+        var e=MatchEngine.FromTestState(s0);
+        Reject(e,UseAtk(e,"asako-ume-attack",ume.Id,host.Id)); // control: immune before the grant
+        Accept(e,UseAtk(e,"yoritomo-ebumi-grant",ebumi.Id));
+        Equal(e.State.AttackTargetGrants.Count,1,"The action leaves a standing grant"); Equal(e.State.AttackTargetGrants[0].PlayerId,0); Equal(e.State.AttackTargetGrants[0].Exception.Kind,"Ranged");
+        Equal(e.State.AdditionalActions.Count,0,"No Reconnaissance: no additional Battle action"); Equal(e.State.PriorityPlayerId,1,"...so priority passes to the opponent");
+        Accept(e,Cmd(e,"pass"));
+        // A MELEE Attack action neither uses the exception nor spends the grant ("your next RANGED Attack action").
+        Reject(e,UseAtk(e,"chiyo-attack",chiyo.Id,host.Id));
+        Accept(e,UseAtk(e,"chiyo-attack",chiyo.Id,host2.Id));
+        Equal(e.State.AttackTargetGrants.Count,1,"A Melee action leaves the Ranged grant alone");
+        Accept(e,Cmd(e,"pass"));
+        // The next Ranged Attack action: the followed Personality is a legal target...
+        Accept(e,UseAtk(e,"asako-ume-attack",ume.Id,host.Id));
+        Equal(e.State.Cards[host.Id].Zone,Zone.Dead,"The Ranged Attack destroyed the followed Personality"); Equal(e.State.Cards[follower.Id].Zone,Zone.FateDiscard,"...with his Follower");
+        Equal(e.State.AttackTargetGrants.Count,0,"...and used the grant up");
+        Accept(e,Cmd(e,"pass"));
+        // ...and only that one action: a later Ranged Attack is back to the ordinary rule.
+    }
+    {
+        var s=Table(false,out var eb,out var um,out _,out var isasCard,out var followed,out _,out _);
+        var (_,otherFollower)=Followed(s,"training-crane-courtier"); // a second, unrelated followed Personality: his Follower is a plain legal target
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"yoritomo-ebumi-grant",eb.Id)); Accept(e,Cmd(e,"pass"));
+        // "Your next Ranged Attack action" is spent by that action even when it did not need the exception (here: a lone Follower).
+        Accept(e,UseAtk(e,"asako-ume-attack",um.Id,otherFollower.Id));
+        Equal(e.State.AttackTargetGrants.Count,0,"Spent by the next Ranged Attack action, needed or not");
+        Accept(e,Cmd(e,"pass"));
+        Reject(e,UseAtk(e,"tsuruchi-isas-attack",isasCard.Id,followed.Id));
+    }
+    {
+        // With Reconnaissance at the current battlefield: the additional Battle action, priority stays with Ebumi's player.
+        var s=Table(true,out var eb,out var um,out _,out _,out var followed,out _,out _);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"yoritomo-ebumi-grant",eb.Id));
+        Equal(e.State.AdditionalActions.Count(g=>g.PlayerId==0),1,"Reconnaissance: an additional Battle action is granted"); Equal(e.State.PriorityPlayerId,0,"...so the same player keeps priority");
+        Accept(e,UseAtk(e,"asako-ume-attack",um.Id,followed.Id)); // taken as that additional action, still covered by the grant
+        Equal(e.State.Cards[followed.Id].Zone,Zone.Dead);
+        // Reconnaissance at a different province, or held by the other player, is not "you have Reconnaissance" here.
+        var s2=Table(false,out var eb2,out _,out _,out _,out _,out _,out _);
+        s2.Players[1].Provinces[1].Reconnaissance[0]=true; s2.Players[1].Provinces[0].Reconnaissance[1]=true;
+        var e2=MatchEngine.FromTestState(s2);
+        Accept(e2,UseAtk(e2,"yoritomo-ebumi-grant",eb2.Id));
+        Equal(e2.State.AdditionalActions.Count,0); Equal(e2.State.PriorityPlayerId,1);
+    }
+    {
+        // The grant is battle-scoped: an unused one ends with the battle's resolution.
+        var s=Table(false,out var eb,out _,out _,out _,out _,out _,out _);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"yoritomo-ebumi-grant",eb.Id));
+        Equal(e.State.AttackTargetGrants.Count,1);
+        Accept(e,Cmd(e,"pass")); Accept(e,Cmd(e,"pass")); // both players pass: the battle resolves
+        Equal(e.State.AttackTargetGrants.Count,0,"An unused grant is cleared when the battle resolves");
+    }
+    {
+        // Offered through QueryActions, and the offered command validates.
+        var s=Table(false,out _,out _,out _,out _,out _,out _,out _);
+        Equal(OfferedFor(MatchEngine.FromTestState(s),0,"yoritomo-ebumi-grant").Length,1);
+    }
+}
+
+static void TargetStatusPredicate()
+{
+    // The generalized target-status predicate (P2): any-of, one representation of honor, keyword-only / clan-only / clan-or-keyword terms.
+    var s=FollowerAttackTable();
+    CardInstance P(string def,Action<CardInstance>? tweak=null){var c=Add(s,def,1,Zone.Battlefield,province:0);tweak?.Invoke(c);return c;}
+    var honorable=P("training-lion-samurai");
+    var crane=P("training-crane-samurai");
+    var dishonorable=P("training-lion-samurai",c=>c.Dishonorable=true);
+    var ninja=P("training-ninja-source");                                                     // printed Ninja keyword, Unaligned
+    var kolat=P("training-lion-samurai",c=>c.GrantedKeywords=[new("Kolat","test-fixture","Permanent")]);
+    var shadowClan=P("training-shadowlands-personality");                                     // Shadowlands CLAN, no keyword
+    var rikate=P("oracle-l5r-576");                                                           // Phoenix Clan + the printed Shadowlands KEYWORD, no Shadowlands Clan
+    var dishonorableNinjaShadow=P("training-shadowlands-personality",c=>{c.Dishonorable=true;c.GrantedKeywords=[new("Ninja","test-fixture","Permanent")];}); // matches EVERY term
+    var follower=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:honorable.Id); follower.Dishonorable=true; // a Follower is never (dis)honorable, whatever the flag says
+    var e=MatchEngine.FromTestState(s);
+    bool M(CardInstance c,TargetStatus t)=>e.MatchesTargetStatus(e.State.Cards[c.Id],t);
+    // honorable / dishonorable
+    Check(M(honorable,TargetStatus.IsHonorable) && !M(dishonorable,TargetStatus.IsHonorable),"honorable: a Personality not in the dishonorable state");
+    Check(M(dishonorable,TargetStatus.IsDishonorable) && !M(honorable,TargetStatus.IsDishonorable),"dishonorable");
+    Check(!M(follower,TargetStatus.IsHonorable) && !M(follower,TargetStatus.IsDishonorable),"Only a Personality is honorable or dishonorable");
+    // keyword-only
+    var ninjaOnly=new TargetStatus(Keywords:["Ninja"]);
+    Check(M(ninja,ninjaOnly) && M(dishonorableNinjaShadow,ninjaOnly) && !M(shadowClan,ninjaOnly) && !M(honorable,ninjaOnly),"keyword term: printed and granted keywords, nothing else");
+    Check(M(kolat,new TargetStatus(Keywords:["Kolat"])) && !M(ninja,new TargetStatus(Keywords:["Kolat"])),"a GRANTED keyword counts");
+    // clan-only vs clan-or-keyword
+    var clanOnly=new TargetStatus(Clans:["Shadowlands"]);
+    Check(M(shadowClan,clanOnly) && !M(rikate,clanOnly),"Clans: Clan alignment only -- Rikate's Shadowlands is a keyword");
+    Check(M(shadowClan,TargetStatus.IsShadowlands) && M(rikate,TargetStatus.IsShadowlands) && !M(honorable,TargetStatus.IsShadowlands) && !M(ninja,TargetStatus.IsShadowlands),"ClanOrKeyword: Clan alignment OR the printed keyword");
+    Check(M(honorable,new TargetStatus(Clans:["Lion"])) && !M(crane,new TargetStatus(Clans:["Lion"])),"a real Clan term");
+    // combinations: any one term is sufficient; none matching is false
+    var dj=TargetStatus.DishonorableKolatNinjaOrShadowlands;
+    foreach(var (card,expected,why) in new[]{(dishonorable,true,"dishonorable"),(ninja,true,"Ninja"),(kolat,true,"Kolat"),(shadowClan,true,"Shadowlands clan"),(rikate,true,"Shadowlands keyword"),(honorable,false,"none of them")})
+        Equal(M(card,dj),expected,$"dishonorable/Kolat/Ninja/Shadowlands: {why}");
+    Check(M(dishonorableNinjaShadow,dj),"A card satisfying several terms matches (once -- the answer is a boolean)");
+    Check(!M(honorable,TargetStatus.KolatNinjaOrShadowlands) && M(rikate,TargetStatus.KolatNinjaOrShadowlands) && !M(dishonorable,TargetStatus.KolatNinjaOrShadowlands),"KolatNinjaOrShadowlands has no honor term");
+    Check(!M(honorable,new TargetStatus()),"An empty specification matches nothing");
+    Equal(dj.Describe(),"dishonorable, Kolat, Ninja, or Shadowlands"); Equal(TargetStatus.IsDishonorable.Describe(),"dishonorable"); Equal(new TargetStatus(Honorable:true,Dishonorable:true).Describe(),"honorable or dishonorable");
+
+    // ---- As an EFFECT condition: Dispensing Justice ("destroy him if dishonorable, Kolat, Ninja, or Shadowlands", else move him home) and
+    // Winds of Dismissal (Honor loss equal to his base Personal Honor), each parameterized by the ability's own IfTarget. The migration
+    // keeps every old outcome EXCEPT the intended fix: a Shadowlands-KEYWORD-only card (Asako Rikate) now counts, as Mitsuko's already did.
+    Equal(AbilityCatalog.All["dispensing-justice-destroy"].IfTarget,TargetStatus.DishonorableKolatNinjaOrShadowlands);
+    Equal(AbilityCatalog.All["winds-of-dismissal-choice"].IfTarget,TargetStatus.DishonorableKolatNinjaOrShadowlands);
+    Equal(AbilityCatalog.All["mitsuko-bow-destroy"].IfTarget,TargetStatus.KolatNinjaOrShadowlands);
+    foreach(var (def,tweak,destroyed,why) in new (string,Action<CardInstance>?,bool,string)[]
+    {
+        ("training-lion-samurai",null,false,"ordinary honorable: moved home"),
+        ("training-lion-samurai",c=>c.Dishonorable=true,true,"dishonorable"),
+        ("training-ninja-source",null,true,"printed Ninja"),
+        ("training-lion-samurai",c=>c.GrantedKeywords=[new("Kolat","t","Permanent")],true,"granted Kolat"),
+        ("training-shadowlands-personality",null,true,"Shadowlands clan"),
+        ("training-shadowlands-personality",c=>{c.Dishonorable=true;c.GrantedKeywords=[new("Ninja","t","Permanent")];},true,"every term at once: destroyed (once)"),
+        ("oracle-l5r-576",null,true,"THE FIX: Shadowlands printed as a keyword only (Asako Rikate, Phoenix Clan)"),
+    })
+    {
+        var t=FollowerAttackTable();
+        var strat=Add(t,"oracle-l5r-2029",0,Zone.Hand);
+        var performer=Add(t,"training-crane-samurai",0,Zone.Battlefield,province:0); performer.GrantedKeywords=[new("Magistrate","test-fixture","Permanent")];
+        var target=Add(t,def,1,Zone.Battlefield,province:0); tweak?.Invoke(target);
+        var ee=MatchEngine.FromTestState(t);
+        Accept(ee,new GameCommand("useAbility",0,ee.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
+        Equal(ee.State.Cards[target.Id].Zone,destroyed?Zone.Dead:Zone.Home,$"Dispensing Justice: {why}");
+    }
+    {
+        // Dispensing Justice's own "no attachments" clause is unchanged: a followed Shadowlands-keyword Personality is only moved home.
+        var t=FollowerAttackTable();
+        var strat=Add(t,"oracle-l5r-2029",0,Zone.Hand);
+        var performer=Add(t,"training-crane-samurai",0,Zone.Battlefield,province:0); performer.GrantedKeywords=[new("Magistrate","test-fixture","Permanent")];
+        var target=Add(t,"oracle-l5r-576",1,Zone.Battlefield,province:0); WithFollower(t,target);
+        var ee=MatchEngine.FromTestState(t);
+        Accept(ee,new GameCommand("useAbility",0,ee.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
+        Equal(ee.State.Cards[target.Id].Zone,Zone.Home,"An attachment keeps him from being destroyed, exactly as before");
+    }
+    foreach(var (def,tweak,loses,why) in new (string,Action<CardInstance>?,bool,string)[]
+    {
+        ("training-crane-samurai",null,false,"ordinary honorable: no loss"),
+        ("training-crane-samurai",c=>c.Dishonorable=true,true,"dishonorable"),
+        ("training-shadowlands-personality",null,true,"Shadowlands clan"),
+        ("training-shadowlands-personality",c=>{c.Dishonorable=true;c.GrantedKeywords=[new("Ninja","t","Permanent")];},true,"every term at once: the loss applies ONCE"),
+        ("oracle-l5r-576",null,true,"THE FIX: Shadowlands keyword only"),
+    })
+    {
+        var t=MatchEngine.CreateEconomyScenario().State; t.Phase=Phase.Action; t.ActivePlayerId=0; t.PriorityPlayerId=0;
+        var host=Add(t,"training-shugenja",0,Zone.Home); host.GrantedKeywords=[new("Air","test-fixture","Permanent")];
+        var winds=Add(t,"oracle-l5r-9344",0,Zone.Attached,attachedTo:host.Id);
+        var target=Add(t,def,1,Zone.Home); tweak?.Invoke(target);
+        var ee=MatchEngine.FromTestState(t);
+        var before=ee.State.Players[1].Honor;
+        Accept(ee,new GameCommand("useAbility",0,ee.Version,CardId:winds.Id,TargetId:target.Id,AbilityId:"winds-of-dismissal-choice"));
+        Equal(ee.State.Players[1].Honor,before-(loses?CardCatalog.Get(def).PersonalHonor:0),$"Winds of Dismissal: {why}");
+    }
+
+    // ---- As an effect condition on an Attack's strength: the non-experienced Kahoku's "+2 strength if the target is dishonorable".
+    Equal(AbilityCatalog.All["bayushi-kahoku-attack"].IfTarget,TargetStatus.IsDishonorable);
+    foreach(var (dishonorableTarget,expectedZone) in new[]{(false,Zone.Battlefield),(true,Zone.Dead)})
+    {
+        var t=FollowerAttackTable();
+        var kahoku=Add(t,"oracle-l5r-806",0,Zone.Battlefield,province:0);
+        var target=Add(t,"training-crane-veteran",1,Zone.Battlefield,province:0); target.Dishonorable=dishonorableTarget; // Force 5: needs the +2
+        var ee=MatchEngine.FromTestState(t);
+        var command=UseAtk(ee,"bayushi-kahoku-attack",kahoku.Id,target.Id);
+        if(dishonorableTarget) { Accept(ee,command); Equal(ee.State.Cards[target.Id].Zone,expectedZone); } else Reject(ee,command);
+    }
+
+    // ---- As a target-LEGALITY layer: the existing honorable-personality / dishonorable-personality categories now ask the predicate, and
+    // TargetMustBe layers it on any category (Kakita Kazan: an enemy DISHONORABLE Personality).
+    Equal(AbilityCatalog.All["kazan-shame"].TargetMustBe,TargetStatus.IsDishonorable);
+}
+
+static void PersonalityWave24Cards()
+{
+    Equal(PublishedContent.PersonalityWave24.Cards.Length,6,"Personality wave 24 publishes six Personalities");
+    foreach(var (id,ability) in new[]{("oracle-l5r-807","kahoku-exp-attack"),("oracle-l5r-9831","tsuruchi-kosoko-exp-attack"),("oracle-l5r-9832","yoritomo-ebumi-grant"),("oracle-l5r-4185","kazan-shame"),
+        ("oracle-l5r-3311","hiruma-nitani-attack"),("oracle-l5r-10276","shinoda-exp-bow-destroy")})
+        Check(CardCatalog.Get(id).Abilities!.SequenceEqual(new[]{ability}) && CardCatalog.Get(id).Type==CardType.Personality,$"{id} wires {ability}");
+    Equal(CardCatalog.Get("oracle-l5r-9831").Text,"Battle: Ranged 6 Attack that may target a Personality with Followers.");
+
+    // ---- Kakita Kazan: "Target an enemy dishonorable Personality: Bow him. His controller loses 2 Honor. Gain 2 Honor."
+    MatchState KazanTable(out CardInstance kazan,out CardInstance dishonorable,out CardInstance honorable,out CardInstance ownDishonorable,out CardInstance enemyFollower)
+    {
+        var s=FollowerAttackTable();
+        kazan=Add(s,"oracle-l5r-4185",0,Zone.Battlefield,province:0);
+        dishonorable=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); dishonorable.Dishonorable=true;
+        honorable=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+        ownDishonorable=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); ownDishonorable.Dishonorable=true;
+        enemyFollower=WithFollower(s,dishonorable);
+        return s;
+    }
+    {
+        var s=KazanTable(out var kazan,out var dishonorable,out var honorable,out var ownDishonorable,out var enemyFollower);
+        var e=MatchEngine.FromTestState(s);
+        var refused=e.Execute(UseAtk(e,"kazan-shame",kazan.Id,honorable.Id));
+        Check(!refused.Accepted && refused.Error!.Contains("dishonorable"),$"An honorable target is not a legal target ({refused.Error})");
+        Reject(e,UseAtk(e,"kazan-shame",kazan.Id,honorable.Id));
+        Reject(e,UseAtk(e,"kazan-shame",kazan.Id,ownDishonorable.Id)); // dishonorable but not an ENEMY Personality
+        Reject(e,UseAtk(e,"kazan-shame",kazan.Id,enemyFollower.Id));   // a Follower is not a Personality
+        var (mine,theirs)=(e.State.Players[0].Honor,e.State.Players[1].Honor);
+        Accept(e,UseAtk(e,"kazan-shame",kazan.Id,dishonorable.Id));
+        Check(e.State.Cards[dishonorable.Id].Bowed,"Bowed"); Equal(e.State.Players[1].Honor,theirs-2,"His controller loses 2 Honor"); Equal(e.State.Players[0].Honor,mine+2,"Gain 2 Honor");
+        Check(OfferedFor(MatchEngine.FromTestState(s),0,"kazan-shame").Length>=1,"Offered only against a legal (enemy dishonorable) target, and it validates");
+    }
+    {
+        // A dishonorable Kazan performing it is rehonored instead of gaining the Honor; a Stalwart target's bow is negated, the Honor loss is not.
+        var s=KazanTable(out var kazan,out var dishonorable,out _,out _,out _);
+        kazan.Dishonorable=true; dishonorable.GrantedKeywords=[new("Stalwart","test-fixture","Permanent")];
+        var e=MatchEngine.FromTestState(s);
+        var (mine,theirs)=(e.State.Players[0].Honor,e.State.Players[1].Honor);
+        Accept(e,UseAtk(e,"kazan-shame",kazan.Id,dishonorable.Id));
+        Check(!e.State.Cards[kazan.Id].Dishonorable && e.State.Players[0].Honor==mine,"A dishonorable performer is rehonored instead of gaining Honor");
+        Check(!e.State.Cards[dishonorable.Id].Bowed,"Stalwart negates the bow"); Equal(e.State.Players[1].Honor,theirs-2,"...but not the Honor loss");
+        // With only an honorable enemy Personality on the table, no enabled Kazan action is offered at all.
+        var s2=FollowerAttackTable(); Add(s2,"oracle-l5r-4185",0,Zone.Battlefield,province:0); Add(s2,"training-lion-courtier",1,Zone.Battlefield,province:0);
+        Equal(OfferedFor(MatchEngine.FromTestState(s2),0,"kazan-shame").Length,0);
+    }
+
+    // ---- Hiruma Nitani: "Bow Nitani unless you have Reconnaissance: Ranged 4 Attack, with +2 strength if the target is Shadowlands."
+    foreach(var (recon,bowsNitani) in new[]{(false,true),(true,false)})
+    {
+        var s=FollowerAttackTable();
+        var nitani=Add(s,"oracle-l5r-3311",0,Zone.Battlefield,province:0);
+        var lone=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        if(recon) s.Players[1].Provinces[0].Reconnaissance[0]=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"hiruma-nitani-attack",nitani.Id,lone.Id));
+        Equal(e.State.Cards[lone.Id].Zone,Zone.Dead,"Ranged 4 destroys a Force-3 target");
+        Equal(e.State.Cards[nitani.Id].Bowed,bowsNitani,recon?"Reconnaissance: Nitani is not bowed":"No Reconnaissance: Nitani bows");
+    }
+    foreach(var (def,tweak,expectHit,why) in new (string,Action<CardInstance>?,bool,string)[]
+    {
+        ("training-lion-veteran",null,false,"an ordinary Force-6 target: 4 < 6"),
+        ("training-lion-veteran",c=>c.GrantedKeywords=[new("Shadowlands","t","Permanent")],true,"a Shadowlands (keyword) Force-6 target: 4+2 = 6"),
+        ("training-shadowlands-personality",c=>c.Modifiers=[new("test-fixture","test-fixture","Force",4)],true,"a Shadowlands CLAN Force-6 target"),
+        ("oracle-l5r-576",c=>c.Modifiers=[new("test-fixture","test-fixture","Force",2)],true,"Asako Rikate (Shadowlands as a printed keyword only), Force 6"),
+        ("training-lion-veteran",c=>c.Dishonorable=true,false,"dishonorable is NOT Shadowlands: still 4"),
+    })
+    {
+        var s=FollowerAttackTable();
+        var nitani=Add(s,"oracle-l5r-3311",0,Zone.Battlefield,province:0);
+        var target=Add(s,def,1,Zone.Battlefield,province:0); tweak?.Invoke(target);
+        var e=MatchEngine.FromTestState(s);
+        var command=UseAtk(e,"hiruma-nitani-attack",nitani.Id,target.Id);
+        if(expectHit) { Accept(e,command); Equal(e.State.Cards[target.Id].Zone,Zone.Dead,why); } else Reject(e,command);
+    }
+    {
+        var s=FollowerAttackTable(); var nitani=Add(s,"oracle-l5r-3311",0,Zone.Battlefield,bowed:true,province:0); Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"hiruma-nitani-attack",nitani.Id)); // a bowed Nitani cannot act, Reconnaissance or not
+    }
+
+    // ---- Kuni Shinoda - exp: "Target an enemy card: Bow it. If it is Shadowlands, destroy it."
+    foreach(var (def,tweak,destroyed,why) in new (string,Action<CardInstance>?,bool,string)[]
+    {
+        ("training-lion-samurai",null,false,"an ordinary Personality is only bowed"),
+        ("training-shadowlands-personality",null,true,"Shadowlands clan: bowed then destroyed"),
+        ("oracle-l5r-576",null,true,"Shadowlands keyword only: bowed then destroyed"),
+        ("training-stalwart-personality",c=>c.GrantedKeywords=[new("Shadowlands","t","Permanent")],true,"Stalwart negates only the bow: the destroy is a separate clause"),
+    })
+    {
+        var s=FollowerAttackTable();
+        var shinoda=Add(s,"oracle-l5r-10276",0,Zone.Battlefield,province:0);
+        var target=Add(s,def,1,Zone.Battlefield,province:0); tweak?.Invoke(target);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,UseAtk(e,"shinoda-exp-bow-destroy",shinoda.Id,target.Id));
+        if(destroyed) Equal(e.State.Cards[target.Id].Zone,Zone.Dead,why); else { Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,why); Check(e.State.Cards[target.Id].Bowed,why+" (bowed)"); }
+    }
+    {
+        // A lone enemy Follower is "an enemy card" too: destroyed as an attachment when Shadowlands (its host survives), only bowed otherwise; own cards are out.
+        var s=FollowerAttackTable();
+        var shinoda=Add(s,"oracle-l5r-10276",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var dark=WithFollower(s,host); dark.GrantedKeywords=[new("Shadowlands","t","Permanent")];
+        var plain=WithFollower(s,host);
+        var own=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,UseAtk(e,"shinoda-exp-bow-destroy",shinoda.Id,own.Id));
+        var e1=MatchEngine.FromTestState(s); Accept(e1,UseAtk(e1,"shinoda-exp-bow-destroy",shinoda.Id,dark.Id));
+        Equal(e1.State.Cards[dark.Id].Zone,Zone.FateDiscard,"A Shadowlands Follower is destroyed as an attachment"); Equal(e1.State.Cards[host.Id].Zone,Zone.Battlefield,"...its host survives");
+        var e2=MatchEngine.FromTestState(s); Accept(e2,UseAtk(e2,"shinoda-exp-bow-destroy",shinoda.Id,plain.Id));
+        Equal(e2.State.Cards[plain.Id].Zone,Zone.Attached,"An ordinary Follower is only bowed"); Check(e2.State.Cards[plain.Id].Bowed);
+    }
+
+}
+
 static void AsakoUmeAttack()
 {
     var s=StrongholdBattle("oracle-l5r-1218");
