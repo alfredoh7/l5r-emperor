@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Brawl (oracle-l5r-1127) as strategy-wave-16. Its 'Needs Regions (not built)' blocker was stale: Regions and Terrains already existed. Adds the region-or-terrain Target (exempt from the Battle-timing at-battlefield Require), DestroyRegion, and the paired brawl-bow/brawl-destroy abilities; one client line so FindCard can resolve a Region target.",
+  "validation": "dotnet run tests/L5R.Core.Tests: 196/196 core (new StrategyWave16Primitives; mutation-checked: removing the Region exemption fails it), 57/57 published, 9/9 deck-format, 10/10 deck-workshop. bash tools/check.sh --skip-client: all green. Scan sha256-verified against its receipt. Client compile left to CI; Godot not installed locally, so Region targeting in the picker was NOT exercised in a native client.",
+  "remaining": "On-table gold outlines for Region targets depend on open PR #292 (Regions/Celestials presentation). Picker dropdown works without it. CARD_INVENTORY.xlsx regenerated (389 wired).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/304",
+  "branch": "claude/304-brawl-region-terrain",
+  "updated": "2026-09-18T19:45:48.355048+00:00"
+}

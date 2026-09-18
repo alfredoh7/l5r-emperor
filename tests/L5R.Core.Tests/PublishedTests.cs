@@ -108,9 +108,10 @@ internal static class PublishedTests
         // Lion Ancestor already does) = 375 (Batch E's own baseline, now merged into main -- re-verified
         // against origin/main by running the suite before any Batch F change) + 13 (this branch's own
         // PersonalityWave22 (12) + RegionWave3 (1), issue #301 Batch F: thirteen cards assigned, none
-        // already published) = 388. Recomputed from the actual current baseline each time this
-        // conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,388);
+        // already published) = 388 (Batch F's own baseline, now merged into main) + 1 (this branch's
+        // own StrategyWave16, issue #304: Brawl) = 389. Recomputed from the actual current baseline
+        // each time this conflicts, never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,389);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
