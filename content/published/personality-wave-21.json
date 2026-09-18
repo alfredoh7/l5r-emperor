@@ -1,0 +1,316 @@
+{
+  "Profile": "personality-wave-21",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10290",
+      "Name": "Akodo Chiyo",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Crab Clan players may ignore Chiyo's Honor Requirement.\nBattle: Melee 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10290.jpg",
+      "Keywords": [
+        "Tactician",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "chiyo-attack"
+      ],
+      "Effect": "none",
+      "HonorRequirementWaiverClan": "Crab"
+    },
+    {
+      "Id": "oracle-l5r-10640",
+      "Name": "Kitsu Ririko",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "(Draw a card after your Destined card enters play.)\nRiriko enters play ignoring Honor Requirement if you are a Unicorn Clan player.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10640.jpg",
+      "Keywords": [
+        "Destined",
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "HonorRequirementWaiverClan": "Unicorn"
+    },
+    {
+      "Id": "oracle-l5r-4934",
+      "Name": "Matsu Kaido",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Kaido has +1F while attacking.\nFear Battle: Target an enemy Personality or Follower: Reduce its Force to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4934.jpg",
+      "Keywords": [
+        "Hero",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kaido-force-zero"
+      ],
+      "Effect": "attacking-one"
+    },
+    {
+      "Id": "oracle-l5r-10853",
+      "Name": "Matsu Miura",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 7,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give a target enemy Personality or Follower a Force penalty equal to Miura's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10853.jpg",
+      "Keywords": [
+        "Naval",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "miura-force-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4197",
+      "Name": "Kakita Maratai",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 8,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a duel ends that your Personality won, bow Maratai: She sculpts a statue to honor the winner. Gain 2 Honor. Take the Imperial Favor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4197.jpg",
+      "Keywords": [
+        "Artisan",
+        "Crane Clan",
+        "Sculptor"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "maratai-statue"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4469",
+      "Name": "Kitsune Ohsuki",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan • Nonhuman • Sparrow • Cavalry • Spirit Personality with the ability, \"Limited: If none of your provinces were destroyed since your last turn ended: Gain 3 Honor.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4469.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ohsuki-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4474",
+      "Name": "Kitsune Tokoru",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan • Nonhuman • Bear • Spirit Personality with the ability, \"Battle: Target an attacking enemy card: Bow it. Destroy it if it is an attachment.\"",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4474.jpg",
+      "Keywords": [
+        "Earth",
+        "Mantis Clan",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tokoru-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9086",
+      "Name": "Utaku Mai",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality or Follower: You may move Mai to the current battlefield. If she is now there, give the targeted card a Force penalty equal to Mai's Personal Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9086.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Battle Maiden",
+        "Imperial",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mai-move-force-penalty"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6906",
+      "Name": "Shinjo Kinto",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: Move him home. This movement will not be negated if you have Reconnaissance.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6906.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Scout",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kinto-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10023",
+      "Name": "Ohsuki's Sparrow",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nLimited: If none of your provinces were destroyed since your last turn ended: Gain 3 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10023.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Mantis Clan",
+        "Nonhuman",
+        "Sparrow",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ohsuki-sparrow-honor"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10025",
+      "Name": "Tokoru's Bear",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 3,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.\nBattle: Target an attacking enemy card: Bow it. Destroy it if it is an attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10025.jpg",
+      "Keywords": [
+        "Bear",
+        "Mantis Clan",
+        "Nonhuman",
+        "Spirit"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tokoru-bear-bow"
+      ],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

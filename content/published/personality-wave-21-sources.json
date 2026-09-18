@@ -1,0 +1,101 @@
+[
+  {
+    "card_id": "oracle-l5r-10290",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10290",
+    "image_path": "assets/reference/oracle/torn-asunder/webp/oracle-l5r-10290-printing-1-image-1.webp",
+    "image_sha256": "57568ddbb3faec98eb0712d2f55cd3645df16bca55565b2c81e514e350bae55b"
+  },
+  {
+    "card_id": "oracle-l5r-10640",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10640",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10640-printing-1-image-1.webp",
+    "image_sha256": "c661d2512e693494b1db8cb865d39f80ce2756ce3918b4e3d6a36badc03c3148"
+  },
+  {
+    "card_id": "oracle-l5r-4934",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4934",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-4934-printing-1-image-1.webp",
+    "image_sha256": "d475969c1e0df26b3d73fcdd31af377e320b378b6234212c114dd1bbca5d78b4"
+  },
+  {
+    "card_id": "oracle-l5r-10853",
+    "printing_set": [
+      "Aftermath"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10853",
+    "image_path": "assets/reference/oracle/aftermath/webp/oracle-l5r-10853-printing-1-image-1.webp",
+    "image_sha256": "044493f1699c3c7a6c60b3d3e7f42ae8dad2b4af0def7c2aff3c6419fa777160"
+  },
+  {
+    "card_id": "oracle-l5r-4197",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4197",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-4197-printing-1-image-1.webp",
+    "image_sha256": "b2b87ffc20d144c6bc3975af1b27b2fbca6108d1d3499738d7ffa1c1da2bf450"
+  },
+  {
+    "card_id": "oracle-l5r-4469",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4469",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-4469-printing-1-image-1.webp",
+    "image_sha256": "19901545052881521e6da3e4803227c1d2e87fc85ff0fb77f2ecd72db18b99df"
+  },
+  {
+    "card_id": "oracle-l5r-4474",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=4474",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-4474-printing-2-image-1.webp",
+    "image_sha256": "a9b79045eac97ea5fc370b949dcfac0137f3fffcdc6af20adffbdf7cf89001e1"
+  },
+  {
+    "card_id": "oracle-l5r-9086",
+    "printing_set": [
+      "Promotional&ndash;Emperor"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9086",
+    "image_path": "assets/reference/oracle/promotional-emperor/webp/oracle-l5r-9086-printing-2-image-1.webp",
+    "image_sha256": "1c34c6959fa0f70284e7eecdd304c6448f231aa1cf212ba6cdb7a9421e46c29c"
+  },
+  {
+    "card_id": "oracle-l5r-6906",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6906",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-6906-printing-1-image-1.webp",
+    "image_sha256": "5917e9bfe398a9d1359b1eb65758e2249be05bfa9c73094eaf0cc04bcdc732bc"
+  },
+  {
+    "card_id": "oracle-l5r-10023",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10023",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-10023-printing-1-image-1.jpg",
+    "image_sha256": "43ff6563bf08fb5944d501ad6c95dc8240dace86c1ff47b2d6c47fc6a3addf61"
+  },
+  {
+    "card_id": "oracle-l5r-10025",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10025",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-10025-printing-1-image-1.jpg",
+    "image_sha256": "64ad7e18825d924a3377c9770fa96b4bb29b0010e6942e6eef2ffce8b5284a7c"
+  }
+]

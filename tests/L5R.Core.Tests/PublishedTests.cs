@@ -99,9 +99,15 @@ internal static class PublishedTests
         // there) = 348 (Batch B's own baseline, now merged into main) + 7 (this branch's own
         // StrategyWave14, issue #289 Batch C -- eight cards assigned again, but Wrathful Ancestor
         // (oracle-l5r-9390) turned out already published in strategy-wave-6 too, so only 7 are new
-        // here) = 355. Recomputed from the actual current baseline each time this conflicts, never
-        // copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,364);
+        // here) = 355 + 9 (PR #296's own StrategyWave15 (7) + SpellWave4 (1) + RingWave2 (1), issue
+        // #295 Batch D -- ten cards assigned, Bow Before My Will already published) = 364 (Batch D's
+        // own baseline, now merged into main) + 11 (this branch's own PersonalityWave21, issue #299
+        // Batch E: nine assigned Personalities, none already published, PLUS the two created-only
+        // token definitions -- Ohsuki's Sparrow and Tokoru's Bear -- which are ordinary published,
+        // non-ScenarioOnly CardDefinitions and so count here exactly like personality-wave-17's own
+        // Lion Ancestor already does) = 375. Recomputed from the actual current baseline each time
+        // this conflicts, never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,375);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

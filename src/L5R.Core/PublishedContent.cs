@@ -1474,6 +1474,39 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Personality wave 21 (issue #299, Batch E of the "Not blocked; deferred for scope"
+    /// BLOCKERS audit -- following Batch A/follower-wave-14, Batch B/strategy-wave-13, Batch C/
+    /// strategy-wave-14, Batch D/strategy-wave-15 + spell-wave-4 + ring-wave-2): nine Personalities and
+    /// the two created-only tokens two of them produce (oracle-l5r-10023 Ohsuki's Sparrow and
+    /// oracle-l5r-10025 Tokoru's Bear, published exactly like personality-wave-17's own Lion
+    /// Ancestor -- CardDefinition.CreatedOnly). New primitives: CardDefinition.
+    /// HonorRequirementWaiverClan (Akodo Chiyo's Crab / Kitsu Ririko's Unicorn waiver, one shared
+    /// mechanism read by MatchEngine.QuotePurchase); MatchState.ProvinceDestroyedSinceTurnEnd (Ohsuki's
+    /// Sparrow -- a per-player flag set at DestroyProvince and cleared at the end of that player's own
+    /// turn, distinct from Village Guardian's match-lifetime ProvinceEverDestroyed); the
+    /// own-personality-won-duel Reaction trigger (Kakita Maratai -- the duelWonReaction window
+    /// broadened from the winning card's own reaction to any of its controller's watchers); the
+    /// enemy-attacking-card Target (Tokoru's Bear); the attacking-one Effect (Matsu Kaido); a
+    /// conditional MovementCannotBeNegated check (Shinjo Kinto, and Wrathful Ancestor's own clause);
+    /// Utaku Mai's addition to ValidateAbility's reinforcesFromElsewhere list; and CreatePersonality's
+    /// new duringEntryReaction mode, letting Ohsuki/Tokoru create their token from inside their own
+    /// entry Reaction window without clobbering it.</summary>
+    public static PublishedSnapshot PersonalityWave21 { get; } = LoadPersonalityWave21();
+
+    private static PublishedSnapshot LoadPersonalityWave21()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave21.json", "personality-wave-21", requireDecks: false);
+        if(snapshot.Cards.Length != 11)
+            throw new InvalidOperationException("Unexpected personality-wave-21 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-21 card is not a textful Personality: {card.Id}");
+        var others21 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others21).Any())
+            throw new InvalidOperationException("personality-wave-21 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
