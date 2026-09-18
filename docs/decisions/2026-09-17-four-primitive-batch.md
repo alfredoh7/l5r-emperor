@@ -189,11 +189,15 @@ the new `unimpeachableNameReaction` `Apply()` branch), `src/L5R.Core/CardAbiliti
 (`FieldsOfMercyNegatesPersonalityDestruction`, `CheckTsujikenWatch`, `AbilityMayCauseHonorLoss`/
 `ControlsDishonorablePersonality`/`ResolveOrDeferUnimpeachableName`, new `any-holding`/
 `optional-dishonorable-personality` Target categories, four new AbilityCatalog entries and execution
-cases), `PublishedContent.cs`/`CardCatalog.cs`/`L5R.Core.csproj` (Strategy wave 11, Follower wave 11,
-Personality wave 20 -- renamed up from this branch's own original wave 10/10/19 numbering to avoid
-same-name collisions with unrelated waves issues #271/#273/#276 independently merged under those same
-numbers while this branch was in flight), three new `tools/content/package_{strategy_wave_11,
-follower_wave_11,personality_wave_20}.py`, `tools/content/build_card_inventory.py` (removed the four
+cases), `PublishedContent.cs`/`CardCatalog.cs`/`L5R.Core.csproj` (Strategy wave 12, Follower wave 13,
+Personality wave 20 -- renamed up TWICE from this branch's own original wave 10/10/19 numbering:
+first to 11/11/20 to avoid same-name collisions with unrelated waves issues #271/#273/#276
+independently merged under those same numbers while this branch was in flight, then Strategy/Follower
+renamed again to 12/13 once a second sibling PR (#281, issue #278) turned out to have independently
+claimed "strategy-wave-11"/"follower-wave-11" for its own, different cards -- neither PR had merged
+into main yet, so GitHub's own per-PR mergeability check never caught it), three new
+`tools/content/package_{strategy_wave_12,follower_wave_13,personality_wave_20}.py`,
+`tools/content/build_card_inventory.py` (removed the four
 now-stale `BLOCKERS` entries), `docs/CARD_INVENTORY.xlsx` (regenerated, 328 wired),
 `tests/L5R.Core.Tests/Program.cs`/`PublishedTests.cs` (new regression coverage, pinned count 328),
 `src/L5R.Core/CardCatalog.cs` (three new training fixtures: `training-expensive-holding`,

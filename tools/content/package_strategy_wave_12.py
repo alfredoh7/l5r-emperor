@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 11 (issue #282, the four-primitive batch): Unimpeachable Name and Fields of
+"""Build Strategy wave 12 (issue #282, the four-primitive batch): Unimpeachable Name and Fields of
 Mercy -- two mostly-independent primitives (a broad out-of-play "before any action resolves"
 Reaction, and a per-player destroyed-Personality counter gating DestroyUnits' own Personality-
 specific component) each with a curated Effect/Ability mapping, hand-verified against each card's
@@ -17,7 +17,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "strategy-wave-11"
+PROFILE = "strategy-wave-12"
 
 ABILITIES: dict[int, list[str]] = {
     8989: ["unimpeachable-name-reaction", "unimpeachable-name-bow"],  # Unimpeachable Name
@@ -57,5 +57,5 @@ if __name__ == "__main__":
     import sys
     ids = sys.argv[1:]
     if not ids:
-        raise SystemExit("Usage: package_strategy_wave_11.py oracle-l5r-<id> [...]")
+        raise SystemExit("Usage: package_strategy_wave_12.py oracle-l5r-<id> [...]")
     print(json.dumps(package(ids)))
