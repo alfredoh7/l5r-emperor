@@ -746,6 +746,42 @@ public static class AbilityCatalog
         ["intervening-spirit-move"] = new("Battle", "Even if this unit is not at the current battlefield, if any enemy units are there, target your Personality: Move him there. Straighten him if he moved. If he is an Ancestor and this Shugenja is Water, you may take an additional Battle action", "own-personality"),
         ["earth-flows-move"] = new("Battle", "If you are the Defender, target a Personality: Move him to the current battlefield. Straighten his unit if he moved", "personality"),
         ["winds-of-dismissal-choice"] = new("Limited", "Bow this Shugenja and target another player's Personality: If he is dishonorable, Kolat, Ninja, or Shadowlands, his controller loses Honor equal to his base Personal Honor. If this Shugenja is Air, gain 1 Honor", "enemy-personality"),
+        // Stormless Fury (issue #276 follow-up): a Reaction pair sharing one printed "after the
+        // resolution of a Battle action" moment (OpenBattleActionReactionWindow), watched generically
+        // rather than tied to a specific effect classification (Fallow Lands/Khol's own "before-
+        // attack-resolves" narrower trigger, or Hizumi/Ruya's own "a bow just happened" one). The two
+        // halves never both apply to the same physical card copy at once -- the card is either in
+        // Zone.Hand (offering stormless-fury-attach) or already attached/in play (offering
+        // stormless-fury-bow) -- so they safely share the one "after-battle-action-resolves" Trigger,
+        // disambiguated purely by zone at offer time, the same technique bowed-personality-at-own-
+        // battlefield/own-action-bowed-personality already share under "bowReaction".
+        //
+        // stormless-fury-attach is the general "out of play Reaction reusing Equip (Limited)'s own
+        // attach mechanism" primitive: unlike ordinary Equip (a Limited action from hand, no Reaction
+        // gate) or Equip (Battle) (a PlayerAbility that also grants an Additional Action on attach),
+        // this attaches an out-of-play card as a genuine Reaction, deliberately WITHOUT granting that
+        // Additional Action -- see AttachAsOutOfPlayReaction in MatchEngine.cs. The specific "your
+        // performing Thunder Shugenja" restriction is Stormless Fury's own bespoke Require, not part
+        // of the general primitive.
+        ["stormless-fury-attach"] = new("Reaction", "After the resolution of a Battle action, if this card is in your hand, choose your performing Thunder Shugenja: Attach this card to him", "none", Trigger: "after-battle-action-resolves"),
+        // stormless-fury-bow is an ordinary in-play Reaction on the same shared trigger -- "target a
+        // Personality who performed it" is always the one just-resolved performer
+        // (MatchState.BattleActionReactionPerformerId), so it needs no separate Target selection.
+        // Excluded, per the card's own errata ruling, from firing against the SAME action instance
+        // that triggered this copy's own stormless-fury-attach half (see
+        // MatchState.BattleActionReaction1UsedCardIds and its Require below).
+        ["stormless-fury-bow"] = new("Reaction", "After the resolution of a Battle action, if this Shugenja is at the current battlefield, target a Personality who performed it: Bow him", "none", Trigger: "after-battle-action-resolves"),
+        // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" Reaction
+        // primitive (ResolveOrDeferAnnounceReaction in MatchEngine.cs), generalizing the exact
+        // announce-time hook ExecuteAbilityEffects already uses for War Weariness/Times of Strife into
+        // a real, player-usable, deferred Reaction window -- offered only when the about-to-execute
+        // ability is classified Ranged by the existing AttackKind() lookup (a card is free to react to
+        // ANY announced action in principle; this one's own printed text narrows it to Ranged). Her
+        // own effect sets a transient immunity flag (MatchState.RangedAttackStrengthReductionImmune)
+        // that every existing Attack-strength-reducing Reaction (Fallow Lands, Training's own negate)
+        // now checks before applying, cleared once that specific Attack's own resolution completes
+        // (ResolveAttackNow) -- never carried into a later, unrelated Attack.
+        ["tsuruchi-yakusho-immunity"] = new("Reaction", "After you announce an action, if Yakusho is at the current battlefield: Ranged Attacks from the action's effects will not have their strength reduced", "none", Trigger: "own-ranged-action-announced"),
     });
 }
 
@@ -1236,6 +1272,10 @@ public sealed partial class MatchEngine
         // Tsuruchi Isas: "Move Isas home" is a second, unconditional effect of the same ability --
         // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
         if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
+        // Tsuruchi Yakusho (issue #276 follow-up): this specific Attack's own resolution has now fully
+        // completed -- the single funnel every Attack resolves through, deferred or not -- so any
+        // immunity granted for it is cleared here, never carried into a later, unrelated Attack.
+        _state.RangedAttackStrengthReductionImmune = false;
     }
     // Steps A-E already happened (presence, announce, performer, required targeting, costs) by the
     // time a card's own UseAbility case calls this. Returns true if a reaction window was opened --
@@ -1369,6 +1409,15 @@ public sealed partial class MatchEngine
                 // own-battlefield already use.
                 "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Stormless Fury (issue #276 follow-up): both its out-of-play attach half and its
+                // in-play bow half share this one trigger, scoped to the one specific offered card by
+                // id -- same shape as own-won-duel/bowed-personality-at-own-battlefield above.
+                "after-battle-action-resolves" => _state.PendingChoice.Type == "battleActionReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action"
+                // primitive's own window, same single-watcher shape.
+                "own-ranged-action-announced" => _state.PendingChoice.Type == "announceReaction"
+                    && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 _ => false
             },
             _ => false
@@ -1391,7 +1440,14 @@ public sealed partial class MatchEngine
             // a Terrain stays in play afterward (Zone.Battlefield) -- its own abilities, including an
             // entering-play Reaction, must still be usable from there. Singh Remnants' shape is the
             // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
+            // Stormless Fury (issue #276 follow-up): "after-battle-action-resolves" covers BOTH an
+            // out-of-play half (stormless-fury-attach, Singh Remnants' own out-of-play shape) and an
+            // ordinary in-play half (stormless-fury-bow) sharing one trigger -- broadened to accept
+            // either zone here, narrowed to the exact one each half actually needs by its own bespoke
+            // Require below (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
+            // for the bow half).
             Require(ability.Trigger == "any-personality-enters-play" ? source.Zone is Zone.Hand or Zone.FateDiscard
+                : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
                 : ability.Timing == "Discipline" ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
                 // A Ring (issue #194) may use its printed action from hand too -- "you may discard
                 // this Ring from your hand to use its ability without cost" -- in addition to the
@@ -1503,6 +1559,13 @@ public sealed partial class MatchEngine
         if (id == "a-close-call-negate")
             Require(_state.PendingAttack!.Kind is "Ranged" or "Melee" && Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")),
                 "A Close Call needs a Ranged or Melee Attack targeting a Personality with an Armor attached.");
+        // Tsuruchi Yakusho (issue #276 follow-up): every existing Attack-strength-reducing Reaction is
+        // blocked outright while her own immunity flag is set for this specific (Ranged) Attack's own
+        // resolution -- covers both current reduction sites (Fallow Lands' -2, Training's own full
+        // negate) generically, so a future reducing card only needs to be added to this same id list.
+        if (id is "fallow-lands-reaction" or "training-attack-negate")
+            Require(!(_state.PendingAttack!.Kind == "Ranged" && _state.RangedAttackStrengthReductionImmune),
+                "This Ranged Attack is immune to strength reduction for the remainder of its resolution.");
         // Fallow Lands: unlike an ordinary Zone.Battlefield/Attached Reaction card, AtBattle() does not
         // apply -- it never moves, it just sits at its own home province forever. "The province to which
         // it is attached" is under attack only when the CURRENT active player is someone else (their own
@@ -1516,6 +1579,25 @@ public sealed partial class MatchEngine
                 "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
         if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
+        // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
+        // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
+        // belonging to the SAME player who holds this card in hand; the card itself must still
+        // actually be in hand (a copy already attached carries this ability id too, but offers only
+        // stormless-fury-bow -- see FindBattleActionReactionCandidate).
+        if (id == "stormless-fury-attach")
+        {
+            var performer = Card(_state.BattleActionReactionPerformerId!);
+            Require(source!.Zone == Zone.Hand, "Stormless Fury may only attach itself from your hand.");
+            Require(performer.OwnerId == player.Id && Keyword(performer, "Thunder") && Keyword(performer, "Shugenja"),
+                "Stormless Fury only attaches to your own performing Thunder Shugenja.");
+        }
+        // Stormless Fury's own second Reaction: must be attached and at the current battlefield, and
+        // -- the card owner's own errata ruling -- may not trigger against the same action instance
+        // that triggered this copy's own stormless-fury-attach half.
+        if (id == "stormless-fury-bow")
+            Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
+                "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
+        if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
         // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
         // CardId), following the same restrictions Equip() enforces -- Honor Requirement included.
         if (ability.Trigger == "any-personality-enters-play")
@@ -1991,8 +2073,88 @@ public sealed partial class MatchEngine
         // branch above, not before -- an eligible watcher whose triggering ability also happens to be
         // consumed as an Additional Action is a known, narrow scope limit this pass (see
         // FindBeforeActionReactionWatcher's own comment), not silently mishandled.
+        // Tsuruchi Yakusho (issue #276 follow-up): "after you announce an action" -- earlier than
+        // beforeActionReaction below (which reacts to an already-fully-formed, about-to-apply effect),
+        // matching the printed ruling that announcing "technically occurs before performers are
+        // selected, costs are paid, targets are selected, and effects applied."
+        if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferBeforeActionReaction(command)) return;
         ExecuteAbilityEffects(command);
+    }
+    // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" Reaction
+    // primitive, generalizing the same announce-time moment War Weariness/Times of Strife already
+    // hook (the very top of ExecuteAbilityEffects) into a genuine, player-usable, deferred window --
+    // only ever offered when the about-to-execute ability is classified Ranged by the existing
+    // AttackKind() lookup (a printed narrowing on Yakusho's own text, not a limit of the primitive
+    // itself, which a future card could reuse unscoped). Defers the WHOLE command, same shape as
+    // ResolveOrDeferBeforeActionReaction, so nothing of the ability's own effect -- including the two
+    // hardcoded announce-time checks it would otherwise trip -- runs until the window closes.
+    private bool ResolveOrDeferAnnounceReaction(GameCommand command)
+    {
+        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Timing != "Battle"
+            || AttackKind(command.AbilityId) != "Ranged") return false;
+        var watcher = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == command.PlayerId && InPlay(c) && !c.Bowed && AtBattle(c)
+            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "own-ranged-action-announced"));
+        if (watcher is null) return false;
+        _state.PendingAnnouncedAction = command;
+        _state.PendingChoice = new("announceReaction", watcher.OwnerId, watcher.Id, "After you announce this action: you may use this card's own reaction, or pass.");
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = watcher.OwnerId;
+        Emit("reactionWindow", "Announce reaction window opened.", watcher.OwnerId, watcher.Id);
+        return true;
+    }
+    // Stormless Fury (issue #276 follow-up): the general "after a Battle action resolves" primitive,
+    // offering either an out-of-play attach-as-Reaction candidate (Equip (Limited)'s own attach
+    // mechanism, reused as a Reaction) or, failing that, an ordinary in-play watcher -- never both at
+    // once, since the two halves live in mutually exclusive zones for any one card copy.
+    private (CardInstance Watcher, bool OutOfPlay)? FindBattleActionReactionCandidate(CardInstance performer)
+    {
+        var outOfPlay = _state.Cards.Values.FirstOrDefault(c => c.OwnerId == performer.OwnerId && c.Zone == Zone.Hand
+            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
+        if (outOfPlay is not null) return (outOfPlay, true);
+        var inPlay = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !c.Bowed && !_state.BattleActionReaction1UsedCardIds.Contains(c.Id)
+            && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var d) && d.Timing == "Reaction" && d.Trigger == "after-battle-action-resolves"));
+        return inPlay is not null ? (inPlay, false) : null;
+    }
+    // Called from ExecuteAbilityEffects' own tail, the same spot OpenBowReactionWindow already
+    // watches from -- only for an ability that is itself a genuine Battle action with an identifiable
+    // performer (never for a Reaction's own resolution, already excluded by the caller).
+    private bool OpenBattleActionReactionWindow(GameCommand command, AbilityDefinition ability, CardInstance? source, int closesTo)
+    {
+        if (ability.Timing != "Battle") return false;
+        var performer = ability.Performer is not null ? (command.PerformerId is null ? null : ActingPersonality(Card(command.PerformerId)))
+            : source is null ? null : ActingPersonality(source);
+        if (performer is null || Definition(performer).Type != CardType.Personality) return false;
+        _state.BattleActionReactionPerformerId = performer.Id;
+        _state.BattleActionReaction1UsedCardIds.Clear();
+        if (FindBattleActionReactionCandidate(performer) is not (CardInstance watcher, _))
+        {
+            _state.BattleActionReactionPerformerId = null;
+            return false;
+        }
+        _state.PendingChoice = new("battleActionReaction", watcher.OwnerId, watcher.Id, "After the Battle action resolved: you may use this card's own reaction, or pass.", closesTo);
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = watcher.OwnerId;
+        Emit("reactionWindow", "Battle-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        return true;
+    }
+    // Stormless Fury's own out-of-play attach (Equip (Limited)'s own mechanism, reused as a Reaction):
+    // deliberately minimal -- unlike MatchEngine.Equip, this card has no AttachRequiresKeyword/
+    // AttachGrantsKeyword/HonorRequirement/AttachmentAllowed cap of its own, and its printed effect
+    // never mentions paying a cost (0 Gold anyway, validated generically by ValidatePayment). No
+    // Additional Action is ever granted here -- that is the entire point of this being a Reaction,
+    // not Equip (Battle) -- and OpenEntryReactionWindow is deliberately not called either: Stormless
+    // Fury's own printed text is a complete, closed effect ("Attach this card to him"), not a fresh
+    // entering-play moment inviting a THIRD nested reaction.
+    private void AttachAsOutOfPlayReaction(CardInstance card, CardInstance target, int ownerId)
+    {
+        Player(ownerId).Hand.Remove(card.Id);
+        // Equip (Battle)'s own convention: an attachment's ProvinceIndex must be copied from its
+        // wielder for AtBattle() to ever recognize it (unlike ordinary Equip(), whose target is
+        // always at Zone.Home -- ProvinceIndex null either way -- this attach can land on a
+        // Personality already at a battlefield).
+        card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true; card.ProvinceIndex = target.ProvinceIndex;
+        Emit("equipped", $"{Definition(card).Name} attached to {Definition(target).Name} (Reaction).", ownerId, card.Id);
     }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
     // Action grant for this use. Threaded through so the tail below knows whether to keep priority
@@ -2334,6 +2496,22 @@ public sealed partial class MatchEngine
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
             case "fallow-lands-reaction": _state.PendingAttack!.Strength -= 2; break;
+            // Stormless Fury (issue #276 follow-up): Equip (Limited)'s own attach mechanism, reused
+            // here as a Reaction, deliberately without granting Equip (Battle)'s Additional Action.
+            case "stormless-fury-attach":
+                AttachAsOutOfPlayReaction(source!, Card(_state.BattleActionReactionPerformerId!), player.Id);
+                _state.BattleActionReaction1UsedCardIds.Add(source!.Id);
+                break;
+            case "stormless-fury-bow":
+            {
+                var performer = Card(_state.BattleActionReactionPerformerId!);
+                if (!StalwartNegatesBow(performer, player.Id)) performer.Bowed = true;
+                break;
+            }
+            // Tsuruchi Yakusho (issue #276 follow-up): sets the transient immunity flag every existing
+            // Attack-strength-reducing Reaction now checks (see the Require block above); cleared by
+            // ResolveAttackNow once the specific Ranged Attack this action produces actually resolves.
+            case "tsuruchi-yakusho-immunity": _state.RangedAttackStrengthReductionImmune = true; break;
             case "low-market-equip":
             {
                 source!.Bowed = true;
@@ -2824,6 +3002,10 @@ public sealed partial class MatchEngine
         // action, it is not itself a fresh "your action bowed a Personality" event that could
         // re-trigger the same (or another) watching card all over again.
         if (ability.Timing != "Reaction" && OpenBowReactionWindow(player.Id, bowedBeforeAction, 1 - player.Id)) return;
+        // Stormless Fury (issue #276 follow-up): a chance to react to a Battle action having just
+        // resolved with an identifiable performer -- same "never for a Reaction's own resolution"
+        // exclusion as OpenBowReactionWindow above.
+        if (ability.Timing != "Reaction" && OpenBattleActionReactionWindow(command, ability, source, 1 - player.Id)) return;
         // Overconfident (issue #223): a chance to react to anything this ability's own resolution
         // just destroyed or recruited (MarkDead/Purchase/RecruitReserve already queued it) -- but
         // only when this action is actually about to hand priority back the ordinary way. A Reaction
