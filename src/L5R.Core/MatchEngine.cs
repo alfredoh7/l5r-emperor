@@ -108,6 +108,7 @@ public sealed partial class MatchEngine
             {
                 Add(player.Id,"oracle-l5r-10292",Zone.Home,true);
                 Add(player.Id,"training-search-source",Zone.Home,true);
+                Add(player.Id,"training-look-source",Zone.Home,true);
                 string[] dynasty=["oracle-l5r-9865","oracle-l5r-9865","oracle-l5r-4777","training-costed-region"];
                 string[] fate=["training-terrain","training-terrain"];
                 for(var i=0;i<dynasty.Length;i++) state.Cards[player.DynastyDeck[i]].DefinitionId=dynasty[i];
@@ -158,6 +159,8 @@ public sealed partial class MatchEngine
             // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
             // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
             if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
+            // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
+            if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -681,7 +684,7 @@ public sealed partial class MatchEngine
         Require(_state.Phase==Phase.Action,"Order Seppuku is only available during the Action Phase.");
         // Deck search (issue #312): Seppuku cuts through pending choices, but a search is a private, multi-step decision whose
         // pending choice a destruction-triggered window (Overconfident) would overwrite, orphaning it -- finish the search first.
-        Require(_state.PendingSearch is null,"Finish the deck search before ordering Seppuku.");
+        Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
@@ -2151,6 +2154,14 @@ public sealed partial class MatchEngine
         // its own PendingChoice like Harsh Choices above; ResumeEventAfterSearch discards the Event, refills the
         // province and resumes the reveal loop once the search has shuffled and finished. The Event stays in its
         // province, face up, until then.
+        // Signs and Portents (issue #322): "Look at the top four cards of any Fate deck. You may discard one of them. Put the rest
+        // back in any order." -- the look primitive (DeckLook.cs), deferred through its own PendingChoice exactly like Imperial
+        // Gift's search; the Event is discarded and the reveal resumes once the arrangement is submitted.
+        if(LookCatalog.ForEventEffect(Definition(card).Effect) is { } eventLook)
+        {
+            BeginLook(eventLook,card,player.Id,"event");
+            return true;
+        }
         if(Definition(card).Effect=="imperial-gift")
         {
             GainHonor(player.Id,2,"Imperial Gift",card);

@@ -1,0 +1,32 @@
+{
+  "Profile": "holding-wave-2",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6095",
+      "Name": "Public Records",
+      "Type": "Holding",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 2,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Bow this card: Produce 2 Gold. Limited: Bow this card: Look at the top three cards of your Fate deck. Put them back in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6095.jpg",
+      "Keywords": [
+        "Singular"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "public-records-look"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

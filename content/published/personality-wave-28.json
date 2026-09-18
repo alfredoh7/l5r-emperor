@@ -1,0 +1,66 @@
+{
+  "Profile": "personality-wave-28",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-3918",
+      "Name": "Isawa Tamaki",
+      "Type": "Personality",
+      "Clan": "Phoenix",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Look at the top card of your Fate deck. You may put it at the bottom of the deck.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3918.jpg",
+      "Keywords": [
+        "Ishiken",
+        "Phoenix Clan",
+        "Shugenja",
+        "Soul of Isawa Hachiko",
+        "Void"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "isawa-tamaki-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10479",
+      "Name": "Bayushi Kahoku",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Look at the top three cards of your Fate deck. You may show one of them that is a Political Strategy and put it in your hand. Put the remaining cards back in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10479.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Unique",
+        "Final Student",
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kahoku-exp2-look"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

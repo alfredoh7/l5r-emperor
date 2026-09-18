@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Adds the generic look-at-the-top-N-cards primitive (issue #322): a private LookView (viewer only, including a look at the opponent's deck), one arrangeTopCards command (position:disposition tokens, no new GameCommand field) with top/bottom/hand/show/discard dispositions, per-rule min/max enforced by the engine, reorderable or fixed order, no shuffle and no RNG use, empty/short decks handled, QueryActions offering the viewer's legal answers, and a shared FinishDeferredAction tail with the deck search. Wires Public Records (holding-wave-2), Isawa Tamaki and Bayushi Kahoku exp2 (personality-wave-28), Banish All Doubt (strategy-wave-17) and Signs and Portents (event-wave-4). Stacked on PR #328.",
+  "validation": "bash tools/check.sh --skip-client passed (Core incl. 14 new deck-look tests each mutation-checked, AI 21/21 including a look at every stage for 5 abilities x 4 decks x 3 seeds, Server 8/8 including a restart mid-look at the opponent's deck, Client.Transport 7/7 including every MatchView property and both look commands over the wire, Python content tests); dotnet build of src/L5R.Client compiled clean; published count pinned at 397 = 390 (origin/main 7ac0854f) + 2 (#328) + 5. Godot import/smoke not run locally; CI runs it.",
+  "remaining": "Client UI (#323, Alfredo): the shipped client cannot answer a look until it reads MatchView.PendingLook. Rules questions awaiting Mendon are listed in docs/decisions/2026-09-18-look-top-cards-primitive.md. Rebase onto main after #328 squash-merges and re-derive the pinned published count from the actual baseline. 20 other look cards not wired (reported in the decision doc).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/322",
+  "branch": "claude/322-view-top-n-cards",
+  "updated": "2026-09-18T22:43:50.306672+00:00"
+}

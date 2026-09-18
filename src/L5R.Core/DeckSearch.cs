@@ -267,12 +267,16 @@ public sealed partial class MatchEngine
         }
     }
 
-    private void ShowSearchedCard(PendingSearch search, CardInstance card)
+    private void ShowSearchedCard(PendingSearch search, CardInstance card) => RecordShown(search.PlayerId, card, Card(search.SourceCardId), search.Deck!, "search");
+
+    /// <summary>Appends a card to the public shown-cards record (the opponent reviews it from MatchView.ShownCards) and
+    /// announces it. <paramref name="how"/> completes the record's context ("search", "look").</summary>
+    private void RecordShown(int playerId, CardInstance card, CardInstance source, string deck, string how)
     {
-        var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
-        var context = $"{Definition(source).Name}, {search.Deck} deck search";
+        var player = Player(playerId);
+        var context = $"{Definition(source).Name}, {deck} deck {how}";
         var eventSequence = _state.Events.Count + 1L;
-        _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source.Id, source.DefinitionId, search.Deck!, context, _state.TurnNumber, eventSequence));
+        _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source.Id, source.DefinitionId, deck, context, _state.TurnNumber, eventSequence));
         // The event carries no card id: the shown card may end up in a hidden hand, and the record is keyed by sequence.
         Emit("cardShown", $"{player.Name} shows {Definition(card).Name} ({context}).", player.Id);
     }
@@ -346,23 +350,31 @@ public sealed partial class MatchEngine
     // taken and its effect done, a Region discarded, and a pass.
     private void FinishSearch(PendingSearch search)
     {
-        var player = Player(search.PlayerId);
-        ShuffleDeck(player, search.Deck!);
-        _state.PendingSearch = null; _state.PendingChoice = null;
-        if (search.Origin == "event") { ResumeEventAfterSearch(search); return; }
-        // The Limited action has now resolved: the ordinary tail of a resolved action -- a chance to react to it having
-        // bowed a Personality (Shizuka bowed herself as the cost), a deferred Overconfident/Times of Strife window, then
-        // priority to the opponent (the same tail Asako Rikate's window ends with, plus the bow window it does not need).
-        if (search.BowedBefore is not null && OpenBowReactionWindow(search.PlayerId, search.BowedBefore.ToHashSet(StringComparer.Ordinal), 1 - search.PlayerId)) return;
-        if (OpenOverconfidentDrawWindow(1 - search.PlayerId)) return;
-        NextAction(search.PlayerId);
+        ShuffleDeck(Player(search.PlayerId), search.Deck!);
+        _state.PendingSearch = null;
+        FinishDeferredAction(search.PlayerId, search.Origin, search.SourceCardId, search.BowedBefore);
     }
 
-    // An Event's own resolution once its search is done (Imperial Gift): the Event is discarded and the province
-    // refills, exactly as ResolveEvent's default case does, then the Events Phase reveal loop resumes.
-    private void ResumeEventAfterSearch(PendingSearch search)
+    // The tail every deferred action ends with (a deck search, a look at the top cards): the pending choice is over and
+    // the action that opened it now resolves like any other. A Limited action gets the ordinary tail of a resolved action --
+    // a chance to react to it having bowed a Personality (Shizuka bowed herself as the cost; bowedBefore is the snapshot of
+    // what was already bowed when it was announced), a deferred Overconfident/Times of Strife window, then priority to the
+    // opponent (the same tail Asako Rikate's window ends with, plus the bow window it does not need). An Event is discarded,
+    // its province refilled, and the Events Phase reveal resumes.
+    private void FinishDeferredAction(int playerId, string origin, string sourceCardId, List<string>? bowedBefore)
     {
-        var player = Player(search.PlayerId); var card = Card(search.SourceCardId);
+        _state.PendingChoice = null;
+        if (origin == "event") { ResumeEventAfterDeferral(playerId, sourceCardId); return; }
+        if (bowedBefore is not null && OpenBowReactionWindow(playerId, bowedBefore.ToHashSet(StringComparer.Ordinal), 1 - playerId)) return;
+        if (OpenOverconfidentDrawWindow(1 - playerId)) return;
+        NextAction(playerId);
+    }
+
+    // An Event's own resolution once its deferred text is done (Imperial Gift's search, Signs and Portents' look): the Event
+    // is discarded and the province refills, exactly as ResolveEvent's default case does, then the reveal loop resumes.
+    private void ResumeEventAfterDeferral(int playerId, string sourceCardId)
+    {
+        var player = Player(playerId); var card = Card(sourceCardId);
         var province = player.Provinces[card.ProvinceIndex!.Value];
         province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
         Emit("eventResolved", $"{Definition(card).Name} resolved and was discarded.", player.Id, card.Id);

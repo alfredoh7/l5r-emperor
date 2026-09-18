@@ -64,6 +64,35 @@ Run("resolves a deck search at every stage without stalling: Region into a provi
         Check(pass.GetView(1).ShownCards!.Length==0 && pass.GetView(1).Events.Any(e=>e.Type=="searchPassed") && pass.GetView(1).Events.Any(e=>e.Type=="deckShuffled"),"Passed and still shuffled");
     }
 });
+// Look at the top N cards (issue #322): the AI answers every stage of every look shape from the legal actions it is offered.
+Run("resolves a look at the top cards at every stage without stalling: each deck of the four (the opponent's included), a required take, a fixed order, a shown card",()=>
+{
+    foreach(var seed in new ulong[]{1,42,831})
+        foreach(var ability in new[]{"training-look-dynasty","training-look-any","training-look-take-item","training-look-fixed","training-look-show"})
+            for(var deckIndex=0;deckIndex<4;deckIndex++)
+            {
+                var game=MatchEngine.CreateDeckSearchShowcase(seed);
+                var source=game.State.Cards.Values.First(c=>c.OwnerId==0 && c.Zone==Zone.Home && c.DefinitionId=="training-look-source").Id;
+                Check(game.Execute(new("useAbility",0,game.Version,source,AbilityId:ability)).Accepted,"The look could not be started");
+                var steps=0; var viewedOpponentDeck=false;
+                while(game.State.PendingChoice is {} pending && pending.Type.StartsWith("look"))
+                {
+                    var view=game.GetView(pending.PlayerId); var actions=game.QueryActions(pending.PlayerId);
+                    Check(view.PendingLook is not null,$"The viewer has no look view at {pending.Type}");
+                    // Narrow the deck choice to one deck (standing in for a player who prefers it); the arrangement is left to the AI.
+                    var decks=actions.Where(a=>a.Type=="chooseLookDeck").ToArray();
+                    if(decks.Length>0) actions=[decks[Math.Min(deckIndex,decks.Length-1)]];
+                    var decision=TrainingOpponent.Choose(view,actions);
+                    Check(decision.Command is not null,$"The AI stalled at {pending.Type}");
+                    if(decision.Command!.Type=="chooseLookDeck" && decision.Command.TargetPlayerId==1) viewedOpponentDeck=true;
+                    var result=game.Execute(decision.Command!);
+                    Check(result.Accepted,$"Illegal {decision.Command.Type} at {pending.Type}: {result.Error}");
+                    Check(++steps<6,"The look did not finish in a bounded number of decisions");
+                }
+                Check(game.State.PendingChoice is null,$"{ability}: the look finished and play continued");
+                if(viewedOpponentDeck) Check(game.GetView(1).PendingLook is null && game.GetView(0).Events.Any(e=>e.Type=="topCardsLooked"),"The deck owner only learns that a look happened");
+            }
+});
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: AI vs AI in the deck-search fixture plays on, searches, shuffles and replays deterministically",()=>PlaySearchMatch(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})

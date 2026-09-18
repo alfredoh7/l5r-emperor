@@ -19,7 +19,8 @@ try
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
-        ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; })
+        ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
+        ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
     };
     foreach (var (name, test) in cases)
     {
@@ -207,6 +208,75 @@ static void SearchViewsCrossTheWire()
     var wire = System.Text.Json.JsonSerializer.Serialize(MatchSession.ToWire(command), web);
     var bound = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(wire, Protocol.Json)!.BindToSeat(1, 9);
     Check(System.Text.Json.JsonSerializer.Serialize(bound) == System.Text.Json.JsonSerializer.Serialize(command), "A search command survives the client payload, the server's strict schema and the seat binding");
+}
+
+// Issue #322: the look view crosses the wire inside MatchView like the search view does, so prove it the same way -- on the exact server
+// envelope, every MatchView property present, the client's deserialization identical to the engine's, the viewer's ordered cards reaching
+// only the viewer (including when the viewer looks at the OPPONENT's deck), and every look action (deck choice, arrangement) surviving
+// the AvailableAction mapping and the seat-bound command.
+static void LookViewsCrossTheWire()
+{
+    var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+    static string SourceOf(MatchEngine e) => e.State.Cards.Values.First(c => c.OwnerId == 0 && c.DefinitionId == "training-look-source").Id;
+    static MatchEngine Snap(MatchEngine e) => MatchEngine.Replay(e.ExportReplay());
+    static void Step(MatchEngine e, GameCommand command) { var result = e.Execute(command); if (!result.Accepted) throw new InvalidOperationException(result.Error); }
+    var stages = new List<(string Name, MatchEngine Engine)>();
+    var game = MatchEngine.CreateDeckSearchShowcase();
+    Step(game, new("useAbility", 0, game.Version, SourceOf(game), AbilityId: "training-look-any")); stages.Add(("deck choice", Snap(game)));
+    Step(game, new("chooseLookDeck", 0, game.Version, Choice: "Fate", TargetPlayerId: 1)); stages.Add(("opponent's deck", Snap(game)));
+    Step(game, new("arrangeTopCards", 0, game.Version, CardIds: ["2:top", "0:discard", "1:bottom"])); stages.Add(("done", Snap(game)));
+    var own = MatchEngine.CreateDeckSearchShowcase();
+    Step(own, new("useAbility", 0, own.Version, SourceOf(own), AbilityId: "training-look-show"));
+    stages.Add(("own deck, two cards", Snap(own)));
+    Step(own, own.QueryActions(0).First(a => a.Type == "arrangeTopCards").Command!); stages.Add(("shown", Snap(own)));
+
+    var seen = new HashSet<string>();
+    foreach (var (stage, engine) in stages)
+        foreach (var viewer in new[] { 0, 1 })
+        {
+            var view = engine.GetView(viewer); var actions = engine.QueryActions(viewer);
+            var message = new StateMessage("state", "ABCDEFGH", viewer, view.Version, view, actions.Select(AvailableAction.FromCore).ToArray(), [true, true]);
+            var json = System.Text.Json.JsonSerializer.Serialize(message, Protocol.Json);
+            using var document = System.Text.Json.JsonDocument.Parse(json);
+            var wireView = document.RootElement.GetProperty("view");
+            var received = wireView.Deserialize<MatchView>(web)!;
+            Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(view, web), $"{stage}/viewer {viewer}: the client's MatchView differs from the engine's");
+            foreach (var property in typeof(MatchView).GetProperties())
+                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
+            var receivedActions = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!;
+            Check(receivedActions.Length == actions.Length, $"{stage}: an action was dropped");
+            for (var i = 0; i < actions.Length; i++)
+            {
+                var got = receivedActions[i] with { Command = receivedActions[i].Command is null ? null : receivedActions[i].Command! with { PlayerId = viewer, ExpectedVersion = view.Version } };
+                Check(System.Text.Json.JsonSerializer.Serialize(got, web) == System.Text.Json.JsonSerializer.Serialize(actions[i], web), $"{stage}: action '{actions[i].Type}' changed on the wire");
+                if (actions[i].Type is "chooseLookDeck" or "arrangeTopCards") seen.Add(actions[i].Type);
+            }
+            var viewerSide = viewer == 0;
+            if (stage is "deck choice" or "opponent's deck" or "own deck, two cards")
+                Check(viewerSide ? received.PendingLook is not null : received.PendingLook is null, $"{stage}/viewer {viewer}: the look reaches only the viewer");
+            switch (stage)
+            {
+                case "deck choice":
+                    if (viewerSide) Check(received.PendingLook!.DeckChoices!.Length == 4 && received.PendingLook.Cards is null && received.PendingLook.DeckChoices.Count(d => !d.OwnDeck) == 2, "Four decks offered, two of them the opponent's, and no cards before one is chosen");
+                    break;
+                case "opponent's deck":
+                    if (viewerSide) Check(received.PendingLook is { Stage: "Arrange", OwnDeck: false, DeckOwnerId: 1 } l && l.Cards!.Length == 3 && l.Cards.All(c => c.Definition.Id == c.DefinitionId) && l.Cards.Select(c => c.Position).SequenceEqual(new[] { 0, 1, 2 }), "The opponent's top cards, in order, with their definitions");
+                    else foreach (var card in engine.State.Players[1].FateDeck.Take(3)) Check(!json.Contains(engine.State.Cards[card].DefinitionId) && !json.Contains('"' + card + '"'), "The deck owner's envelope names a card of the deck being looked at");
+                    break;
+                case "own deck, two cards":
+                    if (viewerSide) Check(received.PendingLook!.Requested == 2 && received.PendingLook.Cards!.Length == 2 && received.PendingLook.Rules![0].Disposition == "show" && received.PendingLook.Rules[0].Min == 1, "The caller's count and the required show reach the client");
+                    break;
+                case "shown":
+                    Check(received.PendingLook is null && received.ShownCards is [{ Deck: "Fate" }] && received.ShownCards[0].Context.Contains("Fate deck look"), "The show is public and the look is over");
+                    break;
+            }
+        }
+    foreach (var type in new[] { "chooseLookDeck", "arrangeTopCards" }) Check(seen.Contains(type), $"The test never carried a {type} action over the wire");
+    // The commands a look sends fit the strict server command: the deck choice rides Choice + TargetPlayerId, the arrangement rides CardIds.
+    var command = new GameCommand("arrangeTopCards", 1, 9, CardIds: ["1:top", "0:bottom"], Choice: "Fate", TargetPlayerId: 0);
+    var wire = System.Text.Json.JsonSerializer.Serialize(MatchSession.ToWire(command), web);
+    var bound = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(wire, Protocol.Json)!.BindToSeat(1, 9);
+    Check(System.Text.Json.JsonSerializer.Serialize(bound) == System.Text.Json.JsonSerializer.Serialize(command), "A look command survives the client payload, the server's strict schema and the seat binding");
 }
 
 static async Task InvalidConnections(string url)
