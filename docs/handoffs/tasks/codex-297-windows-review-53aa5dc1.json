@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Build reusable private Windows preview delivery and Mendon review notifications, starting with PR292.",
-  "validation": "Initial scope and existing export/fixture entry points inspected; implementation and Windows checks pending.",
-  "remaining": "Implement packaging, launchers, Claude handoff, Windows validation and targeted notification after verified upload.",
+  "lane": "shared",
+  "summary": "Added shared preview-delivery tooling and agent instructions: exact-source Windows packages, direct prepared launchers, isolated settings, private release staging and one targeted Mendon notification after Windows validation. No game rules or client source changed.",
+  "validation": "Strict Windows export passed. Seven packaging/publication regression groups passed locally. Uploaded digest verification and Windows runtime/launcher CI pending.",
+  "remaining": "Finish upload and actual Windows checks; publish and send authorized review notification. PR292 gameplay findings and Mendon human review remain open; delivery-tooling review also requested.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-18T16:00:06.422724+00:00"
+  "updated": "2026-09-18T16:09:56.082180+00:00"
 }
