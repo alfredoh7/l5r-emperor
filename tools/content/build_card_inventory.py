@@ -164,7 +164,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-9900": "Needs a new Reaction trigger: \"after an action resolves that a Personality performed\" (the Terrain-play and additional-Battle-action halves are separately wirable).",
     "oracle-l5r-1607": "Needs Chi as a repeatable payable cost resource (distinct from a Force/Stat modifier), interacting correctly with the existing Chi<=0 death rule.",
     "oracle-l5r-2035": "Needs an opponent-chooses-or-random discard mechanic (Reconnaissance-conditional).",
-    "oracle-l5r-2332": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-2342": "Needs a compound ability shape the engine has no precedent for: one Battle action that optionally targets and destroys an enemy attachment AND, independently, conditionally becomes a Ranged Attack. AbilityCatalog's own Target field can only ever be an ordinary Target category (here, an attachment) or the special \"attack\" shape (which hands off to the separate AttackStrength/AttackKind/ResolveOrDeferAttack switches) -- never both at once on one ability id, so \"optional destroy, then possibly also attack\" cannot be expressed as a single ability the way this card prints it.",
     "oracle-l5r-10126": "Rings themselves are now built (issue #194); that alone does not unblock this card. Its own scan (\"Extend the Soul's Boundaries\") shows: enters play paying 1 less Gold per Ring controlled (a new variable, count-scaled discount -- every existing discount is either clan-alignment-based or a fixed printed amount, never scaled by a live count); Battle: destroy this card, bow the performing Shugenja, destroy him unless he is Void, target an enemy Personality whose controller may shuffle him and his attachments back into their owners' decks (needs a shuffle-into-deck primitive, not built); if he did not choose this, the acting player takes two additional Battle actions (a grant conditioned on the TARGET's own opponent choice, a novel shape). Three separate unbuilt pieces, not one.",
     "oracle-l5r-2419": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
@@ -186,7 +185,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10735": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10943": "Needs a self-replacing Terrain variant plus an ongoing army-wide Force passive tied to being in play as Terrain (same two gaps as oracle-l5r-10941).",
     "oracle-l5r-10551": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900/4118).",
-    "oracle-l5r-10742": "Needs an \"after this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10945": "Not blocked; deferred for scope (Discipline is already built; needs a standalone \"attachment\" Target category, a subset of the existing attachment-or-dishonorable-personality shape).",
     "oracle-l5r-10946": "Not blocked; deferred for scope (own-personality Target, CardPersonalHonor, and dual Force/Chi modifiers all already exist; needs a new \"unopposed\" condition check).",
     "oracle-l5r-5046": "Needs a keyword-conditional cost EXEMPTION (bow the performer unless it has a given keyword) -- distinct from every existing keyword-conditional EFFECT.",
@@ -236,7 +234,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10963": "Needs an \"Interrupt\" timing (not built; the plain Melee 2 Attack half is separately wirable).",
     "oracle-l5r-8989": "Needs a broad \"before another player's action\" Reaction trigger (existing triggers are narrow -- before an Attack, before an additional action -- not any action).",
     "oracle-l5r-9168": "Not blocked; deferred for scope (the Set-Force pattern already exists, per oracle-l5r-543's own note).",
-    "oracle-l5r-10403": "Needs an \"after this battlefield's province is destroyed\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10182": "Needs a \"before an action's effect destroys a card, negate\" Reaction trigger (same gap as oracle-l5r-2530; the Terrain-play half is separately wirable).",
     "oracle-l5r-9390": "Not blocked; deferred for scope (Spirit-keyword Performer and MoveHome already exist; the 'will not be negated' clause just means never opening the reaction window for this specific move).",
 
