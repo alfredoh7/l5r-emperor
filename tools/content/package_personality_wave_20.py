@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Personality wave 19 (issue TBD, the four-primitive batch): Yasuki Tsujiken -- a persistent,
+"""Build Personality wave 20 (issue #282, the four-primitive batch): Yasuki Tsujiken -- a persistent,
 per-instance watched-relationship trigger ("after each time THIS specific, once-chosen Holding bows,
 for as long as Tsujiken remains in play, its controller loses 1 Honor"), plus his separately-wirable
 Open half (bow Tsujiken, straighten a Holding, waived if its base Gold Cost is 4 or lower).
@@ -15,7 +15,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "personality-wave-19"
+PROFILE = "personality-wave-20"
 
 ABILITIES: dict[int, list[str]] = {
     9469: ["tsujiken-watch-holding", "tsujiken-straighten-holding"],  # Yasuki Tsujiken
@@ -48,5 +48,5 @@ if __name__ == "__main__":
     import sys
     ids = sys.argv[1:]
     if not ids:
-        raise SystemExit("Usage: package_personality_wave_19.py oracle-l5r-<id> [...]")
+        raise SystemExit("Usage: package_personality_wave_20.py oracle-l5r-<id> [...]")
     print(json.dumps(package(ids)))
