@@ -92,10 +92,13 @@ internal static class PublishedTests
         // True total: 322 (shared baseline after PR #280) + 2 (PR #277's SpellWave3 +
         // PersonalityWave19) + 3 (PR #281's own FollowerWave11 + StrategyWave11) + 4 (PR #283's own
         // FollowerWave12, now merged into main) + 4 (PR #284's own StrategyWave12 (2) +
-        // FollowerWave13 (1) + PersonalityWave20 (1), now merged into main) + 6 (this branch's own
-        // FollowerWave14, issue #285) = 341. Recomputed from the actual current baseline each time
-        // this conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,341);
+        // FollowerWave13 (1) + PersonalityWave20 (1), now merged into main) + 6 (PR #286's own
+        // FollowerWave14, issue #285) = 341 (Batch A's own baseline) + 7 (this branch's own
+        // StrategyWave13, issue #287 Batch B -- eight cards assigned, but Surety of Purpose
+        // (oracle-l5r-7664) turned out already published in strategy-wave-6, so only 7 are new
+        // here) = 348. Recomputed from the actual current baseline each time this conflicts, never
+        // copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,348);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
