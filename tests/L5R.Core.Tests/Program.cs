@@ -192,7 +192,8 @@ var tests = new (string Name, Action Run)[]
     ("Yasuki Tsujiken (oracle-l5r-9469): his own entering-play Reaction marks a target Holding, independently stacking per copy of Tsujiken that marks it; every future bow of a marked Holding (by any cause) costs its controller 1 Honor per active mark, for as long as the marking Tsujiken remains in play; his separate Open half straightens a target Holding, only bowing himself as a cost when that Holding's base Gold Cost is above 4", YasukiTsujikenPrimitive),
     ("Follower wave 14 (issue #285): the first batch of six \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Asako House Guard's dual-choice Set-Force (asako-house-guard-force-chi/-honor, sharing one UsageKey, plus its own Phoenix Clan attach restriction); Legulus's Legion's bow-cost Attack reading its own LIVE Force via sourceId (proven against a token modifier, not just its printed Force); Village Guardian's new per-player MatchState.ProvinceEverDestroyed tracker, set at MatchEngine.DestroyProvince's own single choke point (proven to flag only the province's own owner, never the attacker) and read by its own entry Reaction's draw count (0, 1 or 2); Village Raiders' AttachGrantsKeyword \"Conqueror\" (its own scan literally reads \"This Personality has Conqueror\" despite being a Follower), proven end-to-end through an actual battle resolution, plus its own separate flat Melee 4 Attack; Water Spider Adept's pure attach restriction with no ability text at all; and Yodotai Legionnaire's entry Honor loss carrying the real Legionnaire keyword, previously exercised only by a synthetic fixture, through Aulus's own existing unit-scoped boost", FollowerWave14Primitives),
     ("Strategy wave 13 (issue #287): Batch B of the \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Scorn the Weak's flat -5F with a Force-now-0-gated Honor loss and optional second-target dishonor (CardIds); Strength in Terror's dynamic Force reduction off a chosen Paragon Performer's own live Force plus an optional attachment-destroy (CardIds); Strength of Purity's new numeric Personal-Honor-threshold Performer category; Strength of the Bear's own-unbowed-personality Performer paired with enemy-force-lower-than-performer, plus its own printed-Force-gated straighten-back; Strength of the Divine's dual Force-vs-Personal-Honor choice sharing one UsageKey, each branch buffing its own chosen, opposed Paragon Performer then attacking with strength read live off that same Performer; The Strength of the Spider's new clan-checked Performer and its own destroy-if-bowed-else-cripple two-branch effect; and Unexpected's optional self-bow-for-a-draw (a third CardIds reuse)", StrategyWave13Primitives),
-    ("Strategy wave 14 (issue #289): Batch C of the \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Banzai!'s Discipline card narrowed back to a Battle-only presence Require (its own printed verb, unlike the shared Discipline switch's default BattleOrOpen-like permissiveness) plus crushing-force's own own-opposed Target reused verbatim; Pure Intent's new own-personality-opposed Performer category; Marshal Your Strength's own Force-and-Chi dual modifier (ApplyModifier's own stat-agnostic Chi branch, exercised by a real card for the first time) minus 1 when unopposed; Lost in Transit's own Battle/Open Discipline needing no presence narrowing, reusing the standalone \"attachment\" Target category verbatim; Strong Defenses' new own-defending-personality-at-battle Performer plus its own Khol-Regulars-shaped -3 Reaction; Trusting Instinct's own -2 Reaction (both added to Tsuruchi Yakusho's shared strength-reduction-immunity id list) plus a move-to-the-opposed-current-battlefield Battle half; and Visage of the Orochi's own floored Set-Force \"raise to 6\" plus an optional CardIds-carried bow target compared against the Performer's own post-raise Force", StrategyWave14Primitives)
+    ("Strategy wave 14 (issue #289): Batch C of the \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Banzai!'s Discipline card narrowed back to a Battle-only presence Require (its own printed verb, unlike the shared Discipline switch's default BattleOrOpen-like permissiveness) plus crushing-force's own own-opposed Target reused verbatim; Pure Intent's new own-personality-opposed Performer category; Marshal Your Strength's own Force-and-Chi dual modifier (ApplyModifier's own stat-agnostic Chi branch, exercised by a real card for the first time) minus 1 when unopposed; Lost in Transit's own Battle/Open Discipline needing no presence narrowing, reusing the standalone \"attachment\" Target category verbatim; Strong Defenses' new own-defending-personality-at-battle Performer plus its own Khol-Regulars-shaped -3 Reaction; Trusting Instinct's own -2 Reaction (both added to Tsuruchi Yakusho's shared strength-reduction-immunity id list) plus a move-to-the-opposed-current-battlefield Battle half; and Visage of the Orochi's own floored Set-Force \"raise to 6\" plus an optional CardIds-carried bow target compared against the Performer's own post-raise Force", StrategyWave14Primitives),
+    ("Strategy wave 15 / spell-wave-4 / ring-wave-2 (issue #295): Batch D of the \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Charge Into Danger's own plain own-personality Performer, its move conditional (not a hard gate) on assigned-to-or-would-be-opposed, its straighten independent of whether it moved; Consuming Weakness's new own-shadowlands-personality-at-battle Performer and dead-personality-any-discard Target (Zone.Dead, any owner); Fires of Turmoil's new unattached-unit-card Target (the non-enemy-restricted counterpart to Ikoma Masumi's own); Gripped by Terror's new own-personality-at-battle Performer plus a one-shot ApplyModifier loop over Army(); Outnumbered's own Performer/Target-less \"give all qualifying cards X\" shape, the same one-shot loop; Preserving Honor's own new \"preservingHonor\" PendingChoice, proven through all three outcomes (bow, move, and Stalwart negating the bow into the remove-from-game fallback); Your Clan Needs You!'s fourth caller into the shared Purchase/RecruitReserve/CreatePersonality entry sequence, its new own-personality-in-province Target, and the new post-battle province-placement primitive, proven end to end through an actual battle resolution; Sanctuary of the Waves' new own-wielder-or-personality-with-wielder-keyword Target, proven on both the default (wielder) and Water-unlocked (another own Personality) branches, plus the not-opposed no-op; and False Ring of Earth's new Dueling.SharesNoKeywords comparison feeding Ring recruitment's existing GrantRingRecruit shape, proven through an actual duel resolution on both a qualifying and a disqualifying pairing, plus the first negative-magnitude MaxHandSize use", BatchDPrimitives)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -7988,5 +7989,326 @@ static void StrategyWave14Primitives()
         Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:withAttachment.Id);
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"visage-of-the-orochi",PerformerId:performer.Id,CardIds:[withAttachment.Id]));
+    }
+}
+static void BatchDPrimitives()
+{
+    // Charge Into Danger (oracle-l5r-10366): "Battle: Choose your performing Personality: If he
+    // assigned to, or would be opposed at, the current battlefield, move him there. If his base
+    // Force is 7 or higher, straighten him." Plain own-personality Performer -- no new category
+    // needed. The move is conditional, not a hard legality gate.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10366",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Home,true); // bowed, Force 3
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // enemy present -- would be opposed
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"charge-into-danger-move",PerformerId:performer.Id));
+        Equal(e.State.Cards[performer.Id].Zone,Zone.Battlefield,"Would be opposed there: moved in");
+        Equal(e.State.Cards[performer.Id].ProvinceIndex,0);
+        Check(e.State.Cards[performer.Id].Bowed,"Base Force 3 is below 7: not straightened");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10366",0,Zone.Hand);
+        var performer=Add(s,"training-high-force-personality",0,Zone.Home,true); // Force 7
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"charge-into-danger-move",PerformerId:performer.Id));
+        Equal(e.State.Cards[performer.Id].Zone,Zone.Battlefield);
+        Check(!e.State.Cards[performer.Id].Bowed,"Base Force 7 or higher: straightened");
+    }
+    {
+        // Not assigned to the current battlefield, and no enemy presence there -- legal to submit
+        // (own-personality carries no presence gate of its own), but nothing moves. The Force-7
+        // straighten is still unconditional, independent of whether he moved.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10366",0,Zone.Hand);
+        var performer=Add(s,"training-high-force-personality",0,Zone.Home,true); // Force 7
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"charge-into-danger-move",PerformerId:performer.Id));
+        Equal(e.State.Cards[performer.Id].Zone,Zone.Home,"Neither assigned nor opposed: no move");
+        Check(!e.State.Cards[performer.Id].Bowed,"Straightened regardless -- the Force check does not depend on moving");
+    }
+    // Consuming Weakness (oracle-l5r-1467, Fear): "Battle: Choose your performing Shadowlands
+    // Personality and remove a target dead Personality in any discard pile from the game: Give your
+    // Personality +3F, or +4F if he is Undead." New own-shadowlands-personality-at-battle Performer;
+    // new dead-personality-any-discard Target (Zone.Dead, any owner -- contrary to its own BLOCKERS
+    // note, no such Target category existed anywhere in the engine before this).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-1467",0,Zone.Hand);
+        var performer=Add(s,"training-shadowlands-personality",0,Zone.Battlefield,province:0); // Force 2, not Undead
+        var deadEnemy=Add(s,"training-lion-samurai",1,Zone.Dead);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:deadEnemy.Id,AbilityId:"consuming-weakness",PerformerId:performer.Id));
+        Equal(e.State.Cards[deadEnemy.Id].Zone,Zone.RemovedFromGame,"Removed from the game");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,5,"2 + 3 (not Undead)");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-1467",0,Zone.Hand);
+        var performer=Add(s,"training-undead-personality",0,Zone.Battlefield,province:0); // Force 2, Undead
+        var deadOwn=Add(s,"training-crane-samurai",0,Zone.Dead); // "any discard pile" -- the performer's own works too
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:deadOwn.Id,AbilityId:"consuming-weakness",PerformerId:performer.Id));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,6,"2 + 4 (Undead)");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-1467",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // not Shadowlands
+        var deadEnemy=Add(s,"training-lion-samurai",1,Zone.Dead);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:deadEnemy.Id,AbilityId:"consuming-weakness",PerformerId:performer.Id));
+    }
+    // Fires of Turmoil (oracle-l5r-10552): "Battle: Discard the top card of a Fate deck. Target a
+    // card without attachments. If the discarded card's Focus Value is odd, bow the target (0 is
+    // even). Otherwise, straighten it. Move its unit home if the target has a Madness token." New
+    // unattached-unit-card Target (no ownership restriction, unlike Ikoma Masumi's own); "a Fate
+    // deck" resolves to the performer's own (DiscardTopOfFateDeck, Aberrations' own precedent).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10552",0,Zone.Hand);
+        var oddFocusCard=Add(s,"oracle-l5r-1121",0,Zone.FateDeck); // Bow Before My Will, Focus 1 (odd)
+        s.Players[0].FateDeck.Insert(0,oddFocusCard.Id);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        target.Tokens.Add(new CardToken("test-madness","Madness","test"));
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"fires-of-turmoil"));
+        Equal(e.State.Cards[oddFocusCard.Id].Zone,Zone.FateDiscard,"Discarded the top card of the performer's own Fate deck");
+        Check(e.State.Cards[target.Id].Bowed,"Odd Focus Value: bow the target");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Has a Madness token: its unit moves home");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10552",0,Zone.Hand);
+        var evenFocusCard=Add(s,"training-item",0,Zone.FateDeck); // Focus 0 (even)
+        s.Players[0].FateDeck.Insert(0,evenFocusCard.Id);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,true,province:0); // bowed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"fires-of-turmoil"));
+        Check(!e.State.Cards[target.Id].Bowed,"Even Focus Value (0 counts as even): straighten instead");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"No Madness token: stays put");
+    }
+    // Gripped by Terror (oracle-l5r-2908, Fear): "Battle: Choose your performing Personality and
+    // target an enemy Personality or Follower: Give it -4F. If your Personality is Nonhuman, give
+    // each of your Personalities at the current battlefield +1F." New own-personality-at-battle
+    // Performer (no unbowed qualifier, no keyword gate). Applied once via a plain ApplyModifier loop
+    // over Army() at resolution, not a live recomputed passive (Utaku Elite Guard's own shape is
+    // mirrored only conceptually here, since this is a one-shot Strategy effect).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-2908",0,Zone.Hand);
+        var performer=Add(s,"training-nonhuman-personality",0,Zone.Battlefield,province:0); // Force 2, Nonhuman
+        var ally=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, another own Personality here
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"gripped-by-terror",PerformerId:performer.Id));
+        Equal(e.GetView(1).Players[1].Army.Single(c=>c.Id==target.Id).Force,0,"4 - 4, clamped at 0");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,3,"Nonhuman performer: +1F too (2 + 1)");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==ally.Id).Force,4,"Every own Personality at the battlefield: +1F (3 + 1)");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-2908",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, not Nonhuman
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"gripped-by-terror",PerformerId:performer.Id));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,3,"Not Nonhuman: no army-wide boost");
+    }
+    // Outnumbered (oracle-l5r-10746): "Battle: Give all your opposed Personalities with Followers at
+    // the current battlefield +1F. Give all enemy Personalities there without Followers -1F." No
+    // Performer or Target -- a pure battlefield-scoped, one-shot foreach-over-Army effect.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-10746",0,Zone.Hand);
+        var withFollower=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3
+        Add(s,"training-follower",0,Zone.Attached,province:0,attachedTo:withFollower.Id);
+        var withoutFollower=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // Force 2
+        var enemyWithout=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        var enemyWithFollower=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:enemyWithFollower.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"outnumbered"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==withFollower.Id).Force,4,"3 + 1: has a Follower");
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==withoutFollower.Id).Force,2,"No Follower: unaffected");
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==enemyWithout.Id).Force,3,"4 - 1: no Follower");
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==enemyWithFollower.Id).Force,6,"Has a Follower: unaffected");
+    }
+    // Preserving Honor (oracle-l5r-6060): "Battle: Target an enemy Personality at the current
+    // battlefield: His controller chooses either to bow him, or to choose another location and move
+    // him there. If the bowing or movement is negated, remove the Personality from the game." New
+    // "preservingHonor" PendingChoice; StalwartNegatesBow's own already-returned bool (every other
+    // call site discards it) feeds the remove-from-game fallback.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-6060",0,Zone.Hand);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"preserving-honor"));
+        Equal(e.State.PendingChoice?.Type,"preservingHonor");
+        Equal(e.State.PendingChoice?.PlayerId,1,"The targeted Personality's own controller answers");
+        Accept(e,Cmd(e,"choosePreservingHonor",player:1) with {Choice="bow"});
+        Check(e.State.Cards[target.Id].Bowed,"Chose to bow");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Nothing negated the bow: not removed");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-6060",0,Zone.Hand);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"preserving-honor"));
+        Accept(e,Cmd(e,"choosePreservingHonor",player:1) with {Choice="move"});
+        Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Chose to move: moved home, not removed");
+    }
+    {
+        // Stalwart negates the bow itself -- the detection hook fires the fallback.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-6060",0,Zone.Hand);
+        Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // satisfies the blanket presence Require
+        var target=Add(s,"training-stalwart-personality",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"preserving-honor"));
+        Accept(e,Cmd(e,"choosePreservingHonor",player:1) with {Choice="bow"});
+        Check(!e.State.Cards[target.Id].Bowed,"Stalwart negated the bow itself");
+        Equal(e.State.Cards[target.Id].Zone,Zone.RemovedFromGame,"The bowing was negated: removed from the game");
+    }
+    // Your Clan Needs You! (oracle-l5r-9687): a fourth caller into the shared Purchase/
+    // RecruitReserve/CreatePersonality entry sequence, for ANY own Personality mid-Battle; new
+    // own-personality-in-province Target (a province card is never InPlay, so ability.Performer's
+    // own InPlay requirement could never apply); a genuinely new post-battle province-placement
+    // primitive (MatchEngine.CheckYourClanNeedsYouReturn/ResolveYourClanNeedsYouProvince).
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-9687",0,Zone.Hand);
+        var recruit=Add(s,"training-nonhuman-personality",0,Zone.Province,province:1); // GoldCost 3 - 6 clamps to 0
+        s.Players[0].Provinces[1].CardId=recruit.Id;
+        s.Players[1].Provinces[0].Strength=0;
+        var enemy=Add(s,"training-nonhuman-personality",1,Zone.Battlefield,province:0);
+        enemy.Modifiers=[new("test-fixture","test-fixture","Force",-2)]; // Force 2 -> 0, so the recruit (2) wins outright as Attacker
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:recruit.Id,AbilityId:"your-clan-needs-you"));
+        Equal(e.State.Cards[recruit.Id].Zone,Zone.Battlefield,"Brought into play at the current battlefield");
+        Equal(e.State.Cards[recruit.Id].ProvinceIndex,0);
+        Check(!e.State.Cards[recruit.Id].Bowed,"Enters play straightened by default");
+        Resolve(e); // the recruit's own side (the Attacker) wins outright, so he survives the battle
+        Equal(e.State.PendingChoice?.Type,"yourClanNeedsYouProvince","After the battle ends, if he is in play: choose a province");
+        Equal(e.State.PendingChoice?.PlayerId,0);
+        Accept(e,Cmd(e,"chooseYourClanNeedsYouProvince",player:0,province:2));
+        Equal(e.State.Cards[recruit.Id].Zone,Zone.Province,"Put into one of your provinces, face-up");
+        Check(e.State.Cards[recruit.Id].FaceUp);
+        Equal(e.State.Players[0].Provinces[2].CardId,recruit.Id);
+        Check(!e.State.Cards[recruit.Id].Bowed,"A fresh start, the same reset a card returning to a deck gets");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var strat=Add(s,"oracle-l5r-9687",0,Zone.Hand);
+        var recruit=Add(s,"training-nonhuman-personality",0,Zone.Province,province:1);
+        s.Players[0].Provinces[1].CardId=recruit.Id;
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:recruit.Id,AbilityId:"your-clan-needs-you"));
+    }
+    // Sanctuary of the Waves (oracle-l5r-10238, spell-wave-4, Water): "Battle: Bow this card and
+    // target this Shugenja, or, if this Shugenja is Water, you may target another of your
+    // Personalities: Move the target to the current battlefield if he would be opposed there.
+    // Straighten him if he moved." New own-wielder-or-personality-with-wielder-keyword Target -- the
+    // Target-side mirror of own-wielder-or-source-with-wielder-keyword.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var wielder=Add(s,"training-shugenja",0,Zone.Home,true); // bowed, at Home, not Water
+        var spell=Add(s,"oracle-l5r-10238",0,Zone.Attached,attachedTo:wielder.Id);
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // opposed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:wielder.Id,AbilityId:"sanctuary-of-the-waves-move"));
+        Check(e.State.Cards[spell.Id].Bowed,"Bow this card, as its own cost");
+        Equal(e.State.Cards[wielder.Id].Zone,Zone.Battlefield,"Moved to the current battlefield: would be opposed there");
+        Check(!e.State.Cards[wielder.Id].Bowed,"Straightened: he moved");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var wielder=Add(s,"training-shugenja",0,Zone.Home); // not Water
+        var spell=Add(s,"oracle-l5r-10238",0,Zone.Attached,attachedTo:wielder.Id);
+        var other=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:other.Id,AbilityId:"sanctuary-of-the-waves-move"));
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var wielder=Add(s,"training-water-shugenja",0,Zone.Battlefield,province:0); // Water; already at the battlefield
+        var spell=Add(s,"oracle-l5r-10238",0,Zone.Attached,province:0,attachedTo:wielder.Id);
+        var other=Add(s,"training-crane-samurai",0,Zone.Home,true); // bowed, at Home
+        Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:other.Id,AbilityId:"sanctuary-of-the-waves-move"));
+        Equal(e.State.Cards[other.Id].Zone,Zone.Battlefield,"Water wielder: a different own Personality may be targeted, and moves in");
+        Check(!e.State.Cards[other.Id].Bowed,"Straightened: he moved");
+        Equal(e.State.Cards[wielder.Id].Zone,Zone.Battlefield,"The wielder himself stays where he was");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        var wielder=Add(s,"training-shugenja",0,Zone.Home,true);
+        var spell=Add(s,"oracle-l5r-10238",0,Zone.Attached,attachedTo:wielder.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:spell.Id,TargetId:wielder.Id,AbilityId:"sanctuary-of-the-waves-move"));
+        Equal(e.State.Cards[wielder.Id].Zone,Zone.Home,"Not opposed: no move");
+        Check(e.State.Cards[wielder.Id].Bowed,"Never moved, so never straightened");
+    }
+    // False Ring of Earth (oracle-l5r-10532, ring-wave-2): Ring recruitment's own existing
+    // GrantRingRecruit shape (issue #194), triggered from Dueling.ResolveDuel via a new
+    // Dueling.SharesNoKeywords comparison, plus the first negative-magnitude MaxHandSize use.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var ringId=PublishedContent.RingWave2.Cards.Single(c=>c.Name=="False Ring of Earth").Id;
+        var ring=Add(s,ringId,1,Zone.Hand);
+        var challenger=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Chi 4, no keywords
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // Chi 3, no keywords
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:challenger.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Check(e.State.PendingDuel is null,"The duel is fully resolved (neither side has Duelist)");
+        Check(e.State.AdditionalActions.Any(g=>g.PlayerId==1 && g.ScopeCardIds is {Length:1} ids && ids[0]==ring.Id),
+            "False Ring of Earth becomes recruitable: winner and loser shared no keywords");
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,Cmd(e,"pass")); // priority passed to player 0 after the duel resolved -- hand it back
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:ring.Id,AbilityId:"false-ring-of-earth-recruit"));
+        Equal(e.State.Cards[ring.Id].Zone,Zone.Home,"Put into play");
+        Equal(e.State.Players[1].Honor,honorBefore-2,"Lose 2 Honor");
+    }
+    {
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=1; s.PriorityPlayerId=1;
+        var ringId=PublishedContent.RingWave2.Cards.Single(c=>c.Name=="False Ring of Earth").Id;
+        var ring=Add(s,ringId,1,Zone.Hand);
+        var challenger=Add(s,"training-shugenja",1,Zone.Battlefield,province:0); // Chi 3, Shugenja
+        var challenge=Add(s,"training-duel-challenge",1,Zone.Hand);
+        var enemy=Add(s,"training-thunder-shugenja",0,Zone.Battlefield,province:0); // Chi 2, Shugenja too
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:challenge.Id,PerformerId:challenger.Id,TargetId:enemy.Id,AbilityId:"training-duel-challenge"));
+        Accept(e,new GameCommand("acceptDuel",0,e.Version));
+        Accept(e,new GameCommand("strike",0,e.Version));
+        Check(!e.State.AdditionalActions.Any(g=>g.ScopeCardIds is {Length:1} ids && ids[0]==ring.Id),
+            "Shared the Shugenja keyword: not recruitable");
+    }
+    {
+        var s=MatchEngine.CreateEconomyScenario().State;
+        var ringId=PublishedContent.RingWave2.Cards.Single(c=>c.Name=="False Ring of Earth").Id;
+        Add(s,ringId,1,Zone.Home);
+        while(s.Players[0].Hand.Count<7) Add(s,"training-rally",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Cmd(e,"endDynasty"));
+        Equal(e.State.Players[0].Hand.Count,8,"One over the lowered threshold of 7 (8 printed - 1 from the opponent's False Ring of Earth) after the End Phase draw");
+        Equal(e.State.PendingChoice!.Type,"discardHand");
+        Equal(e.State.PendingChoice!.Prompt,"Discard 1 card(s) to return to 7.");
     }
 }

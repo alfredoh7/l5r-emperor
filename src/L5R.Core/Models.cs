@@ -412,6 +412,13 @@ public sealed class MatchState
     // PendingConqueror.ProvinceIndex already documents). FinishBattleReturnHomeAndTransition reads and
     // clears it once its own after-resolve effects have run.
     public int? ResolvedBattleProvinceIndex { get; set; }
+    // Your Clan Needs You! (oracle-l5r-9687, issue #295): "After the battle ends, if he is in play,
+    // discard all his attachments and put him into one of your provinces, face-up, discarding any
+    // card there" -- the recruited Personality's own id, watched from the moment he enters play via
+    // this ability until this same battle's own resolution checks it
+    // (MatchEngine.CheckYourClanNeedsYouReturn), then removed from this list regardless of outcome.
+    // A List (not a single nullable id), since more than one copy could resolve within one battle.
+    public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
     // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --

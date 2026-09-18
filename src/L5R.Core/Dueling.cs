@@ -13,6 +13,13 @@ namespace L5R.Core;
 // ordinary ability's own NextAction call would have left it).
 public sealed partial class MatchEngine
 {
+    // False Ring of Earth (issue #295): "shared no keywords" -- every keyword either card effectively
+    // carries (printed or granted, minus any removed), checked pairwise via the same live Keyword()
+    // lookup every other keyword check in this engine already uses (so a removed/conditional keyword
+    // on the OTHER side is still resolved correctly, not just string-matched against a raw list).
+    private bool SharesNoKeywords(CardInstance a, CardInstance b) =>
+        !(Definition(a).Keywords ?? []).Concat(a.GrantedKeywords.Select(g => g.Keyword)).Distinct(StringComparer.Ordinal)
+            .Where(k => !KeywordRemoved(a, k)).Any(k => Keyword(b, k));
     private bool AnyDuelReactionAvailable(PendingDuel duel) =>
         AnyInPlayReactionAvailable("before-duel-begins") ||
         AnyOutOfPlayReactionAvailable(duel.ChallengerPlayerId, "before-duel-begins") ||
@@ -277,6 +284,13 @@ public sealed partial class MatchEngine
         // a Focus Effect that dishonors the loser, resolved before the duel's own "destroy the
         // loser," makes that death a dishonorable one instead of an honorable one.
         ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId);
+        // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
+        // Personality who shared no keywords with your Personality in the duel" -- Ring
+        // recruitment's own existing shape (GrantRingRecruit, issue #194), reusing winnerId/loserIds
+        // exactly as this resolution just computed them. A tie (winnerId null, or two loserIds) never
+        // satisfies "you win," so both are excluded.
+        if (winnerId is not null && loserIds.Count == 1)
+            GrantRingRecruit(Player(Card(winnerId).OwnerId), SharesNoKeywords(Card(winnerId), Card(loserIds[0])), "false-ring-of-earth-recruit");
         foreach (var focusedId in duel.OrderedFocusEffects)
         {
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
