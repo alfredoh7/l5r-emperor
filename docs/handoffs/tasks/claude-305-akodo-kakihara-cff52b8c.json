@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wire Akodo Kakihara (oracle-l5r-223, personality-wave-23): Reaction after another player's action or Ranged/Melee Attack targets him, +Force equal to his current Personal Honor (0 while dishonored: no window). Non-Attack actions via a new KakiharaWatcher branch of the existing beforeActionReaction window; Attacks via the existing attackReaction window (bonus lands before the strength comparison and changes the outcome). One printed ability, two catalog entries sharing one UsageKey. QueryActions now lists the beforeActionReaction window's own reactions and validates attackReaction ones. Stale BLOCKERS entry removed; scan-verified, text follows the scan.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests: 200/200 core, 57/57 published; bash tools/check.sh --skip-client all green (python unittests, L5R.AI.Tests 14/14, L5R.Server.Tests 5/5, L5R.Client.Transport.Tests 4/4). Four new regression tests with positive and negative cases; 12 deliberate logic mutations each turned a test red. PublishedTests pinned count recomputed from the actual origin/main baseline after Brawl (#306): 389 + 1 = 390. Not run: Godot client (--skip-client); no UI change.",
+  "remaining": "Known limit: one beforeActionReaction window per command, so an earlier eligible watcher (Rokai/Tamoko/Champion of Thunder/Brothers of Goemon) pre-empts Kakihara's reaction for that command; targeting means command.TargetId only. Documented in docs/decisions/2026-09-18-akodo-kakihara.md. Otherwise none; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/305",
+  "branch": "claude/305-akodo-kakihara",
+  "updated": "2026-09-18T20:09:26.808748+00:00"
+}
