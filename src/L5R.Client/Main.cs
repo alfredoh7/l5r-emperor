@@ -73,6 +73,8 @@ public partial class Main : Node
         if (_capturePath is not null) GetWindow().GrabFocus();
         if (_captureMode == "battle-reference" && _capturePath is not null)
         { SetProcessInput(false); AddChild(new BattleArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode == "support-reference" && _capturePath is not null)
+        { SetProcessInput(false); AddChild(new SupportArtReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "battle-escalation-reference" && _capturePath is not null)
         { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "threshold-reference" && _capturePath is not null)

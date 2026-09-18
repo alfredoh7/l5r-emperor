@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement approved A Region pairs, B Celestial artwork, C inspection and native action review; expose Low Market target-specific Gold quotes from Core.",
-  "validation": "Client build and 496 deterministic checks passed before Nikutai integration. Native Mac default, compact/opposite seat, crowded both seats and normal motion passed; Fallow reaction and refined artwork verification in progress.",
-  "remaining": "Integrate fresh main, finish art comparison and final native verification, publish PR evidence and request mdornbrook review; stacked UI prerequisites remain unmerged.",
+  "summary": "Implemented approved A paired Regions, B derived Celestial lacquer/brass frame beside Favor, and C inspection with printed text, full scans, engine choices and explicit costs. Added authoritative Low Market price quotes and regression. Integrated main through #294; refreshed verified private WebP85 art pack v9 so launchers work.",
+  "validation": "496 deterministic checks passed on integrated main (43 collaboration, 130 content, 204 core, 57 published, 9 deck-format, 10 workshop, 13 custom Practice, 20 AI, 5 server, 5 transport). Client build 0 warnings/errors, import/headless smoke passed. Five native Mac support layout/motion cases and two existing Home/Favor cases passed; final integrated default rerun covered Low Market, Celestial discard, Fallow Lands reaction, replacement/refill/removal and inspection. Native source/comparison plate inspected; whole-screen pixel equivalence not claimed. Private release asset size/digest verified. Latest launcher smoke and prepared review launcher verified.",
+  "remaining": "PR #292 shared review from mdornbrook, CI and prerequisite UI stack merge order; Alfredo's native visual acceptance and native Windows playtest remain unclaimed. Implementation is ready for review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/291",
   "branch": "codex/291-regions-celestials",
-  "updated": "2026-09-18T14:14:27.733518+00:00"
+  "updated": "2026-09-18T14:31:48.284334+00:00"
 }

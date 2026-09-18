@@ -9,4 +9,4 @@ Accepted by Alfredo on 2026-09-18: A's paired Region/province layout, B's Celest
 
 UI task: #291. Mechanics prerequisites: #250/#252. Stabilized presentation prerequisite: PR #275; older UI dependencies remain in that stack. The branch also integrates current main, preserving new rules and the stabilization EquipCost helper. Shared integration requires mdornbrook review under repository policy.
 
-Status: selected design; implementation and validation in progress.
+Status: selected design implemented and locally validated; see [SUPPORT_CARDS.md](../SUPPORT_CARDS.md). Shared review and the prerequisite UI stack remain pending.

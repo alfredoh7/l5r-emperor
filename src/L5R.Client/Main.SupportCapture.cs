@@ -103,7 +103,11 @@ public partial class Main
                 await CheckSupportReaction();GD.Print("REGIONS_CELESTIALS_PASS: "+_captureMode);GetTree().Quit();return;
             }
             var engine=SupportFixture(crowded);await LoadSupportFixture(engine,seat);CheckSupportLayout();
-            if(_captureMode.Contains("review")) {SetNotice("Regions and Celestials · prepared practice table · real engine actions");return;}
+            if(_captureMode.Contains("review"))
+            {
+                SetNotice("Regions and Celestials · prepared practice table · real engine actions");
+                await SupportCapture("");GD.Print("SUPPORT_REVIEW_READY: native prepared table loaded; both owners, Regions, Celestials and Favor verified");return;
+            }
             await SupportCapture("");var version=View.Version;
             var region=Self.Provinces.First(p=>p.Region?.Definition?.Id=="oracle-l5r-4777").Region!;
             await SupportClick(_tiles.Single(t=>t.Card.Id==region.Id));

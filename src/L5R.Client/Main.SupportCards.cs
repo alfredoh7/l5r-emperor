@@ -41,7 +41,8 @@ public partial class Main
             text.AddChild(new HSeparator());
             text.AddChild(Palette.Wrapped(part.Text, 16, Palette.Paper));
         }
-        if (_chosen is not null) text.AddChild(Palette.Wrapped("Review the performer, target and cost below. Confirm when ready.", 17, Palette.PaperDim));
+        if (_chosen?.Command?.AbilityId is { } chosenAbility && AbilityCatalog.All.TryGetValue(chosenAbility, out var selectedAbility))
+            text.AddChild(Palette.Wrapped(selectedAbility.Label, 16, Palette.Paper));
         _inspector.AddChild(SidebarSkin.Button("Inspect card", () => ShowSupportCard(card)));
         if (card.Zone == Zone.Region && card.ProvinceIndex is int index)
             _inspector.AddChild(Palette.Wrapped($"Province {index + 1} · {owner.Provinces.Single(p => p.Index == index).Strength} strength\nThe Region stays with this province.", 15, Palette.PaperDim));
