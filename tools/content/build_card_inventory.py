@@ -203,7 +203,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-193": "Needs a Battle-timed Recruit-from-province mechanic (distinct from ordinary Dynasty purchase) plus a unit-count comparison between sides.",
     "oracle-l5r-200": "Needs a 'battle resolution does not bow winning cards' modifier flag, triggered by a before-resolution Reaction (not built). The Melee 8 Attack itself is trivial but incomplete without it.",
     "oracle-l5r-10059": "Needs a modifiable Personal Honor stat (current PersonalHonor is a fixed printed value with no StatModifier equivalent), a 'Dark Virtue' action classification, and an Honor-Victory-threshold modifier -- none built.",
-    "oracle-l5r-223": "Needs a broad 'after another player's action targets this card' Reaction trigger (the single largest recurring gap across multiple waves).",
     "oracle-l5r-10849": "Needs a modifier hook into the existing Tactical Advantage rulebook action's own Force-bonus amount (a generic action-amount-modifier mechanism doesn't exist yet).",
     "oracle-l5r-232": "Needs a 'Tactical action resolved' classification-dispatch trigger, a broad 'after an enemy Battle action destroys your card' Reaction trigger, and a cost/Honor-Requirement-ignoring Recruit -- none built.",
     "oracle-l5r-241": "Needs card creation (a new Follower instance). 'Tactical Limited' itself maps onto the existing Limited Timing per the established Political/Tactical precedent, so is not itself a blocker.",

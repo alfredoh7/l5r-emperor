@@ -183,6 +183,10 @@ var tests = new (string Name, Action Run)[]
     ("General in-play unit-targeting Reaction primitive: Champion of Thunder's own multi-affected-card case -- one action (a Force penalty) hits every card in the unit at once; Champion's controller chooses exactly one to negate on, leaving the rest penalized", ChampionOfThunderChoosesAmongMultipleAffectedCards),
     ("General in-play unit-targeting Reaction primitive: Brothers of Goemon requires controlling a Ring before the reaction is even offered, never triggers when the resolving effect could never bow the target (BowsTarget's own curated classification), and negates ONLY the bow when an effect both applies a Force penalty and conditionally bows off the post-penalty Force (costly-feud) -- the Force penalty still lands in full", BrothersOfGoemonRingGateAndPartialBowNegation),
     ("A Close Call reuses the existing before-attack-resolves Reaction window from hand (AnyAttackReactionAvailable's own new out-of-play check) rather than the new unit-targeting watcher, gated on an Armor-wearing Personality targeted by a Ranged or Melee Attack -- no Armor or a non-Attack ability never offers it, and negation zeroes the Attack's strength before it resolves, same shape as training-attack-negate", ACloseCallArmorAttackNegation),
+    ("Personality wave 23 (issue #305): Akodo Kakihara is published with the scan's own colon-form text, two catalog entries sharing ONE UsageKey (one printed ability, two windows), and the stale 'broad targets-this-card trigger' blocker is gone", AkodoKakiharaPublishedShape),
+    ("Akodo Kakihara (issue #305), non-Attack half: another player's Battle or Open action targeting HIM opens the general beforeActionReaction window for his controller; the bonus is his CURRENT Personal Honor (a PersonalHonor modifier counts), lands before the action resolves and does not negate it; never offered for his own controller's action, an action targeting a different card, a Dishonorable Kakihara (+0F: no window), a bowed one, one not in play, or once his single per-turn use is spent", AkodoKakiharaReactsToNonAttackActions),
+    ("Akodo Kakihara (issue #305), Attack half: a Ranged or Melee Attack targeting HIM opens the existing attackReaction window and the Force bonus decides the outcome -- the same Attack destroys him when nobody reacts and fails against his raised Force when he does; no window opens for an Attack at another card, a Dishonorable/bowed/spent Kakihara, and when another reactor opens one anyway his reaction is disabled and rejected unless he is the target", AkodoKakiharaReactsToAttacks),
+    ("Akodo Kakihara (issue #305): the shared beforeActionReaction window now enumerates its watcher's own reactions through QueryActions (Kakihara's single option, Champion of Thunder's one option per unit member, Rokai's), and the documented single-window limit holds -- an earlier eligible watcher (Champion of Thunder in his unit) takes the window and Kakihara's own reaction is not offered for that command", AkodoKakiharaWindowListingAndSingleWindowLimit),
     ("Stormless Fury (issue #276 follow-up): the general 'after a Battle action resolves' Reaction primitive (OpenBattleActionReactionWindow) -- its own out-of-play half reuses Equip (Limited)'s own attach mechanism as a Reaction, deliberately granting no Additional Action (unlike Equip (Battle)); its own in-play half bows the just-resolved action's own performer, excluded (BattleActionReaction1UsedCardIds) from firing against the SAME action that triggered the first half, but firing normally against a later, different action", StormlessFuryBattleActionReaction),
     ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity),
     ("Follower wave 12 (issue #279): four small, mostly-independent primitives -- Apprentice Shinobi's universal 'after any Ninja action resolves, +1F' trait (Keyword(source,\"Ninja\") alone, since a printed 'Ninja Battle' prefix is never retained in ability.Timing; reset for free by FinishTurn's own Modifiers.Clear()); Legion of the Bat's new 'after an action moves a card to this battlefield' Reaction (MoveToBattlefield itself queues the candidate; RecruitReserve is explicitly excluded, proven negative) plus its own Crane Clan Equip discount; Nikutai's new 'after a sibling Follower in this unit bows' Reaction (Even if bowed; straightens the OTHER Follower, not itself; proven scoped to its own unit only); and Wave Man's new automatic 'after an Attack Phase ends, straighten this unit' trait, proven on both the 'last battlefield resolved' and 'declined to attack' paths, and proven NOT to spuriously consume an unrelated StraightenBlockedTurn on an already-unbowed card", FollowerWave11Primitives),
@@ -5315,6 +5319,312 @@ static void ACloseCallArmorAttackNegation()
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
         Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Negated: Melee Attacks too, not just Ranged");
+    }
+}
+static void AkodoKakiharaPublishedShape()
+{
+    Equal(PublishedContent.PersonalityWave23.Cards.Length,1,"Akodo Kakihara only");
+    var k=CardCatalog.Get("oracle-l5r-223");
+    Check(!k.ScenarioOnly && k.Type==CardType.Personality && k.Name=="Akodo Kakihara" && k.Clan=="Lion");
+    // Verified against the scan (Force 4 / Chi 3 / Cost 7 / Honor Requirement 7 / Personal Honor 4).
+    Equal(k.Force,4); Equal(k.Chi,3); Equal(k.GoldCost,7); Equal(k.HonorRequirement,7); Equal(k.PersonalHonor,4);
+    Check(k.Keywords!.Contains("Lion Clan") && k.Keywords.Contains("Samurai") && k.Keywords.Contains("Paragon"));
+    // The published text follows the scan (a colon after "targets Kakihara"), not the catalogue's comma.
+    Equal(k.Text,"Reaction: After another player's action targets Kakihara: Give him a Force bonus equal to his Personal Honor.");
+    Equal(k.Abilities!.Length,2);
+    // One printed ability in two windows: exactly one per-turn use, shared through one UsageKey.
+    Equal(AbilityCatalog.All["kakihara-force-bonus"].UsageKey,"kakihara-force-bonus");
+    Equal(AbilityCatalog.All["kakihara-attack-force-bonus"].UsageKey,"kakihara-force-bonus");
+    Equal(AbilityCatalog.All["kakihara-force-bonus"].Trigger,"before-action-resolves");
+    Equal(AbilityCatalog.All["kakihara-attack-force-bonus"].Trigger,"before-attack-resolves");
+}
+static int KakiharaForce(MatchEngine e,string cardId)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==cardId).Force;
+static void AkodoKakiharaReactsToNonAttackActions()
+{
+    {
+        // Another player's Battle action targets Kakihara: the window opens for HIS controller, on HIM.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Equal(KakiharaForce(e,k.Id),4,"Printed Force before any reaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PendingChoice?.CardId,k.Id);
+        Equal(e.State.PendingChoice?.PlayerId,1);
+        Check(!e.State.Cards[k.Id].Bowed,"Deferred: the bow has not applied yet");
+        var options=e.QueryActions(1);
+        Check(options.Any(a=>a.Command?.AbilityId=="kakihara-force-bonus" && a.Enabled),"The reaction is offered to his controller");
+        Check(options.Any(a=>a.Type=="declineReaction"),"and so is passing on it");
+        Check(!options.Any(a=>a.Command?.AbilityId=="kakihara-attack-force-bonus"),"The Attack half belongs to the Attack window, never this one");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus")); // wrong window
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
+        Equal(KakiharaForce(e,k.Id),8,"+4F: a bonus equal to his Personal Honor, applied before the action resolves");
+        var modifier=e.State.Cards[k.Id].Modifiers.Single(m=>m.Stat=="Force");
+        Equal(modifier.Amount,4); Equal(modifier.Source,k.Id); Equal(modifier.Effect,"kakihara-force-bonus");
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.PendingChoice is null);
+        Check(e.State.Cards[k.Id].Bowed,"The bonus is not a negation: the deferred action still resolves");
+        Equal(KakiharaForce(e,k.Id),8,"and the bonus stays");
+        Equal(e.State.Cards[k.Id].AbilityUses["kakihara-force-bonus"],e.State.TurnNumber,"his one printed use this turn is spent");
+    }
+    {
+        // Passing on it leaves him untouched; the action resolves as if he were not a watcher at all.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.Cards[k.Id].Bowed && e.State.Cards[k.Id].Modifiers.Count==0,"Declined: no bonus");
+    }
+    {
+        // The amount is his CURRENT Personal Honor (printed 4, plus a +2 PersonalHonor modifier = 6), not the printed one.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        k.Modifiers.Add(new("test-source","test","PersonalHonor",2));
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
+        Equal(e.State.Cards[k.Id].Modifiers.Single(m=>m.Stat=="Force").Amount,6,"Current Personal Honor, not printed");
+    }
+    {
+        // A dishonored Kakihara has 0 Personal Honor: +0F, so no window is opened for nothing at all.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0); k.Dishonorable=true;
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Check(e.State.PendingChoice is null,"No window for a +0F bonus");
+        Check(e.State.Cards[k.Id].Bowed && e.State.Cards[k.Id].Modifiers.Count==0,"The action resolved immediately, no bonus");
+    }
+    {
+        // A different card is targeted: Kakihara sits in play but nothing about HIM triggers.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var other=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:other.Id,AbilityId:"training-bow-at-battle"));
+        Check(e.State.PendingChoice is null,"An action targeting another card never opens his window");
+        Check(e.State.Cards[other.Id].Bowed);
+    }
+    {
+        // Bowed: ValidateAbility forbids any ability from a bowed card, so the window is never offered.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var striker=Add(s,"training-honor-strike-samurai",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0,bowed:true);
+        var e=MatchEngine.FromTestState(s);
+        var honor=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:striker.Id,TargetId:k.Id,AbilityId:"training-honor-strike"));
+        Check(e.State.PendingChoice is null,"A bowed Kakihara cannot react");
+        Equal(e.State.Players[1].Honor,honor-2,"The action resolved at once");
+    }
+    {
+        // Not in play (in his controller's hand): nothing to monitor, an unrelated action resolves normally.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        Add(s,"oracle-l5r-223",1,Zone.Hand);
+        var other=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:other.Id,AbilityId:"training-bow-at-battle"));
+        Check(e.State.PendingChoice is null,"A Kakihara in hand watches nothing");
+    }
+    {
+        // Once per turn, shared with the Attack half: a spent use opens no window; a use stamped on an EARLIER turn does.
+        foreach(var stamp in new[]{0,-1})
+        {
+            var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+            var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+            var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+            k.AbilityUses["kakihara-force-bonus"]=s.TurnNumber+stamp;
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+            Equal(e.State.PendingChoice?.Type,stamp==0?null:"beforeActionReaction",stamp==0?"Spent this turn: no window":"Used on an earlier turn: available again");
+        }
+    }
+    {
+        // "Action" is not "Reaction": Tamori Ruya's own Reaction (ruya-bow) names Kakihara as its target, from
+        // another player, inside an already-open bowReaction window. It resolves normally -- it must neither open
+        // a nested beforeActionReaction window (that would overwrite the open one) nor trigger Kakihara.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var ruya=Add(s,"oracle-l5r-7789",0,Zone.Battlefield,province:0);
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var bowedByAction=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:bowedByAction.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PendingChoice?.Type,"bowReaction");
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ruya.Id,TargetId:k.Id,AbilityId:"ruya-bow"));
+        Equal(e.State.PendingChoice?.Type,"bowReaction","The open window is untouched: no nested Kakihara window");
+        Check(e.State.Cards[k.Id].Bowed && e.State.Cards[k.Id].Modifiers.Count==0,"Ruya's bow resolved, Kakihara never reacted");
+    }
+    {
+        // Open actions too (not just Battle actions), and the acting player must be ANOTHER player: the
+        // opponent's Open action targeting Kakihara opens the window; his own controller's never does.
+        foreach(var actor in new[]{0,1})
+        {
+            var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=actor; s.ActivePlayerId=actor;
+            var source=Add(s,"training-bow-any-source",actor,Zone.Home);
+            var k=Add(s,"oracle-l5r-223",1,Zone.Home);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,new GameCommand("useAbility",actor,e.Version,CardId:source.Id,TargetId:k.Id,AbilityId:"training-bow-any"));
+            if(actor==0)
+            {
+                Equal(e.State.PendingChoice?.Type,"beforeActionReaction","Another player's Open action");
+                Equal(e.State.PendingChoice?.CardId,k.Id);
+                Check(!e.State.Cards[k.Id].Bowed);
+            }
+            else
+            {
+                Check(e.State.PendingChoice is null,"His own controller's action never triggers it");
+                Check(e.State.Cards[k.Id].Bowed);
+            }
+        }
+    }
+}
+static void AkodoKakiharaReactsToAttacks()
+{
+    // Ranged 5 (Carpenter Castle Siege) vs Kakihara's Force 4: a legal target that dies if nothing changes,
+    // and survives once his Personal Honor lands on top of his Force before the strength comparison.
+    (MatchEngine,MatchState,CardInstance,CardInstance,CardInstance) Siege(Action<CardInstance,MatchState>? tweak=null,bool otherReactor=false)
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var other=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, also a legal target for Ranged 5
+        if(otherReactor) Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
+        tweak?.Invoke(k,s);
+        return (MatchEngine.FromTestState(s),s,castle,k,other);
+    }
+    GameCommand Attack(MatchEngine e,MatchState s,CardInstance castle,string targetId)=>
+        new("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:targetId,AbilityId:"carpenter-castle-siege");
+    {
+        // Control: nobody reacts, the Attack destroys him (the window opened only because HE could react).
+        var (e,s,castle,k,_)=Siege();
+        Accept(e,Attack(e,s,castle,k.Id));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.Cards[k.Id].Zone!=Zone.Battlefield,"Force 4 <= strength 5: destroyed when he does not react");
+    }
+    {
+        // Reacting decides it: +4F makes Force 8 > strength 5 by the time the Attack resolves.
+        var (e,s,castle,k,_)=Siege();
+        Accept(e,Attack(e,s,castle,k.Id));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        var options=e.QueryActions(1);
+        Check(options.Any(a=>a.Command?.AbilityId=="kakihara-attack-force-bonus" && a.Enabled),"Offered (enabled) in the Attack window");
+        Check(!options.Any(a=>a.Command?.AbilityId=="kakihara-force-bonus"),"The non-Attack half is never listed here");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus")); // wrong window
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+        Equal(KakiharaForce(e,k.Id),8);
+        Equal(e.State.PendingAttack?.Strength,5,"The Attack's own strength is untouched: the bonus is on Kakihara, not a negation");
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.PendingChoice is null && e.State.PendingAttack is null);
+        Equal(e.State.Cards[k.Id].Zone,Zone.Battlefield,"Force 8 > strength 5: the Attack fails");
+        Equal(e.State.Cards[k.Id].AbilityUses["kakihara-force-bonus"],e.State.TurnNumber,"The one printed use is spent (shared UsageKey)");
+        Check(!e.QueryActions(1).Any(a=>a.Command?.AbilityId=="kakihara-attack-force-bonus" && a.Enabled),"and no longer offered");
+    }
+    {
+        // Melee too: Sankaku-Yari's Melee 4 Attack vs the same Force 4.
+        foreach(var reacts in new[]{false,true})
+        {
+            var s=StrongholdBattle("oracle-l5r-1218");
+            var wielder=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+            var yari=Add(s,"oracle-l5r-6469",0,Zone.Attached,province:0,attachedTo:wielder.Id);
+            var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yari.Id,TargetId:k.Id,AbilityId:"sankaku-yari-attack"));
+            Equal(e.State.PendingChoice?.Type,"attackReaction");
+            if(reacts) Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+            Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+            Check((e.State.Cards[k.Id].Zone==Zone.Battlefield)==reacts,reacts?"Melee 4 < Force 8: survives":"Melee 4 >= Force 4: destroyed");
+        }
+    }
+    {
+        // Current Personal Honor again: a PersonalHonor modifier of +1 makes the bonus 5.
+        var (e,s,castle,k,_)=Siege((c,_)=>c.Modifiers.Add(new("test-source","test","PersonalHonor",1)));
+        Accept(e,Attack(e,s,castle,k.Id));
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+        Equal(e.State.Cards[k.Id].Modifiers.Single(m=>m.Stat=="Force").Amount,5);
+    }
+    {
+        // The Attack targets a DIFFERENT card: no reactor could matter, so no window even though Kakihara is in play.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var other=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,Attack(e,s,castle,other.Id));
+        Check(e.State.PendingChoice is null,"An Attack at someone else never opens a window for Kakihara");
+        Check(e.State.Cards[other.Id].Zone!=Zone.Battlefield,"and simply resolves");
+    }
+    {
+        // Another reactor DOES open a window on an Attack at another card: Kakihara's reaction is listed
+        // disabled and rejected there, while the same reactor changes nothing when HE is the target.
+        var (e,s,castle,k,other)=Siege(otherReactor:true);
+        Accept(e,Attack(e,s,castle,other.Id));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Check(e.QueryActions(1).Any(a=>a.Command?.AbilityId=="kakihara-attack-force-bonus" && !a.Enabled),"Listed, but disabled: he is not the target");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-attack-force-bonus"));
+    }
+    {
+        // Dishonorable (+0F), bowed, or spent this turn: no window on an Attack at him, and it destroys him outright.
+        foreach(var scenario in new[]{"dishonored","bowed","spent"})
+        {
+            var (e,s,castle,k,_)=Siege((c,state)=>{
+                if(scenario=="dishonored") c.Dishonorable=true;
+                if(scenario=="bowed") c.Bowed=true;
+                if(scenario=="spent") c.AbilityUses["kakihara-force-bonus"]=state.TurnNumber;
+            });
+            Accept(e,Attack(e,s,castle,k.Id));
+            Check(e.State.PendingChoice is null,$"{scenario}: no window");
+            Check(e.State.Cards[k.Id].Zone!=Zone.Battlefield,$"{scenario}: the Attack resolved and destroyed him");
+        }
+    }
+}
+static void AkodoKakiharaWindowListingAndSingleWindowLimit()
+{
+    {
+        // Champion of Thunder lists one option per unit member (host + itself), each enabled.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:host.Id,AbilityId:"training-bow-at-battle"));
+        var options=e.QueryActions(1).Where(a=>a.Command?.AbilityId=="champion-of-thunder-negate").ToArray();
+        Equal(options.Length,2,"One option per card in the unit");
+        Check(options.All(a=>a.Enabled) && options.Select(a=>a.Command!.TargetId).OrderBy(x=>x).SequenceEqual(new[]{host.Id,champion.Id}.OrderBy(x=>x)));
+        Check(!e.QueryActions(0).Any(a=>a.Type=="useAbility"),"The acting player is offered nothing to use, only to pass");
+        Accept(e,options[0].Command!);
+    }
+    {
+        // Rokai: a single option, offered only to the watcher's own controller.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var destroyer=Add(s,"training-no-attachments-destroyer",0,Zone.Battlefield,province:0);
+        var rokai=Add(s,"training-rokai",1,Zone.Battlefield,province:0);
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:destroyer.Id,TargetId:target.Id,AbilityId:"training-destroy-no-attachments"));
+        Check(e.QueryActions(1).Any(a=>a.Command?.AbilityId=="rokai-negate-destruction" && a.Command.CardId==rokai.Id && a.Enabled));
+    }
+    {
+        // Known limit, pinned so it cannot silently change: the primitive opens ONE window per command. Kakihara
+        // with a Champion of Thunder in his own unit: Champion (an earlier watcher) takes the window, Kakihara
+        // is not offered one for that command.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var k=Add(s,"oracle-l5r-223",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:k.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:k.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PendingChoice?.CardId,champion.Id,"Champion holds the window");
+        Check(!e.QueryActions(1).Any(a=>a.Command?.AbilityId=="kakihara-force-bonus"),"Kakihara's own reaction is not offered for this command");
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
     }
 }
 static void TamokoOpenHonorGain()

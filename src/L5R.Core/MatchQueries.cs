@@ -109,9 +109,38 @@ public sealed partial class MatchEngine
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
                 var used=card.AbilityUses.ContainsKey(reactionId);
-                Add("useAbility",AbilityCatalog.All[reactionId].Label,
-                    new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
-                    used?"This reaction has already been used.":null,card.Id);
+                var reactionCommand=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId);
+                // Akodo Kakihara (issue #305): an in-play Attack reactor may carry a printed condition of its own
+                // (only when HE is the target), so a listed reaction is only enabled while ValidateAbility
+                // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
+                Add("useAbility",AbilityCatalog.All[reactionId].Label,reactionCommand,
+                    used?"This reaction has already been used.":AbilityRejection(reactionCommand),card.Id);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"beforeActionReaction" } beforeActionPending)
+        {
+            // Mirumoto Rokai / Tamori Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara: the
+            // general in-play "before an action resolves" window is scoped to the one specific watching card by
+            // id (same single-watcher shape as announceReaction below), so only that card's own controller is
+            // offered its before-action-resolves reaction. A reaction whose own Target is a choice among the
+            // watcher's unit (Champion's "own-unit-member") gets one option per member; every other one is
+            // offered once. Each is validated exactly like a submitted command, so a reaction that cannot
+            // legally be used right now is listed disabled with its reason rather than hidden or offered blind.
+            if(beforeActionPending.PlayerId==playerId)
+            {
+                var card=Card(beforeActionPending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="before-action-resolves"))
+                {
+                    var reaction=AbilityCatalog.All[reactionId];
+                    string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
+                    foreach(var candidate in candidates)
+                    {
+                        var reactionCommand=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:candidate,AbilityId:reactionId);
+                        var label=candidate is null?reaction.Label:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})";
+                        Add("useAbility",label,reactionCommand,AbilityRejection(reactionCommand),card.Id);
+                    }
+                }
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
