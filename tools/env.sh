@@ -22,7 +22,14 @@ if [ ! -x "$GODOT" ]; then
   shopt -s nullglob
   for l5r_editor in "$L5R_PROJECT_ROOT"/.tools/godot/Godot*_mono_*.exe; do
     case "$l5r_editor" in *_console.exe) continue ;; esac
-    [ -f "$l5r_editor" ] && export GODOT="$l5r_editor" && break
+    # An `if` here, not a bare `[ -f ... ] && ... && break`: under a sourcing script's own
+    # `set -e` (check.sh always has one active), a plain "&&" chain's own false left-hand side
+    # aborts the WHOLE script right here whenever .tools/godot/ has no match yet (e.g. a fresh
+    # checkout, or `--skip-client` in an environment with no Godot installed at all) -- silently,
+    # with zero output, since a failed `[ -f ]` test prints nothing. That previously made
+    # `check.sh --skip-client` itself unusable without Godot ever being installed, defeating the
+    # whole point of `--skip-client`.
+    if [ -f "$l5r_editor" ]; then export GODOT="$l5r_editor"; break; fi
   done
   shopt -u nullglob
 fi

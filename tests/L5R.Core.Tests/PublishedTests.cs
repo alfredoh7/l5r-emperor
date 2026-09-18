@@ -86,13 +86,15 @@ internal static class PublishedTests
     private static void Catalogue()
     {
         // 317 (before this session's own concurrent waves landed) + 2 (follower-wave-10) + 3
-        // (strategy-wave-10) + 1 (spell-wave-3) + 1 (personality-wave-19) + 4 (follower-wave-12,
-        // this branch's own four cards -- renamed from follower-wave-11 after a sibling concurrent
-        // PR (#281, issue #278) independently claimed that name for a different card set) = 328.
-        // Recomputed from the actual current baseline each time this conflicts, not copied from
-        // either side of a merge -- see the decision doc for a real near-miss this exact number
-        // caused earlier in this same session.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,328);
+        // (strategy-wave-10) + 1 (spell-wave-3) + 1 (personality-wave-19) + 2 (follower-wave-11,
+        // PR #281's own Champion of Thunder/Brothers of Goemon, now merged into main) + 1
+        // (strategy-wave-11, PR #281's own A Close Call) + 4 (follower-wave-12, this branch's own
+        // four cards -- renamed from follower-wave-11 after a sibling concurrent PR (#281, issue
+        // #278) independently claimed that name for a different card set) = 331. Recomputed from
+        // the actual current baseline each time this conflicts, not copied from either side of a
+        // merge -- see the decision doc for a real near-miss this exact number caused earlier in
+        // this same session.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,331);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

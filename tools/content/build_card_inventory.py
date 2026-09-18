@@ -47,10 +47,8 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10891": "Needs card creation (new Follower instances).",
     "oracle-l5r-683": "Needs a new Reaction trigger: \"after a battle resolution ends.\"",
     "oracle-l5r-10892": "Needs a control-transfer mechanic (explicitly deferred since Loyal, #142).",
-    "oracle-l5r-1167": "Needs a retroactive partial-negation Reaction trigger (\"after another player's action targets a card, negate just its bowing\" -- existing triggers fully negate, or fire before resolution, never after with a partial effect). Rings themselves are now built (issue #194); \"if you control any Rings\" is trivial.",
     "oracle-l5r-10682": "Needs Home-timing generalization plus hypothetical-opposition movement.",
     "oracle-l5r-10105": "Needs an \"after being targeted\" Reaction trigger, plus card creation and attachment transfer.",
-    "oracle-l5r-1292": "Needs an \"after being targeted, negate\" Reaction trigger.",
     "oracle-l5r-9867": "Needs a delayed/scheduled effect across turn boundaries.",
     "oracle-l5r-10894": "Needs a \"modify the next Honor change\" pending-state mechanism.",
     "oracle-l5r-1595": "Needs an \"after each turn begins\" Reaction trigger, plus a Transfer-prevention flag and enemy-Equip.",
@@ -150,7 +148,6 @@ BLOCKERS: dict[str, str] = {
     # (oracle-l5r-10714) -- see Item Wave 2 / Strategy Wave 4. Several more below are genuinely close
     # (noted "Not blocked; deferred for scope") but were left for a future pass to keep this wave's
     # own scope bounded.
-    "oracle-l5r-10359": "Needs an \"after being targeted\" Reaction trigger (the Battle half, a plain Force boost, is separately wirable).",
     "oracle-l5r-24": "Needs a Gold-Cost comparison Target category plus a Gold-Cost-reduction effect (both novel).",
     "oracle-l5r-634": "Needs a Retainer mechanic, movement to any location (not just home), and a province-card discard (three separate gaps).",
     "oracle-l5r-10929": "Not blocked; deferred for scope (Discipline is already built; needs only a new \"own opposed Personality\" Target category).",
