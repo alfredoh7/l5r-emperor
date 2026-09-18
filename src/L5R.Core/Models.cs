@@ -304,6 +304,36 @@ public sealed class PendingBeforeBattleResolve
     public string? EncircledFirstSelectedId { get; set; }
 }
 
+/// <summary>One claim on "the first opportunity to take a Battle action or pass" in a battle (Battle Phase
+/// spec 4.3/4.4; issue #310). PlayerId is the BENEFICIARY -- who the card says gets the opportunity, not
+/// necessarily who played it (Sneak Attack names "the Attacker" even if the Defender were to play it).
+/// Kind is "Naval" (the Naval Invasion Reaction) or "Engage" (any other grant, e.g. Daidoji Yuki);
+/// SourceId is the card that made the claim, when there is one.</summary>
+public sealed record FirstOpportunityClaim(int PlayerId, string Kind, string? SourceId);
+
+/// <summary>The Engage window (Battle Phase spec 4.2; issue #310): open from the moment the Attacker selects
+/// a battlefield until both players pass in succession, while "Engage:" actions and "After engaging"
+/// Reactions are played. Claims accumulate here in the order made and are resolved ONCE, when the window
+/// closes (MatchEngine.ResolveFirstOpportunity) -- the Defender's claim always wins whatever the order,
+/// otherwise the Attacker's, and any number of claims by one player are the same single opportunity.
+/// NavalInvasionUsed enforces the printed "once per battle"; NavalPerformerId is the Personality that
+/// Reaction's "which he must perform" binds the Attacker's first action to.</summary>
+public sealed class PendingEngage
+{
+    public int ProvinceIndex { get; set; }
+    public int Attacker { get; set; }
+    public int Defender { get; set; }
+    public List<FirstOpportunityClaim> Claims { get; set; } = [];
+    public bool NavalInvasionUsed { get; set; }
+    public string? NavalPerformerId { get; set; }
+}
+
+/// <summary>A limit on the FIRST Battle action a player takes in a battle, set when the Engage window closes
+/// and consumed by that player's next accepted command: Naval Invasion's "which he must perform"
+/// (PerformerId), or Rebuilding Kyuden Hida's "the Attacker may not announce a Battle action before the
+/// Defender's first normal opportunity to act or pass" (MustPass).</summary>
+public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, bool MustPass);
+
 /// <summary>An Additional Action grant (core rules Glossary; issue #181): one Battle action the
 /// named player may take out of the normal back-and-forth alternation, without ceding priority to
 /// their opponent in between. ScopeCardIds null means any of the player's own cards (Again!'s
@@ -414,6 +444,16 @@ public sealed class MatchState
     // (ordering choices, Encircled Terrain's own selection sub-stages); cleared before the battle's
     // actual winner/casualties are ever computed.
     public PendingBeforeBattleResolve? PendingBeforeBattleResolve { get; set; }
+    // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
+    // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
+    // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),
+    // set the instant the battle starts (Default) and again when the Engage window resolves its claims;
+    // cleared when the battle resolves. FirstActionRestriction is the one-shot limit on the holder's first
+    // action (see FirstActionRestriction). All three are plain data so a replay reproduces them exactly.
+    public PendingEngage? PendingEngage { get; set; }
+    public int? FirstActionPlayerId { get; set; }
+    public string? FirstActionReason { get; set; }
+    public FirstActionRestriction? FirstActionRestriction { get; set; }
     // After This Battle Resolves (issue #272, Looting the Ruins' own printed timing): "after the
     // resolution of the current battle but before the next battlefield is chosen." FinishBattleResolution
     // sets this to the province that just resolved (its own provinceIndex parameter, otherwise lost --
@@ -674,9 +714,42 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
 public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, string ChallengerId,
     string ChallengedId, string Stat, string Stage, int TurnPlayerId, bool Struck);
+/// <summary>The names <see cref="BattleStepView"/> speaks in, one per step of the rules lead's formal Battle
+/// Phase (issue #310). A client keys its sidebar off these constants and never infers timing itself.</summary>
+public static class BattleSteps
+{
+    // Segments (spec steps 1-5). "None" is any moment outside the Attack Phase. The spec's Declaration
+    // Segment is not a separate decision in this engine: the attacker's Infantry assignment prompt IS the
+    // declaration (an empty assignment declines) -- see docs/decisions/2026-09-18-battle-timing-primitives.md.
+    public const string None = "None", InfantryManeuvers = "InfantryManeuvers", CavalryManeuvers = "CavalryManeuvers",
+        FightBattles = "FightBattles", Resolution = "Resolution";
+    // Steps. AttackerAssigns/DefenderAssigns are the Maneuvers decisions; ChooseBattle is 4.1; Engage is 4.2;
+    // BattleActions is 4.5 (the first-action holder of 4.3/4.4 is in FirstActionPlayerId); BeforeResolution and
+    // Aftermath are the two observable halves of Resolution (5) -- the Force comparison itself is instantaneous.
+    public const string AttackerAssigns = "AttackerAssigns", DefenderAssigns = "DefenderAssigns", ChooseBattle = "ChooseBattle",
+        Engage = "Engage", BattleActions = "BattleActions", BeforeResolution = "BeforeResolution", Aftermath = "Aftermath";
+    // FirstActionReason values.
+    public const string ReasonDefault = "Default", ReasonNaval = "Naval", ReasonEngageGrant = "EngageGrant", ReasonDefenderOverride = "DefenderOverride";
+    // FirstActionLimit values.
+    public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly";
+}
+
+/// <summary>Public, read-only Battle Phase timing (issue #310): everything a battle sidebar needs, derived from
+/// authoritative state on every GetView and identical for both viewers (nothing here is hidden information).
+/// Read: <c>Segment</c>/<c>Step</c> (what the phase is doing), <c>DecisionPlayerId</c> (whose decision it is),
+/// <c>BattlefieldProvince</c> (the selected battle), <c>FirstActionPlayerId</c>/<c>FirstActionReason</c> (who acts
+/// first and why; while the Engage window is open they are provisional, <c>FirstActionResolved</c> false, and
+/// <c>EngageClaims</c> lists the claims so far), <c>FirstActionLimit</c>/<c>FirstActionPerformerId</c> (a limit on
+/// that first action), <c>ConsecutivePasses</c> (0 or 1; two ends the segment), <c>BeforeResolutionSourceIds</c>
+/// (cards whose "before this battle resolves" trait is still to apply) and <c>Window</c> (the open PendingChoice
+/// type, if any).</summary>
+public sealed record BattleStepView(string Segment, string Step, int? DecisionPlayerId, int? AttackerPlayerId,
+    int? BattlefieldProvince, int? FirstActionPlayerId, string? FirstActionReason, bool FirstActionResolved,
+    FirstOpportunityClaim[] EngageClaims, string? FirstActionLimit, string? FirstActionPerformerId,
+    int ConsecutivePasses, string[] BeforeResolutionSourceIds, string? ActiveBeforeResolutionSourceId, string? Window);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
     PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null,
-    DuelView? PendingDuel = null);
+    DuelView? PendingDuel = null, BattleStepView? BattleStep = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

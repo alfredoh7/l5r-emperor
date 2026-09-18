@@ -212,6 +212,7 @@ runner.Run("core",tests);
 PublishedTests.Run(runner);
 GoldParityTests.Run(runner);
 GoldQuoteTests.Run(runner);
+BattleTimingTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 return runner.Finish();

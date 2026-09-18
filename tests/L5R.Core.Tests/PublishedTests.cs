@@ -109,12 +109,14 @@ internal static class PublishedTests
         // against origin/main by running the suite before any Batch F change) + 13 (this branch's own
         // PersonalityWave22 (12) + RegionWave3 (1), issue #301 Batch F: thirteen cards assigned, none
         // already published) = 388 (Batch F's own baseline, now merged into main) + 1 (StrategyWave16, issue
-        // #304: Brawl, now merged into main) = 389 (origin/main's own baseline after that merge, re-derived
-        // by counting distinct non-ScenarioOnly ids across content/published/*.json, not copied from either
-        // side of the conflict) + 1 (this branch's own PersonalityWave23, issue #305: Akodo Kakihara, not
-        // previously published) = 390. Recomputed from the actual current origin/main baseline each time
-        // this conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,390);
+        // #304: Brawl, now merged into main) = 389 + 1 (PersonalityWave23, issue #305: Akodo Kakihara, now
+        // merged into main) = 390 (origin/main at 7ac0854f, re-derived by counting distinct non-ScenarioOnly ids
+        // across content/published/*.json, not copied from either side of the conflict -- BOTH sides of this
+        // exact merge independently said 390, and the unmarked assertion line below still said 390 after the
+        // merge, a coincidental match for entirely different reasons) + 1 (this branch's own PersonalityWave25,
+        // issue #309: Daidoji Yuki, Experienced) = 391. Recomputed from the actual current origin/main baseline
+        // each time this conflicts, never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,391);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
