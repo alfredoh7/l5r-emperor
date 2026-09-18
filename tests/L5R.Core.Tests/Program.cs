@@ -204,7 +204,8 @@ var tests = new (string Name, Action Run)[]
     ("Personality wave 22 (issue #301): the Battle bow/destroy family -- Bayushi Nori's dual-choice shape (bow the Personality OR every attachment, Honor loss only when dishonorable, one shared use, enemy only, presence required); Hida Mimori's new enemy-bowed-card Target (a Personality with his attachments, or a lone Follower/Item, with every illegal shape rejected, plus Rokai's destruction-negation window); Isawa Mitsuko's bow-then-conditional-destroy (Shadowlands by Clan AND by the printed keyword Rikate carries, Ninja, Kolat, and a Stalwart target still destroyed); Sutigu's new own-source-or-unbowed-attached-with-keyword Performer (Sutigu or his own unbowed Weapon, straightening negated only on an attachment)", BatchFBattleBowAndDestroy),
     ("Personality wave 22 (issue #301): movement and opponent-choice cards -- Asahina Munefusa's Battle half (exempt from presence for a controller with no unit there, attacking Personalities only, Honor only if he really moved, Tamoko able to negate it); Shosuro Hawado (remove any Dynasty card in any discard pile as the cost, usable while bowed, home or a chosen battlefield with enemy units, straightening only if she really moved, one shared use); Asako Rikate's new rikateDetach PendingChoice (any subset of the unit's attachments returned to hand through the generalized ReturnToHand, THEN -2C, with the ordering proven lethal or not); Shosuro Rin's new rinShame PendingChoice (dishonor, or bow plus a negated straightening, Stalwart included)", BatchFMovementAndChoices),
     ("Personality wave 22 / region-wave-3 (issue #301): passives, equip and recruit -- Isawa Kojiro's live conditional Naval (appears and disappears with an attached Spell, never a durable grant); Yoritomo Minori's self-received per-other-Magistrate Force bonus (army-scoped, printed or granted, bowed counting, attacking or defending); Soshi Neiru's Open-timed Air-Spell equip (fixed wielder, no once-per-turn limit, usable by the non-active player, never in Battle); Shinden Shorai as the fourth caller of the shared province-Personality entry sequence (the player's OWN turn count, the Lion-Clan-Personality Honor Requirement waiver keyed on the recruit rather than the player, same province, full cost, Proclaim resuming to the opponent)", BatchFPassivesEquipAndRecruit),
-    ("Strategy wave 16 (issue #304): Brawl -- its \"Needs Regions (not built)\" blocker was stale. The destroy half's new region-or-terrain Target (a Region at ANY province, either owner's, destroyed to its owner's Dynasty discard with its static strength bonus going with it; a Terrain through the shared DiscardTerrain removal, meeting Ring of Water's destroyed-a-Terrain condition; never a Personality; offered targets exactly the Region and the Terrain; disabled with nothing to destroy), usable at Open timing outside a Battle while the Battle-only bow half is not, and the bow half's reuse of enemy-card-without-attachments (an unattached enemy bows; an attached one and your own card do not)", StrategyWave16Primitives)
+    ("Strategy wave 16 (issue #304): Brawl -- its \"Needs Regions (not built)\" blocker was stale. The destroy half's new region-or-terrain Target (a Region at ANY province, either owner's, destroyed to its owner's Dynasty discard with its static strength bonus going with it; a Terrain through the shared DiscardTerrain removal, meeting Ring of Water's destroyed-a-Terrain condition; never a Personality; offered targets exactly the Region and the Terrain; disabled with nothing to destroy), usable at Open timing outside a Battle while the Battle-only bow half is not, and the bow half's reuse of enemy-card-without-attachments (an unattached enemy bows; an attached one and your own card do not)", StrategyWave16Primitives),
+    ("Pile-targeted abilities are offered by QueryActions (issue #317): Hunter of Harmony's own-kiho-strategy-in-discard, Scholarly Hermit's own-ring-in-discard and Tranquil Garden's ring-in-play-or-own-discard each had a ValidateAbility branch but no candidates arm, so a target in a discard pile was never offered -- each is now offered enabled with exactly its legal targets (wrong owner, wrong zone and wrong type excluded), every offered target validates, and with no target the ability is offered disabled", PileTargetsAreOffered)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -8744,6 +8745,72 @@ static void StrategyWave16Primitives()
         var e=MatchEngine.FromTestState(s);
         Reject(e,Use(e,"brawl-bow",brawl,defender));
         Check(!e.State.Cards[defender.Id].Bowed,"A Personality with an attachment is not a legal bow target");
+    }
+}
+// Issue #317: three target categories ValidateAbility accepts but AbilityActions' candidates switch never
+// listed. A target in a discard pile is not in the in-play default, so the ability was never offered by
+// QueryActions and could only be taken by submitting the command directly (the same gap Kharmic had, #303).
+static void PileTargetsAreOffered()
+{
+    // The ability is offered enabled, lists exactly its legal targets, and every offered target validates.
+    void Offered(MatchEngine e,string ability,string[] expected)
+    {
+        var option=e.QueryActions(0).SingleOrDefault(a=>a.Command?.AbilityId==ability);
+        Check(option is not null && option.Enabled,$"{ability} is offered enabled");
+        Check(option!.TargetIds!.OrderBy(x=>x).SequenceEqual(expected.OrderBy(x=>x)),$"{ability} offers exactly its legal targets");
+        foreach(var target in expected) Accept(MatchEngine.FromTestState(e.State),option.Command! with {TargetId=target});
+    }
+    MatchState Fixture()
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.ActivePlayerId=0; s.PriorityPlayerId=0;
+        return s;
+    }
+    // Hunter of Harmony: a Kiho Strategy in the player's OWN Fate discard pile.
+    {
+        var s=Fixture();
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"oracle-l5r-3522",0,Zone.Attached,attachedTo:host.Id);
+        var volcano=Add(s,"oracle-l5r-9186",0,Zone.FateDiscard);
+        var weakness=Add(s,"oracle-l5r-8425",0,Zone.FateDiscard);
+        Add(s,"training-rally",0,Zone.FateDiscard);   // a Strategy, but not Kiho
+        Add(s,"oracle-l5r-9186",1,Zone.FateDiscard);  // Kiho, but the opponent's discard pile
+        Add(s,"oracle-l5r-9186",0,Zone.Hand);         // Kiho, but in hand
+        Offered(MatchEngine.FromTestState(s),"hunter-of-harmony-return",[volcano.Id,weakness.Id]);
+    }
+    // Scholarly Hermit: a Ring in the player's OWN Fate discard pile.
+    {
+        var s=Fixture();
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"oracle-l5r-10684",0,Zone.Attached,attachedTo:host.Id);
+        var air=Add(s,"oracle-l5r-6333",0,Zone.FateDiscard);
+        var water=Add(s,"oracle-l5r-6339",0,Zone.FateDiscard);
+        Add(s,"oracle-l5r-6335",1,Zone.FateDiscard);  // a Ring, but the opponent's discard pile
+        Add(s,"oracle-l5r-6338",0,Zone.Home);         // a Ring, but in play rather than in a discard pile
+        Add(s,"oracle-l5r-6334",0,Zone.Hand);         // a Ring, but in hand
+        Add(s,"oracle-l5r-9186",0,Zone.FateDiscard);  // in the right pile, but not a Ring
+        Offered(MatchEngine.FromTestState(s),"scholarly-hermit-search",[air.Id,water.Id]);
+    }
+    // Tranquil Garden: any Ring in play (either side's), or a Ring in the player's OWN Fate discard pile.
+    {
+        var s=Fixture();
+        Add(s,"oracle-l5r-8721",0,Zone.Home);
+        var ownInPlay=Add(s,"oracle-l5r-6333",0,Zone.Home,bowed:true);
+        var enemyInPlay=Add(s,"oracle-l5r-6335",1,Zone.Home,bowed:true);
+        var ownDiscard=Add(s,"oracle-l5r-6339",0,Zone.FateDiscard);
+        Add(s,"oracle-l5r-6334",1,Zone.FateDiscard);  // a Ring, but the opponent's discard pile
+        Add(s,"oracle-l5r-6338",0,Zone.Hand);         // a Ring, but in hand
+        Add(s,"oracle-l5r-9186",0,Zone.FateDiscard);  // in the right pile, but not a Ring
+        Offered(MatchEngine.FromTestState(s),"tranquil-garden-ring",[ownInPlay.Id,enemyInPlay.Id,ownDiscard.Id]);
+    }
+    // With nothing to target the ability is offered disabled (not silently absent, not enabled).
+    {
+        var s=Fixture();
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        Add(s,"oracle-l5r-3522",0,Zone.Attached,attachedTo:host.Id);
+        Add(s,"oracle-l5r-10684",0,Zone.Attached,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        foreach(var label in new[]{"Remove this card from the game","Bow: Put a Ring"})
+            Check(e.QueryActions(0).Any(a=>a.Type=="useAbility" && a.Label.StartsWith(label) && !a.Enabled),$"'{label}...' is offered disabled with no legal target");
     }
 }
 static void BatchEPrimitives()
