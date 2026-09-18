@@ -395,6 +395,18 @@ public static class AbilityCatalog
         ["champion-of-thunder-negate"] = new("Reaction", "After another player's action targets a card in this unit: Negate the action's effects on this card.", "own-unit-member", Trigger: "before-action-resolves"),
         ["champion-of-thunder-attack"] = new("Battle", "Ranged 6 Attack", "attack"),
         ["brothers-goemon-negate"] = new("Reaction", "After another player's action targets a card in this unit, if you control any Rings: Negate the card's bowing from the action's effects.", "none", Trigger: "before-action-resolves"),
+        // Akodo Kakihara (oracle-l5r-223, issue #305): "Reaction: After another player's action targets
+        // Kakihara: Give him a Force bonus equal to his Personal Honor." One printed ability, two
+        // catalog entries because an ability carries exactly one Trigger and this card must react in
+        // two different windows: a non-Attack action goes through the general in-play targeting
+        // primitive's "beforeActionReaction" window (FindBeforeActionReactionWatcher's own Kakihara
+        // branch), while a Ranged/Melee Attack has its own separately-orderable pipeline and is
+        // reacted to in the existing "attackReaction" window (ResolveOrDeferAttack), Khol Regulars'
+        // shape. Both share UsageKey "kakihara-force-bonus" so the one printed ability is used at most
+        // once per turn across the two windows. Target "none" for both: the affected card is Kakihara
+        // himself, fixed by the trigger, never a player choice.
+        ["kakihara-force-bonus"] = new("Reaction", "After another player's action targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-action-resolves", UsageKey: "kakihara-force-bonus"),
+        ["kakihara-attack-force-bonus"] = new("Reaction", "After another player's Ranged or Melee Attack targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-attack-resolves", UsageKey: "kakihara-force-bonus"),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
         // onto the existing Open/Battle/Limited/BattleOrOpen values verbatim (confirmed precedent,
@@ -1537,7 +1549,7 @@ public sealed partial class MatchEngine
     private (CardInstance Watcher, string Kind)? FindBeforeActionReactionWatcher(GameCommand command)
     {
         if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)) return null;
-        if (MovementCannotBeNegated(command)) return null;
+        if (MovementCannotBeNegated(command)) return KakiharaWatcher(command, affected);
         if (Definition(affected).Type == CardType.Personality)
         {
             if (DestroysTarget(command.AbilityId))
@@ -1565,8 +1577,22 @@ public sealed partial class MatchEngine
                 if (brothers is not null) return (brothers, "bow");
             }
         }
-        return null;
+        return KakiharaWatcher(command, affected);
     }
+    // Akodo Kakihara (issue #305): unlike Champion/Brothers above, the trigger is only "another player's
+    // action targets HIM" -- the affected card itself, never a card elsewhere in his unit. Consulted LAST,
+    // so every earlier watcher keeps exactly the priority it already had (this primitive opens ONE window
+    // per command: if a Rokai/Tamoko/Champion/Brothers is also eligible, they take it and Kakihara's
+    // reaction is not offered for that command -- a documented known limit, see the decision doc). Also
+    // consulted when MovementCannotBeNegated already ruled out every NEGATING watcher: his reaction
+    // negates nothing, so "this movement will not be negated" does not stop him reacting to being targeted.
+    // "Action" excludes a Reaction: a Reaction-timed ability that happens to name Kakihara as its target
+    // is not "another player's action," and opening a nested window from inside an already-open reaction
+    // window would overwrite that window's own PendingChoice. An Attack (AttackKind non-empty) never
+    // reaches here: it reacts through the separate attackReaction window (AnyAttackReactionAvailable).
+    private (CardInstance Watcher, string Kind)? KakiharaWatcher(GameCommand command, CardInstance affected) =>
+        AttackKind(command.AbilityId!) == "" && AbilityCatalog.All.TryGetValue(command.AbilityId!, out var actingAbility) && actingAbility.Timing != "Reaction"
+            && KakiharaCanReact(affected, command.PlayerId) ? (affected, "force") : null;
     // "This movement will not be negated" (issue #299): the printed clause on Wrathful Ancestor and
     // Shinjo Kinto. A negating interrupt (Tamori Tamoko's move-negate, Champion of Thunder's own
     // "all") never even gets its window opened for such a command -- the movement is never offered
@@ -1795,9 +1821,13 @@ public sealed partial class MatchEngine
     // caller; every future in-play trigger (e.g. Legion of the Bat's own "after an action moves an
     // enemy Infantry Personality to this card's battlefield," once that move-resolved hook exists)
     // reuses this directly instead of a bespoke AnyXReactionAvailable check.
-    private bool AnyInPlayReactionAvailable(string trigger) => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
+    // relevant (Akodo Kakihara, issue #305): an optional per-(card, ability) narrowing for a Reaction whose
+    // OWN trigger condition is cheap to evaluate up front and would otherwise open a pointless window on
+    // every Attack while the card sat in play (Kakihara only ever cares about an Attack that targets HIM);
+    // every other caller omits it and keeps the existence-only behavior described above.
+    private bool AnyInPlayReactionAvailable(string trigger, Func<CardInstance, string, bool>? relevant = null) => _state.Cards.Values.Any(c => InPlay(c) && !c.Bowed &&
         (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger &&
-            (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber)));
+            (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber) && (relevant?.Invoke(c, id) ?? true)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
     // attack.Kind here rather than inside AnyInPlayReactionAvailable itself.
     // A Close Call (the first before-attack-resolves Reaction printed on a Strategy card): unlike
@@ -1808,8 +1838,28 @@ public sealed partial class MatchEngine
     // making the card unusable exactly when its own printed text needs it. AnyOutOfPlayReactionAvailable
     // already exists for this (Effortless Counterattack's shape); reused here for both players at once,
     // since an Attack reaction is open to either side, unlike that helper's own single-player callers.
-    private bool AnyAttackReactionAvailable() => AnyInPlayReactionAvailable("before-attack-resolves")
+    // Akodo Kakihara (issue #305) is the first in-play before-attack-resolves reactor whose own trigger is
+    // "this specific card is the Attack's target": only he is narrowed by the (attacker, target) pair, so a
+    // Kakihara sitting in play never opens an Attack window that could not possibly matter to him.
+    private bool AnyAttackReactionAvailable(int attackerId, string? targetId) =>
+        AnyInPlayReactionAvailable("before-attack-resolves", (c, id) => id != "kakihara-attack-force-bonus" || targetId == c.Id && KakiharaCanReact(c, attackerId))
         || AnyOutOfPlayReactionAvailable(0, "before-attack-resolves") || AnyOutOfPlayReactionAvailable(1, "before-attack-resolves");
+    // Akodo Kakihara (oracle-l5r-223, issue #305): "Reaction: After another player's action targets
+    // Kakihara: Give him a Force bonus equal to his Personal Honor." Whether the reaction is worth offering
+    // at all, shared by both windows it can open (FindBeforeActionReactionWatcher's non-Attack branch and
+    // AnyAttackReactionAvailable's Attack one): he must be in play and unbowed (ValidateAbility already
+    // forbids using ANY ability from a bowed card, so this only avoids opening a window nobody could use),
+    // the acting player must not be his own controller ("another player's action"), his one printed use
+    // this turn must still be available (the shared "kakihara-force-bonus" UsageKey -- not the per-id key
+    // AnyInPlayReactionAvailable checks, since the Attack half is a separate catalog entry), and his
+    // CURRENT Personal Honor must be above 0. CardPersonalHonor already yields 0 while he is dishonorable
+    // (the card owner's own ruling: a dishonored Kakihara gets +0F, "or no bonus, whichever is more
+    // efficient") -- the efficient reading is chosen: no window is opened for a bonus of nothing.
+    private bool KakiharaCanReact(CardInstance card, int actingPlayerId) =>
+        InPlay(card) && !card.Bowed && card.OwnerId != actingPlayerId
+        && (Definition(card).Abilities ?? []).Contains("kakihara-force-bonus")
+        && CardPersonalHonor(card) > 0
+        && (!card.AbilityUses.TryGetValue("kakihara-force-bonus", out var used) || used != _state.TurnNumber);
     // General "out of play" Reaction primitive: some printed Reactions are played FROM outside play
     // (hand or a discard pile) to interrupt something -- Singh Remnants attaching itself as a
     // Personality enters play is the first case; Effortless Counterattack negating an action taken
@@ -1919,7 +1969,7 @@ public sealed partial class MatchEngine
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null, bool additional = false, int? strengthOverride = null)
     {
         var strength = strengthOverride ?? EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
-        if (!AnyAttackReactionAvailable())
+        if (!AnyAttackReactionAvailable(attacker.Id, targetId))
         {
             ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId);
             return false;
@@ -2262,6 +2312,18 @@ public sealed partial class MatchEngine
         // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
         // with every other attack-boosting Reaction.
         if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
+        // Akodo Kakihara (issue #305): "After another player's action targets Kakihara" -- narrows each of his
+        // two windows to the deferred action/Attack that actually names HIM as its target and was issued by
+        // someone other than his own controller. The Reaction is only ever worth using while his CURRENT
+        // Personal Honor is above 0 (0 while dishonorable -- the card owner's own ruling: no bonus).
+        if (id == "kakihara-force-bonus")
+            Require(_state.PendingNegatableAbility is { } kakiharaAction && kakiharaAction.TargetId == source!.Id && kakiharaAction.PlayerId != source.OwnerId,
+                "Akodo Kakihara only reacts to another player's action that targets him.");
+        if (id == "kakihara-attack-force-bonus")
+            Require(_state.PendingAttack is { } kakiharaAttack && kakiharaAttack.TargetId == source!.Id && kakiharaAttack.PlayerId != source.OwnerId,
+                "Akodo Kakihara only reacts to another player's Attack that targets him.");
+        if (id is "kakihara-force-bonus" or "kakihara-attack-force-bonus")
+            Require(CardPersonalHonor(source!) > 0, "Akodo Kakihara has no Personal Honor to convert into a Force bonus.");
         // A Close Call: "after a Personality with an Armor is targeted by a Melee or Ranged Attack" --
         // both the Kind restriction and the Armor-attached restriction narrow the shared
         // before-attack-resolves Reaction window (the same shape khol-regulars-reaction/flesh-cutter-
@@ -4069,6 +4131,17 @@ public sealed partial class MatchEngine
                 _state.NegatedEffectKind = "bow"; _state.NegatedEffectCardId = pending.TargetId;
                 break;
             }
+            // Akodo Kakihara (issue #305): "Give him a Force bonus equal to his Personal Honor." The Force
+            // bonus convention is every other one-shot "give him +N Force" effect's (Banzai!, Pure Intent,
+            // Marshal Your Strength, Strength of Purity): ApplyModifier "Force", which lasts until the end
+            // of the turn (cleared in FinishTurn) and is a snapshot of his Personal Honor at the moment the
+            // reaction resolves, not a live link. Either window's bonus lands BEFORE the deferred action
+            // or Attack actually resolves, so an Attack's own strength-versus-Force comparison
+            // (ResolveAttackNow, re-read at resolution) sees the raised Force.
+            case "kakihara-force-bonus":
+            case "kakihara-attack-force-bonus":
+                ApplyModifier(source!, source!.Id, id, "Force", CardPersonalHonor(source));
+                break;
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
@@ -4824,6 +4897,15 @@ public sealed partial class MatchEngine
     }
     private static int TokenCount(CardInstance card, string type) => card.Tokens.Count(t => t.Type == type);
     private static bool HasToken(CardInstance card, string type) => card.Tokens.Any(t => t.Type == type);
+
+    // The reason ValidateAbility would refuse this exact command right now, or null if it would accept it --
+    // the same try/catch shape AbilityActions uses per candidate, for a caller (an in-window Reaction
+    // listing in MatchQueries) that needs a single command's own enabled/disabled state and reason.
+    private string? AbilityRejection(GameCommand command)
+    {
+        try { ValidateAbility(command); return null; }
+        catch (RuleViolation e) { return e.Message; }
+    }
 
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {

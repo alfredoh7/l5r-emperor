@@ -63,13 +63,19 @@ public sealed partial class MatchEngine
         // quote as every other costed action (issue #303), so the client shows the payment panel and the
         // command carries the engine's suggested sources. An unpayable cost is offered disabled with its
         // reason instead of as an action that could only be rejected.
-        void AddReaction(CardInstance card,string abilityId,string? reason=null)
+        // validate (Akodo Kakihara, issue #305): a reaction with a printed condition of its own (only when HE is
+        // the target) is listed disabled, with ValidateAbility's own reason, while that condition does not
+        // hold -- checked against the command AS QUOTED, so a payment the engine just suggested is never itself
+        // the reason. targetId/label serve a reaction whose own Target is a choice (Champion of Thunder's
+        // "own-unit-member": one option per unit member); both default to the plain single-option shape.
+        void AddReaction(CardInstance card,string abilityId,string? reason=null,string? targetId=null,string? label=null,bool validate=false)
         {
-            var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:abilityId);
+            var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,AbilityId:abilityId);
             var gold=QuoteAbilityGold(command);
             if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
             reason??=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
-            Add("useAbility",AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
+            if(reason is null && validate) reason=AbilityRejection(command);
+            Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
@@ -118,7 +124,32 @@ public sealed partial class MatchEngine
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
                 var used=card.AbilityUses.ContainsKey(reactionId);
-                AddReaction(card,reactionId,used?"This reaction has already been used.":null);
+                // Akodo Kakihara (issue #305): an in-play Attack reactor may carry a printed condition of its own
+                // (only when HE is the target), so a listed reaction is only enabled while ValidateAbility
+                // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
+                AddReaction(card,reactionId,used?"This reaction has already been used.":null,validate:true);
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"beforeActionReaction" } beforeActionPending)
+        {
+            // Mirumoto Rokai / Tamori Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara: the
+            // general in-play "before an action resolves" window is scoped to the one specific watching card by
+            // id (same single-watcher shape as announceReaction below), so only that card's own controller is
+            // offered its before-action-resolves reaction. A reaction whose own Target is a choice among the
+            // watcher's unit (Champion's "own-unit-member") gets one option per member; every other one is
+            // offered once. Each is validated exactly like a submitted command, so a reaction that cannot
+            // legally be used right now is listed disabled with its reason rather than hidden or offered blind.
+            if(beforeActionPending.PlayerId==playerId)
+            {
+                var card=Card(beforeActionPending.CardId!);
+                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="before-action-resolves"))
+                {
+                    var reaction=AbilityCatalog.All[reactionId];
+                    string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
+                    foreach(var candidate in candidates)
+                        AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
+                }
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
