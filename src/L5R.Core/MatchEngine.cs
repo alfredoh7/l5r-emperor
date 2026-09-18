@@ -133,6 +133,11 @@ public sealed partial class MatchEngine
         if (_state.PendingChoice is not null)
         {
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
+            // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
+            if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
+            // Your Clan Needs You! (issue #295): the recruiting player chooses which province to place
+            // the recruited Personality back into, once this battle ends.
+            if (_state.PendingChoice.Type=="yourClanNeedsYouProvince") { ResolveYourClanNeedsYouProvince(command); return; }
             if (_state.PendingChoice.Type=="declineStraighten") { ResolveDeclineStraighten(command); return; }
             if (_state.PendingChoice.Type=="conqueror") { ResolveConqueror(command); return; }
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
@@ -1115,6 +1120,13 @@ public sealed partial class MatchEngine
     // here once every queued Overconfident offer this battle produced has been resolved.
     private void FinishBattleReturnHomeAndTransition(int attacker)
     {
+        // Your Clan Needs You! (oracle-l5r-9687, issue #295): "After the battle ends, if he is in
+        // play..." -- checked first, before anything else below, since this is the earliest point at
+        // which the just-finished battle's own outcome (including FinishBattleResolution's own
+        // attacker-return sweep and any Overconfident window) has fully settled where every card in
+        // play now sits. Deferring here (a province choice) re-enters this same function from scratch
+        // once answered, so nothing below runs twice.
+        if (CheckYourClanNeedsYouReturn()) return;
         // After This Battle Resolves (issue #272): "after the resolution of the current battle but
         // before the next battlefield is chosen. If it is the last battlefield to resolve, then
         // return the card to the player's hand and then end the battle phase" -- run first, so the
@@ -1127,6 +1139,64 @@ public sealed partial class MatchEngine
             SetPhase(Phase.Dynasty,attacker);
         }
         else SetPhase(Phase.BattleSelection,attacker);
+    }
+    // Your Clan Needs You! (oracle-l5r-9687, issue #295): "discard all his attachments and put him
+    // into one of your provinces, face-up, discarding any card there" -- checked once per watched id,
+    // one PendingChoice at a time (a province choice is genuine player agency, unlike Earth Flows'
+    // own unconditional Honor gain). Processes/removes every watched id it can resolve outright (a
+    // card no longer in play, or with no province left to place him in, needs no choice at all);
+    // returns true the moment it must pause for one, leaving any further watched ids for the next call
+    // once ResolveYourClanNeedsYouProvince re-enters FinishBattleReturnHomeAndTransition.
+    private bool CheckYourClanNeedsYouReturn()
+    {
+        foreach(var id in _state.YourClanNeedsYouWatchIds.ToArray())
+        {
+            _state.YourClanNeedsYouWatchIds.Remove(id);
+            if(!_state.Cards.TryGetValue(id,out var card) || !InPlay(card)) continue;
+            // "Discard" (not "destroy") his attachments -- a plain removal, not DestroyAttachment's own
+            // destruction (which would spuriously fire Expendable/Destroyed-during-battle bonuses for
+            // something that was never actually destroyed).
+            foreach(var attachment in Attachments(card.Id).ToArray())
+            {
+                attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.FaceUp=true; attachment.Tokens.Clear();
+                card.GrantedKeywords.RemoveAll(g=>g.Source==attachment.Id && g.Duration=="Attachment");
+                Emit("attachmentDiscarded",$"{Definition(attachment).Name} was discarded.",attachment.OwnerId,attachment.Id);
+            }
+            if(card.Zone==Zone.Battlefield) ReturnHome(card,false);
+            // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
+            // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
+            // no meaning once this card is sitting face-up in a province again, ready to be purchased.
+            card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
+            card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
+            card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
+            var owner=Player(card.OwnerId);
+            if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
+            _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
+            _state.PriorityPlayerId=card.OwnerId; _state.ConsecutivePasses=0;
+            Emit("reactionWindow","Your Clan Needs You!: choose a province.",card.OwnerId,id);
+            return true;
+        }
+        return false;
+    }
+    private void ResolveYourClanNeedsYouProvince(GameCommand command)
+    {
+        var pending=_state.PendingChoice!;
+        Require(command.Type=="chooseYourClanNeedsYouProvince" && command.PlayerId==pending.PlayerId && command.Province is int provinceIndex
+            && Player(pending.PlayerId).Provinces.Any(p=>p.Index==provinceIndex && !p.Destroyed),
+            "Choose one of your own non-destroyed provinces.");
+        var card=Card(pending.CardId!);
+        var province=Player(pending.PlayerId).Provinces.Single(p=>p.Index==command.Province!.Value);
+        if(province.CardId is string existingId)
+        {
+            var existing=Card(existingId);
+            existing.Zone=Zone.DynastyDiscard; existing.ProvinceIndex=null;
+            Emit("provinceDiscard",$"{Player(pending.PlayerId).Name} discarded {Definition(existing).Name} from a province (Your Clan Needs You!).",pending.PlayerId,existingId);
+        }
+        card.Zone=Zone.Province; card.ProvinceIndex=province.Index; card.FaceUp=true;
+        province.CardId=card.Id;
+        Emit("cardPlacedInProvince",$"{Definition(card).Name} was placed face-up into a province (Your Clan Needs You!).",pending.PlayerId,card.Id);
+        _state.PendingChoice=null;
+        FinishBattleReturnHomeAndTransition(_state.ActivePlayerId);
     }
     // Looting the Ruins (issue #272): "After this battle resolves, if this Terrain is in play, put it
     // into your hand" -- unconditional, no PendingChoice/Reaction window ("requires no interruption
@@ -1789,7 +1859,13 @@ public sealed partial class MatchEngine
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by
     // 1" -- the printed 8 becomes a per-player computed value, raised by 1 for every in-play card an
     // OPPONENT controls carrying this Effect (either of them, on either side, could stack).
-    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size");
+    // False Ring of Earth (oracle-l5r-10532, issue #295): "Other players have -1 maximum hand size" --
+    // the first negative-magnitude use of this same per-player computed value (issue #223's own
+    // increase-other-hand-size term only ever raised it). A separate Effect string, not a negative
+    // count on the same one, so a table with both an increaser and a decreaser nets out correctly
+    // rather than one silently overwriting the other.
+    private int MaxHandSize(int playerId) => 8+_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="increase-other-hand-size")
+        -_state.Cards.Values.Count(c=>c.OwnerId!=playerId && InPlay(c) && Definition(c).Effect=="decrease-other-hand-size");
     private void EndTurn()
     {
         // Tamori Tamoko's own Open action (issue #207 follow-up): "before the turn ends, gain 1

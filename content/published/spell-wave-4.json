@@ -1,0 +1,32 @@
+{
+  "Profile": "spell-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10238",
+      "Name": "Sanctuary of the Waves",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow this card and target this Shugenja, or, if this Shugenja is Water, you may target another of your Personalities: Move the target to the current battlefield if he would be opposed there. Straighten him if he moved.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10238.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "sanctuary-of-the-waves-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -160,6 +160,15 @@ public sealed partial class MatchEngine
             Add("chooseShinden","Bow and prevent straightening this turn",Command("chooseShinden") with {Choice="bow"});
             Add("chooseShinden","Allow opponent to gain 1 Honor",Command("chooseShinden") with {Choice="honor"});
         }
+        else if(_state.PendingChoice is { Type:"preservingHonor" })
+        {
+            Add("choosePreservingHonor","Bow him",Command("choosePreservingHonor") with {Choice="bow"});
+            Add("choosePreservingHonor","Move him home",Command("choosePreservingHonor") with {Choice="move"});
+        }
+        else if(_state.PendingChoice is { Type:"yourClanNeedsYouProvince" })
+            foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed))
+                Add("chooseYourClanNeedsYouProvince",$"Place into province {p.Index+1}"+(p.CardId is not null?$" (discarding {Definition(Card(p.CardId)).Name})":""),
+                    Command("chooseYourClanNeedsYouProvince",province:p.Index));
         else if(_state.PendingChoice is { Type:"conqueror" })
         {
             foreach(var id in _state.PendingConqueror!.CandidateIds)

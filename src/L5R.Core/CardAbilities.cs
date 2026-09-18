@@ -317,6 +317,14 @@ public static class AbilityCatalog
         ["ring-of-void-recruit"] = new("Limited", "Play if you have two or fewer Rings in play. Discard your hand", "none"),
         ["ring-of-void-draw"] = new("Limited", "Void Limited, bow: Draw a card. If you now have more cards in your hand than any other player, discard a card", "none"),
         ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none"),
+        // False Ring of Earth (oracle-l5r-10532, issue #295): Dueling (issue #204) and the own-won-duel
+        // Reaction trigger (issue #209) cover "after a duel resolves" generally, but this Ring's own
+        // condition is a per-PLAYER reaction to any duel their side wins (not a reaction carried by the
+        // winning duelist card itself) -- reuses Ring recruitment's existing "grant an Additional Battle
+        // Action scoped to this Ring in hand" shape (GrantRingRecruit) instead, called from ResolveDuel
+        // once a winner is known (see Dueling.cs), the same simplification every other Ring recruit
+        // condition already uses in place of a forced mid-resolution interrupt.
+        ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none"),
         ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality"),
         // Not a Reaction/grant at all (issue #194) -- a standing condition, usable any time it holds,
         // like an ordinary Battle ability. Simplified from "Absent Battle" the same way as above.
@@ -654,6 +662,15 @@ public static class AbilityCatalog
         // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
         // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
         ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
+        // Sanctuary of the Waves (oracle-l5r-10238, spell-wave-4, issue #295): the mirror-image target
+        // shape of own-wielder-or-source-with-wielder-keyword above (a TARGET choice between the
+        // wielder and another own Personality, gated by the wielder's own keyword, rather than a
+        // Performer/cost choice) -- see own-wielder-or-personality-with-wielder-keyword's own doc
+        // comment. The move-to-battlefield-if-opposed half reuses MoveToBattlefield/AtBattle exactly as
+        // intervening-spirit-move/earth-flows-move already do; both of those are also this card's own
+        // precedent for the exemptions below (a Personality "reinforcing" the battle is never assumed
+        // to already be present).
+        ["sanctuary-of-the-waves-move"] = new("Battle", "Bow this card and target this Shugenja, or, if this Shugenja is Water, you may target another of your Personalities: Move the target to the current battlefield if he would be opposed there. Straighten him if he moved", "own-wielder-or-personality-with-wielder-keyword", RequiredKeywords: ["Water"]),
         // Kitsu Akai (Second City, issue #257): the engine's first "create a card" effect --
         // MatchEngine.CreatePersonality, no target of its own (the created card is not chosen, only
         // named by the effect itself, the same "none" shape kano-token already uses for a no-target
@@ -1044,6 +1061,90 @@ public static class AbilityCatalog
         // since no generic Target category composes correctly with an effect still pending within the
         // same ability.
         ["visage-of-the-orochi"] = new("Battle", "Choose your performing opposed unbowed Thunder Personality: Raise his Force to 6. You may target and bow an enemy card with lower Force and no attachments", "none", Performer: "own-unbowed-personality-with-keyword-opposed", RequiredKeywords: ["Thunder"]),
+        // Strategy wave 15 / spell-wave-4 / ring-wave-2 (issue #295): Batch D of the "Not blocked;
+        // deferred for scope" audit. oracle-l5r-1121 Bow Before My Will (its own BLOCKERS entry)
+        // turned out already fully wired and published in strategy-wave-6 under bow-before-my-will --
+        // the same stale-entry pattern Batches B and C each hit once (Surety of Purpose, Wrathful
+        // Ancestor) -- so it is not re-packaged here.
+        // Charge Into Danger (oracle-l5r-10366): its own scan corrects deck-pool.json's paraphrase --
+        // a plain Performer ("Choose your performing Personality"), not a separately-chosen Target;
+        // "assigned to... the current battlefield" is exactly AtBattle (Assign() already sets
+        // Zone.Battlefield+ProvinceIndex the moment a unit is assigned there), and "would be opposed
+        // there" is the same enemy-army-presence check every sibling move ability already uses. No new
+        // Performer category needed: own-personality (any of the player's own in-play Personalities)
+        // already covers "at any location," since every in-play Personality zone (Home or Battlefield)
+        // is reachable from there.
+        ["charge-into-danger-move"] = new("Battle", "Choose your performing Personality: If he assigned to, or would be opposed at, the current battlefield, move him there. If his base Force is 7 or higher, straighten him", "none", Performer: "own-personality"),
+        // Consuming Weakness (oracle-l5r-1467): RemoveFromGame and Shadowlands clan-affiliation checks
+        // already exist; needs a new Shadowlands-conditional Performer category (own-personality-at-
+        // battle generalized off HasClanAffiliation, the same way own-unbowed-spider-personality-at-
+        // battle already generalizes it for The Strength of the Spider) and a genuinely new "dead
+        // Personality in any discard pile" Target (Zone.Dead, any owner) -- contrary to its own
+        // BLOCKERS note, no such Target category existed yet anywhere in this file.
+        ["consuming-weakness"] = new("Battle", "Choose your performing Shadowlands Personality and remove a target dead Personality in any discard pile from the game: Give your Personality +3F, or +4F if he is Undead", "dead-personality-any-discard", Performer: "own-shadowlands-personality-at-battle"),
+        // Fires of Turmoil (oracle-l5r-10552): its own scan drops deck-pool.json's "in a unit"
+        // qualifier from the Target text, but every existing sibling "without attachments" category is
+        // already unit-scoped (Follower, or an unattached Personality) -- kept here too, as
+        // unattached-unit-card, the plain (non-enemy-restricted) counterpart to Ikoma Masumi's own
+        // enemy-card-without-attachments. "A Fate deck" resolves to the performing player's own,
+        // exactly like Aberrations (DiscardTopOfFateDeck) -- no separate qualifier is ever printed
+        // for an unqualified "a" effect like this in the existing ruleset. Cost is 0 despite the blank
+        // cost medallion on both of its own Coils of Madness printings -- confirmed against
+        // oracle-l5r-10555 Strength of the Divine, an already-published 0-cost Coils of Madness
+        // Strategy whose own scan renders the exact same way.
+        ["fires-of-turmoil"] = new("Battle", "Discard the top card of your Fate deck. Target a card without attachments. If the discarded card's Focus Value is odd, bow the target (0 is even). Otherwise, straighten it. Move its unit home if the target has a Madness token", "unattached-unit-card"),
+        // Gripped by Terror (oracle-l5r-2908): an army-scoped Nonhuman-conditional Force boost, applied
+        // once at resolution (a snapshot ApplyModifier loop over Army(), not a live recomputed passive
+        // the way Utaku Elite Guard's own printed keyword ability works -- this is a one-shot Strategy
+        // effect, not a standing in-play trait, so it reuses only the concept, not the mechanism).
+        // Needs a new own-personality-at-battle Performer (no unbowed qualifier printed, no keyword
+        // gate either -- the plain "at battle" variant of own-personality that did not exist yet).
+        ["gripped-by-terror"] = new("Battle", "Choose your performing Personality and target an enemy Personality or Follower: Give it -4F. If your Personality is Nonhuman, give each of your Personalities at the current battlefield +1F", "enemy-force", Performer: "own-personality-at-battle"),
+        // Outnumbered (oracle-l5r-10746): no Performer or Target at all -- a pure battlefield-scoped
+        // "give all qualifying cards X" effect, mirroring Utaku Elite Guard's own army-scoped shape
+        // conceptually (scan your own army for a condition, apply a Force delta) but resolved once, as
+        // a plain foreach over Army(), the same one-shot-vs-standing-passive distinction Gripped by
+        // Terror's own doc comment above draws. Cost is 0 (see Fires of Turmoil's own doc comment for
+        // why its blank Gates of Chaos cost medallion still means 0 -- confirmed against oracle-l5r-
+        // 10742 Looting the Ruins and oracle-l5r-10748 Strength of the Bear, two already-published
+        // 0-cost Gates of Chaos Strategies with the identical blank medallion).
+        ["outnumbered"] = new("Battle", "Give all your opposed Personalities with Followers at the current battlefield +1F. Give all enemy Personalities there without Followers -1F", "none"),
+        // Preserving Honor (oracle-l5r-6060): the opponent-chooses-effect shape shinden-choice already
+        // uses (a dedicated PendingChoice type, resolved by its own handler) -- but a genuinely new one,
+        // since the two offered outcomes (bow vs. move-away) differ from shinden's own (bow vs. Honor),
+        // and the "if negated, remove from game" fallback needs its own detection hook. StalwartNegatesBow
+        // already RETURNS whether a bow was negated (every existing call site just discards that bool);
+        // the move branch reuses MoveHome's own internal NegatesEffect("move") check directly (inlined,
+        // so the negation result can be branched on) rather than calling MoveHome itself. This ability's
+        // own id is deliberately NOT added to FindBeforeActionReactionWatcher's curated lists (Rokai/
+        // Tamoko/Champion of Thunder/Brothers of Goemon): unlike every existing negatable ability, the
+        // specific effect kind (bow or move) here is not known until the TARGET's controller answers the
+        // PendingChoice, well after that window would need to have already opened. Stalwart remains the
+        // one automatic, always-live source of "the bowing... is negated" the fallback can act on today.
+        ["preserving-honor"] = new("Battle", "Target an enemy Personality at the current battlefield: His controller chooses either to bow him, or to choose another location and move him there. If the bowing or movement is negated, remove the Personality from the game", "enemy-personality"),
+        // Your Clan Needs You! (oracle-l5r-9687): the most complex card in this batch. "Bring a
+        // Personality straight from a province into a battlefield, paying all costs" already exists
+        // three times over (Purchase, RecruitReserve, CreatePersonality), all funneling into the same
+        // shared entry-sequence primitives (QuotePurchase, Pay, QueueOverconfidentDraw,
+        // EntryReactionAbility, OpenEntryReactionWindow, OpenOverconfidentDrawWindow) -- this is a
+        // fourth caller into that same shared sequence, reusing every one of those primitives directly,
+        // for ANY own Personality (no Reserve-keyword gate) mid-Battle. Its own Performer cannot use the
+        // ordinary ability.Performer mechanism at all: every existing Performer category requires
+        // InPlay(performer), but a province card is never InPlay -- modeled as this ability's own
+        // Target instead (own-personality-in-province, a new out-of-play Target branch alongside
+        // own-kiho-strategy-in-discard/own-ring-in-discard), sidestepping that assumption entirely. The
+        // Gold cost is NOT the Strategy's own printed GoldCost (0) -- it is the recruited Personality's
+        // own cost minus 6 (see the dedicated cost-ternary override in the generic cost-computation
+        // block below); command.SourceIds is reused for that payment exactly the way Low Market/Equip
+        // (Battle) already reuse it for a non-source-card payment. The post-battle "discard his
+        // attachments and return him to a province face-up" half is genuinely new -- no existing
+        // primitive ever places a specific card into a chosen province, so
+        // MatchEngine.CheckYourClanNeedsYouReturn/ResolveYourClanNeedsYouProvince adds one, mirroring
+        // CheckEarthFlowsBonus's own post-resolution-hook shape for WHEN it fires (right as
+        // FinishBattleReturnHomeAndTransition begins, once every card's post-battle Zone is settled)
+        // but needing its own PendingChoice (which province) since, unlike Earth Flows' unconditional
+        // Honor gain, "one of your provinces" is a genuine player choice.
+        ["your-clan-needs-you"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Personality in one of your provinces: Bring him into play at the current battlefield, paying all costs but paying 6 less Gold. After the battle ends, if he is in play, discard all his attachments and put him into one of your provinces, face-up, discarding any card there", "own-personality-in-province"),
     });
 }
 
@@ -1238,7 +1339,11 @@ public sealed partial class MatchEngine
         // when not already destroyed by its own alternate branch) -- still counts as "bows the
         // target" at this ability-id level, the same "a specific instance might not end up bowing"
         // allowance costly-feud's own doc comment above already establishes.
-        or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider";
+        or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider"
+        // Fires of Turmoil (issue #295): the same conditional-bow-or-straighten shape as Strategic
+        // Sacrifice/Weakness of Man above (here, gated by the discarded Fate card's own Focus parity
+        // rather than the target's current bow state) -- still counts as "bows the target."
+        or "fires-of-turmoil";
     // Finds the one eligible in-play watcher for a just-submitted command, if any -- every branch is
     // an "in play" Reaction (the user's own clarification), monitored live, never pre-registered.
     // Rokai (a classified destroy) is scoped to "another player's action," "your Personality," and
@@ -1832,7 +1937,15 @@ public sealed partial class MatchEngine
             // battlefield if he would be opposed there" is the exact same "the resolution moves the
             // performer there" shape -- previously masked entirely, since a BattleOrOpen ability got
             // no presence check of any kind before this issue.
-            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move" or "houken-exp-straighten";
+            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move" or "houken-exp-straighten"
+                // Sanctuary of the Waves (issue #295): its default target IS the wielder himself, whose
+                // whole point is moving INTO the battle -- the acting player is never assumed to already
+                // have presence there, same reasoning as Intervening Spirit's own membership above.
+                or "sanctuary-of-the-waves-move"
+                // Your Clan Needs You! (issue #295): brings a fresh Personality straight from a
+                // province into the current battlefield -- the acting player may have zero presence
+                // there beforehand (that is the entire point of reinforcing).
+                or "your-clan-needs-you";
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
@@ -1853,6 +1966,12 @@ public sealed partial class MatchEngine
             if (id == "trusting-instinct-move")
                 Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
                     "Trusting Instinct only moves your Personality to a battlefield where he would be opposed.");
+            // Your Clan Needs You! (issue #295): "If any enemy units are at the current battlefield" --
+            // its own printed entry condition, checked here alongside every other id-specific presence
+            // Require in this same actingAsBattle block.
+            if (id == "your-clan-needs-you")
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                    "Your Clan Needs You! requires enemy units at the current battlefield.");
         }
         // Banzai! (oracle-l5r-10929, issue #289): a Discipline card whose own printed action is
         // "Battle:" only (not "Battle/Open" like Lost in Transit) -- the shared Discipline Phase check
@@ -1878,7 +1997,7 @@ public sealed partial class MatchEngine
         // played/destroyed this battle, an opposing unit ever present in a won battle) is not itself
         // re-checked here. This also naturally makes the grant, not a separate flag, the single
         // source of truth for "was this satisfied."
-        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit")
+        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "false-ring-of-earth-recruit")
             Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
                 "This Ring's recruitment condition has not been granted yet.");
         // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
@@ -2053,6 +2172,17 @@ public sealed partial class MatchEngine
                 // Timing (Battle, here) already gates the SOURCE card's own presence; the performer's
                 // only extra restriction beyond own-personality is "unbowed".
                 "own-unbowed-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed,
+                // Gripped by Terror (oracle-l5r-2908, issue #295): "Choose your performing Personality"
+                // -- no unbowed qualifier, no keyword gate. own-personality's own at-battle variant,
+                // which did not exist yet (every prior "at battle, no other restriction" Performer also
+                // carried either "unbowed" or a keyword gate).
+                "own-personality-at-battle" => Definition(performer).Type == CardType.Personality && (!actingAsBattle || AtBattle(performer)),
+                // Consuming Weakness (oracle-l5r-1467, issue #295): own-unbowed-spider-personality-at-
+                // battle's own shape, generalized off HasClanAffiliation the same way that category
+                // itself generalizes AtBattle -- Shadowlands instead of Spider, and no "unbowed"
+                // qualifier printed here.
+                "own-shadowlands-personality-at-battle" => Definition(performer).Type == CardType.Personality &&
+                    HasClanAffiliation(performer, "Shadowlands") && (!actingAsBattle || AtBattle(performer)),
                 // Strength of Purity (oracle-l5r-7546, issue #287): "your performing Personality with
                 // 3 or higher Personal Honor" -- a numeric Personal Honor threshold on the Performer
                 // itself, hardcoded to this one card's own printed 3 (lobby's own hardcoded >=1
@@ -2324,6 +2454,19 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "ring-in-play-or-own-discard")
                     Require(Definition(target).Type == CardType.Ring && (InPlay(target) || target.OwnerId == player.Id && target.Zone == Zone.FateDiscard),
                         "Choose a Ring in play or in your own Fate discard pile.");
+                // Consuming Weakness (issue #295): "a target dead Personality in any discard pile" --
+                // Zone.Dead (this engine's own "discard pile" for a Personality specifically -- Zone.
+                // FateDiscard/DynastyDiscard are for Fate/Dynasty cards of every OTHER type), any owner,
+                // not in play, so this needs its own branch too.
+                else if (ability.Target == "dead-personality-any-discard")
+                    Require(type == CardType.Personality && target.Zone == Zone.Dead, "Choose a dead Personality in any discard pile.");
+                // Your Clan Needs You! (issue #295): "your performing Personality in one of your
+                // provinces" -- a province card is never InPlay, so this needs its own branch too, the
+                // same shape own-kharmic-card/own-kiho-strategy-in-discard already use for a target
+                // outside the ordinary in-play zones.
+                else if (ability.Target == "own-personality-in-province")
+                    Require(target.OwnerId == player.Id && type == CardType.Personality && target.Zone == Zone.Province && target.FaceUp,
+                        "Choose your own face-up Personality in a province.");
                 else
                 {
                     Require(InPlay(target), "Target a card in play.");
@@ -2340,7 +2483,7 @@ public sealed partial class MatchEngine
                     // a BattleOrOpen ability's Open half has no battlefield to validate a target
                     // against at all, so this Require applies only while genuinely acting as Battle.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm")
-                        && id is not ("intervening-spirit-move" or "earth-flows-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
@@ -2372,6 +2515,14 @@ public sealed partial class MatchEngine
                         // keyword with no mechanical rule of its own (e.g. Berserker), or in addition
                         // to one a keyword already has (e.g. Tactician): see AbilityDefinition.RequiredKeywords.
                         "own-personality-with-keyword" => personality && own && HasKeywords(target, ability.RequiredKeywords),
+                        // Sanctuary of the Waves (issue #295): "target this Shugenja, or, if this
+                        // Shugenja is Water, you may target another of your Personalities" -- the
+                        // Target-side mirror of own-wielder-or-source-with-wielder-keyword's own
+                        // Performer-side cost choice: the default candidate is always the wielder
+                        // himself; a DIFFERENT own Personality only qualifies once the wielder's own
+                        // keyword condition holds.
+                        "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
+                            (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
                         "enemy-personality" => personality && !own,
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
@@ -2422,6 +2573,11 @@ public sealed partial class MatchEngine
                         // the Ranged/Melee "attack" Target already uses, as a bare enemy-card check
                         // (no Attack strength/kind involved here, just "without attachments").
                         "enemy-card-without-attachments" => !own && (type == CardType.Follower || personality && !HasAttachments(target)),
+                        // Fires of Turmoil (issue #295): the same Follower-or-unattached-Personality
+                        // shape as enemy-card-without-attachments above, minus its enemy restriction --
+                        // this card's own "Target a card without attachments" is printed with no
+                        // ownership qualifier at all.
+                        "unattached-unit-card" => type == CardType.Follower || personality && !HasAttachments(target),
                         // Ikoma Tsukasa (issue #198): the same shape as above, but the "without
                         // attachments" restriction is waived entirely while the performer's controller
                         // controls any Terrain.
@@ -2516,7 +2672,11 @@ public sealed partial class MatchEngine
         }
         // Equip (Battle) has no source card of its own -- its cost is the targeted Spell's, paid on
         // attachment, not a Strategy's own GoldCost.
-        var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
+        // Your Clan Needs You! (issue #295): although its own source IS a Strategy (printed GoldCost
+        // 0), the Gold actually spent is the RECRUITED Personality's own cost, minus 6 (minimum 0) --
+        // never the Strategy's own GoldCost. Checked first so it overrides the Strategy branch below.
+        var cost = id == "your-clan-needs-you" && command.TargetId is not null ? Math.Max(0, Definition(Card(command.TargetId)).GoldCost - 6)
+            : source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
             : ability.Target == "spell-or-reserve-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
             // Low Market: "paying 2 less Gold, to a minimum of 1" -- its own printed discount on the
             // targeted attachment's own GoldCost, the same per-candidate-cost shape as Equip (Battle).
@@ -2917,6 +3077,84 @@ public sealed partial class MatchEngine
                     Card(orochiIds[0]).Bowed = true;
                 break;
             }
+            // Batch D of the "Not blocked; deferred for scope" audit (issue #295): strategy-wave-15,
+            // spell-wave-4, ring-wave-2.
+            case "charge-into-danger-move":
+            {
+                var performer = Card(command.PerformerId!);
+                if (AtBattle(performer) || Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())
+                    MoveToBattlefield(performer, _state.CurrentBattleProvince!.Value);
+                if (Definition(performer).Force >= 7) Straighten(performer);
+                break;
+            }
+            case "consuming-weakness":
+            {
+                var performer = Card(command.PerformerId!);
+                RemoveFromGame(target!);
+                ApplyModifier(performer, source!.Id, id, "Force", Keyword(performer, "Undead") ? 4 : 3);
+                break;
+            }
+            case "fires-of-turmoil":
+            {
+                var discardedFocus = DiscardTopOfFateDeck(player);
+                if (discardedFocus is int f && f % 2 != 0) { if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; }
+                else Straighten(target!);
+                if (HasToken(target!, "Madness")) MoveHome(Card(UnitHostId(target!)), false);
+                break;
+            }
+            case "gripped-by-terror":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(target!, source!.Id, id, "Force", -4);
+                if (Keyword(performer, "Nonhuman"))
+                    foreach (var c in Army(player.Id, _state.CurrentBattleProvince!.Value))
+                        ApplyModifier(c, source.Id, id, "Force", 1);
+                break;
+            }
+            case "outnumbered":
+            {
+                if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())
+                    foreach (var c in Army(player.Id, _state.CurrentBattleProvince!.Value).Where(c => Attachments(c.Id).Any(a => Definition(a).Type == CardType.Follower)))
+                        ApplyModifier(c, source!.Id, id, "Force", 1);
+                foreach (var c in Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Where(c => !Attachments(c.Id).Any(a => Definition(a).Type == CardType.Follower)))
+                    ApplyModifier(c, source!.Id, id, "Force", -1);
+                break;
+            }
+            case "preserving-honor":
+                _state.PendingChoice = new("preservingHonor", target!.OwnerId, target.Id,
+                    $"{Definition(target).Name} ({target.Id}): bow him, or choose another location and move him there.", player.Id);
+                _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
+                Emit("reactionWindow", "Preserving Honor: choose bow or move.", target.OwnerId, target.Id);
+                return; // The action does not finish until the targeted Personality's controller answers.
+            case "your-clan-needs-you":
+            {
+                var card = target!;
+                var quote = QuotePurchase(player.Id, card.Id);
+                Require(quote.Error is null && Definition(card).Type == CardType.Personality, quote.Error ?? "");
+                var recruitCost = Math.Max(0, quote.Cost - 6);
+                Pay(player.Id, card, recruitCost, command.SourceIds);
+                var province = player.Provinces.Single(p => p.CardId == card.Id);
+                province.CardId = null;
+                card.Zone = Zone.Battlefield; card.ProvinceIndex = _state.CurrentBattleProvince!.Value; card.FaceUp = true;
+                card.Bowed = Definition(card).Effect == "enters-bowed";
+                if (Definition(card).Effect == "enters-dishonored") Dishonor(card);
+                Emit("cardEnteredPlay", $"{player.Name} brought {Definition(card).Name} into play via Your Clan Needs You!{(card.Bowed ? " bowed" : "")}.", player.Id, card.Id);
+                QueueOverconfidentDraw(card);
+                Refill(player, province);
+                _state.YourClanNeedsYouWatchIds.Add(card.Id);
+                var reactionId = EntryReactionAbility(card);
+                if (quote.ProclaimEligible)
+                {
+                    if (reactionId is not null) card.AbilityUses.Remove(reactionId);
+                    _state.PendingChoice = new("proclaim", player.Id, card.Id, "After entry: Proclaim for Honor" + (reactionId is not null ? ", use this card's own reaction," : "") + " or pass. Each may be used once.");
+                    _state.ConsecutivePasses = 0;
+                    Emit("reactionWindow", "Proclaim reaction window opened.", player.Id, card.Id);
+                    return;
+                }
+                if (OpenEntryReactionWindow(player.Id, card, 1 - player.Id)) return;
+                if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
+                break;
+            }
             case "keppo-destroy":
                 if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
                 break;
@@ -3163,6 +3401,22 @@ public sealed partial class MatchEngine
                 Card(command.PerformerId!).Bowed = true;
                 DestroyUnits([target!], actingPlayerId: player.Id);
                 break;
+            case "sanctuary-of-the-waves-move":
+            {
+                source!.Bowed = true;
+                if (Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any())
+                {
+                    var wasAtBattle = AtBattle(target!);
+                    MoveToBattlefield(target!, _state.CurrentBattleProvince!.Value);
+                    // Plain Straighten, not StraightenUnit: unlike Intervening Spirit/The Earth Flows
+                    // (neither of which bows itself as a cost), this card's own default target IS its
+                    // own wielder -- StraightenUnit would straighten this very Spell's own attachments,
+                    // undoing the bow this case just paid as a cost, since the Spell is still attached
+                    // to the wielder it may be straightening.
+                    if (!wasAtBattle) Straighten(target!);
+                }
+                break;
+            }
             case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
             case "kitsu-akai-battle":
                 // No StalwartNegatesBow check -- unlike lady-matsus-rage-bow-destroy's own bow
@@ -3341,7 +3595,7 @@ public sealed partial class MatchEngine
             case "ring-of-air-recruit": case "ring-of-water-recruit": case "ring-of-earth-recruit": case "ring-of-fire-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
                 break;
-            case "false-ring-of-air-recruit": case "false-ring-of-water-recruit":
+            case "false-ring-of-air-recruit": case "false-ring-of-water-recruit": case "false-ring-of-earth-recruit":
                 player.Hand.Remove(source!.Id); source.Zone = Zone.Home; source.FaceUp = true;
                 GainHonor(player.Id, -2, Definition(source).Name);
                 break;
@@ -3810,6 +4064,38 @@ public sealed partial class MatchEngine
         NextAction(pending.ActingPlayerId!.Value);
     }
 
+    // Preserving Honor (oracle-l5r-6060, issue #295): the targeted Personality's own controller
+    // chooses bow-or-move, the same shinden-choice shape (a dedicated PendingChoice type). "If the
+    // bowing or movement is negated, remove the Personality from the game": StalwartNegatesBow already
+    // RETURNS whether the bow was negated (every other call site just discards that bool) -- reused
+    // directly here as the detection hook. The move branch inlines MoveHome's own body (ReturnHome plus
+    // its NegatesEffect("move") check) rather than calling MoveHome itself, so the negation result can
+    // be branched on the same way.
+    private void ResolvePreservingHonor(GameCommand command)
+    {
+        var pending = _state.PendingChoice!;
+        Require(command.Type == "choosePreservingHonor" && command.PlayerId == pending.PlayerId && command.Choice is "bow" or "move",
+            "The targeted Personality's controller must choose to bow him or move him.");
+        var card = Card(pending.CardId!);
+        if (command.Choice == "bow")
+        {
+            if (StalwartNegatesBow(card, pending.ActingPlayerId!.Value)) RemoveFromGame(card);
+            else card.Bowed = true;
+        }
+        else if (NegatesEffect(card, "move"))
+        {
+            Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
+            RemoveFromGame(card);
+        }
+        else
+        {
+            ReturnHome(card, false);
+            Emit("unitMovedHome", $"{Definition(card).Name}'s unit moved home.", card.OwnerId, card.Id);
+        }
+        _state.PendingChoice = null;
+        NextAction(pending.ActingPlayerId!.Value);
+    }
+
     private void CycleProvinces(PlayerState player, string[] ids)
     {
         // The submitted order is the bottom-of-deck order; replacements are revealed together.
@@ -4091,6 +4377,8 @@ public sealed partial class MatchEngine
                 "own-wielder-or-source-with-wielder-keyword" => HasKeywords(Card(source!.AttachedTo!), ability.RequiredKeywords)
                     ? new[] { Card(source.AttachedTo!).Id, source.Id } : new[] { Card(source.AttachedTo!).Id },
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
+                "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
+                "own-shadowlands-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
@@ -4117,6 +4405,8 @@ public sealed partial class MatchEngine
                     "attachment-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type is CardType.Item or CardType.Follower or CardType.Spell).Cast<string?>().ToArray(),
                     "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 var legal = new List<GameCommand>(); string? error = null;
                 foreach (var target in candidates)
@@ -4128,6 +4418,10 @@ public sealed partial class MatchEngine
                         ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
                         : ability.Target == "attachment-in-hand" && target is not null
                         ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(1, Definition(Card(target)).GoldCost - 2)).FirstOrDefault()?.SourceIds }
+                        // Your Clan Needs You! (issue #295): same per-candidate-cost shape as Equip
+                        // (Battle)/Low Market above -- the chosen province Personality's own discounted cost.
+                        : id == "your-clan-needs-you" && target is not null
+                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(0, Definition(Card(target)).GoldCost - 6)).FirstOrDefault()?.SourceIds }
                         : prototype with { TargetId = target };
                     try { ValidateAbility(command); legal.Add(command); }
                     catch (RuleViolation e) { error ??= e.Message; }
