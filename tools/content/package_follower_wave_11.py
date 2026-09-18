@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Follower wave 10 (issue TBD, the four-primitive batch): Cultist Infiltrator -- an
+"""Build Follower wave 11 (issue #282, the four-primitive batch): Cultist Infiltrator -- an
 enemy-attachable Follower (a per-ability-id exception on Equip's own ownership Require) that gives
 its host a persistent -1C token after each Straighten Phase (through CreateToken's existing shared
 Chi<=0 death check) and is excluded from Overlay's own attachment-transfer loop.
@@ -24,7 +24,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "follower-wave-10"
+PROFILE = "follower-wave-11"
 
 ABILITIES: dict[int, list[str]] = {}
 EFFECTS: dict[int, str] = {
@@ -63,5 +63,5 @@ if __name__ == "__main__":
     import sys
     ids = sys.argv[1:]
     if not ids:
-        raise SystemExit("Usage: package_follower_wave_10.py oracle-l5r-<id> [...]")
+        raise SystemExit("Usage: package_follower_wave_11.py oracle-l5r-<id> [...]")
     print(json.dumps(package(ids)))
