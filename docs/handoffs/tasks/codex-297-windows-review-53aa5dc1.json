@@ -1,0 +1,9 @@
+{
+  "lane": "ui",
+  "summary": "Build reusable private Windows preview delivery and Mendon review notifications, starting with PR292.",
+  "validation": "Initial scope and existing export/fixture entry points inspected; implementation and Windows checks pending.",
+  "remaining": "Implement packaging, launchers, Claude handoff, Windows validation and targeted notification after verified upload.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
+  "branch": "codex/297-windows-review",
+  "updated": "2026-09-18T16:00:06.422724+00:00"
+}
