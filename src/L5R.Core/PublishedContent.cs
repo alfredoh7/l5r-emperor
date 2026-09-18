@@ -1170,25 +1170,28 @@ public static class PublishedContent
         return snapshot;
     }
 
-    /// <summary>Follower wave 11 (issue #279): four small, mostly-independent primitives, then four
+    /// <summary>Follower wave 12 (issue #279): four small, mostly-independent primitives, then four
     /// Followers wired onto them -- Apprentice Shinobi (a universal "after any Ninja action resolves"
     /// trait), Legion of the Bat (a new "after an action moves a card to this battlefield" Reaction,
     /// plus its own Crane Clan Equip discount), Nikutai (a new "after a sibling Follower in this unit
     /// bows" Reaction), and Wave Man (a new "after an Attack Phase ends" automatic trait). See
-    /// docs/decisions for the full primitive writeup.</summary>
-    public static PublishedSnapshot FollowerWave11 { get; } = LoadFollowerWave11();
+    /// docs/decisions for the full primitive writeup. Named wave 12, not 11, because a sibling
+    /// concurrent task (issue #278/PR #281) independently claimed "follower-wave-11" for a different
+    /// card set (Champion of Thunder / Brothers of Goemon); this is a genuine content-name collision,
+    /// caught only because both PRs were open simultaneously and neither had merged yet.</summary>
+    public static PublishedSnapshot FollowerWave12 { get; } = LoadFollowerWave12();
 
-    private static PublishedSnapshot LoadFollowerWave11()
+    private static PublishedSnapshot LoadFollowerWave12()
     {
-        var snapshot = Load("L5R.Published.FollowerWave11.json", "follower-wave-11", requireDecks: false);
+        var snapshot = Load("L5R.Published.FollowerWave12.json", "follower-wave-12", requireDecks: false);
         if(snapshot.Cards.Length != 4)
-            throw new InvalidOperationException("Unexpected follower-wave-11 card count.");
+            throw new InvalidOperationException("Unexpected follower-wave-12 card count.");
         foreach(var card in snapshot.Cards)
             if(card.Type != CardType.Follower || card.Text.Length == 0)
-                throw new InvalidOperationException($"follower-wave-11 card is not a textful Follower: {card.Id}");
+                throw new InvalidOperationException($"follower-wave-12 card is not a textful Follower: {card.Id}");
         var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Select(c=>c.Id);
         if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
-            throw new InvalidOperationException("follower-wave-11 duplicates a card already published elsewhere.");
+            throw new InvalidOperationException("follower-wave-12 duplicates a card already published elsewhere.");
         return snapshot;
     }
 

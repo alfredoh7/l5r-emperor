@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Follower wave 11 (issue #279): four small, mostly-independent primitives, then wire four
+"""Build Follower wave 12 (issue #279): four small, mostly-independent primitives, then wire four
 Followers onto them -- Apprentice Shinobi, Legion of the Bat, Nikutai, Wave Man.
 
 All four were catalogued as Personality in this issue's own task description, but every one of
@@ -20,7 +20,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "follower-wave-11"
+PROFILE = "follower-wave-12"
 
 # Apprentice Shinobi (419): "After the resolution of a Ninja action: Give this card +1F." -- no
 # "Reaction:" prefix, so this is a mandatory, unconditional, always-on trait (Effect marker only,
@@ -83,5 +83,5 @@ if __name__ == "__main__":
     import sys
     ids = sys.argv[1:]
     if not ids:
-        raise SystemExit("Usage: package_follower_wave_11.py oracle-l5r-<id> [...]")
+        raise SystemExit("Usage: package_follower_wave_12.py oracle-l5r-<id> [...]")
     print(json.dumps(package(ids)))

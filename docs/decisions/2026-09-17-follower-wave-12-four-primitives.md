@@ -1,4 +1,4 @@
-# Follower wave 11: four small primitives (Ninja-action trait, move-to-battlefield Reaction,
+# Follower wave 12: four small primitives (Ninja-action trait, move-to-battlefield Reaction,
 sibling-bow Reaction, Attack-Phase-end trait), and four Followers wired onto them
 
 **Decision:** Apprentice Shinobi, Legion of the Bat, Nikutai, and Wave Man are all published
@@ -10,7 +10,11 @@ own `types` field already agreed). Each needed one small, mostly independent pri
 **Naming, this session's own wrinkle:** this work started against `follower-wave-10`, but
 `origin/main` advanced mid-session with a genuinely concurrent `follower-wave-10` (issue #271, Front
 Rank Troops/Fudo's Fiends -- an unrelated task, same numeric slot) that merged first. Rebased onto
-that as `follower-wave-11` rather than fighting over the number; `LoadFollowerWave11`'s own
+that as `follower-wave-11` -- then renamed again to `follower-wave-12` once a second, genuinely
+concurrent collision surfaced: PR #281 (issue #278, Champion of Thunder/Brothers of Goemon/A Close
+Call) independently claimed `follower-wave-11` for an entirely different card set, and since neither
+PR had merged into `main` yet, GitHub's own mergeability check against each PR's own base branch
+never caught it -- only became visible once both PRs were open at once. `LoadFollowerWave12`'s own
 duplicate-check chain includes `FollowerWave10.Cards`.
 
 **Scan verification, this session's own wrinkle:** `assets/reference/oracle/*/images/` is
