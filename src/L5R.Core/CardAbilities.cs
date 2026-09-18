@@ -800,6 +800,31 @@ public static class AbilityCatalog
         // bows a sibling Follower could, in principle, have bowed Nikutai itself first.
         ["nikutai-straighten"] = new("Reaction", "Even if this card is bowed, after a Follower in this unit bows: Straighten it.", "none", Trigger: "sibling-follower-bowed"),
         ["nikutai-attack"] = new("Battle", "Melee 5 Attack", "attack"),
+        // Yasuki Tsujiken (oracle-l5r-9469): "After Tsujiken enters play, target a Holding: Until
+        // Tsujiken leaves play, after each time its controller bows it, he loses 1 Honor" -- a
+        // persistent, per-instance watched-relationship trigger (MatchState.TsujikenWatches), unlike
+        // every existing Reaction trigger here, which either fires once (this one too, at entry) or
+        // watches a fixed relationship (the source's own unit/location) rather than a target selected
+        // once and tracked indefinitely afterward. No restriction on selecting the same Holding twice
+        // (a second copy of Tsujiken, or -- nothing printed forbids it -- the same Tsujiken were he to
+        // somehow re-enter play) stacks a second, independent mark.
+        ["tsujiken-watch-holding"] = new("Reaction", "After Tsujiken enters play, target a Holding: Until Tsujiken leaves play, after each time its controller bows it, he loses 1 Honor", "any-holding", Trigger: "own-enters-play"),
+        // "Bow Tsujiken and target a Holding: Straighten it. You may bow it if its base Gold Cost is
+        // 4 or lower" -- "it" in the second sentence is Tsujiken himself (bowing him is the ability's
+        // own cost, normally mandatory; a cheap-Holding target makes that cost optional instead), NOT
+        // the Holding, which this ability always straightens, never bows -- see the execution case.
+        ["tsujiken-straighten-holding"] = new("Open", "Bow Tsujiken and target a Holding: Straighten it. You may bow it if its base Gold Cost is 4 or lower", "any-holding"),
+        // Unimpeachable Name (oracle-l5r-8989): "Reaction: Before the resolution of another player's
+        // action: Reduce each Honor loss from its effects by 3 (minimum 0). You may target and
+        // rehonor a dishonorable Personality." An out-of-play Reaction broader than the existing
+        // "before an action resolves" primitive (Mirumoto Rokai/Tamori Tamoko, above) -- that one only
+        // watches a curated destroy/move/straighten Target on ITS OWN in-play card; this one is
+        // offered against ANY action, played from outside play. See
+        // CardAbilities.ResolveOrDeferUnimpeachableName/AbilityMayCauseHonorLoss for the (also
+        // curated, documented-scope, extendable) classifier deciding when the window is worth opening
+        // at all.
+        ["unimpeachable-name-reaction"] = new("Reaction", "Before the resolution of another player's action: Reduce each Honor loss from its effects by 3 (minimum 0). You may target and rehonor a dishonorable Personality", "optional-dishonorable-personality", Trigger: "before-any-action-resolves"),
+        ["unimpeachable-name-bow"] = new("Battle", "Bow your performing Shugenja and target an enemy card: Bow it. Gain 2 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Shugenja"]),
     });
 }
 
@@ -1047,6 +1072,40 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses = 0;
         _state.PriorityPlayerId = watcher.OwnerId;
         Emit("reactionWindow", "Before-action reaction window opened.", watcher.OwnerId, watcher.Id);
+        return true;
+    }
+    // Unimpeachable Name (oracle-l5r-8989): "Before the resolution of another player's action:
+    // Reduce each Honor loss from its effects by 3 (minimum 0). You may target and rehonor a
+    // dishonorable Personality." An out-of-play Reaction (hand or a discard pile) broader than
+    // FindBeforeActionReactionWatcher above -- that one only watches a curated destroy/move/
+    // straighten Target on an IN-PLAY card; this one is offered against ANY action. Whether an
+    // action "causes an Honor loss" cannot be known before actually resolving it without re-running
+    // every effect twice, so -- the same curated, extendable-by-id discipline DestroysTarget/
+    // MoveOrStraightenKind above already use, not a fully general prediction -- this lists every
+    // ability id whose own execution case contains a literal negative GainHonor call. A controlled
+    // Dishonorable Personality is always enough to open the window on its own, independent of this
+    // list, since Rehonor does not depend on the specific triggering action at all.
+    private static bool AbilityMayCauseHonorLoss(string? abilityId) => abilityId is "blind-rage" or "bow-before-my-will" or "yogo-adi-choice"
+        or "training-honor-strike" or "training-honor-loss-entry" or "training-honor-cost-attack" or "training-reconnaissance-strike"
+        or "tsudoken-exp2-entry" or "nojima-entry" or "ayumi-entry" or "soshi-conditional-bow" or "unseen-assassin-strike" or "fujimura-expose";
+    private bool ControlsDishonorablePersonality(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && c.Dishonorable);
+    // Gate for whether the window is even worth opening -- "if [neither a Dishonorable Personality
+    // nor an Honor loss] occurs, do not trigger the reaction interrupt" (the user's own ruling).
+    private bool UnimpeachableNameAvailable(int reactingPlayerId, string? abilityId) =>
+        AnyOutOfPlayReactionAvailable(reactingPlayerId, "before-any-action-resolves") &&
+        (ControlsDishonorablePersonality(reactingPlayerId) || AbilityMayCauseHonorLoss(abilityId));
+    // Defers the WHOLE command, the same shape ResolveOrDeferBeforeActionReaction/
+    // ResolveOrDeferAdditionalAction already use: nothing about the triggering action executes until
+    // the reacting player (the opponent of whoever submitted it) answers.
+    private bool ResolveOrDeferUnimpeachableName(GameCommand command, string? abilityId)
+    {
+        var reactingPlayerId = 1 - command.PlayerId;
+        if (!UnimpeachableNameAvailable(reactingPlayerId, abilityId)) return false;
+        _state.PendingOutOfPlayActionReaction = command;
+        _state.PendingChoice = new("unimpeachableNameReaction", reactingPlayerId, null, "Before this action resolves: you may play Unimpeachable Name, or pass.");
+        _state.ConsecutivePasses = 0;
+        _state.PriorityPlayerId = reactingPlayerId;
+        Emit("reactionWindow", "Out-of-play action reaction window opened.", reactingPlayerId);
         return true;
     }
     // The Personality actually performing a resolving ability, for Protection's own purposes: an
@@ -1427,6 +1486,10 @@ public sealed partial class MatchEngine
                 // own-battlefield already use.
                 "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Unimpeachable Name (oracle-l5r-8989): out-of-play, like any-personality-enters-play
+                // above -- no CardId match (it is not watching a specific OTHER card's own entry, it
+                // is reacting to an action), just the reacting player's own id.
+                "before-any-action-resolves" => _state.PendingChoice.Type == "unimpeachableNameReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
                 // Stormless Fury (issue #276 follow-up): both its out-of-play attach half and its
                 // in-play bow half share this one trigger, scoped to the one specific offered card by
                 // id -- same shape as own-won-duel/bowed-personality-at-own-battlefield above.
@@ -1471,7 +1534,7 @@ public sealed partial class MatchEngine
             // either zone here, narrowed to the exact one each half actually needs by its own bespoke
             // Require below (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
             // for the bow half).
-            Require(ability.Trigger == "any-personality-enters-play" ? source.Zone is Zone.Hand or Zone.FateDiscard
+            Require(ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
                 : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
                 : ability.Timing == "Discipline" ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
                 // A Ring (issue #194) may use its printed action from hand too -- "you may discard
@@ -1806,6 +1869,18 @@ public sealed partial class MatchEngine
                     Require(CardForce(target) <= strength, "That card's Force is above the Attack's strength.");
                 }
             }
+            // Unimpeachable Name (oracle-l5r-8989): "You MAY target and rehonor a dishonorable
+            // Personality" -- an optional target, the same "not required to exist" shape as "attack"
+            // above (a null TargetId always validates; a supplied one must be a real Dishonorable
+            // Personality, either side, no ownership restriction printed).
+            else if (ability.Target == "optional-dishonorable-personality")
+            {
+                if (command.TargetId is not null)
+                {
+                    var target = Card(command.TargetId);
+                    Require(Definition(target).Type == CardType.Personality && target.Dishonorable, "Target a dishonorable Personality, or none.");
+                }
+            }
             // "A discarded Personality" (core rules Glossary: Discarded vs. Dead) is explicitly not
             // in play -- it sits in a discard pile without yet being marked dead.
             else if (ability.Target == "discarded-personality")
@@ -1896,6 +1971,9 @@ public sealed partial class MatchEngine
                         // controls. Bowing it (in the execution switch) pays the cost; the effect
                         // itself is a counter increment, not applied to this target at all.
                         "own-unbowed-farm" => type == CardType.Holding && own && !target.Bowed && Keyword(target, "Farm"),
+                        // Yasuki Tsujiken (oracle-l5r-9469): "target a Holding" -- no ownership or
+                        // bowed-state restriction on either of his own two abilities.
+                        "any-holding" => type == CardType.Holding,
                         "own-personality" => personality && own,
                         // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
                         // Personality controlled by the active player" -- "if it is not your turn" is
@@ -2106,6 +2184,9 @@ public sealed partial class MatchEngine
         // selected, costs are paid, targets are selected, and effects applied."
         if (ResolveOrDeferAnnounceReaction(command)) return;
         if (ResolveOrDeferBeforeActionReaction(command)) return;
+        // Unimpeachable Name (oracle-l5r-8989): checked after Rokai/Tamoko above, same shape as the
+        // Additional-Action branch -- offered against this same command before it resolves.
+        if (ResolveOrDeferUnimpeachableName(command, command.AbilityId)) return;
         ExecuteAbilityEffects(command);
     }
     // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" Reaction
@@ -2675,7 +2756,7 @@ public sealed partial class MatchEngine
             case "tetsuo-destroy-weaker-weaponed": case "training-destroy-no-attachments": DestroyUnits([target!], true, player.Id); break;
             // Bowing the target Farm IS the cost; the effect is the counter increment, not applied to
             // the Farm itself. Consumed by PersonalityForce/FollowerForce (Keyword "Ashigaru" + AtBattle).
-            case "training-ashigaru-boost": case "ashigaru-elite-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; break;
+            case "training-ashigaru-boost": case "ashigaru-elite-boost": target!.Bowed = true; _state.AshigaruBoost[player.Id]++; CheckTsujikenWatch(target); break;
             case "shunsuke-make-dead": MakeDead(target!, true); break;
             case "training-make-dead": MakeDead(target!, true); break;
             case "training-attack-boost": _state.PendingAttack!.Strength += 2; break;
@@ -2834,6 +2915,31 @@ public sealed partial class MatchEngine
             case "asahina-straighten":
                 Straighten(target!);
                 GainHonor(player.Id, 1, "Asahina House Guard", source);
+                break;
+            case "tsujiken-watch-holding":
+                _state.TsujikenWatches.Add(new(source!.Id, target!.Id));
+                Emit("tsujikenWatch", $"{Definition(source).Name} is watching {Definition(target).Name}.", player.Id, target.Id);
+                break;
+            case "tsujiken-straighten-holding":
+                // "You may bow it [Tsujiken] if its [the target Holding's] base Gold Cost is 4 or
+                // lower" -- bowing Tsujiken is his own ability's usual cost, waived (made optional)
+                // for a cheap target; defaulting to the player's own better outcome (not bowing him)
+                // when the waiver applies, rather than modeling a separate yes/no sub-choice. The
+                // target itself is always straightened here, never bowed.
+                if (Definition(target!).GoldCost > 4) source!.Bowed = true;
+                Straighten(target!);
+                break;
+            case "unimpeachable-name-reaction":
+                if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
+                source.Zone = Zone.FateDiscard; source.FaceUp = true;
+                _state.HonorLossReductionPlayerId = player.Id;
+                if (target is not null) Rehonor(target);
+                Emit("unimpeachableNameReaction", $"{Definition(source).Name} reduces Honor loss from this action by 3 (minimum 0){(target is not null ? $"; {Definition(target).Name} was rehonored" : "")}.", player.Id, source.Id);
+                break;
+            case "unimpeachable-name-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                GainHonor(player.Id, 2, "Unimpeachable Name", source);
+                CheckTsujikenWatch(target!);
                 break;
             case "singh-remnants-attach": case "training-personality-entry-watch":
             {
@@ -3338,7 +3444,24 @@ public sealed partial class MatchEngine
     private void DiscardTerrain(CardInstance terrain)
     {
         terrain.Zone = Zone.FateDiscard; terrain.ProvinceIndex = null; terrain.FaceUp = true;
+        // Fields of Mercy (oracle-l5r-2530): "the count of destroyed personalities does not start
+        // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
+        // resume where this one left off. A no-op for every other Terrain (RemoveAll matches nothing).
+        _state.FieldsOfMercyWatches.RemoveAll(w => w.CardId == terrain.Id);
         Emit("terrainDiscarded", $"{Definition(terrain).Name} was removed from play.", terrain.OwnerId, terrain.Id);
+    }
+    // Fields of Mercy (oracle-l5r-2530): the first currently-in-play copy's own watch (there is
+    // realistically only ever one -- at most one Terrain per battlefield -- but this does not assume
+    // it). Returns true (negate) once that copy has already seen one of `card`'s own controller's
+    // Personalities fully destroyed while it has been in play; otherwise records this one as the
+    // first and returns false. False with no active copy at all (the common case).
+    private bool FieldsOfMercyNegatesPersonalityDestruction(CardInstance card)
+    {
+        var watch = _state.FieldsOfMercyWatches.FirstOrDefault(w => InPlay(Card(w.CardId)));
+        if (watch is null) return false;
+        if (watch.DestroyedCount[card.OwnerId] >= 1) return true;
+        watch.DestroyedCount[card.OwnerId]++;
+        return false;
     }
     // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
     // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.
@@ -3379,6 +3502,25 @@ public sealed partial class MatchEngine
     {
         card.Tokens.Remove(token);
         Emit("tokenDestroyed", $"{Definition(card).Name}'s {token.Type} token was destroyed.", card.OwnerId, card.Id);
+    }
+    // Yasuki Tsujiken (oracle-l5r-9469): "after each time [a watched Holding]'s controller bows it,
+    // he loses 1 Honor" -- for as long as Tsujiken remains in play. There is no single existing "any
+    // cause bows a card" choke point in this engine (unlike Straighten(), which is one) -- a Holding
+    // only ever becomes bowed via a small, enumerable set of ability effects (Ashigaru Elite's own
+    // Farm-bow cost is the only one today; Tsujiken's own Open half always STRAIGHTENS its target,
+    // never bows it). This is called from each of those specific sites, a documented, narrow scope
+    // choice rather than a blanket refactor of every ".Bowed=true" site across the engine's combat/
+    // cost paths that can never touch a Holding -- a future Holding-bowing card adds its own call
+    // here, the same convention DestroysTarget/MoveOrStraightenKind already use for a curated set.
+    // One Honor loss PER active mark (a Holding marked by 3 Tsujikens loses its controller 3 Honor on
+    // one bow); InPlay(Card(w.TsujikenId)) is checked live rather than eagerly pruned on every call,
+    // so a mark placed by a Tsujiken who has since left play (MarkDead already removes his own marks
+    // outright, but this is a defensive double-check) never fires.
+    private void CheckTsujikenWatch(CardInstance card)
+    {
+        if (Definition(card).Type != CardType.Holding) return;
+        var marks = _state.TsujikenWatches.Count(w => w.HoldingId == card.Id && InPlay(Card(w.TsujikenId)));
+        if (marks > 0) GainHonor(card.OwnerId, -marks, "Yasuki Tsujiken");
     }
     private static int TokenCount(CardInstance card, string type) => card.Tokens.Count(t => t.Type == type);
     private static bool HasToken(CardInstance card, string type) => card.Tokens.Any(t => t.Type == type);

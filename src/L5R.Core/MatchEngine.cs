@@ -233,6 +233,22 @@ public sealed partial class MatchEngine
                 }
                 return;
             }
+            if (_state.PendingChoice.Type=="unimpeachableNameReaction")
+            {
+                // Unimpeachable Name (oracle-l5r-8989): open only to the one reacting player (unlike
+                // attackReaction/additionalActionReaction, which are open to either side) -- the
+                // top-level priority check already enforces that, so this window closes the instant
+                // they answer either way, same single-pass shape as entryReaction/bowReaction above.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending reaction first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingOutOfPlayActionReaction is not null)
+                {
+                    var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
+                    ExecuteAbilityEffects(pending);
+                    _state.HonorLossReductionPlayerId=null;
+                }
+                return;
+            }
             if (_state.PendingChoice.Type=="duelReaction")
             {
                 // Dueling (issue #204): "a reaction to being challenged or entering a duel," offered
@@ -490,8 +506,19 @@ public sealed partial class MatchEngine
         foreach (var use in lower.AbilityUses)
             if (!higher.AbilityUses.TryGetValue(use.Key, out var current) || use.Value > current) higher.AbilityUses[use.Key] = use.Value;
 
-        foreach (var attachment in _state.Cards.Values.Where(c => c.AttachedTo == lower.Id))
+        foreach (var attachment in _state.Cards.Values.Where(c => c.AttachedTo == lower.Id).ToArray())
         {
+            // Cultist Infiltrator (oracle-l5r-1595): "This card will not be transferred" -- the one
+            // printed exception to Overlay's own attachment-carryover above. Discarded instead of
+            // left dangling on `lower` (about to be RemoveFromGame'd below, which does not itself
+            // relocate an attachment still pointing at it). Its own OwnerId is untouched, so this
+            // already lands in the correct original owner's discard pile by construction.
+            if (Definition(attachment).Effect == "cultist-infiltrator")
+            {
+                attachment.Zone = Zone.FateDiscard; attachment.AttachedTo = null; attachment.ProvinceIndex = null; attachment.Tokens.Clear();
+                Emit("attachmentDestroyed", $"{Definition(attachment).Name} was not transferred and was discarded.", attachment.OwnerId, attachment.Id);
+                continue;
+            }
             attachment.AttachedTo = higher.Id;
             attachment.ProvinceIndex = higher.ProvinceIndex;
         }
@@ -1165,7 +1192,16 @@ public sealed partial class MatchEngine
         Require(_state.Phase==Phase.Action && command.PlayerId==_state.ActivePlayerId,"Equip is a Limited action on your turn.");
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
-        Require(target.OwnerId==command.PlayerId && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,"Choose your Personality at home.");
+        // Cultist Infiltrator (oracle-l5r-1595): "You may attach this card to a Personality you do
+        // not control" -- the one printed exception to Equip's own ordinary "your Personality"
+        // restriction, an Effect-keyed override rather than a new command/ability (its own OwnerId
+        // stays with whoever equips it either way -- CardInstance.OwnerId is never reassigned, see
+        // docs/decisions/2026-09-12-unique-singular-control-transfer.md -- so "returned to the
+        // original owner's discard pile" when it and/or its host is later destroyed is already
+        // correct by construction; DestroyUnits' own attachment loop below already keys off the
+        // attachment's own unchanged OwnerId, never its host's).
+        Require((target.OwnerId==command.PlayerId || def.Effect=="cultist-infiltrator") && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,
+            def.Effect=="cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
@@ -1228,6 +1264,10 @@ public sealed partial class MatchEngine
             Player(command.PlayerId).Hand.Remove(card.Id);
             card.Zone=Zone.Battlefield; card.ProvinceIndex=province; card.FaceUp=true;
             Player(command.PlayerId).TerrainPlayedThisBattle=true; // Ring of Water's own recruitment condition (issue #194)
+            // Fields of Mercy (oracle-l5r-2530): its own destroyed-Personality counter starts at 0
+            // only from this exact moment -- never retroactively for destructions before it entered
+            // play. A fresh watch per entry (DiscardTerrain removes this one's entry when it leaves).
+            if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
             if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
             NextAction(command.PlayerId);
@@ -1522,6 +1562,10 @@ public sealed partial class MatchEngine
             : Zone.DynastyDiscard;
         card.FaceUp=true; card.Tokens.Clear();
         if(Definition(card).Type==CardType.Personality && card.Dishonorable) GainHonor(card.OwnerId,-Definition(card).PersonalHonor,"Dishonorable death",card);
+        // Yasuki Tsujiken (oracle-l5r-9469): "Until Tsujiken leaves play..." -- his own watches end
+        // the moment HE dies (a no-op RemoveAll for every other Personality, since TsujikenId only
+        // ever matches marks placed by this exact CardInstance).
+        if(Definition(card).Type==CardType.Personality) _state.TsujikenWatches.RemoveAll(w=>w.TsujikenId==card.Id);
     }
     // Overconfident (core rules keyword, issue #223): "each other player may draw a card after an
     // Overconfident card enters or leaves play" -- both triggers share this one queuing helper (the
@@ -1643,6 +1687,17 @@ public sealed partial class MatchEngine
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
                 ExpendableDraw(attachment);
+            }
+            // Fields of Mercy (oracle-l5r-2530): "if a card effect has destroyed another Personality
+            // in that army while this card was in play: negate the Personality's destruction." Only
+            // the Personality-specific portion below (MarkDead, leaving the battlefield, Overconfident/
+            // Expendable/Halls-of-Memory/Lady-Matsu's-Rage consequences) is skipped -- her attachments
+            // were already destroyed unconditionally above, matching "an effect that destroys an
+            // entire unit would destroy all cards attached to the personality but not the personality."
+            if(Definition(card).Type==CardType.Personality && FieldsOfMercyNegatesPersonalityDestruction(card))
+            {
+                Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated by Fields of Mercy (attachments were still destroyed).",card.OwnerId,card.Id);
+                continue;
             }
             card.ProvinceIndex=null;
             MarkDead(card);
@@ -1829,6 +1884,14 @@ public sealed partial class MatchEngine
             else Straighten(card);
         }
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
+        // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
+        // a -1C token" -- fires once per turn's single Straighten Phase, for every Cultist
+        // Infiltrator in play regardless of whose turn it is (no "your own turn" qualifier printed)
+        // or which player controls its host (it may be attached to an enemy Personality). Routed
+        // through CreateToken so its own existing Chi<=0 death check (shared with every other
+        // Chi-token path) still fires immediately if this brings the host to 0 or below.
+        foreach(var infiltrator in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="cultist-infiltrator").ToArray())
+            CreateToken(Card(infiltrator.AttachedTo!),"Cultist",infiltrator.Id,"Chi",-1);
         EventsPhase(player);
     }
     private void EventsPhase(PlayerState player)
@@ -2073,6 +2136,17 @@ public sealed partial class MatchEngine
         {
             Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated.",playerId,source?.Id);
             return;
+        }
+        // Unimpeachable Name (oracle-l5r-8989): "Reduce each Honor loss from its effects by 3
+        // (minimum 0)" -- active only while resolving the one specific command this player's own
+        // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
+        // Honor change of theirs during that single resolution is reduced, not just the first.
+        if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
+        {
+            var reduced=Math.Min(0,amount+3);
+            if(reduced==0) { Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced to 0 by Unimpeachable Name.",playerId,source?.Id); return; }
+            Emit("honorLossReduced",$"{Player(playerId).Name}'s Honor loss from {reason} was reduced by Unimpeachable Name.",playerId,source?.Id);
+            amount=reduced;
         }
         var player=Player(playerId); player.Honor+=amount;
         if(player.Honor<=-20) player.DishonorLossPending=true;

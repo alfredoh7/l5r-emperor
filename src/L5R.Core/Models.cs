@@ -322,6 +322,18 @@ public sealed record TamokoHonorCheck(string TargetId, int BeneficiaryPlayerId);
 /// already been discarded as this ability's own cost by the time it fires.</summary>
 public sealed record LadyMatsusRageWatch(string TargetId, int ActingPlayerId);
 
+/// <summary>Yasuki Tsujiken (oracle-l5r-9469): one mark placed by his own "After Tsujiken enters
+/// play, target a Holding" Reaction. See MatchState.TsujikenWatches for the full shape/lifecycle.</summary>
+public sealed record TsujikenWatch(string TsujikenId, string HoldingId);
+
+/// <summary>Fields of Mercy (oracle-l5r-2530): the per-player destroyed-Personality counter for one
+/// specific in-play copy of the card. See MatchState.FieldsOfMercyWatches for the full lifecycle.</summary>
+public sealed class FieldsOfMercyWatch
+{
+    public string CardId { get; set; } = "";
+    public int[] DestroyedCount { get; set; } = new int[2];
+}
+
 /// <summary>Dueling (core rules; issue #204): a mini-game that pauses whatever the outer game was
 /// doing (a duel-issuing ability's own execution sets this up and returns without ceding priority,
 /// same shape as PendingAttack) until it resolves, then hands priority back exactly where the
@@ -520,6 +532,35 @@ public sealed class MatchState
     // window, read by nikutai-straighten's own execution (Target "none", same auto-determined shape
     // as MoveReactionTargetId above).
     public string? NikutaiReactionTargetId { get; set; }
+    // Unimpeachable Name (oracle-l5r-8989): an out-of-play (hand/discard) Reaction offered before
+    // ANY action resolves -- broader than PendingNegatableAbility above (which only ever watches a
+    // curated destroy/move/straighten Target on an IN-PLAY card). The whole triggering command is
+    // stashed here, same defer-then-execute shape, while a "unimpeachableNameReaction" window offers
+    // the opponent a chance to play it (or pass) before the command actually resolves. See
+    // CardAbilities.ResolveOrDeferUnimpeachableName / AbilityMayCauseHonorLoss.
+    public GameCommand? PendingOutOfPlayActionReaction { get; set; }
+    // Set to the reacting player's own id for the duration of resolving PendingOutOfPlayActionReaction
+    // only when Unimpeachable Name was actually played (not merely offered) -- consumed (amount
+    // floored toward 0, never past it) by every negative GainHonor call for that same player while
+    // active, satisfying "reduce EACH Honor loss from its effects by 3" for a command that causes more
+    // than one. Cleared unconditionally once that one command finishes resolving.
+    public int? HonorLossReductionPlayerId { get; set; }
+    // Yasuki Tsujiken (oracle-l5r-9469): each entry is one "mark" placed by his own entering-play
+    // Reaction on a specific Holding -- a list, not a dictionary, since the SAME Holding may be marked
+    // more than once (by separate copies of Tsujiken; nothing printed forbids it), and each mark is
+    // independently worth 1 Honor lost per future bow. A mark stays here even after its own Tsujiken
+    // leaves play (removed instead at that point -- see MatchEngine's own destroy/discard paths) rather
+    // than being filtered live by InPlay(), so a client can enumerate exactly which stacked marks are
+    // still active without re-deriving it. TsujikenId names the specific CardInstance that placed the
+    // mark (Alfredo's own future signifier can key its rendering off this -- see the decision doc).
+    public List<TsujikenWatch> TsujikenWatches { get; set; } = [];
+    // Fields of Mercy (oracle-l5r-2530): one entry per currently-in-play copy, created when it enters
+    // play (never earlier -- "the count of destroyed personalities does not start until Fields of
+    // Mercy are played") and removed when it leaves (DiscardTerrain), so a later copy entering play
+    // always starts its own count fresh. DestroyedCount is indexed by player id: how many of that
+    // player's own Personalities have already been fully destroyed while this specific copy has been
+    // in play. See CardAbilities.FieldsOfMercyNegatesPersonalityDestruction.
+    public List<FieldsOfMercyWatch> FieldsOfMercyWatches { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
