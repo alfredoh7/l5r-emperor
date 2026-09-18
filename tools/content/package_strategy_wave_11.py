@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 10 (issue #278): A Close Call, a narrower proof case for the same "any action
+"""Build Strategy wave 11 (issue #278): A Close Call, a narrower proof case for the same "any action
 targeting a card in the unit" family the general in-play unit-targeting Reaction primitive builds --
 unlike Champion of Thunder/Brothers of Goemon (Follower wave 11), A Close Call reacts only to a
 Ranged/Melee Attack targeting an Armor-wearing Personality, and reuses the EXISTING before-attack-
@@ -19,7 +19,7 @@ from pathlib import Path
 from package_vanilla_wave import build_definition_fields
 
 ROOT = Path(__file__).resolve().parents[2]
-PROFILE = "strategy-wave-10"
+PROFILE = "strategy-wave-11"
 
 ABILITIES: dict[int, list[str]] = {
     10359: ["a-close-call-negate", "a-close-call-boost"],  # A Close Call
@@ -51,5 +51,5 @@ if __name__ == "__main__":
     import sys
     ids = sys.argv[1:]
     if not ids:
-        raise SystemExit("Usage: package_strategy_wave_10.py oracle-l5r-<id> [...]")
+        raise SystemExit("Usage: package_strategy_wave_11.py oracle-l5r-<id> [...]")
     print(json.dumps(package(ids)))

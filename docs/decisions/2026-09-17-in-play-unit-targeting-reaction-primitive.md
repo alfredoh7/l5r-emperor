@@ -162,7 +162,7 @@ entries per card plus two Target categories `own-unit-member`/`personality-with-
 new `training-unit-force-penalty` fixture ability), `src/L5R.Core/MatchEngine.cs` (`DestroyUnits`'s
 negation check now goes through `NegatesEffect`; the new `mantis-clan-discount` Equip term, the same
 shape `lion-clan-discount` already established), `tools/env.sh` (the Godot-glob `set -e` fix),
-`PublishedContent.cs`/`CardCatalog.cs`/`L5R.Core.csproj` (Follower wave 11, Strategy wave 10), two new
+`PublishedContent.cs`/`CardCatalog.cs`/`L5R.Core.csproj` (Follower wave 11, Strategy wave 11), two new
 `tools/content/package_follower_wave_11.py` / `package_strategy_wave_10.py`,
 `tools/content/build_card_inventory.py` (removed the three now-stale `BLOCKERS` entries for
 oracle-l5r-1167/1292/10359), `docs/CARD_INVENTORY.xlsx` (regenerated, 320 wired),
