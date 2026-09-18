@@ -34,8 +34,12 @@ namespace L5R.Core;
 // core rules default (Chi) needs no override. DuelRefusable opens an AwaitingAccept decision for the
 // challenged player first; "Your performer duels the target" (no refusal language at all) leaves it
 // false, matching every unrefusable duel-issuing card's own printed phrasing.
+// Cost (issue #303): the ability's Gold cost RULE, the single piece of data GoldQuotes.cs interprets to
+// price it -- validation, option generation, the quote shipped to the client and the actual payment all
+// read this one rule. Null means "no explicit rule": a Strategy source pays its own printed cost and a
+// Discipline pays its source's printed cost (GoldQuotes.ImplicitGoldRule); anything else is free.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
-    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false);
+    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null);
 
 public static class AbilityCatalog
 {
@@ -214,7 +218,7 @@ public static class AbilityCatalog
         // Shugenja) -- Item/Follower/Spell alike, whichever the printed keyword happens to be on. The
         // one difference (a non-Spell Reserve attachment never grants the bonus Additional Action for
         // its own Battle ability) is applied in the execution case below, not here.
-        ["equip-battle"] = new("Battle", "Equip (Battle): Attach a Spell or a Reserve Fate card to your opposed unbowed Shugenja, paying all costs", "spell-or-reserve-in-hand", PlayerAbility: true, Performer: "own-unbowed-shugenja-opposed-at-battle"),
+        ["equip-battle"] = new("Battle", "Equip (Battle): Attach a Spell or a Reserve Fate card to your opposed unbowed Shugenja, paying all costs", "spell-or-reserve-in-hand", PlayerAbility: true, Performer: "own-unbowed-shugenja-opposed-at-battle", Cost: GoldCostRule.TargetPrinted()),
         // Training-only: a Spell's own Battle ability, exercised only through the "equip-battle"
         // follow-up window above -- proves a just-attached Spell can immediately act.
         ["training-spell-force-boost"] = new("Battle", "Target your Personality at the current battlefield: +2 Force", "own-personality"),
@@ -296,7 +300,7 @@ public static class AbilityCatalog
         // Kharmic keyword's own repeatable action (not tied to any specific card): pay 2 Gold, discard
         // a Kharmic card you control. A Dynasty card is replaced with a fresh, immediately face-up
         // Dynasty card (see the execution case); a Fate card's discard is followed by an extra draw.
-        ["kharmic-discard"] = new("Limited", "Pay 2 Gold, discard a Kharmic card you control: a Dynasty card is replaced face-up; a Fate card is followed by an extra draw", "own-kharmic-card", PlayerAbility: true),
+        ["kharmic-discard"] = new("Limited", "Pay 2 Gold, discard a Kharmic card you control: a Dynasty card is replaced face-up; a Fate card is followed by an extra draw", "own-kharmic-card", PlayerAbility: true, Cost: GoldCostRule.Fixed(2)),
         // Rings (issue #194): each real Ring has two abilities -- its own recruit action (moves it
         // from hand into play, gated by its printed entry condition) and its printed in-play action
         // (also usable directly from hand, discarding the Ring instead of bowing it -- "you may
@@ -466,13 +470,24 @@ public static class AbilityCatalog
         // this fires when a DIFFERENT card the player controls (a Personality) enters play, letting
         // Singh Remnants -- sitting in hand or a discard pile -- attach itself. Target "none": the
         // Personality is implicit (the entryReaction window's own CardId), not separately chosen.
-        ["singh-remnants-attach"] = new("Reaction", "After your Personality enters play, if this card is in your hand or discard pile: attach it to him, paying all costs. Gain 1 Honor.", "none", Trigger: "any-personality-enters-play"),
-        ["training-personality-entry-watch"] = new("Reaction", "Training: after a Personality enters play, attach this card to it, gain 1 Honor", "none", Trigger: "any-personality-enters-play"),
+        ["singh-remnants-attach"] = new("Reaction", "After your Personality enters play, if this card is in your hand or discard pile: attach it to him, paying all costs. Gain 1 Honor.", "none", Trigger: "any-personality-enters-play", Cost: GoldCostRule.SourcePrinted()),
+        ["training-personality-entry-watch"] = new("Reaction", "Training: after a Personality enters play, attach this card to it, gain 1 Honor", "none", Trigger: "any-personality-enters-play", Cost: GoldCostRule.SourcePrinted()),
         // Clay Kshatriya's Invest: reuses the same own-enters-play Reaction/entryReaction window every
         // other "after entering play" ability already shares -- genuinely optional (the player may
         // decline), unlike a mandatory entry effect, so no new window shape is needed.
-        ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play"),
-        ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play"),
+        ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(5)),
+        ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(3)),
+        // Generalized Gold payment (issue #303): synthetic fixtures, one per cost shape, standing in for
+        // six real cards that are NOT wired yet (Exchange of Letters, Urgency, Virtuous Charity, At Any
+        // Cost, A Stain Cleansed, Disgraceful Conduct -- see docs/decisions/2026-09-18-generalized-gold-
+        // payment.md). Each proves that the shape prices, validates, quotes and pays through the ONE
+        // GoldCostRule path, so wiring the real card is just a catalog line plus its own effect.
+        ["training-urgency-draw"] = new("Limited", "Training (Urgency shape): Pay 2 Gold: draw a card", "none", Cost: GoldCostRule.Fixed(2)),
+        ["training-charity-honor"] = new("Open", "Training (Virtuous Charity shape): Pay zero or more Gold: gain that much Honor", "none", Cost: GoldCostRule.Variable()),
+        ["training-charity-honor-capped"] = new("Open", "Training: Pay 1 to 4 Gold: gain that much Honor", "none", Cost: GoldCostRule.Variable(1, 4)),
+        ["training-disgrace-bow"] = new("Open", "Training (Disgraceful Conduct shape): Pay the target Personality or unit's total Gold cost minus 4 (minimum 0): bow him", "personality", Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0)),
+        ["training-stain-straighten"] = new("Open", "Training (A Stain Cleansed shape): Pay the target unit's total Gold cost plus 2: straighten him", "personality", Cost: GoldCostRule.TargetUnitTotal(2)),
+        ["training-at-any-cost"] = new("Open", "Training (At Any Cost shape): Pay a dead Personality's own Gold cost: gain 1 Honor", "dead-personality-any-discard", Cost: GoldCostRule.TargetPrinted()),
         ["thunderous-legion-destroy"] = new("Battle", "Destroy a target enemy card without attachments", "enemy-force", RequireNoAttachments: true),
         ["brothers-great-lake-bow"] = new("Battle", "Bow a target enemy card", "enemy-force"),
         // Dueling (issue #204): "Your performer duels the target" (unrefusable -- no printed language
@@ -570,7 +585,7 @@ public static class AbilityCatalog
         ["mihato-move"] = new("Battle", "Target an enemy Personality: move him home", "enemy-personality"),
         ["noboru-exp2-favor"] = new("Limited", "Political: take the Imperial Favor", "none"),
         ["noboru-shattered-star-weaken"] = new("Battle", "Fire: Bow a target enemy Personality; give Noboru a Force bonus equal to the target's Force", "enemy-personality"),
-        ["noritada-invest"] = new("Reaction", "Invest 3 Gold: give this Personality two +1F Fire tokens", "none", Trigger: "own-enters-play"),
+        ["noritada-invest"] = new("Reaction", "Invest 3 Gold: give this Personality two +1F Fire tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(3)),
         ["obote-boost"] = new("Limited", "Void: discard a card to give Obote a Force bonus equal to its Focus Value", "hand"),
         ["rikyou-move"] = new("Battle", "Even if bowed: if any enemy units are at the current battlefield, move Rikyou there and straighten his unit", "none"),
         // Togashi Korimi, Experienced: the second ability's own optional "you may discard a Kiho or
@@ -641,7 +656,7 @@ public static class AbilityCatalog
         // itself is the entire cost/limiter -- the shared "abilities on bowed cards cannot be used"
         // rule already makes this usable at most once between straightens, no separate UsageKey
         // needed, same convention as e.g. "hired-legion-draw".
-        ["low-market-equip"] = new("Open", "Open: Bow this card, choose your performing Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to a minimum of 1", "attachment-in-hand", Performer: "own-personality"),
+        ["low-market-equip"] = new("Open", "Open: Bow this card, choose your performing Personality and target an attachment in your hand: Attach it to him, paying 2 less Gold, to a minimum of 1", "attachment-in-hand", Performer: "own-personality", Cost: GoldCostRule.TargetPrinted(-2, floor: 1)),
         // Fallow Lands (the first Region with a static trait, The Shadow's Embrace): "This province
         // has +2 strength" (EffectiveProvinceStrength, live off ProvinceState.RegionId -- applies
         // immediately on attach, without respect to presence, per its own printed wording) plus
@@ -1158,7 +1173,8 @@ public static class AbilityCatalog
         // FinishBattleReturnHomeAndTransition begins, once every card's post-battle Zone is settled)
         // but needing its own PendingChoice (which province) since, unlike Earth Flows' unconditional
         // Honor gain, "one of your provinces" is a genuine player choice.
-        ["your-clan-needs-you"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Personality in one of your provinces: Bring him into play at the current battlefield, paying all costs but paying 6 less Gold. After the battle ends, if he is in play, discard all his attachments and put him into one of your provinces, face-up, discarding any card there", "own-personality-in-province"),
+        ["your-clan-needs-you"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Personality in one of your provinces: Bring him into play at the current battlefield, paying all costs but paying 6 less Gold. After the battle ends, if he is in play, discard all his attachments and put him into one of your provinces, face-up, discarding any card there", "own-personality-in-province",
+            Cost: GoldCostRule.TargetRecruit(-6, floor: 0)),
         // Personality wave 21 (issue #299, Batch E of the "Not blocked; deferred for scope" BLOCKERS
         // audit): nine Personalities plus the two tokens two of them create.
         //
@@ -1259,7 +1275,7 @@ public static class AbilityCatalog
         // card-specific variant of equip-battle -- Open timing instead of Battle, Neiru herself as the
         // fixed wielder (no separate Performer), restricted by RequiredKeywords to Air Spells in hand.
         // Like equip-battle, exempt from the once-per-turn dedupe (no printed limit).
-        ["neiru-equip"] = new("Open", "Equip an Air Spell from your hand to Neiru, paying all costs", "spell-in-hand-with-keyword", RequiredKeywords: ["Air"]),
+        ["neiru-equip"] = new("Open", "Equip an Air Spell from your hand to Neiru, paying all costs", "spell-in-hand-with-keyword", RequiredKeywords: ["Air"], Cost: GoldCostRule.TargetPrinted()),
         // Sutigu (oracle-l5r-7676): "Bow Sutigu or one of his Weapons" is a cost-choice Performer, the
         // same family as Xijkt's/Tamori Shosei's own -- here Sutigu himself or one of his own unbowed
         // Weapon-keyword attachments.
@@ -1267,7 +1283,8 @@ public static class AbilityCatalog
             Performer: "own-source-or-unbowed-attached-with-keyword", RequiredKeywords: ["Weapon"]),
         // Shinden Shorai (oracle-l5r-6857, a Region): the fourth caller into the shared "bring a face-up
         // province Personality into play, paying all costs" entry sequence (BringProvincePersonalityIntoPlay).
-        ["shinden-shorai-recruit"] = new("Limited", "If it is not your first or second turn: Bring a face-up Personality in this province into play, paying all costs. You may ignore the Personality's Honor Requirement if he is Lion Clan", "own-personality-in-province"),
+        ["shinden-shorai-recruit"] = new("Limited", "If it is not your first or second turn: Bring a face-up Personality in this province into play, paying all costs. You may ignore the Personality's Honor Requirement if he is Lion Clan", "own-personality-in-province",
+            Cost: GoldCostRule.TargetRecruit(honorWaiverClan: "Lion")),
         // Brawl (oracle-l5r-1127, issue #304): two alternative effects of one Strategy -- the paired-
         // ability shape sharing one UsageKey that Strength of the Divine/Horibe already use. The bow
         // half reuses enemy-card-without-attachments verbatim (Masumi/Unexpected/Jinai). The destroy
@@ -3022,45 +3039,21 @@ public sealed partial class MatchEngine
         // HonorRequirementWaiverClan's recruiting-player-Clan check -- Unique/Singular, Loyal) is
         // validated here too, so an offered command is one that really resolves, and its cost is "all
         // costs": the Personality's full Gold cost, no Clan discount/allegiance route.
-        PurchaseQuote? recruitQuote = null;
         if (id == "shinden-shorai-recruit")
         {
             Require(player.TurnsTaken > 2, "Shinden Shorai cannot be used on your first or second turn.");
             var recruit = Card(command.TargetId!);
             Require(recruit.ProvinceIndex == source!.ProvinceIndex, "Choose the face-up Personality in this Region's own province.");
-            recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
+            var recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
             Require(recruitQuote.Error is null, recruitQuote.Error ?? "");
         }
-        // Equip (Battle) has no source card of its own -- its cost is the targeted Spell's, paid on
-        // attachment, not a Strategy's own GoldCost.
-        // Your Clan Needs You! (issue #295): although its own source IS a Strategy (printed GoldCost
-        // 0), the Gold actually spent is the RECRUITED Personality's own cost, minus 6 (minimum 0) --
-        // never the Strategy's own GoldCost. Checked first so it overrides the Strategy branch below.
-        var cost = recruitQuote is not null ? recruitQuote.Cost
-            // Soshi Neiru (issue #301): the equipped Spell's own printed cost, exactly like Equip (Battle).
-            : id == "neiru-equip" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
-            : id == "your-clan-needs-you" && command.TargetId is not null ? Math.Max(0, Definition(Card(command.TargetId)).GoldCost - 6)
-            : source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost
-            : ability.Target == "spell-or-reserve-in-hand" && command.TargetId is not null ? Definition(Card(command.TargetId)).GoldCost
-            // Low Market: "paying 2 less Gold, to a minimum of 1" -- its own printed discount on the
-            // targeted attachment's own GoldCost, the same per-candidate-cost shape as Equip (Battle).
-            : ability.Target == "attachment-in-hand" && command.TargetId is not null ? Math.Max(1, Definition(Card(command.TargetId)).GoldCost - 2)
-            // Singh Remnants' shape: attaching itself, paying all costs -- its own GoldCost, already
-            // separately validated above against the just-entered Personality's own restrictions.
-            : ability.Trigger == "any-personality-enters-play" ? Definition(source!).GoldCost
-            // Discipline (core rules, issue #184): "typically... a Gold cost" -- the card's own
-            // printed GoldCost, same convention as a Strategy card played from hand.
-            : ability.Timing == "Discipline" ? Definition(source!).GoldCost
-            : id == "kharmic-discard" ? 2
-            // Invest (core rules): a separate, optional, standalone payment made only as the card
-            // enters play (already enforced by reusing the own-enters-play Reaction/entryReaction
-            // window, which only stays open for that one entry) -- never rolled over from the
-            // card's own recruit/attach cost. Each Invest card's own amount is hardcoded per ability
-            // id here, same convention as Kharmic's fixed 2 Gold.
-            : id == "clay-kshatriya-invest" ? 5
-            : id == "training-invest" ? 3
-            : id == "noritada-invest" ? 3 : 0;
-        ValidatePayment(player.Id, cost, command.SourceIds);
+        // The Gold cost (issue #303): every ability's price -- Equip (Battle)/Soshi Neiru's Spell cost, Low
+        // Market's "2 less, to a minimum of 1", Your Clan Needs You!'s recruit cost minus 6, Shinden
+        // Shorai's "all costs", Singh Remnants' own cost, a Strategy/Discipline's printed cost, Kharmic's
+        // 2 and each Invest's amount -- is one GoldCostRule on the ability, interpreted in GoldQuotes.cs.
+        // The same AbilityCost prices the offered payment (AbilityActions), the client's GoldQuote and the
+        // charge in ExecuteAbilityEffects, so validation can never disagree with what is then paid.
+        ValidateAbilityPayment(command, player.Id);
     }
 
     private void UseAbility(GameCommand command)
@@ -3214,8 +3207,9 @@ public sealed partial class MatchEngine
                 Emit("warWearinessBow", $"{Definition(warWearinessPerformer).Name} bows (War Weariness).", warWearinessPerformer.OwnerId, warWearinessPerformer.Id);
             }
         }
-        if (source is not null && Definition(source).Type == CardType.Strategy && Definition(source).GoldCost > 0)
-            Pay(player.Id, source, Definition(source).GoldCost, command.SourceIds);
+        // The one payment for every costed ability (issue #303): exactly the AbilityCost that validation
+        // priced, so no execution case below re-hardcodes (or forgets) its own Pay(...).
+        PayForAbility(command, player);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
         {
             _state.FavorPlayerId = null;
@@ -3256,8 +3250,13 @@ public sealed partial class MatchEngine
                     $"{Definition(target).Name} ({target.Id}): bow and prevent straightening for this turn, or let {player.Name} gain 1 Honor.", player.Id);
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
-            case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            // Generalized Gold payment fixtures (issue #303): the Gold itself was already charged by
+            // PayForAbility above; a variable-cost effect reads the amount the player actually chose.
+            case "training-urgency-draw": Draw(player); break;
+            case "training-charity-honor": case "training-charity-honor-capped": GainHonor(player.Id, PaidGoldAmount(command), "Training charity"); break;
+            case "training-at-any-cost": GainHonor(player.Id, 1, "Training At Any Cost"); break;
             case "veteran-advisor-draw": Draw(player); break;
             case "hired-legion-draw": source!.Bowed = true; Draw(player); break;
             case "akodo-regulars-boost": DiscardFate(player, target!); ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
@@ -3498,7 +3497,7 @@ public sealed partial class MatchEngine
                 // The shared entry sequence (issue #301: factored out once Shinden Shorai became its
                 // fourth caller) -- unchanged behavior, straight into the current battlefield.
                 _state.YourClanNeedsYouWatchIds.Add(card.Id);
-                if (BringProvincePersonalityIntoPlay(player, card, quote, Math.Max(0, quote.Cost - 6), command.SourceIds, _state.CurrentBattleProvince!.Value, "Your Clan Needs You!")) return;
+                if (BringProvincePersonalityIntoPlay(player, card, quote, _state.CurrentBattleProvince!.Value, "Your Clan Needs You!")) return;
                 break;
             }
             // Shinden Shorai (oracle-l5r-6857, issue #301): the same entry sequence, into HOME. Every
@@ -3509,7 +3508,7 @@ public sealed partial class MatchEngine
                 var recruit = target!;
                 var recruitQuote = QuotePurchase(player.Id, recruit.Id, ignoreHonorRequirementIfPersonalityClan: "Lion");
                 Require(recruitQuote.Error is null && Definition(recruit).Type == CardType.Personality, recruitQuote.Error ?? "");
-                if (BringProvincePersonalityIntoPlay(player, recruit, recruitQuote, recruitQuote.Cost, command.SourceIds, null, "Shinden Shorai", proclaimResumesTo: 1 - player.Id)) return;
+                if (BringProvincePersonalityIntoPlay(player, recruit, recruitQuote, null, "Shinden Shorai", proclaimResumesTo: 1 - player.Id)) return;
                 break;
             }
             case "keppo-destroy":
@@ -3731,7 +3730,6 @@ public sealed partial class MatchEngine
                 source!.Bowed = true;
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                Pay(player.Id, attachment, Math.Max(1, Definition(attachment).GoldCost - 2), command.SourceIds);
                 player.Hand.Remove(attachment.Id);
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 if (Definition(attachment).AttachGrantsKeyword is string granted) GrantKeyword(performer, granted, attachment.Id, "Attachment");
@@ -3877,7 +3875,6 @@ public sealed partial class MatchEngine
             case "neiru-equip":
             {
                 var spell = target!;
-                Pay(player.Id, spell, Definition(spell).GoldCost, command.SourceIds);
                 player.Hand.Remove(spell.Id);
                 spell.Zone = Zone.Attached; spell.AttachedTo = source!.Id; spell.FaceUp = true; spell.ProvinceIndex = source.ProvinceIndex;
                 if (Definition(spell).AttachGrantsKeyword is string neiruGranted) GrantKeyword(source, neiruGranted, spell.Id, "Attachment");
@@ -3926,7 +3923,6 @@ public sealed partial class MatchEngine
             {
                 var performer = Card(command.PerformerId!);
                 var attachment = target!;
-                Pay(player.Id, attachment, Definition(attachment).GoldCost, command.SourceIds);
                 player.Hand.Remove(attachment.Id);
                 attachment.Zone = Zone.Attached; attachment.AttachedTo = performer.Id; attachment.FaceUp = true; attachment.ProvinceIndex = performer.ProvinceIndex;
                 // Reserve (issue #184): a non-Spell attachment can carry AttachGrantsKeyword too (a
@@ -4221,7 +4217,6 @@ public sealed partial class MatchEngine
             {
                 var enteredPersonality = Card(_state.PendingChoice!.CardId!);
                 var attachDef = Definition(source!);
-                Pay(player.Id, source!, attachDef.GoldCost, command.SourceIds);
                 if (source!.Zone == Zone.Hand) player.Hand.Remove(source.Id);
                 source.Zone = Zone.Attached; source.AttachedTo = enteredPersonality.Id; source.FaceUp = true;
                 if (attachDef.AttachGrantsKeyword is string granted) GrantKeyword(enteredPersonality, granted, source.Id, "Attachment");
@@ -4230,17 +4225,14 @@ public sealed partial class MatchEngine
                 break;
             }
             case "clay-kshatriya-invest":
-                Pay(player.Id, source!, 5, command.SourceIds);
                 CreateToken(source!, "Invest", id, "Force", 1);
                 CreateToken(source!, "Invest", id, "Force", 1);
                 break;
             case "training-invest":
-                Pay(player.Id, source!, 3, command.SourceIds);
                 CreateToken(source!, "Invest", id, "Force", 1);
                 break;
             case "kharmic-discard":
             {
-                Pay(player.Id, target!, 2, command.SourceIds);
                 if (target!.Zone == Zone.Hand)
                 {
                     player.Hand.Remove(target.Id); target.Zone = Zone.FateDiscard; target.FaceUp = true;
@@ -4952,8 +4944,12 @@ public sealed partial class MatchEngine
                 "own-source-or-unbowed-holding-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Holding && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
                 // Sutigu (issue #301): the source itself, or any of its own unbowed keyworded attachments.
                 "own-source-or-unbowed-attached-with-keyword" => new[] { source?.Id }.Concat(_state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone == Zone.Attached && c.AttachedTo == source?.Id && !c.Bowed && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id)).ToArray(),
-                "own-wielder-or-source-with-wielder-keyword" => HasKeywords(Card(source!.AttachedTo!), ability.RequiredKeywords)
-                    ? new[] { Card(source.AttachedTo!).Id, source.Id } : new[] { Card(source.AttachedTo!).Id },
+                // A wielder-relative ability on a Spell still in hand (The Earth's Hunger while unattached) has no
+                // wielder yet: no performer, so it is offered disabled instead of Card(null) throwing out of
+                // QueryActions for the whole player (found while building the Equip (Battle) payment fixture, issue #303).
+                "own-wielder-or-source-with-wielder-keyword" => source?.AttachedTo is null ? []
+                    : HasKeywords(Card(source.AttachedTo), ability.RequiredKeywords)
+                    ? new[] { Card(source.AttachedTo).Id, source.Id } : new[] { Card(source.AttachedTo).Id },
                 "own-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-shadowlands-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
@@ -4971,10 +4967,8 @@ public sealed partial class MatchEngine
             if (performers.Length == 0) performers = [null];
             foreach (var performer in performers)
             {
-                var cost = source is not null && Definition(source).Type == CardType.Strategy ? Definition(source).GoldCost : 0;
-                var payment = PaymentOptions(playerId, cost).FirstOrDefault();
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
-                var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, payment?.SourceIds,
+                var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
                     CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
                 string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
@@ -4985,6 +4979,10 @@ public sealed partial class MatchEngine
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                     "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
+                    // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
+                    // hand or a face-up province, neither of which the in-play default reaches, so the
+                    // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
+                    "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
@@ -4995,32 +4993,30 @@ public sealed partial class MatchEngine
                 // keeps only the ones with enemy units. Every other ability has exactly one (null).
                 int?[] destinations = id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray() : [null];
                 var legal = new List<GameCommand>(); string? error = null;
+                var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
                 foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
                 {
-                    // Equip (Battle)/Low Market's cost is the targeted attachment's own (possibly
-                    // discounted) GoldCost, not a fixed per-performer cost -- each candidate needs its
-                    // own payment recomputed.
-                    var command = ability.Target == "spell-or-reserve-in-hand" && target is not null
-                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
-                        : ability.Target == "attachment-in-hand" && target is not null
-                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(1, Definition(Card(target)).GoldCost - 2)).FirstOrDefault()?.SourceIds }
-                        // Your Clan Needs You! (issue #295): same per-candidate-cost shape as Equip
-                        // (Battle)/Low Market above -- the chosen province Personality's own discounted cost.
-                        : id == "your-clan-needs-you" && target is not null
-                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Math.Max(0, Definition(Card(target)).GoldCost - 6)).FirstOrDefault()?.SourceIds }
-                        // Soshi Neiru (issue #301): the equipped Spell's own printed cost.
-                        : id == "neiru-equip" && target is not null
-                        ? prototype with { TargetId = target, SourceIds = PaymentOptions(playerId, Definition(Card(target)).GoldCost).FirstOrDefault()?.SourceIds }
-                        // Shinden Shorai (issue #301): the recruit's own full quoted cost ("paying all costs").
-                        : id == "shinden-shorai-recruit" && target is not null
-                        ? prototype with { TargetId = target, SourceIds = QuotePurchase(playerId, target, ignoreHonorRequirementIfPersonalityClan: "Lion").Payments.FirstOrDefault()?.SourceIds }
-                        : prototype with { TargetId = target, Province = destination };
-                    try { ValidateAbility(command); legal.Add(command); }
+                    // The payment offered with each candidate is the engine's own suggestion from the ONE
+                    // Gold quote for that candidate (issue #303) -- fixed, target-derived (Equip (Battle),
+                    // Low Market, Your Clan Needs You!, Soshi Neiru, Shinden Shorai) or variable alike, never
+                    // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
+                    // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
+                    // it always has.
+                    var command = prototype with { TargetId = target, Province = destination };
+                    var quote = QuoteAbilityGold(command);
+                    command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
+                    try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
                     catch (RuleViolation e) { error ??= e.Message; }
                 }
+                var firstQuote = quotes.Count > 0 ? quotes[0].Quote : null;
+                // A target-derived cost differs per target, so every legal target ships its own quote and
+                // the client swaps between them without a round trip.
+                var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
+                    ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                 var label = ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
-                    legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray());
+                    legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
+                    Gold: firstQuote, TargetGold: targetQuotes);
             }
         }
     }

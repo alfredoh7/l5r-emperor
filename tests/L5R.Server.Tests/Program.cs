@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Text.Json;
+using L5R.Core;
 using L5R.Server;
 using Microsoft.AspNetCore.Builder;
 
@@ -11,7 +12,8 @@ var cases = new (string Name, Func<Task> Test)[]
     ("duplicate commands, stale versions and recovery across restart", IdempotencyAndRecovery),
     ("concurrent commands serialize into exactly one accepted change", ConcurrentCommands),
     ("persistence failures leave gameplay unchanged", PersistenceRollback),
-    ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput)
+    ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput),
+    ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire)
 };
 var failures = 0;
 foreach (var (name, test) in cases)
@@ -190,6 +192,37 @@ static async Task ReconnectAndMalformedInput()
     await second.SendAsync(oversized.AsMemory(), WebSocketMessageType.Text, true, CancellationToken.None);
     Check((await ReadTypeAsync(second, "error")).GetProperty("error").GetProperty("code").GetString() == "message_too_large",
         "Oversized messages are rejected without changing state.");
+}
+
+// Issue #303: a command field or quote missing from the wire records is silently dropped online (DeckPosition and
+// TargetPlayerId were), so compare the wire command with GameCommand by reflection and round-trip real quotes.
+static Task GoldWire()
+{
+    var command = new GameCommand("useAbility", 1, 9, "card", ["source"], 2, true, true, new() { ["unit"] = 1 }, ["card-a"], "target",
+        "ability", "performer", "choice", "Top", 1, 4);
+    var properties = typeof(GameCommand).GetProperties().Where(p => p.Name is not ("PlayerId" or "ExpectedVersion" or "EqualityContract")).ToArray();
+    foreach (var property in properties)
+    {
+        Check(typeof(WireGameCommand).GetProperty(property.Name) is not null, $"WireGameCommand has no {property.Name}: it would be dropped online.");
+        var value = property.GetValue(command);
+        Check(value is not null && !(property.PropertyType.IsValueType && Equals(value, Activator.CreateInstance(property.PropertyType))),
+            $"The sample command leaves {property.Name} at its default, so this test would not notice it being dropped.");
+    }
+    var json = JsonSerializer.Serialize(WireGameCommand.FromCore(command), Protocol.Json);
+    var bound = JsonSerializer.Deserialize<WireGameCommand>(json, Protocol.Json)!.BindToSeat(1, 9);
+    Check(JsonSerializer.Serialize(bound) == JsonSerializer.Serialize(command), "Every GameCommand field survives the wire and the seat binding.");
+
+    var quote = new GoldQuote(3, GoldCostKind.Variable, "You choose", null, [new PaymentOption(["a"], 4, 3, 1)], 0, 6,
+        new Dictionary<int, PaymentOption[]> { [0] = [new PaymentOption([], 0, 0, 0)], [3] = [new PaymentOption(["a"], 4, 3, 1)] });
+    var option = new ActionOption("useAbility", "Pay", true, null, command, "card", ["t1", "t2"], null, null, quote,
+        new Dictionary<string, GoldQuote> { ["t1"] = quote, ["t2"] = quote with { Cost = 5, Kind = GoldCostKind.Derived } });
+    var action = AvailableAction.FromCore(option);
+    var wire = JsonSerializer.Serialize(action, Protocol.Json);
+    var back = JsonSerializer.Deserialize<AvailableAction>(wire, Protocol.Json)!;
+    Check(back.Gold is { Cost: 3, Kind: GoldCostKind.Variable, MinAmount: 0, MaxAmount: 6 } && back.Gold.PaymentsByAmount![3][0].SourceIds[0] == "a", "The Gold quote and its per-amount payments cross the wire.");
+    Check(back.TargetGold!["t2"].Cost == 5 && back.TargetGold["t2"].Kind == GoldCostKind.Derived, "Per-target quotes cross the wire.");
+    Check(back.Command!.GoldAmount == 4, "The chosen amount is part of the wire command.");
+    return Task.CompletedTask;
 }
 
 static void VerifyPrivacy(JsonElement state, int playerId)

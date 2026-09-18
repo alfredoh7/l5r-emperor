@@ -56,8 +56,27 @@ public sealed partial class MatchEngine
         GameCommand Command(string type,string? id=null,string[]? sources=null,int? province=null,bool discount=false,bool allegiance=false,
             Dictionary<string,int>? assignments=null,string[]? cardIds=null,string? target=null)
             =>new(type,playerId,_state.Version,id,sources,province,discount,allegiance,assignments,cardIds,target);
-        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null)
-            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote));
+        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null,
+            GoldQuote? gold=null,Dictionary<string,GoldQuote>? targetGold=null)
+            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote,gold,targetGold));
+        // A Reaction offered inside a reaction window (an Invest, Singh Remnants' attach, ...): same one Gold
+        // quote as every other costed action (issue #303), so the client shows the payment panel and the
+        // command carries the engine's suggested sources. An unpayable cost is offered disabled with its
+        // reason instead of as an action that could only be rejected.
+        // validate (Akodo Kakihara, issue #305): a reaction with a printed condition of its own (only when HE is
+        // the target) is listed disabled, with ValidateAbility's own reason, while that condition does not
+        // hold -- checked against the command AS QUOTED, so a payment the engine just suggested is never itself
+        // the reason. targetId/label serve a reaction whose own Target is a choice (Champion of Thunder's
+        // "own-unit-member": one option per unit member); both default to the plain single-option shape.
+        void AddReaction(CardInstance card,string abilityId,string? reason=null,string? targetId=null,string? label=null,bool validate=false)
+        {
+            var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,AbilityId:abilityId);
+            var gold=QuoteAbilityGold(command);
+            if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
+            reason??=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
+            if(reason is null && validate) reason=AbilityRejection(command);
+            Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
+        }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
         if(_state.Phase==Phase.Action)
@@ -85,9 +104,7 @@ public sealed partial class MatchEngine
                 if(reactionId is not null)
                 {
                     var used=enteringCard.AbilityUses.ContainsKey(reactionId);
-                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
-                        new("useAbility",playerId,_state.Version,CardId:enteringCard.Id,AbilityId:reactionId),
-                        used?"This reaction has already been used.":null,enteringCard.Id);
+                    AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
                 // only relevant once a Personality is what entered.
@@ -95,9 +112,7 @@ public sealed partial class MatchEngine
                     foreach(var (card,watchId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone is Zone.Hand or Zone.FateDiscard)
                         .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
                         .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="any-personality-enters-play"))
-                        Add("useAbility",AbilityCatalog.All[watchId].Label,
-                            new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:watchId),
-                            cardId:card.Id);
+                        AddReaction(card,watchId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -109,12 +124,10 @@ public sealed partial class MatchEngine
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
                 var used=card.AbilityUses.ContainsKey(reactionId);
-                var reactionCommand=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId);
                 // Akodo Kakihara (issue #305): an in-play Attack reactor may carry a printed condition of its own
                 // (only when HE is the target), so a listed reaction is only enabled while ValidateAbility
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
-                Add("useAbility",AbilityCatalog.All[reactionId].Label,reactionCommand,
-                    used?"This reaction has already been used.":AbilityRejection(reactionCommand),card.Id);
+                AddReaction(card,reactionId,used?"This reaction has already been used.":null,validate:true);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -135,11 +148,7 @@ public sealed partial class MatchEngine
                     var reaction=AbilityCatalog.All[reactionId];
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
                     foreach(var candidate in candidates)
-                    {
-                        var reactionCommand=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:candidate,AbilityId:reactionId);
-                        var label=candidate is null?reaction.Label:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})";
-                        Add("useAbility",label,reactionCommand,AbilityRejection(reactionCommand),card.Id);
-                    }
+                        AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
@@ -152,9 +161,7 @@ public sealed partial class MatchEngine
             foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Hand)
                 .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-additional-action-resolves"))
-                Add("useAbility",AbilityCatalog.All[reactionId].Label,
-                    new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
-                    cardId:card.Id);
+                AddReaction(card,reactionId);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"battleActionReaction" } battleActionPending)
@@ -165,9 +172,7 @@ public sealed partial class MatchEngine
             {
                 var card=Card(battleActionPending.CardId!);
                 foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="after-battle-action-resolves"))
-                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
-                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
-                        cardId:card.Id);
+                    AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -178,9 +183,7 @@ public sealed partial class MatchEngine
             {
                 var card=Card(announcePending.CardId!);
                 foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
-                    Add("useAbility",AbilityCatalog.All[reactionId].Label,
-                        new("useAbility",playerId,_state.Version,CardId:card.Id,AbilityId:reactionId),
-                        cardId:card.Id);
+                    AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -243,10 +246,16 @@ public sealed partial class MatchEngine
                     {
                         var def=Definition(card);
                         var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).Select(t=>t.Id).ToArray();
-                        var payment=PaymentOptions(playerId,def.GoldCost).FirstOrDefault();
-                        var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":payment is null?"Insufficient unbowed Gold production.":null;
-                        Add("equip",$"Equip {def.Name} · {def.GoldCost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:legalTargets[0]):null,
-                            reason,card.Id,legalTargets);
+                        // One Gold quote per candidate wielder (issue #303): Katagi's discount depends on the
+                        // wielder, so the price can differ per target and the client swaps quotes on retarget.
+                        var equipQuotes=legalTargets.ToDictionary(id=>id,id=>QuoteEquipGold(playerId,card,Card(id)));
+                        var affordable=legalTargets.Where(id=>equipQuotes[id].Payments.Length>0).ToArray();
+                        var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":affordable.Length==0?"Insufficient unbowed Gold production.":null;
+                        var firstTarget=affordable.FirstOrDefault();
+                        var firstQuote=firstTarget is null?null:equipQuotes[firstTarget];
+                        Add("equip",$"Equip {def.Name} · {firstQuote?.Cost??def.GoldCost} Gold",reason is null?Command("equip",card.Id,firstQuote!.Payments[0].SourceIds,target:firstTarget):null,
+                            reason,card.Id,reason is null?affordable:legalTargets,gold:firstQuote,
+                            targetGold:affordable.Any(id=>equipQuotes[id].Kind==GoldCostKind.Derived)?affordable.ToDictionary(id=>id,id=>equipQuotes[id]):null);
                     }
                 }
                 Add("pass","Pass action",Command("pass"));
@@ -273,18 +282,23 @@ public sealed partial class MatchEngine
                 foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type==CardType.Strategy && Definition(c).ScenarioOnly))
                 {
                     var def=Definition(card);
+                    // A Strategy played with playStrategy pays its printed cost (issue #303): one quote, with
+                    // the engine's suggested sources pre-filled, and an unpayable cost is a disabled option.
+                    var strategyGold=QuoteStrategyGold(playerId,card);
+                    var strategyPay=strategyGold?.Payments.FirstOrDefault()?.SourceIds;
+                    var strategyReason=strategyGold is not null && strategyGold.Payments.Length==0?"Insufficient unbowed Gold production.":null;
                     if(Keyword(card,"Terrain"))
                     {
                         var blocked=_state.Cards.Values.Any(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==_state.CurrentBattleProvince && Keyword(c,"Terrain"));
                         var terrainReason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield."
-                            :blocked?"This battlefield already has a Terrain in play.":null;
-                        Add("playStrategy",$"Play {def.Name}",terrainReason is null?Command("playStrategy",card.Id):null,terrainReason,card.Id,[]);
+                            :blocked?"This battlefield already has a Terrain in play.":strategyReason;
+                        Add("playStrategy",$"Play {def.Name}",terrainReason is null?Command("playStrategy",card.Id,strategyPay):null,terrainReason,card.Id,[],gold:strategyGold);
                         continue;
                     }
                     var targets=_state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==_state.CurrentBattleProvince && Definition(c).Type==CardType.Personality &&
                         (def.Effect=="force-three"?c.OwnerId==playerId:c.OwnerId!=playerId && PersonalityForce(c)<=3)).Select(c=>c.Id).ToArray();
-                    var reason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield.":targets.Length==0?"No legal target at this battlefield.":null;
-                    Add("playStrategy",$"Play {def.Name}",reason is null?Command("playStrategy",card.Id,target:targets[0]):null,reason,card.Id,targets);
+                    var reason=!Army(playerId,_state.CurrentBattleProvince!.Value).Any()?"You have no unit at the current battlefield.":targets.Length==0?"No legal target at this battlefield.":strategyReason;
+                    Add("playStrategy",$"Play {def.Name}",reason is null?Command("playStrategy",card.Id,strategyPay,target:targets[0]):null,reason,card.Id,targets,gold:strategyGold);
                 }
                 // Reserve (issue #184): an absent battle action -- no presence of the recruiting
                 // player's own required, only a battlefield at the card's own province with enemy
@@ -303,7 +317,7 @@ public sealed partial class MatchEngine
                         var reason=!eligible?"There is no battlefield here with enemy presence.":quote.Error??(payment is null?"Insufficient unbowed Gold production.":null);
                         var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";
                         Add("recruitReserve",$"Recruit {def.Name} from Reserve · {quote.Cost} Gold · {mode}",
-                            reason is null?Command("recruitReserve",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id);
+                            reason is null?Command("recruitReserve",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote,gold:ToGoldQuote(quote));
                     }
                 }
                 Add("pass","Pass battle action",Command("pass"));
@@ -323,7 +337,7 @@ public sealed partial class MatchEngine
                             var reason=quote.Error ?? (payment is null?"Insufficient unbowed Gold production.":null);
                             var mode=discount?allegiance?"discount + allegiance":"Clan discount":allegiance?"Clan allegiance":"full cost";
                             Add("purchase",$"Buy {def.Name} · {quote.Cost} Gold{(def.Type==CardType.Personality?$" · {mode}":"")}",
-                                reason is null?Command("purchase",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote);
+                                reason is null?Command("purchase",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote,gold:ToGoldQuote(quote));
                         }
                         if(def.Type==CardType.Personality)
                         {

@@ -614,15 +614,39 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // "Choose a player" (issue #210): a player, not a card, is the target -- Kitsuki Horume's own
     // shape ("Choose a player. He gains or loses 1 Honor."). Distinct from PlayerId (the ACTING
     // player submitting this command).
-    int? TargetPlayerId = null);
+    int? TargetPlayerId = null,
+    // Generalized Gold payment (issue #303): the amount of Gold the acting player chooses to pay for an
+    // ability whose cost is a player-chosen variable ("pay zero or more Gold"). Null for every fixed or
+    // derived cost (the engine's own GoldQuote decides those) and read only for a variable-cost ability,
+    // where it must lie inside that quote's MinAmount..MaxAmount; null there means the minimum.
+    int? GoldAmount = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
+// Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
+// discount)". Null only for quotes serialized by an older engine.
 public sealed record PurchaseQuote(string CardId, int Cost, bool ClanDiscount, bool ClanAllegiance,
-    bool ProclaimEligible, string? Error, PaymentOption[] Payments);
+    bool ProclaimEligible, string? Error, PaymentOption[] Payments, string? Basis = null);
 public sealed record OverlayQuote(string CardId, string TargetId, int HigherLevel, int LowerLevel, string? Error);
+/// <summary>The one authoritative Gold quote (issue #303) for any action that costs Gold: recruiting,
+/// equipping, playing a Strategy and every costed ability. The client renders this and never derives a
+/// cost itself. Kind is "fixed" (printed on the card or fixed in an ability), "derived" (computed from a
+/// chosen target: another card's cost, a unit's grouped total, a recruit quote, plus a modifier and floor)
+/// or "variable" (the player chooses the amount, MinAmount..MaxAmount, sent as GameCommand.GoldAmount).
+/// Cost is what the action costs now (for "variable", the default amount, i.e. MinAmount). Payments are
+/// the engine's suggested and alternative source sets for Cost, best first; for "variable" quotes
+/// PaymentsByAmount holds them for every legal amount (keyed by amount) so the client can change the
+/// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
+public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
+    int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+/// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
+/// target-derived). Null when the action costs no Gold.</param>
+/// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
+/// changes when the player picks a different target, so every legal target ships its own quote and the
+/// client swaps between them without a round trip. Null for fixed and variable costs.</param>
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
-    int[]? Provinces = null, PurchaseQuote? Quote = null);
+    int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
+    Dictionary<string, GoldQuote>? TargetGold = null);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

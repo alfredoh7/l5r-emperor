@@ -16,7 +16,8 @@ try
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
-        ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url))
+        ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
+        ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; })
     };
     foreach (var (name, test) in cases)
     {
@@ -107,6 +108,24 @@ static async Task Reconnect(string url)
     await host.Submit(new GameCommand("concede", saved.PlayerId, 1));
     await WaitFor(() => host.Snapshot?.View.Version == 2 && !host.Busy);
     Check(host.Snapshot!.View.WinnerId == 1, "The latest connection remains usable after overlapping reconnects.");
+}
+
+// The outgoing mapping is an explicit field list, so a new GameCommand field is silently dropped online unless it is
+// added there (DeckPosition and TargetPlayerId were). Compare against GameCommand by reflection, and prove the
+// server's strict schema (unmapped members are errors) accepts exactly what the client sends.
+static void OutgoingPayload()
+{
+    var command = new GameCommand("useAbility", 1, 9, "card", ["source"], 2, true, true, new() { ["unit"] = 1 }, ["card-a"], "target",
+        "ability", "performer", "choice", "Top", 1, 4);
+    var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+    var json = System.Text.Json.JsonSerializer.Serialize(MatchSession.ToWire(command), web);
+    using var document = System.Text.Json.JsonDocument.Parse(json);
+    var sent = document.RootElement.EnumerateObject().Select(p => p.Name).ToHashSet();
+    var expected = typeof(GameCommand).GetProperties().Where(p => p.Name is not ("PlayerId" or "ExpectedVersion" or "EqualityContract"))
+        .Select(p => char.ToLowerInvariant(p.Name[0]) + p.Name[1..]).ToHashSet();
+    Check(sent.SetEquals(expected), $"The client wire payload and GameCommand disagree: missing [{string.Join(",", expected.Except(sent))}] extra [{string.Join(",", sent.Except(expected))}]");
+    var wire = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(json, Protocol.Json)!;
+    Check(System.Text.Json.JsonSerializer.Serialize(wire.BindToSeat(1, 9)) == System.Text.Json.JsonSerializer.Serialize(command), "The server binds exactly the command the client meant, GoldAmount included.");
 }
 
 static async Task InvalidConnections(string url)
