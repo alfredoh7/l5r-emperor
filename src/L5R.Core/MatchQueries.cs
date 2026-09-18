@@ -165,6 +165,24 @@ public sealed partial class MatchEngine
             Add("choosePreservingHonor","Bow him",Command("choosePreservingHonor") with {Choice="bow"});
             Add("choosePreservingHonor","Move him home",Command("choosePreservingHonor") with {Choice="move"});
         }
+        else if(_state.PendingChoice is { Type:"rikateDetach" } rikatePending)
+        {
+            // Asako Rikate (issue #301): any subset of the unit's attachments may go to hand. Offered:
+            // keep them all, return them all, or return exactly one (every subset is legal to submit
+            // directly through CardIds; these are the choices a client can enumerate without a combinatorial
+            // explosion, the same convention declineStraighten's own single-card options follow).
+            var attachments=Attachments(rikatePending.CardId!).Select(a=>a.Id).ToArray();
+            Add("chooseRikateDetach","Keep every attachment",Command("chooseRikateDetach",cardIds:[]),targets:attachments);
+            Add("chooseRikateDetach","Put every attachment into your hand",Command("chooseRikateDetach",cardIds:attachments),targets:attachments);
+            if(attachments.Length>1)
+                foreach(var id in attachments)
+                    Add("chooseRikateDetach",$"Put only {Definition(Card(id)).Name} into your hand",Command("chooseRikateDetach",cardIds:[id]),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"rinShame" })
+        {
+            Add("chooseRinShame","Dishonor him",Command("chooseRinShame") with {Choice="dishonor"});
+            Add("chooseRinShame","Refuse: he is bowed and cannot straighten this turn",Command("chooseRinShame") with {Choice="decline"});
+        }
         else if(_state.PendingChoice is { Type:"yourClanNeedsYouProvince" })
             foreach(var p in Player(playerId).Provinces.Where(p=>!p.Destroyed))
                 Add("chooseYourClanNeedsYouProvince",$"Place into province {p.Index+1}"+(p.CardId is not null?$" (discarding {Definition(Card(p.CardId)).Name})":""),
