@@ -151,17 +151,18 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 
     private bool PointerOnTable(Vector2 viewportPoint)
     {
         if (CameraBlocked || !_tableViewport.GetGlobalRect().HasPoint(viewportPoint)) return false;
-        // Fixed HUD lives outside this rectangle; modal/expanded views are
-        // blocked above. Root hover state intentionally does not govern the
-        // isolated viewport, whose mouse events are forwarded before root GUI.
-        return true;
+        if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
+        // The Fallen strips can overlap the projection. Check only the visible
+        // placards, not their full-screen parent, before forwarding root input.
+        return !_clanHud.GetChildren().OfType<Control>().Any(c =>
+            c.IsVisibleInTree() && c.GetGlobalRect().HasPoint(viewportPoint));
     }
 
     public override void _Input(InputEvent @event)
@@ -169,6 +170,11 @@ public partial class Main
         // A recorded demonstration consumes live input so a wheel/key/click
         // cannot alter the evidence mid-take. Normal play and input probes do not.
         if (_capturePath is not null && _captureMode == "published-ink-film")
+        { GetViewport().SetInputAsHandled(); return; }
+        // The acceptance probes supply tagged viewport mouse events. Ignore
+        // unrelated live desktop gestures only in those explicit capture modes;
+        // focus checks and ordinary game input routing remain in force.
+        if (IsMouseInputCapture && @event is InputEventMouse && !@event.HasMeta(CaptureMouseTag))
         { GetViewport().SetInputAsHandled(); return; }
         if (_tableSurface is null || MenuVisible) return;
         if (@event is InputEventMouse location) _lastTableMouse = location.Position;
@@ -187,7 +193,7 @@ public partial class Main
             }
             if (!PointerOnTable(mouse.Position))
             {
-                if (!mouse.Pressed) _tableSurface.ForwardMouse(mouse);
+                if (!mouse.Pressed) _tableSurface.ReleaseMouseOutside(mouse);
                 return;
             }
             if (!mouse.Pressed) { _tableSurface.ForwardMouse(mouse); GetViewport().SetInputAsHandled(); return; }
@@ -300,7 +306,7 @@ public partial class Main
         { _matSections.Emphasize(null, hover:true); HideTableTooltip(); return; }
         Control? hovered = token ?? _matSections.IconAt(_lastTableMouse) ?? TableHovered;
         if (token is null)
-            while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not CardTile) hovered = hovered.GetParent() as Control;
+            while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not (CardTile or PermanentGrantSeal or CardTokenRail)) hovered = hovered.GetParent() as Control;
         var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
             : hovered is CardTile provinceCard && provinceCard.Card.Zone == L5R.Core.Zone.Province
                 ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
@@ -308,6 +314,9 @@ public partial class Main
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
         _tableTooltip = token is not null ? token._MakeCustomTooltip(token.Explanation) :
+            hovered is PermanentGrantSeal grant ? grant.CreateReadingPreview() :
+            hovered is CardTokenRail rail ? rail.CreateReadingPreview() :
+            hovered is HomeReminder reminder ? reminder.CreateReadingPreview() :
             hovered is CardTile card ? card.CreateReadingPreview() : ReadingTooltip.Create(hovered, hovered.GetMeta("flat_tooltip").AsString());
         _root.AddChild(_tableTooltip);
         _tableTooltip.Scale = Vector2.One / _root.Scale.X;

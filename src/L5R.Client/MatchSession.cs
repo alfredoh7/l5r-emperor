@@ -12,7 +12,7 @@ public sealed record SessionSnapshot(MatchView View, ActionOption[] Actions, str
 public sealed record RoomSeat(string RoomCode, int PlayerId, string SeatToken, int ProtocolVersion, string ContentVersion);
 
 /// <summary>The presentation submits intentions here. It never changes engine state.</summary>
-public sealed class MatchSession : IDisposable
+public sealed partial class MatchSession : IDisposable
 {
     public event Action? Changed;
     public event Action<string>? Notice;
@@ -49,6 +49,14 @@ public sealed class MatchSession : IDisposable
         if (_engine is null || Online) return;
         _localSeat = 1 - _localSeat;
         RefreshLocal();
+    }
+
+    public void StartCustomPractice(Deck yourDeck, Deck opponentDeck)
+    {
+        // Construct and validate before disconnecting/replacing a running session.
+        var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
+        Disconnect(); _engine = engine; _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
     }
 
     public void FollowPracticePriority()

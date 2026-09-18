@@ -1,0 +1,63 @@
+{
+  "task_id": "01a0a600-30a7-7409-8aa8-b61a3e834794",
+  "approval": "Alfredo approved B3 and explicitly requested separate table/room Meshy lanterns on 2026-09-15. Table uses previously approved high-resolution artwork; room uses an unaltered crop of the approved B3 fixture.",
+  "source_sha256": "ff63290b4c79eb3c5c7bc56054206cd35e0b1a95d067f490d9066cd31bc5ea0d",
+  "source_region_px": null,
+  "cli": "@meshy-ai/cli 0.3.0",
+  "settings": {
+    "model_type": "standard",
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "target_formats": "glb",
+    "ultra_mode": false,
+    "image_enhancement": true
+  },
+  "estimated_credits": 30,
+  "pricing_checked": "2026-09-15 https://docs.meshy.ai/en/api/pricing",
+  "downloads": [
+    {
+      "file": "model.glb",
+      "sha256": "0922daff3e0c91c87d34e1c45bd2115619c32aa03d6a0afe699d754f624892ba",
+      "bytes": 61901224
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "sha256": "6c48d3acf95921f50c165f3e096c15fca9f7442e6af3a10843de373d67501b04",
+      "bytes": 24812560
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "sha256": "e324213f3a0e0d9eac4afef96d0a08dc7fa3b155c40fb50cfe1304cbd3223f93",
+      "bytes": 1931408
+    },
+    {
+      "file": "texture_0_normal.png",
+      "sha256": "d73138a76d79f82a137f2b9cee01900959e5f7b6d85586277b7761dd31775a62",
+      "bytes": 20574436
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "sha256": "8b7676f5dc9cc34c1c46bbe7baae6946b5e394d6670b0bc48de694f5fba79bdb",
+      "bytes": 1679738
+    },
+    {
+      "file": "thumbnail.png",
+      "sha256": "0a9cc7963dfc9095db826e5911786d9affe81db19668bfff98b1cb3415cd8b81",
+      "bytes": 156795
+    }
+  ],
+  "raw_storage": "Ignored artifacts/meshy/table-lantern-v1/download. No credentials or signed URLs retained here.",
+  "remaining": "Alfredo visual acceptance; new animation deferred. Native composition and close-up checks provided.",
+  "consumed_credits_reported_by_task": 30,
+  "timestamps_ms": {
+    "created_at": 1789491430618,
+    "started_at": 1789491430624,
+    "finished_at": 1789491562894
+  },
+  "texture_prompt": "Aged dark bronze tabletop lantern, matching the reference silhouette, fine worn gold floral engraving, soot darkening and tarnish, thin bronze ribs and amber window panes. Retain visible candle and window construction. No background or plinth. Relightable PBR materials, preserve weathering.",
+  "balance_before_both_lanterns": 1805,
+  "balance_after_both_lanterns": 1745,
+  "returned_model_version": "Not supplied in task response; standard CLI route requests Meshy-7."
+}

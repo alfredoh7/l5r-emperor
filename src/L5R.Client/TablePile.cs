@@ -22,6 +22,7 @@ public partial class TablePile : TooltipButton
     public Rect2 TopFace => LayerFace(Math.Max(0, _shownCount));
     private Rect2 LayerFace(float level)
     {
+        if(PileZone==Zone.RemovedFromGame) level=Math.Min(level,12);
         var height = Size.Y - 18; var width = height * .7142857f;
         return new Rect2((Size.X-width)/2-level*CardLean,26-level*CardThickness,width,height);
     }
@@ -42,12 +43,12 @@ public partial class TablePile : TooltipButton
     {
         OwnerId=player.Id; PileZone=zone;
         _fate=zone is Zone.FateDeck or Zone.FateDiscard;
-        _discard=zone is Zone.FateDiscard or Zone.DynastyDiscard;
-        var cards=player.Discard.Where(c=>c.Zone==zone).ToArray();
+        _discard=zone is Zone.FateDiscard or Zone.DynastyDiscard or Zone.RemovedFromGame;
+        var cards=zone==Zone.RemovedFromGame?player.RemovedFromGame:player.Discard.Where(c=>c.Zone==zone).ToArray();
         Count=zone==Zone.FateDeck?player.FateDeckCount:zone==Zone.DynastyDeck?player.DynastyDeckCount:cards.Length;
         _shownCount = Count;
         Material = CardPaper.Table;
-        var name=(_fate?"Fate":"Dynasty")+(_discard?" discard":" deck");
+        var name=zone==Zone.RemovedFromGame?"Removed from the Game":(_fate?"Fate":"Dynasty")+(_discard?" discard":" deck");
         // The projection doesn't expose chronological pile order. The face is a
         // representative public card, not a claim about the top of an ordered pile.
         _face=_discard&&(recentDiscard ?? cards.FirstOrDefault()?.Definition) is {} def?CardTile.Artwork(def):null;
@@ -84,7 +85,7 @@ public partial class TablePile : TooltipButton
             // Each card has a dark core and a separate worn paper lip. Alternating
             // fibers and tiny deterministic offsets prevent a solid extruded-block look.
             // Fractional top thickness follows the existing draw/discard interpolation.
-            for(var i=0;i<Math.Ceiling(_shownCount);i++)
+            for(var i=0;i<Math.Ceiling(PileZone==Zone.RemovedFromGame?Math.Min(_shownCount,12):_shownCount);i++)
             {
                 var level=Math.Min(i+1,_shownCount);
                 var layer=LayerFace(level);

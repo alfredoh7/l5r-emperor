@@ -13,7 +13,9 @@ public sealed partial class MatchEngine
             var def=Definition(card);
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray());
+                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
+                card.Protections.Select(p=>new GrantedEffectView("Action protection",
+                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
         }
         var players=_state.Players.Select(player=>
         {
@@ -38,12 +40,13 @@ public sealed partial class MatchEngine
                 // focused-card list has no comparable positional slot).
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
                 owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray());
+                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray())
+                { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
+            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck));
     }
 
@@ -56,11 +59,11 @@ public sealed partial class MatchEngine
         GameCommand Command(string type,string? id=null,string[]? sources=null,int? province=null,bool discount=false,bool allegiance=false,
             Dictionary<string,int>? assignments=null,string[]? cardIds=null,string? target=null)
             =>new(type,playerId,_state.Version,id,sources,province,discount,allegiance,assignments,cardIds,target);
-        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null)
-            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote));
+        void Add(string type,string label,GameCommand? command=null,string? reason=null,string? cardId=null,string[]? targets=null,int[]? provinces=null,PurchaseQuote? quote=null,int? goldCost=null)
+            =>result.Add(new(type,label,reason is null,reason,command,cardId,targets,provinces,quote,goldCost));
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action)
+        if(_state.Phase==Phase.Action && _state.PendingChoice is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
@@ -71,7 +74,31 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player=Player(playerId);
-        if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
+        if(_state.PendingChoice is { Type:"harshChoices" } harsh)
+        {
+            Add("harshChoices","Keep province",Command("harshChoices") with {Choice="decline"},cardId:harsh.CardId);
+            var last=player.Provinces.Count(p=>!p.Destroyed)==1;
+            Add("harshChoices",last?"Destroy last province · Defeat":"Destroy province · Draw 3",
+                Command("harshChoices") with {Choice="destroy"},cardId:harsh.CardId,
+                provinces:Card(harsh.CardId).ProvinceIndex is int province?[province]:[]);
+        }
+        else if(_state.PendingChoice is { Type:"timesOfStrifeDiscard" })
+        {
+            foreach(var id in player.Hand)
+                Add("timesOfStrifeDiscard",$"Discard {Definition(Card(id)).Name}",Command("timesOfStrifeDiscard",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"overconfidentDraw" or "brashDraw" } draw)
+        {
+            Add(draw.Type,"Draw 1 card",Command(draw.Type) with {Choice="draw"});
+            Add(draw.Type,"Decline draw",Command(draw.Type) with {Choice="decline"});
+        }
+        else if(_state.PendingChoice is { Type:"bowReaction" or "beforeActionReaction" })
+        {
+            // Use the execution validator for the exact watcher, targets, costs and usage limits.
+            result.AddRange(AbilityActions(playerId,reactionsOnly:true).Where(a=>a.Enabled));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
         {
             if(pending.PlayerId==playerId)
             {
@@ -186,11 +213,20 @@ public sealed partial class MatchEngine
                     foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type is CardType.Item or CardType.Follower))
                     {
                         var def=Definition(card);
-                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).Select(t=>t.Id).ToArray();
-                        var payment=PaymentOptions(playerId,def.GoldCost).FirstOrDefault();
-                        var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":payment is null?"Insufficient unbowed Gold production.":null;
-                        Add("equip",$"Equip {def.Name} · {def.GoldCost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:legalTargets[0]):null,
-                            reason,card.Id,legalTargets);
+                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).ToArray();
+                        if(legalTargets.Length==0)
+                            Add("equip",$"Equip {def.Name}",reason:"No Personality meets the attachment requirements.",cardId:card.Id);
+                        // Only combine targets that have the same authoritative price. Changing a
+                        // target in the client must not carry a cheaper payment onto another target.
+                        foreach(var group in legalTargets.GroupBy(t=>EquipCost(playerId,card,t)))
+                        {
+                            var cost=group.Key;var targetIds=group.Select(t=>t.Id).ToArray();
+                            var payment=PaymentOptions(playerId,cost).FirstOrDefault();
+                            var duplicate=(Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name);
+                            var reason=duplicate?"You already control this Unique or Singular card.":payment is null?"Insufficient unbowed Gold production.":null;
+                            Add("equip",$"Equip {def.Name} · {cost} Gold",reason is null?Command("equip",card.Id,payment!.SourceIds,target:targetIds[0]):null,
+                                reason,card.Id,targetIds,goldCost:cost);
+                        }
                     }
                 }
                 Add("pass","Pass action",Command("pass"));
@@ -201,8 +237,9 @@ public sealed partial class MatchEngine
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
-                var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
                 var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
+                var provinces=Player(1-_state.ActivePlayerId).Provinces
+                    .Where(p=>!p.Destroyed && (attack || _state.UnresolvedBattlefields.Contains(p.Index))).Select(p=>p.Index).ToArray();
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",

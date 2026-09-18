@@ -16,13 +16,47 @@ public partial class Main
     private CardTile? _probeTile;
     private double _nextCameraProbe = .25;
 
+    private const string CaptureMouseTag = "native_acceptance_mouse";
+    private bool IsMouseInputCapture => _capturePath is not null &&
+        (_captureMode.StartsWith("published-stabilization", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
+         (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal)));
+    private void PushCaptureMouse(InputEventMouse mouse, bool buffered = false)
+    {
+        mouse.SetMeta(CaptureMouseTag, true);
+        if (buffered) Input.ParseInputEvent(mouse);
+        else GetViewport().PushInput(mouse, true);
+    }
     private void MoveProbeMouse(Vector2 point, Vector2 relative = default)
     {
         GetViewport().WarpMouse(point);
-        GetViewport().PushInput(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative }, true);
+        PushCaptureMouse(new InputEventMouseMotion { Position = point, GlobalPosition = point, Relative = relative });
     }
-    private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => GetViewport().PushInput(
-        new InputEventMouseButton { ButtonIndex = button, Pressed = pressed, Position = point, GlobalPosition = point, Factor = 1 }, true);
+    private Vector2 FindProbeCloth()
+    {
+        var rect = _tableViewport.GetGlobalRect().Grow(-16);
+        var fabric = TableArtStage.FabricBounds(new Vector2(WorldWidth, _worldHeight)).Grow(-16);
+        // HUD overlays now cover the old viewport-origin target. Find a clear
+        // gesture path using current routing and real projected GUI hit tests.
+        for (var y = rect.Position.Y; y < rect.End.Y; y += 24)
+        for (var x = rect.Position.X; x < rect.End.X - 60; x += 24)
+        {
+            var point = new Vector2(x, y);
+            if (Enumerable.Range(0, 4).Any(i => !PointerOnTable(point + new Vector2(i * 20, 0))
+                || OverStatToken(point + new Vector2(i * 20, 0))
+                || !fabric.HasPoint(ScreenToWorld(point + new Vector2(i * 20, 0))))) continue;
+            MoveProbeMouse(point);
+            var hit = TableHovered;
+            if (hit is null || hit == _world || hit == _board || hit == _pileHud)
+            {
+                GD.Print($"CAMERA_CLOTH_TARGET: {point}; focus={GetWindow().HasFocus()}; hit={hit?.Name}");
+                return point;
+            }
+        }
+        throw new InvalidOperationException("Camera probe could not find uncovered empty cloth.");
+    }
+    private void CameraMouse(MouseButton button, bool pressed, Vector2 point) => PushCaptureMouse(
+        new InputEventMouseButton { ButtonIndex = button, Pressed = pressed, Position = point, GlobalPosition = point, Factor = 1 });
     private void CameraKey(Key key, bool pressed) => Input.ParseInputEvent(new InputEventKey { Keycode = key, PhysicalKeycode = key, Pressed = pressed });
     private void RequireCamera(bool value, string message) { if (!value) throw new InvalidOperationException("Camera acceptance: " + message); }
 
@@ -68,9 +102,10 @@ public partial class Main
                     RequireCamera(_selected?.Id == _probeSelection && View.Version == _probeVersion, "drag activated a card");
                     RequireCamera(_inspectorPanel.GetGlobalRect().Position == _probeHud, "HUD moved with the table");
                     ResetTableCamera();
-                    _probePoint = _tableViewport.GetGlobalRect().Position + new Vector2(5, 5);
+                    _probePoint = FindProbeCloth();
                     MoveProbeMouse(_probePoint); break;
                 case 5:
+                    RequireCamera(GetWindow().HasFocus() && PointerOnTable(_probePoint), "cloth target lost focus or became covered before the drag");
                     _probeCenter = _cameraCenter;
                     CameraMouse(MouseButton.Left, true, _probePoint); break;
                 case 6:

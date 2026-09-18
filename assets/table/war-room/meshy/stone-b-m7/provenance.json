@@ -1,0 +1,79 @@
+{
+  "asset": "stone-b-m7",
+  "task_id": "01a0a794-b7bd-76b9-994f-e1f1e57e5b79",
+  "resource": "image-to-3d",
+  "request": {
+    "resource": "image-to-3d",
+    "arguments": [
+      "image-to-3d",
+      "create",
+      "--image-url",
+      "assets/table/war-room/polish-m7/stone-reference.png",
+      "--model-type",
+      "standard",
+      "--ultra-mode",
+      "true",
+      "--should-texture",
+      "true",
+      "--image-enhancement",
+      "false",
+      "--texture-prompt",
+      "One dry hand-dressed dark gray basalt column footing. Subtly alternate irregular corner chips and sparse shallow natural fissures. Fine granular matte mineral surface, slightly worn edges, broad flat top and bottom. Match the same size, overall square shape and quiet charcoal palette as the reference; tiny weathering variation only. No polish, no shiny wax, no metal, no plastic or fantasy relief.",
+      "--enable-pbr",
+      "true",
+      "--texture-resolution",
+      "4k",
+      "--remove-lighting",
+      "true",
+      "--target-formats",
+      "glb",
+      "--operation-id",
+      "l5r-stone-b-m7",
+      "--async",
+      "--save-json",
+      "artifacts/meshy/stone-b-m7/submission.json"
+    ]
+  },
+  "texture_prompt_returned": "One dry hand-dressed dark gray basalt column footing. Subtly alternate irregular corner chips and sparse shallow natural fissures. Fine granular matte mineral surface, slightly worn edges, broad flat top and bottom. Match the same size, overall square shape and quiet charcoal palette as the reference; tiny weathering variation only. No polish, no shiny wax, no metal, no plastic or fantasy relief.",
+  "source_reference": "assets/table/war-room/polish-m7/stone-reference.png",
+  "status": "SUCCEEDED",
+  "consumed_credits": 35,
+  "timestamps": {
+    "created_at": 1789517941968,
+    "started_at": 1789517941970,
+    "finished_at": 1789518243866
+  },
+  "raw_downloads": [
+    {
+      "file": "model.glb",
+      "bytes": 92687356,
+      "sha256": "a3eea10981a514b0fb6a9bbe2dbb7e742e9740d1a64e9e1b901c0d91a0d2396d"
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "bytes": 30572893,
+      "sha256": "569e8df36e71f2fc636e1ebe4c3c0ca45d09121cb9a98adf3bfe118d0c0361c9"
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "bytes": 18577,
+      "sha256": "0b75845435262aca830944bd0d77cadc183c03b061f063a15935c743bbfe7303"
+    },
+    {
+      "file": "texture_0_normal.png",
+      "bytes": 28931088,
+      "sha256": "046481cdf0a80b310a489483f3686799e691960edd187ef95f679e285fbd7759"
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "bytes": 1614397,
+      "sha256": "af6f131c0303fa5413e5ab1e5524a9a823b4c6e3a2d77cd831743e130bea7f58"
+    },
+    {
+      "file": "thumbnail.png",
+      "bytes": 206926,
+      "sha256": "5936eb730db319b8ef84dbcc3b6104327df5bfa41b25d9be97e112b4f5a364de"
+    }
+  ],
+  "disposition": "Inspected original, then prepared in Blender for native review."
+}
