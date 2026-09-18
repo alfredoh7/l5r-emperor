@@ -1328,6 +1328,38 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Strategy wave 13 (issue #287): Batch B of the "Not blocked; deferred for scope"
+    /// cards from build_card_inventory.py's own BLOCKERS audit, following Batch A (follower-wave-14,
+    /// issue #285). Eight cards were assigned, but Surety of Purpose (oracle-l5r-7664) was found
+    /// already published in strategy-wave-6 (issue #264), so only seven are new here: Scorn the
+    /// Weak's flat -5F plus a conditional Honor loss and optional dishonor of a second target
+    /// (CardIds); Strength in Terror's dynamic Force reduction off a chosen Paragon Performer plus
+    /// an optional attachment-destroy (CardIds); Strength of Purity's new numeric Personal-Honor-
+    /// threshold Performer category; Strength of the Bear's own-unbowed-personality Performer paired
+    /// with the existing enemy-force-lower-than-performer Target; Strength of the Divine's dual
+    /// Force-vs-Personal-Honor choice (sharing one UsageKey), each branch buffing its own chosen,
+    /// opposed Paragon Performer (a new own-unbowed-personality-with-keyword-opposed category) then
+    /// attacking with strength read live off that same Performer; The Strength of the Spider's new
+    /// clan-checked own-unbowed-spider-personality-at-battle Performer, a destroy-if-bowed-else-
+    /// cripple two-branch effect (its own Focus Effect duel-delay clause is deliberately deferred,
+    /// see CardAbilities.cs); and Unexpected's optional self-bow-for-a-draw (a third CardIds
+    /// reuse).</summary>
+    public static PublishedSnapshot StrategyWave13 { get; } = LoadStrategyWave13();
+
+    private static PublishedSnapshot LoadStrategyWave13()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave13.json", "strategy-wave-13", requireDecks: false);
+        if(snapshot.Cards.Length != 7)
+            throw new InvalidOperationException("Unexpected strategy-wave-13 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-13 card is not a textful Strategy: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("strategy-wave-13 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

@@ -870,6 +870,87 @@ public static class AbilityCatalog
         // both non-Battle lines. Only the plain "Battle: Melee 4 Attack" (no bow cost, unlike Legulus's
         // Legion above) needed a new ability id, modeled directly on nikutai-attack's own shape.
         ["village-raiders-attack"] = new("Battle", "Melee 4 Attack", "attack"),
+        // Strategy wave 13 (issue #287): Batch B of the "Not blocked; deferred for scope" BLOCKERS
+        // audit -- eight Strategy cards a prior audit confirmed buildable with existing (or
+        // trivially small new) primitives. Surety of Purpose (oracle-l5r-7664), originally listed
+        // among these eight, turned out to already be fully wired and published (strategy-wave-6,
+        // issue #264's own Second City audit) under the existing "surety-of-purpose" ability id
+        // above -- its own BLOCKERS entry was simply stale and has been removed, not re-wired here.
+        // Scorn the Weak (oracle-l5r-9925): "Battle: Target an enemy Personality: Give him -5F. If
+        // his Force is now 0, his controller loses 1 Honor and you may target and dishonor a
+        // Personality." No Performer at all (crushing-force's own plain-Target shape), a flat -5F
+        // (ApplyModifier already floors Force at 0 via CardForce/PersonalityForce's own Math.Max).
+        // The trailing "you may target and dishonor" is CardIds' own established optional-second-
+        // selection reuse (see ValidateAbility's own scorn-the-weak branch), the same "not required
+        // to exist" idiom optional-dishonorable-personality already establishes for a single
+        // TargetId, just carried on CardIds since this ability already has a required primary
+        // TargetId of its own.
+        ["scorn-the-weak"] = new("Battle", "Target an enemy Personality: Give him -5F. If his Force is now 0, his controller loses 1 Honor and you may target and dishonor a Personality", "enemy-personality"),
+        // Strength in Terror (oracle-l5r-7538): "Battle: Choose your performing Paragon and target
+        // an enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You
+        // may target and destroy one of the Personality's attachments. Lose 3 Honor." No "unbowed"
+        // qualifier on the Performer, the same shape surety-of-purpose already established for a
+        // bare "Choose your performing Paragon." The dynamic Force reduction reads the chosen
+        // Performer's own live CardForce, the same self-referential shape legulus-legion-attack
+        // already established for a Follower's own Force, just against a separately-chosen
+        // Performer instead of the source card itself. The optional attachment-destroy is CardIds'
+        // own second-selection reuse again, restricted to one of the primary target's own attachments.
+        ["strength-in-terror"] = new("Battle", "Choose your performing Paragon and target an enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You may target and destroy one of the Personality's attachments. Lose 3 Honor", "enemy-personality", Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Paragon"]),
+        // Strength of Purity (oracle-l5r-7546): "Battle: Choose your performing Personality with 3
+        // or higher Personal Honor: Give him +3F." A numeric Personal Honor threshold Performer --
+        // no existing category reads a threshold off the Performer itself (lobby's own >=1 check is
+        // a plain Target category, not a Performer one), so this adds one, hardcoded to this one
+        // card's own printed 3 (the same "no need to generalize for a single card" discipline
+        // lobby's own hardcoded 1 already follows).
+        ["strength-of-purity"] = new("Battle", "Choose your performing Personality with 3 or higher Personal Honor: Give him +3F", "none", Performer: "own-personality-honor-3-plus-at-battle"),
+        // Strength of the Bear (oracle-l5r-10748, no printed Cost -- confirmed blank on its own
+        // scan, matching deck-pool.json's own missing "cost" field): "Battle: Bow your target
+        // unbowed Personality. Bow a target enemy card with lower Force than his. If your
+        // Personality has 5 or more printed Force, straighten him." "Target" (not "performing")
+        // matches Steel on Steel's own own-unbowed-personality Performer precedent exactly (no
+        // AtBattle qualifier of its own). enemy-force-lower-than-performer (immovable-object-bow's
+        // own Target) already compares against the chosen Performer's live Force verbatim. The
+        // trailing printed-Force threshold reuses Definition(performer).Force, the same "printed,
+        // not live" idiom personality-force-neq-performer-base already established.
+        ["strength-of-the-bear"] = new("Battle", "Bow your target unbowed Personality. Bow a target enemy card with lower Force than his. If your Personality has 5 or more printed Force, straighten him", "enemy-force-lower-than-performer", Performer: "own-unbowed-personality"),
+        // Strength of the Divine (oracle-l5r-10555, no printed Cost -- confirmed blank on its own
+        // scan, same as Strength of the Bear above): "Battle: Target your opposed unbowed Paragon.
+        // Give him +2F or +2PH. Melee Attack with strength equal to his Force or Personal Honor." A
+        // dual choice sharing one UsageKey (Horibe's own bow/straighten shape, and Batch A's own
+        // asako-house-guard-force-chi/-honor pair) -- but each branch here pairs a buff with an
+        // Attack whose own strength reads that SAME branch's stat back off the just-buffed Performer
+        // (monastery-fire-attack's own "read the performer's live state, then attack" shape), not a
+        // Set-Force. own-unbowed-personality-with-keyword-opposed is a new Performer category:
+        // own-unbowed-shugenja-opposed-at-battle's own "opposed" (enemy army present) gate,
+        // generalized off its hardcoded Shugenja onto RequiredKeywords the same way
+        // own-unbowed-personality-at-battle-with-keyword already generalized the plain at-battle
+        // gate -- "opposed," not "performing," so no AtBattle check of its own, matching this card's
+        // own "target," not "performing," phrasing.
+        ["strength-of-the-divine-force"] = new("Battle", "Target your opposed unbowed Paragon: +2F. Melee Attack with strength equal to his Force", "attack", Performer: "own-unbowed-personality-with-keyword-opposed", RequiredKeywords: ["Paragon"], UsageKey: "strength-of-the-divine"),
+        ["strength-of-the-divine-honor"] = new("Battle", "Target your opposed unbowed Paragon: +2PH. Melee Attack with strength equal to his Personal Honor", "attack", Performer: "own-unbowed-personality-with-keyword-opposed", RequiredKeywords: ["Paragon"], UsageKey: "strength-of-the-divine"),
+        // The Strength of the Spider (oracle-l5r-8362): its own Focus Effect clause ("you may choose
+        // now to delay the effects of losing this duel until after the next Dynasty Phase begins")
+        // is genuinely novel duel-resolution-timing plumbing -- no other card's own printed text
+        // defers a duel's OWN loss consequences this way anywhere in this catalog yet, so it is
+        // deliberately deferred here, narrower in scope than the rest of this card, rather than
+        // inventing new Dueling infrastructure for a single card (the same existing "Dueling/Focus
+        // Effects" gap oracle-l5r-6702/7995 are already blocked on). Its own Battle half is fully
+        // wired: own-unbowed-spider-personality-at-battle is a new Performer category (a CLAN check,
+        // HasClanAffiliation, not a printed Keyword -- RequiredKeywords/HasKeywords cannot express
+        // it), enemy-force already covers "an enemy Personality or Follower" verbatim, the dynamic
+        // Force reduction reads the Performer's own live CardForce the same way strength-in-terror
+        // above does, and DestroyAttackTarget already dispatches Personality-vs-Follower destruction
+        // correctly for the "destroy it if it is bowed" branch.
+        ["strength-of-the-spider"] = new("Battle", "Choose your performing unbowed Spider Clan Personality and target an enemy Personality or Follower: Destroy it if it is bowed. Reduce its Force by an amount equal to your Personality's Force. Bow it if its Force is now 0", "enemy-force", Performer: "own-unbowed-spider-personality-at-battle"),
+        // Unexpected (oracle-l5r-9940): "Battle: Choose your performing unbowed Personality and
+        // target an enemy card without attachments: Bow it. You may bow your Personality; if you
+        // did, draw a card." own-unbowed-personality-at-battle (no RequiredKeywords -- no keyword
+        // printed) and enemy-card-without-attachments both already exist verbatim. The optional
+        // self-bow-for-a-draw is CardIds' own third reuse this wave: the performer's own id, when
+        // supplied, opts in (a genuine two-outcome choice, unlike tsujiken-straighten-holding's own
+        // auto-pick-the-better-outcome simplification -- staying unbowed has real value here, so
+        // this needs an actual player choice, not an automatic default).
+        ["unexpected"] = new("Battle", "Choose your performing unbowed Personality and target an enemy card without attachments: Bow it. You may bow your Personality; if you did, draw a card", "enemy-card-without-attachments", Performer: "own-unbowed-personality-at-battle"),
     });
 }
 
@@ -1027,7 +1108,10 @@ public sealed partial class MatchEngine
     // houken-exp-straighten, tsudoken-exp-straighten's own second straighten).
     private static bool DestroysTarget(string abilityId) => abilityId is "tetsuo-destroy-weaker-weaponed" or "training-destroy-no-attachments"
         or "elite-sentry-destroy" or "thunderous-legion-destroy" or "volcano-tattoo-destroy" or "ring-of-fire-destroy"
-        or "unseen-assassin-strike" or "kojinrue-destroy" or "dairuko-exp-bow" or "yozo-exp-destroy" or "dispensing-justice-destroy" or "kuronada-destroy";
+        or "unseen-assassin-strike" or "kojinrue-destroy" or "dairuko-exp-bow" or "yozo-exp-destroy" or "dispensing-justice-destroy" or "kuronada-destroy"
+        // The Strength of the Spider (issue #287): conditionally destroys its own target (the
+        // "destroy it if it is bowed" branch).
+        or "strength-of-the-spider";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -1055,7 +1139,13 @@ public sealed partial class MatchEngine
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
         or "soshi-conditional-bow" or "kinaro-exp-bow" or "nubane-bow" or "xijkt-bow" or "kouzei-bow" or "mitoshi-bow" or "jinai-bow"
-        or "muzu-bow" or "hiroto-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow";
+        or "muzu-bow" or "hiroto-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
+        // Strategy wave 13 (issue #287): Strength of the Bear and Unexpected both bow their own
+        // target unconditionally; The Strength of the Spider bows its target conditionally (only
+        // when not already destroyed by its own alternate branch) -- still counts as "bows the
+        // target" at this ability-id level, the same "a specific instance might not end up bowing"
+        // allowance costly-feud's own doc comment above already establishes.
+        or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider";
     // Finds the one eligible in-play watcher for a just-submitted command, if any -- every branch is
     // an "in play" Reaction (the user's own clarification), monitored live, never pre-registered.
     // Rokai (a classified destroy) is scoped to "another player's action," "your Personality," and
@@ -1244,6 +1334,13 @@ public sealed partial class MatchEngine
         // sakata-attack already established (there, a token count; here, CardForce itself).
         "legulus-legion-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
         "village-raiders-attack" => 4,
+        // Strength of the Divine (oracle-l5r-10555, issue #287): "Melee Attack with strength equal
+        // to his Force or Personal Honor" -- sourceId here is the just-buffed Performer (not the
+        // Strategy card itself), the same self-referential live-read shape legulus-legion-attack
+        // already established, just reading a separately-chosen card instead of the ability's own
+        // source.
+        "strength-of-the-divine-force" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -1287,6 +1384,7 @@ public sealed partial class MatchEngine
         "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
         "champion-of-thunder-attack" => "Ranged",
         "legulus-legion-attack" or "village-raiders-attack" => "Melee",
+        "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -1829,6 +1927,31 @@ public sealed partial class MatchEngine
                 // Timing (Battle, here) already gates the SOURCE card's own presence; the performer's
                 // only extra restriction beyond own-personality is "unbowed".
                 "own-unbowed-personality" => Definition(performer).Type == CardType.Personality && !performer.Bowed,
+                // Strength of Purity (oracle-l5r-7546, issue #287): "your performing Personality with
+                // 3 or higher Personal Honor" -- a numeric Personal Honor threshold on the Performer
+                // itself, hardcoded to this one card's own printed 3 (lobby's own hardcoded >=1
+                // Target-side threshold is the closest existing precedent for a bare numeric gate;
+                // this is the Performer-side equivalent). No "unbowed" qualifier printed.
+                "own-personality-honor-3-plus-at-battle" => Definition(performer).Type == CardType.Personality &&
+                    CardPersonalHonor(performer) >= 3 && (!actingAsBattle || AtBattle(performer)),
+                // Strength of the Divine (oracle-l5r-10555, issue #287): "your opposed unbowed
+                // Paragon" -- own-unbowed-shugenja-opposed-at-battle's own "opposed" (enemy army
+                // present at the current battlefield) gate, generalized off its hardcoded Shugenja
+                // onto RequiredKeywords, the same way own-unbowed-personality-at-battle-with-keyword
+                // already generalized the plain at-battle gate off individual hardcoded keywords.
+                // "Opposed," not "performing," so no AtBattle check of its own -- matching Crushing
+                // Force's own own-opposed Target category, which checks the same Army presence
+                // without an AtBattle check either.
+                "own-unbowed-personality-with-keyword-opposed" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
+                    HasKeywords(performer, ability.RequiredKeywords) && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                // The Strength of the Spider (oracle-l5r-8362, issue #287): "your performing unbowed
+                // Spider Clan Personality" -- a CLAN check (HasClanAffiliation), not a printed
+                // Keyword, so RequiredKeywords/HasKeywords cannot express it; hardcoded to Spider,
+                // the same "no need to generalize for a single card" discipline every other
+                // hardcoded-single-value category here already follows (e.g. the honor-3-plus
+                // category just above).
+                "own-unbowed-spider-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
+                    HasClanAffiliation(performer, "Spider") && AtBattle(performer),
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -1880,12 +2003,55 @@ public sealed partial class MatchEngine
             // player chooses to destroy right now), not a static per-ability-id/target/source formula
             // AttackStrength's own switch can express. CardIds carries the chosen token ids here
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id == "mitsu-fire-attack" || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
+            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected"
+                || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             if (id == "mitsu-fire-attack")
             {
                 var tokenIds = command.CardIds ?? [];
                 Require(tokenIds.Distinct().Count() == tokenIds.Length && tokenIds.All(tid => source!.Tokens.Any(t => t.Id == tid && t.Type == "Fire")),
                     "Choose zero or more of Mitsu's own Fire tokens to destroy.");
+            }
+            // Scorn the Weak (oracle-l5r-9925, issue #287): "If his Force is now 0, ... you may
+            // target and dishonor a Personality" -- CardIds carries this optional second target (any
+            // Personality, either side, no further restriction printed), the same "not required to
+            // exist" idiom optional-dishonorable-personality already establishes for a single
+            // TargetId, just carried on CardIds since this ability already has a required primary
+            // TargetId. Only offered when the primary target's Force would actually reach 0 from
+            // this ability's own flat -5F (CardForce already floors at 0, so "now 0" reduces to a
+            // pre-effect Force of 5 or less).
+            if (id == "scorn-the-weak")
+            {
+                var ids = command.CardIds ?? [];
+                Require(ids.Length is 0 or 1, "Scorn the Weak may target at most one additional Personality to dishonor.");
+                if (ids.Length == 1)
+                {
+                    Require(CardForce(Card(command.TargetId!)) <= 5,
+                        "You may only target and dishonor a Personality when the enemy Personality's Force would reach 0.");
+                    Require(Definition(Card(ids[0])).Type == CardType.Personality, "Target a Personality to dishonor.");
+                }
+            }
+            // Strength in Terror (oracle-l5r-7538, issue #287): "You may target and destroy one of
+            // the Personality's attachments" -- CardIds' own second-selection reuse again, restricted
+            // to one of the primary target's own attachments.
+            if (id == "strength-in-terror")
+            {
+                var ids = command.CardIds ?? [];
+                Require(ids.Length is 0 or 1, "Strength in Terror may target at most one attachment to destroy.");
+                if (ids.Length == 1)
+                {
+                    var attachmentToDestroy = Card(ids[0]);
+                    Require(attachmentToDestroy.Zone == Zone.Attached && attachmentToDestroy.AttachedTo == command.TargetId,
+                        "Target one of the Personality's own attachments.");
+                }
+            }
+            // Unexpected (oracle-l5r-9940, issue #287): "You may bow your Personality; if you did,
+            // draw a card" -- CardIds' own third reuse this wave: the performer's own id, when
+            // supplied, opts into the self-bow-for-a-draw.
+            if (id == "unexpected")
+            {
+                var ids = command.CardIds ?? [];
+                Require(ids.Length is 0 or 1 && (ids.Length == 0 || ids[0] == command.PerformerId),
+                    "You may only bow your own performing Personality.");
             }
             if (ability.Target == "none") Require(command.TargetId is null, "This action has no target.");
             // Ranged/Melee Attack: unlike every other ability target, this one is not required to
@@ -1916,7 +2082,13 @@ public sealed partial class MatchEngine
                     // Keywords -- this is a synthetic marker for the card's own unique text, not a
                     // printed keyword other cards could reference.
                     Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
-                    var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, source?.Id);
+                    // Strength of the Divine (issue #287): the first "attack" Target ability with its
+                    // own separate Performer -- sourceId here must be the chosen Performer (the card
+                    // whose live Force/Personal Honor the strength formula reads), not the ability's
+                    // own source card, the same distinction ExecuteAbilityEffects' own case already
+                    // draws for it. Every existing "attack" ability has no Performer of its own, so
+                    // this is unconditionally identical to the old source?.Id fallback for all of them.
+                    var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id);
                     Require(CardForce(target) <= strength, "That card's Force is above the Attack's strength.");
                 }
             }
@@ -2467,6 +2639,93 @@ public sealed partial class MatchEngine
                 if (DiscardTopOfFateDeck(player) is int idFocus)
                     Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += idFocus + 1;
                 break;
+            // Strategy wave 13 (issue #287): Batch B of the "Not blocked; deferred for scope"
+            // BLOCKERS audit. Scorn the Weak (oracle-l5r-9925): a flat -5F, then (only when the
+            // target's Force is now 0, already enforced by ValidateAbility's own scorn-the-weak
+            // branch above) the controller's own Honor loss and the optional dishonor of a second,
+            // separately-selected Personality carried on CardIds.
+            case "scorn-the-weak":
+                ApplyModifier(target!, source!.Id, id, "Force", -5);
+                if (CardForce(target!) == 0)
+                {
+                    GainHonor(target!.OwnerId, -1, "Scorn the Weak", source);
+                    if (command.CardIds is { Length: 1 } scornDishonorIds) Dishonor(Card(scornDishonorIds[0]));
+                }
+                break;
+            // Strength in Terror (oracle-l5r-7538): the chosen Paragon's own live Force reduces the
+            // target's, then the optional attachment-destroy (CardIds, validated above), then the
+            // flat Honor loss.
+            case "strength-in-terror":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(target!, source!.Id, id, "Force", -CardForce(performer));
+                if (command.CardIds is { Length: 1 } terrorAttachmentIds) DestroyAttachment(Card(terrorAttachmentIds[0]));
+                GainHonor(player.Id, -3, "Strength in Terror", source);
+                break;
+            }
+            case "strength-of-purity": ApplyModifier(Card(command.PerformerId!), source!.Id, id, "Force", 3); break;
+            // Strength of the Bear (oracle-l5r-10748): bows both the chosen Performer and the
+            // enemy Target (each independently Stalwart-checkable, since only the latter is
+            // "an enemy's effect" from its own controller's point of view -- the Performer's own bow
+            // is the ability's own printed cost/effect on your own card, same as every other self-bow
+            // in this file), then straightens the Performer back if his own printed Force qualifies.
+            case "strength-of-the-bear":
+            {
+                var performer = Card(command.PerformerId!);
+                if (!StalwartNegatesBow(performer, player.Id)) performer.Bowed = true;
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (Definition(performer).Force >= 5) Straighten(performer);
+                break;
+            }
+            // Strength of the Divine (oracle-l5r-10555): buffs the chosen (opposed, unbowed Paragon)
+            // Performer first, then attacks with strength read live off that same, now-buffed
+            // Performer -- monastery-fire-attack's own "performer effect, then attack read off the
+            // performer" shape.
+            case "strength-of-the-divine-force":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(performer, source!.Id, id, "Force", 2);
+                if (ResolveOrDeferAttack(id, player, target?.Id, performer.Id, consumedGrant)) return;
+                break;
+            }
+            case "strength-of-the-divine-honor":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(performer, source!.Id, id, "PersonalHonor", 2);
+                if (ResolveOrDeferAttack(id, player, target?.Id, performer.Id, consumedGrant)) return;
+                break;
+            }
+            // The Strength of the Spider (oracle-l5r-8362): "Destroy it if it is bowed" is an
+            // alternate branch to the Force-reduction-then-conditional-bow that follows, not a
+            // sequential step alongside it (the classic L5R "cripple, or outright kill if it's
+            // already bowed" two-branch shape) -- DestroyAttackTarget already dispatches
+            // Personality-vs-Follower destruction correctly for either kind of target.
+            case "strength-of-the-spider":
+            {
+                var performer = Card(command.PerformerId!);
+                if (target!.Bowed) DestroyAttackTarget(target, player.Id);
+                else
+                {
+                    ApplyModifier(target, source!.Id, id, "Force", -CardForce(performer));
+                    if (CardForce(target) == 0 && !StalwartNegatesBow(target, player.Id)) target.Bowed = true;
+                }
+                break;
+            }
+            // Unexpected (oracle-l5r-9940): bows the enemy Target (an "enemy's effect," so
+            // Stalwart-checkable), then the optional self-bow-for-a-draw (CardIds, validated above,
+            // the performer's own choice -- a cost paid by its own controller, so no Stalwart check,
+            // matching every other self-paid bow-as-cost in this file).
+            case "unexpected":
+            {
+                var performer = Card(command.PerformerId!);
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (command.CardIds is { Length: 1 })
+                {
+                    performer.Bowed = true;
+                    Draw(player);
+                }
+                break;
+            }
             case "keppo-destroy":
                 if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
                 break;

@@ -190,7 +190,8 @@ var tests = new (string Name, Action Run)[]
     ("Unimpeachable Name (oracle-l5r-8989): a broad out-of-play \"before any action resolves\" Reaction -- reduces the reacting player's own Honor loss from that action by 3 (minimum 0) and/or rehonors a target Dishonorable Personality; NOT offered at all when neither condition could possibly apply; her own separate Battle ability bows a performing Shugenja and an enemy card for 2 Honor", UnimpeachableNamePrimitive),
     ("Fields of Mercy (oracle-l5r-2530): a per-Terrain-instance, per-player destroyed-Personality counter that starts at 0 only once the card itself enters play (never retroactively) -- the first Personality destruction after entry still happens normally (and starts the count), every one after that has only the Personality-destruction component negated (attachments on that unit are still destroyed)", FieldsOfMercyPrimitive),
     ("Yasuki Tsujiken (oracle-l5r-9469): his own entering-play Reaction marks a target Holding, independently stacking per copy of Tsujiken that marks it; every future bow of a marked Holding (by any cause) costs its controller 1 Honor per active mark, for as long as the marking Tsujiken remains in play; his separate Open half straightens a target Holding, only bowing himself as a cost when that Holding's base Gold Cost is above 4", YasukiTsujikenPrimitive),
-    ("Follower wave 14 (issue #285): the first batch of six \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Asako House Guard's dual-choice Set-Force (asako-house-guard-force-chi/-honor, sharing one UsageKey, plus its own Phoenix Clan attach restriction); Legulus's Legion's bow-cost Attack reading its own LIVE Force via sourceId (proven against a token modifier, not just its printed Force); Village Guardian's new per-player MatchState.ProvinceEverDestroyed tracker, set at MatchEngine.DestroyProvince's own single choke point (proven to flag only the province's own owner, never the attacker) and read by its own entry Reaction's draw count (0, 1 or 2); Village Raiders' AttachGrantsKeyword \"Conqueror\" (its own scan literally reads \"This Personality has Conqueror\" despite being a Follower), proven end-to-end through an actual battle resolution, plus its own separate flat Melee 4 Attack; Water Spider Adept's pure attach restriction with no ability text at all; and Yodotai Legionnaire's entry Honor loss carrying the real Legionnaire keyword, previously exercised only by a synthetic fixture, through Aulus's own existing unit-scoped boost", FollowerWave14Primitives)
+    ("Follower wave 14 (issue #285): the first batch of six \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Asako House Guard's dual-choice Set-Force (asako-house-guard-force-chi/-honor, sharing one UsageKey, plus its own Phoenix Clan attach restriction); Legulus's Legion's bow-cost Attack reading its own LIVE Force via sourceId (proven against a token modifier, not just its printed Force); Village Guardian's new per-player MatchState.ProvinceEverDestroyed tracker, set at MatchEngine.DestroyProvince's own single choke point (proven to flag only the province's own owner, never the attacker) and read by its own entry Reaction's draw count (0, 1 or 2); Village Raiders' AttachGrantsKeyword \"Conqueror\" (its own scan literally reads \"This Personality has Conqueror\" despite being a Follower), proven end-to-end through an actual battle resolution, plus its own separate flat Melee 4 Attack; Water Spider Adept's pure attach restriction with no ability text at all; and Yodotai Legionnaire's entry Honor loss carrying the real Legionnaire keyword, previously exercised only by a synthetic fixture, through Aulus's own existing unit-scoped boost", FollowerWave14Primitives),
+    ("Strategy wave 13 (issue #287): Batch B of the \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Scorn the Weak's flat -5F with a Force-now-0-gated Honor loss and optional second-target dishonor (CardIds); Strength in Terror's dynamic Force reduction off a chosen Paragon Performer's own live Force plus an optional attachment-destroy (CardIds); Strength of Purity's new numeric Personal-Honor-threshold Performer category; Strength of the Bear's own-unbowed-personality Performer paired with enemy-force-lower-than-performer, plus its own printed-Force-gated straighten-back; Strength of the Divine's dual Force-vs-Personal-Honor choice sharing one UsageKey, each branch buffing its own chosen, opposed Paragon Performer then attacking with strength read live off that same Performer; The Strength of the Spider's new clan-checked Performer and its own destroy-if-bowed-else-cripple two-branch effect; and Unexpected's optional self-bow-for-a-draw (a third CardIds reuse)", StrategyWave13Primitives)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -7546,5 +7547,194 @@ static void FollowerWave14Primitives()
         Equal(e.State.Players[0].Honor,honorBefore-2,"Entry Honor loss: -2");
         Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==legionnaire.Id).Force,2,"Base 1 + 1 from Aulus's own unit-scoped Legionnaire boost -- the real card, not just the synthetic fixture");
         Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==aulus.Id).Force,3,"Aulus itself is not a Legionnaire -- unaffected");
+    }
+}
+static void StrategyWave13Primitives()
+{
+    // Scorn the Weak (oracle-l5r-9925): "Target an enemy Personality: Give him -5F. If his Force is
+    // now 0, his controller loses 1 Honor and you may target and dishonor a Personality."
+    {
+        // Force 6 - 5 = 1: does NOT reach 0. No Honor loss, and the optional second target is
+        // rejected outright (nothing to gate it on).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-9925",0,Zone.Hand);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // blanket army-presence requirement -- no Performer of its own
+        var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var third=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[1].Honor;
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"scorn-the-weak",CardIds:[third.Id]));
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"scorn-the-weak"));
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,1,"6 - 5 = 1");
+        Equal(e.State.Players[1].Honor,honorBefore,"Force did not reach 0: no Honor loss");
+        Check(!e.State.Cards[third.Id].Dishonorable,"No dishonor offered when Force never reached 0");
+    }
+    {
+        // Force 4 - 5 floors to 0: the controller loses 1 Honor, and the optional second target
+        // (any Personality, either side, no restriction printed) may be dishonored.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-9925",0,Zone.Hand);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // blanket army-presence requirement -- no Performer of its own
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        var third=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[1].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"scorn-the-weak",CardIds:[third.Id]));
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,0,"CardForce floors at 0, never negative");
+        Equal(e.State.Players[1].Honor,honorBefore-1,"Force reached 0: controller loses 1 Honor");
+        Check(e.State.Cards[third.Id].Dishonorable,"The optional second target was dishonored");
+    }
+    // Strength in Terror (oracle-l5r-7538, Fear): "Choose your performing Paragon and target an
+    // enemy Personality: Reduce his Force by an amount equal to your Paragon's Force. You may
+    // target and destroy one of the Personality's attachments. Lose 3 Honor."
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-7538",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6
+        var attachment=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:target.Id);
+        var filler=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // an unrelated card -- not the primary target
+        var offTarget=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:filler.Id);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strength-in-terror",PerformerId:performer.Id,CardIds:[offTarget.Id])); // not one of the TARGET's own attachments
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strength-in-terror",PerformerId:performer.Id,CardIds:[attachment.Id]));
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,3,"6 - 3 (the Paragon's own live Force) = 3");
+        Equal(e.State.Cards[attachment.Id].Zone,Zone.FateDiscard,"The optional attachment was destroyed");
+        Equal(e.State.Players[0].Honor,honorBefore-3,"Loses 3 Honor");
+    }
+    // Strength of Purity (oracle-l5r-7546): "Choose your performing Personality with 3 or higher
+    // Personal Honor: Give him +3F."
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-7546",0,Zone.Hand);
+        var tooLow=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Personal Honor 2
+        var qualifies=Add(s,"training-crane-courtier",0,Zone.Battlefield,province:0); // Personal Honor 3
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"strength-of-purity",PerformerId:tooLow.Id)); // Personal Honor 2 < 3
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"strength-of-purity",PerformerId:qualifies.Id));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==qualifies.Id).Force,5,"Printed Force 2 + 3");
+    }
+    // Strength of the Bear (oracle-l5r-10748, no printed Cost): "Bow your target unbowed
+    // Personality. Bow a target enemy card with lower Force than his. If your Personality has 5 or
+    // more printed Force, straighten him."
+    {
+        // Printed Force 4 (below 5): stays bowed.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-10748",0,Zone.Hand);
+        var performer=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // printed Force 4
+        var weaker=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:weaker.Id,AbilityId:"strength-of-the-bear",PerformerId:performer.Id));
+        Check(e.State.Cards[performer.Id].Bowed,"Printed Force 4 < 5: stays bowed");
+        Check(e.State.Cards[weaker.Id].Bowed,"Enemy target with lower Force is bowed too");
+    }
+    {
+        // Printed Force 6 (5 or more): straightened back immediately.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-10748",0,Zone.Hand);
+        var performer=Add(s,"training-lion-veteran",0,Zone.Battlefield,province:0); // printed Force 6
+        var weaker=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:weaker.Id,AbilityId:"strength-of-the-bear",PerformerId:performer.Id));
+        Check(!e.State.Cards[performer.Id].Bowed,"Printed Force 6 >= 5: straightened back");
+        Check(e.State.Cards[weaker.Id].Bowed,"Enemy target with lower Force is still bowed");
+    }
+    // Strength of the Divine (oracle-l5r-10555, no printed Cost): "Target your opposed unbowed
+    // Paragon. Give him +2F or +2PH. Melee Attack with strength equal to his Force or Personal
+    // Honor." A dual choice sharing one UsageKey; each branch buffs the Performer then attacks with
+    // strength read live off that same, now-buffed Performer.
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-10555",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, PersonalHonor 2
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        var enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2, opposes the performer
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-force"));
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==performer.Id).Force,5,"3 + 2");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Attack strength 5 (the buffed Force) destroys a Force-2 target");
+        // Shared UsageKey: the OTHER half of this same printed opportunity is now exhausted too.
+        var enemy2=Add(e.State,"training-lion-courtier",1,Zone.Battlefield,province:0);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,PerformerId:performer.Id,TargetId:enemy2.Id,AbilityId:"strength-of-the-divine-honor"));
+    }
+    {
+        // The Personal Honor branch, independent of the Force branch above.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-10555",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, PersonalHonor 2
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        var enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-honor"));
+        Equal(e.State.Cards[performer.Id].Modifiers.Where(m=>m.Stat=="PersonalHonor").Sum(m=>m.Amount),2,"Personal Honor buffed by +2");
+        Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,"Attack strength 4 (the buffed Personal Honor: printed 2 + 2) destroys a Force-2 target");
+    }
+    // The Strength of the Spider (oracle-l5r-8362): "Choose your performing unbowed Spider Clan
+    // Personality and target an enemy Personality or Follower: Destroy it if it is bowed. Reduce
+    // its Force by an amount equal to your Personality's Force. Bow it if its Force is now 0."
+    {
+        // Already-bowed branch: destroyed outright, no Force reduction needed.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8362",0,Zone.Hand);
+        var performer=Add(s,"training-spider-honor-loss",0,Zone.Battlefield,province:0); // Spider Clan, Force 2
+        var bowedTarget=Add(s,"training-lion-veteran",1,Zone.Battlefield,true,province:0); // Force 6, already bowed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:bowedTarget.Id,AbilityId:"strength-of-the-spider",PerformerId:performer.Id));
+        Equal(e.State.Cards[bowedTarget.Id].Zone,Zone.Dead,"Already bowed: destroyed outright, even at Force 6");
+    }
+    {
+        // Unbowed branch, reduced to exactly 0: cripple, then bow (still alive).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8362",0,Zone.Hand);
+        var performer=Add(s,"training-spider-honor-loss",0,Zone.Battlefield,province:0); // Spider Clan, Force 2
+        var target=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2, unbowed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strength-of-the-spider",PerformerId:performer.Id));
+        Equal(e.State.Cards[target.Id].Zone,Zone.Battlefield,"Still alive -- the unbowed branch never destroys");
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,0,"2 - 2 = 0");
+        Check(e.State.Cards[target.Id].Bowed,"Force reached 0: bowed");
+    }
+    {
+        // Unbowed branch, NOT reduced to 0: crippled but not bowed.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-8362",0,Zone.Hand);
+        var performer=Add(s,"training-spider-honor-loss",0,Zone.Battlefield,province:0); // Spider Clan, Force 2
+        var target=Add(s,"training-lion-veteran",1,Zone.Battlefield,province:0); // Force 6, unbowed
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"strength-of-the-spider",PerformerId:performer.Id));
+        Equal(e.GetView(0).Players[1].Army.Single(c=>c.Id==target.Id).Force,4,"6 - 2 = 4");
+        Check(!e.State.Cards[target.Id].Bowed,"Force did not reach 0: not bowed");
+    }
+    // Unexpected (oracle-l5r-9940): "Choose your performing unbowed Personality and target an enemy
+    // card without attachments: Bow it. You may bow your Personality; if you did, draw a card."
+    {
+        // Declines the optional self-bow: the target is still bowed, but no draw and the performer
+        // stays unbowed.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-9940",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"unexpected",PerformerId:performer.Id,CardIds:[target.Id])); // must be the PERFORMER's own id, not the target's
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"unexpected",PerformerId:performer.Id));
+        Check(e.State.Cards[target.Id].Bowed,"Target bowed");
+        Check(!e.State.Cards[performer.Id].Bowed,"Declined the optional self-bow: performer stays unbowed");
+        Equal(e.State.Players[0].Hand.Count,handBefore-1,"No draw when the optional self-bow was declined -- only the Strategy card itself leaves hand, played from it");
+    }
+    {
+        // Takes the optional self-bow: draws a card.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var strat=Add(s,"oracle-l5r-9940",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        var handBefore=e.State.Players[0].Hand.Count;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"unexpected",PerformerId:performer.Id,CardIds:[performer.Id]));
+        Check(e.State.Cards[target.Id].Bowed,"Target bowed");
+        Check(e.State.Cards[performer.Id].Bowed,"Took the optional self-bow");
+        Equal(e.State.Players[0].Hand.Count,handBefore,"The Strategy card itself leaves hand (-1) but the draw (+1) nets back to even");
     }
 }
