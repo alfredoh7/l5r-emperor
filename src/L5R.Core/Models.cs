@@ -407,6 +407,22 @@ public sealed class MatchState
     public PendingAttack? PendingAttack { get; set; }
     public PendingConqueror? PendingConqueror { get; set; }
     public PendingDuel? PendingDuel { get; set; }
+    // Deck search (issue #312): see DeckSearch.cs. Non-null exactly while one of the "search*" PendingChoice
+    // types is open; it holds the engine-private context (which deck, which card was picked) that the
+    // player's own MatchView.PendingSearch is derived from, and is never sent as-is to anyone.
+    public PendingSearch? PendingSearch { get; set; }
+    // Deck search (issue #312): the append-only, PUBLIC record of every card a player has shown the other
+    // player (a search shows what it found). Exposed to both players as MatchView.ShownCards.
+    public List<ShownCard> ShownCards { get; set; } = [];
+    // Deck search (issue #312): the persisted shuffle generator (SplitMix64, see MatchEngine.StableRandom).
+    // Setup continues the very sequence the seed started (so every existing setup is byte-for-byte
+    // unchanged), and every mid-game Shuffle reads and advances this one value. It is engine-private: it
+    // is part of MatchState only so State/Copy()/Execute rollback carry it, and it appears in no MatchView.
+    public ulong RngState { get; set; }
+    // Events Phase reveal cursor: the index of the next province ContinueEventsReveal should reveal. A
+    // reveal that defers to a player decision (Harsh Choices, Imperial Gift's search) resumes from here,
+    // so the card that province refilled with is not revealed in the same phase it was placed.
+    public int EventsRevealNext { get; set; }
     public int? CurrentBattleProvince { get; set; }
     public List<int> UnresolvedBattlefields { get; set; } = [];
     // Before This Battle Resolves (issue #272): see PendingBeforeBattleResolve's own doc comment.
@@ -678,5 +694,9 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,
     PlayerView[] Players, GameEvent[] Events, string[] Limitations, int? FavorPlayerId = null,
-    DuelView? PendingDuel = null);
+    DuelView? PendingDuel = null,
+    // Deck search (issue #312), see DeckSearch.cs. PendingSearch is PRIVATE to the searching player (the deck
+    // viewer: remaining cards grouped with counts, eligibility per entry) and null in everyone else's view.
+    // ShownCards is PUBLIC: the append-only record of every card either player has shown, identical in both views.
+    SearchView? PendingSearch = null, ShownCardView[]? ShownCards = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

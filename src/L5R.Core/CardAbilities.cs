@@ -38,8 +38,12 @@ namespace L5R.Core;
 // price it -- validation, option generation, the quote shipped to the client and the actual payment all
 // read this one rule. Null means "no explicit rule": a Strategy source pays its own printed cost and a
 // Discipline pays its source's printed cost (GoldQuotes.ImplicitGoldRule); anything else is free.
+// Search (issue #312): the ability's deck search, as declarative data (which deck(s), the criteria each deck's
+// candidates must meet, what happens to the chosen card -- see DeckSearch.cs). A non-null Search means using the
+// ability starts the shared search flow: (optional deck choice) -> candidate list -> select or pass -> show ->
+// effect -> shuffle -> the action resolves. The ability's own cost (Bow Shizuka) is paid in its execution case.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
-    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null);
+    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null, SearchSpec? Search = null);
 
 public static class AbilityCatalog
 {
@@ -1293,6 +1297,15 @@ public static class AbilityCatalog
         // Require because a Region sits in Zone.Region, never AtBattle-eligible.
         ["brawl-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments", UsageKey: "brawl"),
         ["brawl-destroy"] = new("BattleOrOpen", "Target a Region (at any province) or a Terrain: Destroy it", "region-or-terrain", UsageKey: "brawl"),
+        // Deck search (issue #312). Ikoma Shizuka (oracle-l5r-10292): "Limited: Bow Shizuka: Search your Dynasty or
+        // Fate deck. If you find a Region, attach it to one of your provinces, paying all costs. If you find a
+        // Terrain, put it in your hand and discard a card." The cost (bow Shizuka) is paid in the execution case; the
+        // rest is the SearchSpec -- a deck choice, per-deck criteria (Region only / Terrain only), per-deck effects.
+        ["shizuka-search"] = new("Limited", "Bow Shizuka: search your Dynasty or Fate deck", "none", Search: SearchCatalog.IkomaShizuka),
+        // Training fixtures for the search criteria vocabulary and the optional flag (see SearchCatalog).
+        ["training-search-cheap"] = new("Limited", "Training: search your Fate deck for a cheap non-Unique Follower or Item", "none", Search: SearchCatalog.TrainingCheap),
+        ["training-search-focus"] = new("Limited", "Training: search your Fate deck for a Strategy with Focus 2 or less", "none", Search: SearchCatalog.TrainingFocus),
+        ["training-search-optional"] = new("Limited", "Training: you may search your Fate deck for a Weapon", "none", Search: SearchCatalog.TrainingOptional),
     });
 }
 
@@ -4372,6 +4385,12 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "mugoshi-slander": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
+            // Deck search (issue #312): the cost (bow Shizuka) is paid now; the search itself defers through its own
+            // PendingChoice types, so -- like shinden-choice above -- the action does not finish here: FinishSearch
+            // hands priority on once the deck has been shuffled.
+            case "shizuka-search": source!.Bowed = true; BeginSearch(ability.Search!, source, player.Id, "ability", bowedBeforeAction); return;
+            case "training-search-cheap": case "training-search-focus": case "training-search-optional":
+                BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction); return;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Apprentice Shinobi (issue #279): "After the resolution of a Ninja action: Give this card

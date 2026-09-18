@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text.Json;
 using L5R.Client;
 using L5R.Core;
 using L5R.Server;
@@ -17,7 +18,8 @@ try
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
-        ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; })
+        ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
+        ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; })
     };
     foreach (var (name, test) in cases)
     {
@@ -126,6 +128,85 @@ static void OutgoingPayload()
     Check(sent.SetEquals(expected), $"The client wire payload and GameCommand disagree: missing [{string.Join(",", expected.Except(sent))}] extra [{string.Join(",", sent.Except(expected))}]");
     var wire = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(json, Protocol.Json)!;
     Check(System.Text.Json.JsonSerializer.Serialize(wire.BindToSeat(1, 9)) == System.Text.Json.JsonSerializer.Serialize(command), "The server binds exactly the command the client meant, GoldAmount included.");
+}
+
+// Issue #312: MatchView crosses the wire as the core record itself (the server serializes StateMessage.View, the client
+// deserializes MatchView with the same web defaults), so a new view field can only be lost by a mapping layer or an ignore
+// attribute. Prove it for the two new fields and, by reflection, for EVERY MatchView property, on the exact server envelope; and
+// prove every search action (deck choice, select, pass, province with its Gold quote, discard) survives the AvailableAction mapping.
+static void SearchViewsCrossTheWire()
+{
+    var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+    static string SourceOf(MatchEngine e, string definition) => e.State.Cards.Values.First(c => c.OwnerId == 0 && c.DefinitionId == definition).Id;
+    // A fresh engine rebuilt from the journal, the way a restarted server holds the room: stage snapshots the wire must carry.
+    static MatchEngine Snap(MatchEngine e) => MatchEngine.Replay(e.ExportReplay());
+    static void Step(MatchEngine e, GameCommand command) { var result = e.Execute(command); if (!result.Accepted) throw new InvalidOperationException(result.Error); }
+    var stages = new List<(string Name, MatchEngine Engine)>();
+    var dynasty = MatchEngine.CreateDeckSearchShowcase();
+    Step(dynasty, new("useAbility", 0, dynasty.Version, SourceOf(dynasty, "oracle-l5r-10292"), AbilityId: "shizuka-search")); stages.Add(("deck choice", Snap(dynasty)));
+    Step(dynasty, new("chooseSearchDeck", 0, dynasty.Version, Choice: "Dynasty")); stages.Add(("list", Snap(dynasty)));
+    Step(dynasty, new("selectSearchCard", 0, dynasty.Version, Choice: "training-costed-region")); stages.Add(("province", Snap(dynasty)));
+    Step(dynasty, new("chooseSearchProvince", 0, dynasty.Version, Province: 0, SourceIds: dynasty.QueryActions(0).First(a => a.Type == "chooseSearchProvince").Command!.SourceIds)); stages.Add(("done", Snap(dynasty)));
+    var fate = MatchEngine.CreateDeckSearchShowcase();
+    Step(fate, new("useAbility", 0, fate.Version, SourceOf(fate, "oracle-l5r-10292"), AbilityId: "shizuka-search"));
+    Step(fate, new("chooseSearchDeck", 0, fate.Version, Choice: "Fate")); Step(fate, new("selectSearchCard", 0, fate.Version, Choice: "training-terrain")); stages.Add(("discard", Snap(fate)));
+
+    var seenTypes = new HashSet<string>();
+    foreach (var (stage, engine) in stages)
+        foreach (var viewer in new[] { 0, 1 })
+        {
+            var view = engine.GetView(viewer); var actions = engine.QueryActions(viewer);
+            // Exactly the server's envelope, serialized with the server's options; the client reads "view" and "actions" as MatchSession.Receive does.
+            var message = new StateMessage("state", "ABCDEFGH", viewer, view.Version, view, actions.Select(AvailableAction.FromCore).ToArray(), [true, true]);
+            var json = System.Text.Json.JsonSerializer.Serialize(message, Protocol.Json);
+            using var document = System.Text.Json.JsonDocument.Parse(json);
+            var wireView = document.RootElement.GetProperty("view");
+            var received = wireView.Deserialize<MatchView>(web)!;
+            Check(System.Text.Json.JsonSerializer.Serialize(received, web) == System.Text.Json.JsonSerializer.Serialize(view, web), $"{stage}/viewer {viewer}: the client's MatchView differs from the engine's");
+            foreach (var property in typeof(MatchView).GetProperties())
+                Check(wireView.TryGetProperty(char.ToLowerInvariant(property.Name[0]) + property.Name[1..], out _), $"MatchView.{property.Name} is missing from the wire envelope: a field would be dropped online");
+            var receivedActions = document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!;
+            Check(receivedActions.Length == actions.Length, $"{stage}: an action was dropped");
+            for (var i = 0; i < actions.Length; i++)
+            {
+                // The client binds the actor and version onto every template (MatchSession.Receive); compare after the same binding.
+                var got = receivedActions[i] with { Command = receivedActions[i].Command is null ? null : receivedActions[i].Command! with { PlayerId = viewer, ExpectedVersion = view.Version } };
+                Check(System.Text.Json.JsonSerializer.Serialize(got, web) == System.Text.Json.JsonSerializer.Serialize(actions[i], web), $"{stage}: action '{actions[i].Type}' changed on the wire");
+                if (actions[i].Type is "chooseSearchDeck" or "selectSearchCard" or "passSearch" or "chooseSearchProvince" or "chooseSearchDiscard") seenTypes.Add(actions[i].Type);
+            }
+            var searcher = viewer == 0;
+            if (stage != "done")
+                Check(searcher ? received.PendingSearch is not null : received.PendingSearch is null, $"{stage}/viewer {viewer}: the deck viewer must reach only the searcher");
+            switch (stage)
+            {
+                case "deck choice":
+                    if (searcher) Check(received.PendingSearch!.DeckChoices!.Length == 2 && received.PendingSearch.Entries is null, "The deck choice carries counts and no contents");
+                    else Check(!json.Contains("training-costed-region") && !json.Contains("oracle-l5r-9865"), "The opponent's envelope names no deck card");
+                    break;
+                case "list":
+                    if (searcher) Check(received.PendingSearch!.Entries!.Length > 1 && received.PendingSearch.Entries.All(e => e.Definition.Id == e.DefinitionId) && received.PendingSearch.Entries.Any(e => !e.Eligible && e.Reason is not null), "The entries carry their definition, eligibility and reason");
+                    else Check(!json.Contains("training-costed-region") && !json.Contains("oracle-l5r-9865"), "The opponent's envelope names no deck card");
+                    break;
+                case "province":
+                    if (searcher) Check(receivedActions.Where(a => a.Type == "chooseSearchProvince").All(a => a.Gold is { Cost: 2, Kind: GoldCostKind.Fixed } && a.Command!.SourceIds is { Length: > 0 }), "The Gold quote and the suggested payment reach the client");
+                    Check(received.ShownCards is [{ Definition.Id: "training-costed-region" }] && received.ShownCards[0].ShownByPlayerId == 0, "The shown card is already public");
+                    break;
+                case "done":
+                    Check(received.PendingSearch is null && received.ShownCards is [{ Definition.Id: "training-costed-region", Deck: "Dynasty" }], "The public record survives after the search");
+                    break;
+                case "discard":
+                    if (searcher) Check(received.PendingSearch!.Stage == "ChooseDiscard" && received.PendingSearch.Selected?.Id == "training-terrain", "The discard stage shows the found card");
+                    Check(received.ShownCards is [{ Definition.Id: "training-terrain", Deck: "Fate" }], "Both players receive the record");
+                    break;
+            }
+        }
+    foreach (var type in new[] { "chooseSearchDeck", "selectSearchCard", "chooseSearchProvince", "chooseSearchDiscard" })
+        Check(seenTypes.Contains(type), $"The test never carried a {type} action over the wire");
+    // The commands a search sends fit the strict server command with nothing dropped: Choice, Province, SourceIds and TargetId are all carried.
+    var command = new GameCommand("chooseSearchProvince", 1, 9, Choice: "Dynasty", Province: 2, SourceIds: ["a"], TargetId: "hand-card");
+    var wire = System.Text.Json.JsonSerializer.Serialize(MatchSession.ToWire(command), web);
+    var bound = System.Text.Json.JsonSerializer.Deserialize<WireGameCommand>(wire, Protocol.Json)!.BindToSeat(1, 9);
+    Check(System.Text.Json.JsonSerializer.Serialize(bound) == System.Text.Json.JsonSerializer.Serialize(command), "A search command survives the client payload, the server's strict schema and the seat binding");
 }
 
 static async Task InvalidConnections(string url)

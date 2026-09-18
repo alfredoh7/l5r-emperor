@@ -1,0 +1,494 @@
+namespace L5R.Core;
+
+// Deck search (issue #312): ONE reusable "search a deck, select a legal card, show it, apply the effect,
+// shuffle" flow, private to the searching player. First consumers: Ikoma Shizuka (a choice of two decks,
+// each with its own criteria and its own effect) and Imperial Gift (one deck, one criteria). The catalogue
+// has ~44 more cards that search a deck or a discard pile; the pieces below are shaped for that family:
+//
+//   1. SearchSpec/SearchCriteria are DECLARATIVE data on the ability (AbilityDefinition.Search) or, for an
+//      Event, looked up from its Effect (SearchCatalog.ForEventEffect). The engine evaluates the criteria per
+//      candidate; the client never filters or decides legality.
+//   2. The flow is one pending state (MatchState.PendingSearch) driven by four PendingChoice types, in
+//      exactly this order:  optional deck choice -> candidate list -> select (or pass when nothing
+//      qualifies) -> SHOW the card to the opponent -> APPLY the card's own effect -> SHUFFLE the searched
+//      deck (also when the player passed) -> the action resolves and play continues.
+//   3. Hidden information: the searcher's MatchView.PendingSearch lists the deck's remaining cards GROUPED
+//      by card with a count, sorted by type then name (never deck order), each with an eligibility flag and
+//      a short reason. The opponent gets none of it -- only public events that a search happened and, after
+//      selection, the deliberately shown card (MatchView.ShownCards). The RNG state and the deck order never
+//      leave the engine.
+//
+// The shown-cards record is keyed by a per-match sequence number, NOT the card's instance id (see
+// docs/decisions/2026-09-18-deck-search-primitive.md): an instance id would be a handle the opponent could
+// try to resolve elsewhere, and the record needs only the definition to be reviewable.
+
+/// <summary>The two decks a search can target, as they appear on the wire.</summary>
+public static class SearchDeck
+{
+    public const string Dynasty = "Dynasty";
+    public const string Fate = "Fate";
+}
+
+/// <summary>What happens to the chosen card once it has been shown (the card's own printed effect).</summary>
+public static class SearchEffect
+{
+    /// <summary>Put it into the searcher's hand (Imperial Gift; the Fate half of Ikoma Shizuka before her discard).</summary>
+    public const string ToHand = "to-hand";
+    /// <summary>Put it into the hand, then the searcher discards a card of their choice (Ikoma Shizuka's Terrain).</summary>
+    public const string ToHandThenDiscard = "to-hand-then-discard";
+    /// <summary>Attach the Region to one of the searcher's own provinces that has none, paying its Gold cost; a
+    /// Region that cannot be attached (no free province, or it cannot be paid) goes to the Dynasty discard pile.</summary>
+    public const string AttachRegion = "attach-region";
+}
+
+/// <summary>The stage a pending search is in; also names which PendingChoice type is open.</summary>
+public static class SearchStage
+{
+    public const string ChooseDeck = "ChooseDeck";           // PendingChoice "searchDeck"
+    public const string Select = "Select";                   // PendingChoice "searchSelect"
+    public const string ChooseProvince = "ChooseProvince";   // PendingChoice "searchRegionProvince"
+    public const string ChooseDiscard = "ChooseDiscard";     // PendingChoice "searchDiscard"
+}
+
+/// <summary>One numeric condition on a candidate card (Focus Value, Gold Cost, ...). Stat is one of
+/// Focus, GoldCost, Force, Chi, PersonalHonor; Op is one of &lt;=, &gt;=, &lt;, &gt;, ==. The right-hand side is a
+/// constant; a comparison against the performer's own stat ("a lower Focus Value than your Personality's Chi",
+/// Refuge of the Three Sisters) is a natural extension and is not built yet.</summary>
+public sealed record SearchComparison(string Stat, string Op, int Value);
+
+/// <summary>Who may be selected. Every condition that is set must hold (Keywords is "all of"). Noun is the short
+/// display name of what is being searched for ("Region", "Terrain", "Item") used in prompts and reasons.</summary>
+public sealed record SearchCriteria(string Noun, CardType[]? Types = null, string[]? Keywords = null,
+    string[]? ExcludedKeywords = null, bool NonUnique = false, string[]? Titles = null, SearchComparison[]? Comparisons = null);
+
+/// <summary>One searchable deck, the criteria that deck's candidates must meet, and what happens to the chosen
+/// card. A card that lets the player pick the deck (Ikoma Shizuka) lists two, each with its own criteria.</summary>
+public sealed record SearchDeckOption(string Deck, SearchCriteria Criteria, string Effect);
+
+/// <summary>A whole search: Optional is true only for a printed "you may search" (Pass is then legal even when a
+/// card qualifies); every other search must take an eligible card and may pass only when none qualifies.</summary>
+public sealed record SearchSpec(string Id, string Label, SearchDeckOption[] Decks, bool Optional = false);
+
+public static class SearchCatalog
+{
+    /// <summary>Ikoma Shizuka (oracle-l5r-10292): "Search your Dynasty or Fate deck. If you find a Region, attach it
+    /// to one of your provinces, paying all costs. If you find a Terrain, put it in your hand and discard a
+    /// card." A Terrain is a Strategy carrying the Terrain keyword.</summary>
+    public static SearchSpec IkomaShizuka { get; } = new("ikoma-shizuka", "Search your Dynasty or Fate deck",
+    [
+        new(SearchDeck.Dynasty, new("Region", [CardType.Region]), SearchEffect.AttachRegion),
+        new(SearchDeck.Fate, new("Terrain", [CardType.Strategy], ["Terrain"]), SearchEffect.ToHandThenDiscard)
+    ]);
+
+    /// <summary>Imperial Gift (oracle-l5r-3694): "Gain 2 Honor and search your Fate deck for an Item, show it, and
+    /// put it into your hand." The Honor is the Event's own step; this is the search half.</summary>
+    public static SearchSpec ImperialGift { get; } = new("imperial-gift", "Search your Fate deck for an Item",
+        [new(SearchDeck.Fate, new("Item", [CardType.Item]), SearchEffect.ToHand)]);
+
+    // Training fixtures (never in a playable deck): they exercise the criteria vocabulary and the optional flag
+    // ahead of any published card needing them.
+    /// <summary>Fate deck, a non-Unique Follower or Item that costs 2 Gold or less: Types + NonUnique + a GoldCost comparison.</summary>
+    public static SearchSpec TrainingCheap { get; } = new("training-cheap", "Search your Fate deck for a cheap non-Unique Follower or Item",
+        [new(SearchDeck.Fate, new("cheap non-Unique Follower or Item", [CardType.Follower, CardType.Item], NonUnique: true,
+            Comparisons: [new("GoldCost", "<=", 2)]), SearchEffect.ToHand)]);
+    /// <summary>Fate deck, a Strategy with Focus Value 2 or less: a Focus comparison.</summary>
+    public static SearchSpec TrainingFocus { get; } = new("training-focus", "Search your Fate deck for a low-Focus Strategy",
+        [new(SearchDeck.Fate, new("Strategy with Focus 2 or less", [CardType.Strategy], Comparisons: [new("Focus", "<=", 2)]), SearchEffect.ToHand)]);
+    /// <summary>Fate deck, a Weapon Item, and the player MAY decline: the printed "you may search" shape.</summary>
+    public static SearchSpec TrainingOptional { get; } = new("training-optional", "You may search your Fate deck for a Weapon",
+        [new(SearchDeck.Fate, new("Weapon", [CardType.Item], ["Weapon"]), SearchEffect.ToHand)], Optional: true);
+
+    public static IReadOnlyDictionary<string, SearchSpec> All { get; } = new[] { IkomaShizuka, ImperialGift, TrainingCheap, TrainingFocus, TrainingOptional }
+        .ToDictionary(s => s.Id, StringComparer.Ordinal);
+
+    /// <summary>The search an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
+    public static SearchSpec? ForEventEffect(string effect) => effect == "imperial-gift" ? ImperialGift : null;
+}
+
+/// <summary>Engine-private context of the search in progress (MatchState.PendingSearch). Never sent to a client
+/// as-is: the searcher's MatchView carries a SearchView derived from it, everyone else gets nothing.</summary>
+public sealed class PendingSearch
+{
+    public string SearchId { get; set; } = "";
+    /// <summary>The card whose text started the search (Ikoma Shizuka, or the revealed Event).</summary>
+    public string SourceCardId { get; set; } = "";
+    public int PlayerId { get; set; }
+    /// <summary>A <see cref="SearchStage"/> value.</summary>
+    public string Stage { get; set; } = SearchStage.Select;
+    /// <summary>The <see cref="SearchDeck"/> being searched; null while the deck is still to be chosen.</summary>
+    public string? Deck { get; set; }
+    /// <summary>The instance picked from the deck once one has been selected. Still physically in the deck list
+    /// while a follow-up choice (a Region's province) is pending, so the deck and the card zones never disagree.</summary>
+    public string? SelectedCardId { get; set; }
+    /// <summary>"ability" (a Limited action: the action resolves afterwards) or "event" (an Events Phase reveal:
+    /// the Event is discarded and the reveal loop resumes afterwards).</summary>
+    public string Origin { get; set; } = "ability";
+    /// <summary>Ability origin only: every card that was already bowed when the action was announced, so that once the
+    /// search has finished and the action has resolved, "after your action bowed a Personality" Reactions (Tamori Ruya,
+    /// Togashi Hizumi) see exactly the Personalities this action bowed (Shizuka's own cost) -- the check the tail of an
+    /// ordinary action does, which a deferred action would otherwise skip. Null when none was captured.</summary>
+    public List<string>? BowedBefore { get; set; }
+}
+
+/// <summary>One entry of the public, append-only record of cards shown to the other player. Deliberately holds
+/// the definition id and NOT the card's instance id.</summary>
+public sealed record ShownCard(int Sequence, int PlayerId, string DefinitionId, string SourceCardId, string SourceDefinitionId,
+    string Deck, string Context, int TurnNumber, long EventSequence);
+
+/// <summary>Public: what one player showed, for both players' MatchView.ShownCards. <paramref name="Sequence"/> is
+/// the record's own per-match key (1, 2, 3, ...); <paramref name="EventSequence"/> is the sequence number of the
+/// public "cardShown" event, so a client can line the record up with the event log. There is no instance id.</summary>
+public sealed record ShownCardView(int Sequence, int ShownByPlayerId, CardDefinition Definition, string? SourceCardId,
+    string SourceName, string Deck, string Context, int TurnNumber, long EventSequence);
+
+/// <summary>One deck a Shizuka-style card lets the searcher pick. CardsRemaining is already public (the deck count);
+/// no contents are revealed until a deck is chosen.</summary>
+public sealed record SearchDeckChoiceView(string Deck, string Label, int CardsRemaining, string Criteria);
+
+/// <summary>One line of the searcher's deck viewer: a distinct card, how many copies remain, and whether it may be
+/// chosen (with a short reason when it may not). Grouped, sorted by type then name -- never deck order.</summary>
+public sealed record SearchEntryView(string DefinitionId, CardDefinition Definition, int Count, bool Eligible, string? Reason);
+
+/// <summary>PRIVATE to the searching player (null in everyone else's view). Stage says which decision is open:
+/// ChooseDeck (DeckChoices), Select (Entries; CanPass is true only when nothing qualifies, or the search is
+/// Optional), ChooseProvince / ChooseDiscard (Selected is the shown card; the choices are ordinary actions).</summary>
+public sealed record SearchView(string Stage, string SourceCardId, string SourceName, string Label, string Prompt,
+    string? Deck, string? Criteria, int CardsRemaining, SearchDeckChoiceView[]? DeckChoices, SearchEntryView[]? Entries,
+    bool Optional, bool CanPass, CardDefinition? Selected);
+
+public sealed partial class MatchEngine
+{
+    private static bool IsSearchChoice(string type) => type is "searchDeck" or "searchSelect" or "searchRegionProvince" or "searchDiscard";
+
+    private sealed record SearchGroup(string DefinitionId, CardInstance Card, int Count, bool Eligible, string? Reason);
+
+    private static string Article(string noun) => noun.Length > 0 && "AEIOUaeiou".Contains(noun[0]) ? $"an {noun}" : $"a {noun}";
+
+    private static List<string> SearchDeckList(PlayerState player, string deck) => deck == SearchDeck.Dynasty ? player.DynastyDeck : player.FateDeck;
+
+    private SearchSpec SearchSpecOf(PendingSearch search) => SearchCatalog.All.TryGetValue(search.SearchId, out var spec) ? spec
+        : throw new RuleViolation("Unknown search.");
+
+    private SearchDeckOption SearchOptionOf(PendingSearch search) =>
+        SearchSpecOf(search).Decks.Single(d => d.Deck == search.Deck);
+
+    // ---- the flow ----
+
+    /// <summary>Starts a search for <paramref name="playerId"/> on behalf of <paramref name="source"/>. Opens the deck
+    /// choice when the spec offers more than one deck, otherwise goes straight to the candidate list.</summary>
+    private void BeginSearch(SearchSpec spec, CardInstance source, int playerId, string origin, IEnumerable<string>? bowedBefore = null)
+    {
+        var player = Player(playerId);
+        var search = new PendingSearch { SearchId = spec.Id, SourceCardId = source.Id, PlayerId = playerId, Origin = origin, BowedBefore = bowedBefore?.ToList() };
+        _state.PendingSearch = search;
+        _state.PriorityPlayerId = playerId; _state.ConsecutivePasses = 0;
+        Emit("searchStarted", $"{player.Name} searches with {Definition(source).Name}.", playerId, source.Id);
+        if (spec.Decks.Length > 1)
+        {
+            search.Stage = SearchStage.ChooseDeck;
+            _state.PendingChoice = new("searchDeck", playerId, source.Id, $"{Definition(source).Name}: choose which deck to search.");
+            return;
+        }
+        OpenSearchSelection(search, spec.Decks[0]);
+    }
+
+    private void OpenSearchSelection(PendingSearch search, SearchDeckOption option)
+    {
+        var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
+        search.Deck = option.Deck; search.Stage = SearchStage.Select;
+        _state.PendingChoice = new("searchSelect", search.PlayerId, source.Id,
+            $"{Definition(source).Name}: choose {Article(option.Criteria.Noun)} from your {option.Deck} deck, or pass if none qualifies.");
+        Emit("deckSearched", $"{player.Name} searches their {option.Deck} deck.", player.Id);
+    }
+
+    private void ResolveSearchCommand(GameCommand command)
+    {
+        var search = _state.PendingSearch ?? throw new RuleViolation("No search is in progress.");
+        Require(command.PlayerId == search.PlayerId, "Only the searching player may answer this search.");
+        switch (search.Stage)
+        {
+            case SearchStage.ChooseDeck: ChooseSearchDeck(search, command); break;
+            case SearchStage.Select: SelectOrPassSearch(search, command); break;
+            case SearchStage.ChooseProvince: ChooseSearchRegionProvince(search, command); break;
+            case SearchStage.ChooseDiscard: ChooseSearchDiscard(search, command); break;
+            default: throw new RuleViolation("Unknown search stage.");
+        }
+    }
+
+    private void ChooseSearchDeck(PendingSearch search, GameCommand command)
+    {
+        Require(command.Type == "chooseSearchDeck", "Choose which deck to search.");
+        var option = SearchSpecOf(search).Decks.FirstOrDefault(d => d.Deck == command.Choice);
+        Require(option is not null, "Choose the Dynasty or Fate deck.");
+        OpenSearchSelection(search, option!);
+    }
+
+    private void SelectOrPassSearch(PendingSearch search, GameCommand command)
+    {
+        var spec = SearchSpecOf(search); var option = SearchOptionOf(search);
+        var groups = SearchGroups(search);
+        var player = Player(search.PlayerId);
+        if (command.Type == "passSearch")
+        {
+            var anyEligible = groups.Any(g => g.Eligible);
+            // Pass is legal ONLY when nothing qualifies (or the printed text says "you may search"): a player
+            // cannot skip a card they are obliged to take.
+            Require(!anyEligible || spec.Optional, "A card in the deck qualifies, so you must choose one.");
+            Emit("searchPassed", anyEligible
+                ? $"{player.Name} chose not to take a card from their {search.Deck} deck."
+                : $"{player.Name} found no eligible card in their {search.Deck} deck.", player.Id);
+            FinishSearch(search);
+            return;
+        }
+        Require(command.Type == "selectSearchCard" && !string.IsNullOrEmpty(command.Choice), "Choose a card from the deck list.");
+        var group = groups.FirstOrDefault(g => g.DefinitionId == command.Choice);
+        Require(group is not null, "That card is not in the deck being searched.");
+        Require(group!.Eligible, group.Reason ?? "That card does not meet this search's criteria.");
+        var card = group.Card;
+        search.SelectedCardId = card.Id;
+        // 1. SHOW: the opponent sees the card before anything is done with it.
+        ShowSearchedCard(search, card);
+        // 2. APPLY the card's own effect to it (3. the shuffle follows in FinishSearch, once the effect is done).
+        switch (option.Effect)
+        {
+            case SearchEffect.ToHand:
+                MoveSearchedCardToHand(search, card);
+                FinishSearch(search);
+                break;
+            case SearchEffect.ToHandThenDiscard:
+                MoveSearchedCardToHand(search, card);
+                search.Stage = SearchStage.ChooseDiscard;
+                _state.PendingChoice = new("searchDiscard", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: discard a card from your hand.");
+                break;
+            case SearchEffect.AttachRegion:
+                BeginRegionAttach(search, card);
+                break;
+            default: throw new RuleViolation("Unknown search effect.");
+        }
+    }
+
+    private void ShowSearchedCard(PendingSearch search, CardInstance card)
+    {
+        var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
+        var context = $"{Definition(source).Name}, {search.Deck} deck search";
+        var eventSequence = _state.Events.Count + 1L;
+        _state.ShownCards.Add(new ShownCard(_state.ShownCards.Count + 1, player.Id, card.DefinitionId, source.Id, source.DefinitionId, search.Deck!, context, _state.TurnNumber, eventSequence));
+        // The event carries no card id: the shown card may end up in a hidden hand, and the record is keyed by sequence.
+        Emit("cardShown", $"{player.Name} shows {Definition(card).Name} ({context}).", player.Id);
+    }
+
+    private void MoveSearchedCardToHand(PendingSearch search, CardInstance card)
+    {
+        var player = Player(search.PlayerId);
+        SearchDeckList(player, search.Deck!).Remove(card.Id);
+        card.Zone = Zone.Hand; player.Hand.Add(card.Id);
+        Emit("searchToHand", $"{player.Name} put {Definition(card).Name} into their hand.", player.Id);
+    }
+
+    // Ikoma Shizuka's Region half. "Attach it to one of your provinces, paying all costs": a province with no Region
+    // (the Region enters through the same AttachRegionToProvince the Events Phase reveal uses), the Region's own Gold
+    // cost through the ONE payment path (a Fixed GoldQuote and Pay). A Region that cannot be attached -- every
+    // province already has one, or its cost cannot be paid -- is discarded, like any Region that fails to attach.
+    private void BeginRegionAttach(PendingSearch search, CardInstance region)
+    {
+        var player = Player(search.PlayerId);
+        var free = player.Provinces.Where(p => !p.Destroyed && p.RegionId is null).ToArray();
+        var quote = QuoteRegionGold(player.Id, region);
+        var payable = quote is null || quote.Payments.Length > 0;
+        if (free.Length == 0 || !payable)
+        {
+            SearchDeckList(player, search.Deck!).Remove(region.Id);
+            region.Zone = Zone.DynastyDiscard; region.ProvinceIndex = null; region.FaceUp = true;
+            Emit("regionDiscarded", free.Length == 0
+                ? $"{Definition(region).Name} was discarded: none of {player.Name}'s provinces can take a Region."
+                : $"{Definition(region).Name} was discarded: {player.Name} cannot pay its {quote!.Cost} Gold cost.", player.Id, region.Id);
+            FinishSearch(search);
+            return;
+        }
+        // Exactly one place to put it and nothing to pay: nothing to decide, so it just attaches.
+        if (free.Length == 1 && quote is null)
+        {
+            SearchDeckList(player, search.Deck!).Remove(region.Id);
+            AttachRegionToProvince(player, free[0], region);
+            FinishSearch(search);
+            return;
+        }
+        search.Stage = SearchStage.ChooseProvince;
+        _state.PendingChoice = new("searchRegionProvince", search.PlayerId, search.SourceCardId,
+            $"{Definition(region).Name}: choose one of your provinces without a Region to attach it to.");
+    }
+
+    private void ChooseSearchRegionProvince(PendingSearch search, GameCommand command)
+    {
+        Require(command.Type == "chooseSearchProvince" && command.Province is not null, "Choose a province to attach the Region to.");
+        var player = Player(search.PlayerId); var region = Card(search.SelectedCardId);
+        var province = player.Provinces.FirstOrDefault(p => p.Index == command.Province);
+        Require(province is not null && !province.Destroyed, "Choose one of your own provinces that has not been destroyed.");
+        Require(province!.RegionId is null, "That province already has a Region attached.");
+        // The one payment path: the same Gold quote the option carried, validated and charged by Pay().
+        var quote = QuoteRegionGold(player.Id, region);
+        if (quote is not null) Pay(player.Id, region, quote.Cost, command.SourceIds);
+        else ValidatePayment(player.Id, 0, command.SourceIds);
+        SearchDeckList(player, search.Deck!).Remove(region.Id);
+        AttachRegionToProvince(player, province, region);
+        FinishSearch(search);
+    }
+
+    private void ChooseSearchDiscard(PendingSearch search, GameCommand command)
+    {
+        var player = Player(search.PlayerId);
+        Require(command.Type == "chooseSearchDiscard" && command.TargetId is not null && player.Hand.Contains(command.TargetId), "Choose a card from your hand to discard.");
+        DiscardFate(player, Card(command.TargetId));
+        FinishSearch(search);
+    }
+
+    // 3. SHUFFLE, then the action resolves and play continues. Reached from every path out of a search: a card
+    // taken and its effect done, a Region discarded, and a pass.
+    private void FinishSearch(PendingSearch search)
+    {
+        var player = Player(search.PlayerId);
+        ShuffleDeck(player, search.Deck!);
+        _state.PendingSearch = null; _state.PendingChoice = null;
+        if (search.Origin == "event") { ResumeEventAfterSearch(search); return; }
+        // The Limited action has now resolved: the ordinary tail of a resolved action -- a chance to react to it having
+        // bowed a Personality (Shizuka bowed herself as the cost), a deferred Overconfident/Times of Strife window, then
+        // priority to the opponent (the same tail Asako Rikate's window ends with, plus the bow window it does not need).
+        if (search.BowedBefore is not null && OpenBowReactionWindow(search.PlayerId, search.BowedBefore.ToHashSet(StringComparer.Ordinal), 1 - search.PlayerId)) return;
+        if (OpenOverconfidentDrawWindow(1 - search.PlayerId)) return;
+        NextAction(search.PlayerId);
+    }
+
+    // An Event's own resolution once its search is done (Imperial Gift): the Event is discarded and the province
+    // refills, exactly as ResolveEvent's default case does, then the Events Phase reveal loop resumes.
+    private void ResumeEventAfterSearch(PendingSearch search)
+    {
+        var player = Player(search.PlayerId); var card = Card(search.SourceCardId);
+        var province = player.Provinces[card.ProvinceIndex!.Value];
+        province.CardId = null; card.ProvinceIndex = null; card.Zone = Zone.DynastyDiscard;
+        Emit("eventResolved", $"{Definition(card).Name} resolved and was discarded.", player.Id, card.Id);
+        Refill(player, province);
+        ContinueEventsReveal(player);
+    }
+
+    /// <summary>Deterministic shuffle from the persisted generator (see MatchState.RngState): reads the current state,
+    /// shuffles, and stores the advanced state, so the sequence is the same across State copies, replay and a
+    /// server restart. Announces only that it happened.</summary>
+    private void ShuffleDeck(PlayerState player, string deck)
+    {
+        var random = new StableRandom(_state.RngState);
+        random.Shuffle(SearchDeckList(player, deck));
+        _state.RngState = random.State;
+        Emit("deckShuffled", $"{player.Name} shuffled their {deck} deck.", player.Id);
+    }
+
+    // ---- candidates and eligibility ----
+
+    /// <summary>The searched deck's remaining cards grouped by definition (one representative instance, the lowest id,
+    /// so which copy stands for the group never depends on deck order), with the engine's own eligibility verdict.
+    /// Sorted by type then name then id: presentation order, never the deck's order.</summary>
+    private List<SearchGroup> SearchGroups(PendingSearch search)
+    {
+        var option = SearchOptionOf(search);
+        return SearchDeckList(Player(search.PlayerId), search.Deck!).Select(Card).GroupBy(c => c.DefinitionId, StringComparer.Ordinal)
+            .Select(g =>
+            {
+                var representative = g.OrderBy(c => c.Id, StringComparer.Ordinal).First();
+                var (eligible, reason) = SearchEligibility(option.Criteria, representative);
+                return new SearchGroup(g.Key, representative, g.Count(), eligible, reason);
+            })
+            .OrderBy(g => (int)Definition(g.Card).Type).ThenBy(g => Definition(g.Card).Name, StringComparer.Ordinal).ThenBy(g => g.DefinitionId, StringComparer.Ordinal).ToList();
+    }
+
+    private (bool Eligible, string? Reason) SearchEligibility(SearchCriteria criteria, CardInstance card)
+    {
+        var def = Definition(card);
+        var notA = $"Not {Article(criteria.Noun)}";
+        if (criteria.Types is { Length: > 0 } && !criteria.Types.Contains(def.Type)) return (false, notA);
+        if (criteria.Keywords is { Length: > 0 } && !criteria.Keywords.All(k => Keyword(card, k))) return (false, notA);
+        if (criteria.NonUnique && Keyword(card, "Unique")) return (false, "Unique cards cannot be chosen");
+        if (criteria.ExcludedKeywords is { Length: > 0 } && criteria.ExcludedKeywords.FirstOrDefault(k => Keyword(card, k)) is string excluded)
+            return (false, $"{excluded} cards cannot be chosen");
+        if (criteria.Titles is { Length: > 0 } && !criteria.Titles.Contains(def.Name, StringComparer.OrdinalIgnoreCase)) return (false, notA);
+        foreach (var comparison in criteria.Comparisons ?? [])
+        {
+            var actual = SearchStat(card, comparison.Stat);
+            var holds = comparison.Op switch { "<=" => actual <= comparison.Value, ">=" => actual >= comparison.Value, "<" => actual < comparison.Value,
+                ">" => actual > comparison.Value, "==" => actual == comparison.Value, _ => throw new RuleViolation("Unknown search comparison.") };
+            if (!holds) return (false, $"{comparison.Stat} {actual}, needs {comparison.Op} {comparison.Value}");
+        }
+        return (true, null);
+    }
+
+    private static int SearchStat(CardInstance card, string stat)
+    {
+        var def = Definition(card);
+        return stat switch { "Focus" => def.Focus, "GoldCost" => def.GoldCost, "Force" => def.Force, "Chi" => def.Chi, "PersonalHonor" => def.PersonalHonor,
+            _ => throw new RuleViolation("Unknown search statistic.") };
+    }
+
+    // ---- what each player is allowed to see ----
+
+    /// <summary>The searching player's private deck viewer, or null for anyone else.</summary>
+    private SearchView? BuildSearchView(int viewerId)
+    {
+        if (_state.PendingSearch is not { } search || search.PlayerId != viewerId || _state.PendingChoice is null) return null;
+        var spec = SearchSpecOf(search); var player = Player(search.PlayerId); var source = Card(search.SourceCardId);
+        var sourceName = Definition(source).Name;
+        if (search.Stage == SearchStage.ChooseDeck)
+            return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, null, null, 0,
+                spec.Decks.Select(d => new SearchDeckChoiceView(d.Deck, $"Search your {d.Deck} deck", SearchDeckList(player, d.Deck).Count, d.Criteria.Noun)).ToArray(), null, spec.Optional, false, null);
+        var option = SearchOptionOf(search);
+        var remaining = SearchDeckList(player, search.Deck!).Count;
+        var selected = search.SelectedCardId is null ? null : Copy(Definition(Card(search.SelectedCardId)));
+        if (search.Stage != SearchStage.Select)
+            return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null, null, spec.Optional, false, selected);
+        var groups = SearchGroups(search);
+        return new(search.Stage, source.Id, sourceName, spec.Label, _state.PendingChoice.Prompt, search.Deck, option.Criteria.Noun, remaining, null,
+            groups.Select(g => new SearchEntryView(g.DefinitionId, Copy(Definition(g.Card)), g.Count, g.Eligible, g.Reason)).ToArray(),
+            spec.Optional, spec.Optional || groups.All(g => !g.Eligible), null);
+    }
+
+    /// <summary>The public shown-cards record, identical in both players' views.</summary>
+    private ShownCardView[] BuildShownCards() => _state.ShownCards.Select(s =>
+        new ShownCardView(s.Sequence, s.PlayerId, Copy(CardCatalog.Get(s.DefinitionId)), s.SourceCardId, CardCatalog.Get(s.SourceDefinitionId).Name,
+            s.Deck, s.Context, s.TurnNumber, s.EventSequence)).ToArray();
+
+    // ---- the legal actions of the searching player ----
+
+    /// <summary>The searcher's legal actions while a search is open, so a bot, the training AI or any legal-actions-driven
+    /// client can always answer it and can never deadlock: the deck choice; one select action per ELIGIBLE entry, plus
+    /// Pass only when nothing qualifies (or the search is Optional); a province per option (with the Gold quote and the
+    /// engine's suggested payment); a hand card to discard.</summary>
+    private IEnumerable<ActionOption> SearchActions(int playerId)
+    {
+        if (_state.PendingSearch is not { } search || search.PlayerId != playerId) yield break;
+        GameCommand Command(string type, string? target = null, string? choice = null, int? province = null, string[]? sources = null) =>
+            new(type, playerId, _state.Version, TargetId: target, Choice: choice, Province: province, SourceIds: sources);
+        var spec = SearchSpecOf(search); var player = Player(playerId);
+        switch (search.Stage)
+        {
+            case SearchStage.ChooseDeck:
+                foreach (var d in spec.Decks)
+                    yield return new("chooseSearchDeck", $"Search your {d.Deck} deck for {Article(d.Criteria.Noun)}", true, null, Command("chooseSearchDeck", choice: d.Deck));
+                break;
+            case SearchStage.Select:
+                var groups = SearchGroups(search);
+                foreach (var g in groups.Where(g => g.Eligible))
+                    yield return new("selectSearchCard", $"Take {Definition(g.Card).Name}{(g.Count > 1 ? $" ({g.Count} in the deck)" : "")}", true, null, Command("selectSearchCard", choice: g.DefinitionId));
+                if (spec.Optional || groups.All(g => !g.Eligible))
+                    yield return new("passSearch", groups.Any(g => g.Eligible) ? "Take no card (the deck is still shuffled)" : "No card qualifies: pass (the deck is still shuffled)", true, null, Command("passSearch"));
+                break;
+            case SearchStage.ChooseProvince:
+                var region = Card(search.SelectedCardId);
+                var quote = QuoteRegionGold(playerId, region);
+                foreach (var p in player.Provinces.Where(p => !p.Destroyed && p.RegionId is null))
+                    yield return new("chooseSearchProvince", $"Attach {Definition(region).Name} to province {p.Index + 1}{(quote is null ? "" : $" · {quote.Cost} Gold")}", true, null,
+                        Command("chooseSearchProvince", province: p.Index, sources: quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds), region.Id, Provinces: [p.Index], Gold: quote);
+                break;
+            case SearchStage.ChooseDiscard:
+                foreach (var id in player.Hand)
+                    yield return new("chooseSearchDiscard", $"Discard {Definition(Card(id)).Name}", true, null, Command("chooseSearchDiscard", target: id), id);
+                break;
+        }
+    }
+}

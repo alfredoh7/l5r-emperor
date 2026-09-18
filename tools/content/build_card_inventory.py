@@ -54,7 +54,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10335": "Needs a new tracked EnteredPlayTurn field on CardInstance.",
     "oracle-l5r-9868": "Needs the printed Attack-vs-attachments override (explicitly deferred in #158).",
     "oracle-l5r-10679": "Needs \"grant keyword to whole unit\" (the passive Attack-strength defense half is now built -- Destrier/Singh Remnants -- and directly reusable here).",
-    "oracle-l5r-10680": "Needs deck search (pull a specific card out of a shuffled deck).",
+    "oracle-l5r-10680": "The deck search primitive now exists (issue #312: a searched deck, criteria, show, effect, shuffle), but this card searches the discard pile FIRST and then the deck (\"search your discard pile, then deck, for another Enslaved Djinn\") -- a multi-source search, and a discard-pile candidate list, are not built.",
     "oracle-l5r-2437": "Needs \"Equip this Follower as a Battle action\" (not yet a general capability).",
     "oracle-l5r-2520": "Needs an attachment Transfer mechanic.",
     "oracle-l5r-2598": "Needs Dueling/Focus Effects (not started at all).",
@@ -221,7 +221,9 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3637": "Needs an optional-discard-for-attack-bonus primitive (a Ranged Attack whose strength depends on an optional cost paid at the same time, plus a card-type-conditional follow-up draw) -- not built.",
     "oracle-l5r-3638": "Needs a dual-independent-target primitive (choosing a Terrain AND a separate enemy card in one ability) -- no existing shape supports two independently-chosen targets.",
     "oracle-l5r-3639": "Needs both a dual-independent-target primitive (a Follower in hand plus a separate Personality target) and 'Equip this Follower as a Battle action' (not yet a general capability) -- two established gaps compounding on the same card.",
-    "oracle-l5r-10292": "Needs deck search (pull a specific card out of a shuffled deck) and Regions (neither built).",
+    # Ikoma Shizuka (oracle-l5r-10292) published in personality-wave-27 (issue #312), the first card wired on the
+    # deck search primitive (DeckSearch.cs) -- her former note ("Needs deck search ... and Regions (neither built)")
+    # was stale on the Regions half: Regions have been built since region-wave-1. No remaining blocker note for her.
     "oracle-l5r-3660": "The Battle Ranged 4 Attack is directly wirable; blocked by its own passive -- a global 'all your Ranged Attacks get +1 strength while you control a Terrain' scope, distinct from a single card's own conditional Attack strength (existing kamina-exp-attack/shuji-attack-style bonuses only affect their own card's attack, not every Attack the controller makes).",
     "oracle-l5r-10223": "Needs the Engage-timing Reaction window (explicitly not started, #15), plus a 'first Battle-action opportunity, restricted to Terrain actions' priority override.",
     "oracle-l5r-10461": "Ring of Earth is now published (ring-wave-1); 'Earth Battle' is very likely a plain printed-keyword classification too, following Moshi Ikako's own 'Fire Battle' precedent (oracle-l5r-10857, confirmed issue #194) -- not re-verified against this specific card's own scan yet. Still needs a conditional Gold-Cost waiver tied to Ring control before wiring Jikoji's own army-wide Force bonus (the waiver itself: no current Gold discount is conditional on board state, only clan-alignment-based or a fixed printed amount).",
@@ -232,7 +234,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-4375": "Card creation itself is now built (issue #257), but this card still needs a 'bow OR destroy the performer' cost-choice, distinct from the existing bow-or-bow cost choices (own-wielder-or-source-with-wielder-keyword, own-source-or-unbowed-holding-with-keyword) -- not yet built.",
     "oracle-l5r-4382": "Needs card creation (a new Personality instance) as an entry Reaction effect.",
     "oracle-l5r-4386": "Needs card creation (a new Personality instance created directly at a battlefield, then removed from the game when the battle ends) and a 'Home Battle' Timing (performable from Home, unlike ordinary Battle actions which require AtBattle) -- neither built.",
-    "oracle-l5r-10293": "Needs deck search (pull a specific card, filtered by Clan/Type/Unique-status, out of a shuffled Dynasty deck) -- not built.",
+    "oracle-l5r-10293": "The deck search primitive now exists (issue #312) and its criteria can express \"a non-Unique Lion Clan Shugenja\" from the Dynasty deck, but the effect is \"refill this province with him, face-up\" (a search effect the primitive does not have yet) and the ability must be usable from a face-up province card whose own cost is discarding her and paying 2 Gold.",
     "oracle-l5r-9826": "Needs card creation (two new Personality instances) as an entry/overlay Reaction effect; 'overlays' as an alternate entry-trigger condition (distinct from ordinary Purchase) is not yet verified as built.",
     "oracle-l5r-4396": "Needs a per-player 'controls an Ancestor' Honor-gain/loss sweep referencing each player's own starting Family Honor baseline (not tracked as a stat) plus an imposed choice against another player's own card state.",
     "oracle-l5r-10852": "Needs Interrupt timing (not started) and card creation (a new Personality instance).",

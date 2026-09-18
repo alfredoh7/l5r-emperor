@@ -1600,6 +1600,50 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Event wave 3 (issue #312): Imperial Gift (oracle-l5r-3694), "Gain 2 Honor and search your Fate deck
+    /// for an Item, show it, and put it into your hand." The second consumer of the deck search primitive
+    /// (DeckSearch.cs). The Events Phase reveal trigger its Oracle text describes already existed: an Event resolves
+    /// when it is revealed (MatchEngine.ResolveEvent), so no new trigger was needed -- the Event just gains the
+    /// Honor, runs the search (which defers through its own PendingChoice), then is discarded and its province
+    /// refilled. The published Text follows the scan, which does not print the Oracle's boilerplate trigger clause.</summary>
+    public static PublishedSnapshot EventWave3 { get; } = LoadEventWave3();
+
+    private static PublishedSnapshot LoadEventWave3()
+    {
+        var snapshot = Load("L5R.Published.EventWave3.json", "event-wave-3", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected event-wave-3 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Event || card.Text.Length == 0)
+                throw new InvalidOperationException($"event-wave-3 card is not a textful Event: {card.Id}");
+        var othersEvent3 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersEvent3).Any())
+            throw new InvalidOperationException("event-wave-3 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Personality wave 27 (issue #312): Ikoma Shizuka (oracle-l5r-10292), the first consumer of the deck
+    /// search primitive (DeckSearch.cs): "Limited: Bow Shizuka: Search your Dynasty or Fate deck. If you find a Region,
+    /// attach it to one of your provinces, paying all costs. If you find a Terrain, put it in your hand and discard a
+    /// card." Her BLOCKERS note ("Regions (not built)") was stale. One Limited ability whose whole behavior is the
+    /// SearchSpec on it (SearchCatalog.IkomaShizuka); the published Text follows the scan ("your", not the catalogue's
+    /// "you").</summary>
+    public static PublishedSnapshot PersonalityWave27 { get; } = LoadPersonalityWave27();
+
+    private static PublishedSnapshot LoadPersonalityWave27()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave27.json", "personality-wave-27", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-27 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-27 card is not a textful Personality: {card.Id}");
+        var others27 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(EventWave3.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others27).Any())
+            throw new InvalidOperationException("personality-wave-27 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

@@ -111,6 +111,9 @@ public static class TrainingOpponent
             case "useAbility":
                 if(command.AbilityId is "border-first" or "border-game") return command.AbilityId=="border-first"?140:35;
                 if(command.AbilityId=="shunya-honor") return 100;
+                // Deck search (issue #312): a modest bot uses Ikoma Shizuka's search when nothing more useful is on offer
+                // (just above passing), which is what lets a whole AI-vs-AI match exercise the full search flow.
+                if(command.AbilityId=="shizuka-search") return 12;
                 var abilityTarget=self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army).FirstOrDefault(c=>c.Id==command.TargetId);
                 return abilityTarget is null ? -20 : AbilityValue(command.AbilityId,abilityTarget,self,opponent,view);
             case "proclaim": return 1000;
@@ -154,6 +157,14 @@ public static class TrainingOpponent
                 if(enemyForce==0) return 0;
                 return ownForce>=enemyForce?95:ownForce+StrongestThreatProvinceStrength(self,opponent)>=enemyForce?60:self.Provinces.Count(p=>!p.Destroyed)==1?50:0;
             case "pass": return 10;
+            // Deck search (issue #312): a modest bot never stalls in a search. It takes the first eligible card the engine
+            // lists (the list is already sorted by type then name, and holds only eligible entries), passes when the
+            // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
+            // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
+            case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            case "chooseSearchDiscard":
+                var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
+                return discard is null?0:100-HandValue(discard);
             default: return -100;
         }
     }

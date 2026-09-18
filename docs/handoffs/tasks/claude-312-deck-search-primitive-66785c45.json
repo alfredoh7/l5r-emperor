@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Deck search primitive (issue #312): declarative SearchSpec/criteria on the ability; one private flow (optional deck choice, candidate list, select or Pass-only-when-none, show, effect, shuffle, action resolves); MatchView.PendingSearch (searcher only) and MatchView.ShownCards (public record, no instance id); persisted deterministic MatchState.RngState continuing the setup sequence (setups unchanged); Ikoma Shizuka (personality-wave-27, Region attach through the #307 payment path / Terrain to hand + discard) and Imperial Gift (event-wave-3); reveal cursor fix; AI, server-restart and transport tests. No client UI (#314, #315).",
+  "validation": "bash tools/check.sh (with the Godot client build, import and smoke test) and bash tools/check.sh --skip-client pass: 200 core, 57 published, 22 deck-search, 20 AI, 7 server, 6 transport tests; every deck-search test mutation-checked; setup shuffles pinned by golden hashes recorded from origin/main; pinned published count recomputed from origin/main (390) + 2 = 392. Not validated: any graphical client behaviour (no UI was built).",
+  "remaining": "Rules questions awaiting Mendon are listed in docs/decisions/2026-09-18-deck-search-primitive.md (unaffordable Region, Imperial Gift timing, discarding the found Terrain). UI: #314 deck viewer and #315 shown-cards frame. Open PRs #316, #324, #326, #327 overlap files and also bump the pinned published count; whichever merges later must recompute it. Other search cards (discard-pile sources, refill-province and put-into-play effects, dynamic comparisons) are not wired.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/312",
+  "branch": "claude/312-deck-search-primitive",
+  "updated": "2026-09-18T21:55:41.692512+00:00"
+}

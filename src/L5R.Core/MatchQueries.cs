@@ -44,7 +44,9 @@ public sealed partial class MatchEngine
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
             _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
-            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck));
+            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
+            // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
+            BuildSearchView(playerId),BuildShownCards());
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -79,7 +81,7 @@ public sealed partial class MatchEngine
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action)
+        if(_state.Phase==Phase.Action && _state.PendingSearch is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
@@ -223,6 +225,12 @@ public sealed partial class MatchEngine
         {
             foreach(var id in _state.PendingConqueror!.CandidateIds)
                 Add("chooseConqueror",$"Straighten {Definition(Card(id)).Name} instead of returning home bowed",Command("chooseConqueror",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { } searchPending && IsSearchChoice(searchPending.Type))
+        {
+            // Deck search (issue #312): the searcher always has a legal answer (see SearchActions), so no bot or
+            // legal-actions-driven client can stall in a search.
+            result.AddRange(SearchActions(playerId));
         }
         else if(_state.PendingChoice is { Type:"declineStraighten" })
         {

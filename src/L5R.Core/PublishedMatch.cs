@@ -27,6 +27,7 @@ public sealed partial class MatchEngine
             random.Shuffle(player.DynastyDeck); random.Shuffle(player.FateDeck);
             player.Provinces = Enumerable.Range(0, 4).Select(i => new ProvinceState { Index = i, Strength = stronghold.ProvinceStrength, PrintedStrength = stronghold.ProvinceStrength }).ToList();
         }
+        state.RngState = random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         state.ActivePlayerId = state.Players.OrderByDescending(p => p.Honor).First().Id;
         Add(1-state.ActivePlayerId, "oracle-l5r-679", Zone.Home, true, true);
         var engine = new MatchEngine(state, seed, scenario);

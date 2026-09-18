@@ -112,9 +112,12 @@ internal static class PublishedTests
         // #304: Brawl, now merged into main) = 389 (origin/main's own baseline after that merge, re-derived
         // by counting distinct non-ScenarioOnly ids across content/published/*.json, not copied from either
         // side of the conflict) + 1 (this branch's own PersonalityWave23, issue #305: Akodo Kakihara, not
-        // previously published) = 390. Recomputed from the actual current origin/main baseline each time
-        // this conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,390);
+        // previously published) = 390 (origin/main's own baseline after PR #308 merged: re-derived at 7ac0854f by
+        // counting distinct non-ScenarioOnly ids across the content/published/*.json files of that tree, which
+        // agrees with the 390 pinned there) + 2 (this branch's own EventWave3 (Imperial Gift) + PersonalityWave27
+        // (Ikoma Shizuka), issue #312: neither previously published) = 392. Recomputed from the actual current
+        // origin/main baseline each time this conflicts, never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,392);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

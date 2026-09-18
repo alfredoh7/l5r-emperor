@@ -13,7 +13,8 @@ var cases = new (string Name, Func<Task> Test)[]
     ("concurrent commands serialize into exactly one accepted change", ConcurrentCommands),
     ("persistence failures leave gameplay unchanged", PersistenceRollback),
     ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput),
-    ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire)
+    ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire),
+    ("a deck search survives a server restart: the journal recovers the shuffle exactly, and each seat sees only what it may (issue #312)", SearchAndShuffleSurviveRestart)
 };
 var failures = 0;
 foreach (var (name, test) in cases)
@@ -194,6 +195,102 @@ static async Task ReconnectAndMalformedInput()
         "Oversized messages are rejected without changing state.");
 }
 
+// Issue #312: the server persists a room as its journal (seed + accepted commands) and recovers it with MatchEngine.Replay, so a
+// shuffle that used a persisted, deterministic generator is reproduced exactly -- and one that did not would come back different.
+// A room is written to disk mid-search (a Terrain found, the discard still to choose), a server is started on it, the seats connect,
+// the search finishes, the server is RESTARTED, and the turn is played out; the cards player 0 then draws depend on the shuffled
+// Fate deck, so they must equal those of a reference match that never restarted. Three seeds keep a coincidence from passing.
+static async Task SearchAndShuffleSurviveRestart()
+{
+    foreach (var seed in new ulong[] { 11, 22, 33 }) await SearchAndShuffleSurviveRestartFor(seed);
+}
+
+static async Task SearchAndShuffleSurviveRestartFor(ulong seed)
+{
+    var storage = NewStorage();
+    try
+    {
+        var hostToken = "host-token-" + seed; var guestToken = "guest-token-" + seed; const string room = "SRCHTEST";
+        static string HashToken(string token) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)));
+        var journal = MatchEngine.CreateDeckSearchShowcase(seed); var reference = MatchEngine.CreateDeckSearchShowcase(seed);
+        var shizuka = journal.State.Cards.Values.First(c => c.OwnerId == 0 && c.DefinitionId == "oracle-l5r-10292").Id;
+        foreach (var engine in new[] { journal, reference })
+            foreach (var command in new[] { new GameCommand("useAbility", 0, 0, shizuka, AbilityId: "shizuka-search"), new GameCommand("chooseSearchDeck", 0, 1, Choice: "Fate"), new GameCommand("selectSearchCard", 0, 2, Choice: "training-terrain") })
+                if (!engine.Execute(command).Accepted) throw new InvalidOperationException("Setup command rejected: " + command.Type);
+        var store = new RoomStore(storage);
+        await store.SaveAsync(new PersistedRoom(1, room, DateTimeOffset.UtcNow, [new SeatCredential(0, HashToken(hostToken)), new SeatCredential(1, HashToken(guestToken))], journal.ExportReplay(), []));
+
+        JsonElement[] latest = new JsonElement[2];
+        async Task Connect(TestServer server, ClientWebSocket[] sockets)
+        {
+            sockets[0] = await server.ConnectAsync(new SeatReservation(room, 0, hostToken));
+            latest[0] = await ReadLargeTypeAsync(sockets[0], "state");
+            sockets[1] = await server.ConnectAsync(new SeatReservation(room, 1, guestToken));
+            latest[1] = await ReadLargeTypeAsync(sockets[1], "state");
+            latest[0] = await ReadLargeTypeAsync(sockets[0], "state", s => s.GetProperty("playersConnected").EnumerateArray().All(v => v.GetBoolean()));
+        }
+        async Task Act(ClientWebSocket[] sockets, int seat, WireGameCommand command)
+        {
+            var version = latest[seat].GetProperty("sequence").GetInt64();
+            await SendAsync(sockets[seat], new CommandEnvelope("command", Guid.NewGuid().ToString(), version, command));
+            var reply = await ReadLargeTypeAsync(sockets[seat], "commandResult");
+            Check(reply.GetProperty("accepted").GetBoolean(), $"The server rejected {command.Type}: {reply.GetRawText()}");
+            var sequence = reply.GetProperty("sequence").GetInt64();
+            for (var s = 0; s < 2; s++) latest[s] = await ReadLargeTypeAsync(sockets[s], "state", state => state.GetProperty("sequence").GetInt64() == sequence);
+            var mirrored = reference.Execute(command.BindToSeat(seat, reference.Version));
+            Check(mirrored.Accepted && mirrored.Version == sequence, "The reference match rejected what the server accepted: " + mirrored.Error);
+        }
+        static string? Pick(IEnumerable<(string Type, bool Enabled)> actions) => actions.Where(a => a.Enabled).Select(a => a.Type).FirstOrDefault(t => t == "endDynasty") ?? actions.Where(a => a.Enabled).Select(a => a.Type).FirstOrDefault(t => t is "pass" or "discardHand");
+
+        // ---- first server: the recovered mid-search room ----
+        var sockets = new ClientWebSocket[2];
+        await using (var first = await TestServer.StartAsync(storage))
+        {
+            await Connect(first, sockets);
+            var host = latest[0].GetProperty("view"); var guest = latest[1].GetProperty("view");
+            Check(latest[0].GetProperty("sequence").GetInt64() == 3, "The room recovered at the journal's version");
+            Check(host.GetProperty("pendingSearch").ValueKind == JsonValueKind.Object && host.GetProperty("pendingSearch").GetProperty("stage").GetString() == "ChooseDiscard", "The searcher's recovered view holds the search");
+            Check(guest.GetProperty("pendingSearch").ValueKind == JsonValueKind.Null, "The opponent's view has no deck viewer");
+            Check(host.GetProperty("shownCards").GetArrayLength() == 1 && guest.GetProperty("shownCards").GetArrayLength() == 1
+                && host.GetProperty("shownCards").GetRawText() == guest.GetProperty("shownCards").GetRawText(), "The shown-cards record is public and recovered");
+            var foundId = reference.State.Players[0].Hand.Select(id => reference.State.Cards[id]).Single(c => c.DefinitionId == "training-terrain").Id;
+            Check(!latest[1].GetRawText().Contains('"' + foundId + '"', StringComparison.Ordinal), "The recovered opponent envelope holds no id of the hand card that was found");
+            Check(!latest[1].GetRawText().Contains("rngState", StringComparison.OrdinalIgnoreCase), "No generator state on the wire");
+            var actionTypes = latest[0].GetProperty("actions").EnumerateArray().Where(a => a.GetProperty("enabled").GetBoolean()).Select(a => a.GetProperty("type").GetString()).ToArray();
+            Check(actionTypes.Contains("chooseSearchDiscard") && actionTypes.All(t => t is "chooseSearchDiscard" or "concede"), "The recovered searcher is offered exactly the discard choice");
+            // A stray command mid-search is rejected by the server-side engine, atomically.
+            await SendAsync(sockets[0], new CommandEnvelope("command", Guid.NewGuid().ToString(), 3, new WireGameCommand("passSearch")));
+            Check(ErrorCode(await ReadLargeTypeAsync(sockets[0], "commandResult")) == "illegal_action", "The wrong search command is refused");
+            var discard = host.GetProperty("players")[0].GetProperty("hand")[0].GetProperty("id").GetString()!;
+            await Act(sockets, 0, new WireGameCommand("chooseSearchDiscard", TargetId: discard));
+            Check(latest[0].GetProperty("view").GetProperty("pendingSearch").ValueKind == JsonValueKind.Null && latest[0].GetProperty("view").GetProperty("events").EnumerateArray().Any(e => e.GetProperty("type").GetString() == "deckShuffled"), "The search finished and the deck was shuffled");
+            foreach (var socket in sockets) socket.Dispose();
+        }
+
+        // ---- second server: restart, then play the turn out until player 0 has drawn ----
+        sockets = new ClientWebSocket[2];
+        await using (var second = await TestServer.StartAsync(storage))
+        {
+            await Connect(second, sockets);
+            Check(latest[0].GetProperty("sequence").GetInt64() == reference.Version, "Accepted gameplay, the search included, survives the restart");
+            for (var step = 0; step < 40 && latest[0].GetProperty("view").GetProperty("activePlayerId").GetInt32() == 0; step++)
+            {
+                var seat = latest[0].GetProperty("view").GetProperty("priorityPlayerId").GetInt32();
+                var type = Pick(latest[seat].GetProperty("actions").EnumerateArray().Select(a => (a.GetProperty("command").ValueKind == JsonValueKind.Object ? a.GetProperty("command").GetProperty("type").GetString()! : "", a.GetProperty("enabled").GetBoolean())));
+                Check(type is not null, "No way to continue the turn");
+                await Act(sockets, seat, new WireGameCommand(type!));
+            }
+            Check(latest[0].GetProperty("view").GetProperty("activePlayerId").GetInt32() == 1, "Player 0's turn ended");
+            var serverHand = latest[0].GetProperty("view").GetProperty("players")[0].GetProperty("hand").EnumerateArray().Select(c => c.GetProperty("id").GetString()).ToArray();
+            var referenceHand = reference.GetView(0).Players[0].Hand.Select(c => c.Id).ToArray();
+            Check(serverHand.SequenceEqual(referenceHand), $"Seed {seed}: the cards drawn from the shuffled Fate deck differ after a restart");
+            Check(latest[0].GetProperty("view").GetProperty("events").GetRawText() == JsonSerializer.Serialize(reference.GetView(0).Events, Protocol.Json), "The public event log survives the restart unchanged");
+            foreach (var socket in sockets) socket.Dispose();
+        }
+    }
+    finally { Directory.Delete(storage, recursive: true); }
+}
+
 // Issue #303: a command field or quote missing from the wire records is silently dropped online (DeckPosition and
 // TargetPlayerId were), so compare the wire command with GameCommand by reflection and round-trip real quotes.
 static Task GoldWire()
@@ -243,6 +340,30 @@ static void Check(bool condition, string message) { if (!condition) throw new In
 static Task SendAsync<T>(ClientWebSocket socket, T message) => socket.SendAsync(
     JsonSerializer.SerializeToUtf8Bytes(message, Protocol.Json).AsMemory(), WebSocketMessageType.Text, true,
     CancellationToken.None).AsTask();
+
+// ClientConnection.ReceiveAsync enforces the 32 KiB limit on what a CLIENT may send the server; server-to-client state messages
+// have no such cap (MatchSession accepts up to 4 MiB). A state that carries a whole deck viewer (issue #312) exceeds 32 KiB, so the
+// search test reads with the client's own limit instead.
+static async Task<JsonElement> ReadLargeTypeAsync(ClientWebSocket socket, string type, Func<JsonElement, bool>? predicate = null)
+{
+    using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+    var buffer = new byte[16384];
+    while (true)
+    {
+        using var message = new MemoryStream();
+        WebSocketReceiveResult part;
+        do
+        {
+            part = await socket.ReceiveAsync(new ArraySegment<byte>(buffer), timeout.Token);
+            if (part.MessageType == WebSocketMessageType.Close) throw new InvalidOperationException("The socket closed before the expected message.");
+            message.Write(buffer, 0, part.Count);
+            if (message.Length > 4 * 1024 * 1024) throw new InvalidOperationException("Server snapshot exceeds the client's supported size.");
+        } while (!part.EndOfMessage);
+        using var document = JsonDocument.Parse(message.ToArray());
+        var value = document.RootElement;
+        if (value.GetProperty("type").GetString() == type && (predicate is null || predicate(value))) return value.Clone();
+    }
+}
 
 static async Task<JsonElement> ReadTypeAsync(ClientWebSocket socket, string type, Func<JsonElement, bool>? predicate = null)
 {
