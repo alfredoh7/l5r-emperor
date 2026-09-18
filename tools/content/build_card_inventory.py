@@ -143,7 +143,6 @@ BLOCKERS: dict[str, str] = {
     # own scope bounded.
     "oracle-l5r-24": "Needs a Gold-Cost comparison Target category plus a Gold-Cost-reduction effect (both novel).",
     "oracle-l5r-634": "Needs a Retainer mechanic, movement to any location (not just home), and a province-card discard (three separate gaps).",
-    "oracle-l5r-10929": "Not blocked; deferred for scope (Discipline is already built; needs only a new \"own opposed Personality\" Target category).",
     "oracle-l5r-1121": "Not blocked; deferred for scope (CardInstance.StraightenBlockedTurn already exists for the negate-next-straightening half; needs a new Paragon Performer category and an enemy-unit-card Target).",
     "oracle-l5r-1127": "Needs Regions (not built).",
     "oracle-l5r-1151": "Needs Dueling/Focus Effects (not started at all).",
@@ -173,8 +172,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10735": "Needs a \"before this battle resolves\" Reaction trigger (the Terrain-play half is separately wirable).",
     "oracle-l5r-10943": "Needs a self-replacing Terrain variant plus an ongoing army-wide Force passive tied to being in play as Terrain (same two gaps as oracle-l5r-10941).",
     "oracle-l5r-10551": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900/4118).",
-    "oracle-l5r-10945": "Not blocked; deferred for scope (Discipline is already built; needs a standalone \"attachment\" Target category, a subset of the existing attachment-or-dishonorable-personality shape).",
-    "oracle-l5r-10946": "Not blocked; deferred for scope (own-personality Target, CardPersonalHonor, and dual Force/Chi modifiers all already exist; needs a new \"unopposed\" condition check).",
     "oracle-l5r-5046": "Needs a keyword-conditional cost EXEMPTION (bow the performer unless it has a given keyword) -- distinct from every existing keyword-conditional EFFECT.",
     "oracle-l5r-5444": "Needs a \"count this card's own keywords, excluding a named pattern\" mechanism (novel).",
     "oracle-l5r-5533": "Needs an exemption from the generic Battle-timing army-presence requirement (the adjacent-battlefield Performer shape itself, Moto Gunso's own, already exists).",
@@ -189,7 +186,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10388": "Needs a \"count copies of this same card played this battle\" mechanism (novel; the additional-Battle-action half is separately wirable).",
     "oracle-l5r-6034": "Needs a Gold-Cost comparison Target category (same gap as oracle-l5r-24).",
     "oracle-l5r-6060": "Not blocked; deferred for scope (the opponent-chooses-effect shape, shinden-choice's own, already exists; needs a \"was this negated\" detection hook feeding a fallback effect).",
-    "oracle-l5r-9922": "Not blocked; deferred for scope (needs the same new \"own opposed Personality\" Target category noted for oracle-l5r-10929).",
     "oracle-l5r-10164": "Needs an \"actions must target this card if legal\" redirect mechanic (same gap as oracle-l5r-10300).",
     "oracle-l5r-10238": "Not blocked; deferred for scope (similar shape to the existing move-to-battlefield-if-opposed patterns).",
     "oracle-l5r-6702": "Needs Dueling/Focus Effects (the Battle half, a plain Force debuff, is separately wirable).",
@@ -198,7 +194,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-7261": "Needs a genuinely new \"discard the Dynasty card sitting in the current battlefield's province\" primitive -- distinct from every existing discard shape (Kharmic-discard only ever discards a card the ACTING player already controls; the ordinary Dynasty-phase discard is a player's own province choice, never mid-Battle and never possibly an opponent's own province).",
     "oracle-l5r-7435": "Needs Dueling/Focus Effects (the Battle half is separately wirable).",
     "oracle-l5r-10132": "Needs a delayed, multi-step revival mechanic (\"before this turn ends, put a removed unit into play ignoring costs\") -- not built.",
-    "oracle-l5r-9931": "Not blocked; deferred for scope (the Reaction half mirrors Khol Regulars' own -3 exactly; the Battle half needs a \"defending Personality\" Performer filter plus a before-battle-resolves straighten).",
     "oracle-l5r-7753": "Needs a \"Political\" Reaction timing (not built; the Battle half, a plain straighten, is separately wirable).",
     "oracle-l5r-7767": "Needs an \"after being targeted, negate\" Reaction trigger (same gap as oracle-l5r-1292/10107).",
     "oracle-l5r-7995": "Needs Dueling/Focus Effects (the Battle half is separately wirable).",
@@ -209,12 +204,9 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10699": "Needs an ability-copying mechanism (novel meta-effect; not built).",
     "oracle-l5r-10960": "Needs a unit-Force-total comparison Target (same gap as oracle-l5r-2900).",
     "oracle-l5r-8496": "Needs an ongoing \"negate all current and new Force penalties\" effect (novel; the plain-straighten half is separately wirable).",
-    "oracle-l5r-10402": "Not blocked; deferred for scope (the Reaction half mirrors Khol Regulars' own -2; the Battle half is a move-to-an-opposed-battlefield variant of existing move mechanics).",
     "oracle-l5r-10176": "Needs a discard-pile-usable variant distinct from Discipline (its own printed ability, not a Discipline-keyword card).",
     "oracle-l5r-10963": "Needs an \"Interrupt\" timing (not built; the plain Melee 2 Attack half is separately wirable).",
-    "oracle-l5r-9168": "Not blocked; deferred for scope (the Set-Force pattern already exists, per oracle-l5r-543's own note).",
     "oracle-l5r-10182": "Needs a \"before an action's effect destroys a card, negate\" Reaction trigger (same gap as oracle-l5r-2530; the Terrain-play half is separately wirable).",
-    "oracle-l5r-9390": "Not blocked; deferred for scope (Spirit-keyword Performer and MoveHome already exist; the 'will not be negated' clause just means never opening the reaction window for this specific move).",
 
     # Lion Clan Personality review (issue #198): the 49 unwired Lion Clan Personalities left after
     # wiring Personality wave 8's 17 cards, triaged against every primitive built through wave 8.

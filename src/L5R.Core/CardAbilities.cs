@@ -951,6 +951,99 @@ public static class AbilityCatalog
         // auto-pick-the-better-outcome simplification -- staying unbowed has real value here, so
         // this needs an actual player choice, not an automatic default).
         ["unexpected"] = new("Battle", "Choose your performing unbowed Personality and target an enemy card without attachments: Bow it. You may bow your Personality; if you did, draw a card", "enemy-card-without-attachments", Performer: "own-unbowed-personality-at-battle"),
+        // Strategy wave 14 (issue #289): Batch C of the "Not blocked; deferred for scope" cards from
+        // build_card_inventory.py's own BLOCKERS audit. Wrathful Ancestor (oracle-l5r-9390), originally
+        // assigned to this batch too, was found already fully wired and published in strategy-wave-6
+        // (issue #264's own Second City audit, under the existing "wrathful-ancestor-move" ability id)
+        // -- its own BLOCKERS entry was simply stale, the same "Surety of Purpose" situation Batch B
+        // hit. It is NOT re-packaged here; this wave publishes the other seven.
+        //
+        // Banzai! (10929, Discipline :g2:): "Battle: Give your target opposed Personality +2F." Its
+        // own scan confirms the plain "Give your target X" phrasing (no separate Performer), the exact
+        // shape crushing-force's own-opposed Target category already established (own, opposed --
+        // Army(1-player.Id, battlefield).Any(), no AtBattle check of its own). Discipline (issue #184)
+        // is already built, but every card that has exercised it so far (training-discipline-ability)
+        // carried no printed battle/open verb of its own, so the shared "Discipline" Phase switch is
+        // deliberately as permissive as BattleOrOpen (Action or Battle, no presence Require) -- correct
+        // for a card with no verb, but Banzai!'s own scan reads "Battle:" specifically, not "Battle/
+        // Open," so playing it via Discipline still needs the ordinary Battle-only phase/presence gate
+        // core rules p.489 layers Discipline on TOP of ("using one of its actions," not replacing it).
+        // See its own dedicated Require below (ValidateAbility) for that narrowing -- Lost in Transit
+        // below needs no equivalent, since its own printed "Battle/Open" already matches the shared
+        // Discipline switch's existing permissiveness exactly.
+        ["banzai"] = new("Discipline", "Discipline (2). Battle: Give your target opposed Personality +2F", "own-opposed"),
+        // Pure Intent (9922, Cost 0): its own scan reads "Choose your performing opposed Personality:
+        // Give him a Force bonus equal to his Personal Honor. Gain 2 Honor" -- deck-pool.json's own
+        // "Give your target opposed Personality" paraphrase was misleading; the real card uses the
+        // "Choose your performing" Performer idiom (Target "none", effect on the Performer itself),
+        // not a plain Target. No "unbowed" printed, so a new own-personality-opposed Performer category
+        // (own, opposed, no unbowed/keyword gate) -- own-unbowed-personality-with-keyword-opposed's own
+        // shape minus the unbowed/RequiredKeywords restrictions neither this card prints.
+        ["pure-intent"] = new("Battle", "Choose your performing opposed Personality: Give him a Force bonus equal to his Personal Honor. Gain 2 Honor", "none", Performer: "own-personality-opposed"),
+        // Marshal Your Strength (10946, no printed Cost -- confirmed blank on its own scan, same as
+        // Strength of the Bear/Divine's own precedent): "Battle: Give your target Personality Force
+        // and Chi bonuses equal to his Personal Honor, minus 1 if he is unopposed." own-personality
+        // (plain Target, no Performer -- not "opposed" gated, since it works unopposed too, just for
+        // less) and CardPersonalHonor both already exist; ApplyModifier is stat-agnostic (its own Chi
+        // branch, checked live for every stat that reaches it, already covers a Chi modifier -- no
+        // published card has exercised it yet, this is the first). "Unopposed" is a new inline
+        // condition, the negation of the same Army(1-player.Id, battlefield).Any() check every other
+        // "opposed" primitive here already reads -- no new helper needed, just the boolean flipped.
+        ["marshal-your-strength"] = new("Battle", "Give your target Personality Force and Chi bonuses equal to his Personal Honor, minus 1 if he is unopposed", "own-personality"),
+        // Lost in Transit (10945, Discipline :g1:): "Battle/Open: Bow a target attachment." Discipline
+        // is already built, and its own shared Phase switch (Action or Battle, no presence Require) is
+        // already an exact match for a genuine "Battle/Open" verb (BattleOrOpen's own established
+        // convention: no battlefield-presence requirement either) -- no per-id narrowing needed, unlike
+        // Banzai! above. "attachment" (a standalone Target category, no dishonorable-Personality
+        // alternative) already exists verbatim -- nubane-bow's own shape (Open, "Target an attachment:
+        // bow it"), not merely "trivially small" to add as the BLOCKERS note assumed; it was already
+        // there.
+        ["lost-in-transit-bow"] = new("Discipline", "Discipline (1). Battle/Open: Bow a target attachment", "attachment"),
+        // Strong Defenses (9931, Cost 0, Siege): "Reaction: After a Ranged or Melee Attack is
+        // targeted: Give it -3 strength.\nBattle: Choose your performing defending Personality: Give
+        // him +5F. Straighten him before this battle resolves." The Reaction half mirrors Khol
+        // Regulars' own shape exactly (khol-regulars-reaction's own +2, fallow-lands-reaction's own -2)
+        // -- a Strategy-card Reaction played straight from hand, A Close Call's own established shape,
+        // just with no Armor-attached restriction and a magnitude of -3 instead. The Battle half's own
+        // scan prints no "unbowed" qualifier on "your performing defending Personality" (Straighten
+        // "before this battle resolves" is itself the whole point -- the performer may well already be
+        // bowed), so a new own-defending-personality-at-battle Performer category (own-unbowed-
+        // attacking-personality-at-battle's own mirror image, off the existing IsDefendingUnit helper,
+        // minus the unbowed restriction that helper's own attacking counterpart carries). "Before this
+        // battle resolves" is simply straightening immediately, mid-resolution, well before the
+        // eventual BattleForce tally -- no new timing plumbing needed.
+        ["strong-defenses-reaction"] = new("Reaction", "After a Ranged or Melee Attack is targeted: -3 strength", "none", Trigger: "before-attack-resolves"),
+        ["strong-defenses-boost"] = new("Battle", "Choose your performing defending Personality: Give him +5F. Straighten him before this battle resolves", "none", Performer: "own-defending-personality-at-battle"),
+        // Trusting Instinct (10402, Cost 0): "Reaction: After a Ranged or Melee attack is targeted:
+        // Give it -2 strength.\nBattle: Choose your performing Personality: Move him to a battlefield
+        // where he would be opposed." The Reaction half is Strong Defenses' own -3 pattern again, at
+        // -2 (both added to the shared Tsuruchi Yakusho strength-reduction-immunity id list below,
+        // per that list's own doc comment: "a future reducing card only needs to be added to this same
+        // id list"). The Battle half's own scan likewise prints no "unbowed" qualifier -- plain
+        // own-personality (already exists) -- and moves him to THE current battlefield (this engine
+        // resolves one battle at a time, so "a battlefield" is always the current one, Houken-exp's
+        // own "if he would be opposed there" shape), gated on that destination actually being opposed
+        // (a new inline Require, the same Army(1-player.Id, battlefield).Any() opposed check yet
+        // again), via the existing MoveToBattlefield primitive. No straighten afterward -- unlike
+        // Michi/Houken-exp, nothing printed.
+        ["trusting-instinct-reaction"] = new("Reaction", "After a Ranged or Melee Attack is targeted: -2 strength", "none", Trigger: "before-attack-resolves"),
+        ["trusting-instinct-move"] = new("Battle", "Choose your performing Personality: Move him to a battlefield where he would be opposed", "none", Performer: "own-personality"),
+        // Visage of the Orochi (9168, Cost 0, Thunder/Fear): "Battle: Choose your performing opposed
+        // unbowed Thunder Personality: Raise his Force to 6. You may target and bow an enemy card with
+        // lower Force and no attachments." own-unbowed-personality-with-keyword-opposed (Strength of
+        // the Divine's own new Performer category, issue #287) already covers "opposed unbowed [X]
+        // Personality" verbatim with RequiredKeywords: ["Thunder"]. "Raise ... to 6" (not "Set," unlike
+        // Asako House Guard's own unconditional Set-Force pattern) is Set-Force's own delta-to-target-
+        // value idiom, floored at 0 so an already-6-or-higher Performer is never reduced: Math.Max(0, 6
+        // - CardForce(performer)). The optional bow reuses CardIds' own established second-selection
+        // idiom (Scorn the Weak/Strength in Terror/Unexpected, issue #287) rather than a new Target
+        // category: its own "lower Force" comparison is read against the Performer's own POST-raise
+        // Force (Math.Max(6, CardForce(performer)) at validation time, before the Set-Force effect
+        // itself has actually executed) -- inlined directly in ValidateAbility's own CardIds branch,
+        // the same way Strength in Terror already inlines its own attachment-ownership check there,
+        // since no generic Target category composes correctly with an effect still pending within the
+        // same ability.
+        ["visage-of-the-orochi"] = new("Battle", "Choose your performing opposed unbowed Thunder Personality: Raise his Force to 6. You may target and bow an enemy card with lower Force and no attachments", "none", Performer: "own-unbowed-personality-with-keyword-opposed", RequiredKeywords: ["Thunder"]),
     });
 }
 
@@ -1753,7 +1846,27 @@ public sealed partial class MatchEngine
             // all (its own Zone check always fails) -- needs its own province-index comparison instead.
             if (id == "overgrown-grove-move")
                 Require(source!.ProvinceIndex == _state.CurrentBattleProvince, "Overgrown Grove only affects a battle at its own province.");
+            // Trusting Instinct (oracle-l5r-10402, issue #289): "Move him to a battlefield where he
+            // would be opposed" -- this engine resolves one battle at a time, so "a battlefield" is
+            // always the current one (Houken, Experienced's own "if he would be opposed there" shape);
+            // the destination must actually have enemy presence for the move to be legal at all.
+            if (id == "trusting-instinct-move")
+                Require(Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                    "Trusting Instinct only moves your Personality to a battlefield where he would be opposed.");
         }
+        // Banzai! (oracle-l5r-10929, issue #289): a Discipline card whose own printed action is
+        // "Battle:" only (not "Battle/Open" like Lost in Transit) -- the shared Discipline Phase check
+        // above is deliberately as permissive as BattleOrOpen (Action or Battle, no presence Require),
+        // correct for a card with no printed battle/open verb of its own (the only prior real-world
+        // Discipline case), but wrong for Banzai!'s own "Battle:" verb: core rules p.489 layers
+        // Discipline's own sourcing/cost on TOP of "using one of its actions," not in place of that
+        // action's own normal timing. actingAsBattle is unconditionally false for Timing=="Discipline"
+        // (neither switch arm matches), so this narrows it back by hand: strictly the Battle phase,
+        // plus the same battlefield-presence requirement an ordinary "Battle"-Timing ability already
+        // gets from the shared block above.
+        if (id == "banzai")
+            Require(_state.Phase == Phase.Battle && Army(player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                "Banzai! is a Battle-only Discipline: it needs the Battle phase and a unit at the current battlefield.");
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3,"Discarding three Fate cards is a required cost.");
@@ -1805,11 +1918,19 @@ public sealed partial class MatchEngine
         if (id == "a-close-call-negate")
             Require(_state.PendingAttack!.Kind is "Ranged" or "Melee" && Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")),
                 "A Close Call needs a Ranged or Melee Attack targeting a Personality with an Armor attached.");
+        // Strong Defenses / Trusting Instinct (issue #289): "After a Ranged or Melee Attack is
+        // targeted" -- A Close Call's own Kind restriction again, minus its Armor-attached gate (no
+        // such restriction printed on either of these), each played straight from hand like A Close
+        // Call itself (AnyAttackReactionAvailable's own out-of-play discovery already covers a Strategy
+        // card's Reaction, per its own doc comment).
+        if (id is "strong-defenses-reaction" or "trusting-instinct-reaction")
+            Require(_state.PendingAttack!.Kind is "Ranged" or "Melee", "This only reacts to a Ranged or Melee Attack.");
         // Tsuruchi Yakusho (issue #276 follow-up): every existing Attack-strength-reducing Reaction is
         // blocked outright while her own immunity flag is set for this specific (Ranged) Attack's own
         // resolution -- covers both current reduction sites (Fallow Lands' -2, Training's own full
         // negate) generically, so a future reducing card only needs to be added to this same id list.
-        if (id is "fallow-lands-reaction" or "training-attack-negate")
+        // Strong Defenses' -3 and Trusting Instinct's -2 (issue #289) are exactly that future case.
+        if (id is "fallow-lands-reaction" or "training-attack-negate" or "strong-defenses-reaction" or "trusting-instinct-reaction")
             Require(!(_state.PendingAttack!.Kind == "Ranged" && _state.RangedAttackStrengthReductionImmune),
                 "This Ranged Attack is immune to strength reduction for the remainder of its resolution.");
         // Fallow Lands: unlike an ordinary Zone.Battlefield/Attached Reaction card, AtBattle() does not
@@ -1959,6 +2080,18 @@ public sealed partial class MatchEngine
                 // category just above).
                 "own-unbowed-spider-personality-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed &&
                     HasClanAffiliation(performer, "Spider") && AtBattle(performer),
+                // Pure Intent (oracle-l5r-9922, issue #289): "Choose your performing opposed
+                // Personality" -- own-unbowed-personality-with-keyword-opposed's own shape, minus the
+                // unbowed restriction and RequiredKeywords gate neither this card's own scan prints.
+                "own-personality-opposed" => Definition(performer).Type == CardType.Personality &&
+                    Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                // Strong Defenses (oracle-l5r-9931, issue #289): "Choose your performing defending
+                // Personality" -- own-unbowed-attacking-personality-at-battle's own mirror image, off
+                // the existing IsDefendingUnit helper (which already folds in its own AtBattle check),
+                // minus the unbowed restriction that helper's own attacking counterpart carries (no
+                // "unbowed" printed here -- "Straighten him before this battle resolves" is the whole
+                // point, so the performer may already be bowed).
+                "own-defending-personality-at-battle" => Definition(performer).Type == CardType.Personality && IsDefendingUnit(performer),
                 _ => false
             }, "That card does not meet this ability's performer requirement.");
         }
@@ -2010,7 +2143,7 @@ public sealed partial class MatchEngine
             // player chooses to destroy right now), not a static per-ability-id/target/source formula
             // AttackStrength's own switch can express. CardIds carries the chosen token ids here
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected"
+            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi"
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             if (id == "mitsu-fire-attack")
             {
@@ -2059,6 +2192,25 @@ public sealed partial class MatchEngine
                 var ids = command.CardIds ?? [];
                 Require(ids.Length is 0 or 1 && (ids.Length == 0 || ids[0] == command.PerformerId),
                     "You may only bow your own performing Personality.");
+            }
+            // Visage of the Orochi (oracle-l5r-9168, issue #289): "You may target and bow an enemy
+            // card with lower Force and no attachments" -- CardIds' own established optional-second-
+            // selection idiom again, inlined here (rather than a new Target category) because the
+            // comparison is against the Performer's own POST-"Raise to 6" Force, not its live Force at
+            // validation time (the Set-Force effect itself has not executed yet) -- Math.Max(6,
+            // CardForce(performer)) predicts that outcome without needing to actually apply it early.
+            if (id == "visage-of-the-orochi")
+            {
+                var ids = command.CardIds ?? [];
+                Require(ids.Length is 0 or 1, "Visage of the Orochi may target at most one enemy card to bow.");
+                if (ids.Length == 1)
+                {
+                    var bowTarget = Card(ids[0]);
+                    var raisedPerformerForce = Math.Max(6, CardForce(Card(command.PerformerId!)));
+                    Require(bowTarget.OwnerId != player.Id && Definition(bowTarget).Type is CardType.Personality or CardType.Follower
+                        && CardForce(bowTarget) < raisedPerformerForce && !HasAttachments(bowTarget),
+                        "You may only target and bow an enemy card with lower Force than your Thunder Personality (after being raised to 6) and no attachments.");
+                }
             }
             if (ability.Target == "none") Require(command.TargetId is null, "This action has no target.");
             // Ranged/Melee Attack: unlike every other ability target, this one is not required to
@@ -2729,6 +2881,40 @@ public sealed partial class MatchEngine
                 }
                 break;
             }
+            // Strategy wave 14 (issue #289): the seven cards' own Battle-timed execution.
+            case "banzai": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
+            case "pure-intent":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(performer, source!.Id, id, "Force", CardPersonalHonor(performer));
+                GainHonor(player.Id, 2, "Pure Intent", source);
+                break;
+            }
+            case "marshal-your-strength":
+            {
+                var unopposed = !Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any();
+                var bonus = CardPersonalHonor(target!) - (unopposed ? 1 : 0);
+                ApplyModifier(target!, source!.Id, id, "Force", bonus);
+                ApplyModifier(target!, source!.Id, id, "Chi", bonus);
+                break;
+            }
+            case "lost-in-transit-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "strong-defenses-boost":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(performer, source!.Id, id, "Force", 5);
+                Straighten(performer);
+                break;
+            }
+            case "trusting-instinct-move": MoveToBattlefield(Card(command.PerformerId!), _state.CurrentBattleProvince!.Value); break;
+            case "visage-of-the-orochi":
+            {
+                var performer = Card(command.PerformerId!);
+                ApplyModifier(performer, source!.Id, id, "Force", Math.Max(0, 6 - CardForce(performer)));
+                if (command.CardIds is { Length: 1 } orochiIds && !StalwartNegatesBow(Card(orochiIds[0]), player.Id))
+                    Card(orochiIds[0]).Bowed = true;
+                break;
+            }
             case "keppo-destroy":
                 if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
                 break;
@@ -2925,6 +3111,8 @@ public sealed partial class MatchEngine
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
             case "fallow-lands-reaction": _state.PendingAttack!.Strength -= 2; break;
+            case "strong-defenses-reaction": _state.PendingAttack!.Strength -= 3; break;
+            case "trusting-instinct-reaction": _state.PendingAttack!.Strength -= 2; break;
             // Stormless Fury (issue #276 follow-up): Equip (Limited)'s own attach mechanism, reused
             // here as a Reaction, deliberately without granting Equip (Battle)'s Additional Action.
             case "stormless-fury-attach":
