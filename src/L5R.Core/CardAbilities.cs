@@ -1329,6 +1329,10 @@ public sealed partial class MatchEngine
         "moto-ming-gwok-attack" => 5,
         "takasho-attack" => 5,
         "champion-of-thunder-attack" => 6,
+        // Nikutai (oracle-l5r-9872, issue #289): its own printed "Battle: Melee 5 Attack" -- missing
+        // from this switch since wave 12 wired the shared attack-execution case for it without ever
+        // adding its strength/kind here, so it silently resolved as a 0-strength Attack.
+        "nikutai-attack" => 5,
         // Legulus's Legion (oracle-l5r-10899): "strength equal to this Follower's Force" -- reads
         // its own performing instance's live Force via sourceId, the same self-referential shape
         // sakata-attack already established (there, a token count; here, CardForce itself).
@@ -1383,6 +1387,7 @@ public sealed partial class MatchEngine
         "false-ring-of-water-attack" or "sakata-attack" or "mitsu-fire-attack" => "Ranged",
         "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
         "champion-of-thunder-attack" => "Ranged",
+        "nikutai-attack" => "Melee",
         "legulus-legion-attack" or "village-raiders-attack" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
         _ => ""
