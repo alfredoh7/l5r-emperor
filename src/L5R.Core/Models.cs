@@ -417,6 +417,15 @@ public sealed class MatchState
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
     // "for the remainder of the battle," not the turn -- since a turn can contain more than one battle.
     public int[] AshigaruBoost { get; set; } = new int[2];
+    // Village Guardian (oracle-l5r-9162, issue #285): "Draw one card for each player who has had a
+    // province destroyed this game" -- a game-wide, per-player, match-lifetime flag, set once and
+    // never cleared (unlike AshigaruBoost above, which resets every battle). Indexed by player id,
+    // the same shape as AshigaruBoost/DestroyedCount, set at DestroyProvince's own single choke
+    // point. Deliberately NOT FieldsOfMercyWatches' shape (a List of per-Terrain-instance, per-player
+    // Personality-destruction counters) -- this is a plain per-player boolean, scoped to the whole
+    // match rather than any one card instance, and to Province destruction rather than Personality
+    // destruction.
+    public bool[] ProvinceEverDestroyed { get; set; } = new bool[2];
     // Additional Action (issue #181): every currently-available grant across both players, and a
     // command snapshot awaiting the "additionalActionReaction" window (Effortless Counterattack's
     // shape) before it actually resolves. Two Hands' own restriction ("other actions will not give

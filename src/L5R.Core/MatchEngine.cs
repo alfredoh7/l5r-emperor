@@ -1749,6 +1749,9 @@ public sealed partial class MatchEngine
     private void DestroyProvince(int owner,ProvinceState province)
     {
         province.Destroyed=true;
+        // Village Guardian (oracle-l5r-9162, issue #285): the single choke point for "a province
+        // destroyed this game" -- set once, never cleared, read by village-guardian-draw's own count.
+        _state.ProvinceEverDestroyed[owner]=true;
         if(province.CardId is string id) { var card=Card(id); card.Zone=Zone.DynastyDiscard; card.FaceUp=true; card.ProvinceIndex=null; }
         province.CardId=null;
         // A Region attaches to the province itself -- it cannot outlive the province it is attached to.
