@@ -179,6 +179,10 @@ var tests = new (string Name, Action Run)[]
     ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
     ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive),
     ("Front Rank Troops / Fudo's Fiends (issue #271): both cards' own BLOCKERS notes were stale -- MatchEngine.ExpendableDraw already exists and is already generically correct for any card carrying the Expendable keyword, checked at every real destroy path. Zero AbilityCatalog wiring needed; this proves the existing, previously-untested helper actually fires for a real published card", ExpendableFollowers),
+    ("General in-play unit-targeting Reaction primitive: Champion of Thunder negates an enemy action's effects on itself, on its host Personality, or on a sibling Follower, choosing which card in its own unit to negate on each time -- reuses the existing beforeActionReaction window (FindBeforeActionReactionWatcher's own Champion/Brothers branch), with NegatedEffectKind \"all\" reaching every effect sink (StalwartNegatesBow, ApplyModifier, DestroyUnits, MoveHome, Straighten)", ChampionOfThunderNegatesOnAnyUnitMember),
+    ("General in-play unit-targeting Reaction primitive: Champion of Thunder's own multi-affected-card case -- one action (a Force penalty) hits every card in the unit at once; Champion's controller chooses exactly one to negate on, leaving the rest penalized", ChampionOfThunderChoosesAmongMultipleAffectedCards),
+    ("General in-play unit-targeting Reaction primitive: Brothers of Goemon requires controlling a Ring before the reaction is even offered, never triggers when the resolving effect could never bow the target (BowsTarget's own curated classification), and negates ONLY the bow when an effect both applies a Force penalty and conditionally bows off the post-penalty Force (costly-feud) -- the Force penalty still lands in full", BrothersOfGoemonRingGateAndPartialBowNegation),
+    ("A Close Call reuses the existing before-attack-resolves Reaction window from hand (AnyAttackReactionAvailable's own new out-of-play check) rather than the new unit-targeting watcher, gated on an Armor-wearing Personality targeted by a Ranged or Melee Attack -- no Armor or a non-Attack ability never offers it, and negation zeroes the Attack's strength before it resolves, same shape as training-attack-negate", ACloseCallArmorAttackNegation),
     ("Stormless Fury (issue #276 follow-up): the general 'after a Battle action resolves' Reaction primitive (OpenBattleActionReactionWindow) -- its own out-of-play half reuses Equip (Limited)'s own attach mechanism as a Reaction, deliberately granting no Additional Action (unlike Equip (Battle)); its own in-play half bows the just-resolved action's own performer, excluded (BattleActionReaction1UsedCardIds) from firing against the SAME action that triggered the first half, but firing normally against a later, different action", StormlessFuryBattleActionReaction),
     ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity),
     ("Cultist Infiltrator (oracle-l5r-1595): may attach to a Personality its controller does not own (a new Effect-keyed exception on Equip's own ownership Require); after each Straighten Phase gives its host a persistent -1C token via the existing shared CreateToken Chi<=0 death check; is excluded from Overlay's own attachment-transfer loop (discarded instead); and, attached to an enemy Personality, is returned to its OWN original owner's discard pile when that Personality dies, since CardInstance.OwnerId is never reassigned", CultistInfiltratorPrimitive),
@@ -4927,6 +4931,196 @@ static void TamokoNegatesMovementOrStraightening()
         Accept(e,Cmd(e,"declineReaction"));
         Accept(e,Cmd(e,"declineReaction"));
         Check(!e.State.Cards[target.Id].Bowed,"Declined: the straighten applies normally");
+    }
+}
+static void ChampionOfThunderNegatesOnAnyUnitMember()
+{
+    // General in-play unit-targeting Reaction primitive: Champion of Thunder reuses the same
+    // beforeActionReaction window Rokai/Tamoko already opened (FindBeforeActionReactionWatcher's own
+    // Champion/Brothers branch), but the affected card is a genuine player CHOICE ("own-unit-member"),
+    // not auto-determined -- any card in Champion's own unit, not just the literal TargetId.
+    {
+        // On itself (a Follower): Naga Remnants' own naga-remnants-bow (Target "enemy-attachment")
+        // bows a target Follower directly -- Champion picks itself, the only card the window's own
+        // CardId could plausibly have meant here.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attackerHost=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var nagaRemnants=Add(s,"oracle-l5r-10513",0,Zone.Attached,province:0,attachedTo:attackerHost.Id);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nagaRemnants.Id,TargetId:champion.Id,AbilityId:"naga-remnants-bow"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:champion.Id,AbilityId:"champion-of-thunder-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(!e.State.Cards[champion.Id].Bowed,"Negated: Champion never bows from the enemy's own action");
+    }
+    {
+        // On its host Personality: training-bow-at-battle (Target "enemy-personality") bows the host
+        // directly -- Champion's own unit still matches (same host), even though Champion itself was
+        // never the literal TargetId, and its controller may choose to negate on the host instead.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:host.Id,AbilityId:"training-bow-at-battle"));
+        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:host.Id,AbilityId:"champion-of-thunder-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(!e.State.Cards[host.Id].Bowed,"Negated: the host never bows either");
+    }
+    {
+        // On a sibling Follower: naga-remnants-bow again, this time targeting a DIFFERENT Follower in
+        // Champion's own unit -- proving eligibility is unit membership, not "must be Champion's own
+        // literal target."
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var attackerHost=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var nagaRemnants=Add(s,"oracle-l5r-10513",0,Zone.Attached,province:0,attachedTo:attackerHost.Id);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var sibling=Add(s,"training-follower",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:nagaRemnants.Id,TargetId:sibling.Id,AbilityId:"naga-remnants-bow"));
+        Equal(e.State.PendingChoice?.CardId,champion.Id);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:sibling.Id,AbilityId:"champion-of-thunder-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(!e.State.Cards[sibling.Id].Bowed,"Negated: the sibling Follower never bows");
+    }
+}
+static void ChampionOfThunderChoosesAmongMultipleAffectedCards()
+{
+    // Champion of Thunder's own worked example (the card owner's own ruling): "if all Followers in
+    // its unit suffer a Force penalty, the champion of thunder must choose which card to negate the
+    // effects on." training-unit-force-penalty applies -1F to every card in the target's own unit at
+    // once from a single command; Champion's controller chooses exactly ONE to negate on, leaving
+    // the rest penalized -- NegatedEffectKind "all" is deliberately not consumed by the first match
+    // (see NegatesEffect's own doc comment), so it stays live for every remaining ApplyModifier call
+    // in the same re-invoked command, but only ever matches the one chosen card's own id.
+    var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+    var penalizer=Add(s,"training-unit-penalty-personality",0,Zone.Home);
+    var host=Add(s,"training-crane-samurai",1,Zone.Home);
+    var champion=Add(s,"oracle-l5r-1292",1,Zone.Attached,attachedTo:host.Id);
+    var sibling=Add(s,"training-follower",1,Zone.Attached,attachedTo:host.Id);
+    var e=MatchEngine.FromTestState(s);
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:penalizer.Id,TargetId:host.Id,AbilityId:"training-unit-force-penalty"));
+    Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+    Equal(e.State.PendingChoice?.CardId,champion.Id);
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:champion.Id,TargetId:sibling.Id,AbilityId:"champion-of-thunder-negate"));
+    Accept(e,Cmd(e,"declineReaction"));
+    Accept(e,Cmd(e,"declineReaction"));
+    Equal(e.State.Cards[sibling.Id].Modifiers.Count,0,"Chosen: the sibling's own Force penalty never applied");
+    Equal(e.State.Cards[host.Id].Modifiers.Count,1,"Not chosen: the host still suffers the Force penalty");
+    Equal(e.State.Cards[champion.Id].Modifiers.Count,1,"Not chosen: Champion itself still suffers the Force penalty");
+}
+static void BrothersOfGoemonRingGateAndPartialBowNegation()
+{
+    {
+        // No Ring in play: the reaction is never even offered -- Costly Feud's own conditional bow
+        // (Force penalty first, then bow if Force is now 0) resolves immediately and unopposed.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // army presence
+        var feud=Add(s,"oracle-l5r-1521",0,Zone.Hand);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        Add(s,"oracle-l5r-1167",1,Zone.Attached,province:0,attachedTo:host.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:feud.Id,TargetId:host.Id,AbilityId:"costly-feud"));
+        Check(e.State.PendingChoice is null,"No Ring: never offered");
+        Check(e.State.Cards[host.Id].Bowed,"Costly Feud's own bow applies unopposed");
+    }
+    {
+        // A Ring in play, but the resolving effect could never bow the target at all (Reiyu's own
+        // plain Force penalty): BowsTarget's own curated classification correctly withholds the
+        // reaction rather than offering a choice that could never matter.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var reiyu=Add(s,"oracle-l5r-5138",0,Zone.Battlefield,province:0);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"oracle-l5r-1167",1,Zone.Attached,province:0,attachedTo:host.Id);
+        Add(s,"training-ring-of-air",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:reiyu.Id,TargetId:host.Id,AbilityId:"reiyu-force-penalty"));
+        Check(e.State.PendingChoice is null,"A plain Force penalty never offers this reaction");
+        Check(e.State.Cards[host.Id].Modifiers.Count>0,"The Force penalty itself still applies");
+    }
+    {
+        // A Ring in play, and the resolving effect both applies a Force penalty AND conditionally
+        // bows off the POST-penalty Force (Costly Feud, base Force 3 -> 0 after -3): the Force
+        // penalty still lands in full; only the resulting bow is negated -- the retroactive/partial
+        // negation the card needs, achieved by setting the negation signal BEFORE the whole command
+        // is re-invoked, so the unconditional Force penalty and the now-negated conditional bow check
+        // both run within that same single re-invocation.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); // army presence
+        var feud=Add(s,"oracle-l5r-1521",0,Zone.Hand);
+        var host=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+        var brothers=Add(s,"oracle-l5r-1167",1,Zone.Attached,province:0,attachedTo:host.Id);
+        Add(s,"training-ring-of-air",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:feud.Id,TargetId:host.Id,AbilityId:"costly-feud"));
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction");
+        Equal(e.State.PendingChoice?.CardId,brothers.Id);
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:brothers.Id,AbilityId:"brothers-goemon-negate"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(!e.State.Cards[host.Id].Bowed,"Negated: only the bow");
+        Check(e.State.Cards[host.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-3),"The Force penalty still landed in full");
+    }
+}
+static void ACloseCallArmorAttackNegation()
+{
+    {
+        // Armor-wearing Personality targeted by a Ranged Attack: A Close Call, sitting in hand, may
+        // negate the whole Attack -- zeroing PendingAttack.Strength before it resolves, the same
+        // shape training-attack-negate already established. AnyAttackReactionAvailable's own new
+        // out-of-play check is what makes a hand-only reactor discoverable at all.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var closeCall=Add(s,"oracle-l5r-10359",1,Zone.Hand);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        Add(s,"training-armor",1,Zone.Attached,province:0,attachedTo:target.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:target.Id,AbilityId:"carpenter-castle-siege"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:closeCall.Id,AbilityId:"a-close-call-negate"));
+        Equal(e.State.PendingAttack?.Strength,0);
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Negated: the Armor-wearing target survives");
+    }
+    {
+        // No Armor attached: the same Reaction is rejected outright -- the Armor/Kind Require gates
+        // actually USING it, even though the window itself may still open regardless of the eventual
+        // target's own Armor (A Close Call sits in hand either way).
+        var s=StrongholdBattle("oracle-l5r-1218");
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var castle=Add(s,"training-castle",0,Zone.Home);
+        var closeCall=Add(s,"oracle-l5r-10359",1,Zone.Hand);
+        var target=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // no Armor
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:target.Id,AbilityId:"carpenter-castle-siege"));
+        Reject(e,new GameCommand("useAbility",1,e.Version,CardId:closeCall.Id,AbilityId:"a-close-call-negate"));
+    }
+    {
+        // A Melee Attack against an Armor-wearing Personality is negated too, not Ranged-only.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        var wielderHost=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var weapon=Add(s,"training-weapon-with-attack",0,Zone.Attached,province:0,attachedTo:wielderHost.Id);
+        var closeCall=Add(s,"oracle-l5r-10359",1,Zone.Hand);
+        var target=Add(s,"training-battle-bower",1,Zone.Battlefield,province:0); // Force 2, at or below the Melee 2 Attack's strength
+        Add(s,"training-armor",1,Zone.Attached,province:0,attachedTo:target.Id);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:weapon.Id,TargetId:target.Id,AbilityId:"training-weapon-attack"));
+        Equal(e.State.PendingChoice?.Type,"attackReaction");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:closeCall.Id,AbilityId:"a-close-call-negate"));
+        Equal(e.State.PendingAttack?.Strength,0);
+        Accept(e,Cmd(e,"declineReaction"));
+        Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.Cards[target.Id].Zone==Zone.Battlefield,"Negated: Melee Attacks too, not just Ranged");
     }
 }
 static void TamokoOpenHonorGain()

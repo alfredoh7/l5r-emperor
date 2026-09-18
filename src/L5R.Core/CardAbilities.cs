@@ -161,6 +161,14 @@ public static class AbilityCatalog
         // card needing it -- proves strength can be raised or negated by either side before resolution.
         ["training-attack-boost"] = new("Reaction", "Training: +2 to a pending attack", "none", Trigger: "before-attack-resolves"),
         ["training-attack-negate"] = new("Reaction", "Training: negate a pending attack", "none", Trigger: "before-attack-resolves"),
+        // Training-only: exercises the general in-play unit-targeting Reaction primitive's own
+        // multi-affected-card case ahead of any published card needing it -- Champion of Thunder's
+        // own worked example ("if all Followers in its unit suffer a Force penalty, choose which
+        // card to negate the effects on"). A single command targets the unit's own host Personality;
+        // the effect applies to every member of that unit at once (host and every attachment alike),
+        // so a watcher whose OWN unit matches gets a real choice among several simultaneously
+        // affected cards, not just the one literal TargetId.
+        ["training-unit-force-penalty"] = new("Open", "Training: target an enemy Personality; every card in that unit suffers -1F", "enemy-personality"),
         // Training-only: exercises the Terrain primitive's "may be a target for battle actions that
         // target a Terrain" clause, ahead of any published card needing it.
         ["training-destroy-terrain"] = new("Battle", "Training: destroy the Terrain at this battlefield", "terrain-at-battle"),
@@ -363,6 +371,18 @@ public static class AbilityCatalog
         ["rokai-negate-destruction"] = new("Reaction", "After another player's action targets your Personality at Rokai's location, destroy Rokai: Negate your Personality's destruction from the action's effects.", "none", Trigger: "before-action-resolves"),
         ["tamoko-negate"] = new("Reaction", "Before an action resolves, target a Personality: Negate either his movement or straightening from the action's effects.", "none", Trigger: "before-action-resolves"),
         ["tamoko-open"] = new("Open", "If it is not your turn, target an unbowed Personality controlled by the active player: Before the turn ends, gain 1 Honor if he was not assigned to attack your provinces this turn.", "unbowed-personality-controlled-by-active-player"),
+        // Champion of Thunder / Brothers of Goemon: the general in-play unit-targeting Reaction
+        // primitive, reusing the same "before-action-resolves" Trigger/"beforeActionReaction" window
+        // Rokai/Tamoko already opened -- see FindBeforeActionReactionWatcher's own Champion/Brothers
+        // branch for how each is actually found. Champion's own Target ("own-unit-member") lets its
+        // controller choose ANY card in the unit to negate on (not auto-determined like Rokai/Tamoko),
+        // matching the card owner's own ruling that "this card" means "any card in this unit" and
+        // that the controller chooses when more than one card was actually affected at once.
+        // Brothers' own Target stays "none" -- it never offers a choice of card, only whether to use
+        // it at all (auto-determined from the deferred command's own TargetId, Rokai/Tamoko's shape).
+        ["champion-of-thunder-negate"] = new("Reaction", "After another player's action targets a card in this unit: Negate the action's effects on this card.", "own-unit-member", Trigger: "before-action-resolves"),
+        ["champion-of-thunder-attack"] = new("Battle", "Ranged 6 Attack", "attack"),
+        ["brothers-goemon-negate"] = new("Reaction", "After another player's action targets a card in this unit, if you control any Rings: Negate the card's bowing from the action's effects.", "none", Trigger: "before-action-resolves"),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
         // onto the existing Open/Battle/Limited/BattleOrOpen values verbatim (confirmed precedent,
@@ -702,6 +722,15 @@ public static class AbilityCatalog
         // own special validation branch, generalized with an OR against the ordinary InPlay(target) path.
         ["tranquil-garden-ring"] = new("Open", "Bow this card, and target a Ring in play or in your discard pile: If the Ring is in play, straighten it. Otherwise, put it into your hand and destroy this card", "ring-in-play-or-own-discard"),
         ["flesh-cutter-arrows-reaction"] = new("Reaction", "After a Ranged Attack from an action performed by this Personality targets a card without an attached Armor, bow this card: +2 strength", "none", Trigger: "before-attack-resolves"),
+        // A Close Call: narrower than the general in-play unit-targeting Reaction primitive above --
+        // reacts only to a Ranged/Melee Attack targeting an Armor-wearing Personality, so it reuses
+        // the EXISTING before-attack-resolves Reaction window/attackReaction primitive verbatim (the
+        // same shape khol-regulars-reaction above already uses), gated by its own Require (Armor
+        // attached, Kind Ranged or Melee) rather than the new unit-targeting watcher. "Negate its
+        // effects" reuses the exact same shape training-attack-negate already established
+        // (_state.PendingAttack!.Strength = 0, still respecting Protection).
+        ["a-close-call-negate"] = new("Reaction", "After a Personality with an Armor is targeted by a Melee or Ranged Attack: Negate its effects.", "none", Trigger: "before-attack-resolves"),
+        ["a-close-call-boost"] = new("Battle", "Target a Personality with an attachment: Give him +2F.", "personality-with-attachment"),
         // Dual-choice pair sharing one UsageKey (horibe-bow/horibe-straighten's own shape); "Even if
         // this card is bowed" needs the existing bowed-source exemption list, and (since the source
         // is an Item, not a Personality) an explicit AtBattle Require the blanket check never gives it.
@@ -822,6 +851,37 @@ public sealed partial class MatchEngine
     // distinction ("has the PRINTED Magistrate keyword"), since it also grants Magistrate itself and
     // would otherwise always satisfy a plain Keyword() check.
     private static bool PrintedKeyword(CardInstance card, string keyword) => (Definition(card).Keywords ?? []).Contains(keyword, StringComparer.Ordinal);
+    // "Unit" (Champion of Thunder / Brothers of Goemon, the general in-play unit-targeting Reaction
+    // primitive): a Personality plus every attachment on it (Item, Spell, Follower alike) forms one
+    // army entry. A Follower/Item/Spell's own unit is resolved through its host; a Personality's own
+    // unit is itself. Mirrors ActingPersonality's own Zone.Attached-to-parent resolution, for a
+    // different purpose (identifying the whole unit, not just the acting Personality).
+    private string UnitHostId(CardInstance card) => card.Zone == Zone.Attached && card.AttachedTo is string parentId ? parentId : card.Id;
+    private IEnumerable<CardInstance> UnitMembers(CardInstance card)
+    {
+        var host = Card(UnitHostId(card));
+        yield return host;
+        foreach (var attachment in Attachments(host.Id)) yield return attachment;
+    }
+    // The general in-play unit-targeting Reaction primitive's own negation signal (set by
+    // ResolveOrDeferBeforeActionReaction just before re-invoking the deferred command -- see
+    // FindBeforeActionReactionWatcher's own Champion/Brothers branch below). Champion of Thunder's
+    // "all" negates every effect an action applies to the chosen card and is deliberately NOT
+    // consumed here: a single re-invoked ability can apply more than one effect to the same chosen
+    // card (Brothers of Goemon's own worked example -- a Force penalty AND a resulting bow), so "all"
+    // stays active for the whole re-invocation and is cleared only once, defensively, right after
+    // ExecuteAbilityEffects(pending) returns (Apply()'s own "beforeActionReaction" case already does
+    // this unconditionally). A single-purpose kind ("bow" for Brothers, "destroy"/"move"/"straighten"
+    // for Rokai/Tamoko) only ever matches once per re-invocation, so it IS consumed immediately here,
+    // the original convention those three already established.
+    private bool NegatesEffect(CardInstance card, string kind)
+    {
+        if (_state.NegatedEffectCardId != card.Id) return false;
+        if (_state.NegatedEffectKind == "all") return true;
+        if (_state.NegatedEffectKind != kind) return false;
+        _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
+        return true;
+    }
     // Stalwart (core rules, issue #184): "the first time on a turn an enemy's effect would bow a card
     // with this keyword, the bowing (and only the bowing) is negated" -- a targeted ability's OWN
     // effects (Force penalties, Honor loss, and so on) still apply in full; only the .Bowed=true this
@@ -832,6 +892,14 @@ public sealed partial class MatchEngine
     // exactly "resets at each player's end phase, regardless of whose turn it is."
     private bool StalwartNegatesBow(CardInstance card, int actingPlayerId)
     {
+        // Champion of Thunder / Brothers of Goemon: checked first, ahead of every reason below --
+        // unlike those (all either automatic or keyed on whose card this is), this is a genuine
+        // per-instance player CHOICE already made in the reaction window that just closed.
+        if (NegatesEffect(card, "bow"))
+        {
+            Emit("bowNegated", $"{Definition(card).Name}'s bowing was negated before it resolved.", card.OwnerId, card.Id);
+            return true;
+        }
         if (card.OwnerId == actingPlayerId) return false;
         // Togashi Korimi, Experienced (issue #207): "while Korimi is defending, negate her bowing
         // from other players' actions" -- an always-on, unlimited version of the same negation
@@ -907,28 +975,73 @@ public sealed partial class MatchEngine
             or "ring-of-air-straighten" or "mitoshi-straighten" => "straighten",
         _ => null
     };
-    // Finds the one eligible in-play watcher (Rokai for a classified destroy, Tamoko for a
-    // classified move/straighten) for a just-submitted command, if any -- both are "in play"
-    // Reactions (the user's own clarification), monitored live, never pre-registered. Rokai is
-    // further scoped to "another player's action," "your Personality," and "at Rokai's location";
-    // Tamoko has no such restriction at all (any action, any personality, hers or the opponent's).
+    // Champion of Thunder / Brothers of Goemon's own narrower half (Brothers only ever negates a
+    // bow, and must not even offer the reaction when the resolving effect could never bow the
+    // target -- "a plain Force penalty with no bow never offers this reaction," the card owner's own
+    // worked example): a curated, extendable set of ability ids whose own execution case can reach a
+    // StalwartNegatesBow-guarded `target.Bowed = true`, the same "curated, not fully general" shape
+    // DestroysTarget/MoveOrStraightenKind above already establish. A conditionally-bowing ability
+    // (costly-feud: Force penalty always applies, bow only if the post-penalty Force is 0) still
+    // counts as "bows the target" at this ability-id level even though a SPECIFIC instance might not
+    // end up bowing -- offering the reaction anyway there is a harmless, unconsumed choice, not a
+    // rules violation (Brothers' own negation, if used, still only ever removes a bow that would
+    // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
+    private static bool BowsTarget(string abilityId) => abilityId is "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
+        or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support"
+        or "strategic-sacrifice-toggle" or "weakness-of-man-toggle" or "shosuro-ritoru-bow" or "nightingale-blade-bow" or "law-of-darkness-weaken"
+        or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
+        or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
+        or "soshi-conditional-bow" or "kinaro-exp-bow" or "nubane-bow" or "xijkt-bow" or "kouzei-bow" or "mitoshi-bow" or "jinai-bow"
+        or "muzu-bow" or "hiroto-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow";
+    // Finds the one eligible in-play watcher for a just-submitted command, if any -- every branch is
+    // an "in play" Reaction (the user's own clarification), monitored live, never pre-registered.
+    // Rokai (a classified destroy) is scoped to "another player's action," "your Personality," and
+    // "at Rokai's location"; Tamoko (a classified move/straighten) has no such restriction at all.
+    // Champion of Thunder / Brothers of Goemon (the general in-play unit-targeting Reaction
+    // primitive): "after another player's action targets a card in this unit" -- broader than either
+    // above in one way (not restricted to a Personality target at all -- a Follower/Item/Spell in the
+    // unit can be targeted directly too) and narrower in another (only "another player's action,"
+    // matching both cards' own printed text). Champion's own "all" is offered for ANY targeted
+    // command reaching this choke point, regardless of what kind of effect it turns out to apply;
+    // Brothers' own narrower "bow" additionally requires BowsTarget (above) and Ring control, the
+    // latter checked here -- BEFORE the reaction is even offered, exactly as the card owner's own
+    // ruling specifies. Deliberately excluded, the same "known scope limit, not a silent gap" as
+    // Rokai/Tamoko's own Attack exclusion: an Attack-classified ability (AttackKind non-empty) is
+    // left to the separate, already-established Attack pipeline (PendingAttack/attackReaction) --
+    // see A Close Call's own narrower negation there instead, reusing that existing window directly.
     private (CardInstance Watcher, string Kind)? FindBeforeActionReactionWatcher(GameCommand command)
     {
-        if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)
-            || Definition(affected).Type != CardType.Personality) return null;
-        if (DestroysTarget(command.AbilityId))
+        if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)) return null;
+        if (Definition(affected).Type == CardType.Personality)
         {
-            var rokai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("rokai-negate-destruction")
-                && c.OwnerId == affected.OwnerId && command.PlayerId != c.OwnerId && SameLocation(c, affected));
-            if (rokai is not null) return (rokai, "destroy");
+            if (DestroysTarget(command.AbilityId))
+            {
+                var rokai = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("rokai-negate-destruction")
+                    && c.OwnerId == affected.OwnerId && command.PlayerId != c.OwnerId && SameLocation(c, affected));
+                if (rokai is not null) return (rokai, "destroy");
+            }
+            if (MoveOrStraightenKind(command.AbilityId) is string kind)
+            {
+                var tamoko = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("tamoko-negate"));
+                if (tamoko is not null) return (tamoko, kind);
+            }
         }
-        if (MoveOrStraightenKind(command.AbilityId) is string kind)
+        if (command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "")
         {
-            var tamoko = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && (Definition(c).Abilities ?? []).Contains("tamoko-negate"));
-            if (tamoko is not null) return (tamoko, kind);
+            var affectedHostId = UnitHostId(affected);
+            var champion = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !c.Bowed && c.OwnerId == affected.OwnerId
+                && UnitHostId(c) == affectedHostId && (Definition(c).Abilities ?? []).Contains("champion-of-thunder-negate"));
+            if (champion is not null) return (champion, "all");
+            if (BowsTarget(command.AbilityId))
+            {
+                var brothers = _state.Cards.Values.FirstOrDefault(c => InPlay(c) && !c.Bowed && c.OwnerId == affected.OwnerId
+                    && UnitHostId(c) == affectedHostId && (Definition(c).Abilities ?? []).Contains("brothers-goemon-negate") && ControlsAnyRing(c.OwnerId));
+                if (brothers is not null) return (brothers, "bow");
+            }
         }
         return null;
     }
+    private bool ControlsAnyRing(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
     // Defers the WHOLE command (never partially applied), the same shape ResolveOrDeferAdditionalAction
     // already uses, so MoveHome/Straighten/DestroyUnits are never even reached until the watcher's
     // own controller has answered -- avoiding any need to "undo" an already-applied effect (which
@@ -1062,6 +1175,7 @@ public sealed partial class MatchEngine
         "shikaro-attack" => 4,
         "moto-ming-gwok-attack" => 5,
         "takasho-attack" => 5,
+        "champion-of-thunder-attack" => 6,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -1103,6 +1217,7 @@ public sealed partial class MatchEngine
         "horseback-warriors-attack" or "sankaku-yari-attack" => "Melee",
         "false-ring-of-water-attack" or "sakata-attack" or "mitsu-fire-attack" => "Ranged",
         "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
+        "champion-of-thunder-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -1119,7 +1234,16 @@ public sealed partial class MatchEngine
             (!c.AbilityUses.TryGetValue(id, out var used) || used != _state.TurnNumber)));
     // No kind-restricted in-play Reaction exists yet (see AttackKind); once one does, filter by
     // attack.Kind here rather than inside AnyInPlayReactionAvailable itself.
-    private bool AnyAttackReactionAvailable() => AnyInPlayReactionAvailable("before-attack-resolves");
+    // A Close Call (the first before-attack-resolves Reaction printed on a Strategy card): unlike
+    // every prior reactor here (a Personality/Item/Follower, always InPlay-eligible by construction),
+    // a Strategy's own Reaction Timing is legally usable straight from hand too (ValidateAbility's own
+    // Zone Require already allows Zone.Hand for a Strategy/Ring), so this gate must also look there --
+    // otherwise a hand-only reactor would never be discovered and the window would simply never open,
+    // making the card unusable exactly when its own printed text needs it. AnyOutOfPlayReactionAvailable
+    // already exists for this (Effortless Counterattack's shape); reused here for both players at once,
+    // since an Attack reaction is open to either side, unlike that helper's own single-player callers.
+    private bool AnyAttackReactionAvailable() => AnyInPlayReactionAvailable("before-attack-resolves")
+        || AnyOutOfPlayReactionAvailable(0, "before-attack-resolves") || AnyOutOfPlayReactionAvailable(1, "before-attack-resolves");
     // General "out of play" Reaction primitive: some printed Reactions are played FROM outside play
     // (hand or a discard pile) to interrupt something -- Singh Remnants attaching itself as a
     // Personality enters play is the first case; Effortless Counterattack negating an action taken
@@ -1270,6 +1394,15 @@ public sealed partial class MatchEngine
     // every current and future Chi-reducing effect enforces it without needing its own check.
     private void ApplyModifier(CardInstance card, string source, string effect, string stat, int amount)
     {
+        // Champion of Thunder's own "all" (issue #278): negates every effect an action applies to the
+        // chosen card, including a Force/Chi modifier -- Brothers of Goemon's own narrower "bow"
+        // doesn't reach here (a Force penalty still applies in full even when only its resulting bow
+        // is negated, the retroactive/partial negation the card itself needs).
+        if (NegatesEffect(card, "all"))
+        {
+            Emit("modifierNegated", $"{Definition(card).Name}'s {stat} modifier was negated before it resolved.", card.OwnerId, card.Id);
+            return;
+        }
         card.Modifiers.Add(new(source, effect, stat, amount));
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
     }
@@ -1482,6 +1615,13 @@ public sealed partial class MatchEngine
         // targeted" -- both narrow the generic before-attack-resolves Reaction window this card shares
         // with every other attack-boosting Reaction.
         if (id == "khol-regulars-reaction") Require(AtBattle(source!) && _state.PendingAttack!.Kind == "Ranged", "Khol Regulars must be at the current battlefield, reacting to a Ranged Attack.");
+        // A Close Call: "after a Personality with an Armor is targeted by a Melee or Ranged Attack" --
+        // both the Kind restriction and the Armor-attached restriction narrow the shared
+        // before-attack-resolves Reaction window (the same shape khol-regulars-reaction/flesh-cutter-
+        // arrows-reaction above already use), checked before the reaction is even allowed to fire.
+        if (id == "a-close-call-negate")
+            Require(_state.PendingAttack!.Kind is "Ranged" or "Melee" && Attachments(_state.PendingAttack.TargetId!).Any(a => Keyword(a, "Armor")),
+                "A Close Call needs a Ranged or Melee Attack targeting a Personality with an Armor attached.");
         // Tsuruchi Yakusho (issue #276 follow-up): every existing Attack-strength-reducing Reaction is
         // blocked outright while her own immunity flag is set for this specific (Ranged) Attack's own
         // resolution -- covers both current reduction sites (Fallow Lands' -2, Training's own full
@@ -1681,12 +1821,18 @@ public sealed partial class MatchEngine
                     var target = Card(command.TargetId);
                     Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
                     var type = Definition(target).Type;
-                    // Core rules: a Personality with any attachment (not just a Follower) is immune to
-                    // a Ranged/Melee Attack, unless a specific card prints an exception (e.g. "which
-                    // may target a Personality with attached Followers if you have Reconnaissance") --
-                    // no such exception is wired up yet, since no imported Attack needs one.
-                    Require(type == CardType.Follower || type == CardType.Personality && !HasAttachments(target),
-                        "Attack a Follower or a Personality without attachments.");
+                    // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee
+                    // Attack (attack the Follower instead), unless a specific card prints an exception
+                    // (e.g. "which may target a Personality with attached Followers if you have
+                    // Reconnaissance") -- no such exception is wired up yet, since no imported Attack
+                    // needs one. An Item/Spell attachment grants no such immunity -- confirmed by A
+                    // Close Call's own printed premise ("after a Personality with an ARMOR is targeted
+                    // by a Melee or Ranged Attack"), which only makes sense if an Armor-wearing
+                    // Personality is a legal Attack target in the first place. HasAttachments (a bare
+                    // count, "any" attachment) was too broad for this specific check; only a Follower
+                    // attachment actually blocks direct targeting.
+                    Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
+                        "Attack a Follower or a Personality without an attached Follower.");
                     // Seasoned Ashigaru's shape: an immunity to one specific Attack kind only, checked
                     // against the ability's own AttackKind (already tracked per ability id). Effect, not
                     // Keywords -- this is a synthetic marker for the card's own unique text, not a
@@ -1830,6 +1976,16 @@ public sealed partial class MatchEngine
                         "enemy-attacking" => personality && !own && target.OwnerId == _state.ActivePlayerId,
                         "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                        // Champion of Thunder: "any card in this unit" -- the reacting card's own
+                        // unit (source is Champion itself here), always in play by construction
+                        // (every member of a unit is either the host Personality or one of its own
+                        // attachments), so no further InPlay/ownership check is needed beyond the
+                        // blanket one already applied above.
+                        "own-unit-member" => UnitHostId(target) == UnitHostId(source!),
+                        // A Close Call's own Battle half: "target a Personality with an attachment" --
+                        // HasAttachments already exists for exactly this boolean (a count, not "any
+                        // specific kind"), reused verbatim.
+                        "personality-with-attachment" => personality && HasAttachments(target),
                         "lobby" => personality && own && !target.Bowed && CardPersonalHonor(target) >= 1,
                         "fewer-or-equal-followers-than-performer" => personality &&
                             Attachments(target.Id).Count(a => Definition(a).Type == CardType.Follower) <= Attachments(command.PerformerId!).Count(a => Definition(a).Type == CardType.Follower),
@@ -2416,7 +2572,7 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
-            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack":
+            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
@@ -2528,6 +2684,9 @@ public sealed partial class MatchEngine
             }
             case "reiyu-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(source)); break;
             case "training-spell-force-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
+            case "training-unit-force-penalty":
+                foreach (var member in UnitMembers(target!)) ApplyModifier(member, source!.Id, id, "Force", -1);
+                break;
             case "horibe-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "horibe-straighten": Straighten(target!); break;
             // Lion Clan Personality review (issue #198):
@@ -2580,6 +2739,14 @@ public sealed partial class MatchEngine
                 if (!Protected(Card(_state.PendingAttack!.SourceId!))) _state.PendingAttack!.Strength = 0;
                 else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
                 break;
+            case "a-close-call-negate":
+                // Same shape as training-attack-negate above -- "negate its effects" is the whole
+                // Attack, achieved by zeroing the strength ResolveAttackNow later reads (a hit needs
+                // strength > 0), still respecting Protection.
+                if (!Protected(Card(_state.PendingAttack!.SourceId!))) _state.PendingAttack!.Strength = 0;
+                else Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", player.Id, source?.Id);
+                break;
+            case "a-close-call-boost": ApplyModifier(target!, source!.Id, id, "Force", 2); break;
             case "bounty-hunter-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "rumormonger-penalty":
                 source!.Bowed = true;
@@ -2673,6 +2840,26 @@ public sealed partial class MatchEngine
                 break;
             }
             case "tamoko-open": _state.PendingTamokoHonorChecks.Add(new(target!.Id, player.Id)); break;
+            // Champion of Thunder: unlike Rokai/Tamoko above, the affected card is a genuine player
+            // CHOICE (this ability's own Target, "own-unit-member"), not auto-determined from the
+            // deferred command -- "any card in this unit," including one of several simultaneously
+            // affected by the same action. NegatedEffectKind "all" reaches every effect kind
+            // (StalwartNegatesBow's own bow check, ApplyModifier, DestroyUnits, MoveHome, Straighten)
+            // and is deliberately not consumed here (see NegatesEffect's own doc comment).
+            case "champion-of-thunder-negate": _state.NegatedEffectKind = "all"; _state.NegatedEffectCardId = target!.Id; break;
+            // Brothers of Goemon: auto-determined from the deferred command's own TargetId, the same
+            // shape Rokai/Tamoko already use (no separate choice of card -- Brothers' own Target is
+            // "none"). Ring control was already checked before this reaction was even offered (see
+            // FindBeforeActionReactionWatcher); "bow" only ever reaches StalwartNegatesBow's own
+            // check, never ApplyModifier/DestroyUnits/MoveHome/Straighten -- the Force penalty in
+            // costly-feud's own worked example still applies in full, only the resulting bow is
+            // negated.
+            case "brothers-goemon-negate":
+            {
+                var pending = _state.PendingNegatableAbility!;
+                _state.NegatedEffectKind = "bow"; _state.NegatedEffectCardId = pending.TargetId;
+                break;
+            }
             case "scholarly-hermit-search":
                 source!.Bowed = true;
                 player.Hand.Add(target!.Id); target.Zone = Zone.Hand; target.FaceUp = true;
@@ -3014,9 +3201,8 @@ public sealed partial class MatchEngine
         // for every ability-triggered straighten (StraightenUnit calls through this too). Checked
         // before StraightenBlockedTurn below, since a negated straighten was never attempted at all
         // (unlike Hizumi's own block, which negates an attempt that DID happen).
-        if (_state.NegatedEffectKind == "straighten" && _state.NegatedEffectCardId == card.Id)
+        if (NegatesEffect(card, "straighten"))
         {
-            _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
             Emit("straightenNegated", $"{Definition(card).Name}'s straightening was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }
@@ -3062,9 +3248,8 @@ public sealed partial class MatchEngine
         // from the action's effects" -- consumed here, not inside ReturnHome, so the end-of-battle
         // bulk return-home sweep (FinishBattleReturnHomeAndTransition) is never negatable this way --
         // that is not "an action," and Tamoko's own text is scoped to one, not a whole battle ending.
-        if (_state.NegatedEffectKind == "move" && _state.NegatedEffectCardId == card.Id)
+        if (NegatesEffect(card, "move"))
         {
-            _state.NegatedEffectKind = null; _state.NegatedEffectCardId = null;
             Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
             return;
         }

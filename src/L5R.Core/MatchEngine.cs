@@ -1203,8 +1203,12 @@ public sealed partial class MatchEngine
         // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
         // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
         // folded into that one).
+        // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
+        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape
+        // "lion-clan-discount" (Satoshi's Dual Warfans) already established, keyed off a different Clan.
         var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
-            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0));
+            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0)
+            -(def.Effect=="mantis-clan-discount" && Player(command.PlayerId).Clan=="Mantis"?1:0));
         Pay(command.PlayerId,card,cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
@@ -1652,9 +1656,8 @@ public sealed partial class MatchEngine
             // every ability-triggered destroy (this is NEVER set for a bulk battle-resolution
             // destroy, only ever by the defer-then-reexecute mechanism immediately re-invoking the
             // one specific ability that was paused for this exact reaction).
-            if(_state.NegatedEffectKind=="destroy" && _state.NegatedEffectCardId==card.Id)
+            if(NegatesEffect(card,"destroy"))
             {
-                _state.NegatedEffectKind=null; _state.NegatedEffectCardId=null;
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
                 continue;
             }
