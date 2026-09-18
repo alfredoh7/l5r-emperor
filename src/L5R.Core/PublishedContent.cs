@@ -1302,6 +1302,32 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Follower wave 14 (issue #285): the first batch of "Not blocked; deferred for scope"
+    /// cards from build_card_inventory.py's own BLOCKERS audit -- Asako House Guard's dual-choice
+    /// Set-Force (CardAbilities' own asako-house-guard-force-chi/-honor, sharing one UsageKey),
+    /// Legulus's Legion's self-Force-keyed bow-cost Attack (legulus-legion-attack, reading its own
+    /// live CardForce via sourceId), Village Guardian's new per-player MatchState.ProvinceEverDestroyed
+    /// tracker (set at MatchEngine.DestroyProvince's own single choke point), Village Raiders'
+    /// AttachGrantsKeyword "Conqueror" (its scan literally reads "This Personality has Conqueror"
+    /// despite being a Follower), Water Spider Adept's plain AttachRequiresKeyword with no ability
+    /// text at all, and Yodotai Legionnaire's EntryHonorLoss carrying the Legionnaire keyword Aulus's
+    /// own boost condition (MatchEngine's boost-legionnaires-in-unit) already reads.</summary>
+    public static PublishedSnapshot FollowerWave14 { get; } = LoadFollowerWave14();
+
+    private static PublishedSnapshot LoadFollowerWave14()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave14.json", "follower-wave-14", requireDecks: false);
+        if(snapshot.Cards.Length != 6)
+            throw new InvalidOperationException("Unexpected follower-wave-14 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower)
+                throw new InvalidOperationException($"follower-wave-14 card is not a Follower: {card.Id}");
+        var others = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others).Any())
+            throw new InvalidOperationException("follower-wave-14 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

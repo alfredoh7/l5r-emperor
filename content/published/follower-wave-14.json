@@ -1,0 +1,162 @@
+{
+  "Profile": "follower-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-543",
+      "Name": "Asako House Guard",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Phoenix Clan Personality.\nBattle/Open: Target a Personality: Set his Force equal to his Chi or Personal Honor. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-543.jpg",
+      "Keywords": [
+        "Unique",
+        "Void"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "asako-house-guard-force-chi",
+        "asako-house-guard-force-honor"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Phoenix Clan"
+    },
+    {
+      "Id": "oracle-l5r-10899",
+      "Name": "Legulus's Legion",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this Follower enters play, lose 3 Honor.\nBattle, Bow this card: Melee Attack with strength equal to this Follower's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10899.jpg",
+      "Keywords": [
+        "Gaijin",
+        "Yodotai"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "legulus-legion-attack"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-9162",
+      "Name": "Village Guardian",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After this card enters play from your hand: Draw one card for each player who has had a province destroyed this game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9162.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "village-guardian-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9163",
+      "Name": "Village Raiders",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 6,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After this card enters play: Lose 1 Honor.\nThis Personality has Conqueror.\nBattle: Melee 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9163.jpg",
+      "Keywords": [
+        "Shadowlands"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "village-raiders-attack"
+      ],
+      "Effect": "none",
+      "AttachGrantsKeyword": "Conqueror",
+      "EntryHonorLoss": 1
+    },
+    {
+      "Id": "oracle-l5r-10109",
+      "Name": "Water Spider Adept",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Will only attach to a Ninja.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10109.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ninja"
+    },
+    {
+      "Id": "oracle-l5r-10688",
+      "Name": "Yodotai Legionnaire",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may include any number of this Follower in your deck.\nAfter this Follower enters play, lose 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10688.jpg",
+      "Keywords": [
+        "Gaijin",
+        "Legionnaire",
+        "Yodotai"
+      ],
+      "Focus": 1,
+      "Abilities": [],
+      "Effect": "none",
+      "EntryHonorLoss": 2
+    }
+  ],
+  "Decks": []
+}

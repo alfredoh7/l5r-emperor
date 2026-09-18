@@ -42,7 +42,6 @@ TYPE_ORDER = ["Stronghold", "Personality", "Follower", "Item", "Spell", "Strateg
 # for scope; those say so explicitly rather than pretending there's a technical gap. Extend this
 # dict as future waves triage other Types.
 BLOCKERS: dict[str, str] = {
-    "oracle-l5r-543": "Not blocked; deferred for scope (dual-choice Set-Force pattern already exists).",
     "oracle-l5r-618": "Needs card creation (a new Follower instance), not just tokens.",
     "oracle-l5r-10891": "Needs card creation (new Follower instances).",
     "oracle-l5r-683": "Needs a new Reaction trigger: \"after a battle resolution ends.\"",
@@ -73,7 +72,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
     "oracle-l5r-4699": "Needs a targeting immunity keyed off the acting Personality's own Gold Cost.",
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
-    "oracle-l5r-10899": "Not fully blocked; entry Honor loss and a self-Force-keyed Attack strength both reuse existing patterns, but needs verification that AttackStrength can read its own source's Force at validation time.",
     "oracle-l5r-10900": "Needs an attachment Transfer mechanic plus Home-timing generalization.",
     "oracle-l5r-9870": "Needs an \"Interrupt\" timing plus Attack targeting into the Defender's home.",
     "oracle-l5r-10518": "Focus 4, not 1 -- outside the #192 wave's own scope. The top-of-Fate-deck discard primitive now exists (Aberrations, issue #192), but this needs a \"whose deck\" target choice (\"any Fate deck\", not just your own) plus a variable-strength Melee Attack keyed off the discarded card's Focus Value, not a Force modifier.",
@@ -95,11 +93,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-8837": "Needs an alternate Attack comparison axis against Gold Cost instead of Force.",
     "oracle-l5r-10339": "Needs a conditional-keyword-by-the-card's-own-clan mechanism (the attachment-destroy half is separately wirable).",
     "oracle-l5r-9158": "Needs two new Reaction triggers (after its own bow; after being targeted, negate destruction).",
-    "oracle-l5r-9162": "Not blocked; deferred for scope (existing entry-Reaction plus a simple province-destruction count).",
-    "oracle-l5r-9163": "Not blocked; deferred for scope (existing entry-Honor-loss, Conqueror-grant, and Attack patterns).",
     "oracle-l5r-9874": "Needs the Engage-timing Reaction window (explicitly not started, #15).",
-    "oracle-l5r-10109": "Not blocked; pure attach restriction with no ability text, deferred for scope.",
-    "oracle-l5r-10688": "Not blocked; deferred for scope (existing entry-Honor-loss pattern; carries the Legionnaire keyword Aulus's boost needs).",
     "oracle-l5r-9681": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
     # Reserve (issue #184): the primitive itself (Dynasty absent-battle recruit; Fate Equip (Battle)
     # attachment, no bonus Additional Action for non-Spells) is built and demonstrated on Hida Kurabi,

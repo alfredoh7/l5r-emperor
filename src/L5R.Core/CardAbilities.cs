@@ -825,6 +825,51 @@ public static class AbilityCatalog
         // at all.
         ["unimpeachable-name-reaction"] = new("Reaction", "Before the resolution of another player's action: Reduce each Honor loss from its effects by 3 (minimum 0). You may target and rehonor a dishonorable Personality", "optional-dishonorable-personality", Trigger: "before-any-action-resolves"),
         ["unimpeachable-name-bow"] = new("Battle", "Bow your performing Shugenja and target an enemy card: Bow it. Gain 2 Honor", "enemy-card", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Shugenja"]),
+        // Follower wave 14 (issue #285): six "Not blocked; deferred for scope" cards from
+        // build_card_inventory.py's own BLOCKERS audit.
+        //
+        // Asako House Guard (oracle-l5r-543): "Battle/Open: Target a Personality: Set his Force
+        // equal to his Chi or Personal Honor. Gain 1 Honor." The BLOCKERS note's claim of an
+        // existing "dual-choice Set-Force pattern" does not name a literal SetForce primitive --
+        // there isn't one (Force is always a computed StatModifier sum, never directly settable) --
+        // but the underlying idiom (compute the delta needed to reach a target value, then
+        // ApplyModifier that delta) is exactly daifuke-swap-force's own shape, and arata-force-
+        // penalty/rumormonger-penalty already key a Force delta off a DIFFERENT stat the same way.
+        // The "or" choice itself reuses the established shared-UsageKey dual-ability pattern
+        // (atsumichi-bow/atsumichi-straighten, mitoshi-bow/mitoshi-straighten): two catalog entries,
+        // one printed opportunity, whichever is used consumes both. Modeled directly on its own
+        // sibling "House Guard" cycle card, Asahina House Guard (oracle-l5r-494, AttachRequiresKeyword
+        // "Crane Clan", asahina-straighten) -- same BattleOrOpen/Target "personality"/Gain-1-Honor
+        // shape, just Void/Phoenix instead of Air/Crane and Set-Force instead of Straighten.
+        ["asako-house-guard-force-chi"] = new("BattleOrOpen", "Target a Personality: Set his Force equal to his Chi. Gain 1 Honor", "personality", UsageKey: "asako-house-guard-force"),
+        ["asako-house-guard-force-honor"] = new("BattleOrOpen", "Target a Personality: Set his Force equal to his Personal Honor. Gain 1 Honor", "personality", UsageKey: "asako-house-guard-force"),
+        // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
+        // this Follower's Force." AttackStrength/AttackKind already thread sourceId through to every
+        // caller (ActionPerformer(...).Id, same as sakata-attack's own token-count read), so reading
+        // the performer's own live CardForce at declare-time (ResolveOrDeferAttack calls
+        // EffectiveAttackStrength once, before deferring) needed no new plumbing -- this resolves the
+        // BLOCKERS note's own open verification question. "Bow" is a real printed cost distinct from
+        // an Attack's own resolution (no card here bows its own performer automatically, confirmed by
+        // nikutai-attack/sakata-attack neither doing so): modeled on kasuru-draw's own explicit
+        // `source.Bowed = true` cost line, combined with nikutai-attack's own plain ResolveOrDeferAttack
+        // call for the Melee half.
+        ["legulus-legion-attack"] = new("Battle", "Bow this Follower: Melee Attack with strength equal to this Follower's Force", "attack"),
+        // Village Guardian (oracle-l5r-9162): "Reaction: After this card enters play from your hand:
+        // Draw one card for each player who has had a province destroyed this game." A genuine
+        // printed "Reaction:" (unlike EntryHonorLoss's mandatory-trait shape below), so it's an
+        // ordinary entry-Reaction ability (own-enters-play, same trigger as satoshi-warfans-draw),
+        // just looping Draw() by MatchState.ProvinceEverDestroyed's own per-player count instead of
+        // drawing exactly one card.
+        ["village-guardian-draw"] = new("Reaction", "Draw one card for each player who has had a province destroyed this game", "none", Trigger: "own-enters-play"),
+        // Village Raiders (oracle-l5r-9163): "After this card enters play: Lose 1 Honor. This
+        // Personality has Conqueror. Battle: Melee 4 Attack." Its own scan literally prints "This
+        // Personality has Conqueror" despite deck-pool.json's types being ["Follower"] -- read
+        // literally, that is exactly AttachGrantsKeyword's own established shape ("This Personality
+        // has X" for an attachment's wielder, Commander's Steed's family), so it needs no new Effect
+        // case at all: AttachGrantsKeyword "Conqueror" plus the existing EntryHonorLoss field cover
+        // both non-Battle lines. Only the plain "Battle: Melee 4 Attack" (no bow cost, unlike Legulus's
+        // Legion above) needed a new ability id, modeled directly on nikutai-attack's own shape.
+        ["village-raiders-attack"] = new("Battle", "Melee 4 Attack", "attack"),
     });
 }
 
@@ -1194,6 +1239,11 @@ public sealed partial class MatchEngine
         "moto-ming-gwok-attack" => 5,
         "takasho-attack" => 5,
         "champion-of-thunder-attack" => 6,
+        // Legulus's Legion (oracle-l5r-10899): "strength equal to this Follower's Force" -- reads
+        // its own performing instance's live Force via sourceId, the same self-referential shape
+        // sakata-attack already established (there, a token count; here, CardForce itself).
+        "legulus-legion-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        "village-raiders-attack" => 4,
         _ => 0
     };
     // AttackStrength plus every passive defense modifier applying to this specific target (Destrier/
@@ -1236,6 +1286,7 @@ public sealed partial class MatchEngine
         "false-ring-of-water-attack" or "sakata-attack" or "mitsu-fire-attack" => "Ranged",
         "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
         "champion-of-thunder-attack" => "Ranged",
+        "legulus-legion-attack" or "village-raiders-attack" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -2599,8 +2650,16 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
-            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack":
+            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
+            // this Follower's Force" -- the bow is a printed cost, applied here before resolving the
+            // Attack itself (kasuru-draw's own `source.Bowed = true` shape), not something
+            // ResolveOrDeferAttack ever does on its own behalf.
+            case "legulus-legion-attack":
+                source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, source.Id, consumedGrant)) return;
                 break;
             case "khol-regulars-reaction": _state.PendingAttack!.Strength += 2; break;
             case "fallow-lands-reaction": _state.PendingAttack!.Strength -= 2; break;
@@ -2915,6 +2974,23 @@ public sealed partial class MatchEngine
             case "asahina-straighten":
                 Straighten(target!);
                 GainHonor(player.Id, 1, "Asahina House Guard", source);
+                break;
+            // Asako House Guard (oracle-l5r-543): "Set his Force equal to his Chi or Personal
+            // Honor. Gain 1 Honor" -- daifuke-swap-force's own delta-to-target-value shape, just
+            // reading Chi/PersonalHonor instead of another card's Force.
+            case "asako-house-guard-force-chi":
+                ApplyModifier(target!, source!.Id, id, "Force", PersonalityChi(target!) - CardForce(target!));
+                GainHonor(player.Id, 1, "Asako House Guard", source);
+                break;
+            case "asako-house-guard-force-honor":
+                ApplyModifier(target!, source!.Id, id, "Force", CardPersonalHonor(target!) - CardForce(target!));
+                GainHonor(player.Id, 1, "Asako House Guard", source);
+                break;
+            // Village Guardian (oracle-l5r-9162): "Draw one card for each player who has had a
+            // province destroyed this game" -- MatchState.ProvinceEverDestroyed is set once, at
+            // DestroyProvince's own single choke point, per player id.
+            case "village-guardian-draw":
+                for (var p = 0; p < _state.ProvinceEverDestroyed.Length; p++) if (_state.ProvinceEverDestroyed[p]) Draw(player);
                 break;
             case "tsujiken-watch-holding":
                 _state.TsujikenWatches.Add(new(source!.Id, target!.Id));

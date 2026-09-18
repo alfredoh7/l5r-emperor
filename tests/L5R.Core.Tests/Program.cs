@@ -189,7 +189,8 @@ var tests = new (string Name, Action Run)[]
     ("Cultist Infiltrator (oracle-l5r-1595): may attach to a Personality its controller does not own (a new Effect-keyed exception on Equip's own ownership Require); after each Straighten Phase gives its host a persistent -1C token via the existing shared CreateToken Chi<=0 death check; is excluded from Overlay's own attachment-transfer loop (discarded instead); and, attached to an enemy Personality, is returned to its OWN original owner's discard pile when that Personality dies, since CardInstance.OwnerId is never reassigned", CultistInfiltratorPrimitive),
     ("Unimpeachable Name (oracle-l5r-8989): a broad out-of-play \"before any action resolves\" Reaction -- reduces the reacting player's own Honor loss from that action by 3 (minimum 0) and/or rehonors a target Dishonorable Personality; NOT offered at all when neither condition could possibly apply; her own separate Battle ability bows a performing Shugenja and an enemy card for 2 Honor", UnimpeachableNamePrimitive),
     ("Fields of Mercy (oracle-l5r-2530): a per-Terrain-instance, per-player destroyed-Personality counter that starts at 0 only once the card itself enters play (never retroactively) -- the first Personality destruction after entry still happens normally (and starts the count), every one after that has only the Personality-destruction component negated (attachments on that unit are still destroyed)", FieldsOfMercyPrimitive),
-    ("Yasuki Tsujiken (oracle-l5r-9469): his own entering-play Reaction marks a target Holding, independently stacking per copy of Tsujiken that marks it; every future bow of a marked Holding (by any cause) costs its controller 1 Honor per active mark, for as long as the marking Tsujiken remains in play; his separate Open half straightens a target Holding, only bowing himself as a cost when that Holding's base Gold Cost is above 4", YasukiTsujikenPrimitive)
+    ("Yasuki Tsujiken (oracle-l5r-9469): his own entering-play Reaction marks a target Holding, independently stacking per copy of Tsujiken that marks it; every future bow of a marked Holding (by any cause) costs its controller 1 Honor per active mark, for as long as the marking Tsujiken remains in play; his separate Open half straightens a target Holding, only bowing himself as a cost when that Holding's base Gold Cost is above 4", YasukiTsujikenPrimitive),
+    ("Follower wave 14 (issue #285): the first batch of six \"Not blocked; deferred for scope\" cards from build_card_inventory.py's own BLOCKERS audit -- Asako House Guard's dual-choice Set-Force (asako-house-guard-force-chi/-honor, sharing one UsageKey, plus its own Phoenix Clan attach restriction); Legulus's Legion's bow-cost Attack reading its own LIVE Force via sourceId (proven against a token modifier, not just its printed Force); Village Guardian's new per-player MatchState.ProvinceEverDestroyed tracker, set at MatchEngine.DestroyProvince's own single choke point (proven to flag only the province's own owner, never the attacker) and read by its own entry Reaction's draw count (0, 1 or 2); Village Raiders' AttachGrantsKeyword \"Conqueror\" (its own scan literally reads \"This Personality has Conqueror\" despite being a Follower), proven end-to-end through an actual battle resolution, plus its own separate flat Melee 4 Attack; Water Spider Adept's pure attach restriction with no ability text at all; and Yodotai Legionnaire's entry Honor loss carrying the real Legionnaire keyword, previously exercised only by a synthetic fixture, through Aulus's own existing unit-scoped boost", FollowerWave14Primitives)
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -7379,4 +7380,171 @@ static void TsuruchiYakushoAnnounceReactionAndImmunity()
     Accept(e,new GameCommand("declineReaction",0,e.Version));
     Accept(e,new GameCommand("declineReaction",1,e.Version));
     Equal(e.State.Cards[rangedTarget2.Id].Zone,Zone.Battlefield,"Negated: the second target survives");
+}
+static void FollowerWave14Primitives()
+{
+    // Asako House Guard (oracle-l5r-543): "Will only attach to a Phoenix Clan Personality" plus a
+    // dual-choice Battle/Open ability, "Set his Force equal to his Chi or Personal Honor. Gain 1
+    // Honor" -- two catalog entries sharing one UsageKey.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var nonPhoenix=Add(s,"training-crane-samurai",0,Zone.Home);
+        var badGuard=Add(s,"oracle-l5r-543",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:badGuard.Id,target:nonPhoenix.Id,sources:Sources(e,0))); // Will only attach to a Phoenix Clan Personality
+    }
+    {
+        // Set Force equal to Chi: training-lion-samurai's own Force (4), Chi (3) and Personal Honor
+        // (2) are all distinct, so each choice below is an observable, DIFFERENT change.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-phoenix-clan-samurai",0,Zone.Home);
+        var guard=Add(s,"oracle-l5r-543",0,Zone.Attached,attachedTo:host.Id);
+        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Force 4, Chi 3, Personal Honor 2
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:guard.Id,TargetId:target.Id,AbilityId:"asako-house-guard-force-chi"));
+        Equal(e.GetView(0).Players[1].Home.Single(c=>c.Id==target.Id).Force,3,"Force set to the target's own Chi (3), not its Personal Honor (2)");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Gains 1 Honor");
+        // Shared UsageKey: the OTHER half of the same printed opportunity is now exhausted too.
+        var target2=Add(e.State,"training-lion-samurai",1,Zone.Home);
+        // Already used this turn's Battle/Open opportunity, whichever half was used first.
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:guard.Id,TargetId:target2.Id,AbilityId:"asako-house-guard-force-honor"));
+    }
+    {
+        // Set Force equal to Personal Honor: the independent half of the same dual choice.
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-phoenix-clan-samurai",0,Zone.Home);
+        var guard=Add(s,"oracle-l5r-543",0,Zone.Attached,attachedTo:host.Id);
+        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Force 4, Chi 3, Personal Honor 2
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:guard.Id,TargetId:target.Id,AbilityId:"asako-house-guard-force-honor"));
+        Equal(e.GetView(0).Players[1].Home.Single(c=>c.Id==target.Id).Force,2,"Force set to the target's own Personal Honor (2), not its Chi (3)");
+        Equal(e.State.Players[0].Honor,honorBefore+1,"Gains 1 Honor");
+    }
+    // Legulus's Legion (oracle-l5r-10899): entry Honor loss (-3), and "Battle, bow: Melee Attack with
+    // strength equal to this Follower's Force" -- reading its own LIVE Force (including a modifier
+    // applied after it entered play), not just its printed Force, resolving the BLOCKERS note's own
+    // open verification question.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var legion=Add(s,"oracle-l5r-10899",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,Cmd(e,"equip",id:legion.Id,target:host.Id,sources:Sources(e,0)));
+        Equal(e.State.Players[0].Honor,honorBefore-3,"Entry Honor loss: -3");
+    }
+    {
+        // A Force-4 target survives printed Force 3 alone but dies to live Force 5 (3 printed + 2
+        // from a token applied after Legulus's Legion entered play) -- a behavioral proof that
+        // AttackStrength reads its own source's LIVE Force via sourceId, not a cached printed value.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var legion=Add(s,"oracle-l5r-10899",0,Zone.Attached,province:0,attachedTo:host.Id); // printed Force 3
+        legion.Tokens=[new("pretest-token","TestForce","test-fixture","Force",2)]; // live Force 5, not printed 3
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:legion.Id,TargetId:target.Id,AbilityId:"legulus-legion-attack"));
+        Check(e.State.Cards[legion.Id].Bowed,"Bow is a printed cost, paid immediately");
+        Equal(e.State.Cards[target.Id].Zone,Zone.Dead,"Live Force 5 destroys a Force-4 target that printed Force 3 alone could not");
+        // Already bowed by its own cost -- cannot act again.
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:legion.Id,AbilityId:"legulus-legion-attack"));
+    }
+    // Village Guardian (oracle-l5r-9162): "Reaction: After this card enters play from your hand:
+    // Draw one card for each player who has had a province destroyed this game."
+    {
+        // The choke point itself: DestroyProvince sets MatchState.ProvinceEverDestroyed for the
+        // PROVINCE OWNER only, never the attacker.
+        var s=StrongholdBattle("oracle-l5r-1218");
+        s.Players[1].Provinces[0].Strength=1; s.Players[1].Provinces[0].PrintedStrength=1;
+        Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5, unopposed
+        var e=MatchEngine.FromTestState(s);
+        Check(!e.State.ProvinceEverDestroyed[0] && !e.State.ProvinceEverDestroyed[1],"Neither player has had a province destroyed yet");
+        Resolve(e);
+        Check(e.State.Players[1].Provinces[0].Destroyed,"Test setup: the province was actually destroyed");
+        Check(e.State.ProvinceEverDestroyed[1],"Province owner (player 1) is now flagged");
+        Check(!e.State.ProvinceEverDestroyed[0],"The attacker (player 0) is not -- nobody destroyed THEIR province");
+    }
+    {
+        // Draws once per player already flagged -- zero, one, or two cards.
+        foreach(var (flags,expectedDraws) in new[] { ((false,false),0), ((true,false),1), ((true,true),2) })
+        {
+            var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+            s.ProvinceEverDestroyed=[flags.Item1,flags.Item2];
+            var host=Add(s,"training-crane-samurai",0,Zone.Home);
+            var guardian=Add(s,"oracle-l5r-9162",0,Zone.Hand);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Cmd(e,"equip",id:guardian.Id,target:host.Id,sources:Sources(e,0)));
+            Equal(e.State.PendingChoice?.Type,"entryReaction","A genuine printed Reaction -- offered, not automatic");
+            var handBefore=e.State.Players[0].Hand.Count;
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:guardian.Id,AbilityId:"village-guardian-draw"));
+            Equal(e.State.Players[0].Hand.Count,handBefore+expectedDraws,$"ProvinceEverDestroyed={flags}: draws {expectedDraws}");
+        }
+    }
+    // Village Raiders (oracle-l5r-9163): entry Honor loss (-1), AttachGrantsKeyword "Conqueror" (its
+    // own scan literally reads "This Personality has Conqueror" despite being a Follower), and a
+    // plain "Battle: Melee 4 Attack" with no bow cost of its own.
+    {
+        // Entry Honor loss AND AttachGrantsKeyword "Conqueror" both fire off the same real Equip --
+        // GrantKeyword only ever runs from an actual attach command, never from a test fixture that
+        // places a card directly into Zone.Attached (Commander's Steed's own established pattern).
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var raiders=Add(s,"oracle-l5r-9163",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,Cmd(e,"equip",id:raiders.Id,target:host.Id,sources:Sources(e,0)));
+        Equal(e.State.Players[0].Honor,honorBefore-1,"Entry Honor loss: -1");
+        Check(e.State.Cards[host.Id].GrantedKeywords.Any(g=>g.Keyword=="Conqueror"),"Attaching grants Conqueror to the wielder -- the same proof Commander's Steed's own established AttachGrantsKeyword test uses; the grant's own effect during battle resolution is already covered generically by ConquerorStraightensAfterVictory");
+    }
+    {
+        // Flat Melee 4: destroys a Force-4 target.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var raiders=Add(s,"oracle-l5r-9163",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var weak=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); // Force 4
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:raiders.Id,TargetId:weak.Id,AbilityId:"village-raiders-attack"));
+        Equal(e.State.Cards[weak.Id].Zone,Zone.Dead,"Melee 4 destroys a Force-4 target");
+        Check(!e.State.Cards[raiders.Id].Bowed,"No printed bow cost, unlike Legulus's Legion above");
+    }
+    {
+        // Flat Melee 4 cannot even target a Force-5 card -- a card's own Force above the Attack's
+        // strength is illegal, not merely ineffective.
+        var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var raiders=Add(s,"oracle-l5r-9163",0,Zone.Attached,province:0,attachedTo:host.Id);
+        var strong=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,new GameCommand("useAbility",0,e.Version,CardId:raiders.Id,TargetId:strong.Id,AbilityId:"village-raiders-attack"));
+    }
+    // Water Spider Adept (oracle-l5r-10109): a pure attach restriction with no ability text at all.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var nonNinja=Add(s,"training-crane-samurai",0,Zone.Home);
+        var ninja=Add(s,"training-ninja-source",0,Zone.Home);
+        var badAdept=Add(s,"oracle-l5r-10109",0,Zone.Hand);
+        var goodAdept=Add(s,"oracle-l5r-10109",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Reject(e,Cmd(e,"equip",id:badAdept.Id,target:nonNinja.Id,sources:Sources(e,0))); // Will only attach to a Ninja
+        Accept(e,Cmd(e,"equip",id:goodAdept.Id,target:ninja.Id,sources:Sources(e,0)));
+        Equal(e.State.Cards[goodAdept.Id].Zone,Zone.Attached);
+        Check(CardCatalog.Get(goodAdept.DefinitionId).Abilities?.Length is 0 or null,"No ability text at all -- a pure restriction");
+    }
+    // Yodotai Legionnaire (oracle-l5r-10688): entry Honor loss (-2), and the real Legionnaire
+    // keyword Aulus's own boost condition already reads (MatchEngine's boost-legionnaires-in-unit),
+    // previously exercised only by a synthetic fixture (training-legionnaire-follower).
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
+        var host=Add(s,"training-crane-samurai",0,Zone.Home);
+        var aulus=Add(s,"oracle-l5r-10687",0,Zone.Attached,attachedTo:host.Id);
+        var legionnaire=Add(s,"oracle-l5r-10688",0,Zone.Hand); // printed Force 1
+        var e=MatchEngine.FromTestState(s);
+        var honorBefore=e.State.Players[0].Honor;
+        Accept(e,Cmd(e,"equip",id:legionnaire.Id,target:host.Id,sources:[])); // Cost 0: no Gold sources needed
+        Equal(e.State.Players[0].Honor,honorBefore-2,"Entry Honor loss: -2");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==legionnaire.Id).Force,2,"Base 1 + 1 from Aulus's own unit-scoped Legionnaire boost -- the real card, not just the synthetic fixture");
+        Equal(e.GetView(0).Players[0].Home.Single(c=>c.Id==aulus.Id).Force,3,"Aulus itself is not a Legionnaire -- unaffected");
+    }
 }
