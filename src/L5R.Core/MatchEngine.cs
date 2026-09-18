@@ -235,6 +235,29 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
+            if (_state.PendingChoice.Type=="battleActionReaction")
+            {
+                // Stormless Fury (issue #276 follow-up): scoped to the one specific offered card by
+                // id, same single-watcher shape as bowReaction/beforeActionReaction above -- only that
+                // card's own controller may use it, or either side may pass to close the window.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the battle-action reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
+            if (_state.PendingChoice.Type=="announceReaction")
+            {
+                // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action"
+                // primitive -- once the window closes, the originally-announced command finally runs,
+                // the same defer-then-reexecute shape beforeActionReaction/PendingNegatableAbility uses.
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the announce reaction window first.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                if (_state.PendingChoice is null && _state.PendingAnnouncedAction is not null)
+                {
+                    var pending=_state.PendingAnnouncedAction; _state.PendingAnnouncedAction=null;
+                    ExecuteAbilityEffects(pending);
+                }
+                return;
+            }
             Require(command.Type=="discardHand","Choose cards to discard to the hand limit.");
             DiscardHand(command);
             return;
