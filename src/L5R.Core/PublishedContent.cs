@@ -1360,6 +1360,42 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Wave 14 of ability-bearing Strategy cards (issue #289): Batch C of the "Not blocked;
+    /// deferred for scope" cards from build_card_inventory.py's own BLOCKERS audit -- Banzai!'s
+    /// Discipline card whose own printed action is "Battle:" only (a new per-id Require narrowing the
+    /// shared, otherwise BattleOrOpen-permissive, Discipline Phase check back to Battle-only presence)
+    /// plus crushing-force's own own-opposed Target category reused verbatim; Pure Intent's new
+    /// own-personality-opposed Performer category (own-unbowed-personality-with-keyword-opposed minus
+    /// the unbowed/RequiredKeywords gates its own scan does not print); Marshal Your Strength's own
+    /// Force-and-Chi dual modifier (ApplyModifier's own stat-agnostic Chi branch, exercised by a real
+    /// card for the first time) minus 1 when unopposed; Lost in Transit's own Battle/Open Discipline,
+    /// needing no presence narrowing at all, reusing the standalone "attachment" Target category
+    /// verbatim; Strong Defenses' new own-defending-personality-at-battle Performer category (the
+    /// existing IsDefendingUnit helper) plus its own Khol-Regulars-shaped Reaction; Trusting Instinct's
+    /// own -2 Reaction (added, with Strong Defenses' -3, to Tsuruchi Yakusho's shared strength-
+    /// reduction-immunity id list) plus a move-to-the-opposed-current-battlefield Battle half; and
+    /// Visage of the Orochi's own Set-Force "raise to 6" (floored, not unconditional) plus an optional
+    /// CardIds-carried bow target compared against the Performer's own post-raise Force. Wrathful
+    /// Ancestor (oracle-l5r-9390), originally assigned to this batch too, was found already fully wired
+    /// and published in strategy-wave-6 -- its own BLOCKERS entry was simply stale (the same "Surety of
+    /// Purpose" situation Batch B hit), so it is not re-packaged here; this wave publishes the other
+    /// seven.</summary>
+    public static PublishedSnapshot StrategyWave14 { get; } = LoadStrategyWave14();
+
+    private static PublishedSnapshot LoadStrategyWave14()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave14.json", "strategy-wave-14", requireDecks: false);
+        if(snapshot.Cards.Length != 7)
+            throw new InvalidOperationException("Unexpected strategy-wave-14 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-14 card is not a textful Strategy: {card.Id}");
+        var others14 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(others14).Any())
+            throw new InvalidOperationException("strategy-wave-14 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

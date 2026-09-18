@@ -93,12 +93,15 @@ internal static class PublishedTests
         // PersonalityWave19) + 3 (PR #281's own FollowerWave11 + StrategyWave11) + 4 (PR #283's own
         // FollowerWave12, now merged into main) + 4 (PR #284's own StrategyWave12 (2) +
         // FollowerWave13 (1) + PersonalityWave20 (1), now merged into main) + 6 (PR #286's own
-        // FollowerWave14, issue #285) = 341 (Batch A's own baseline) + 7 (this branch's own
+        // FollowerWave14, issue #285) = 341 (Batch A's own baseline) + 7 (PR #288's own
         // StrategyWave13, issue #287 Batch B -- eight cards assigned, but Surety of Purpose
-        // (oracle-l5r-7664) turned out already published in strategy-wave-6, so only 7 are new
-        // here) = 348. Recomputed from the actual current baseline each time this conflicts, never
+        // (oracle-l5r-7664) turned out already published in strategy-wave-6, so only 7 were new
+        // there) = 348 (Batch B's own baseline, now merged into main) + 7 (this branch's own
+        // StrategyWave14, issue #289 Batch C -- eight cards assigned again, but Wrathful Ancestor
+        // (oracle-l5r-9390) turned out already published in strategy-wave-6 too, so only 7 are new
+        // here) = 355. Recomputed from the actual current baseline each time this conflicts, never
         // copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,348);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,355);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
