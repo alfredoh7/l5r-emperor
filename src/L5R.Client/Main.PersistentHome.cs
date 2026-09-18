@@ -15,8 +15,10 @@ public partial class Main
     private static bool IsPersistentHomeCard(CardView card) => card.Zone == Zone.Home && card.AttachedTo is null &&
         card.Definition is { } definition && definition.Type is not (CardType.Personality or CardType.Holding or CardType.Region or CardType.Stronghold or CardType.Follower or CardType.Item or CardType.Spell) &&
         !(definition.Keywords ?? []).Contains("Terrain", StringComparer.OrdinalIgnoreCase);
-    private static CardView[] PersistentCards(PlayerView player) => player.Home.Where(IsPersistentHomeCard).ToArray();
+    private static CardView[] PersistentCards(PlayerView player) => (player.Celestials ?? []).Concat(player.Home.Where(IsPersistentHomeCard)).ToArray();
     private static CardView[] EffectReminders(PlayerView player) => (player.EventsInPlay ?? []).Where(c => c.Definition is not null).ToArray();
+    private float PersistentCardWidth(CardView card) => CardFootprint(card, CardHeight) + (card.Zone == Zone.Celestial ? 34 : 0);
+    private static float PersistentRowHeight(CardView[] cards) => CardHeight + PersistentGap + (cards.Any(c => c.Zone == Zone.Celestial) ? 28 : 0);
     private bool HasPersistentHome(PlayerView player) => View.FavorPlayerId == player.Id || PersistentCards(player).Length > 0 || EffectReminders(player).Length > 0;
 
     private void MeasurePersistentHome()
@@ -27,7 +29,7 @@ public partial class Main
             if (!HasPersistentHome(player)) { _persistentHeights[player.Id] = 0; continue; }
             var cards = PersistentCards(player);
             var favor = View.FavorPlayerId == player.Id;
-            var cardWidth = cards.Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(158).Max();
+            var cardWidth = cards.Select(PersistentCardWidth).DefaultIfEmpty(158).Max();
             var columns = favor ? 2 : 3;
             var count = Math.Min(columns, cards.Length);
             var cardsWidth = count * cardWidth + Math.Max(0, count - 1) * PersistentGap;
@@ -35,7 +37,7 @@ public partial class Main
             var rightWidth = Math.Max(cardsWidth, reminders > 0 ? 300 : 0);
             var width = (favor ? FavorWidth + (rightWidth > 0 ? PersistentGap : 0) : 0) + rightWidth;
             var rows = (int)Math.Ceiling(cards.Length / (float)columns);
-            var rightHeight = rows * (CardHeight + PersistentGap) + reminders * (EffectHeight + 8);
+            var rightHeight = rows * PersistentRowHeight(cards) + reminders * (EffectHeight + 8);
             _persistentHeights[player.Id] = MatHeader + Math.Max(favor ? FavorHeight : 0, rightHeight) + MatPadding;
             _persistentWidth = Math.Max(_persistentWidth, width + MatPadding * 2);
         }
@@ -54,14 +56,14 @@ public partial class Main
             x += FavorWidth + PersistentGap;
         }
         var cards = PersistentCards(player); var columns = View.FavorPlayerId == player.Id ? 2 : 3;
-        var width = cards.Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(158).Max();
+        var width = cards.Select(PersistentCardWidth).DefaultIfEmpty(158).Max();
         for (var i = 0; i < cards.Length; i++)
         {
             var tile = Tile(cards[i], true, width, CardHeight);
-            tile.ContextHelp = "Persistent card at home. Select to inspect the actions currently offered by the game.";
-            Place(group, tile, x + i % columns * (width + PersistentGap), MatHeader + i / columns * (CardHeight + PersistentGap), width, PlaneHeight(CardHeight));
+            if (cards[i].Zone != Zone.Celestial) tile.ContextHelp = "Persistent card at home. Select to inspect the actions currently offered by the game.";
+            Place(group, tile, x + i % columns * (width + PersistentGap), MatHeader + (cards.Any(c => c.Zone == Zone.Celestial) ? 16 : 0) + i / columns * PersistentRowHeight(cards), width, PlaneHeight(CardHeight));
         }
-        var y = MatHeader + (int)Math.Ceiling(cards.Length / (float)columns) * (CardHeight + PersistentGap);
+        var y = MatHeader + (int)Math.Ceiling(cards.Length / (float)columns) * PersistentRowHeight(cards);
         foreach (var effect in EffectReminders(player))
         {
             var reminder = new HomeReminder(player.Id, player.Clan, effect, () => SelectHomeReminder(player.Id, effect.Id));

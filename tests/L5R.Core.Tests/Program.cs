@@ -561,6 +561,29 @@ static void FallowLandsRegion()
 }
 static void LowMarketEquip()
 {
+    // Query-to-command contract: each offered price covers every target in that option.
+    // The client changes only the chosen target and payment; it never computes discounts.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+        var region=Add(s,"oracle-l5r-4777",0,Zone.Region,province:0); s.Players[0].Provinces[0].RegionId=region.Id;
+        var hero=Add(s,"training-crane-clan-samurai",0,Zone.Home);
+        var cheap=Add(s,"training-item",0,Zone.Hand);
+        var costly=Add(s,"training-follower-crane-guard",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var options=e.QueryActions(0).Where(a=>a.CardId==region.Id && a.Enabled && a.Command?.PerformerId==hero.Id).ToArray();
+        Check(options.Any(a=>a.GoldCost==1 && a.TargetIds!.Contains(cheap.Id)),"Minimum-one discount must be quoted");
+        Check(options.Any(a=>a.GoldCost==2 && a.TargetIds!.Contains(costly.Id)),"Four-Gold attachment must be quoted as two");
+        foreach(var option in options)
+        foreach(var target in option.TargetIds!)
+        {
+            var expected=Math.Max(1,CardCatalog.Get(e.State.Cards[target].DefinitionId).GoldCost-2);
+            Equal(option.GoldCost,expected,"Target shares the option's authoritative price");
+            var copy=MatchEngine.FromTestState(s);
+            Accept(copy,option.Command! with {TargetId=target});
+            Check(copy.State.Cards[region.Id].Bowed,"Offered command pays the Region's bow cost");
+            Equal(copy.State.Cards[target].AttachedTo,hero.Id);
+        }
+    }
     // "Attach it to him, paying 2 less Gold" -- a genuine reduction (4 -> 2), not a no-op; bowing
     // itself is the entire cost/limiter (no separate UsageKey), so a second use this turn is rejected.
     {

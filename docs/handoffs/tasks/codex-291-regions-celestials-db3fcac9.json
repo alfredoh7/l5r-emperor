@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved A Regions + B Celestial frame + C inspection on current main and stabilized UI foundation.",
-  "validation": "Initial current-main integration checks running; no native acceptance yet.",
-  "remaining": "Implement artwork/layout/inspection, validate native states, compare source, publish final evidence and launcher.",
+  "summary": "Implement approved A Region pairs, B Celestial artwork, C inspection and native action review; expose Low Market target-specific Gold quotes from Core.",
+  "validation": "Client build and 496 deterministic checks passed before Nikutai integration. Native Mac default, compact/opposite seat, crowded both seats and normal motion passed; Fallow reaction and refined artwork verification in progress.",
+  "remaining": "Integrate fresh main, finish art comparison and final native verification, publish PR evidence and request mdornbrook review; stacked UI prerequisites remain unmerged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/291",
   "branch": "codex/291-regions-celestials",
-  "updated": "2026-09-18T13:47:49.395662+00:00"
+  "updated": "2026-09-18T14:14:27.733518+00:00"
 }

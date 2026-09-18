@@ -220,15 +220,28 @@ public partial class Main
             }
             // Province positions remain stable after destruction: an absent province
             // must never renumber or shift another battlefield's physical destination.
-            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(owner, 2 + province.Index), ProvinceRowY(owner), CardHeight, PlaneHeight(CardHeight));
+            var provinceWidth = ProvinceCardWidth(province);
+            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore },
+                SlotX(owner, 2 + province.Index) + (CardHeight - provinceWidth) / 2, ProvinceRowY(owner), provinceWidth, PlaneHeight(CardHeight));
+            area.SetMeta("province_pair", $"{owner.Id}:{province.Index}");
             var button = new Button { Text = "", Flat = true };
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
-            Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
+            Place(area, button, 8, 0, provinceWidth - 16, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
+            var dynastyX = 0f;
+            var dynastyWidth = CardHeight;
+            if (province.Region is { } region)
+            {
+                var regionWidth = RegionSlotWidth(region);
+                var tile = Tile(region, true, regionWidth, CardHeight);
+                Place(area, tile, 8, 0, regionWidth, PlaneHeight(CardHeight));
+                dynastyX = 8 + regionWidth + RegionCardGap;
+                dynastyWidth = provinceWidth - dynastyX - 8;
+            }
             if (province.Card is { } card)
             {
-                var tile = Tile(card, true, CardHeight, CardHeight);
-                Place(area, tile, 0, 0, CardHeight, PlaneHeight(CardHeight));
+                var tile = Tile(card, true, dynastyWidth, CardHeight);
+                Place(area, tile, dynastyX, 0, dynastyWidth, PlaneHeight(CardHeight));
             }
 
         }

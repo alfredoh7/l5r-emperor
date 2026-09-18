@@ -15,6 +15,7 @@ public partial class CardTile : Button
     private float _bowDestination;
     public float VisualBowAngle => _bowAngle;
     public bool UprightPreview { get; set; }
+    public bool CelestialMount { get; set; }
     public float VisualFaceAngle => _bowAngle + RestAngle + (!UprightPreview && FallenArt.TurnsOnTable(Card) ? Mathf.Pi : 0);
     public bool SelectedSource { get; set; }
     public bool Compact { get; set; }
@@ -172,6 +173,7 @@ public partial class CardTile : Button
     {
         var corners = LocalFaceCorners();
         DrawInteractionHalo();
+        if (CelestialMount) SupportCardArt.DrawCelestial(this, corners);
         for (var spread = 3; spread >= 1; spread--)
             DrawColoredPolygon(LocalFaceCorners(spread).Select(p => p + new Vector2(.6f, .8f + _lift * .5f)).ToArray(), new Color(.008f, .006f, .004f, .055f));
         DrawColoredPolygon(corners.Select(p => p + new Vector2(0, .7f)).ToArray(), new Color("a29174"));

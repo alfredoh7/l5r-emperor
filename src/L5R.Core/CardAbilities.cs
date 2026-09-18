@@ -3939,8 +3939,18 @@ public sealed partial class MatchEngine
                     catch (RuleViolation e) { error ??= e.Message; }
                 }
                 var label = ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})");
-                yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
-                    legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).ToArray());
+                // Low Market's reviewed UI must display the real price and allow source selection.
+                // Keep differently priced attachments in separate options, so changing a target
+                // cannot reuse another attachment's cheaper quote. Validation remains authoritative.
+                if (ability.Target == "attachment-in-hand" && legal.Count > 0)
+                {
+                    foreach (var group in legal.GroupBy(c => Math.Max(1, Definition(Card(c.TargetId!)).GoldCost - 2)))
+                        yield return new("useAbility", label + $" · {group.Key} Gold", true, null,
+                            group.First(), source?.Id, group.Select(c => c.TargetId!).ToArray(), GoldCost: group.Key);
+                }
+                else
+                    yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
+                        legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).ToArray());
             }
         }
     }

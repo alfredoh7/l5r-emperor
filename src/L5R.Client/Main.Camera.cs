@@ -308,8 +308,8 @@ public partial class Main
         if (token is null)
             while (hovered is not null && !hovered.HasMeta("flat_tooltip") && hovered is not (CardTile or PermanentGrantSeal or CardTokenRail)) hovered = hovered.GetParent() as Control;
         var provinceHover = hovered?.HasMeta("province_marker") == true ? hovered.GetMeta("province_marker").AsString()
-            : hovered is CardTile provinceCard && provinceCard.Card.Zone == L5R.Core.Zone.Province
-                ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
+            : hovered is CardTile provinceCard && provinceCard.Card.Zone is L5R.Core.Zone.Province or L5R.Core.Zone.Region
+                ? View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == provinceCard.Card.Id || q.Region?.Id == provinceCard.Card.Id).Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault() : null;
         _matSections.Emphasize(provinceHover, hover:true);
         if (hovered != _tableHover) { HideTableTooltip(); _tableHover = hovered; }
         if (hovered is null || _tableTooltip is not null || (_tableHoverTime += delta) < .5) return;
