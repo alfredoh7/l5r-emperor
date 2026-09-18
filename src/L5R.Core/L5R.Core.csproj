@@ -63,6 +63,8 @@
     <EmbeddedResource Include="../../content/published/strategy-wave-9.json" LogicalName="L5R.Published.StrategyWave9.json" />
     <EmbeddedResource Include="../../content/published/follower-wave-10.json" LogicalName="L5R.Published.FollowerWave10.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-10.json" LogicalName="L5R.Published.StrategyWave10.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-3.json" LogicalName="L5R.Published.SpellWave3.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-19.json" LogicalName="L5R.Published.PersonalityWave19.json" />
     <EmbeddedResource Include="../../content/published/strategy-wave-11.json" LogicalName="L5R.Published.StrategyWave11.json" />
     <EmbeddedResource Include="../../content/published/follower-wave-11.json" LogicalName="L5R.Published.FollowerWave11.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-20.json" LogicalName="L5R.Published.PersonalityWave20.json" />

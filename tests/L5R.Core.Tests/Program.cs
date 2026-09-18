@@ -179,6 +179,8 @@ var tests = new (string Name, Action Run)[]
     ("Second City unwired-card audit, the final rest batch (Holding wave 1, Item wave 3, Region wave 2, Spell wave 2, Strategy wave 7): thirteen cards found fully buildable with pre-existing primitives -- Archery Range/Flesh Cutter Arrows' own before-attack-resolves Reaction; Slanderer's Courtier-or-Magistrate-gated dishonor; Temple of Hotei's plain 'shugenja' Performer; Tranquil Garden's new ring-in-play-or-own-discard Target; Fubatsu Plate's own paired even-if-bowed abilities; Nightingale Blade's conditional attachment-destroy; Satoshi's Dual Warfans' new lion-clan-discount Equip term plus its own entering-play draw; Overgrown Grove's own province-index Require (never AtBattle-eligible); Intervening Spirit's reinforce-from-elsewhere plus conditional additional action; The Earth Flows' Defender-only reinforce and its own new CheckEarthFlowsBonus battle-victory Honor bonus; Winds of Dismissal's own wielder-bow cost; Strategic Sacrifice's own new force-lte-province-strength Target plus its own bow-or-straighten toggle", SecondCityRestBatch),
     ("Battle/Open presence primitive (issue #267): a printed Battle/Open ability's Open half carries no battlefield-presence requirement at all (performed from Home); the SAME ability, used during the Battle phase, now correctly behaves like an ordinary Battle ability -- actingAsBattle generalizes every existing Timing==\"Battle\" presence Require (blanket army presence, Personality-source AtBattle, Target-must-be-at-battle, and the keyword-Performer categories' own AtBattle checks) to also fire for BattleOrOpen during Phase.Battle, with zero behavior change for any existing Battle-only card. Proven end to end on The Weakness of Man (Strategy wave 8, a new force-lte-... sibling Target comparing against the performer's own BASE Force) plus closes a real coverage gap the generalization itself surfaced on Immovable Object (Strategy wave 1) and Mirumoto Houken, Experienced (a genuine regression this pass caught and fixed: his own 'move to the current battlefield if he would be opposed there' needed the same reinforce-from-elsewhere exemption Michi/Rikyou/Intervening Spirit already use). Also builds the sibling \"at any location\" presence exemption (AtAnyLocation: Home, the current battlefield, or another battlefield that has not yet resolved this Battle phase -- broadened, not removed) and proves it on Improved Defenses (Strategy wave 9), an ordinary Battle-only card", BattleOpenPresencePrimitive),
     ("Front Rank Troops / Fudo's Fiends (issue #271): both cards' own BLOCKERS notes were stale -- MatchEngine.ExpendableDraw already exists and is already generically correct for any card carrying the Expendable keyword, checked at every real destroy path. Zero AbilityCatalog wiring needed; this proves the existing, previously-untested helper actually fires for a real published card", ExpendableFollowers),
+    ("Stormless Fury (issue #276 follow-up): the general 'after a Battle action resolves' Reaction primitive (OpenBattleActionReactionWindow) -- its own out-of-play half reuses Equip (Limited)'s own attach mechanism as a Reaction, deliberately granting no Additional Action (unlike Equip (Battle)); its own in-play half bows the just-resolved action's own performer, excluded (BattleActionReaction1UsedCardIds) from firing against the SAME action that triggered the first half, but firing normally against a later, different action", StormlessFuryBattleActionReaction),
+    ("Tsuruchi Yakusho (issue #276 follow-up): the general 'after you announce an action' Reaction primitive (ResolveOrDeferAnnounceReaction), offered only when the about-to-execute ability is classified Ranged by the existing AttackKind() lookup (never Melee); her own effect sets a transient immunity (RangedAttackStrengthReductionImmune) blocking every existing Attack-strength-reducing Reaction (proven against Training's own negate) for the remainder of that specific Attack's own resolution, never carrying over into a later, separate Attack", TsuruchiYakushoAnnounceReactionAndImmunity),
     ("Cultist Infiltrator (oracle-l5r-1595): may attach to a Personality its controller does not own (a new Effect-keyed exception on Equip's own ownership Require); after each Straighten Phase gives its host a persistent -1C token via the existing shared CreateToken Chi<=0 death check; is excluded from Overlay's own attachment-transfer loop (discarded instead); and, attached to an enemy Personality, is returned to its OWN original owner's discard pile when that Personality dies, since CardInstance.OwnerId is never reassigned", CultistInfiltratorPrimitive),
     ("Unimpeachable Name (oracle-l5r-8989): a broad out-of-play \"before any action resolves\" Reaction -- reduces the reacting player's own Honor loss from that action by 3 (minimum 0) and/or rehonors a target Dishonorable Personality; NOT offered at all when neither condition could possibly apply; her own separate Battle ability bows a performing Shugenja and an enemy card for 2 Honor", UnimpeachableNamePrimitive),
     ("Fields of Mercy (oracle-l5r-2530): a per-Terrain-instance, per-player destroyed-Personality counter that starts at 0 only once the card itself enters play (never retroactively) -- the first Personality destruction after entry still happens normally (and starts the count), every one after that has only the Personality-destruction component negated (attachments on that unit are still destroyed)", FieldsOfMercyPrimitive),
@@ -6947,4 +6949,89 @@ static void YasukiTsujikenPrimitive()
         Check(!e.State.Cards[tsujiken.Id].Bowed,"Cost waived -- the target's base Gold Cost (2) is 4 or lower");
         Check(!e.State.Cards[holding.Id].Bowed,"Still straightened");
     }
+}
+static void StormlessFuryBattleActionReaction()
+{
+    // Both halves share the general "after a Battle action resolves" primitive: the out-of-play
+    // attach (no Additional Action granted), then the same card's own second Reaction excluded from
+    // firing against the SAME action that just triggered its own attachment, but firing normally
+    // against a later, different action.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var thunderShugenja=Add(s,"training-thunder-shugenja",0,Zone.Battlefield,province:0);
+    var secondPerformer=Add(s,"training-thunder-shugenja",0,Zone.Battlefield,province:0);
+    var enemy=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, survives a Melee 2 either way
+    var stormlessFury=Add(s,"oracle-l5r-7512",0,Zone.Hand);
+    var e=MatchEngine.FromTestState(s);
+    var grantsBefore=e.State.AdditionalActions.Count;
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:thunderShugenja.Id,AbilityId:"training-weapon-attack")); // no target in sight; deferred Ranged/Melee targeting allows a null target
+    Equal(e.State.PendingChoice?.Type,"battleActionReaction","Stormless Fury in hand, its own controller's performing Thunder Shugenja just resolved a Battle action: the window opens");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:stormlessFury.Id,AbilityId:"stormless-fury-attach"));
+    Equal(e.State.Cards[stormlessFury.Id].Zone,Zone.Attached,"Equip (Limited)'s own attach mechanism fires as a Reaction");
+    Equal(e.State.Cards[stormlessFury.Id].AttachedTo,thunderShugenja.Id);
+    Equal(e.State.AdditionalActions.Count,grantsBefore,"Unlike Equip (Battle), attaching as this Reaction grants no Additional Action");
+    // Using the Reaction hands priority to the opponent first (same shape as any other Reaction) --
+    // they can only ever decline, since the window is scoped to Stormless Fury's own controller.
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    // The card's own errata: the second Reaction may not also fire against the SAME action that
+    // just triggered the first -- still inside the same still-open window.
+    Reject(e,new GameCommand("useAbility",0,e.Version,CardId:stormlessFury.Id,AbilityId:"stormless-fury-bow"));
+    Accept(e,new GameCommand("declineReaction",0,e.Version));
+    Check(e.State.PendingChoice is null,"Window closed");
+    // A later, different action: the second Reaction fires normally, bowing whoever performed it.
+    Accept(e,new GameCommand("pass",1,e.Version)); // hand priority back to player 0 for the next action
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:secondPerformer.Id,AbilityId:"training-weapon-attack"));
+    Equal(e.State.PendingChoice?.Type,"battleActionReaction","The now-in-play Stormless Fury is offered again for a fresh action");
+    Check(!e.State.Cards[secondPerformer.Id].Bowed,"Not yet bowed");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:stormlessFury.Id,AbilityId:"stormless-fury-bow"));
+    Check(e.State.Cards[secondPerformer.Id].Bowed,"Stormless Fury's second Reaction bows the just-resolved action's own performer, against a later action");
+}
+static void TsuruchiYakushoAnnounceReactionAndImmunity()
+{
+    // Offered only for a Ranged-Attack-producing ability (AttackKind), never Melee or a non-Attack
+    // action; her own effect immunizes a Ranged Attack against every existing strength-reducing
+    // Reaction for the remainder of THAT Attack's own resolution, never a later, separate one.
+    var s=StrongholdBattle("oracle-l5r-1218");
+    var yakusho=Add(s,"oracle-l5r-8895",0,Zone.Battlefield,province:0);
+    var meleeAttacker=Add(s,"training-dual-attacker",0,Zone.Battlefield,province:0);
+    var rangedAttacker1=Add(s,"training-dual-attacker",0,Zone.Battlefield,province:0);
+    var rangedAttacker2=Add(s,"training-dual-attacker",0,Zone.Battlefield,province:0);
+    var reactor=Add(s,"training-attack-reactor",1,Zone.Home);
+    var meleeTarget=Add(s,"training-crane-veteran",1,Zone.Battlefield,province:0); // Force 5, survives Melee 2 regardless
+    var rangedTarget1=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+    var rangedTarget2=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3
+    var e=MatchEngine.FromTestState(s);
+
+    // Melee: never offered, regardless of Yakusho's own presence.
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:meleeAttacker.Id,AbilityId:"training-weapon-attack"));
+    Check(e.State.PendingChoice is null || e.State.PendingChoice.Type!="announceReaction","A Melee action never offers Tsuruchi Yakusho's own announce Reaction");
+    Accept(e,new GameCommand("pass",1,e.Version)); // hand priority back to player 0 for the next action
+
+    // Ranged, first Attack: Yakusho reacts to the announce, then her immunity blocks Training's own
+    // negate Reaction from reducing THIS Attack's strength.
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:rangedAttacker1.Id,TargetId:rangedTarget1.Id,AbilityId:"training-honor-cost-attack"));
+    Equal(e.State.PendingChoice?.Type,"announceReaction","A Ranged-Attack-producing action offers Tsuruchi Yakusho's own announce Reaction");
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:yakusho.Id,AbilityId:"tsuruchi-yakusho-immunity"));
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    Accept(e,new GameCommand("declineReaction",0,e.Version));
+    Equal(e.State.PendingChoice?.Type,"attackReaction","The originally-announced action now resolves, deferred by Training's own available reactor");
+    // Immune to strength reduction for the remainder of this Attack's own resolution.
+    Reject(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    Accept(e,new GameCommand("declineReaction",0,e.Version));
+    Equal(e.State.Cards[rangedTarget1.Id].Zone,Zone.Dead,"Undiminished Ranged 3 destroys the Force-3 target: the negate Reaction never landed");
+
+    // Ranged, second Attack: the immunity does not carry over -- Training's own negate now succeeds.
+    Accept(e,new GameCommand("pass",1,e.Version)); // hand priority back to player 0 for the next action
+    Accept(e,new GameCommand("useAbility",0,e.Version,CardId:rangedAttacker2.Id,TargetId:rangedTarget2.Id,AbilityId:"training-honor-cost-attack"));
+    if(e.State.PendingChoice?.Type=="announceReaction")
+    {
+        Accept(e,new GameCommand("declineReaction",0,e.Version));
+        Accept(e,new GameCommand("declineReaction",1,e.Version));
+    }
+    Equal(e.State.PendingChoice?.Type,"attackReaction");
+    Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+    Equal(e.State.PendingAttack?.Strength,0,"No lingering immunity from the earlier, separate Attack: the negate Reaction succeeds this time");
+    Accept(e,new GameCommand("declineReaction",0,e.Version));
+    Accept(e,new GameCommand("declineReaction",1,e.Version));
+    Equal(e.State.Cards[rangedTarget2.Id].Zone,Zone.Battlefield,"Negated: the second target survives");
 }
