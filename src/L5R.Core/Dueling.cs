@@ -333,13 +333,35 @@ public sealed partial class MatchEngine
     private static string? DuelWonReactionAbility(CardInstance card) =>
         (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
 
+    // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the same window,
+    // broadened from "the winning card's OWN reaction" to also reach any OTHER in-play, unbowed card of
+    // the winner's own controller watching for ANY of that controller's Personalities winning (Trigger
+    // "own-personality-won-duel"; Maratai herself need not be the duelist). Unbowed is required only to
+    // decide whether the window is worth opening at all -- Maratai's bow is a cost, so a bowed watcher
+    // could never use it anyway (the shared bowed-source Require in ValidateAbility rejects it too).
+    // The winner's own controller is always the window's PendingChoice.PlayerId, so only their own
+    // watchers ever match ValidateAbility's own trigger check. The "duelWonReaction" PendingChoice
+    // itself is untouched (CardId is still the winning card), so every consumer of the existing own-won-
+    // duel window -- Apply()'s pass/close handling included -- needs no change.
+    private static string? DuelWonBroadcastReactionAbility(CardInstance card) =>
+        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
+
     private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
     {
         var card = Card(winnerId);
         var reactionId = DuelWonReactionAbility(card);
-        if (reactionId is null) return false;
-        card.AbilityUses.Remove(reactionId);
-        _state.PendingChoice = new("duelWonReaction", winnerPlayerId, card.Id, "After the duel resolved, you may use this card's own reaction, or pass.", closesTo);
+        var broadcastWatchers = _state.Cards.Values.Where(c => c.OwnerId == winnerPlayerId && InPlay(c) && !c.Bowed && DuelWonBroadcastReactionAbility(c) is not null).ToArray();
+        if (reactionId is null && broadcastWatchers.Length == 0) return false;
+        // A fresh window per duel: clear any earlier use so the same card may react again to a later duel.
+        if (reactionId is not null) card.AbilityUses.Remove(reactionId);
+        foreach (var watcher in broadcastWatchers)
+        {
+            var watchId = DuelWonBroadcastReactionAbility(watcher)!;
+            watcher.AbilityUses.Remove(AbilityCatalog.All[watchId].UsageKey ?? watchId);
+        }
+        _state.PendingChoice = new("duelWonReaction", winnerPlayerId, card.Id,
+            reactionId is not null ? "After the duel resolved, you may use this card's own reaction, or pass."
+                : "After a duel ended that your Personality won, you may use a card's own reaction, or pass.", closesTo);
         _state.ConsecutivePasses = 0;
         _state.PriorityPlayerId = winnerPlayerId;
         Emit("reactionWindow", "Duel-won reaction window opened.", winnerPlayerId, card.Id);

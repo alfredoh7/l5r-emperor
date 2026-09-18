@@ -698,7 +698,9 @@ public static class AbilityCatalog
         ["unexpected-support"] = new("Battle", "Choose your performing unbowed Commander and target an enemy card with as many or fewer Followers than the performer: Bow it. Negate its next straightening (this turn)", "enemy-fewer-or-equal-followers-than-performer", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Commander"]),
         // "This movement will not be negated": deliberately NOT added to MoveOrStraightenKind below,
         // so Tamori Tamoko's own curated negation interrupt (which only ever recognizes ability ids
-        // listed there) can never apply to it -- exemption by omission, no new code needed.
+        // listed there) can never apply to it -- exemption by omission. Champion of Thunder's own
+        // "all" negation is not gated by that list, so issue #299 additionally routes this id through
+        // MovementCannotBeNegated (the same shared check Shinjo Kinto's conditional clause uses).
         ["wrathful-ancestor-move"] = new("Battle", "Choose your performing unbowed Spirit and target an enemy Personality: Move him home. This movement will not be negated", "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Spirit"]),
         // Strategic Sacrifice (issue #264, Strategy wave 7): the one false-negative the BLOCKERS
         // documentation pass itself caught -- a plain Siege Performer (RequiredKeywords' own already-
@@ -1145,6 +1147,64 @@ public static class AbilityCatalog
         // but needing its own PendingChoice (which province) since, unlike Earth Flows' unconditional
         // Honor gain, "one of your provinces" is a genuine player choice.
         ["your-clan-needs-you"] = new("Battle", "If any enemy units are at the current battlefield, choose your performing Personality in one of your provinces: Bring him into play at the current battlefield, paying all costs but paying 6 less Gold. After the battle ends, if he is in play, discard all his attachments and put him into one of your provinces, face-up, discarding any card there", "own-personality-in-province"),
+        // Personality wave 21 (issue #299, Batch E of the "Not blocked; deferred for scope" BLOCKERS
+        // audit): nine Personalities plus the two tokens two of them create.
+        //
+        // Akodo Chiyo (oracle-l5r-10290): "Battle: Melee 4 Attack" -- the existing attack primitive
+        // (its own AttackStrength/AttackKind entries below, per issue #289's lesson that a new
+        // attack id needs BOTH or it silently resolves as a 0-strength Attack). Her printed
+        // "Crab Clan players may ignore Chiyo's Honor Requirement" is not an ability at all -- see
+        // CardDefinition.HonorRequirementWaiverClan.
+        ["chiyo-attack"] = new("Battle", "Melee 4 Attack", "attack"),
+        // Matsu Kaido (oracle-l5r-4934): "Fear Battle:" -- "Fear" is a plain printed classification
+        // word here (the same treatment Ninja/Kiho/Recon already get, and the same finding Bow Before
+        // My Will/Consuming Weakness reached about their own Fear text), not a distinct engine Timing;
+        // nothing in the engine reads it. "Reduce its Force to 0" is the delta-to-a-target-value shape
+        // asako-house-guard-force-chi already established (its own Set-Force wording), applied once,
+        // not a standing "Force is 0" override.
+        ["kaido-force-zero"] = new("Battle", "Fear Battle: Target an enemy Personality or Follower: Reduce its Force to 0", "enemy-force"),
+        // Matsu Miura (oracle-l5r-10853): arata-force-penalty's own shape, minus Arata's Honor gain.
+        ["miura-force-penalty"] = new("Battle", "Target an enemy Personality or Follower: Give it a Force penalty equal to Miura's Personal Honor", "enemy-force"),
+        // Utaku Mai (oracle-l5r-9086): "You may move Mai to the current battlefield. If she is now
+        // there, give the targeted card a Force penalty equal to Mai's Personal Honor." Mai need not
+        // already be at the battlefield (her whole point is reinforcing it), so she is exempted from
+        // the shared battlefield-presence Requires exactly the way Takasho/Intervening Spirit/
+        // Sanctuary of the Waves already are (see reinforcesFromElsewhere in ValidateAbility). "You
+        // may" is always taken: skipping the move can never do her controller any good (the penalty
+        // needs her there), and if she is already there the move is simply a no-op.
+        ["mai-move-force-penalty"] = new("Battle", "Target an enemy Personality or Follower: You may move Mai to the current battlefield. If she is now there, give the targeted card a Force penalty equal to Mai's Personal Honor", "enemy-force"),
+        // Shinjo Kinto (oracle-l5r-6906): Wrathful Ancestor's own "Move him home" (MoveHome), but the
+        // "will not be negated" clause is CONDITIONAL on Reconnaissance here: registered in
+        // MoveOrStraightenKind below (so Tamori Tamoko's negation interrupt recognizes it as a
+        // movement, unlike Wrathful Ancestor which is simply never registered), then exempted
+        // per-command by MovementCannotBeNegated when the acting player has Reconnaissance at the
+        // current battlefield.
+        ["kinto-move"] = new("Battle", "Target an enemy Personality: Move him home. This movement will not be negated if you have Reconnaissance", "enemy-personality"),
+        // Kakita Maratai (oracle-l5r-4197): "After a duel ends that your Personality won, bow Maratai:
+        // Gain 2 Honor. Take the Imperial Favor." Maratai need not be the duelist -- the first Reaction
+        // on the own-won-duel window that watches ANY of its controller's Personalities winning
+        // (Trigger "own-personality-won-duel"), the duelWonReaction window's own analogue of the
+        // own-enters-play -> any-personality-enters-play broadcast generalization. The bow is the
+        // printed cost, paid in the execution case; the shared bowed-source Require already stops a
+        // bowed Maratai from using it.
+        ["maratai-statue"] = new("Reaction", "After a duel ends that your Personality won, bow Maratai: Gain 2 Honor. Take the Imperial Favor", "none", Trigger: "own-personality-won-duel"),
+        // Kitsune Ohsuki / Kitsune Tokoru (oracle-l5r-4469 / oracle-l5r-4474): "After X enters play:
+        // Create a ... Personality" -- Kitsu Akai's own kitsu-akai-create (MatchEngine.CreatePersonality,
+        // issue #257) as an entering-play Reaction instead of a Limited action, so it is created from
+        // inside its creator's own already-open entry window (CreatePersonality's duringEntryReaction).
+        ["ohsuki-create"] = new("Reaction", "After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Sparrow · Cavalry · Spirit Personality", "none", Trigger: "own-enters-play"),
+        ["tokoru-create"] = new("Reaction", "After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan · Nonhuman · Bear · Spirit Personality", "none", Trigger: "own-enters-play"),
+        // Ohsuki's Sparrow (oracle-l5r-10023): "Limited: If none of your provinces were destroyed since
+        // your last turn ended: Gain 3 Honor." The condition precedes the colon, so it gates USING the
+        // action at all (a per-id Require in ValidateAbility, the way horibe-bow's own "If opposed"
+        // and hiruma-sniper-attack's own Reconnaissance requirement do), not merely its effect --
+        // MatchState.ProvinceDestroyedSinceTurnEnd.
+        ["ohsuki-sparrow-honor"] = new("Limited", "If none of your provinces were destroyed since your last turn ended: Gain 3 Honor", "none"),
+        // Tokoru's Bear (oracle-l5r-10025): "Battle: Target an attacking enemy card: Bow it. Destroy it
+        // if it is an attachment." -- enemy-attacking-card, a new Target category (every existing
+        // "attacking" category is Personality-only; this one also reaches an attacking unit's own
+        // Followers/Items/Spells).
+        ["tokoru-bear-bow"] = new("Battle", "Target an attacking enemy card: Bow it. Destroy it if it is an attachment", "enemy-attacking-card"),
     });
 }
 
@@ -1309,7 +1369,10 @@ public sealed partial class MatchEngine
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
-            or "ring-of-water-move-home" or "mihato-move" or "block-supply" => "move",
+            or "ring-of-water-move-home" or "mihato-move" or "block-supply"
+            // Shinjo Kinto (issue #299): negatable like any other move-home ability -- except when its
+            // own acting player has Reconnaissance (MovementCannotBeNegated), checked per command.
+            or "kinto-move" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
@@ -1343,7 +1406,10 @@ public sealed partial class MatchEngine
         // Fires of Turmoil (issue #295): the same conditional-bow-or-straighten shape as Strategic
         // Sacrifice/Weakness of Man above (here, gated by the discarded Fate card's own Focus parity
         // rather than the target's current bow state) -- still counts as "bows the target."
-        or "fires-of-turmoil";
+        or "fires-of-turmoil"
+        // Tokoru's Bear (issue #299): bows its own target unconditionally (the destroy-if-attachment
+        // half is separate, and independent of whether the bow itself was negated).
+        or "tokoru-bear-bow";
     // Finds the one eligible in-play watcher for a just-submitted command, if any -- every branch is
     // an "in play" Reaction (the user's own clarification), monitored live, never pre-registered.
     // Rokai (a classified destroy) is scoped to "another player's action," "your Personality," and
@@ -1363,6 +1429,7 @@ public sealed partial class MatchEngine
     private (CardInstance Watcher, string Kind)? FindBeforeActionReactionWatcher(GameCommand command)
     {
         if (command.AbilityId is null || command.TargetId is null || !_state.Cards.TryGetValue(command.TargetId, out var affected)) return null;
+        if (MovementCannotBeNegated(command)) return null;
         if (Definition(affected).Type == CardType.Personality)
         {
             if (DestroysTarget(command.AbilityId))
@@ -1392,6 +1459,23 @@ public sealed partial class MatchEngine
         }
         return null;
     }
+    // "This movement will not be negated" (issue #299): the printed clause on Wrathful Ancestor and
+    // Shinjo Kinto. A negating interrupt (Tamori Tamoko's move-negate, Champion of Thunder's own
+    // "all") never even gets its window opened for such a command -- the movement is never offered
+    // for negation at all, rather than being offered and then overridden. Wrathful Ancestor is
+    // unconditional; Kinto's is conditional on his controller having Reconnaissance at the current
+    // battlefield -- the province the current battle is being fought at is always the DEFENDER's own,
+    // so a Defender (who can only ever hold Reconnaissance at an ENEMY province, never their own) never
+    // qualifies. Wrathful Ancestor was previously protected from Tamoko only by omission from
+    // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
+    // anyway; routing it through this shared check closes that gap too.
+    private bool MovementCannotBeNegated(GameCommand command) => command.AbilityId switch
+    {
+        "wrathful-ancestor-move" => true,
+        "kinto-move" => _state.CurrentBattleProvince is int province
+            && HasReconnaissance(command.PlayerId, 1 - _state.ActivePlayerId, province),
+        _ => false
+    };
     private bool ControlsAnyRing(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
     // Defers the WHOLE command (never partially applied), the same shape ResolveOrDeferAdditionalAction
     // already uses, so MoveHome/Straighten/DestroyUnits are never even reached until the watcher's
@@ -1498,6 +1582,8 @@ public sealed partial class MatchEngine
         "monastery-fire-attack" => 5,
         "torazu-fire-attack" => 3,
         "unparalleled-sword-attack" => 4,
+        // Akodo Chiyo (oracle-l5r-10290, issue #299): "Battle: Melee 4 Attack."
+        "chiyo-attack" => 4,
         "shinjo-eun-sahng-attack" => 4,
         "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" => 5,
         "yayu-bow-attack" or "yayu-destroy-attack" => 5,
@@ -1586,7 +1672,7 @@ public sealed partial class MatchEngine
         "shikaro-attack" or "moto-ming-gwok-attack" or "takasho-attack" => "Ranged",
         "champion-of-thunder-attack" => "Ranged",
         "nikutai-attack" => "Melee",
-        "legulus-legion-attack" or "village-raiders-attack" => "Melee",
+        "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
         _ => ""
     };
@@ -1828,6 +1914,13 @@ public sealed partial class MatchEngine
                 // card by id), not open to either side the way before-duel-begins is.
                 "own-won-duel" => _state.PendingChoice.Type == "duelWonReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the
+                // same duelWonReaction window as own-won-duel above, but NOT scoped to the winning
+                // card itself (no CardId match): any of the winner's own controller's cards carrying
+                // this trigger may react, the same broadcast shape any-personality-enters-play already
+                // gives own-enters-play. Whose window it is (PendingChoice.PlayerId) is always the
+                // winner's own controller, so only that player's own watchers ever match.
+                "own-personality-won-duel" => _state.PendingChoice.Type == "duelWonReaction" && command.PlayerId == _state.PendingChoice.PlayerId,
                 // Togashi Hizumi / Tamori Ruya (issue #216): both scoped to the one specific watching
                 // card by id, the same shape own-won-duel already uses -- see OpenBowReactionWindow
                 // for how each is actually distinguished when opening the window.
@@ -1945,7 +2038,11 @@ public sealed partial class MatchEngine
                 // Your Clan Needs You! (issue #295): brings a fresh Personality straight from a
                 // province into the current battlefield -- the acting player may have zero presence
                 // there beforehand (that is the entire point of reinforcing).
-                or "your-clan-needs-you";
+                or "your-clan-needs-you"
+                // Utaku Mai (issue #299): "You may move Mai to the current battlefield" -- the acting
+                // player is never assumed to already have presence there, and Mai herself need not be
+                // there yet either (only the TARGET must be, per the shared Target-AtBattle Require).
+                or "mai-move-force-penalty";
             if (!reinforcesFromElsewhere) Require(Army(player.Id, _state.CurrentBattleProvince!.Value).Any(), "You need a unit at the current battlefield.");
             if (!reinforcesFromElsewhere && source is not null && Definition(source).Type == CardType.Personality)
                 Require(AtBattle(source) || HasHalls(player.Id) && Keyword(source, "Shugenja"), "The performing card must be at this battlefield.");
@@ -1990,6 +2087,11 @@ public sealed partial class MatchEngine
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         if (id == "tamoko-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
+        // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
+        // since your last turn ended" -- a printed condition on USING the action, checked here rather
+        // than only when it resolves (MatchState.ProvinceDestroyedSinceTurnEnd).
+        if (id == "ohsuki-sparrow-honor")
+            Require(!_state.ProvinceDestroyedSinceTurnEnd[player.Id], "One of your provinces was destroyed since your last turn ended.");
         if (id == "shosei-honor") Require(_state.Cards.Values.Any(c => c.OwnerId == player.Id && InPlay(c) && Keyword(c, "Temple")), "You must control a Temple.");
         // Ring recruitment (issue #194): each of these three is only ever playable as the specific
         // Additional Battle Action already granted for it (GrantRingRecruit) -- never as an ordinary
@@ -2532,6 +2634,17 @@ public sealed partial class MatchEngine
                         "attacking" => personality && target.OwnerId == _state.ActivePlayerId,
                         "defending" => personality && target.OwnerId != _state.ActivePlayerId,
                         "enemy-attacking" => personality && !own && target.OwnerId == _state.ActivePlayerId,
+                        // Tokoru's Bear (oracle-l5r-10025, issue #299): "an attacking enemy card" -- not
+                        // just an attacking Personality (enemy-attacking above) but any card in an
+                        // attacking unit: the Personality himself or one of his attached Followers/
+                        // Items/Spells. "Attacking" is a property of the UNIT (its host Personality's
+                        // controller is the active player), so an attachment is judged by its host,
+                        // not by its own OwnerId (Cultist Infiltrator can sit on an enemy Personality).
+                        // Must also be at the current battlefield -- already required for every
+                        // Battle-timed target by the shared Require above, which resolves an
+                        // attachment through its own parent's location.
+                        "enemy-attacking-card" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                            && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
                         "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         "attachment" => target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
                         // Champion of Thunder: "any card in this unit" -- the reacting card's own
@@ -3338,7 +3451,7 @@ public sealed partial class MatchEngine
             case "bayushi-kahoku-attack": case "asako-ume-attack":
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
-            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack":
+            case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack": case "chiyo-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
@@ -3418,6 +3531,35 @@ public sealed partial class MatchEngine
                 break;
             }
             case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
+            // Personality wave 21 (issue #299, Batch E). Akodo Chiyo's "chiyo-attack" shares the
+            // attack-execution case below.
+            // Kitsune Ohsuki / Kitsune Tokoru: created from INSIDE this Personality's own already-open
+            // entry window (duringEntryReaction), so CreatePersonality never returns true here.
+            case "ohsuki-create": CreatePersonality(player.Id, "oracle-l5r-10023", duringEntryReaction: true); break;
+            case "tokoru-create": CreatePersonality(player.Id, "oracle-l5r-10025", duringEntryReaction: true); break;
+            case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
+            // "Destroy it if it is an attachment" is a separate clause from "Bow it" -- a Stalwart
+            // attachment whose bow was negated is still destroyed.
+            case "tokoru-bear-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (target!.Zone == Zone.Attached) DestroyAttachment(target);
+                break;
+            case "kaido-force-zero": ApplyModifier(target!, source!.Id, id, "Force", -CardForce(target!)); break;
+            case "miura-force-penalty": ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(source!)); break;
+            case "mai-move-force-penalty":
+                MoveToBattlefield(source!, _state.CurrentBattleProvince!.Value);
+                // "If she is now there" -- always true once the move above has run (nothing can negate a
+                // move TO a battlefield), but checked rather than assumed so the printed conditional
+                // is what the code actually says.
+                if (AtBattle(source!)) ApplyModifier(target!, source!.Id, id, "Force", -CardPersonalHonor(source!));
+                break;
+            case "kinto-move": MoveHome(target!, false); break;
+            case "maratai-statue":
+                source!.Bowed = true;
+                GainHonor(player.Id, 2, "Kakita Maratai", source);
+                _state.FavorPlayerId = player.Id;
+                Emit("favorTaken", $"{player.Name} took the Imperial Favor.", player.Id);
+                break;
             case "kitsu-akai-battle":
                 // No StalwartNegatesBow check -- unlike lady-matsus-rage-bow-destroy's own bow
                 // (inflicted on an enemy target), this bow is the performer's own chosen cost

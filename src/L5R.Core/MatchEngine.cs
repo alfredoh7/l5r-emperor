@@ -332,20 +332,7 @@ public sealed partial class MatchEngine
     // priority once the window fully closes (both sides passed) -- see PassReaction.
     private bool OpenEntryReactionWindow(int playerId, CardInstance card, int? closesTo = null)
     {
-        // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
-        // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
-        // rather than through the Reaction window below. Every entry point (Purchase, Equip, a played
-        // Terrain, equip-battle's Spell attach) already funnels through this one shared function.
-        if(Keyword(card,"Destined")) Draw(Player(playerId));
-        // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
-        // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
-        if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
-        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
-        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
-        // so mandatory and unconditional, same convention as the two lines above; fires from any
-        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
-        // just Purchase.
-        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
+        ApplyMandatoryEntryEffects(playerId, card);
         var reactionId = EntryReactionAbility(card);
         // Singh Remnants' shape: a DIFFERENT card (in hand or a discard pile) watching for this entry,
         // not the entering card's own reaction -- only relevant when a Personality is what entered.
@@ -361,6 +348,29 @@ public sealed partial class MatchEngine
         _state.ConsecutivePasses = 0;
         Emit("reactionWindow", "Entry reaction window opened.", playerId, card.Id);
         return true;
+    }
+    // The mandatory, unconditional half of "a card enters play" (never an opt-in Reaction): Destined's
+    // draw, an EntryHonorLoss, Sensei's discard. Split out of OpenEntryReactionWindow (issue #299) so a
+    // card created from INSIDE another card's own already-open entry Reaction window (Kitsune Ohsuki's/
+    // Tokoru's created token -- CreatePersonality's duringEntryReaction) still gets these without
+    // opening a second window on top of, and thereby clobbering, the first.
+    private void ApplyMandatoryEntryEffects(int playerId, CardInstance card)
+    {
+        // Destined keyword (core rules): a mandatory Fate-deck draw every time a card carrying it
+        // enters play -- unconditional, not an opt-in Reaction, so it fires here unconditionally
+        // rather than through any Reaction window. Every entry point (Purchase, Equip, a played
+        // Terrain, equip-battle's Spell attach) already funnels through OpenEntryReactionWindow, which
+        // calls this first; CreatePersonality's nested mode calls it directly.
+        if(Keyword(card,"Destined")) Draw(Player(playerId));
+        // "After this card enters play, lose X Honor" with no printed "Reaction:" prefix (issue
+        // #210) -- mandatory, same convention as Destined's own draw above, never an optional choice.
+        if(Definition(card).EntryHonorLoss is int loss) GainHonor(playerId,-loss,$"{Definition(card).Name} entering play",card);
+        // Sensei keyword (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "After [this card] enters
+        // play: Discard all your other Sensei Personalities" -- a trait (no Action:/Reaction: label),
+        // so mandatory and unconditional, same convention as the two lines above; fires from any
+        // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
+        // just Purchase.
+        if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -431,13 +441,24 @@ public sealed partial class MatchEngine
     // same shape low-market-equip/equip-battle already use. Only a Personality is implemented; a
     // created Holding/Region/Attachment is recorded as accepted future scope, not built until a
     // real card needs it (see docs/decisions).
-    private bool CreatePersonality(int ownerId, string definitionId)
+    // duringEntryReaction (issue #299, Kitsune Ohsuki/Tokoru): the created card is being made by a
+    // Reaction used INSIDE another card's own already-open "entryReaction"/"proclaim" window (the
+    // creator's own "After X enters play: Create ..."). Opening a second window here would overwrite
+    // that one's PendingChoice (silently dropping, e.g., the creator's own still-unused Proclaim), and
+    // PendingChoice has no stack -- so only the mandatory half of entering play (Destined/EntryHonorLoss/
+    // Sensei) is applied, Overconfident is still queued (the outer window's own eventual close drains
+    // it, PassReaction), and this returns false so the calling Reaction falls through to its ordinary
+    // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
+    // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
+    // token has an entering-play Reaction of its own and no watcher is known to matter here.
+    private bool CreatePersonality(int ownerId, string definitionId, bool duringEntryReaction = false)
     {
         var definition=CardCatalog.Get(definitionId);
         var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definitionId,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
         _state.Cards.Add(card.Id,card);
         Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
+        if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
     }
 
@@ -633,13 +654,22 @@ public sealed partial class MatchEngine
         // Clan restriction, including for a player whose Stronghold represents no Clan.
         else if(def.Type==CardType.Personality && !LoyaltyAllowsControl(card,player.Clan)) error="Loyal Personalities can only be recruited by a Clan they are aligned with.";
         else if((clanDiscount||clanAllegiance)&&!inClan) error="Clan discount and allegiance require your Clan's Personality.";
-        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
+        // Akodo Chiyo / Kitsu Ririko (issue #299): a Personality's own printed "Clan X players may ignore
+        // / it enters play ignoring Honor Requirement" waiver (CardDefinition.HonorRequirementWaiverClan),
+        // keyed on the RECRUITING player's own Clan -- this is the single check every entry path that
+        // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
+        else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
             -(viaReserve && def.Effect=="reserve-defender-discount"?4:0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : []);
     }
+
+    // True when the card's own printed waiver names the recruiting player's own Clan (see
+    // CardDefinition.HonorRequirementWaiverClan). An empty/unset field never waives anything.
+    private static bool HonorRequirementWaived(CardDefinition def,PlayerState player) =>
+        def.HonorRequirementWaiverClan is string clan && string.Equals(clan,player.Clan,StringComparison.Ordinal);
 
     public int GoldProduced(string cardId,int playerId)
     {
@@ -1433,6 +1463,10 @@ public sealed partial class MatchEngine
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
     private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+        // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
+        // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
+        // starts from the same +1 base).
+        Definition(card).Effect=="attacking-one"?1:
         // Matsu Yoshito (issue #198): "+1F while attacking, or +2F if the Defender is Dragon Clan" --
         // the Defender is always the other player while this card is attacking.
         Definition(card).Effect=="attacking-vs-dragon-bonus"?(Player(1-card.OwnerId).Clan=="Dragon"?2:1):0)-(HasHalls(card.OwnerId)&&Keyword(card,"Ancestor")?1:0):0)
@@ -1822,6 +1856,9 @@ public sealed partial class MatchEngine
         // Village Guardian (oracle-l5r-9162, issue #285): the single choke point for "a province
         // destroyed this game" -- set once, never cleared, read by village-guardian-draw's own count.
         _state.ProvinceEverDestroyed[owner]=true;
+        // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): the windowed twin of the flag above, cleared
+        // at the end of the OWNER's own next turn (FinishTurn) -- see MatchState's own doc comment.
+        _state.ProvinceDestroyedSinceTurnEnd[owner]=true;
         if(province.CardId is string id) { var card=Card(id); card.Zone=Zone.DynastyDiscard; card.FaceUp=true; card.ProvinceIndex=null; }
         province.CardId=null;
         // A Region attaches to the province itself -- it cannot outlive the province it is attached to.
@@ -1897,6 +1934,11 @@ public sealed partial class MatchEngine
     private void FinishTurn()
     {
         foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
+        // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
+        // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
+        // flag (which may already be set by destruction during this very turn) is left untouched until
+        // THEIR turn ends.
+        _state.ProvinceDestroyedSinceTurnEnd[_state.ActivePlayerId]=false;
         _state.TurnNumber++; _state.ActivePlayerId=1-_state.ActivePlayerId;
         StartTurn();
     }

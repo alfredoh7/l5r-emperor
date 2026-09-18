@@ -103,7 +103,17 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // signal MatchEngine.DestroyUnits reads to redirect a destroyed created card to
     // Zone.RemovedFromGame instead of an ordinary discard pile once destruction otherwise finishes,
     // since a created card has no physical printed card to return to any pile.
-    bool CreatedOnly = false);
+    bool CreatedOnly = false,
+    // Akodo Chiyo ("Crab Clan players may ignore Chiyo's Honor Requirement") and Kitsu Ririko
+    // ("Ririko enters play ignoring Honor Requirement if you are a Unicorn Clan player") -- one shared
+    // controller-clan-conditional waiver (issue #299, Batch E): when the player recruiting this
+    // Personality belongs to the named Clan (PlayerState.Clan, the same value every existing
+    // Clan-conditional passive -- crane-clan-discount, mantis-clan-discount, attacking-vs-dragon-bonus --
+    // already compares against), MatchEngine.QuotePurchase skips its Family Honor >= Honor Requirement
+    // check entirely, with no Clan-allegiance surcharge (that is a different, separate waiver route).
+    // A data field rather than an Effect string, since Effect is single-valued and each of these cards
+    // has its own separate reason to occupy it (or, like Ririko, none at all).
+    string? HonorRequirementWaiverClan = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -433,6 +443,16 @@ public sealed class MatchState
     // match rather than any one card instance, and to Province destruction rather than Personality
     // destruction.
     public bool[] ProvinceEverDestroyed { get; set; } = new bool[2];
+    // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed since
+    // your last turn ended" -- unlike ProvinceEverDestroyed above (match-lifetime, never cleared), this
+    // one is per-player and WINDOWED: set at the same single DestroyProvince choke point, but cleared
+    // for a player at the end of THAT player's own turn (FinishTurn), so it reads true exactly when one
+    // of their provinces was destroyed at any point since their previous turn ended -- most commonly
+    // during the opponent's turn, but also by anything that destroys it during their own. Reset at
+    // turn END, not StartTurn: clearing at the start of a turn would erase a destruction that happened
+    // on the opponent's turn just before it, which is precisely the case the printed text asks about.
+    // Never true before any province has been destroyed, so a fresh game starts with it usable.
+    public bool[] ProvinceDestroyedSinceTurnEnd { get; set; } = new bool[2];
     // Additional Action (issue #181): every currently-available grant across both players, and a
     // command snapshot awaiting the "additionalActionReaction" window (Effortless Counterattack's
     // shape) before it actually resolves. Two Hands' own restriction ("other actions will not give
