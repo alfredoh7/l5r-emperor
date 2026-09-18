@@ -24,6 +24,8 @@ if (-not $process.WaitForExit(90000)) { $process.Kill(); throw 'Export runtime s
 if ($process.ExitCode -ne 0) { throw "Export runtime exited $($process.ExitCode)" }
 $runtimeText = Get-Content -Raw -LiteralPath $runtimeLog
 if ($runtimeText -match 'ERROR:|SCRIPT ERROR:|Unhandled exception') { throw $runtimeText }
+$userFolder = Join-Path $env:APPDATA ('L5R\Previews\' + $receipt.folder.Substring('L5R-Review-'.Length))
+if (-not (Test-Path -LiteralPath $userFolder)) { throw 'Export did not create its isolated user-data directory' }
 Write-Host 'WINDOWS_RUNTIME_PASS: exported executable starts with bundled runtime and resources'
 
 # Execute every actual .cmd launcher against a small local executable that records

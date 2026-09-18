@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stage a verified private preview, then publish and notify after Windows checks."""
+"""Stage a private validation candidate, then announce it after Windows checks."""
 import argparse
 import json
 import os
@@ -102,18 +102,25 @@ def stage(spec, receipt, archive):
         notes = (f"Windows preview of **{spec['title']}** from PR #{spec['source_pr']}.\n\n"
                  "Packaging validation is in progress. Do not treat this candidate as accepted.\n\n"
                  f"Source: `{receipt['source_commit']}`\nSHA-256: `{receipt['sha256']}`\n")
-        with tempfile.NamedTemporaryFile("w", suffix=".md", encoding="utf-8") as file:
-            file.write(notes); file.flush()
+        with tempfile.TemporaryDirectory(prefix="l5r-release-") as directory:
+            file = Path(directory) / "notes.md"
+            file.write_text(notes, encoding="utf-8")
             gh("release", "create", receipt["tag"], "--repo", REPO, "--target", receipt["source_commit"],
                "--draft", "--prerelease", "--latest=false", "--title", "Review: " + spec["title"] + " (Windows)",
-               "--notes-file", file.name)
+               "--notes-file", str(file))
         existing = release_for(receipt)
     if not any(a["name"] == receipt["asset"] for a in existing["assets"]):
         if not existing["draft"]:
             raise ValueError("Never append or replace a published preview; increment its revision")
         gh("release", "upload", receipt["tag"], str(archive), "--repo", REPO)
-    verify_asset(receipt, release_for(receipt))
-    print("Draft upload verified; ready for Windows package validation.")
+    release = release_for(receipt)
+    verify_asset(receipt, release)
+    if release["draft"]:
+        # Read-only CI tokens cannot see draft releases. Keep CI read-only and
+        # publish a private prerelease explicitly marked as unvalidated instead.
+        gh("release", "edit", receipt["tag"], "--repo", REPO, "--draft=false",
+           "--prerelease", "--latest=false", "--title", "Validation pending: " + spec["title"] + " (Windows)")
+    print("Private candidate upload verified; Windows validation required before review notification.")
 
 
 def deliver(spec, receipt, validation_commit):
@@ -133,18 +140,21 @@ def deliver(spec, receipt, validation_commit):
     body = notification(spec, receipt, asset)
     # Persist instructions before release publication/notification so every link
     # in the first notification already resolves to a usable complete package.
-    with tempfile.NamedTemporaryFile("w", suffix=".md", encoding="utf-8") as file:
-        file.write(body.replace("@" + spec["reviewer"], spec["reviewer"], 1)); file.flush()
-        gh("release", "edit", receipt["tag"], "--repo", REPO, "--draft=false", "--prerelease", "--latest=false", "--notes-file", file.name)
+    with tempfile.TemporaryDirectory(prefix="l5r-release-") as directory:
+        file = Path(directory) / "notes.md"
+        file.write_text(body.replace("@" + spec["reviewer"], spec["reviewer"], 1), encoding="utf-8")
+        gh("release", "edit", receipt["tag"], "--repo", REPO, "--draft=false", "--prerelease", "--latest=false",
+           "--title", "Review: " + spec["title"] + " (Windows)", "--notes-file", str(file))
     comments = json.loads(gh("api", "--paginate", "--slurp", f"repos/{REPO}/issues/{spec['source_pr']}/comments?per_page=100"))
     marker = f"<!-- l5r-preview:{receipt['tag']} -->"
     existing = next((c for page in comments for c in page if marker in c["body"]), None)
     if existing:
         print("Notification already exists: " + existing["html_url"])
         return
-    with tempfile.NamedTemporaryFile("w", suffix=".json", encoding="utf-8") as file:
-        json.dump({"body": body}, file); file.flush()
-        result = json.loads(gh("api", "--method", "POST", f"repos/{REPO}/issues/{spec['source_pr']}/comments", "--input", file.name))
+    with tempfile.TemporaryDirectory(prefix="l5r-notify-") as directory:
+        file = Path(directory) / "comment.json"
+        file.write_text(json.dumps({"body": body}), encoding="utf-8")
+        result = json.loads(gh("api", "--method", "POST", f"repos/{REPO}/issues/{spec['source_pr']}/comments", "--input", str(file)))
     print("Published and notified: " + result["html_url"])
 
 

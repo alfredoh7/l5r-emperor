@@ -78,14 +78,16 @@ every build retry or claim that a GitHub comment was delivered/read by email.
    This runs the existing strict Windows exporter, checks source SHA and tracked
    cleanliness, adds isolated settings/launchers and emits a ZIP plus receipt under
    ignored `artifacts/previews/`. Never put game binaries into Git.
-3. Stage a private draft release (GitHub CLI authentication required):
+3. Stage a private validation candidate (GitHub CLI authentication required):
 
    ```sh
    python3 tools/previews/publish.py stage --spec previews/regions-celestials.json --receipt artifacts/previews/regions-celestials.receipt.json --archive artifacts/previews/L5R-Review-pr292-7360ff1c17-r1-Windows.zip
    ```
 
-   The publisher verifies GitHub's uploaded size/SHA-256. It never replaces an
-   existing asset. Copy that receipt into `previews/published/<name>.json`, commit
+   The publisher uploads as a draft, verifies GitHub's size/SHA-256, then makes it
+   a private prerelease titled **Validation pending** so read-only CI can download
+   it. No targeted review notification is sent yet. It never replaces an existing
+   asset. Copy that receipt into `previews/published/<name>.json`, commit
    it with the tooling/specification and handoff, then push the delivery PR.
 4. Wait for **Windows review package** CI and the relevant existing checks. The
    Windows job downloads the same release archive, verifies its hash, starts its
@@ -98,8 +100,8 @@ every build retry or claim that a GitHub comment was delivered/read by email.
    python3 tools/previews/publish.py deliver --spec previews/regions-celestials.json --receipt previews/published/regions-celestials.json --validation-commit DELIVERY_COMMIT_SHA
    ```
 
-   The command refuses a mismatched receipt or missing Windows check. It publishes
-   the prerelease (never as the latest stable release), adds the complete instructions
+   The command refuses a mismatched receipt or missing Windows check. It marks
+   the prerelease ready for review (never as the latest stable release), adds the complete instructions
    and posts one `@mdornbrook` review comment on the source PR. Retries detect the
    version marker and do not send another notification. Review routing remains in
    place; publishing a preview never merges the game or changes human acceptance.
