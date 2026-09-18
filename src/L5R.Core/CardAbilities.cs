@@ -224,6 +224,19 @@ public static class AbilityCatalog
         // itself enforces it), and a claim like any other: the Defender's claim overrides it.
         ["naval-invasion"] = new("Reaction", "Naval Invasion: choose your performing Naval Personality: you have the first opportunity to take a Battle action, which he must perform", "none",
             PlayerAbility: true, Performer: "own-naval-personality-at-battle", Trigger: "after-engaging"),
+        // Daidoji Ebizo (oracle-l5r-1629, issue #321): "Battle: Ranged Attack with strength equal to Ebizo's Force" -- the
+        // strength is his live Force (CardForce, so the trait's +1F this turn counts), read when the Attack is declared, the
+        // same self-referential shape legulus-legion-attack already established. (His first printed line is a TRAIT, not an
+        // ability: it is registered by his Effect, see MatchEngine.AfterOwnActionTraits.)
+        ["ebizo-attack"] = new("Battle", "Ranged Attack with strength equal to Ebizo's Force", "attack"),
+        // Training-only: Recon-action classification fixtures (issue #321). "Recon Open"/"Recon Battle" tag the ability itself;
+        // training-plain-open is the same effect with no tag, used both as the untagged control and on Strategies whose own
+        // Recon KEYWORD makes the action a Recon action (an ability inherits its card's keywords).
+        ["training-recon-open"] = new("Open", "Recon Open: no effect (training)", "none", ActionKeywords: ["Recon"]),
+        ["training-plain-open"] = new("Open", "Open: no effect (training)", "none"),
+        ["training-recon-attack"] = new("Battle", "Recon Battle: Ranged 2 Attack (training)", "attack", ActionKeywords: ["Recon"]),
+        // ...and a duel-issuing Recon action, whose resolution is the END of the duel (Dueling.ResolveDuel), not the announcement.
+        ["training-recon-duel"] = new("Battle", "Recon Battle: your Personality duels a target enemy Personality (training, no outcome of its own)", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Recon"]),
         // Training-only: Sneak Attack's shape (oracle-l5r-7311, not wired) -- "Engage: The Attacker has the first
         // opportunity to take a Battle action or pass in this battle." The beneficiary is the ATTACKER whoever plays it.
         ["training-engage-attacker-first"] = new("Reaction", "Engage: The Attacker has the first opportunity to take a Battle action or pass in this battle", "none", Trigger: "after-engaging"),
@@ -1802,6 +1815,10 @@ public sealed partial class MatchEngine
         // already established, just reading a separately-chosen card instead of the ability's own
         // source.
         "strength-of-the-divine-force" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        // Daidoji Ebizo (issue #321): "Ranged Attack with strength equal to Ebizo's Force" -- sourceId is the performing
+        // instance (Ebizo himself), read live the way legulus-legion-attack reads its own Force.
+        "ebizo-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        "training-recon-attack" => 2,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         _ => 0
     };
@@ -1848,6 +1865,7 @@ public sealed partial class MatchEngine
         "nikutai-attack" => "Melee",
         "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
+        "ebizo-attack" or "training-recon-attack" => "Ranged",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -2025,6 +2043,10 @@ public sealed partial class MatchEngine
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
         ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
+        // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). SourceId is the
+        // performer, the closest card the pending Attack retains for the inherited-keyword check.
+        FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.SourceId is null ? null : Card(attack.SourceId));
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
         if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId);
         NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId));
@@ -2061,6 +2083,38 @@ public sealed partial class MatchEngine
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
     }
     private static void RemoveModifiers(CardInstance card, Func<AppliedModifier, bool> match) => card.Modifiers.RemoveAll(m => match(m));
+    // "Was that a [keyword] action?" (issue #321): an action carries a keyword when the ability itself prints it before
+    // its designator ("Recon Reaction:" -- AbilityDefinition.ActionKeywords) OR the card it is on has the keyword, since
+    // "an ability inherits all the keywords of the card it's on" (core rules, Abilities: a Battle ability on a Ninja
+    // Personality is a Ninja ability; a Recon Strategy's action is a Recon action). One general question, so Recon,
+    // Ninja, Kiho, Iaijutsu, Fire ... can all ask it the same way; Apprentice Shinobi's and Mirumoto Yozo's own
+    // older checks (the source card's Ninja keyword; a hardcoded Iaijutsu id list) predate it and are left as they are.
+    private bool ActionCarriesKeyword(AbilityDefinition ability, CardInstance? source, string keyword) =>
+        ability.ActionKeywords?.Contains(keyword, StringComparer.Ordinal) == true || source is not null && Keyword(source, keyword);
+    // Traits of the form "After the resolution of your [keyword] action: Give this card +nF" (Daidoji Ebizo is the first;
+    // Master Scouts is the same trait on a Follower), registered by the card's Effect. A TRAIT, not a Reaction (core
+    // rules, Traits and effects): mandatory, usable while bowed, not limited to once per turn, and resolving before any
+    // Reaction to the same trigger -- so it is applied here, automatically, on EVERY resolution of a matching action of
+    // the card's controller, for as long as the card is in play, wherever it is (Home, a battlefield, attached). The
+    // stat change is an ApplyModifier, i.e. lasts "until the end of the current turn unless a different duration is
+    // stated" (core rules, Duration) and stacks with itself -- the same convention Apprentice Shinobi's own "Give this
+    // card +1F" already follows.
+    private static readonly Dictionary<string, (string ActionKeyword, string Stat, int Amount)> AfterOwnActionTraits = new(StringComparer.Ordinal)
+    {
+        // Daidoji Ebizo (oracle-l5r-1629): "After the resolution of your Recon action: Give Ebizo +1F."
+        ["force-after-own-recon-action"] = ("Recon", "Force", 1),
+    };
+    private void FireAfterOwnActionTraits(AbilityDefinition ability, int actingPlayerId, CardInstance? source)
+    {
+        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && AfterOwnActionTraits.ContainsKey(Definition(c).Effect))
+                     .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
+        {
+            var (keyword, stat, amount) = AfterOwnActionTraits[Definition(card).Effect];
+            if (!ActionCarriesKeyword(ability, source, keyword)) continue;
+            Emit("actionTraitFired", $"{Definition(card).Name}: after the resolution of a {keyword} action, +{amount}{(stat == "Force" ? "F" : " " + stat)} (this turn).", card.OwnerId, card.Id);
+            ApplyModifier(card, card.Id, Definition(card).Effect, stat, amount);
+        }
+    }
     private int CardForce(CardInstance card) => Definition(card).Type switch
     {
         CardType.Personality => PersonalityForce(card),
@@ -3775,6 +3829,7 @@ public sealed partial class MatchEngine
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
             case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack": case "chiyo-attack":
+            case "ebizo-attack": case "training-recon-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
@@ -4475,8 +4530,15 @@ public sealed partial class MatchEngine
                 break;
             case "training-engage-attacker-first": ClaimFirstOpportunity(_state.PendingEngage!.Attacker, "Engage", source); break;
             case "training-engage-gain-honor": GainHonor(player.Id, 1, "Training engage reaction", source); break;
+            // Recon-action classification fixtures (issue #321): no effect of their own -- the point is what fires AFTER them.
+            case "training-recon-open": case "training-plain-open": break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+        // "After the resolution of your [keyword] action" traits (Daidoji Ebizo, issue #321): every in-play card of
+        // the acting player whose Effect registers one (AfterOwnActionTraits) reacts here, the single funnel every
+        // synchronously resolving ability passes through -- a deferred Attack and a duel reach the same helper from
+        // their own completion points (ResolveAttack, ResolveDuel).
+        FireAfterOwnActionTraits(ability, player.Id, source);
         // Apprentice Shinobi (issue #279): "After the resolution of a Ninja action: Give this card
         // +1F" -- unconditional and universal (every in-play copy, regardless of controller or
         // whether Apprentice Shinobi itself took part), checked here at the single shared execution

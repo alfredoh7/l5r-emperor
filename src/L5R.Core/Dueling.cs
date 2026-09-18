@@ -316,6 +316,9 @@ public sealed partial class MatchEngine
         if (IsIaijutsuAction(duel.AbilityId) && _state.Cards.Values.Any(c => c.OwnerId == performer.OwnerId && InPlay(c) && Definition(c).GrantsIaijutsuBonus))
             ApplyModifier(performer, "yozo-exp2-iaijutsu", "yozo-exp2-iaijutsu-bonus", "Force", 2);
         var challengerPlayerId = duel.ChallengerPlayerId;
+        // A duel-issuing ability resolves here, not in ExecuteAbilityEffects (which returned at IssueChallenge):
+        // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
+        FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, performer);
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to
