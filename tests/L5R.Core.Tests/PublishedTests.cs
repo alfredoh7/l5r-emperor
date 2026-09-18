@@ -85,12 +85,16 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        // 322 (shared baseline after PR #280) + 2 (PR #277's SpellWave3 + PersonalityWave19) + 3
-        // (PR #281's own FollowerWave11 + StrategyWave11, now merged into main) + 4 (this branch's
-        // own StrategyWave12 (2) + FollowerWave13 (1) + PersonalityWave20 (1)) = 331. Recomputed
-        // from the actual current baseline each time this conflicts, not copied from either side of
-        // a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,331);
+        // SILENT MERGE TRAP CAUGHT HERE: both sides of this exact conflict independently computed
+        // 331 for entirely different reasons (HEAD: 327 + this branch's own 4; incoming: 327 + PR
+        // #283's own 4) -- a coincidental numeric match that would have made git's own 3-way merge
+        // silently pick either 331 with no conflict marker, DROPPING one side's real 4-card addition.
+        // True total: 322 (shared baseline after PR #280) + 2 (PR #277's SpellWave3 +
+        // PersonalityWave19) + 3 (PR #281's own FollowerWave11 + StrategyWave11) + 4 (PR #283's own
+        // FollowerWave12, now merged into main) + 4 (this branch's own StrategyWave12 (2) +
+        // FollowerWave13 (1) + PersonalityWave20 (1)) = 335. Recomputed from the actual current
+        // baseline each time this conflicts, never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,335);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

@@ -42,7 +42,6 @@ TYPE_ORDER = ["Stronghold", "Personality", "Follower", "Item", "Spell", "Strateg
 # for scope; those say so explicitly rather than pretending there's a technical gap. Extend this
 # dict as future waves triage other Types.
 BLOCKERS: dict[str, str] = {
-    "oracle-l5r-419": "Needs a new Reaction trigger: \"after a Ninja action resolves.\"",
     "oracle-l5r-543": "Not blocked; deferred for scope (dual-choice Set-Force pattern already exists).",
     "oracle-l5r-618": "Needs card creation (a new Follower instance), not just tokens.",
     "oracle-l5r-10891": "Needs card creation (new Follower instances).",
@@ -73,7 +72,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-4118": "Needs a unit-Force-total comparison target (existing categories only compare individual card Force).",
     "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
     "oracle-l5r-4699": "Needs a targeting immunity keyed off the acting Personality's own Gold Cost.",
-    "oracle-l5r-4700": "Needs a new Reaction trigger: \"after an action moves a card to this battlefield\" (the Mantis-discount half is separately wirable).",
     "oracle-l5r-10898": "Needs a persistent one-time destruction shield.",
     "oracle-l5r-10899": "Not fully blocked; entry Honor loss and a self-Force-keyed Attack strength both reuse existing patterns, but needs verification that AttackStrength can read its own source's Force at validation time.",
     "oracle-l5r-10900": "Needs an attachment Transfer mechanic plus Home-timing generalization.",
@@ -81,7 +79,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10518": "Focus 4, not 1 -- outside the #192 wave's own scope. The top-of-Fate-deck discard primitive now exists (Aberrations, issue #192), but this needs a \"whose deck\" target choice (\"any Fate deck\", not just your own) plus a variable-strength Melee Attack keyed off the discarded card's Focus Value, not a Force modifier.",
     "oracle-l5r-4867": "Needs a new Reaction trigger: \"after a Recon action resolves.\"",
     "oracle-l5r-5329": "Needs an ad hoc \"move this Personality into battle\" mechanic, distinct from normal Maneuvers assignment.",
-    "oracle-l5r-9872": "Needs a new Reaction trigger: \"after a Follower in this unit bows.\"",
     "oracle-l5r-10107": "Needs an \"after being targeted, negate\" Reaction trigger.",
     "oracle-l5r-10337": "Needs a \"negate the first Political action against this card each phase\" mechanism (the flat +1PH half is separately wirable).",
     "oracle-l5r-10519": "Needs the Engage-timing Reaction window (explicitly not started, #15).",
@@ -102,7 +99,6 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-9163": "Not blocked; deferred for scope (existing entry-Honor-loss, Conqueror-grant, and Attack patterns).",
     "oracle-l5r-9874": "Needs the Engage-timing Reaction window (explicitly not started, #15).",
     "oracle-l5r-10109": "Not blocked; pure attach restriction with no ability text, deferred for scope.",
-    "oracle-l5r-9255": "Needs a new Reaction trigger: \"after an Attack Phase ends.\"",
     "oracle-l5r-10688": "Not blocked; deferred for scope (existing entry-Honor-loss pattern; carries the Legionnaire keyword Aulus's boost needs).",
     "oracle-l5r-9681": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
     # Reserve (issue #184): the primitive itself (Dynasty absent-battle recruit; Fate Equip (Battle)
