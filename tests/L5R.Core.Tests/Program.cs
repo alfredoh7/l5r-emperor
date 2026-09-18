@@ -206,6 +206,8 @@ var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
 runner.Run("core",tests);
 PublishedTests.Run(runner);
+GoldParityTests.Run(runner);
+GoldQuoteTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 return runner.Finish();

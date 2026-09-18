@@ -83,7 +83,8 @@ public partial class Main : Node
         InitializeFrontend();
         if (_capturePath is null || _captureMode.StartsWith("menu", StringComparison.Ordinal)) return;
         var published = _capturePath is null || _captureMode.StartsWith("published", StringComparison.Ordinal);
-        _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
+        if (_captureMode.StartsWith("gold-", StringComparison.Ordinal)) _session.StartShowcase(_captureMode.Split('-')[1]);
+        else _session.StartPractice(!published, published, _capturePath is null ? 0 : 1);
         Render();
         SetNotice(published ? "Published Lion vs Crane · choose Practice to change Clan or scenario." : "Economy practice · choose a province card to preview its payment.");
     }
@@ -170,6 +171,11 @@ public partial class Main : Node
                 if (_captureMode.StartsWith("published-board", StringComparison.Ordinal))
                 {
                     try { PrepareBoardCapture(); }
+                    catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); _capturePath = null; return; }
+                }
+                if (_captureMode.StartsWith("gold-", StringComparison.Ordinal))
+                {
+                    try { PrepareGoldPaymentCapture(); }
                     catch (Exception e) { GD.PushError(e.ToString()); GetTree().Quit(1); _capturePath = null; return; }
                 }
                 if (_captureMode == "library") LibraryDialog.Show(this);
@@ -428,10 +434,9 @@ public partial class Main : Node
         }
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", Command.CardIds: null } targeted && targeted.TargetIds?.Contains(card.Id) == true)
         {
-            _chosen = targeted with { Command = targeted.Command! with { TargetId = card.Id } };
-            RenderInspector(); Highlight(); return;
+            ChooseTarget(card.Id); return;
         }
-        if (_chosen is { Type: "purchase" or "equip" or "useAbility" or "playStrategy" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
+        if (_chosen is { Type: "purchase" or "recruitReserve" or "equip" or "useAbility" or "playStrategy" } && card.OwnerId == View.ViewerId && Production(card, Self) > 0 && !card.Bowed && card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield)
         {
             if (!_sources.Add(card.Id)) _sources.Remove(card.Id);
             RenderInspector(); Highlight(); return;

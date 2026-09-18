@@ -76,7 +76,7 @@ public static class TrainingOpponent
                 var target=self.Home.Concat(self.Army).Concat(self.Hand).Concat(opponent.Home).Concat(opponent.Army)
                     .Where(c=>legal.Contains(c.Id)).OrderByDescending(c=>AbilityValue(command.AbilityId,c,self,opponent,view))
                     .ThenBy(c=>c.Id,StringComparer.Ordinal).FirstOrDefault();
-                if(target is not null) return command with { TargetId=target.Id };
+                if(target is not null) return WithTarget(command,action,target.Id);
             }
         }
         if(action.Type is "equip" or "playStrategy" && action.TargetIds is {Length:>0} targets)
@@ -84,8 +84,19 @@ public static class TrainingOpponent
             var targetCards=self.Home.Concat(self.Army).Concat(opponent.Army).Where(c=>targets.Contains(c.Id)).ToArray();
             if(targetCards.Length==0) return command;
             var ordered=targetCards.OrderBy(c=>c.Bowed).ThenByDescending(c=>c.Force);
-            return command with { TargetId=ordered.ThenBy(c=>c.Id,StringComparer.Ordinal).First().Id };
+            return WithTarget(command,action,ordered.ThenBy(c=>c.Id,StringComparer.Ordinal).First().Id);
         }
+        return command;
+    }
+
+    /// <summary>Retargets an offered command. When the cost depends on the target (issue #303), the engine's
+    /// own quote for that target supplies the payment, so the bot never submits sources priced for a
+    /// different target; a target it cannot pay for is not a candidate.</summary>
+    private static GameCommand? WithTarget(GameCommand command,ActionOption action,string targetId)
+    {
+        command=command with { TargetId=targetId };
+        if(action.TargetGold is not null && action.TargetGold.TryGetValue(targetId,out var quote))
+            return quote.Payments.Length==0 ? null : command with { SourceIds=quote.Payments[0].SourceIds };
         return command;
     }
 

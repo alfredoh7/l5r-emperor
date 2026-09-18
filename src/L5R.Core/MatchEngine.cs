@@ -469,7 +469,8 @@ public sealed partial class MatchEngine
     // (issue #301): Purchase and RecruitReserve above each inline their own copy (they are commands with
     // their own priority rules); Your Clan Needs You! (issue #295, into the CURRENT BATTLEFIELD) and
     // Shinden Shorai (issue #301, into HOME) are the two ABILITY callers and share this one body --
-    // pay, leave the province, enter play (bowed/dishonored only if the card's own Effect says so),
+    // leave the province (the recruit's cost was already charged by ExecuteAbilityEffects' single
+    // PayForAbility, issue #303, from the ability's GoldCostRule), enter play (bowed/dishonored only if the card's own Effect says so),
     // queue Overconfident, refill the province, then open Proclaim / the entering card's own Reaction /
     // the Overconfident draw. battlefield names the province index to enter at (null: Home, Purchase's
     // own destination). Returns true exactly when a window was opened, so the calling execution case
@@ -477,9 +478,8 @@ public sealed partial class MatchEngine
     // proclaimResumesTo: who regains priority once an opened Proclaim window fully closes (null: the
     // active player, Purchase's own convention; Shinden Shorai, a Limited ACTION, cedes to the opponent
     // like every other Action-phase action).
-    private bool BringProvincePersonalityIntoPlay(PlayerState player,CardInstance card,PurchaseQuote quote,int cost,string[]? sourceIds,int? battlefield,string via,int? proclaimResumesTo=null)
+    private bool BringProvincePersonalityIntoPlay(PlayerState player,CardInstance card,PurchaseQuote quote,int? battlefield,string via,int? proclaimResumesTo=null)
     {
-        Pay(player.Id,card,cost,sourceIds);
         var province=player.Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
@@ -703,11 +703,16 @@ public sealed partial class MatchEngine
         // spends a recruit quote (Purchase, RecruitReserve, Your Clan Needs You!) already funnels through.
         else if(def.Type==CardType.Personality && def.HonorRequirement is int requirement && player.Honor<requirement && !clanAllegiance && !HonorRequirementWaived(def,player)
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
-        var cost=Math.Max(0,def.GoldCost-(def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0)
-            -(viaReserve && def.Effect=="reserve-defender-discount"?4:0)+(clanAllegiance?2:0)-(clanDiscount?2:0));
+        var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
+        var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
+        var rawCost=def.GoldCost-prosperous-reserveDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        var cost=Math.Max(0,rawCost);
+        // The human-readable derivation the payment panel shows (issue #303), term by term.
+        var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
-        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : []);
+        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : [],basis);
     }
 
     // True when the card's own printed waiver names the recruiting player's own Clan (see
@@ -1356,25 +1361,10 @@ public sealed partial class MatchEngine
         // Spell entry too, for both keywords.
         Require(!(Keyword(card,"Unique") || Keyword(card,"Singular")) || !ControlsCopyOf(command.PlayerId,def.Name),
             $"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.");
-        // Mirumoto Katagi (issue #216): "Non-Unique Weapons attaching to Katagi from your hand enter
-        // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
-        // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
-        // formula directly rather than as a new command flag.
-        // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
-        // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different
-        // axis from Katagi's own weapon-discount-non-unique above, so a separate term rather than
-        // folded into that one).
-        // Legion of the Bat (issue #279): "Enters play paying 1 less Gold if you are a Crane Clan
-        // player" -- the exact same shape as Satoshi's Dual Warfans' own lion-clan-discount above,
-        // just a different Clan/term.
-        // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
-        // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape,
-        // keyed off a different Clan.
-        var cost=Math.Max(0,def.GoldCost-(Definition(target).Effect=="weapon-discount-non-unique" && Keyword(card,"Weapon") && !Keyword(card,"Unique")?4:0)
-            -(def.Effect=="lion-clan-discount" && Player(command.PlayerId).Clan=="Lion"?1:0)
-            -(def.Effect=="crane-clan-discount" && Player(command.PlayerId).Clan=="Crane"?1:0)
-            -(def.Effect=="mantis-clan-discount" && Player(command.PlayerId).Clan=="Mantis"?1:0));
-        Pay(command.PlayerId,card,cost,command.SourceIds);
+        // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
+        // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
+        // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
+        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
@@ -1389,6 +1379,10 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type==CardType.Strategy,"Choose a supported Strategy from your hand.");
         var province=_state.CurrentBattleProvince!.Value;
         Require(Army(command.PlayerId,province).Any(),"You need a unit at the current battlefield to take a Battle action.");
+        // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
+        // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
+        // as before, accept no sources).
+        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
         // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
         // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
