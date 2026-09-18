@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved A Regions + B Celestial frame + C inspection on current main and stabilized UI foundation.",
+  "validation": "Initial current-main integration checks running; no native acceptance yet.",
+  "remaining": "Implement artwork/layout/inspection, validate native states, compare source, publish final evidence and launcher.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/291",
+  "branch": "codex/291-regions-celestials",
+  "updated": "2026-09-18T13:47:49.395662+00:00"
+}
