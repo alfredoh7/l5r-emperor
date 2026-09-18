@@ -57,8 +57,15 @@ foreach ($scenario in $spec.scenarios) {
   if (Test-Path -LiteralPath $marker) { Remove-Item -LiteralPath $marker }
   $launcher = Join-Path $root ($scenario.name + '.cmd')
   # Run through cmd's actual double-click command handling from an unrelated CWD.
-  & $env:ComSpec /d /c "`"$launcher`""
-  if ($LASTEXITCODE -ne 0) { throw "Launcher failed: $($scenario.name)" }
+  $start = New-Object System.Diagnostics.ProcessStartInfo
+  $start.FileName = $env:ComSpec
+  # Pass the exact CreateProcess command line: PowerShell's native marshalling
+  # otherwise strips the cmd /c wrapper quotes around a path containing &.
+  $start.Arguments = '/d /s /c ""' + $launcher + '""'
+  $start.UseShellExecute = $false
+  $launchProcess = [System.Diagnostics.Process]::Start($start)
+  if (-not $launchProcess.WaitForExit(15000)) { $launchProcess.Kill(); throw 'Launcher hung' }
+  if ($launchProcess.ExitCode -ne 0) { throw "Launcher failed: $($scenario.name)" }
   $deadline = (Get-Date).AddSeconds(15)
   while (-not (Test-Path -LiteralPath $marker) -and (Get-Date) -lt $deadline) { Start-Sleep -Milliseconds 100 }
   if (-not (Test-Path -LiteralPath $marker)) { throw "Launcher did not start executable: $($scenario.name)" }

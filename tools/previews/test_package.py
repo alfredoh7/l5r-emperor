@@ -1,9 +1,10 @@
 import json
 import tempfile
 import unittest
+from unittest.mock import patch
 import zipfile
 from pathlib import Path
-from package import ROOT, launcher, prepare_folder, read_spec
+from package import ROOT, launcher, prepare_folder, read_spec, verify_source
 
 
 class PackageTests(unittest.TestCase):
@@ -59,6 +60,16 @@ class PackageTests(unittest.TestCase):
                 output.writestr("L5R-Emperor.exe", "fixture")
             with self.assertRaisesRegex(ValueError, "missing"):
                 prepare_folder(self.spec, archive, root / "review")
+
+    def test_uncommitted_csharp_cannot_ship_under_a_published_commit(self):
+        with patch("package.subprocess.check_output", side_effect=[
+            self.spec["source_commit"], "", "src/L5R.Client/Unreviewed.cs\0"
+        ]), self.assertRaisesRegex(ValueError, "untracked"):
+            verify_source(Path("fixture"), self.spec)
+        with patch("package.subprocess.check_output", side_effect=[
+            self.spec["source_commit"], "", "src/L5R.Client/card.jpg.import\0src/L5R.Client/Main.cs.uid\0"
+        ]):
+            self.assertEqual(verify_source(Path("fixture"), self.spec), self.spec["source_commit"])
 
 
 if __name__ == "__main__":

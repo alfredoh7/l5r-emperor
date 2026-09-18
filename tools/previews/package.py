@@ -153,13 +153,24 @@ def prepare_folder(spec, export_zip, folder):
     (folder / "preview.json").write_text(json.dumps(spec, indent=2) + "\n", encoding="utf-8")
 
 
-def package(spec_path, source, output):
-    spec = read_spec(spec_path)
+def verify_source(source, spec):
     head = subprocess.check_output(["git", "-C", str(source), "rev-parse", "HEAD"], text=True).strip()
     if head != spec["source_commit"]:
         raise ValueError("Source checkout does not match the pinned preview commit")
     if subprocess.check_output(["git", "-C", str(source), "status", "--porcelain", "--untracked-files=no"], text=True).strip():
         raise ValueError("Source has tracked changes; commit them and update the specification first")
+    untracked = subprocess.check_output(
+        ["git", "-C", str(source), "ls-files", "--others", "--exclude-standard", "-z"], text=True).split("\0")
+    # Godot generates these adjacent metadata files during import. Everything
+    # else must be committed: in particular C# globbing includes untracked .cs.
+    if any(path and not path.endswith((".import", ".uid")) for path in untracked):
+        raise ValueError("Source contains untracked files other than Godot import metadata")
+    return head
+
+
+def package(spec_path, source, output):
+    spec = read_spec(spec_path)
+    head = verify_source(source, spec)
     subprocess.run(["bash", "tools/export.sh", "windows"], cwd=source, check=True)
     export_zip = source / "artifacts/windows/L5R-Emperor-Windows.zip"
     export_receipt = json.loads((source / "artifacts/checks/package-manifest.json").read_text())

@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Built reusable private Windows previews with prepared launchers, isolated data, Claude handoff and targeted review notification after Windows validation; first PR292 package staged.",
-  "validation": "Strict Windows export and seven local regression groups passed; GitHub upload byte count/SHA-256 verified. Initial Windows CI correctly caught read-only access to draft release; candidate is now a private prerelease marked validation pending, preserving read-only CI permissions. Windows rerun pending.",
-  "remaining": "Complete Windows runtime/launcher CI, then send the authorized review notification. PR292 gameplay findings and human graphical/rules review remain open; tooling PR needs shared review.",
+  "summary": "Implemented reusable Windows preview packaging, isolated scenario launchers, private versioned downloads, Claude instructions and gated Mendon notifications. First PR292 candidate uploaded and verified.",
+  "validation": "Eight local regression groups passed. Strict Windows export and GitHub SHA-256/size verification passed. Actual exported game started successfully on Windows CI and created its isolated user-data directory. Launcher test invocation exposed PowerShell/cmd quote stripping in a path containing spaces and ampersands; fixed the test driver with exact CreateProcess arguments. Final Windows rerun pending.",
+  "remaining": "Pass all five actual Windows launcher checks and final CI, then publish the review-ready instructions and authorized notification. Mendon gameplay/graphical acceptance and shared tooling review remain pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-18T16:12:57.117675+00:00"
+  "updated": "2026-09-18T16:16:00.709174+00:00"
 }
