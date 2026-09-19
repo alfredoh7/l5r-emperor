@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Targeted-by-action reaction family (redirect, re-check, blanket and multi-kind negation) and a per-turn use limit; wires Mirumoto Ezuno, Goju Yurishi, Yasuki Jinn-Kuen exp2, Hida Mochitoko exp (personality-wave-30) and Blade of Champions (item-wave-4).",
+  "validation": "bash tools/check.sh --skip-client passed locally (216 core + 57 published + gold, battle timing, recon, discipline, deck, bofana and 21 new targeted-action tests, 24 AI tests, server and transport tests); 27 mutation checks each failed a named test; published count 409 -> 414 recounted from content/published/*.json; Godot client checks not run locally (no editor in this worktree), left to CI.",
+  "remaining": "None; ready for review. Open rules questions for Mendon are in docs/decisions/2026-09-19-redirection-and-protective-reactions.md.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/335",
+  "branch": "claude/335-redirection-protective-reactions",
+  "updated": "2026-09-19T16:46:13.784856+00:00"
+}
