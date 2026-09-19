@@ -106,7 +106,11 @@ public sealed class MatchSession : IDisposable
 
     /// <summary>The outgoing command payload: every GameCommand field except the acting seat and the expected
     /// version (the server binds both from the authenticated connection). A field missing here is silently
-    /// dropped online, so the transport tests compare this against GameCommand by reflection (issue #303).</summary>
+    /// dropped online, so the transport tests compare this against GameCommand by reflection (issue #303). Deck search
+    /// (issue #312) adds no field: its commands ride Choice (a deck or a card definition id), Province, SourceIds and
+    /// TargetId. The search's view fields (MatchView.PendingSearch, MatchView.ShownCards) travel inside MatchView itself,
+    /// which this session deserializes as the core record, so they need no mapping here; the transport test
+    /// SearchViewsCrossTheWire fails if a MatchView property is ever missing from the wire.</summary>
     public static object ToWire(GameCommand command) => new
     {
         type = command.Type, cardId = command.CardId, sourceIds = command.SourceIds,

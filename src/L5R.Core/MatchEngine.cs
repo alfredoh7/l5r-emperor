@@ -23,6 +23,12 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateStarterMatch(ulong seed = 20260906) => Create(seed, "starter");
     public static MatchEngine CreateEconomyScenario(ulong seed = 20260906) => Create(seed, "economy");
     public static MatchEngine CreatePublishedMatch(ulong seed = 20260906) => Create(seed, PublishedContent.Scenario);
+    /// <summary>Fixture match for the deck search primitive (issue #312): both players have Ikoma Shizuka and the
+    /// training search source unbowed at home, decks that hold Regions and Terrains, and the Action Phase open for
+    /// player 0. An ordinary, replayable engine state (its own scenario name, so ExportReplay/Replay and the server's
+    /// journal recovery cover it) built for tests and for the UI issues' scripted capture -- no menu or room reaches it.</summary>
+    public static MatchEngine CreateDeckSearchShowcase(ulong seed = 20260906) => Create(seed, DeckSearchScenario);
+    public const string DeckSearchScenario = "deck-search";
     // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
     // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
     // never silently change what this exercises.
@@ -46,7 +52,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy")) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -74,6 +80,7 @@ public sealed partial class MatchEngine
             random.Shuffle(player.FateDeck);
             player.Provinces = Enumerable.Range(0,4).Select(i => new ProvinceState { Index=i,Strength=6,PrintedStrength=6 }).ToList();
         }
+        state.RngState=random.State; // Deck search (issue #312): later shuffles continue this exact sequence.
         var engine = new MatchEngine(state,seed,scenario);
         foreach (var player in state.Players)
         {
@@ -90,6 +97,23 @@ public sealed partial class MatchEngine
                 old.DefinitionId=definitions[i]; // Explicit scenario fixture, not a shuffled production deck.
             }
             Add(0,"training-marketplace",Zone.Home,true);
+        }
+        if (scenario == DeckSearchScenario)
+        {
+            // Deck search fixture (issue #312), see CreateDeckSearchShowcase: both players get Ikoma Shizuka and the
+            // training search source in their home, and a few deck positions are rewritten to Regions (Fallow Lands
+            // x2, another published Region, a costed training Region) and Terrains -- explicit fixture edits of an
+            // otherwise ordinary shuffled deck, so the state stays reproducible from the seed and replayable.
+            foreach (var player in state.Players)
+            {
+                Add(player.Id,"oracle-l5r-10292",Zone.Home,true);
+                Add(player.Id,"training-search-source",Zone.Home,true);
+                Add(player.Id,"training-look-source",Zone.Home,true);
+                string[] dynasty=["oracle-l5r-9865","oracle-l5r-9865","oracle-l5r-4777","training-costed-region"];
+                string[] fate=["training-terrain","training-terrain"];
+                for(var i=0;i<dynasty.Length;i++) state.Cards[player.DynastyDeck[i]].DefinitionId=dynasty[i];
+                for(var i=0;i<fate.Length;i++) state.Cards[player.FateDeck[i]].DefinitionId=fate[i];
+            }
         }
         engine.StartTurn();
         if(scenario=="economy") { state.Phase=Phase.Dynasty; engine.Emit("scenario","Economy exercise: choose one payment at a time; Gold never carries over."); }
@@ -132,6 +156,11 @@ public sealed partial class MatchEngine
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
         {
+            // Deck search (issue #312): deck choice, candidate selection/pass, a Region's province, the discard
+            // after a Terrain. Every command a search accepts is validated in ResolveSearchCommand.
+            if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
+            // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
+            if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -679,6 +708,9 @@ public sealed partial class MatchEngine
     private void OrderSeppuku(GameCommand command)
     {
         Require(_state.Phase==Phase.Action,"Order Seppuku is only available during the Action Phase.");
+        // Deck search (issue #312): Seppuku cuts through pending choices, but a search is a private, multi-step decision whose
+        // pending choice a destruction-triggered window (Overconfident) would overwrite, orphaning it -- finish the search first.
+        Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
@@ -2148,6 +2180,7 @@ public sealed partial class MatchEngine
     private void EventsPhase(PlayerState player)
     {
         SetPhase(Phase.Events,player.Id);
+        _state.EventsRevealNext=0;
         ContinueEventsReveal(player);
     }
     // Split from EventsPhase (issue #259, Harsh Choices) so a reveal that needs a genuine player
@@ -2157,8 +2190,12 @@ public sealed partial class MatchEngine
     // once its own choice resolves.
     private void ContinueEventsReveal(PlayerState player)
     {
-        foreach(var province in player.Provinces.Where(p=>!p.Destroyed && p.CardId is not null))
+        // Deck search (issue #312): a reveal that deferred to a player decision (Harsh Choices, Imperial Gift's
+        // search) resumes from the next province, never from the start -- restarting at province 0 would reveal, in
+        // this same phase, the face-down card the deferred Event's own province had just been refilled with.
+        foreach(var province in player.Provinces.Where(p=>p.Index>=_state.EventsRevealNext && !p.Destroyed && p.CardId is not null))
         {
+            _state.EventsRevealNext=province.Index+1;
             var card=Card(province.CardId);
             if(!card.FaceUp)
             {
@@ -2189,6 +2226,25 @@ public sealed partial class MatchEngine
         if(Definition(card).Effect=="harsh-choices")
         {
             _state.PendingChoice=new("harshChoices",player.Id,card.Id,"Harsh Choices: you may destroy this province to draw 3 cards.");
+            return true;
+        }
+        // Imperial Gift (issue #312): "Gain 2 Honor and search your Fate deck for an Item, show it, and put it into
+        // your hand." The Honor first, then the search (deck search primitive, DeckSearch.cs) -- which defers through
+        // its own PendingChoice like Harsh Choices above; ResumeEventAfterSearch discards the Event, refills the
+        // province and resumes the reveal loop once the search has shuffled and finished. The Event stays in its
+        // province, face up, until then.
+        // Signs and Portents (issue #322): "Look at the top four cards of any Fate deck. You may discard one of them. Put the rest
+        // back in any order." -- the look primitive (DeckLook.cs), deferred through its own PendingChoice exactly like Imperial
+        // Gift's search; the Event is discarded and the reveal resumes once the arrangement is submitted.
+        if(LookCatalog.ForEventEffect(Definition(card).Effect) is { } eventLook)
+        {
+            BeginLook(eventLook,card,player.Id,"event");
+            return true;
+        }
+        if(Definition(card).Effect=="imperial-gift")
+        {
+            GainHonor(player.Id,2,"Imperial Gift",card);
+            BeginSearch(SearchCatalog.ImperialGift,card,player.Id,"event");
             return true;
         }
         province.CardId=null; card.ProvinceIndex=null;
@@ -2261,12 +2317,15 @@ public sealed partial class MatchEngine
             card.Zone=Zone.DynastyDiscard;
             Emit("regionDiscarded",$"{Definition(card).Name} was discarded: {player.Name}'s province {province.Index+1} already has a Region attached.",player.Id,card.Id);
         }
-        else
-        {
-            card.Zone=Zone.Region; card.ProvinceIndex=province.Index; province.RegionId=card.Id;
-            Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
-        }
+        else AttachRegionToProvince(player,province,card);
         Refill(player,province);
+    }
+    // The one place a Region enters play attached to a province: the Events Phase reveal above, and a Region found
+    // by a deck search that the searcher attaches to a province of their own choice (issue #312, Ikoma Shizuka).
+    private void AttachRegionToProvince(PlayerState player,ProvinceState province,CardInstance card)
+    {
+        card.Zone=Zone.Region; card.ProvinceIndex=province.Index; card.FaceUp=true; province.RegionId=card.Id;
+        Emit("regionAttached",$"{Definition(card).Name} attached to {player.Name}'s province {province.Index+1}.",player.Id,card.Id);
     }
     // A Celestial (core rules Glossary): unlike Event/Region, it enters play the instant it is
     // revealed regardless of WHICH phase that reveal happens in -- today the Events Phase reveal loop
@@ -2482,6 +2541,9 @@ public sealed partial class MatchEngine
     private sealed class StableRandom(ulong seed)
     {
         private ulong _value=seed;
+        // The generator's whole state is this one value (deck search, issue #312): persisted in
+        // MatchState.RngState so a mid-game shuffle continues the exact sequence the setup shuffles started.
+        public ulong State => _value;
         private ulong Next()
         {
             // SplitMix64; owned algorithm makes shuffles stable across .NET versions.

@@ -48,6 +48,13 @@ namespace L5R.Core;
 // -- "which may target a Personality with attached Followers" (unconditional, Reconnaissance-gated, or
 // limited to a target status) -- letting its Ranged/Melee Attack target a Personality that still has a
 // Follower attached.
+// Search (issue #312): the ability's deck search, as declarative data (which deck(s), the criteria each deck's
+// candidates must meet, what happens to the chosen card -- see DeckSearch.cs). A non-null Search means using the
+// ability starts the shared search flow: (optional deck choice) -> candidate list -> select or pass -> show ->
+// effect -> shuffle -> the action resolves. The ability's own cost (Bow Shizuka) is paid in its execution case.
+// Look (issue #322): the ability's look at the top N cards of a deck, as declarative data (which deck(s), N, the dispositions
+// each viewed card may take with their min/max, where the rest goes, whether the order may change -- see DeckLook.cs).
+// Search and Look are the LAST parameters so both sides' positional callers stay valid.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
     bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null,
     TargetStatus? IfTarget = null, TargetStatus? TargetMustBe = null, AttackFollowerException? FollowerException = null,
@@ -72,7 +79,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // (an Absent Battle action can be taken by a card that is not at the battlefield at all). It is still a Battle
     // action: Battle phase only, and its own targets/performers keep whatever location rule they print. Consumed
     // by ValidateAbility's presence Requires (the block on actingAsBattle); nothing else reads it.
-    bool Absent = false);
+    bool Absent = false,
+    // Deck search / look (issues #312, #322): appended LAST, after main's ActionKeywords/Discipline/Absent, and always passed by name.
+    SearchSpec? Search = null, LookSpec? Look = null);
 
 public static class AbilityCatalog
 {
@@ -1401,6 +1410,34 @@ public static class AbilityCatalog
         // Require because a Region sits in Zone.Region, never AtBattle-eligible.
         ["brawl-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments", UsageKey: "brawl"),
         ["brawl-destroy"] = new("BattleOrOpen", "Target a Region (at any province) or a Terrain: Destroy it", "region-or-terrain", UsageKey: "brawl"),
+        // Deck search (issue #312). Ikoma Shizuka (oracle-l5r-10292): "Limited: Bow Shizuka: Search your Dynasty or
+        // Fate deck. If you find a Region, attach it to one of your provinces, paying all costs. If you find a
+        // Terrain, put it in your hand and discard a card." The cost (bow Shizuka) is paid in the execution case; the
+        // rest is the SearchSpec -- a deck choice, per-deck criteria (Region only / Terrain only), per-deck effects.
+        ["shizuka-search"] = new("Limited", "Bow Shizuka: search your Dynasty or Fate deck", "none", Search: SearchCatalog.IkomaShizuka),
+        // Training fixtures for the search criteria vocabulary and the optional flag (see SearchCatalog).
+        ["training-search-cheap"] = new("Limited", "Training: search your Fate deck for a cheap non-Unique Follower or Item", "none", Search: SearchCatalog.TrainingCheap),
+        ["training-search-focus"] = new("Limited", "Training: search your Fate deck for a Strategy with Focus 2 or less", "none", Search: SearchCatalog.TrainingFocus),
+        ["training-search-optional"] = new("Limited", "Training: you may search your Fate deck for a Weapon", "none", Search: SearchCatalog.TrainingOptional),
+        // Look at the top N cards (issue #322). Public Records (oracle-l5r-6095, a Singular Holding): "Limited: Bow this card: Look at
+        // the top three cards of your Fate deck. Put them back in any order." Reorder only; the bow is the cost.
+        ["public-records-look"] = new("Limited", "Bow this card: look at the top three cards of your Fate deck and put them back in any order", "none", Look: LookCatalog.PublicRecords),
+        // Isawa Tamaki (oracle-l5r-3918): "Limited: Look at the top card of your Fate deck. You may put it at the bottom of the deck."
+        // The scan prints no "Void" prefix (the catalogue's "Void Limited" is a later printing's wording); Void is a plain keyword.
+        ["isawa-tamaki-look"] = new("Limited", "Look at the top card of your Fate deck; you may put it at the bottom", "none", Look: LookCatalog.IsawaTamaki),
+        // Banish All Doubt (oracle-l5r-690, Tactical Strategy): "Limited: Choose your performing unbowed Tactician: Look at the top four
+        // cards of your Fate deck. Put one of them in your hand and put the other three on the bottom of your deck in any order."
+        ["banish-all-doubt-look"] = new("Limited", "Choose your performing unbowed Tactician: look at the top four cards of your Fate deck, put one in your hand and the rest on the bottom in any order", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tactician"], Look: LookCatalog.BanishAllDoubt),
+        // Bayushi Kahoku, Experienced 2 (oracle-l5r-10479): "Limited: Look at the top three cards of your Fate deck. You may show one of
+        // them that is a Political Strategy and put it in your hand. Put the remaining cards back in any order."
+        ["kahoku-exp2-look"] = new("Limited", "Look at the top three cards of your Fate deck; you may show a Political Strategy and put it in your hand; put the rest back in any order", "none", Look: LookCatalog.BayushiKahokuExp2),
+        // Training fixtures for the look parameters (see LookCatalog).
+        ["training-look-dynasty"] = new("Limited", "Training: look at the top two cards of your Dynasty deck", "none", Look: LookCatalog.TrainingDynasty),
+        ["training-look-any"] = new("Limited", "Training: look at the top three cards of any deck", "none", Look: LookCatalog.TrainingAny),
+        ["training-look-take-item"] = new("Limited", "Training: look at the top three cards of your Fate deck and take an Item", "none", Look: LookCatalog.TrainingTakeItem),
+        ["training-look-fixed"] = new("Limited", "Training: look at the top three cards of your Fate deck; you may discard one; the order is fixed", "none", Look: LookCatalog.TrainingFixedOrder),
+        ["training-look-show"] = new("Limited", "Training: look at the top cards of your Fate deck (the count is the caller's) and show one", "none", Look: LookCatalog.TrainingShowAny),
         // Return to Action (oracle-l5r-10953, issue #331; Aftermath): "Discipline :g2: ... Absent Battle: If you are
         // the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten
         // him." The first card on the general Discipline and Absent flags. Discipline: playable from hand (the
@@ -4762,6 +4799,22 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "mugoshi-slander": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
+            // Deck search (issue #312): the cost (bow Shizuka) is paid now; the search itself defers through its own
+            // PendingChoice types, so -- like shinden-choice above -- the action does not finish here: FinishSearch
+            // hands priority on once the deck has been shuffled.
+            case "shizuka-search": source!.Bowed = true; BeginSearch(ability.Search!, source, player.Id, "ability", bowedBeforeAction); return;
+            case "training-search-cheap": case "training-search-focus": case "training-search-optional":
+                BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction); return;
+            // Look at the top N cards (issue #322): like a search, the look defers through its own PendingChoice types, so the
+            // action does not finish here -- FinishLook hands priority on once the arrangement is submitted. A Strategy played from
+            // the hand is spent as it is played (the tail that would discard it is skipped by the deferral).
+            case "public-records-look": source!.Bowed = true; BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
+            case "isawa-tamaki-look": case "kahoku-exp2-look": case "training-look-dynasty": case "training-look-any": case "training-look-take-item": case "training-look-fixed":
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
+            case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
+            case "banish-all-doubt-look":
+                if (source!.Zone == Zone.Hand) DiscardFate(player, source);
+                BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
             // Battle Phase timing (issues #309/#310): the Engage window's consumers. Every claim only RECORDS the
             // request; who actually acts first is decided when the window closes (ResolveFirstOpportunity), so the
             // order claims are made in never matters and claims never stack.

@@ -60,6 +60,58 @@ Run("chooses an offered free Experienced Overlay",()=>
     var decision=TrainingOpponent.Choose(view,[action]);
     Check(decision.Command is {Type:"overlay",TargetId:"lower"},"AI did not choose the offered free Overlay");
 });
+// Deck search (issue #312): the training AI must answer every stage of a search from the legal actions it is offered --
+// the deck choice, taking an eligible card, a Region's province, the discard after a Terrain, and Pass when nothing qualifies.
+Run("resolves a deck search at every stage without stalling: Region into a province, Terrain and discard, and the mandatory pass",()=>
+{
+    foreach(var seed in new ulong[]{1,42,831})
+    {
+        var region=MatchEngine.CreateDeckSearchShowcase(seed); var regionsBefore=region.GetView(0).Players[0].Provinces.Count(p=>p.Region is not null);
+        ResolveSearch(region,"shizuka-search","Dynasty");
+        var regionView=region.GetView(1);
+        Check(regionView.ShownCards!.Length==1 && regionView.ShownCards[0].Definition.Type==CardType.Region,"The AI took a Region and showed it");
+        var attached=regionView.Players[0].Provinces.Count(p=>p.Region is not null)+regionView.Players[0].Discard.Count(c=>c.Definition?.Type==CardType.Region);
+        Check(attached==regionsBefore+1,"The Region attached to a province (or was discarded)");
+        var terrain=MatchEngine.CreateDeckSearchShowcase(seed); var handBefore=terrain.GetView(0).Players[0].HandCount;
+        ResolveSearch(terrain,"shizuka-search","Fate");
+        Check(terrain.GetView(0).Players[0].HandCount==handBefore,"Terrain into the hand, one card discarded");
+        Check(terrain.GetView(1).ShownCards is [{Definition.Type: CardType.Strategy}],"The AI showed a Terrain Strategy");
+        var pass=MatchEngine.CreateDeckSearchShowcase(seed);
+        ResolveSearch(pass,"training-search-optional",null); // the fixture's Fate deck holds no Weapon: Pass is the only legal answer
+        Check(pass.GetView(1).ShownCards!.Length==0 && pass.GetView(1).Events.Any(e=>e.Type=="searchPassed") && pass.GetView(1).Events.Any(e=>e.Type=="deckShuffled"),"Passed and still shuffled");
+    }
+});
+// Look at the top N cards (issue #322): the AI answers every stage of every look shape from the legal actions it is offered.
+Run("resolves a look at the top cards at every stage without stalling: each deck of the four (the opponent's included), a required take, a fixed order, a shown card",()=>
+{
+    foreach(var seed in new ulong[]{1,42,831})
+        foreach(var ability in new[]{"training-look-dynasty","training-look-any","training-look-take-item","training-look-fixed","training-look-show"})
+            for(var deckIndex=0;deckIndex<4;deckIndex++)
+            {
+                var game=MatchEngine.CreateDeckSearchShowcase(seed);
+                var source=game.State.Cards.Values.First(c=>c.OwnerId==0 && c.Zone==Zone.Home && c.DefinitionId=="training-look-source").Id;
+                Check(game.Execute(new("useAbility",0,game.Version,source,AbilityId:ability)).Accepted,"The look could not be started");
+                var steps=0; var viewedOpponentDeck=false;
+                while(game.State.PendingChoice is {} pending && pending.Type.StartsWith("look"))
+                {
+                    var view=game.GetView(pending.PlayerId); var actions=game.QueryActions(pending.PlayerId);
+                    Check(view.PendingLook is not null,$"The viewer has no look view at {pending.Type}");
+                    // Narrow the deck choice to one deck (standing in for a player who prefers it); the arrangement is left to the AI.
+                    var decks=actions.Where(a=>a.Type=="chooseLookDeck").ToArray();
+                    if(decks.Length>0) actions=[decks[Math.Min(deckIndex,decks.Length-1)]];
+                    var decision=TrainingOpponent.Choose(view,actions);
+                    Check(decision.Command is not null,$"The AI stalled at {pending.Type}");
+                    if(decision.Command!.Type=="chooseLookDeck" && decision.Command.TargetPlayerId==1) viewedOpponentDeck=true;
+                    var result=game.Execute(decision.Command!);
+                    Check(result.Accepted,$"Illegal {decision.Command.Type} at {pending.Type}: {result.Error}");
+                    Check(++steps<6,"The look did not finish in a bounded number of decisions");
+                }
+                Check(game.State.PendingChoice is null,$"{ability}: the look finished and play continued");
+                if(viewedOpponentDeck) Check(game.GetView(1).PendingLook is null && game.GetView(0).Events.Any(e=>e.Type=="topCardsLooked"),"The deck owner only learns that a look happened");
+            }
+});
+foreach(var seed in new ulong[]{1,42,831,20260906,99999})
+    Run($"seed {seed}: AI vs AI in the deck-search fixture plays on, searches, shuffles and replays deterministically",()=>PlaySearchMatch(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
     Run($"seed {seed}: legal complete training match, bounded decisions and deterministic replay",()=>Play(seed));
 foreach(var seed in new ulong[]{1,42,831,20260906,99999})
@@ -70,6 +122,46 @@ return runner.Finish();
 void Run(string name,Action run) => tests.Add((name,run));
 
 static void Check(bool condition,string message) { if(!condition) throw new Exception(message); }
+// Starts the search with an explicit command, then lets the training AI answer every decision from ONLY its own view and its
+// offered actions (forceDeck narrows the deck choice, standing in for a player who prefers that deck).
+static void ResolveSearch(MatchEngine game,string ability,string? forceDeck)
+{
+    var source=game.State.Cards.Values.First(c=>c.OwnerId==0 && c.Zone==Zone.Home && (CardCatalog.Get(c.DefinitionId).Abilities??[]).Contains(ability)).Id;
+    Check(game.Execute(new("useAbility",0,game.Version,source,AbilityId:ability)).Accepted,"The search could not be started");
+    var steps=0;
+    while(game.State.PendingChoice is {} pending && pending.Type.StartsWith("search"))
+    {
+        var view=game.GetView(pending.PlayerId); var actions=game.QueryActions(pending.PlayerId);
+        Check(view.PendingSearch is not null,$"The searcher has no deck viewer at {pending.Type}");
+        if(forceDeck is not null) actions=actions.Where(a=>a.Type!="chooseSearchDeck" || a.Command?.Choice==forceDeck).ToArray();
+        var decision=TrainingOpponent.Choose(view,actions);
+        Check(decision.Command is not null,$"The AI stalled at {pending.Type}");
+        var result=game.Execute(decision.Command!);
+        Check(result.Accepted,$"Illegal {decision.Command!.Type} at {pending.Type}: {result.Error}");
+        Check(++steps<8,"The search did not finish in a bounded number of decisions");
+    }
+    Check(game.State.PendingChoice is null,"The search finished and play continued");
+}
+static void PlaySearchMatch(ulong seed)
+{
+    // A bounded number of decisions rather than a finished match: the fixture's Regions (Fallow Lands' +2 strength) can make a
+    // training match a genuine stalemate (seed 42 never ends), which says nothing about the search. What matters is that the AI
+    // never stalls, never makes an illegal move, really searches and shuffles, and that the whole thing replays exactly.
+    var game=MatchEngine.CreateDeckSearchShowcase(seed); var commands=0;
+    while(game.GetView(0).WinnerId is null && commands<700)
+    {
+        var player=game.GetView(0).PriorityPlayerId;
+        var decision=TrainingOpponent.Choose(game.GetView(player),game.QueryActions(player));
+        Check(decision.Command is not null,$"No decision at {game.GetView(player).Phase}, step {commands}");
+        var result=game.Execute(decision.Command!);
+        Check(result.Accepted,$"Illegal {decision.Command!.Type}: {result.Error}"); commands++;
+    }
+    var view=game.GetView(0);
+    Check(view.ShownCards!.Length>0 && view.Events.Any(e=>e.Type=="deckShuffled"),"The AI never searched: the fixture would prove nothing");
+    var replay=MatchEngine.Replay(game.ExportReplay());
+    Check(JsonSerializer.Serialize(replay.GetView(0))==JsonSerializer.Serialize(game.GetView(0)) && JsonSerializer.Serialize(replay.State)==JsonSerializer.Serialize(game.State),"Replay differs (shuffles included)");
+    Console.WriteLine($"  {commands} decisions; {view.ShownCards.Length} cards shown; {view.Events.Count(e=>e.Type=="deckShuffled")} shuffles; {view.VictoryReason}; turn {view.TurnNumber}");
+}
 static void Play(ulong seed,bool published=false)
 {
     var game=published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;

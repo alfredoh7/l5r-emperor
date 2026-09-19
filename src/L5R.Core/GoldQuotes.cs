@@ -262,6 +262,15 @@ public sealed partial class MatchEngine
         return new(cost, kind, basis, null, PaymentOptions(playerId, cost));
     }
 
+    /// <summary>A Region attached by a deck search (issue #312, Ikoma Shizuka: "attach it to one of your provinces, paying
+    /// all costs") pays its own printed Gold cost: one Fixed quote, and the engine's Pay() charges it. Null when free
+    /// (every published Region costs 0, so no payment panel appears for them).</summary>
+    private GoldQuote? QuoteRegionGold(int playerId, CardInstance region)
+    {
+        var def = Definition(region);
+        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost)) : null;
+    }
+
     /// <summary>A Strategy played with the playStrategy command pays its own printed cost. Null when free.</summary>
     private GoldQuote? QuoteStrategyGold(int playerId, CardInstance card)
     {

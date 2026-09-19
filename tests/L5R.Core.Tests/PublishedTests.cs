@@ -118,7 +118,11 @@ internal static class PublishedTests
         // non-ScenarioOnly ids across content/published/*.json) + 1 (this branch's own StrategyWave18 Return to Action,
         // issue #331) = 400. Recomputed from the actual current origin/main baseline
         // each time this conflicts, never copied from either side of a merge (this merge's two sides said 393 and 396).
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,400);
+        // + 7 (this branch, issues #312 and #322: EventWave3 Imperial Gift + PersonalityWave27 Ikoma Shizuka + EventWave4 Signs and Portents
+        // + PersonalityWave28 Isawa Tamaki and Bayushi Kahoku exp2 + StrategyWave17 Banish All Doubt + HoldingWave2 Public Records, none
+        // previously published) = 407, re-derived after merging origin/main ddb58847 (400, counted from the JSON files: distinct
+        // non-ScenarioOnly ids across content/published/*.json) plus this branch's seven, and checked against the merged tree.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,407);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

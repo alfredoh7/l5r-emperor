@@ -233,6 +233,8 @@ ReconActionTests.Run(runner);
 DisciplineAndAbsentTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
+DeckSearchTests.Run(runner);
+DeckLookTests.Run(runner);
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
