@@ -1,13 +1,10 @@
 using static RegressionAssertions;
 using L5R.Core;
 
-// Redirection and protective reactions to an action that TARGETS a card (issue #335): Mirumoto Ezuno and Blade of Champions (redirect the
-// action), Goju Yurishi (move, re-check, negate), Yasuki Jinn-Kuen - exp2 (blanket negation for Gold) and Hida Mochitoko - exp (bowing and
-// destruction, twice a turn), with the general pieces they are the first consumers of (TargetedActionReactions.cs, AbilityLimits.cs). Every
-// reading is in docs/decisions/2026-09-19-redirection-and-protective-reactions.md. Each test builds an explicit position and drives it only
-// through QueryActions and the commands the engine offers. The table is the Battle Phase with player 1 the Attacker (ActivePlayerId, the one
-// acting) and player 0 the Defender who controls the reacting cards at the current battlefield, the Defender's province 0 -- unless a test
-// swaps the roles.
+// Redirection and protective reactions (issue #335): Ezuno, Blade of Champions, Yurishi, Jinn-Kuen exp2, Mochitoko exp and the primitives under
+// them (TargetedActionReactions.cs, AbilityLimits.cs); readings in docs/decisions/2026-09-19-redirection-and-protective-reactions.md. Tests drive
+// explicit positions through QueryActions and offered commands. Default table: Battle Phase, player 1 the Attacker and the acting player, player 0
+// the Defender whose reacting cards stand at the Defender's province 0.
 internal static class TargetedActionReactionTests
 {
     private const string Ezuno = "oracle-l5r-5086", Blade = "oracle-l5r-1004", Yurishi = "oracle-l5r-2862", JinnKuen = "oracle-l5r-9445", Mochitoko = "oracle-l5r-3152";
@@ -577,6 +574,12 @@ internal static class TargetedActionReactionTests
         // Not for an Open action, not for his own controller's action, not from Home, not while bowed.
         foreach (var (name, setup) in new (string, Func<MatchEngine>)[]
         {
+            ("Yurishi at Home (The Earth Flows may target him there)", () =>
+            {
+                var s = Table(actor: 0); s.PriorityPlayerId = 1; var y = Add(s, Yurishi, 0, Zone.Home); Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0);
+                var shugenja = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0); var spell = Add(s, EarthFlows, 1, Zone.Attached, province: 0, parent: shugenja.Id);
+                var e = MatchEngine.FromTestState(s); Accept(e, Offer(e, 1, "earth-flows-move", spell.Id, y.Id)); return e;
+            }),
             ("an Open action", () => { var s = Table(Phase.Action); var y = Add(s, Yurishi, 0, Zone.Home); var src = Add(s, "training-bow-any-source", 1, Zone.Home); var e = MatchEngine.FromTestState(s); Accept(e, Offer(e, 1, "training-bow-any", src.Id, y.Id)); return e; }),
             ("his own controller's Battle action", () => { var s = Table(actor: 0); var y = Add(s, Yurishi, 0, Zone.Battlefield, province: 0); var src = Add(s, "training-battle-straightener", 0, Zone.Battlefield, province: 0); var e = MatchEngine.FromTestState(s); Accept(e, Offer(e, 0, "training-straighten-at-battle", src.Id, y.Id)); return e; }),
             ("a bowed Yurishi", () => { var s = Table(); var y = Add(s, Yurishi, 0, Zone.Battlefield, bowed: true, province: 0); var src = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); var e = MatchEngine.FromTestState(s); Accept(e, Offer(e, 1, Bow, src.Id, y.Id)); return e; }),
@@ -747,11 +750,14 @@ internal static class TargetedActionReactionTests
             Eq(e.State.Cards[r.Merchant.Id].Zone, Zone.Battlefield, "not moved home"); Eq(e.State.Cards[strategy.Id].Zone, Zone.FateDiscard, "the Strategy was still spent");
         }
         // Dishonor (Justice of the Crane, an Item).
+        foreach (var reacts in new[] { false, true })
         {
             var r = MerchantTable(); var wielder = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var item = Add(r.S, JusticeOfTheCrane, 1, Zone.Attached, province: 0, parent: wielder.Id);
             var e = MatchEngine.FromTestState(r.S);
-            Accept(e, Offer(e, 1, "justice-of-crane-dishonor", item.Id, r.Merchant.Id)); Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate")); ClosePassing(e);
-            Check(!e.State.Cards[r.Merchant.Id].Dishonorable, "not dishonored");
+            Accept(e, Offer(e, 1, "justice-of-crane-dishonor", item.Id, r.Merchant.Id));
+            if (reacts) Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate"));
+            ClosePassing(e);
+            Eq(e.State.Cards[r.Merchant.Id].Dishonorable, !reacts, reacts ? "not dishonored" : "control: dishonored when nobody reacts");
         }
         // Destruction (a Personality without attachments).
         {

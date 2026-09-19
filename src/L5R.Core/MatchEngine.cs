@@ -1939,7 +1939,6 @@ public sealed partial class MatchEngine
     // state beyond it.
     private void Dishonor(CardInstance card)
     {
-        // The blanket negation of an action's effects on a card (issue #335, NegateAllEffectsOn) reaches dishonoring it.
         if(NegatesEffect(card,"all"))
         {
             Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);

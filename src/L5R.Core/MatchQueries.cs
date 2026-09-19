@@ -80,9 +80,7 @@ public sealed partial class MatchEngine
             if(reason is null && validate) reason=AbilityRejection(command);
             Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
         }
-        // "An action targets X" reactions (issue #335, TargetedActionReactions.cs), offered in both windows an action can be held in: every one of THIS
-        // player's that applies to the held action right now, listed disabled with its reason when it cannot be used (spent, bowed, unpayable), plus --
-        // for a reaction that CHOOSES the new target (Blade of Champions) -- one option per legal target, each validated like a submitted command.
+        // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
         void AddTargetedActionReactions()
         {
             if(OpenReactionSubject() is not { } held) return;

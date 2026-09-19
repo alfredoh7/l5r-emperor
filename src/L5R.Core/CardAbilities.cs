@@ -82,10 +82,7 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     bool Absent = false,
     // Deck search / look (issues #312, #322): appended LAST, after main's ActionKeywords/Discipline/Absent, and always passed by name.
     SearchSpec? Search = null, LookSpec? Look = null,
-    // How many times per turn this ability may be used by its card (or player): the printed limit. 1 is the default ("once per
-    // turn" is what every ability without a printed number has); Hida Mochitoko's "Twice per turn" is 2; AbilityUseLimit.Unlimited
-    // is the "any number of times per turn" / "Repeatable" / "tireless" exemption. A separate ability sharing a UsageKey shares the
-    // count. See AbilityLimits.cs for how uses are stored and compared.
+    // The printed per-turn limit: 1 by default, N for "N times per turn", AbilityUseLimit.Unlimited for "any number of times" (AbilityLimits.cs).
     int UsesPerTurn = 1);
 
 public static class AbilityCatalog
@@ -529,24 +526,15 @@ public static class AbilityCatalog
         ["kakihara-force-bonus"] = new("Reaction", "After another player's action targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-action-resolves", UsageKey: "kakihara-force-bonus"),
         ["training-before-action-suppress"] = new("Reaction", "Training: after another player's action targets a card of yours, bow this card and every other unbowed card of yours with a before-action reaction.", "none", Trigger: "before-action-resolves"),
         ["kakihara-attack-force-bonus"] = new("Reaction", "After another player's Ranged or Melee Attack targets Kakihara: Give him a Force bonus equal to his Personal Honor.", "none", Trigger: "before-attack-resolves", UsageKey: "kakihara-force-bonus"),
-        // "An action targets X" reactions that redirect, re-check or negate (issue #335; TargetedActionReactions.cs). One trigger, offered in both the
-        // before-action window and the attack window, one entry per printed ability -- the window an action is held in is the engine's business, not
-        // the card's. Target "none" for each but Blade of Champions, whose reactor CHOOSES the new target among the legal ones.
-        // Mirumoto Ezuno (oracle-l5r-5086).
+        // "An action targets X" reactions (issue #335, TargetedActionReactions.cs), one entry per printed ability; Blade of Champions' reactor chooses the new target.
         ["ezuno-redirect"] = new("Reaction", "When another player's action would target one of your Shugenja at Ezuno's location, it targets Ezuno instead, if legal.", "none", Trigger: ReactionTriggers.TargetedByAction),
-        // Blade of Champions (oracle-l5r-1004).
         ["blade-of-champions-redirect"] = new("Reaction", "When a Battle action would target a card in this unit, bow this card: The action targets another of your cards instead, if legal.", "redirect-target-own-card", Trigger: ReactionTriggers.TargetedByAction),
-        // Goju Yurishi (oracle-l5r-2862).
         ["yurishi-disappear"] = new("Reaction", "After another player's Battle action targets Yurishi: He disappears into the shadows. Move him home. If he is no longer a legal target for the action, negate its effects on him.", "none", Trigger: ReactionTriggers.TargetedByAction),
-        // Yasuki Jinn-Kuen - exp2 (oracle-l5r-9445): "Political Open" / "Political Reaction" -- Political is a printed classification with no rule of its
-        // own here (Yasuki Kodo's "Political Open" straighten has the same shape), so it is not tagged as an ActionKeyword: nothing reads it, and the
-        // tag is pinned to the Recon actions that do (issue #309).
+        // "Political" has no rule of its own yet (as for Yasuki Kodo), so it is not an ActionKeyword: that tag is pinned to the Recon actions that read it.
         ["jinn-kuen-straighten"] = new("Open", "Political Open: Target a Holding or Stronghold: Straighten it.", "holding-or-stronghold"),
         ["jinn-kuen-negate"] = new("Reaction", "Political Reaction: After an action targets your Merchant, pay 2 Gold: Negate the action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, Cost: GoldCostRule.Fixed(2)),
-        // Hida Mochitoko - exp (oracle-l5r-3152): the first ability with a printed limit above once per turn.
         ["mochitoko-negate"] = new("Reaction", "Twice per turn, after an action targets your Follower at Mochitoko's location: Negate its bowing and destruction from that action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, UsesPerTurn: 2),
-        // Training fixture (issue #335): Jinn-Kuen's reaction at a Gold cost of 0, as a cost reduced to nothing would price it -- it must still be offered to a
-        // controller with no Gold to spend.
+        // Training fixtures (issue #335): Jinn-Kuen's reaction priced at 0 (a reduced cost must still be offered with no Gold), and bows for the negations to answer.
         ["training-negate-merchant-free"] = new("Reaction", "Training: after an action targets your Merchant, pay 0 Gold: Negate the action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, Cost: GoldCostRule.Fixed(0)),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
         // already built through issue #194. "Political"/"Tactical" as a printed-Timing prefix map
@@ -603,7 +591,6 @@ public static class AbilityCatalog
         // OpenBowReactionWindow at an actual battlefield (every existing bow training fixture is
         // Open-timing, usable only during the Action phase, never while AtBattle is true).
         ["training-bow-at-battle"] = new("Battle", "Training: bow a target enemy Personality at the current battlefield", "enemy-personality"),
-        // Training fixture (issue #335): bows any enemy card (a Follower too) -- a bow-only Battle action for the negation reactions to answer.
         ["training-bow-enemy-card-at-battle"] = new("Battle", "Training: bow a target enemy card at the current battlefield", "enemy-card"),
         ["training-bow-enemy-card-open"] = new("Open", "Training: bow a target enemy card at any location", "enemy-card"),
         // A second, independent source (own AbilityUses dedupe scope) so a test can straighten the
@@ -1850,8 +1837,6 @@ public sealed partial class MatchEngine
     // hook, e.g. Overconfident's own MarkDead-triggered queue). The window offers EVERY applicable reaction of
     // both players (issue #318); it opens only if at least one is usable right now, and the command
     // re-executes when both players have passed consecutively (Apply()'s "beforeActionReaction" case).
-    // The reactions that also watch WHO an action targets (TargetedActionReactions.cs: Ezuno, Blade of Champions, Yurishi, Jinn-Kuen, Mochitoko) share
-    // this window, and are asked about the same deferred command.
     private bool ResolveOrDeferBeforeActionReaction(GameCommand command)
     {
         var subject = SubjectForAnnouncedAction(command);
@@ -2106,8 +2091,6 @@ public sealed partial class MatchEngine
     // Kakihara sitting in play never opens an Attack window that could not possibly matter to him.
     // Per player (issue #318): who holds a reaction decides who has the first opportunity in the window
     // (FirstReactionOpportunity), so availability is asked of one owner at a time.
-    // The Attack is also "an action that targets" its target (issue #335): a redirecting or protecting reaction (TargetedActionReactions.cs) holds
-    // the same window open for the Attack's command, taken from the effects running right now.
     private bool AttackReactionAvailableTo(int playerId, int attackerId, string? targetId) =>
         AnyInPlayReactionAvailable("before-attack-resolves", (c, id) => c.OwnerId == playerId
             && (id != "kakihara-attack-force-bonus" || targetId == c.Id && KakiharaCanReact(c, attackerId)))
@@ -2267,7 +2250,6 @@ public sealed partial class MatchEngine
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
         ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
-        // Negations played in the window (Mochitoko's, Jinn-Kuen's) were for this Attack only; one it never reached must not linger.
         _state.NegatedEffects.Clear();
         // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
         // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). SourceId is the
@@ -2407,9 +2389,6 @@ public sealed partial class MatchEngine
                 "before-action-resolves" => _state.PendingChoice.Type == "beforeActionReaction" && _state.PendingNegatableAbility is { } deferredAction
                     && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var reactingCard)
                     && BeforeActionReactionApplies(reactingCard, id, deferredAction),
-                // "An action targets X" reactions that change who is affected or negate what happens to them (issue #335;
-                // TargetedActionReactions.cs): open in BOTH windows an action can be held in, for whichever action is held
-                // there now, judged live by TargetedActionReactionApplies for the reacting card.
                 TargetedByAction => _state.PendingChoice.Type is "beforeActionReaction" or "attackReaction" && OpenReactionSubject() is { } heldAction
                     && command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var targetedReactor)
                     && TargetedActionReactionApplies(targetedReactor, id, heldAction),
@@ -2492,14 +2471,7 @@ public sealed partial class MatchEngine
                 or "hawado-move-home" or "hawado-move-battlefield", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        // The per-turn use limit (AbilityLimits.cs): once by default, N where the card prints "N times per turn"
-        // (Hida Mochitoko: twice), or off entirely (AbilityDefinition.UsesPerTurn == Unlimited) for "any number of
-        // times per turn" (Tactical Advantage, Equip (Battle), Soshi Neiru's equip), "tireless" (Ashigaru Elite,
-        // which explicitly stacks with other uses, and Elite Sentry's straighten), "Repeatable" (Ring of Air/Water)
-        // and Naval Invasion ("once per BATTLE", enforced by PendingEngage.NavalInvasionUsed, so a per-turn dedupe
-        // would be wrong). Those exemptions were an id list here until issue #335. Each such ability's own
-        // cost/requirements (a different unbowed Farm each time, for Ashigaru Elite) are its only real limit.
-        // Border Keep's once-per-GAME refresh is the one use that never resets: any stamp at all spends it.
+        // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). Border Keep's once-per-GAME refresh never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
         Require(id == "border-game" ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
@@ -3179,12 +3151,8 @@ public sealed partial class MatchEngine
                         // Yasuki Tsujiken (oracle-l5r-9469): "target a Holding" -- no ownership or
                         // bowed-state restriction on either of his own two abilities.
                         "any-holding" => type == CardType.Holding,
-                        // Yasuki Jinn-Kuen - exp2 (issue #335): "target a Holding or Stronghold" -- either side's, any bow state.
                         "holding-or-stronghold" => type is CardType.Holding or CardType.Stronghold,
-                        // Blade of Champions (issue #335): "the action targets another of your cards instead, if legal" -- the new target is one of the
-                        // reacting player's own cards, not the card the action targets now, and the held action must accept it (the action's own target
-                        // validation run again). The Blade is not a candidate: it is bowed as the cost, so what is legal against it cannot be judged
-                        // beforehand (RedirectCandidates excludes it, and so does this).
+                        // Blade of Champions: one of the reactor's own other cards (not the Blade: it is bowed as the cost) that the held action accepts.
                         "redirect-target-own-card" => own && target.Id != source!.Id && OpenReactionSubject() is { } redirectedAction
                             && target.Id != redirectedAction.TargetId && ActionAcceptsTarget(redirectedAction, target.Id),
                         // Asahina Munefusa (issue #301): "your Temple Holding" -- an own Holding carrying
@@ -3568,8 +3536,6 @@ public sealed partial class MatchEngine
         var pendingAttackBefore = _state.PendingAttack;
         // Asked BEFORE the effects run: a hand-played card is in a discard pile by the time the deferral below is reached.
         var fromDiscard = PlayedFromDiscard(AbilityCatalog.All[command.AbilityId!], command.CardId is null ? null : Card(command.CardId));
-        // An Attack declared by these effects is held in its reaction window before RunAbilityEffects returns, and the reactors asked about it
-        // need the action itself (TargetedActionReactions.cs), so it is kept for the length of the call.
         var runningBefore = _runningCommand;
         _runningCommand = command;
         try { RunAbilityEffects(command, consumedGrant); }
@@ -4640,19 +4606,13 @@ public sealed partial class MatchEngine
             case "kakihara-attack-force-bonus":
                 source!.Modifiers.Add(new(source.Id, id, "Force", CardPersonalHonor(source)));
                 break;
-            // "An action targets X" reactions (issue #335, TargetedActionReactions.cs), each answering the action held in the open window.
-            // Ezuno: the action targets him instead. Blade of Champions: bow it (the cost), then the action targets the chosen card of the
-            // controller's -- re-checked after the cost, since legality is judged on the position the action would really resolve in.
+            // Blade's legality is re-checked inside RedirectAction, after the bow.
             case "ezuno-redirect": RedirectAction(HeldAction(), source!.Id, source); break;
             case "blade-of-champions-redirect": source!.Bowed = true; RedirectAction(HeldAction(), target!.Id, source); break;
-            // Yurishi: move him home (a negation of movement played in the window keeps him where he is), then the action's own legality against
-            // him is asked again; if it no longer holds, its effects on him are negated.
             case "yurishi-disappear": MoveHome(source!, false); RecheckTarget(HeldAction(), source!); break;
-            // Jinn-Kuen's Gold was paid above. Blanket negation of the action's effects on the card it targets.
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 NegateAllEffectsOn(Card(HeldAction().TargetId)); break;
-            // Mochitoko: bowing and destruction, two kinds negated at once, for the Follower the action targets.
             case "mochitoko-negate": NegateEffects(Card(HeldAction().TargetId), "bow", "destroy"); break;
             case "jinn-kuen-straighten": Straighten(target!); break;
             // Training fixture (issue #318): "after another player's action targets a card of yours, bow this
@@ -5434,8 +5394,6 @@ public sealed partial class MatchEngine
     }
     private void DestroyAttachment(CardInstance card)
     {
-        // Hida Mochitoko / Yasuki Jinn-Kuen (issue #335): the destruction of a Follower, Item or Spell is negatable like a Personality's (DestroyUnits),
-        // whether the action targeted it directly or an Attack hit it.
         if (NegatesEffect(card, "destroy"))
         {
             Emit("destructionNegated", $"{Definition(card).Name}'s destruction was negated before it resolved.", card.OwnerId, card.Id);
@@ -5455,7 +5413,6 @@ public sealed partial class MatchEngine
     // changes. IDs are a persistent sequence on MatchState, not a fresh Guid, so replay stays deterministic.
     private CardToken? CreateToken(CardInstance card, string type, string source, string? stat = null, int amount = 0)
     {
-        // The blanket negation of an action's effects on a card (issue #335, NegateAllEffectsOn) reaches a token the action would place on it.
         if (NegatesEffect(card, "all"))
         {
             Emit("tokenNegated", $"A {type} token on {Definition(card).Name} was negated before it resolved.", card.OwnerId, card.Id);
