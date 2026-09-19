@@ -2850,8 +2850,12 @@ static void BayushiKahokuExpTrait()
         // Two SEPARATE selections: -4F on one Personality (H), the Attack on another (D3, Force 3 <= 3).
         var (s,kahoku,h,_,_,d3)=Table();
         var e=MatchEngine.FromTestState(s);
+        var kahokuForce=e.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku.Id).Force;
         Accept(e,UseAtk(e,"kahoku-exp-attack",kahoku.Id,h.Id,[d3.Id]));
         Check(e.State.Cards[h.Id].Modifiers.Any(m=>m.Stat=="Force" && m.Amount==-4),"The -4F went to the TargetId Personality");
+        // Mendon's ruling: "Bayushi Kahoku's force is not modified by this action."
+        Equal(e.GetView(0).Players[0].Army.Single(c=>c.Id==kahoku.Id).Force,kahokuForce,"Kahoku's own Force is unchanged by his action");
+        Check(!e.State.Cards[kahoku.Id].Modifiers.Any(m=>m.Stat=="Force"),"No Force modifier lands on Kahoku himself");
         Equal(e.State.Cards[h.Id].Zone,Zone.Battlefield,"...who was not attacked");
         Equal(e.State.Cards[d3.Id].Zone,Zone.Dead,"The Attack (CardIds) destroyed the other, dishonorable, Personality");
         // The exception lifts the Follower immunity only, never the strength check: D4 (Force 4 > 3) is not made a legal target by the -4F on H.
