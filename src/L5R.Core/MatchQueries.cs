@@ -13,7 +13,9 @@ public sealed partial class MatchEngine
             var def=Definition(card);
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray());
+                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
+                card.GrantedAbilities.Count==0?null:card.GrantedAbilities.Select(g=>new GrantedAbilityView(g.AbilityId,AbilityCatalog.All[g.AbilityId].Label,AbilityCatalog.All[g.AbilityId].Timing,g.Source,g.Duration,g.CopiedFrom,g.CopiedFromName)).ToArray(),
+                GoldSourceProduction(card));
         }
         var players=_state.Players.Select(player=>
         {
@@ -47,7 +49,7 @@ public sealed partial class MatchEngine
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
-            BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId));
+            BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId));
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -82,7 +84,7 @@ public sealed partial class MatchEngine
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null)
+        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
@@ -123,7 +125,7 @@ public sealed partial class MatchEngine
         {
             // Open to either side -- list this player's own eligible before-attack-resolves Reactions.
             foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && !c.Bowed)
-                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
+                .SelectMany(c=>AbilityIdsOf(c).Select(a=>(Card:c,Id:a)))
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
                 var used=card.AbilityUses.ContainsKey(reactionId);
@@ -173,7 +175,7 @@ public sealed partial class MatchEngine
             if(battleActionPending.PlayerId==playerId)
             {
                 var card=Card(battleActionPending.CardId!);
-                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="after-battle-action-resolves"))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="after-battle-action-resolves"))
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
@@ -184,7 +186,7 @@ public sealed partial class MatchEngine
             if(announcePending.PlayerId==playerId)
             {
                 var card=Card(announcePending.CardId!);
-                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
+                foreach(var reactionId in AbilityIdsOf(card).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-ranged-action-announced"))
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
@@ -260,6 +262,17 @@ public sealed partial class MatchEngine
         {
             // Look at the top N cards (issue #322): the viewer always has a legal answer (see LookActions).
             result.AddRange(LookActions(playerId));
+        }
+        else if(_state.PendingChoice is { } copyPending && IsCopyChoice(copyPending.Type))
+        {
+            // Copying a keyword or an ability (issue #338): one option per candidate; the player always has a legal answer.
+            result.AddRange(CopyActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"eitherOr" })
+        {
+            // The opposing player's Either/Or choice (issue #338): one option per option the engine offers, the unavailable ones
+            // listed disabled with the reason.
+            result.AddRange(EitherOrActions(playerId));
         }
         else if(_state.PendingChoice is { } searchPending && IsSearchChoice(searchPending.Type))
         {
@@ -408,6 +421,7 @@ public sealed partial class MatchEngine
         }
         if(_state.PendingChoice is null && _state.Phase is Phase.Action or Phase.Battle) result.AddRange(AbilityActions(playerId));
         Add("concede","Concede",Command("concede"));
-        return result.ToArray();
+        // Unfortunate Hesitation (issue #338): what a player who owes a pass cannot do at this opportunity is listed disabled.
+        return ApplyForcedPassToOptions(playerId,result);
     }
 }

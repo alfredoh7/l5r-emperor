@@ -29,6 +29,15 @@ public sealed partial class MatchEngine
     /// journal recovery cover it) built for tests and for the UI issues' scripted capture -- no menu or room reaches it.</summary>
     public static MatchEngine CreateDeckSearchShowcase(ulong seed = 20260906) => Create(seed, DeckSearchScenario);
     public const string DeckSearchScenario = "deck-search";
+    /// <summary>Fixture matches for the copy wizard and the Either/Or wizard (issue #338): ordinary, replayable engine states (each its own scenario name,
+    /// so ExportReplay/Replay and the server's journal recovery cover them) built for tests and for the UI issues' scripted captures -- no menu or room
+    /// reaches them. In the copy showcase player 0 controls Fukuzo, a Training skin receiver and a Training skin donor at home, and player 1's discard
+    /// pile holds real Personalities to copy from; in the Either/Or showcase player 0 holds Unfortunate Hesitation, Yoritomo Sakuma and Shosuro Rin
+    /// and player 1 Yogo Adi and a Training Either/Or source. Both open in player 0's Action Phase.</summary>
+    public static MatchEngine CreateCopyShowcase(ulong seed = 20260906) => Create(seed, CopyShowcaseScenario);
+    public static MatchEngine CreateEitherOrShowcase(ulong seed = 20260906) => Create(seed, EitherOrShowcaseScenario);
+    public const string CopyShowcaseScenario = "copy-showcase";
+    public const string EitherOrShowcaseScenario = "either-or-showcase";
     // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
     // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
     // never silently change what this exercises.
@@ -52,7 +61,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy" or DeckSearchScenario)) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -115,6 +124,23 @@ public sealed partial class MatchEngine
                 for(var i=0;i<fate.Length;i++) state.Cards[player.FateDeck[i]].DefinitionId=fate[i];
             }
         }
+        if (scenario == CopyShowcaseScenario)
+        {
+            // Copy showcase (issue #338): Fukuzo and the two training fixtures at player 0's home; Tamori Tamoko (two abilities), Bayushi Kahoku
+            // - exp2 and Ikoma Shizuka (dead or discarded, a Limited action each) and a training donor in player 1's Dynasty discard pile.
+            Add(0,"oracle-l5r-2728",Zone.Home,true);
+            Add(0,"training-skin-receiver",Zone.Home,true);
+            foreach (var definition in new[] { "oracle-l5r-10056", "oracle-l5r-10479", "oracle-l5r-10292", "training-skin-donor" }) Add(1,definition,Zone.DynastyDiscard,true);
+            Add(1,"oracle-l5r-10056",Zone.Dead,true);
+        }
+        if (scenario == EitherOrShowcaseScenario)
+        {
+            // Either/Or showcase (issue #338): Sakuma and Rin at player 0's home with Unfortunate Hesitation in hand; Yogo Adi (a Political action that
+            // targets player 0's Personalities, so Sakuma may react) and the three-option fixture at player 1's home.
+            Add(0,"oracle-l5r-9624",Zone.Home,true); Add(0,"oracle-l5r-7151",Zone.Home,true);
+            var hesitation = Add(0,"oracle-l5r-9941",Zone.Hand,true); state.Players[0].Hand.Add(hesitation.Id);
+            Add(1,"oracle-l5r-9485",Zone.Home,true); Add(1,"training-either-or-source",Zone.Home,true);
+        }
         engine.StartTurn();
         if(scenario=="economy") { state.Phase=Phase.Dynasty; engine.Emit("scenario","Economy exercise: choose one payment at a time; Gold never carries over."); }
         return engine;
@@ -161,6 +187,10 @@ public sealed partial class MatchEngine
             if (IsSearchChoice(_state.PendingChoice.Type)) { ResolveSearchCommand(command); return; }
             // Look at the top N cards (issue #322): the deck choice and the one arrangement command.
             if (IsLookChoice(_state.PendingChoice.Type)) { ResolveLookCommand(command); return; }
+            // Copying keywords and abilities (issue #338): the two independent copy decisions (CardCopy.cs).
+            if (IsCopyChoice(_state.PendingChoice.Type)) { ResolveCopyCommand(command); return; }
+            // The opposing player's Either/Or choice (issue #338): answered by the deciding player, who holds priority (EitherOr.cs).
+            if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -276,7 +306,10 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
                 {
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
-                    ExecuteAbilityEffects(pending);
+                    // A reaction that negated the whole action (Yoritomo Sakuma, issue #338): it is taken, its costs are paid, its effects
+                    // are not applied (ActionNegation.cs).
+                    var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+                    if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
                     // Defensive: a negation signal must never survive past the one re-invocation it
                     // was set for -- if the re-invoked ability did not actually reach a matching
                     // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear them here
@@ -348,6 +381,8 @@ public sealed partial class MatchEngine
             return;
         }
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
+        // Unfortunate Hesitation (issue #338): a player who owes a pass at an ordinary Action/Battle opportunity may only pass.
+        EnforceForcedPass(command);
         // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
         // Invasion's "which he must perform"; Rebuilding Kyuden Hida's "may not announce a Battle action before the
         // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
@@ -624,6 +659,7 @@ public sealed partial class MatchEngine
 
         higher.Modifiers.AddRange(lower.Modifiers);
         higher.GrantedKeywords.AddRange(lower.GrantedKeywords);
+        higher.GrantedAbilities.AddRange(lower.GrantedAbilities);
         higher.RemovedKeywords.AddRange(lower.RemovedKeywords.Where(k => !higher.RemovedKeywords.Contains(k, StringComparer.Ordinal)));
         higher.RemovedClanAffiliations.AddRange(lower.RemovedClanAffiliations.Where(c => !higher.RemovedClanAffiliations.Contains(c, StringComparer.Ordinal)));
         higher.Protections.AddRange(lower.Protections);
@@ -652,6 +688,7 @@ public sealed partial class MatchEngine
         // retaining a second, stale copy in Removed from Game.
         lower.Modifiers.Clear();
         lower.GrantedKeywords.Clear();
+        lower.GrantedAbilities.Clear();
         lower.RemovedKeywords.Clear();
         lower.RemovedClanAffiliations.Clear();
         lower.Protections.Clear();
@@ -718,6 +755,8 @@ public sealed partial class MatchEngine
         // Deck search (issue #312): Seppuku cuts through pending choices, but a search is a private, multi-step decision whose
         // pending choice a destruction-triggered window (Overconfident) would overwrite, orphaning it -- finish the search first.
         Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
+        // The same for a copy in progress (its receiver could be the one destroyed) and an Either/Or choice (issue #338).
+        Require(_state.PendingCopy is null && _state.PendingEitherOr is null,"Finish the pending choice before ordering Seppuku.");
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
@@ -788,6 +827,8 @@ public sealed partial class MatchEngine
     public int GoldProduced(string cardId,int playerId)
     {
         var card=Card(cardId); var def=Definition(card);
+        // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
+        if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
@@ -810,10 +851,12 @@ public sealed partial class MatchEngine
             }
         }
         return byTotal.Where(p=>p.Key>=cost).SelectMany(p=>p.Value.Select(ids=>new PaymentOption(ids,p.Key,cost,p.Key-cost)))
-            .OrderBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
+            // A payment that bows no alternate source (a Personality that can bow for Gold, issue #338) is always preferred to one that does:
+            // the engine never suggests bowing Sakuma when printed producers cover the cost. With no such card in play every count is 0.
+            .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && Definition(c).GoldProduction>0);
+    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
     private void ValidatePayment(int playerId,int cost,string[]? sourceIds)
     {
         var ids=sourceIds??[];
@@ -829,6 +872,14 @@ public sealed partial class MatchEngine
         ValidatePayment(playerId,cost,sourceIds);
         var ids=sourceIds??[];
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
+        // in the log so the opponent sees why it bowed.
+        foreach(var id in ids)
+            if(Definition(_state.Cards[id]).GoldProduction==0 && AlternateGoldSource(_state.Cards[id]) is { } alternate)
+            {
+                _state.Cards[id].AbilityUses[AbilityCatalog.All[alternate.AbilityId].UsageKey ?? alternate.AbilityId]=_state.TurnNumber;
+                Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
+            }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
         Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
     }
@@ -1365,7 +1416,7 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
-            card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
+            card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
             card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
@@ -2119,7 +2170,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until
@@ -2541,6 +2592,7 @@ public sealed partial class MatchEngine
         // AttackDeclaration's own once-per-turn entry (Pass, Phase.Action case) is the correct reset
         // point for it, not Phase.Battle itself.
         if(phase is Phase.Action or Phase.AttackDeclaration or Phase.Dynasty) _state.WarWearinessBowedThisPhase=false;
+        PruneForcedPasses(phase);
         // Wave Man (issue #279): "After an Attack Phase ends: Straighten this unit" -- a trait (no
         // Action:/Reaction: prefix), so mandatory and automatic, never an optional choice, same
         // convention as EntryHonorLoss/Destined above. The Attack Phase ends in exactly two places --

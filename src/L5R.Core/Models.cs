@@ -127,7 +127,13 @@ public sealed record NegatedEffect(string Kind, string CardId);
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
 /// (lasts until that attachment moves or is destroyed), "Turn" (cleared at turn end, the default
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
-public sealed record GrantedKeyword(string Keyword, string Source, string Duration);
+public sealed record GrantedKeyword(string Keyword, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
+
+/// <summary>An ability a card has because another card's effect gave it (as opposed to one printed on it), the ability twin of
+/// GrantedKeyword. Duration is "Permanent" (only when the granting text says so; it survives the card dying and returning),
+/// "Turn" (cleared at turn end) or "Copy" (a copied ability, kept until the copying ability is used again -- Source is that
+/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). See CardCopy.cs.</summary>
+public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
 /// will not be negated") -- while any Protection sits in a card's own list, no card of the
@@ -158,6 +164,9 @@ public sealed class CardInstance
     public string? AttachedTo { get; set; }
     public List<AppliedModifier> Modifiers { get; set; } = [];
     public List<GrantedKeyword> GrantedKeywords { get; set; } = [];
+    // Abilities gained from another card's effect (Fukuzo's copied ability; a permanent grant). Usable exactly like a printed
+    // ability -- MatchEngine.AbilityIdsOf is the one place that adds them to Definition.Abilities.
+    public List<GrantedAbility> GrantedAbilities { get; set; } = [];
     // Keywords removed from this specific card by permanent or ongoing effects. Overlay transfers
     // these removals just like granted keywords, so the replacement Personality retains its state.
     public List<string> RemovedKeywords { get; set; } = [];
@@ -680,6 +689,19 @@ public sealed class MatchState
     // player's own Personalities have already been fully destroyed while this specific copy has been
     // in play. See CardAbilities.FieldsOfMercyNegatesPersonalityDestruction.
     public List<FieldsOfMercyWatch> FieldsOfMercyWatches { get; set; } = [];
+    // Copying keywords and abilities (issue #338, Fukuzo): non-null exactly while a "copyKeyword"/"copyAbility" PendingChoice is
+    // open. Holds the snapshot of what may be copied and the steps still to answer; see CardCopy.cs. The chooser's own
+    // MatchView.PendingCopy is derived from it.
+    public PendingCopy? PendingCopy { get; set; }
+    // The opposing player's Either/Or choice (issue #338, Yoritomo Sakuma, Unfortunate Hesitation): non-null exactly while an
+    // "eitherOr" PendingChoice is open. See EitherOr.cs; MatchView.PendingEitherOr is derived from it for BOTH players.
+    public PendingEitherOr? PendingEitherOr { get; set; }
+    // Whole-action negation (issue #338, Yoritomo Sakuma): set on the deferred command's window while a reaction has negated the
+    // action's effects; the window's close then resolves it with everything but its costs skipped (ActionNegation.cs).
+    public bool DeferredActionNegated { get; set; }
+    // Unfortunate Hesitation: players who "must pass at [their] next opportunity this phase to take a Battle, Limited, or Open
+    // action". Each entry is consumed by that player's next pass at such an opportunity, and lapses when its phase ends.
+    public List<ForcedPass> ForcedPasses { get; set; } = [];
     public int? WinnerId { get; set; }
     public string? VictoryReason { get; set; }
     public PlayerState[] Players { get; set; } = [];
@@ -735,7 +757,14 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
-    CardToken[]? Tokens = null);
+    CardToken[]? Tokens = null,
+    // Abilities this card has by another card's effect (a copied ability, a permanent grant), with their labels; null when none.
+    GrantedAbilityView[]? GrantedAbilities = null,
+    // Authoritative Gold this card can produce for a payment right now (a printed producer, or a card that can bow to produce Gold
+    // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
+    int? GoldProduced = null);
+/// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
+public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
@@ -801,5 +830,10 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     SearchView? PendingSearch = null, ShownCardView[]? ShownCards = null,
     // Look at the top N cards (issue #322), see DeckLook.cs: PRIVATE to the viewing player (the top cards in order and what each
     // may become) and null in everyone else's view, including the deck owner's when the viewer looks at the OPPONENT's deck.
-    LookView? PendingLook = null);
+    LookView? PendingLook = null,
+    // Copying keywords and abilities (issue #338, see CardCopy.cs): PRIVATE to the choosing player, null in everyone else's view.
+    CopyView? PendingCopy = null,
+    // The opposing player's Either/Or choice (issue #338, see EitherOr.cs): PUBLIC -- both players see what is being decided and
+    // by whom; only the deciding player's view carries the payment quotes.
+    EitherOrView? PendingEitherOr = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

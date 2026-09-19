@@ -92,9 +92,9 @@ internal static class BattleTimingTests
         var ability=AbilityCatalog.All["yuki-engage-recon"];
         Eq(ability.Timing,"Reaction"); Eq(ability.Trigger,"after-engaging-at-own-battlefield");
         Check(ability.ActionKeywords is ["Recon"],"Yuki's ability carries the printed Recon action keyword");
-        // Nothing else already wired has a printed Recon prefix (the whole published text was searched), so Yuki's is the only tagged
-        // ability of any PUBLISHED card (later synthetic training fixtures may carry tags of their own).
-        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords is not null && CardCatalog.Cards.Values.Any(c=>!c.ScenarioOnly && c.Abilities!.Contains(a.Key))).Select(a=>a.Key)),"yuki-engage-recon");
+        // Nothing else already wired has a printed Recon prefix (the whole published text was searched), so Yuki's is the only Recon-tagged
+        // ability of any PUBLISHED card (other action keywords, e.g. Political since issue #338, are tagged too and are not what is counted here) (later synthetic training fixtures may carry tags of their own).
+        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true && CardCatalog.Cards.Values.Any(c=>!c.ScenarioOnly && c.Abilities!.Contains(a.Key))).Select(a=>a.Key)),"yuki-engage-recon");
         foreach(var card in CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly))
             Check(!System.Text.RegularExpressions.Regex.IsMatch(card.Text,@"\bRecon (Battle|Open|Limited|Reaction)") || card.Id==Yuki,$"{card.Name} prints a Recon action but is not tagged");
         // Naval Invasion changes existing published play for exactly these cards (printed Naval, a granter, or a live conditional grant);
