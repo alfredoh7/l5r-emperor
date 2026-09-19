@@ -2466,9 +2466,6 @@ public sealed partial class MatchEngine
             // "Repeatable" (issue #194): Ring of Air/Water's own printed keyword on their in-play
             // actions, same convention as Tactical Advantage/Equip (Battle) above.
             or "ring-of-air-straighten" or "ring-of-water-move-home"
-            // Played from a discard pile as a granted additional action (Daigotsu Bofana - exp): the grant is the permission, and a
-            // card in a discard pile is not the object that was played earlier this turn.
-            || source is not null && ability.Timing == "Battle" && DiscardPlayGrant(player.Id, source) is not null
             || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
@@ -3058,10 +3055,10 @@ public sealed partial class MatchEngine
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
                         "Choose a Kiho Strategy card from your Fate discard pile.");
                 // Daigotsu Bofana - exp (issue #333): "a Dark Virtue in your discard pile" -- a Strategy carrying the
-                // keyword, in the player's own Fate discard pile, that has a Battle action to be played for (a card with
+                // keyword, in the player's own Fate discard pile, that has a Battle action still playable this turn (a card with
                 // none would only waste the grant).
                 else if (ability.Target == "own-dark-virtue-in-discard")
-                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasBattleAction(target),
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasUnspentBattleAction(target),
                         "Choose a Dark Virtue with a Battle action from your Fate discard pile.");
                 // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
                 // discard pile -- not in play, so this needs its own branch too.
@@ -5526,7 +5523,7 @@ public sealed partial class MatchEngine
                     // Kharmic had -- validated, but a target in a discard pile is never in the in-play
                     // default, so the ability was never offered. Each mirrors its own Require above.
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
-                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasBattleAction(c)).Select(c => (string?)c.Id).ToArray(),
+                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasUnspentBattleAction(c)).Select(c => (string?)c.Id).ToArray(),
                     "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's

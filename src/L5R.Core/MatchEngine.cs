@@ -199,7 +199,7 @@ public sealed partial class MatchEngine
                 // clearing PendingChoice), so Proclaim can still follow, in either order, until passed.
                 Require(command.Type is "proclaim" or "useAbility" or "declineReaction" or "pass","Resolve the Proclaim reaction window first.");
                 if (command.Type=="proclaim") Proclaim(command);
-                else if (command.Type=="useAbility") UseAbility(command);
+                else if (command.Type=="useAbility") { ApplyPendingEntryEffects(); UseAbility(command); }
                 else PassReaction();
                 return;
             }
@@ -481,7 +481,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
-            ApplyMandatoryEntryEffects(command.PlayerId,card);
+            _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -551,7 +551,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if(quote.ProclaimEligible)
         {
-            ApplyMandatoryEntryEffects(player.Id,card);
+            _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",player.Id,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.",proclaimResumesTo);
             _state.ConsecutivePasses=0;
@@ -698,7 +698,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
-            ApplyMandatoryEntryEffects(command.PlayerId,card);
+            _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -842,6 +842,7 @@ public sealed partial class MatchEngine
         var card=Card(pending.CardId);
         player.ProclaimUsedTurn=_state.TurnNumber;
         GainHonor(player.Id,Definition(card).PersonalHonor,"Proclaim");
+        ApplyPendingEntryEffects();
         _state.ConsecutivePasses=0;
         _state.PriorityPlayerId=1-command.PlayerId;
     }
@@ -854,6 +855,7 @@ public sealed partial class MatchEngine
         {
             _state.PendingChoice=null;
             _state.ConsecutivePasses=0;
+            if(pending.Type=="proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed","Both players passed; the reaction window closed.");
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by

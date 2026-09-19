@@ -92,5 +92,21 @@ public sealed partial class MatchEngine
     // only two ways to use a non-Reaction ability from a discard pile (ValidateAbility's zone check).
     private static bool PlayedFromDiscard(AbilityDefinition ability, CardInstance? source) =>
         source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard } && ability.Timing != "Reaction";
-    private bool HasBattleAction(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Battle");
+    // Same-turn replay is refused PER ACTION (Mendon's ruling): the once-per-turn stamp lives under each ability's own UsageKey on the card
+    // and survives the move to the discard pile, so an action performed this turn (from hand, in play, or earlier from the pile) cannot be
+    // performed again, while another action of the same card can. The Discipline play uses the very same stamp, so both rules are one mechanism.
+    private bool HasUnspentBattleAction(CardInstance card) => (Definition(card).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Battle"
+        && (!card.AbilityUses.TryGetValue(def.UsageKey ?? a, out var used) || used != _state.TurnNumber));
+
+    // Proclaim first, then the entering effects (Mendon's ruling): a Proclaim-eligible entry opens the Proclaim window, and its mandatory "after
+    // this enters play" effects -- an Honor loss, Destined's draw, Sensei's discard, exp Bofana's discards -- wait for the Proclaim decision, so the
+    // Proclaim gain and the loss are two separate Honor changes in that order, never netted. They are applied at the first of: the Proclaim being
+    // taken, a Reaction being used in the window (a trait resolves before a Reaction to the same trigger), or the window closing.
+    private void ApplyPendingEntryEffects()
+    {
+        if (_state.PendingEntryEffectsCardId is not string id) return;
+        _state.PendingEntryEffectsCardId = null;
+        var card = Card(id);
+        ApplyMandatoryEntryEffects(card.OwnerId, card);
+    }
 }

@@ -31,7 +31,8 @@ internal static class DaigotsuBofanaTests
             ("Base Bofana resolves before any Reaction: with a Champion of Thunder on his unit the discard is asked first, then the before-action window opens, and the action then resolves; every offered discard validates on a fresh engine", TraitResolvesBeforeReactions),
             ("Base Bofana: Bayushi Kahoku - exp's Attack, whose own target rides in CardIds beside a separate -4F target, targets Bofana through either", KahokuAttackTargetsBofana),
             ("Bofana - exp entering play by Purchase (a proclaim-eligible Spider player) or Overlay: his controller loses 2 Honor and each other player discards a card of their choice -- two if they are Crab Clan (the Clan of their Stronghold) -- or as many as they hold", ExpEntryDiscards),
-            ("Proclaim-eligible entries (a Personality of the buyer's own Clan, bought without the Clan discount) get their mandatory entry effects like every other entry -- the Honor loss, Destined's draw -- before the Proclaim window; this was skipped before issue #333", ProclaimEligibleEntryAppliesMandatoryEffects),
+            ("Proclaim-eligible entries (a Personality of the buyer's own Clan, bought without the Clan discount) get their mandatory entry effects like every other entry -- this was skipped before issue #333 -- and Proclaim comes FIRST: the Proclaim gain and an entering Honor loss are two Honor changes in that order (checked in the event log), never netted; the nine already-wired Personalities each still behave, with Proclaim taken or passed", ProclaimThenEntryEffects),
+            ("Bofana - exp's play from the discard pile follows the same-turn rule PER ACTION (Mendon's ruling): the same action already performed this turn (from hand, or earlier from the pile) is refused, another action of the same card is allowed, and the next turn allows both", ExpDarkVirtueSameTurnRulePerAction),
             ("Bofana - exp's Battle action: a Dark Virtue with a Battle action in your discard pile is targetable (nothing else is), and the additional action it grants plays exactly that card for one of its Battle actions of your choice, then removes it from the game", ExpPlaysDarkVirtueFromDiscard),
             ("Bofana - exp's additional action is only ever the one: passing or taking any other action forfeits it, the card stays in the discard pile, and a card cannot be played from a discard pile without the grant", ExpGrantIsForfeitable),
         ];
@@ -598,19 +599,27 @@ internal static class DaigotsuBofanaTests
 
     private static void ExpEntryDiscards()
     {
+        var owedRound = 0;
         foreach (var (clan, hand, discards) in new[] { ("Lion", 3, 1), ("Crab", 3, 2), ("Crab", 1, 1), ("Crab", 0, 0), ("Lion", 0, 0), ("Crane", 2, 1) })
         {
             var e = SpiderTable(out var exp, clan, hand);
             var honor = e.State.Players[0].Honor; var oppHonor = e.State.Players[1].Honor; var ownHand = e.State.Players[0].Hand.Count;
             var buy = e.QueryActions(0).First(a => a.Type == "purchase" && a.CardId == exp.Id && a.Enabled && a.Command is { ClanDiscount: false, ClanAllegiance: false });
             Accept(e, buy.Command!);
-            Eq(e.State.Players[0].Honor, honor - 2, "his controller loses 2 Honor as he enters");
             Eq(e.State.Players[1].Honor, oppHonor, "the other player loses none");
-            // Bofana is a Spider Clan Personality bought by a Spider player: Proclaim is on offer, and the entry effects still applied.
+            // Bofana is a Spider Clan Personality bought by a Spider player: Proclaim is on offer. Proclaim first, the entering effects after (Mendon).
             Eq(e.State.PendingChoice?.Type, "proclaim", "the Proclaim window is open (he is in the buyer's own Clan)");
-            Check(e.QueryActions(0).Any(a => a.Type == "proclaim"), "Proclaim is offered");
+            Eq(e.State.Players[0].Honor, honor, "nothing has happened to his controller's Honor yet: the entering effects wait for the Proclaim decision");
             Check(!Asked(e), "the discards wait for the Proclaim window: the open window is never overwritten");
-            Accept(e, new GameCommand("declineReaction", 0, e.Version)); Accept(e, new GameCommand("declineReaction", 1, e.Version));
+            if (owedRound++ % 2 == 0)
+            {
+                Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
+                Eq(e.State.Players[0].Honor, honor - 2, "Proclaim taken (a gain of his 0 Personal Honor), then he loses 2 Honor as he enters");
+                Check(!Asked(e), "the discards still wait for the window to close");
+            }
+            else Check(e.QueryActions(0).Any(a => a.Type == "proclaim"), "Proclaim is offered (and passed on here)");
+            Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+            Eq(e.State.Players[0].Honor, honor - 2, "his controller loses 2 Honor as he enters (at the latest when the window closes)");
             var owed = 0;
             while (Asked(e))
             {
@@ -645,23 +654,72 @@ internal static class DaigotsuBofanaTests
         }
     }
 
-    private static void ProclaimEligibleEntryAppliesMandatoryEffects()
+    // Buys `card` (player 0, given Clan, plenty of Honor) at full cost -- the Proclaim-eligible mode -- and returns the engine with the purchase made.
+    private static MatchEngine BuyProclaimEligible(string card, string clan, Action<MatchState>? tweak = null)
     {
-        // Mirumoto Kazuya (Dragon, "After Kazuya enters play, lose 2 Honor": EntryHonorLoss 2) and Hida Kurabi (Crab, Destined: draw a card).
-        foreach (var (card, clan, cost) in new[] { ("oracle-l5r-10454", "Dragon", 5), ("oracle-l5r-10832", "Crab", 6) })
-            foreach (var proclaimEligible in new[] { true, false })
+        var def = CardCatalog.Get(card);
+        var s = MatchEngine.CreateEconomyScenario().State;
+        s.Players[0].Clan = clan; s.Players[0].Honor = 30;
+        for (var i = 0; i < def.GoldCost / 2 + 2; i++) Add(s, "training-marketplace", 0, Zone.Home);
+        var entering = s.Cards[s.Players[0].Provinces[0].CardId!]; entering.DefinitionId = card; entering.FaceUp = true;
+        tweak?.Invoke(s);
+        var e = MatchEngine.FromTestState(s);
+        var option = e.QueryActions(0).First(a => a.Type == "purchase" && a.CardId == entering.Id && a.Enabled && a.Command is { ClanDiscount: false } && a.Quote is { ProclaimEligible: true });
+        Accept(e, option.Command!);
+        Eq(e.State.PendingChoice?.Type, "proclaim", $"{card}: the Proclaim window is open");
+        return e;
+    }
+
+    private static void ProclaimThenEntryEffects()
+    {
+        // The ordering, in the event log and not only the final number: Proclaim (+3) is one Honor change, the entering loss (-2) another, after it.
+        foreach (var takeProclaim in new[] { true, false })
+        {
+            var e = BuyProclaimEligible("training-crane-proclaim-loss", "Crane");
+            var honor = e.State.Players[0].Honor;
+            Eq(e.State.Players[0].Honor, honor, "nothing yet");
+            if (takeProclaim)
             {
-                var s = MatchEngine.CreateEconomyScenario().State;
-                s.Players[0].Clan = clan;
-                for (var i = 0; i < (cost + 1) / 2; i++) Add(s, "training-marketplace", 0, Zone.Home);
-                var entering = s.Cards[s.Players[0].Provinces[0].CardId!]; entering.DefinitionId = card; entering.FaceUp = true;
-                var e = MatchEngine.FromTestState(s);
+                Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
+                Eq(e.State.Players[0].Honor, honor + 3 - 2, "Proclaim +3 then the entering loss -2");
+            }
+            Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+            Eq(e.State.Players[0].Honor, takeProclaim ? honor + 1 : honor - 2, takeProclaim ? "unchanged by the passes" : "no Proclaim: only the loss, applied when the window closed");
+            var log = e.State.Events.Select(x => x.Message).ToArray();
+            var gain = Array.FindIndex(log, m => m.Contains("+3 Honor") && m.Contains("Proclaim"));
+            var loss = Array.FindIndex(log, m => m.Contains("-2 Honor") && m.Contains("entering play"));
+            Check(loss >= 0, "the entering loss is in the log as its own event: " + string.Join(" | ", log.TakeLast(6)));
+            if (takeProclaim) Check(gain >= 0 && gain < loss, "the Proclaim gain is its own event, BEFORE the loss");
+            else Check(gain < 0, "no Proclaim event when it was passed");
+        }
+        // The nine already-wired Personalities that were skipping their mandatory effect on a Proclaim-eligible purchase.
+        var nine = new (string Id, string Clan, string Effect)[]
+        {
+            ("oracle-l5r-10454", "Dragon", "loss"), ("oracle-l5r-10456", "Dragon", "loss"), ("oracle-l5r-1765", "Spider", "loss"), ("oracle-l5r-10630", "Dragon", "loss+draw"),
+            ("oracle-l5r-10640", "Lion", "draw"), ("oracle-l5r-10832", "Crab", "draw"), ("oracle-l5r-10854", "Lion", "draw"),
+            ("oracle-l5r-5095", "Dragon", "sensei"), ("oracle-l5r-10287", "Dragon", "sensei"),
+        };
+        foreach (var (id, clan, effect) in nine)
+            foreach (var takeProclaim in new[] { true, false })
+            {
+                var def = CardCatalog.Get(id);
+                var otherSensei = id == "oracle-l5r-5095" ? "oracle-l5r-10287" : "oracle-l5r-5095";
+                CardInstance? sensei = null;
+                var e = BuyProclaimEligible(id, clan, s => { if (effect == "sensei") sensei = Add(s, otherSensei, 0, Zone.Home); });
                 var honor = e.State.Players[0].Honor; var hand = e.State.Players[0].Hand.Count;
-                var option = e.QueryActions(0).First(a => a.Type == "purchase" && a.CardId == entering.Id && a.Enabled && a.Command is { ClanAllegiance: false } c && c.ClanDiscount == !proclaimEligible);
-                Accept(e, option.Command!);
-                Eq(e.State.PendingChoice?.Type == "proclaim", proclaimEligible, "the Proclaim window is open exactly for the full-cost purchase");
-                if (card == "oracle-l5r-10454") Eq(e.State.Players[0].Honor, honor - 2, $"{card}: lost 2 Honor entering (proclaim-eligible: {proclaimEligible})");
-                else Eq(e.State.Players[0].Hand.Count, hand + 1, $"{card}: Destined drew a card entering (proclaim-eligible: {proclaimEligible})");
+                Eq(e.State.Players[0].Honor, honor); Eq(e.State.Players[0].Hand.Count, hand, $"{id}: nothing applied while the Proclaim window is open");
+                if (takeProclaim) Accept(e, e.QueryActions(0).Single(a => a.Type == "proclaim").Command!);
+                Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version)); Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+                var gained = takeProclaim ? def.PersonalHonor : 0;
+                var lost = def.EntryHonorLoss ?? 0;
+                Eq(e.State.Players[0].Honor, honor + gained - lost, $"{id}: Proclaim {(takeProclaim ? "taken" : "passed")}, entering loss {lost}");
+                Eq(e.State.Players[0].Hand.Count, hand + (effect.Contains("draw") ? 1 : 0), $"{id}: Destined draw");
+                if (sensei is not null) Eq(e.State.Cards[sensei.Id].Zone, Zone.DynastyDiscard, $"{id}: the other Sensei is discarded");
+                if (takeProclaim && gained > 0 && lost > 0)
+                {
+                    var log = e.State.Events.Select(x => x.Message).ToArray();
+                    Check(Array.FindIndex(log, m => m.Contains("Proclaim")) is var g && g >= 0 && g < Array.FindIndex(log, m => m.Contains("entering play")), $"{id}: Proclaim gain logged before the entering loss");
+                }
             }
     }
 
@@ -727,6 +785,51 @@ internal static class DaigotsuBofanaTests
         Accept(e4, Offer(e4, 0, "training-straighten-at-battle", dv4.Id, e4.State.Cards.Values.Single(c => c.OwnerId == 1 && c.Zone == Zone.Battlefield).Id));
         e4 = Edit(e4, st => { st.PriorityPlayerId = 0; Add(st, "training-dark-virtue", 0, Zone.FateDiscard); });
         Check(!e4.QueryActions(0).Single(a => a.Label.StartsWith("Target a Dark Virtue")).Enabled, "his own action is once per turn");
+    }
+
+    private static void ExpDarkVirtueSameTurnRulePerAction()
+    {
+        const string Straighten = "training-straighten-at-battle";
+        // The real sequence: player 0 plays the Dark Virtue's BOW from hand (its once-per-turn use is spent, and stays on the card in the discard
+        // pile), the opponent passes, and Bofana grants the play of the same card from the pile.
+        var s = Table(actor: 0);
+        var exp = Add(s, BofanaExp, 0, Zone.Battlefield, province: 0);
+        var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        var dv = Add(s, "training-dark-virtue", 0, Zone.Hand);
+        var e = MatchEngine.FromTestState(s);
+        Accept(e, Offer(e, 0, Bow, dv.Id, enemy.Id));
+        Eq(e.State.Cards[dv.Id].Zone, Zone.FateDiscard, "played from hand: now in the discard pile");
+        Accept(e, new GameCommand("pass", 1, e.Version));
+        Accept(e, e.QueryActions(0).Single(a => a.Command?.AbilityId == "bofana-exp-dark-virtue").Command!);
+        var offers = e.QueryActions(0).Where(a => a.CardId == dv.Id && a.Type == "useAbility").ToArray();
+        var bowOffer = offers.Single(a => a.Label.StartsWith("Training: bow a target enemy Personality"));
+        var straightenOffer = offers.Single(a => a.Label.StartsWith("Training: straighten"));
+        Check(!bowOffer.Enabled && bowOffer.Reason!.Contains("already been used"), "the same action, performed this turn: offered disabled with its reason: " + bowOffer.Reason);
+        Check(straightenOffer.Enabled, "the other action of the same card: allowed");
+        Reject(e, new GameCommand("useAbility", 0, e.Version, CardId: dv.Id, TargetId: enemy.Id, AbilityId: Bow));
+        Accept(e, Offer(e, 0, Straighten, dv.Id, enemy.Id));
+        Eq(e.State.Cards[dv.Id].Zone, Zone.RemovedFromGame, "the permitted action resolved and the card left the game");
+        {
+            // Both actions spent this turn (one earlier from hand, the other earlier from the pile): nothing playable is left, so the Dark Virtue is no target.
+            var t = Table(actor: 0);
+            Add(t, BofanaExp, 0, Zone.Battlefield, province: 0); Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var spent = Add(t, "training-dark-virtue", 0, Zone.FateDiscard);
+            spent.AbilityUses[Bow] = t.TurnNumber; spent.AbilityUses[Straighten] = t.TurnNumber;
+            var x = MatchEngine.FromTestState(t);
+            Check(!x.QueryActions(0).Single(a => a.Label.StartsWith("Target a Dark Virtue")).Enabled, "no unspent Battle action: not a legal target");
+        }
+        {
+            // The next turn: the stamps are stale, and both actions are open again.
+            var t = Table(actor: 0);
+            Add(t, BofanaExp, 0, Zone.Battlefield, province: 0); var foe = Add(t, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var old = Add(t, "training-dark-virtue", 0, Zone.FateDiscard);
+            old.AbilityUses[Bow] = t.TurnNumber - 1; old.AbilityUses[Straighten] = t.TurnNumber - 1;
+            var x = MatchEngine.FromTestState(t);
+            Accept(x, x.QueryActions(0).Single(a => a.Command?.AbilityId == "bofana-exp-dark-virtue").Command!);
+            Check(x.QueryActions(0).Where(a => a.CardId == old.Id && a.Type == "useAbility").All(a => a.Enabled), "both Battle actions are available on the next turn");
+            Accept(x, Offer(x, 0, Bow, old.Id, foe.Id));
+            Eq(x.State.Cards[old.Id].Zone, Zone.RemovedFromGame);
+        }
     }
 
     private static void ExpGrantIsForfeitable()

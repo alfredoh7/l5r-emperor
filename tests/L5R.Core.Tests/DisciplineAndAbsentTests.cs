@@ -25,6 +25,7 @@ internal static class DisciplineAndAbsentTests
             ("Return to Action from the discard pile: insufficient Gold is disabled and rejected, an unpaid or over-sourced command is rejected, and a removed card can never be played again", DiscardPlayCostRules),
             ("Return to Action: a card in hand is offered only as the free play and a card in the discard pile only as the paid one (never both modes for one card)", ModesAreExclusive),
             ("Return to Action: once per turn per card -- played from hand it cannot be replayed from the discard pile the same turn (Aftermath supplement), but can on a later turn", SameTurnReplayRule),
+            ("The same-turn replay rule is per ACTION, not per card (Mendon's ruling, issue #333): a Discipline card with two actions can play its other action from the discard pile the turn the first was played from hand, but not the same one", SameTurnReplayIsPerAction),
             ("Return to Action: a negated movement (Tamori Tamoko) leaves him at home and bowed -- no straighten -- while the card is still spent (hand: discarded; discard pile: paid and removed); declining lets it resolve", NegatedMovement),
             ("Return to Action: every enabled offered command (hand and discard copies, every offered target) validates on a fresh replay", OfferedCommandsAllValidate),
             ("Banzai! and Lost in Transit from HAND (newly possible): the ordinary free play, ending in the Fate discard pile; the printed Battle verb still gates Banzai!, and Battle/Open in a battle needs presence", HandPlayOfExistingDisciplineCards),
@@ -288,6 +289,21 @@ internal static class DisciplineAndAbsentTests
         sameTurn.Card.AbilityUses[Rta] = sameTurn.S.TurnNumber;
         var st = MatchEngine.FromTestState(sameTurn.S);
         Reject(st, Use(st, sameTurn.Card, Rta, sameTurn.UnbowedHome.Id, TwoGold(st)));
+    }
+
+    private static void SameTurnReplayIsPerAction()
+    {
+        const string Other = "training-discipline-ability";
+        var rig = Table();
+        rig.Card.DefinitionId = "training-two-action-discipline";
+        var e = MatchEngine.FromTestState(rig.S);
+        Accept(e, Use(e, rig.Card, Rta, rig.BowedHome.Id));                                              // the first action, from hand (free)
+        Eq(e.State.Cards[rig.Card.Id].Zone, Zone.FateDiscard);
+        Accept(e, Pass(e));
+        Reject(e, Use(e, rig.Card, Rta, rig.UnbowedHome.Id, TwoGold(e)));                                // the same action, same turn: refused
+        var honor = e.State.Players[0].Honor;
+        Accept(e, Use(e, rig.Card, Other, null, TwoGold(e)));                                            // the card's other action, same turn: allowed
+        Eq(e.State.Players[0].Honor, honor + 1); Eq(e.State.Cards[rig.Card.Id].Zone, Zone.RemovedFromGame);
     }
 
     private static void NegatedMovement()

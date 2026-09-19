@@ -591,6 +591,8 @@ public sealed class MatchState
     // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
     // UseAbility carries on with it exactly where it stopped.
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    // The card whose mandatory "after this enters play" effects wait for its open Proclaim window (see ApplyPendingEntryEffects).
+    public string? PendingEntryEffectsCardId { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
     // performed" -- cleared only when Action/AttackDeclaration/Dynasty is entered (see SetPhase),
     // never by every individual Phase.Battle re-entry (once per battlefield) -- the user's own
