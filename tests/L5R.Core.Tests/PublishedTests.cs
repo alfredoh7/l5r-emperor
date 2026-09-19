@@ -114,9 +114,11 @@ internal static class PublishedTests
         // across content/published/*.json, not copied from either side of the conflict -- BOTH sides of this
         // exact merge independently said 390, and the unmarked assertion line below still said 390 after the
         // merge, a coincidental match for entirely different reasons) + 1 (this branch's own PersonalityWave25,
-        // issue #309: Daidoji Yuki, Experienced) = 391. Recomputed from the actual current origin/main baseline
-        // each time this conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,391);
+        // issue #309: Daidoji Yuki, Experienced) = 391 (PR A's own baseline) + 2 (this branch's own
+        // PersonalityWave26, Daidoji Ebizo, and FollowerWave15, Master Scouts, issue #321) = 393. Recomputed
+        // from the actual current baseline each time this conflicts (391 distinct non-ScenarioOnly ids in
+        // content/published/*.json before this change), never copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,393);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

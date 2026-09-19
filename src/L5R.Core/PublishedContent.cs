@@ -1617,6 +1617,40 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Personality wave 26 (issue #321, PR B of #309): Daidoji Ebizo (oracle-l5r-1629) -- the first consumer of the Recon-action classification (AbilityDefinition.ActionKeywords plus a keyword-inheriting ActionCarriesKeyword) and of the general 'after the resolution of your [keyword] action' trait (MatchEngine.AfterOwnActionTraits). His trait is registered by his Effect, fires on every resolution of a matching action of his controller wherever he is in play, and gives +1F until end of turn; his Battle ability is a Ranged Attack with strength equal to his live Force.</summary>
+    public static PublishedSnapshot PersonalityWave26 { get; } = LoadPersonalityWave26();
+
+    private static PublishedSnapshot LoadPersonalityWave26()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave26.json", "personality-wave-26", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected personality-wave-26 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-26 card is not a textful Personality: {card.Id}");
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+            throw new InvalidOperationException("personality-wave-26 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
+    /// <summary>Follower wave 15 (issue #321, PR B of #309): Master Scouts (oracle-l5r-4867), the second card carrying the trait Daidoji Ebizo introduces -- 'After the resolution of a Recon action you took: Give this card +1F' -- registered by its Effect exactly like Ebizo's (MatchEngine.AfterOwnActionTraits); no new engine code.</summary>
+    public static PublishedSnapshot FollowerWave15 { get; } = LoadFollowerWave15();
+
+    private static PublishedSnapshot LoadFollowerWave15()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave15.json", "follower-wave-15", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-15 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower || card.Text.Length == 0)
+                throw new InvalidOperationException($"follower-wave-15 card is not a textful Follower: {card.Id}");
+        var othersNew = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersNew).Any())
+            throw new InvalidOperationException("follower-wave-15 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
