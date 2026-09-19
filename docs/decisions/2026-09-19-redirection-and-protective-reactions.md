@@ -140,6 +140,23 @@ his entry Honor loss; Jinn-Kuen paying through the quote, unpayable, free, blank
 twice-per-turn count and reset, bow-only, destroy-only, both, an Attack, and every "not offered" rule; and every enabled offer validated on a
 fresh engine. Mutation checks (each mutation applied, the suite run, a named test failed, source restored) are listed in the PR.
 
-## Unblocked by the same work
+## Unblocked by the same work (unwired cards the primitives now cover)
 
-See the PR description for the list of unwired catalogue cards these primitives cover, with ids and names.
+Found by scanning the catalogue text for redirect and "after an action targets" shapes; none is wired here, and each still needs its own
+`TargetedActionReactionApplies` case, ability entry and effect case (and a fresh reading of its scan).
+
+- **Redirect** (`RedirectAction` / `ActionAcceptsTarget` / `YojimboRedirectApplies`): Bayushi Wakui (10310, Magistrates at his battlefield), Shiba Sansesuke (6803,
+  any action, bow him), Riku (10323, a named Personality), Hida Kisada (Emperor) (3127, chooses another Personality at his location, Blade's shape),
+  Chugo Seido (1373, a Holding, destroy it), Ryoshun's Guidance (6425) and Benten's Blessing (959) (Celestials, discard), Shifting Terrain (10168, a
+  Terrain), Shosuro Aroru - exp2 (7089, plus a move afterwards), The Castle of Order (10185, once per battle). Standing or granted redirects need a
+  hook that rewrites every later action (Ruthless Onslaught 10164, Yoritomo Naoto 10300) or a granted ability (Spirit of the Yojimbo 7430, Ceaseless Vigil 10139).
+- **Move, re-check, negate** (Yurishi's shape): Snake Tattoo (7310, a Strategy, "move him to an adjacent battlefield").
+- **Blanket or several-kind negation** (`NegateEffects`): O-Yoroi Troops (10107, exactly Champion of Thunder's ability), Ancient Armor of the Qamar - exp (9970),
+  Vigilant Riders (9158), Isawa Norimichi (3881), Isawa Sakonoko (3891), Stone of Remembrance (7501), Kakita Kae (4179, bowing, destruction and movement),
+  Know No Fear (4481, bowing and movement), Caught in the Act (1238), Near Miss (5523), Well Protected (9288), Social Grace (9928), Undetectable Enemy (8961),
+  Ancestral Protection (370), Hundred-Fold Cut (3513), Fudo - exp (2721, "twice per turn" as well), Yasuki Ikke (9809, negate or make the player lose Honor: a choice).
+- **Per-turn counter** (`UsesPerTurn`): Fudo - exp (2721: twice per turn) and Matsu Rika (9827: three times per turn; her other gap is the Bushido Virtue classification).
+
+Those played from a hand (every Strategy above) also need the trigger offered from a hand: `TargetedActionReactionCandidates` reads in-play cards only. Cards whose
+trigger is a Political, Limited or Iaijutsu action need that classification first (Kamalakar 4253, Taishuu 7733, Moto Shigeru 5370, Astonishing Accusation 637,
+Oriole Imperial Vanguard 10337, To First Blood 8500).
