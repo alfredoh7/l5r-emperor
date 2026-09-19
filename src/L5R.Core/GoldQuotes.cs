@@ -42,6 +42,10 @@ public static class GoldCostBasis
     public const string TargetRecruit = "target-recruit";
     /// <summary>Chosen by the player between Amount (the minimum) and MaxAmount.</summary>
     public const string Variable = "variable";
+    /// <summary>What Equip would charge to attach the ability's attachment (its target, or the source itself -- AttachSpec.Card) to the ability's
+    /// wielder: the printed cost less every discount that applies to this attachment, this wielder and this player (EquipGoldCost), then Modifier
+    /// and Floor. "Paying all costs" is Modifier 0; "paying 1 less Gold" is Modifier -1 (Moto Jun-Ni, Foothills Keep, Fading Shadows).</summary>
+    public const string AttachCost = "attach-cost";
 }
 
 /// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
@@ -60,11 +64,12 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null) =>
         new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan);
     public static GoldCostRule Variable(int min = 0, int? max = null) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max);
+    public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
 
     public string Kind => Basis switch
     {
         GoldCostBasis.Variable => GoldCostKind.Variable,
-        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit => GoldCostKind.Derived,
+        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost => GoldCostKind.Derived,
         _ => GoldCostKind.Fixed
     };
 }
@@ -163,6 +168,18 @@ public sealed partial class MatchEngine
                     : rule.Amount > 0 ? $"You choose the amount (at least {rule.Amount} Gold)" : "You choose the amount (zero or more Gold)";
                 return new(rule, chosen, basis, error, false, source ?? target, rule.Amount, rule.MaxAmount);
             }
+            case GoldCostBasis.AttachCost:
+            {
+                // The attachment is the target (a discard pile) or the source itself (in hand); the wielder is the source or the chosen
+                // performer. Until both are known there is nothing to price. Katagi's "from your hand" discount applies only from a hand.
+                if (ability.Attach is not { } attach) return new(rule, 0, "This ability attaches nothing.", "This ability attaches nothing.", false, null);
+                var attachment = attach.Card == AttachSource.Self ? source : target;
+                var wielder = WielderOfAttach(attach, command, source);
+                if (attachment is null || wielder is null)
+                    return new(rule, 0, attachment is null ? "Choose a target to see this cost." : "Choose a performing card to see this cost.", null, true, null);
+                var (equipCost, equipBasis, _) = EquipGoldCost(command.PlayerId, attachment, wielder, fromHand: attachment.Zone == Zone.Hand);
+                return new(rule, Clamp(equipCost + rule.Modifier, rule.Floor), equipBasis + Modified(rule.Modifier, rule.Floor), null, false, attachment);
+            }
         }
         // Every remaining basis is derived from the chosen target.
         if (target is null) return new(rule, 0, "Choose a target to see this cost.", null, true, null);
@@ -252,7 +269,9 @@ public sealed partial class MatchEngine
     // less every discount that applies to THIS attachment, THIS wielder and THIS player. Katagi's is the
     // one wielder-dependent term, so it alone makes an equip quote "derived"; the Clan discounts depend on
     // the equipping player only.
-    private (int Cost, string Basis, string Kind) EquipGoldCost(int playerId, CardInstance card, CardInstance target)
+    // fromHand (issue #337): an attach from a discard pile prices like an Equip except for a discount printed for attachments "from your
+    // hand" (Katagi's), which only an attach from hand earns.
+    private (int Cost, string Basis, string Kind) EquipGoldCost(int playerId, CardInstance card, CardInstance target, bool fromHand = true)
     {
         var def = Definition(card); var player = Player(playerId);
         var basis = $"{def.Name} cost {def.GoldCost}";
@@ -261,7 +280,7 @@ public sealed partial class MatchEngine
         // play paying 4 less Gold" -- a narrow, single-card discount (unlike Clan Discount/Allegiance,
         // which are printed-choice flags on every purchase), so it belongs on Equip's own cost
         // formula directly rather than as a new command flag.
-        if (Definition(target).Effect == "weapon-discount-non-unique" && Keyword(card, "Weapon") && !Keyword(card, "Unique"))
+        if (fromHand && Definition(target).Effect == "weapon-discount-non-unique" && Keyword(card, "Weapon") && !Keyword(card, "Unique"))
         { raw -= 4; kind = GoldCostKind.Derived; basis += $" − 4 ({Definition(target).Name}, non-Unique Weapon)"; }
         // Satoshi's Dual Warfans (issue #264): "Enters play paying 1 less Gold if you are a Lion
         // Clan player" -- the EQUIPPING PLAYER's own Clan, not the wielder's own trait (a different

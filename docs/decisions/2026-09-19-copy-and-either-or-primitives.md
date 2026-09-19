@@ -3,8 +3,8 @@
 Status: accepted (Mendon, standing authority); every reading below is an implemented reading with its alternative recorded so it can be
 flipped. Lane: shared (rules engine, view/wire contract, one client line). Issue #338 (PR: this branch). Waves: `personality-wave-33`
 (Fukuzo `oracle-l5r-2728`, Yoritomo Sakuma `oracle-l5r-9624`) and `strategy-wave-22` (Unfortunate Hesitation `oracle-l5r-9941`).
-The published count is **412** (409 on `origin/main` 7f306655 plus these three, recounted from the distinct non-`ScenarioOnly` ids in
-`content/published/*.json`). Follow-up UI issues for Alfredo: the reusable copy wizard (#342) and the Either/Or wizard (#343).
+The published count is **417** (414 on `origin/main` 8b378a8d, which already holds issue #337's five, plus these three, recounted from the distinct
+non-`ScenarioOnly` ids in `content/published/*.json`; it was 412 before merging #337). Follow-up UI issues for Alfredo: the reusable copy wizard (#342) and the Either/Or wizard (#343).
 
 Scans were read by eye and their working copies sha256-checked against the receipts (Second City for Fukuzo and Sakuma, The Shadow's Embrace
 for Unfortunate Hesitation). Two text corrections, both the scan wins over the catalogue: Sakuma prints "negate the action's *(remaining)*
@@ -221,4 +221,4 @@ and Either/Or execution cases, `AbilityIdsOf` at the in-play scans, the Politica
 listings, the view fields, the forced-pass options), `Models.cs`, `Dueling.cs`, `CardCatalog.cs`, `PublishedContent.cs`, `L5R.Core.csproj`,
 `src/L5R.Client/Main.cs` (one line), `src/L5R.AI/TrainingOpponent.cs`, `tools/content/package_personality_wave_33.py`,
 `package_strategy_wave_22.py`, `build_card_inventory.py`, `docs/CARD_INVENTORY.xlsx`, the shipped art, and the tests above plus the pinned count in
-`PublishedTests.cs` (409 to 412) and the two Recon tag assertions.
+`PublishedTests.cs` (414 to 417) and the two Recon tag assertions.

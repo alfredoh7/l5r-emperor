@@ -78,6 +78,14 @@ Run("answers the opposing player's Either/Or choice (Yoritomo Sakuma, Unfortunat
     var copy=new ActionOption("chooseCopyKeyword","Copy the keyword Berserker",true,null,new("chooseCopyKeyword",0,view.Version,Choice:"Berserker"));
     Check(TrainingOpponent.Choose(view with { PendingChoice=new("copyKeyword",0,null,"Fukuzo: choose the keyword to copy.") },[copy]).Command?.Choice=="Berserker","The practice opponent stalled in a copy decision");
 });
+Run("answers a conditional effect choice (Mirumoto Yumaru) with an option the engine offered instead of stalling (issue #337)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    var view=game.GetView(0) with { PendingChoice=new("effectChoice",0,null,"Mirumoto Yumaru: choose one.") };
+    var actions=new[]{"self","target","both"}.Select(o=>new ActionOption("chooseEffect",o,true,null,new("chooseEffect",0,view.Version,Choice:o),null)).ToArray();
+    var decision=TrainingOpponent.Choose(view,actions);
+    Check(decision.Command is {Type:"chooseEffect",Choice:"self"},"The practice opponent stalled, or took an option that was not offered first");
+});
 Run("chooses an offered free Experienced Overlay",()=>
 {
     var game=MatchEngine.CreateEconomyScenario();var view=game.GetView(0);
