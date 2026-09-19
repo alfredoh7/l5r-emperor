@@ -63,6 +63,21 @@ Run("answers a forced discard (Times of Strife, Daigotsu Bofana) with the least 
     int Value(CardView c)=>c.Definition?.Effect switch {"force-three"=>8,"bow-small"=>6,_=>c.Definition?.Type==CardType.Follower?5:4};
     Check(Value(hand.Single(c=>c.Id==decision.Command!.TargetId))==hand.Min(Value),"It gave up a card that was not its least useful");
 });
+Run("answers the opposing player's Either/Or choice (Yoritomo Sakuma, Unfortunate Hesitation) and a copy decision (Fukuzo) instead of stalling (issue #338)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    var view=game.GetView(0) with { PendingChoice=new("eitherOr",0,null,"Yoritomo Sakuma: pay 2 Gold, or your action's remaining effects are negated.") };
+    var pay=new ActionOption("chooseEitherOr","Pay 2 Gold",true,null,new("chooseEitherOr",0,view.Version,Choice:"pay",SourceIds:["a-source"]));
+    var negate=new ActionOption("chooseEitherOr","Do not pay",true,null,new("chooseEitherOr",0,view.Version,Choice:"negate"));
+    Check(TrainingOpponent.Choose(view,[negate,pay]).Command?.Choice=="pay","The practice opponent let its action be negated instead of paying 2 Gold");
+    var bow=new ActionOption("chooseEitherOr","Bow him",true,null,new("chooseEitherOr",0,view.Version,Choice:"bow"));
+    var owe=new ActionOption("chooseEitherOr","Do not bow him",true,null,new("chooseEitherOr",0,view.Version,Choice:"pass"));
+    Check(TrainingOpponent.Choose(view,[owe,bow]).Command?.Choice=="bow","The practice opponent took a forced pass instead of bowing the Personality");
+    var unpayable=new ActionOption("chooseEitherOr","Pay 2 Gold",false,"You cannot produce 2 Gold.",null);
+    Check(TrainingOpponent.Choose(view,[unpayable,negate]).Command?.Choice=="negate","The practice opponent stalled when the only enabled option was the consequence");
+    var copy=new ActionOption("chooseCopyKeyword","Copy the keyword Berserker",true,null,new("chooseCopyKeyword",0,view.Version,Choice:"Berserker"));
+    Check(TrainingOpponent.Choose(view with { PendingChoice=new("copyKeyword",0,null,"Fukuzo: choose the keyword to copy.") },[copy]).Command?.Choice=="Berserker","The practice opponent stalled in a copy decision");
+});
 Run("answers a conditional effect choice (Mirumoto Yumaru) with an option the engine offered instead of stalling (issue #337)",()=>
 {
     var game=MatchEngine.CreateStarterMatch();

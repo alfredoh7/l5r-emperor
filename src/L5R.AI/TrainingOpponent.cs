@@ -169,6 +169,11 @@ public static class TrainingOpponent
             case "chooseSearchDiscard":
                 var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
                 return discard is null?0:100-HandValue(discard);
+            // The opposing player's Either/Or choice (issue #338): pay when the engine offers a payable Gold option (a modest bot keeps its action), then bow the
+            // threatened Personality, then lose Honor, and only then take the consequence. Copying a keyword or ability
+            // (Fukuzo): the first candidate the engine lists.
+            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => 70, _ => 60 };
+            case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
             // A forced discard (Times of Strife, Daigotsu Bofana; issue #333): the same modest rule as the discard after a Terrain -- give up
             // the least useful card in hand.
             case "forcedDiscard":

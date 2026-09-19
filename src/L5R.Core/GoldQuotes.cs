@@ -80,6 +80,30 @@ public sealed partial class MatchEngine
     /// carries the ordinary PaymentOptions limit); bounds the wire size of "pay zero or more".</summary>
     private const int VariablePaymentOptionsPerAmount = 8;
 
+    // Alternate Gold source (issue #338, Yoritomo Sakuma: "Reaction: When paying a Gold Cost, bow Sakuma: Produce 2 Gold."). The general
+    // shape is "bow this card as a payment source", chosen INSIDE the payment like any Holding: the ability carries PaymentProduction, the
+    // card counts as a Gold producer for every payment (the quote's suggestions, ValidatePayment, Pay, the HUD's total) while it is in play
+    // and unbowed and its use is unspent this turn, and choosing it as a source is what bows it and spends the use. It is a Reaction
+    // ("once a turn" like every other), never an action of its own. A source that also names a target to sacrifice (Zlkyt's "destroy your
+    // target Mine or Farm: Produce Gold equal to its base Gold Cost") is a further extension this does not model.
+    private (string AbilityId, int Amount)? AlternateGoldSource(CardInstance card)
+    {
+        foreach (var id in AbilityIdsOf(card))
+            if (AbilityCatalog.All.TryGetValue(id, out var ability) && ability.PaymentProduction is int amount
+                && !(card.AbilityUses.TryGetValue(ability.UsageKey ?? id, out var used) && used == _state.TurnNumber))
+                return (id, amount);
+        return null;
+    }
+
+    /// <summary>What a card can produce for a payment right now, for the client (CardView.GoldProduced): its printed production, or the
+    /// amount of its alternate source. Null when it produces nothing or is not somewhere it could.</summary>
+    private int? GoldSourceProduction(CardInstance card)
+    {
+        if (card.Zone is not (Zone.Home or Zone.Stronghold or Zone.Battlefield)) return null;
+        if (Definition(card).GoldProduction > 0) return GoldProduced(card.Id, card.OwnerId);
+        return AlternateGoldSource(card)?.Amount;
+    }
+
     /// <summary>The resolved price of one ability command. Amount is what must be paid now; Subject is the
     /// card named in the payment event; NeedsTarget means a target-derived rule has no target yet.</summary>
     private sealed record AbilityCost(GoldCostRule Rule, int Amount, string Basis, string? Error, bool NeedsTarget,

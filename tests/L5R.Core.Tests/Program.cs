@@ -241,6 +241,8 @@ AttachFromDiscardTests.Run(runner);
 FadingShadowsTests.Run(runner);
 EffectChoiceTests.Run(runner);
 FollowerPerformerTests.Run(runner);
+CardCopyTests.Run(runner);
+EitherOrTests.Run(runner);
 ActionLockTests.Run(runner);
 MultiTargetTests.Run(runner);
 MoveDestinationTests.Run(runner);
