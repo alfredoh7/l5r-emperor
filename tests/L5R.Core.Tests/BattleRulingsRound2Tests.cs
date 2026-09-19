@@ -307,6 +307,13 @@ internal static class BattleRulingsRound2Tests
         var e0=MatchEngine.FromTestState(s0);
         Pass(e0,1); Pass(e0,0);
         Check(e0.State.PendingChoice is null && Fought(e0,"attacking Force 3, defending Force 5"),"no legal performer: the Reaction is never asked about");
+        // An unusable Reaction is no member of the set: with one trait and a Steady Resolve nobody could use, there is nothing to order and nothing to ask.
+        var s1=Combat();
+        Add(s1,"training-crane-samurai",0,Zone.Battlefield,province:0); Add(s1,"training-crane-veteran",1,Zone.Battlefield,province:0);
+        Add(s1,"training-before-resolution-boost-terrain",0,Zone.Battlefield,province:0); Add(s1,"training-steady-resolve",0,Zone.Hand);
+        var e1=MatchEngine.FromTestState(s1);
+        Pass(e1,1); Pass(e1,0);
+        Check(e1.State.PendingChoice is null && Fought(e1,"attacking Force 5, defending Force 5"),"the trait applied directly: the unusable Reaction is not in the set");
         // The Defender's Reaction: its own controller (not the active player) is asked; the window offers the plays, then the pass.
         var s=Combat();
         var x=Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0); var y=Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0);
