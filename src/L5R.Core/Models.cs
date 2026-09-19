@@ -467,6 +467,10 @@ public sealed class MatchState
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
+    // Attack-vs-Followers exceptions granted by another card (AttackFollowerException shape (e), Yoritomo
+    // Ebumi): standing, one-shot permissions for a player's NEXT Attack action of the covered kind. Battle-
+    // scoped like AdditionalActions -- consumed when that Attack executes, cleared at FinishBattleResolution.
+    public List<AttackTargetGrant> AttackTargetGrants { get; set; } = [];
     // "Before an action resolves" reactions (Mirumoto Rokai's destruction-negation, Tamori Tamoko's
     // movement-or-straightening-negation, Champion of Thunder, Brothers of Goemon, Akodo Kakihara's Force
     // bonus): the whole triggering command is stashed here (never partially applied) while an alternating

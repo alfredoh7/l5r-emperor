@@ -38,8 +38,18 @@ namespace L5R.Core;
 // price it -- validation, option generation, the quote shipped to the client and the actual payment all
 // read this one rule. Null means "no explicit rule": a Strategy source pays its own printed cost and a
 // Discipline pays its source's printed cost (GoldQuotes.ImplicitGoldRule); anything else is free.
+// Target status (P2, see TargetStatus): IfTarget is the status the ability's own text conditions its
+// EFFECT on ("destroy him if he is dishonorable, Kolat, Ninja, or Shadowlands"; "+2 strength if the target
+// is dishonorable") -- read back through MatchEngine.EffectConditionMet. TargetMustBe is a target-LEGALITY
+// condition layered onto whichever Target category the ability already uses, exactly like
+// RequireNoAttachments ("target an enemy dishonorable Personality"). Both are any-of tests on the target.
+// FollowerException (P1, see AttackFollowerException): a permission printed on this Attack ability itself
+// -- "which may target a Personality with attached Followers" (unconditional, Reconnaissance-gated, or
+// limited to a target status) -- letting its Ranged/Melee Attack target a Personality that still has a
+// Follower attached.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
-    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null);
+    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null,
+    TargetStatus? IfTarget = null, TargetStatus? TargetMustBe = null, AttackFollowerException? FollowerException = null);
 
 public static class AbilityCatalog
 {
@@ -180,13 +190,35 @@ public static class AbilityCatalog
         ["shinjo-eun-sahng-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
         ["shosuro-konishi-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
         ["tsuruchi-kosoko-attack"] = new("Battle", "Ranged 5 Attack", "attack"),
+        // Tsuruchi Kosoko - exp (oracle-l5r-9831): "Ranged 6 Attack that may target a Personality with
+        // Followers" -- the unconditional printed Follower exception (AttackFollowerException shape (a)).
+        // Training fixtures for the printed Follower-exception shapes no published card exercises yet: (b) Reconnaissance-gated
+        // (Strategic Strike / Toritaka Chokichi's text, both unwired) and (c) target-status-gated, here on a MELEE Attack.
+        ["training-followed-recon-attack"] = new("Battle", "Training: Ranged 3 Attack, which may target a Personality with attached Followers if you have Reconnaissance", "attack", FollowerException: new("Ranged", Condition: AttackFollowerException.Reconnaissance)),
+        ["training-followed-dishonorable-melee-attack"] = new("Battle", "Training: Melee 3 Attack, which may target a dishonorable Personality with attached Followers", "attack", FollowerException: new("Melee", TargetIs: TargetStatus.IsDishonorable)),
+        ["tsuruchi-kosoko-exp-attack"] = new("Battle", "Ranged 6 Attack that may target a Personality with Followers", "attack", FollowerException: new("Ranged")),
         ["stalking-tiger-attack"] = new("Battle", "Melee 6 Attack", "attack"),
         // "Bow Isas: Ranged 3 Attack. Move Isas home." -- the source bows itself as its own performer
         // (no separate Performer field, same shape as kouki-force), then moves home after the Attack
         // resolves regardless of outcome (ResolveAttackNow's per-ability switch).
         ["tsuruchi-isas-attack"] = new("Battle", "Bow Isas · Ranged 3 Attack, then move him home", "attack"),
         // Import wave 2 (issue #97): the Attack primitive's first target-dependent strength.
-        ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack"),
+        ["bayushi-kahoku-attack"] = new("Battle", "Ranged 3 Attack (+2 if the target is dishonorable)", "attack", IfTarget: TargetStatus.IsDishonorable),
+        // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
+        // Attack." TargetId is the -4F target; the Attack's own (separate, optional) target rides on
+        // CardIds -- see ValidateAbility's kahoku-exp-attack branch. His static "Ranged Attacks from
+        // actions performed by Kahoku may target dishonorable Personalities with attached Followers" is
+        // the Effect "ranged-attacks-may-target-dishonorable-with-followers" (StaticAttackFollowerExceptions).
+        ["kahoku-exp-attack"] = new("Battle", "Target an enemy Personality: Give him -4F. Ranged 3 Attack", "enemy-personality"),
+        // Yoritomo Ebumi (oracle-l5r-9832): the first Follower exception granted by an action for a LATER
+        // Attack (AttackFollowerException shape (e)) -- see MatchEngine.GrantAttackFollowerException.
+        // P2 wave-24 cards (see TargetStatus): Kakita Kazan uses the status as a target-LEGALITY layer
+        // (TargetMustBe); Hiruma Nitani's +2 strength and Kuni Shinoda - exp's destroy use it as an EFFECT
+        // condition (IfTarget).
+        ["kazan-shame"] = new("Battle", "Target an enemy dishonorable Personality: Bow him. His controller loses 2 Honor. Gain 2 Honor", "enemy-personality", TargetMustBe: TargetStatus.IsDishonorable),
+        ["hiruma-nitani-attack"] = new("Battle", "Bow Nitani unless you have Reconnaissance: Ranged 4 Attack, with +2 strength if the target is Shadowlands", "attack", IfTarget: TargetStatus.IsShadowlands),
+        ["shinoda-exp-bow-destroy"] = new("Battle", "Target an enemy card: Bow it. If it is Shadowlands, destroy it", "enemy-card", IfTarget: TargetStatus.IsShadowlands),
+        ["yoritomo-ebumi-grant"] = new("Battle", "One Ranged Attack from your next Ranged Attack action this battle may target a Personality with attached Followers. If you have Reconnaissance, you may take an additional Battle action", "none"),
         ["asako-ume-attack"] = new("Battle", "Ranged 4 Attack", "attack"),
         // Training-only: exercises the Honor-loss-immunity primitive's "pay Honor to use a Battle
         // ability" shape (e.g. "Battle: Lose N Honor: [Attack]") ahead of any published card needing
@@ -716,7 +748,7 @@ public static class AbilityCatalog
         // (own-unbowed-personality-at-battle-with-keyword / own-personality-with-keyword-at-battle) --
         // Magistrate/Paragon/Commander/Spirit carry no mechanical rule of their own here either,
         // exactly like Kitsu Akai's own Ancestor/Spirit precedent above.
-        ["dispensing-justice-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy Personality: If he has no attachments and is dishonorable, Kolat, Ninja, or Shadowlands, destroy him. Move him home", "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"]),
+        ["dispensing-justice-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy Personality: If he has no attachments and is dishonorable, Kolat, Ninja, or Shadowlands, destroy him. Move him home", "enemy-personality", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], IfTarget: TargetStatus.DishonorableKolatNinjaOrShadowlands),
         // Fear is a printed keyword with no mechanical rule of its own (confirmed against the card's
         // own scan -- a separate keyword line, not a "Fear Battle:" compound timing prefix the way the
         // local catalogue's own text paraphrase suggested), the same as Wrathful Ancestor's below.
@@ -792,7 +824,7 @@ public static class AbilityCatalog
         ["overgrown-grove-move"] = new("Battle", "Discard the top 3 cards of your Fate deck and target an attacking Personality: Move him home", "attacking"),
         ["intervening-spirit-move"] = new("Battle", "Even if this unit is not at the current battlefield, if any enemy units are there, target your Personality: Move him there. Straighten him if he moved. If he is an Ancestor and this Shugenja is Water, you may take an additional Battle action", "own-personality"),
         ["earth-flows-move"] = new("Battle", "If you are the Defender, target a Personality: Move him to the current battlefield. Straighten his unit if he moved", "personality"),
-        ["winds-of-dismissal-choice"] = new("Limited", "Bow this Shugenja and target another player's Personality: If he is dishonorable, Kolat, Ninja, or Shadowlands, his controller loses Honor equal to his base Personal Honor. If this Shugenja is Air, gain 1 Honor", "enemy-personality"),
+        ["winds-of-dismissal-choice"] = new("Limited", "Bow this Shugenja and target another player's Personality: If he is dishonorable, Kolat, Ninja, or Shadowlands, his controller loses Honor equal to his base Personal Honor. If this Shugenja is Air, gain 1 Honor", "enemy-personality", IfTarget: TargetStatus.DishonorableKolatNinjaOrShadowlands),
         // Stormless Fury (issue #276 follow-up): a Reaction pair sharing one printed "after the
         // resolution of a Battle action" moment (OpenBattleActionReactionWindow), watched generically
         // rather than tied to a specific effect classification (Fallow Lands/Khol's own "before-
@@ -1261,7 +1293,7 @@ public static class AbilityCatalog
         ["mimori-destroy"] = new("Battle", "Target a bowed enemy card: Destroy it", "enemy-bowed-card"),
         // Isawa Mitsuko, Experienced (oracle-l5r-3866).
         ["mitsuko-straighten"] = new("Open", "Target an Air Shugenja or a Holding: Straighten it", "air-shugenja-or-holding"),
-        ["mitsuko-bow-destroy"] = new("Battle", "Target an enemy Personality: Bow him. Destroy him if he is Kolat, Ninja, or Shadowlands", "enemy-personality"),
+        ["mitsuko-bow-destroy"] = new("Battle", "Target an enemy Personality: Bow him. Destroy him if he is Kolat, Ninja, or Shadowlands", "enemy-personality", IfTarget: TargetStatus.KolatNinjaOrShadowlands),
         // Shosuro Hawado (oracle-l5r-7103): "Move Hawado home or to a battlefield with one or more enemy
         // units" -- a choice of destinations, so two catalog entries sharing one once-per-turn use. Both
         // pay the same cost (remove a Dynasty card in any discard pile from the game -- the Target) and
@@ -1328,11 +1360,6 @@ public sealed partial class MatchEngine
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
         return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
     }
-    // "Shadowlands" (Mitsuko's own "Destroy him if he is Kolat, Ninja, or Shadowlands"): a Personality is
-    // Shadowlands either by Clan alignment (every fixture and a few published cards) or, for the cards
-    // that print it as a keyword instead of a Clan (Asako Rikate, Takasho, Keppo, Daigotsu Kendo -- the
-    // catalogue records only "Phoenix Clan"/none plus a "Shadowlands" keyword), by that keyword.
-    private bool IsShadowlands(CardInstance card) => HasClanAffiliation(card, "Shadowlands") || Keyword(card, "Shadowlands");
     // Shosuro Hawado (issue #301): the card types built from the Dynasty deck (as opposed to the Fate deck's
     // Strategy/Follower/Item/Spell/Ring, or a Stronghold). Only ever asked of a card in a discard pile.
     private static bool IsDynastyCardType(CardType type) => type is CardType.Personality or CardType.Holding or CardType.Event or CardType.Region or CardType.Celestial;
@@ -1477,7 +1504,9 @@ public sealed partial class MatchEngine
         // Hida Mimori / Isawa Mitsuko (issue #301): Mimori destroys her target outright (a Personality
         // target reaches Rokai; an attachment target never does -- see BeforeActionReactionApplies's
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
-        or "mimori-destroy" or "mitsuko-bow-destroy";
+        or "mimori-destroy" or "mitsuko-bow-destroy"
+        // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
+        or "shinoda-exp-bow-destroy";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -1532,7 +1561,17 @@ public sealed partial class MatchEngine
         // Bayushi Nori's Personality half, Isawa Mitsuko and Sutigu (issue #301) bow their own target
         // unconditionally. (Nori's attachments half bows the target's ATTACHMENTS, never the target
         // itself, so it is deliberately absent; Rin's bow happens later, after a choice.)
-        or "nori-bow-personality" or "mitsuko-bow-destroy" or "sutigu-bow";
+        or "nori-bow-personality" or "mitsuko-bow-destroy" or "sutigu-bow"
+        // Personality wave 24: Kakita Kazan and Kuni Shinoda - exp each bow their target (Shinoda's
+        // destroy rides on an effect condition only for what follows the bow).
+        or "kazan-shame" or "shinoda-exp-bow-destroy";
+    // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
+    // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
+    // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
+    // targeted effect, "enemy-personality"); its Attack's own target rides in CardIds. That TargetId IS
+    // "an action targets" its card, so the reactions here apply to it -- Champion of Thunder's "all" negating
+    // the -4F, Kakihara's bonus -- while the Attack's own target still reaches the attack window.
+    private static bool TargetsThroughAttackPipeline(string abilityId) => AttackKind(abilityId) != "" && AbilityCatalog.All[abilityId].Target == "attack";
     // "Before an action resolves" reactions, in play (the user's own clarification: monitored live, never
     // pre-registered). Every one that applies to a just-submitted command, on EITHER player's cards, is a
     // reaction the window may offer -- issue #318 (Mendon's ruling: "if an action opens a reaction window and
@@ -1572,19 +1611,19 @@ public sealed partial class MatchEngine
             case "tamoko-negate":
                 return negatable && Definition(affected).Type == CardType.Personality && MoveOrStraightenKind(command.AbilityId) is not null;
             case "champion-of-thunder-negate":
-                return negatable && command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == ""
+                return negatable && command.PlayerId != affected.OwnerId && !TargetsThroughAttackPipeline(command.AbilityId)
                     && card.OwnerId == affected.OwnerId && UnitHostId(card) == UnitHostId(affected);
             case "brothers-goemon-negate":
-                return negatable && command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "" && BowsTarget(command.AbilityId)
+                return negatable && command.PlayerId != affected.OwnerId && !TargetsThroughAttackPipeline(command.AbilityId) && BowsTarget(command.AbilityId)
                     && card.OwnerId == affected.OwnerId && UnitHostId(card) == UnitHostId(affected) && ControlsAnyRing(card.OwnerId);
             // His reaction negates nothing, so "this movement will not be negated" does not stop him reacting
             // to being targeted (unlike every negating reaction above).
             case "kakihara-force-bonus":
-                return AttackKind(command.AbilityId) == "" && card.Id == affected.Id;
+                return !TargetsThroughAttackPipeline(command.AbilityId) && card.Id == affected.Id;
             // Training fixture (issue #318): any card of the affected card's own controller, against another
             // player's action -- see its execution case.
             case "training-before-action-suppress":
-                return command.PlayerId != affected.OwnerId && AttackKind(command.AbilityId) == "" && card.OwnerId == affected.OwnerId;
+                return command.PlayerId != affected.OwnerId && !TargetsThroughAttackPipeline(command.AbilityId) && card.OwnerId == affected.OwnerId;
             default:
                 return false;
         }
@@ -1755,7 +1794,14 @@ public sealed partial class MatchEngine
         "yayu-bow-attack" or "yayu-destroy-attack" => 5,
         "stalking-tiger-attack" => 6,
         "tsuruchi-isas-attack" => 3,
-        "bayushi-kahoku-attack" => 3 + (target is not null && target.Dishonorable ? 2 : 0),
+        // Tsuruchi Kosoko - exp: "Ranged 6 Attack". Bayushi Kahoku - exp: "Ranged 3 Attack" (after the -4F).
+        "tsuruchi-kosoko-exp-attack" => 6,
+        "training-followed-recon-attack" or "training-followed-dishonorable-melee-attack" => 3,
+        "kahoku-exp-attack" => 3,
+        // Hiruma Nitani: "Ranged 4 Attack, with +2 strength if the target is Shadowlands" -- Clan alignment
+        // OR the printed keyword (TargetStatus.IsShadowlands), read off the ability's own IfTarget.
+        "hiruma-nitani-attack" => 4 + (EffectConditionMet(abilityId, target) ? 2 : 0),
+        "bayushi-kahoku-attack" => 3 + (EffectConditionMet(abilityId, target) ? 2 : 0),
         "asako-ume-attack" => 4,
         "training-honor-cost-attack" => 3,
         "training-weapon-attack" => 2,
@@ -1840,6 +1886,8 @@ public sealed partial class MatchEngine
         "nikutai-attack" => "Melee",
         "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
+        "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" => "Ranged",
+        "training-followed-dishonorable-melee-attack" => "Melee",
         _ => ""
     };
     // General "in play" Reaction primitive: a printed Reaction whose card must actually be in play
@@ -1973,7 +2021,10 @@ public sealed partial class MatchEngine
         if (strength > 0 && targetId is not null)
         {
             var target = Card(targetId);
-            if (InPlay(target) && AtBattle(target) && CardForce(target) <= strength)
+            // AttackComparedForce is the one decision point for WHICH Force a Personality's Attack
+            // strength is compared to (see AttackTargeting.cs) -- identical to CardForce for every target
+            // that needs no Follower exception.
+            if (InPlay(target) && AtBattle(target) && AttackComparedForce(target) <= strength)
             {
                 DestroyAttackTarget(target, playerId);
                 if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
@@ -2616,8 +2667,22 @@ public sealed partial class MatchEngine
             // player chooses to destroy right now), not a static per-ability-id/target/source formula
             // AttackStrength's own switch can express. CardIds carries the chosen token ids here
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi"
+            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack"
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
+            // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
+            // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
+            // core rules an Attack's targeting is its own step, "not required up front"): TargetId is the
+            // -4F target (a required enemy Personality, validated by the ordinary category switch below),
+            // CardIds carries the optional Attack target -- the established optional-second-selection
+            // idiom (Scorn the Weak, Strength in Terror). It is validated as any Attack target, including
+            // Kahoku's own static Follower-immunity exception (AttackTargeting.cs), and MAY be the very
+            // Personality the -4F just weakened, so the strength check sees that Force already reduced.
+            if (id == "kahoku-exp-attack")
+            {
+                var ids = command.CardIds ?? [];
+                Require(ids.Length is 0 or 1, "Kahoku's Ranged Attack may target at most one card.");
+                if (ids.Length == 1) RequireLegalAttackTarget(id, ability, command, player, source, Card(ids[0]), command.TargetId, 4);
+            }
             if (id == "mitsu-fire-attack")
             {
                 var tokenIds = command.CardIds ?? [];
@@ -2692,37 +2757,10 @@ public sealed partial class MatchEngine
             // enemy army with Force at or below the attack's (possibly conditional) strength.
             else if (ability.Target == "attack")
             {
-                if (command.TargetId is not null)
-                {
-                    var target = Card(command.TargetId);
-                    Require(InPlay(target) && AtBattle(target) && target.OwnerId != player.Id, "Target a card in the current enemy army.");
-                    var type = Definition(target).Type;
-                    // Core rules: a Personality with an attached FOLLOWER is immune to a Ranged/Melee
-                    // Attack (attack the Follower instead), unless a specific card prints an exception
-                    // (e.g. "which may target a Personality with attached Followers if you have
-                    // Reconnaissance") -- no such exception is wired up yet, since no imported Attack
-                    // needs one. An Item/Spell attachment grants no such immunity -- confirmed by A
-                    // Close Call's own printed premise ("after a Personality with an ARMOR is targeted
-                    // by a Melee or Ranged Attack"), which only makes sense if an Armor-wearing
-                    // Personality is a legal Attack target in the first place. HasAttachments (a bare
-                    // count, "any" attachment) was too broad for this specific check; only a Follower
-                    // attachment actually blocks direct targeting.
-                    Require(type == CardType.Follower || type == CardType.Personality && !Attachments(target.Id).Any(a => Definition(a).Type == CardType.Follower),
-                        "Attack a Follower or a Personality without an attached Follower.");
-                    // Seasoned Ashigaru's shape: an immunity to one specific Attack kind only, checked
-                    // against the ability's own AttackKind (already tracked per ability id). Effect, not
-                    // Keywords -- this is a synthetic marker for the card's own unique text, not a
-                    // printed keyword other cards could reference.
-                    Require(AttackKind(id) != "Melee" || Definition(target).Effect != "melee-attack-immune", "Melee Attacks may not target this card.");
-                    // Strength of the Divine (issue #287): the first "attack" Target ability with its
-                    // own separate Performer -- sourceId here must be the chosen Performer (the card
-                    // whose live Force/Personal Honor the strength formula reads), not the ability's
-                    // own source card, the same distinction ExecuteAbilityEffects' own case already
-                    // draws for it. Every existing "attack" ability has no Performer of its own, so
-                    // this is unconditionally identical to the old source?.Id fallback for all of them.
-                    var strength = id == "mitsu-fire-attack" ? (command.CardIds ?? []).Length : EffectiveAttackStrength(id, player, target, command.PerformerId ?? source?.Id);
-                    Require(CardForce(target) <= strength, "That card's Force is above the Attack's strength.");
-                }
+                // The legality rules (Follower-immunity and its explicit exceptions, per-kind immunity,
+                // strength) live in RequireLegalAttackTarget (AttackTargeting.cs), shared with abilities that
+                // carry their Attack target on CardIds instead of TargetId (Bayushi Kahoku - exp).
+                if (command.TargetId is not null) RequireLegalAttackTarget(id, ability, command, player, source, Card(command.TargetId));
             }
             // Unimpeachable Name (oracle-l5r-8989): "You MAY target and rehonor a dishonorable
             // Personality" -- an optional target, the same "not required to exist" shape as "attack"
@@ -2855,6 +2893,10 @@ public sealed partial class MatchEngine
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
+                    // TargetMustBe (P2): a target-status legality condition layered onto whichever category
+                    // follows, exactly like RequireNoAttachments -- "target an enemy dishonorable Personality".
+                    Require(ability.TargetMustBe is null || MatchesTargetStatus(target, ability.TargetMustBe),
+                        $"The target must be {ability.TargetMustBe?.Describe()}.");
                     Require((!ability.RequireNoAttachments || !HasAttachments(target)) && ability.Target switch {
                         "shinden" => personality && !own && !target.Bowed,
                         "air" => personality && Keyword(target, "Air"),
@@ -2876,7 +2918,7 @@ public sealed partial class MatchEngine
                         "air-shugenja-or-holding" => type == CardType.Holding || personality && Keyword(target, "Air") && Keyword(target, "Shugenja"),
                         // Shosuro Rin (issue #301): "an honorable Personality" -- the plain negation of
                         // dishonorable-personality below, either side.
-                        "honorable-personality" => personality && !target.Dishonorable,
+                        "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
                         // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
                         // Personality controlled by the active player" -- "if it is not your turn" is
@@ -3013,7 +3055,7 @@ public sealed partial class MatchEngine
                             _state.Cards.Values.Any(c => c.OwnerId == target.OwnerId && Definition(c).Type == CardType.Personality && InPlay(c) && c.Dishonorable),
                         // Dragon Clan review (issue #207): Kitsuki Fujimura -- any Dishonorable
                         // Personality, either side.
-                        "dishonorable-personality" => personality && target.Dishonorable,
+                        "dishonorable-personality" => MatchesTargetStatus(target, TargetStatus.IsDishonorable),
                         // Mirumoto Kouzei: an enemy Personality or Follower with Force at or below
                         // the source's own current Force.
                         "enemy-card-force-lte-self" => !own && type is CardType.Personality or CardType.Follower && CardForce(target) <= CardForce(source!),
@@ -3202,12 +3244,37 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true; card.ProvinceIndex = target.ProvinceIndex;
         Emit("equipped", $"{Definition(card).Name} attached to {Definition(target).Name} (Reaction).", ownerId, card.Id);
     }
+    // Tidy Up (core rules, step G): a Strategy or Ring played from hand is discarded once its action is
+    // done. Shared by RunAbilityEffects' own tail (the ordinary, immediate path) and by
+    // ExecuteAbilityEffects below (an Attack deferred behind its reaction window).
+    private void SpendHandPlayedCard(PlayerState player, CardInstance? source)
+    {
+        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+    }
+    // Issue #320: every Attack case in RunAbilityEffects' switch does `if (ResolveOrDeferAttack(...)) return;`,
+    // so an Attack that opens the attackReaction window skips the tail that discards a hand-played
+    // Strategy/Ring, and ResolveAttack (run once both players pass) never discards it either -- the card
+    // stayed in hand for good. Detected here rather than at each Attack case so every current and future
+    // Attack (Strategic Strike, ...) is covered without boilerplate: an Attack was deferred by THIS call
+    // exactly when it left a PendingAttack that was not already there. The played card is spent as the
+    // window opens, like its Gold cost already is (PayForAbility) and like a hand-played Dueling Strategy
+    // (IssueChallenge) -- the engine has no "being resolved" zone, and the card must not sit in hand,
+    // reusable, while the opponent reacts. Step G formally follows resolution, so it is in the discard pile
+    // (not yet "in limbo") while a Reaction window is open. Additional Action bookkeeping is deliberately
+    // untouched: PendingAttack.Additional and ResolveAttack already carry it across the window.
+    private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
+    {
+        var pendingAttackBefore = _state.PendingAttack;
+        RunAbilityEffects(command, consumedGrant);
+        if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
+            SpendHandPlayedCard(Player(command.PlayerId), command.CardId is null ? null : Card(command.CardId));
+    }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
     // Action grant for this use. Threaded through so the tail below knows whether to keep priority
     // with the same player instead of ceding it, on top of whatever this ability's own effects do
     // (Again!/Two Hands themselves add fresh grants directly in the switch, detected generically by
     // comparing the grant count before and after rather than a separate special case per card).
-    private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
+    private void RunAbilityEffects(GameCommand command, bool consumedGrant = false)
     {
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
         var player = Player(command.PlayerId);
@@ -3215,6 +3282,9 @@ public sealed partial class MatchEngine
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
+        // An Attack action executing spends this player's standing Attack-target grants of its kind
+        // ("your NEXT Ranged Attack action", Yoritomo Ebumi) -- validated at declaration, spent here.
+        if (AttackKind(id) is { Length: > 0 } declaredAttackKind) ConsumeAttackTargetGrants(player.Id, declaredAttackKind);
         // Times of Strife (issue #259): "after each time another player who controls no units at the
         // current battlefield announces a Battle action, he discards a card" -- checked here,
         // "announcing" the action, before its own effects below apply (matching the card's own
@@ -3322,7 +3392,10 @@ public sealed partial class MatchEngine
             case "shamate-move": MoveHome(target!, false); if (target!.OwnerId != player.Id) GainHonorFromPerformer(Card(command.PerformerId!), 2, "Shamate Keep"); break;
             // Second City unwired-card audit (issue #264):
             case "dispensing-justice-destroy":
-                if (!HasAttachments(target!) && (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands")))
+                // "If he has no attachments and is dishonorable, Kolat, Ninja, or Shadowlands" -- the ability's
+                // own IfTarget status (P2): any one term is enough, and a card matching several is destroyed
+                // once. Shadowlands is a Clan alignment OR the printed keyword (Rikate, Takasho, ...).
+                if (!HasAttachments(target!) && EffectConditionMet(id, target))
                     DestroyUnits([target!], false, player.Id);
                 else MoveHome(target!, false);
                 break;
@@ -3610,8 +3683,8 @@ public sealed partial class MatchEngine
             }
             case "winds-of-dismissal-choice":
                 Card(source!.AttachedTo!).Bowed = true;
-                if (target!.Dishonorable || Keyword(target, "Kolat") || Keyword(target, "Ninja") || HasClanAffiliation(target, "Shadowlands"))
-                    GainHonor(target.OwnerId, -Definition(target).PersonalHonor, "Winds of Dismissal", source);
+                if (EffectConditionMet(id, target))
+                    GainHonor(target!.OwnerId, -Definition(target).PersonalHonor, "Winds of Dismissal", source);
                 if (Keyword(Card(source.AttachedTo!), "Air")) GainHonor(player.Id, 1, "Winds of Dismissal", source);
                 break;
             case "law-of-darkness-weaken": ApplyModifier(target!, source!.Id, id, "Force", -4); if (target!.Dishonorable && !StalwartNegatesBow(target, player.Id)) target.Bowed = true; break;
@@ -3723,6 +3796,53 @@ public sealed partial class MatchEngine
                 break;
             case "shinjo-eun-sahng-attack": case "shosuro-konishi-attack": case "tsuruchi-kosoko-attack": case "stalking-tiger-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            // Tsuruchi Kosoko - exp (oracle-l5r-9831): a plain Ranged 6 Attack whose printed Follower
+            // exception is declared on the ability itself (FollowerException) -- nothing to do here but
+            // attack.
+            case "tsuruchi-kosoko-exp-attack":
+            case "training-followed-recon-attack": case "training-followed-dishonorable-melee-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
+            // Attack." The -4F applies first (to TargetId), then the Attack resolves against its own
+            // separately chosen target (CardIds, validated in ValidateAbility) -- which may be the very
+            // Personality just weakened, whose Force the resolution-time comparison re-reads.
+            case "kahoku-exp-attack":
+                ApplyModifier(target!, source!.Id, id, "Force", -4);
+                if (ResolveOrDeferAttack(id, player, command.CardIds is { Length: 1 } kahokuAttackIds ? kahokuAttackIds[0] : null, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            // Yoritomo Ebumi (oracle-l5r-9832): "One Ranged Attack from your next Ranged Attack action this
+            // battle may target a Personality with attached Followers. If you have Reconnaissance, you may
+            // take an additional Battle action." A standing grant (AttackFollowerException shape (e)),
+            // then -- only with Reconnaissance at the current battlefield -- an additional Battle action.
+            case "yoritomo-ebumi-grant":
+                GrantAttackFollowerException(player.Id, new AttackFollowerException("Ranged"), source!.Id);
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) GrantAdditionalAction(player.Id, null);
+                break;
+            // Kakita Kazan (oracle-l5r-4185): the "enemy dishonorable" legality is the ability's own
+            // TargetMustBe (checked in ValidateAbility); the effect is unconditional. The Honor gain is an
+            // action performed by Kazan, so a dishonorable Kazan is rehonored instead (GainHonorFromPerformer).
+            case "kazan-shame":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                GainHonor(target!.OwnerId, -2, "Kakita Kazan", source);
+                GainHonorFromPerformer(source!, 2, "Kakita Kazan");
+                break;
+            // Hiruma Nitani (oracle-l5r-3311): "Bow Nitani unless you have Reconnaissance" is a cost paid up
+            // front; the +2 strength against a Shadowlands target is AttackStrength's IfTarget condition.
+            case "hiruma-nitani-attack":
+                if (!HasReconnaissanceAtCurrentBattlefield(player.Id)) source!.Bowed = true;
+                if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
+                break;
+            // Kuni Shinoda - exp (oracle-l5r-10276): bow, then destroy if Shadowlands (IfTarget) -- a lone
+            // attachment as an attachment, a Personality as a whole unit (mimori-destroy's own dispatch); the
+            // destroy is a separate clause from the bow, so a Stalwart target whose bow was negated still dies.
+            case "shinoda-exp-bow-destroy":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (EffectConditionMet(id, target))
+                {
+                    if (target!.Zone == Zone.Attached) DestroyAttachment(target); else DestroyUnits([target], false, player.Id);
+                }
                 break;
             case "tsuruchi-isas-attack":
                 source!.Bowed = true;
@@ -3893,7 +4013,7 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 // "Destroy him if he is Kolat, Ninja, or Shadowlands" -- a separate clause from the bow, so
                 // a Stalwart target whose bow was negated is still destroyed (tokoru-bear-bow's own shape).
-                if (Keyword(target!, "Kolat") || Keyword(target!, "Ninja") || IsShadowlands(target!)) DestroyUnits([target!], false, player.Id);
+                if (EffectConditionMet(id, target)) DestroyUnits([target!], false, player.Id);
                 break;
             case "hawado-move-home":
             case "hawado-move-battlefield":
@@ -4155,7 +4275,7 @@ public sealed partial class MatchEngine
             // Champion of Thunder: unlike Rokai/Tamoko above, the affected card is a genuine player
             // CHOICE (this ability's own Target, "own-unit-member"), not auto-determined from the
             // deferred command -- "any card in this unit," including one of several simultaneously
-            // affected by the same action. NegatedEffectKind "all" reaches every effect kind
+            // affected by the same action. NegatedEffects "all" reaches every effect kind
             // (StalwartNegatesBow's own bow check, ApplyModifier, DestroyUnits, MoveHome, Straighten)
             // and is deliberately not consumed here (see NegatesEffect's own doc comment).
             case "champion-of-thunder-negate": _state.NegatedEffects.Add(new("all", target!.Id)); break;
@@ -4462,7 +4582,7 @@ public sealed partial class MatchEngine
         // A Ring's own recruit ability already moves it out of Zone.Hand within its own execution
         // case above, so it never falls into this branch -- only "discard from hand to use the
         // printed action without cost" (issue #194) does.
-        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+        SpendHandPlayedCard(player, source);
         // Discipline (core rules, issue #184): "played and resolved and then removed from the game" --
         // always, whether or not its own effect above did anything else with the card.
         if (ability.Timing == "Discipline") RemoveFromGame(source!);
@@ -4891,8 +5011,12 @@ public sealed partial class MatchEngine
         watch.DestroyedCount[card.OwnerId]++;
         return false;
     }
-    // A Ranged/Melee Attack's target is either a lone Follower (an attachment) or a Personality with
-    // no Followers attached (a full unit) -- the two existing destruction paths, chosen by type.
+    // A Ranged/Melee Attack's target is a lone Follower (an attachment), a Personality with no Followers
+    // attached (a full unit), or -- only under an explicit AttackFollowerException -- a Personality WITH
+    // Followers attached. The two destruction paths are chosen by type: a Personality's destruction
+    // always takes its whole unit (core rules: "If the Personality leaves play, the whole unit leaves play
+    // the same way"), so a followed Personality's attached Followers are destroyed with him -- each
+    // discarded to the Fate discard pile as a destroyed card (DestroyUnits), Expendable draws included.
     private void DestroyAttackTarget(CardInstance target, int playerId)
     {
         if (Definition(target).Type == CardType.Follower) DestroyAttachment(target);
@@ -5038,6 +5162,12 @@ public sealed partial class MatchEngine
                     // hand or a face-up province, neither of which the in-play default reaches, so the
                     // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
                     "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
+                    // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
+                    // Kharmic had -- validated, but a target in a discard pile is never in the in-play
+                    // default, so the ability was never offered. Each mirrors its own Require above.
+                    "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),

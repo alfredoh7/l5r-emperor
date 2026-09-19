@@ -135,6 +135,15 @@ It is now a true multi-reaction window:
   player when they hold a reaction (an attacker's own boost, say), otherwise the other player -- which is
   still the defender in the usual case, so every existing single-reactor Attack test is unchanged, and only
   three tests that had the attacker's own reactor wait behind a vacuous defender pass lost that pass.
+- **An Attack's own target reaches the attack window, but `TargetId` of an Attack-classified ability is not
+  always that target.** The window used to skip every Attack-classified ability (`AttackKind` non-empty).
+  Bayushi Kahoku - exp (#313, merged after the first version of this change) is Attack-classified but its
+  `TargetId` is the separate "-4F" target (an ordinary targeted effect) and its Attack's own target rides in
+  `CardIds`. The exclusion is now `TargetsThroughAttackPipeline` (Attack-classified AND Target category
+  `"attack"`), so the -4F targeting is an action targeting its card here (Champion of Thunder can negate the
+  -4F, Kakihara can react), while Kahoku's Attack target still reaches the attack window through the
+  `targetId` passed to `ResolveOrDeferAttack`. Kahoku is the only such ability today (checked against the
+  whole `AttackKind` list).
 - **"Action" excludes a Reaction, for every card in this window.** A Reaction-timed ability that names a card
   as its target never opens or joins this window (it would also overwrite an open window's `PendingChoice`).
 
