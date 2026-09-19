@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wire Daigotsu Bofana (1706, forced once-per-phase trait) and Daigotsu Bofana - exp (10315, entry discards + Dark Virtue play from the discard pile) as personality-wave-29. General pieces: once-per-phase limit (PhaseLimits.cs), forced discard generalized from Times of Strife and now offered through QueryActions, discard-pile additional-action grant. Also fixes Proclaim-eligible entries skipping mandatory entry effects (nine wired cards).",
-  "validation": "bash tools/check.sh --skip-client passes (216 core, 57 published, 18 bofana, 23 ai and the rest; python tool tests). 19 named mutations each fail a named test. Godot client import/smoke not run locally (no Godot in this worktree); CI runs it.",
-  "remaining": "None; ready for review. Open rules questions for Mendon are listed in docs/decisions/2026-09-19-daigotsu-bofana.md. No bespoke client UI for the forced discard (engine offers it as ordinary hand-card options; not visually checked).",
+  "summary": "Wire Daigotsu Bofana (1706) and Daigotsu Bofana - exp (10315) as personality-wave-29: once-per-phase limit, generalized forced discard, discard-pile additional action. Mendon's rulings applied: Dark Virtue replay follows the same-turn rule per action (Discipline already keyed per action, one shared mechanism), Proclaim gain comes first then the entering effects (nine wired Personalities fixed), Strategy performer reading confirmed.",
+  "validation": "bash tools/check.sh --skip-client passes; 24 named mutations each fail a named test. Godot client import/smoke not run locally; CI runs it.",
+  "remaining": "None; ready for review. No bespoke client UI for the forced discard (not visually checked).",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/333",
   "branch": "claude/333-daigotsu-bofana",
-  "updated": "2026-09-19T12:52:43.132678+00:00"
+  "updated": "2026-09-19T14:21:25.085274+00:00"
 }

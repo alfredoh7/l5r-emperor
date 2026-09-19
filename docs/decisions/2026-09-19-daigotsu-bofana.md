@@ -38,7 +38,7 @@ published whole: base Bofana is one Effect, exp Bofana is an Effect plus `EntryH
 | 1 | **"Another player"** is any player other than Bofana's controller (`command.PlayerId != Bofana.OwnerId`). In the two-player game that is his opponent. | -- |
 | 2 | **The first targeting each phase spends the trigger whether or not the discard happens.** The Force test and an empty hand are the effect's conditions, not the trigger's: a Force 9 performer, or a player with no hand, still uses up that phase's trigger, and a second targeting the same phase does nothing. | Spend it only when a discard actually results. |
 | 3 | **Base Force = the printed Force (7)**, read from the definition, ignoring every modifier on Bofana; the performer's side is `CardForce` (all modifiers, tokens, conditional bonuses). +3 on Bofana does not let a Force 8 performer be caught; -3 does not let a Force 5 one off. | Compare against Bofana's current Force. |
-| 4 | **The performing card** follows Mendon's ruling (above), implemented in one function (`PerformingCardForce`). **A Strategy (or other card) whose ability names a performing card** -- "choose your performing Samurai" -- is performed by that Personality, so his Force decides; the ability's own Performer field is the engine's record of exactly that. A Strategy with no named performer, a Ring, Holding, Region, Celestial, a Stronghold and a player ability (the Imperial Favor) are Force 0. A Strategy played by a player whose army is attacking is still Force 0: an army at the battlefield performs nothing unless the card names it. | Every Strategy is Force 0 even when it names a performing Personality (Mendon's sentence "strategy cards ... always cause the discard" read literally). One line in `PerformingCardForce`. **OPEN 1.** |
+| 4 | **The performing card** follows Mendon's ruling (above), implemented in one function (`PerformingCardForce`). **A Strategy (or other card) whose ability names a performing card** -- "choose your performing Samurai" -- is performed by that Personality, so his Force decides; the ability's own Performer field is the engine's record of exactly that. A Strategy with no named performer, a Ring, Holding, Region, Celestial, a Stronghold and a player ability (the Imperial Favor) are Force 0. A Strategy played by a player whose army is attacking is still Force 0: an army at the battlefield performs nothing unless the card names it. | Every Strategy is Force 0 even when it names a performing Personality (Mendon's sentence "strategy cards ... always cause the discard" read literally). One line in `PerformingCardForce`. **Confirmed by Mendon (PR #334): the implemented reading stands.** |
 | 5 | **"Targets" is `command.TargetId`**, exactly as for Akodo Kakihara's reaction: a group or mass effect that names no single target does not target anything, and a second selection carried in `CardIds` does not count -- with one exception, Bayushi Kahoku - exp, whose Attack's own target rides in `CardIds` beside a separate -4F `TargetId` and who targets both. | Treat every affected card as targeted (needs per-ability classification with no card asking for it yet). |
 | 6 | **Timing: at announcement, before every Reaction window.** A trait resolves before any Reaction to the same trigger (core rules; the engine's `AfterOwnActionTraits` says the same), so the discard is asked first, then a Champion of Thunder / Kakihara window opens, then the action resolves. The Force comparison is made at that moment, before any Reaction can change it. | Queue it and ask after the action resolves (the Times of Strife shape). Rejected: a queued discard opened by a window's close would strand the action that window is holding (see Limits). |
 | 7 | **"Action" excludes a Reaction**, as it does for Kakihara: a Reaction that names Bofana neither triggers the trait nor is answered by it. | -- |
@@ -104,10 +104,19 @@ Clan", Matsu Yoshito's "the Defender is Dragon Clan"). Order follows the text: H
 Proclaim window for a Proclaim-eligible entry (a Personality of the buyer's own Clan, not bought with the Clan discount, by the active
 player, once per turn) and never applied the mandatory entry effects -- `ApplyMandatoryEntryEffects` was only reached through
 `OpenEntryReactionWindow`, which the Proclaim branch bypasses. A Spider player buying exp Bofana at full cost was exactly that case. The
-three branches now apply them before opening the window. **Behaviour change to already-wired cards** (nine; each was silently skipping its
+three branches now apply them, and **Mendon ruled the order (PR #334): Proclaim first.** The Proclaim gain is a separate Honor change from
+any entering trait, so the entering effects -- an Honor loss, Destined's draw, Sensei's discard, exp Bofana's Honor loss and discards -- are
+held on `MatchState.PendingEntryEffectsCardId` and applied by `ApplyPendingEntryEffects` at the first of: the Proclaim being taken (right
+after its gain), a Reaction being used in the window (a trait resolves before a Reaction to the same trigger), or the window closing with
+Proclaim passed. The two are never netted: the event log reads "+3 Honor (Proclaim)" then "-2 Honor (... entering play)". A Personality
+that enters without a Proclaim window (not Proclaim-eligible, Overlay, an ability's recruit that is not eligible) still applies them at once
+through `OpenEntryReactionWindow`, as before. Limit: a player who uses the entry Reaction first and Proclaims afterwards sees the trait
+before the Proclaim gain. **Behaviour change to already-wired cards** (nine; each was silently skipping its
 mandatory effect on a Proclaim-eligible purchase): Mirumoto Kazuya, Togashi Noboru, Daigotsu Shikenuro and Mirumoto Bojan (Honor loss
 on entry), Mirumoto Bojan, Kitsu Ririko, Hida Kurabi and Matsu Ryohei (Destined draw), Mirumoto Hikaro and Yozo exp2 (Sensei discard).
-A regression test buys Kazuya and Kurabi both ways.
+`ProclaimThenEntryEffects` checks all nine, with Proclaim taken and passed, plus the event order on a Crane fixture with Personal Honor 3
+and an entering loss of 2 (none of the nine has Personal Honor above 0 together with a loss); exp Bofana's own test checks that nothing
+happens to his controller's Honor while the window is open and that the discards wait for it to close. **Confirmed by Mendon.**
 
 ### Second ability: investigation, and the decision to wire it
 
@@ -127,11 +136,11 @@ the card, and it is not half the card: both abilities are wired and tested end t
 
 - `AdditionalActionGrant.FromDiscard` (one defaulted field): the grant is the play of the single scoped card from a discard pile.
 - Target category `own-dark-virtue-in-discard` (a Strategy carrying "Dark Virtue" in your own Fate discard pile **that has a Battle
-  action** -- a card with none would only waste the grant, so it is not offered as a target) and the ability `bofana-exp-dark-virtue`,
+  action not yet performed this turn** -- a card with none would only waste the grant, so it is not offered as a target) and the ability `bofana-exp-dark-virtue`,
   whose effect is `GrantAdditionalAction(player, [target], fromDiscard: true)`.
 - `PlayableFromDiscard` in `ValidateAbility`'s zone check and in `AbilityActions`' candidate sources: a discard-pile card is a legal
   source for a **Battle-timed** ability of exactly the card a live `FromDiscard` grant of that player names ("one of its Battle actions":
-  a Battle/Open card's Open half is not one, and the once-per-turn stamp the card earned earlier this turn is not the object played).
+  a Battle/Open card's Open half is not one), and the same-turn rule applies **per action** (see (b)).
   Which Battle action is the player's choice: every one is offered, each validated like any action (target, performer, cost, presence).
 - `ConsumeAdditionalActionGrant` spends a `FromDiscard` grant first, so an unscoped Again! grant is never spent in its place.
 - `PlayedFromDiscard` generalizes `DisciplineFromDiscard`'s removal: a card whose non-Reaction ability is played from a discard pile is
@@ -143,8 +152,16 @@ discard pile; nothing about a card in a discard pile is playable without it (tes
 Battle action.
 
 **Decisions and alternatives.** (a) The chosen card's ability is *its* action, so the Force/Honor/target rules are its own, not Bofana's.
-(b) A hand-played Dark Virtue discarded earlier this turn can be played again from the discard pile the same turn (Discipline's "not the
-same turn as played from hand" is a Discipline rule, not repeated here); alternative: keep the card's once-per-turn stamp. **OPEN 2.**
+(b) **Same-turn replay, ruled by Mendon (PR #334): it follows Discipline's "not the same turn" rule, and the rule is per ACTION, not per
+card.** If a Dark Virtue has more than one action, an action not yet performed may be performed on the turn the card's other action was
+used; the same action cannot be replayed the same turn. Implemented with no new mechanism: the engine's once-per-turn stamp is written under
+each ability's own `UsageKey` (default: its id) on the card's `AbilityUses`, and it survives the card's move to a discard pile, so an action
+performed this turn -- from hand, in play, or earlier from the pile -- is refused when played from the pile through Bofana, while another
+action of the same card is allowed and the next turn allows both. The first version exempted Bofana's play from the stamp; that exemption
+is gone. **Discipline was already per action** (the same key; `SameTurnReplayRule` for Return to Action is unchanged) -- there was nothing
+to align, and both rules are now demonstrably one mechanism: `SameTurnReplayIsPerAction` proves it for a two-action Discipline fixture.
+Return to Action, Banzai! and Lost in Transit have one action each and behave as before. Bofana's target list also drops a Dark Virtue whose
+Battle actions are all spent this turn (it would only waste the grant).
 (c) A Discipline-flagged Dark Virtue played through Bofana would pay the Discipline cost (the pile play prices by the flag); no such card
 exists. (d) The grant obeys "no new additional actions this battle" (Two Hands), like every grant.
 
@@ -167,15 +184,14 @@ exists. (d) The grant obeys "no new additional actions this battle" (Two Hands),
   lists offered actions shows it; a bespoke presentation is UI-lane work. (The same was already true of Times of Strife, which was not
   offered at all before.)
 
-## Open questions for Mendon
+## Mendon's answers to the three open questions (PR #334) -- all confirmed
 
-1. **A Strategy that names a performing Personality** (Unexpected, Strength of the Divine, ...): I read your "Strategy cards count as Force
-   0" as applying to a Strategy with no performer, so a Strategy that says "choose your performing X" is performed by X and X's current
-   Force decides. If you meant every Strategy, it is one line (`PerformingCardForce`, the `ability.Performer` test).
-2. **Playing a Dark Virtue from the discard pile the same turn it was played from hand** is allowed here (the grant is the permission).
-   Say if it should follow Discipline's "not the same turn".
-3. **Proclaim-eligible entries now apply their mandatory entry effects** (list above): confirm the change to the nine already-wired cards
-   is what the printed cards mean (it is what their text says).
+1. **A Strategy that names a performing Personality** is performed by him (his current Force decides); a Strategy with no named performer is
+   Force 0. Confirmed as implemented; no change.
+2. **Dark Virtue replay from the discard pile** follows Discipline's "not the same turn" rule, **per action**, not per card (decision (b)
+   above). Changed.
+3. **Proclaim-eligible entries apply their mandatory entry effects** -- confirmed -- and **Proclaim comes first**, as a separate Honor change
+   from any entering trait; not netted (the Proclaim paragraph above). Changed.
 
 ## Mutation checks
 
@@ -196,13 +212,18 @@ fails at least one named test (the run is a throwaway script, not committed):
 | A Reaction counts as an action | `OnlyAnotherPlayersActions` |
 | The trigger is spent only when the discard condition is met | `PersonalityForceThreshold`, `OncePerPhaseAndPerInstance` |
 | A Crab Clan player discards one card, not two | `ExpEntryDiscards` |
-| The Proclaim path skips the mandatory entry effects again | `ExpEntryDiscards`, `ProclaimEligibleEntryAppliesMandatoryEffects` |
+| The Proclaim path skips the mandatory entry effects again | `ExpEntryDiscards`, `ProclaimThenEntryEffects` |
 | The played Strategy counts as a card in hand | `EmptyHandNothingHappens` |
 | A card played from a discard pile is not removed from the game | `ExpPlaysDarkVirtueFromDiscard`, `ExpGrantIsForfeitable` |
 | Bofana - exp may target a Dark Virtue with no Battle action | `ExpPlaysDarkVirtueFromDiscard` (the first run of this mutation passed: the test only checked the listing, so it now also submits the illegal targets directly) |
 | Kahoku's Attack target does not count as targeting | `KahokuAttackTargetsBofana` |
 | Bofana - exp's entry discards never queued | `ExpEntryDiscards` |
 | A discard-pile card is playable without the grant | `ExpPlaysDarkVirtueFromDiscard`, `ExpGrantIsForfeitable` |
+| The same-turn rule keyed per CARD (any action used this turn blocks every action of the card) | `ExpDarkVirtueSameTurnRulePerAction`, `SameTurnReplayIsPerAction` (Discipline) |
+| Bofana's discard-pile play exempt from the same-turn rule again | `ExpDarkVirtueSameTurnRulePerAction` |
+| Entering effects applied BEFORE the Proclaim window (the loss ahead of the Proclaim gain) | `ExpEntryDiscards`, `ProclaimThenEntryEffects` |
+| Entering effects never applied when the Proclaim window closes unused | `ExpEntryDiscards`, `ProclaimThenEntryEffects` |
+| A Dark Virtue with only spent Battle actions is still a target | `ExpDarkVirtueSameTurnRulePerAction` |
 
 ## Affected files
 
@@ -212,9 +233,9 @@ the `own-dark-virtue-in-discard` target and candidate list, `PlayableFromDiscard
 exemption, candidate sources, label, removal, grant creation and consumption, the Times of Strife queue entry), `MatchEngine.cs` (the
 generalized drain and `ResolveForcedDiscard`, the entry-effect hook, the three Proclaim branches), `MatchQueries.cs` (the `forcedDiscard`
 listing), `Models.cs` (`ForcedDiscard`, `PendingForcedDiscards`, `ForcedDiscardContinuation`, `AdditionalActionGrant.FromDiscard`),
-`PublishedContent.cs` / `CardCatalog.cs` / `L5R.Core.csproj` (personality-wave-29, plus eleven `training-*` fixtures),
+`PublishedContent.cs` / `CardCatalog.cs` / `L5R.Core.csproj` (personality-wave-29, plus thirteen `training-*` fixtures),
 `src/L5R.AI/TrainingOpponent.cs` (the discard score), `tools/content/package_personality_wave_29.py`,
 `content/published/personality-wave-29*.json`, the two art files, `tools/content/build_card_inventory.py` (Bofana's stale BLOCKERS
 entry removed, two notes updated) and `docs/CARD_INVENTORY.xlsx` (regenerated, 409 wired), `tests/L5R.Core.Tests/DaigotsuBofanaTests.cs`
-(new, 18 tests), `Program.cs` (the Times of Strife test, the suite registration), `PublishedTests.cs` (pinned count 409),
+(new, 19 tests), `Program.cs` (the Times of Strife test, the suite registration), `PublishedTests.cs` (pinned count 409),
 `tests/L5R.AI.Tests/Program.cs`.
