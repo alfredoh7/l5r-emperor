@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Wire Daigotsu Hotako exp3, Doji Yoshitada, Sea Troll Predator, Utaku Liu-Xeung exp (personality-wave-32) and Bonds of Coin, Gold and Steel, Fear Me! (strategy-wave-21) on four general primitives: action-lock, multi-target action slots, move to a rule-defined destination, stat-penalty hook (plus the Clan entry discount on QuotePurchase). Published count 409 -> 416.",
-  "validation": "bash tools/check.sh --skip-client passes (216 core, 57 published, 18 gold-parity, 20 gold-quote, and new action-lock 10, multi-target 16, move-destination 9, stat-penalty 8; AI 23, server 8, transport 7); client project builds with dotnet build; 38 of 41 named mutations fail a named test (3 equivalent). Godot import/smoke not run locally (no Godot); CI runs it.",
-  "remaining": "None for the engine. The client ignores ActionOption.Slots/Provinces (default choice submitted): UI issues #345 (multi-target viewer), #346 (destination picker with arrows), #347 (action-lock indicator).",
+  "summary": "Applied Mendon's rulings on PR #348 on the same branch: conditional follow-up slots asked at resolution (Yoshitada, Fear Me!), one before-action reaction window per target (TargetWindows.cs), per-mover negation for Sea Troll Predator, adjacency on the defender's province line at every call site (Moto Gunso and the adjacent-battlefield category fixed), current-stat reading (Fear Me!/Chokehold/Ring of Fire compare current Chi; Rumormonger base Personal Honor; unit Gold cost totals), action-lock covers innate actions (Order Seppuku) but not assignment, and copied abilities. Merged origin/main 05cc2493 and 1f79b9d7 (never rebased); pinned published count recounted: 417 on main + 7 = 424. Decision doc records all seven rulings as confirmed by Mendon; issue #345 updated with up-front vs follow-up slots, comments on #346 and #347.",
+  "validation": "bash tools/check.sh --skip-client all green on the merged tree (216 core, 57 published, action-lock 14, multi-target 21, move-destination 10, stat-penalty 10, AI 25, server, transport 7); dotnet build src/L5R.Client builds; 58 named mutations, 55 killed by a named test and 3 equivalent survivors (table in the decision doc); Godot not available locally, client import/smoke left to CI.",
+  "remaining": "None; ready for review. The two rules-not-text sites (Proclaim gain and dishonorable-death loss) still read printed Personal Honor, noted in the decision doc for Mendon. UI follow-ups #345 #346 #347 belong to Alfredo.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/336",
   "branch": "claude/336-hotako-yoshitada-predator-liuxeung",
-  "updated": "2026-09-19T17:06:11.665728+00:00"
+  "updated": "2026-09-19T20:18:38.531245+00:00"
 }
