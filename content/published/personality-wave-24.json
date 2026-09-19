@@ -1,0 +1,183 @@
+{
+  "Profile": "personality-wave-24",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-807",
+      "Name": "Bayushi Kahoku",
+      "Type": "Personality",
+      "Clan": "Scorpion",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Ranged Attacks from actions performed by Kahoku may target dishonorable Personalities with attached Followers.\nBattle: Target an enemy Personality: Give him -4F. Ranged 3 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-807.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Final Student",
+        "Magistrate",
+        "Samurai",
+        "Scorpion Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kahoku-exp-attack"
+      ],
+      "Effect": "ranged-attacks-may-target-dishonorable-with-followers"
+    },
+    {
+      "Id": "oracle-l5r-9831",
+      "Name": "Tsuruchi Kosoko",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Ranged 6 Attack that may target a Personality with Followers.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9831.jpg",
+      "Keywords": [
+        "Unique",
+        "Experienced",
+        "Mantis Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "tsuruchi-kosoko-exp-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9832",
+      "Name": "Yoritomo Ebumi",
+      "Type": "Personality",
+      "Clan": "Mantis",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: One Ranged Attack from your next Ranged Attack action this battle may target a Personality with attached Followers. If you have Reconnaissance, you may take an additional Battle action.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9832.jpg",
+      "Keywords": [
+        "Naval",
+        "Mantis Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yoritomo-ebumi-grant"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4185",
+      "Name": "Kakita Kazan",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 4,
+      "HonorRequirement": 5,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy dishonorable Personality: Bow him. His controller loses 2 Honor. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4185.jpg",
+      "Keywords": [
+        "Duelist",
+        "Commander",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai",
+        "Soul of Kakita Idzuki"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kazan-shame"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3311",
+      "Name": "Hiruma Nitani",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow Nitani unless you have Reconnaissance: Ranged 4 Attack, with +2 strength if the target is Shadowlands.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3311.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Jade Hand",
+        "Samurai",
+        "Scout",
+        "Soul of Hiruma Hidora"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hiruma-nitani-attack"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10276",
+      "Name": "Kuni Shinoda",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy card: Bow it. If it is Shadowlands, destroy it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10276.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Crab Clan",
+        "Earth",
+        "Experienced",
+        "Hero",
+        "Shugenja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "shinoda-exp-bow-destroy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
