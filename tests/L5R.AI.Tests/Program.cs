@@ -35,6 +35,23 @@ Run("resolves purchase and Proclaim with alternating reaction priority",()=>
     }
     Check(game.GetView(0).PendingChoice is null,"Reaction window stuck");
 });
+Run("passes, never deadlocks, in a multi-reaction before-action window (issue #318)",()=>
+{
+    // The legal-action listing now offers the player holding priority every reaction of their own that applies to the
+    // deferred action (here Kakihara's and a Champion of Thunder's, the latter with a chosen target) alongside a pass.
+    // The practice opponent scores a targetless or unknown reaction below passing, so it always passes -- and since a
+    // pass is always listed for whoever holds priority, the window closes on two consecutive passes.
+    var game=MatchEngine.CreateStarterMatch();
+    var view=game.GetView(0) with { PendingChoice=new("beforeActionReaction",1,null,"Before this action resolves: either player may use a reaction, or pass.") };
+    var actions=new ActionOption[]
+    {
+        new("useAbility","Kakihara",true,null,new("useAbility",0,view.Version,CardId:"kakihara",AbilityId:"kakihara-force-bonus"),"kakihara"),
+        new("useAbility","Champion of Thunder",true,null,new("useAbility",0,view.Version,CardId:"champion",TargetId:"host",AbilityId:"champion-of-thunder-negate"),"champion"),
+        new("declineReaction","Pass reaction",true,null,new("declineReaction",0,view.Version))
+    };
+    var decision=TrainingOpponent.Choose(view,actions);
+    Check(decision.Command?.Type=="declineReaction","The practice opponent took a reaction over passing");
+});
 Run("chooses an offered free Experienced Overlay",()=>
 {
     var game=MatchEngine.CreateEconomyScenario();var view=game.GetView(0);
