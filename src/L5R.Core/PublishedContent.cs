@@ -1624,7 +1624,7 @@ public static class PublishedContent
         return snapshot;
     }
 
-    /// <summary>Personality wave 25 (issues #309/#310): Daidoji Yuki, Experienced (oracle-l5r-1696) -- the first consumer of the Battle Phase timing primitives (the Engage window, the first-action claim with Naval Invasion, the generalized before-resolution window and the public BattleStepView). Yuki's Recon Reaction grants Reconnaissance (an Attacker's; a Defender's is a documented no-op) and claims the first opportunity to act.</summary>
+    /// <summary>Personality wave 25 (issues #309/#310): Daidoji Yuki, Experienced (oracle-l5r-1696) -- the first consumer of the Battle Phase timing primitives (the Engage window, the first-action claim with Naval Invasion, the generalized before-resolution window and the public BattleStepView). Yuki's Recon Reaction grants his controller Reconnaissance at the battlefield whether they are the Attacker or the Defender (a Defender's sits at their own province) and claims the first opportunity to act.</summary>
     public static PublishedSnapshot PersonalityWave25 { get; } = LoadPersonalityWave25();
 
     private static PublishedSnapshot LoadPersonalityWave25()

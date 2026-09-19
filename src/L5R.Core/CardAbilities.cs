@@ -239,6 +239,8 @@ public static class AbilityCatalog
         // Training-only: exercises the Reconnaissance primitive (issue #93) ahead of any published
         // card needing it -- a per-player, per-province boolean that gates only part of an effect.
         ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
+        // ...and the printed "You have Reconnaissance at the current battlefield", usable by either side of a battle.
+        ["training-gain-reconnaissance-here"] = new("Battle", "Training: you have Reconnaissance at the current battlefield", "none"),
         ["training-reconnaissance-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor if you have Reconnaissance there", "enemy-personality"),
         // ---- Battle Phase timing (issues #309/#310): the Engage window, the first-action claim, and the general
         // "before this battle resolves" window. See docs/decisions/2026-09-18-battle-timing-primitives.md.
@@ -1681,16 +1683,15 @@ public sealed partial class MatchEngine
     // "all") never even gets its window opened for such a command -- the movement is never offered
     // for negation at all, rather than being offered and then overridden. Wrathful Ancestor is
     // unconditional; Kinto's is conditional on his controller having Reconnaissance at the current
-    // battlefield -- the province the current battle is being fought at is always the DEFENDER's own,
-    // so a Defender (who can only ever hold Reconnaissance at an ENEMY province, never their own) never
-    // qualifies. Wrathful Ancestor was previously protected from Tamoko only by omission from
+    // battlefield -- whichever side he fights on: an Attacker's grant sits at the Defender's province and
+    // a Defender's at their own (issue #309; this note used to say a Defender never qualifies, which the
+    // rules lead's Daidoji Yuki ruling overturned). Wrathful Ancestor was previously protected from Tamoko only by omission from
     // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
     // anyway; routing it through this shared check closes that gap too.
     private bool MovementCannotBeNegated(GameCommand command) => command.AbilityId switch
     {
         "wrathful-ancestor-move" => true,
-        "kinto-move" => _state.CurrentBattleProvince is int province
-            && HasReconnaissance(command.PlayerId, 1 - _state.ActivePlayerId, province),
+        "kinto-move" => HasReconnaissanceAtCurrentBattlefield(command.PlayerId),
         _ => false
     };
     private bool ControlsAnyRing(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
@@ -1778,7 +1779,19 @@ public sealed partial class MatchEngine
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
     // Resets to false only when the battle there resolves (see ResolveBattle).
+    // Either player may hold it at ANY battlefield (rules lead's ruling, issue #309: Daidoji Yuki grants it "regardless of
+    // whether Yuki's controller is the attacker or the defender", so a Defender holds it at their OWN province -- the
+    // engine's earlier assumption that a Defender can only hold it at an enemy province is gone). The real question every
+    // reader asks is HasReconnaissanceAtCurrentBattlefield(player); the raw (player, province owner, index) form below is
+    // only for the province-index-targeted training grant, and must never be answered with "1 - player" as the owner.
     private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
+    // "You have Reconnaissance at the current battlefield" (Yuki, and every Recon Reaction like him): the battlefield's
+    // province row is always the DEFENDER's (a battlefield only ever sits at a defending player's province), whichever
+    // player is being granted it -- so the owner is 1 - ActivePlayerId for the Attacker and the Defender alike.
+    private void GrantReconnaissanceAtCurrentBattlefield(int playerId)
+    {
+        if (_state.CurrentBattleProvince is int province) GrantReconnaissance(playerId, 1 - _state.ActivePlayerId, province);
+    }
     private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
     {
         var province = Player(provinceOwnerId).Provinces[provinceIndex];
@@ -2508,7 +2521,7 @@ public sealed partial class MatchEngine
                 && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
                 "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
-        if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
+        if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
         // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
         // belonging to the SAME player who holds this card in hand; the card itself must still
@@ -3712,7 +3725,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "keppo-destroy":
-                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) DestroyAttachment(target!);
                 break;
             case "kuronada-destroy": DestroyUnits([target!], false, player.Id); break;
             case "shosuro-ritoru-bow":
@@ -4160,8 +4173,10 @@ public sealed partial class MatchEngine
                 break;
             case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
             case "training-reconnaissance-strike":
-                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike", source);
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) GainHonor(target!.OwnerId, -2, "Training Reconnaissance strike", source);
                 break;
+            // Training-only (issue #309): "You have Reconnaissance at the current battlefield" (a Battle action of either side).
+            case "training-gain-reconnaissance-here": GrantReconnaissanceAtCurrentBattlefield(player.Id); break;
             case "tactical-advantage":
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
                 DiscardFate(player, target!);
@@ -4625,14 +4640,11 @@ public sealed partial class MatchEngine
             // order claims are made in never matters and claims never stack.
             case "yuki-engage-recon":
             {
-                var engage = _state.PendingEngage!;
-                // "You have Reconnaissance there": the engine's Reconnaissance rule (see MovementCannotBeNegated) is that
-                // a player holds it only at an ENEMY province, and a battlefield is always the Defender's own province --
-                // so an Attacker's Yuki gains it and a defending Yuki's grant is a no-op. Not forced: reported for the
-                // rules lead (docs/decisions/2026-09-18-battle-timing-primitives.md, open question 1). The first-
-                // opportunity claim below is unaffected either way.
-                if (player.Id == engage.Attacker) GrantReconnaissance(player.Id, engage.Defender, engage.ProvinceIndex);
-                else Emit("reconnaissanceNotGained", $"{player.Name} cannot hold Reconnaissance at their own province's battlefield; Yuki's Reconnaissance has no effect.", player.Id, source?.Id);
+                // "You have Reconnaissance there": granted to Yuki's controller whether they are the Attacker or the Defender
+                // (rules lead's ruling, verbatim: the all-Scouts condition -- checked by ValidateAbility -- is what decides the grant,
+                // "regardless of whether Yuki is in an attacking or defending army"). "There" is Yuki's battlefield, which for a
+                // Defender is their OWN province; the opponent gains nothing.
+                GrantReconnaissanceAtCurrentBattlefield(player.Id);
                 ClaimFirstOpportunity(player.Id, "Engage", source);
                 break;
             }

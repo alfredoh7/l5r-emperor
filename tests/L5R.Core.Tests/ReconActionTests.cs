@@ -203,6 +203,7 @@ internal static class ReconActionTests
             var e=MatchEngine.FromTestState(s);
             Accept(e,Use(e,0,"training-recon-attack",actor.Id));
             Eq(e.State.PendingChoice?.Type,"attackReaction","The Recon Attack is pending, open to reaction");
+            Eq(e.State.PendingAttack!.Kind,"Ranged","a Ranged Attack (Ranged-only reactions -- Strong Defenses, Tsuruchi Yakusho -- key off this)");
             Eq(Bonuses(e,ebizo),0,"Announced, not yet resolved: no bonus yet");
             Accept(e,Decline(e)); Accept(e,Decline(e));
             Check(e.State.PendingChoice is null && e.State.PendingAttack is null);
@@ -251,6 +252,7 @@ internal static class ReconActionTests
             Accept(e,Decline(e)); // the Attacker has no reaction to play: pass, so the Defender's opportunity comes
             Accept(e,Use(e,1,"yuki-engage-recon",yuki.Id));
             Eq(Bonuses(e,defenderEbizo),1,"A defending Yuki triggers his controller's Ebizo"); Eq(Bonuses(e,attackerEbizo),0);
+            Check(e.State.Players[1].Provinces[0].Reconnaissance[1] && !e.State.Players[1].Provinces[0].Reconnaissance[0],"(and, per the rules lead's ruling, gave the Defender Reconnaissance at their own province)");
         }
     }
 
@@ -277,6 +279,14 @@ internal static class ReconActionTests
             Reject(e,Use(e,0,"ebizo-attack",ebizo.Id,target:target.Id)); // a declared target above the Attack's strength (4) is not a legal target
             Accept(e,Use(e,0,"ebizo-attack",ebizo.Id)); // ...but the action itself needs no target up front
             Eq(e.State.Cards[target.Id].Zone,Zone.Battlefield,"strength 4 cannot destroy a Force-6 target");
+        }
+        // Held open by an enemy attack reactor, the pending Attack is a Ranged one whose strength is his live Force.
+        {
+            var s=BattleTable();
+            var ebizo=Add(s,Ebizo,0,Zone.Battlefield,province:0); Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id));
+            Eq(e.State.PendingAttack!.Kind,"Ranged"); Eq(e.State.PendingAttack.Strength,4,"strength = his Force (4)");
         }
         // Two Recon actions first: Ebizo is Force 6 now, so the SAME attack destroys the Force-6 target -- the strength is his live Force.
         {

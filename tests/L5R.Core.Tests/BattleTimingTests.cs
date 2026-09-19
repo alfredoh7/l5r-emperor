@@ -21,7 +21,9 @@ internal static class BattleTimingTests
             ("First-action claim: an attacker-side claim (Sneak Attack shape) flips the first opportunity to the Attacker", AttackerClaimFlips),
             ("First-action claim: two and three attacker-side claims (incl. an attacker-controlled Yuki) are still exactly one opportunity", ClaimsNeverStack),
             ("First-action claim: a defending Yuki overrides the attacker's claims in either order, and the Defender acts first", DefenderClaimWinsAnyOrder),
-            ("Daidoji Yuki: Reconnaissance for an Attacker's Yuki (resets after the battle), a no-op for a Defender's, first opportunity either way", YukiReconnaissance),
+            ("Daidoji Yuki: Reconnaissance for his controller as Attacker OR Defender (own province), never the opponent, resets after the battle", YukiReconnaissance),
+            ("Daidoji Yuki: the all-Scouts condition decides the grant on either side, and only his controller's Personalities count", YukiReconnaissanceScoutCondition),
+            ("Reconnaissance readers ask 'does this player have it at the current battlefield': a defender's Yuki-granted Recon serves Sniper, Keppo, Kinto and a fixture; the opponent never gains it", ReconnaissanceReadersServeDefenders),
             ("Daidoji Yuki: every Personality of his controller there must be a Scout, he must be assigned to the engaged battlefield, unbowed, once", YukiConditions),
             ("Engage window: opens once per battle, only when something is playable at the SELECTED battlefield, and never again in that battle", WindowOncePerBattle),
             ("Engage window state is plain data: a snapshot taken mid-window continues identically on two engines", EngageDeterministic),
@@ -294,17 +296,152 @@ internal static class BattleTimingTests
         Check(e.State.Players[1].Provinces[0].Reconnaissance[0],"Still held during the battle");
         ResolveByPassing(e);
         Check(e.State.Players[1].Provinces[0].Reconnaissance.All(r=>!r),"Reconnaissance resets for both players once the battle resolves");
-        // A Defender's Yuki: the engine's Reconnaissance rule (only ever at an ENEMY province) makes his grant a no-op; the first-opportunity part is unaffected.
+        Check(!e.State.Players[0].Provinces[0].Reconnaissance.Any(r=>r),"Nothing is set at the Attacker's own province row");
+        Check(!e.GetView(0).Events.Any(ev=>ev.Type=="reconnaissanceNotGained"));
+        // A Defender's Yuki (rules lead's ruling): the Scout condition alone decides the grant, so his controller has Reconnaissance
+        // "there" -- the battlefield is the Defender's OWN province -- exactly as an Attacker's controller does at the enemy's.
         var s2=Table(); Units(s2,defender:"training-scout-samurai");
         var yuki2=Add(s2,Yuki,1,Zone.Battlefield,province:0);
         var e2=MatchEngine.FromTestState(s2);
         Accept(e2,Select(e2)); Accept(e2,Decline(e2));
         Accept(e2,Use(e2,1,"yuki-engage-recon",yuki2.Id));
-        Check(e2.State.Players.SelectMany(p=>p.Provinces).All(p=>p.Reconnaissance.All(r=>!r)),"Nobody gained Reconnaissance");
-        Check(e2.GetView(0).Events.Any(ev=>ev.Type=="reconnaissanceNotGained") && !e2.GetView(0).Events.Any(ev=>ev.Type=="reconnaissanceGained"),"Reported, not silent");
-        Eq(e2.State.PendingEngage!.Claims.Count,1,"...but the claim still stands");
+        Check(e2.State.Players[1].Provinces[0].Reconnaissance[1],"The Defender holds Reconnaissance at their own battlefield province");
+        Check(!e2.State.Players[1].Provinces[0].Reconnaissance[0],"The opponent (the Attacker) does not gain it");
+        Check(!e2.State.Players[0].Provinces[0].Reconnaissance.Any(r=>r),"Nothing is set at the Attacker's own province of the same index");
+        Check(e2.GetView(0).Events.Any(ev=>ev.Type=="reconnaissanceGained" && ev.Message.Contains(e2.State.Players[1].Name)),"Announced as the Defender's gain");
+        Check(!e2.GetView(0).Events.Any(ev=>ev.Type=="reconnaissanceNotGained"),"Never reported as a no-op any more");
+        Eq(e2.State.PendingEngage!.Claims.Count,1,"The first-opportunity claim is recorded exactly as before");
         CloseWindow(e2);
-        Eq(e2.State.PriorityPlayerId,1);
+        Eq(e2.State.PriorityPlayerId,1); Eq(ReasonOf(e2),BattleSteps.ReasonDefault,"A defender claim with nothing to override is still just the default");
+        Check(e2.State.Players[1].Provinces[0].Reconnaissance[1],"Still held during the battle");
+        ResolveByPassing(e2);
+        Check(e2.State.Players.SelectMany(p=>p.Provinces).All(p=>p.Reconnaissance.All(r=>!r)),"Reset for both players when the battle resolves, as for an Attacker's");
+        // Each side's own Yuki grants its own controller (never the other's), and the Defender's claim still overrides.
+        var s3=Table(); Units(s3,attacker:"training-scout-samurai",defender:"training-scout-samurai");
+        var yA=Add(s3,Yuki,0,Zone.Battlefield,province:0); var yD=Add(s3,Yuki,1,Zone.Battlefield,province:0);
+        var e3=MatchEngine.FromTestState(s3);
+        Accept(e3,Select(e3));
+        Accept(e3,Use(e3,0,"yuki-engage-recon",yA.Id)); Accept(e3,Use(e3,1,"yuki-engage-recon",yD.Id));
+        Check(e3.State.Players[1].Provinces[0].Reconnaissance[0] && e3.State.Players[1].Provinces[0].Reconnaissance[1],"Each controller holds their own");
+        CloseWindow(e3);
+        Eq(e3.State.PriorityPlayerId,1); Eq(ReasonOf(e3),BattleSteps.ReasonDefenderOverride);
+    }
+
+    // The all-Scouts condition (checked in ValidateAbility) is the ONLY thing deciding the grant, on either side. It reads
+    // "all your Personalities there", so only his controller's Personalities count, never the opponent's.
+    private static void YukiReconnaissanceScoutCondition()
+    {
+        foreach(var side in new[]{0,1})
+        {
+            // A non-Scout beside a Yuki of THIS side, with the other side entirely Scouts: refused, nobody gains anything, no claim.
+            var s=Table();
+            Units(s,attacker:side==0?"training-crane-samurai":"training-scout-samurai",defender:side==1?"training-lion-samurai":"training-scout-samurai");
+            var yuki=Add(s,Yuki,side,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Select(e));
+            Check(e.State.PendingChoice is null,$"side {side}: Yuki cannot be used and nothing else is playable: no window");
+            // Same position with a playable Strategy so the window opens and the refusal itself is exercised.
+            var s2=Table();
+            Units(s2,attacker:side==0?"training-crane-samurai":"training-scout-samurai",defender:side==1?"training-lion-samurai":"training-scout-samurai");
+            var yuki2=Add(s2,Yuki,side,Zone.Battlefield,province:0); Add(s2,Honor,side,Zone.Hand);
+            var e2=MatchEngine.FromTestState(s2);
+            Accept(e2,Select(e2));
+            Eq(e2.State.PendingChoice?.Type,"engageReaction",$"side {side}");
+            if(e2.State.PriorityPlayerId!=side) Accept(e2,Decline(e2));
+            var refused=e2.Execute(Use(e2,side,"yuki-engage-recon",yuki2.Id));
+            Check(!refused.Accepted && refused.Error!.Contains("Scouts"),$"side {side}: refused for the Scout condition ({refused.Error})");
+            Check(e2.State.Players.SelectMany(p=>p.Provinces).All(p=>p.Reconnaissance.All(r=>!r)),$"side {side}: nobody gained Reconnaissance");
+            Check(e2.State.PendingEngage!.Claims.Count==0,$"side {side}: and no claim was made");
+        }
+        // Only his controller's Personalities count: the OTHER side's non-Scout does not stop either Yuki (Attacker's, Defender's).
+        {
+            var s=Table(); Units(s,attacker:"training-crane-samurai",defender:"training-scout-samurai"); var yuki=Add(s,Yuki,1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s); Accept(e,Select(e)); Accept(e,Decline(e)); Accept(e,Use(e,1,"yuki-engage-recon",yuki.Id));
+            Check(e.State.Players[1].Provinces[0].Reconnaissance[1],"Defender's Yuki with an all-Scout army gains it against a non-Scout Attacker");
+            var s2=Table(); Units(s2,attacker:"training-scout-samurai",defender:"training-lion-samurai"); var yuki2=Add(s2,Yuki,0,Zone.Battlefield,province:0);
+            var e2=MatchEngine.FromTestState(s2); Accept(e2,Select(e2)); Accept(e2,Use(e2,0,"yuki-engage-recon",yuki2.Id));
+            Check(e2.State.Players[1].Provinces[0].Reconnaissance[0],"Attacker's Yuki with an all-Scout army gains it against a non-Scout Defender");
+        }
+    }
+
+    // Every reader asks the one question -- does THIS player have Reconnaissance at the CURRENT battlefield, whoever owns that
+    // province -- so a Defender who gained it (here through Yuki) satisfies each Recon-dependent card, and one who did not is refused.
+    private static void ReconnaissanceReadersServeDefenders()
+    {
+        // Common shape: player 0 attacks with a plain Personality; player 1 defends with Yuki (a Scout) and the card under test.
+        // Yuki is played in the Engage window (or not, for the control) and the window is then closed; the Defender acts first.
+        MatchEngine Defence(Action<MatchState,CardInstance,CardInstance> arrange,bool playYuki,out CardInstance yuki)
+        {
+            var s=Table();
+            var attacker=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+            yuki=Add(s,Yuki,1,Zone.Battlefield,province:0);
+            arrange(s,attacker,yuki);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Select(e));
+            if(playYuki) { Accept(e,Decline(e)); Accept(e,Use(e,1,"yuki-engage-recon",yuki.Id)); }
+            CloseWindow(e);
+            Eq(e.State.PriorityPlayerId,1,"the Defender acts first");
+            return e;
+        }
+        string? Error(MatchEngine e,GameCommand c)=>e.Execute(c) is { Accepted:false } r ? r.Error : null;
+        // Hiruma Sniper (a Follower on Yuki): "Battle: If you have Reconnaissance: Ranged 4 Attack." Requirement, not effect-gated.
+        foreach(var recon in new[]{true,false})
+        {
+            CardInstance sniper=null!,target=null!;
+            var e=Defence((s,a,y)=>{ target=a; sniper=Add(s,"oracle-l5r-3325",1,Zone.Attached,province:0,parent:y.Id); },recon,out _);
+            var cmd=Use(e,1,"hiruma-sniper-attack",sniper.Id,target:target.Id);
+            if(recon)
+            {
+                Accept(e,cmd);
+                Eq(e.State.Cards[target.Id].Zone,Zone.Dead,"A defending Sniper's Ranged 4 Attack kills the Force-3 attacker: Yuki gave the Defender Reconnaissance");
+            }
+            else Check(Error(e,cmd)?.Contains("Reconnaissance")==true,"Without Reconnaissance the Defender's Sniper is refused for the requirement");
+        }
+        // Keppo (a Scout): "If you have Reconnaissance, target an enemy attachment: Destroy it" -- effect-gated, so it fizzles without.
+        foreach(var recon in new[]{true,false})
+        {
+            CardInstance keppo=null!,item=null!;
+            var e=Defence((s,a,y)=>{ keppo=Add(s,"oracle-l5r-4328",1,Zone.Battlefield,province:0); item=Add(s,"training-item",0,Zone.Attached,province:0,parent:a.Id); },recon,out _);
+            Accept(e,Use(e,1,"keppo-destroy",keppo.Id,target:item.Id));
+            Eq(e.State.Cards[item.Id].Zone==Zone.Attached,!recon,recon?"a defending Keppo with Reconnaissance destroys the attachment":"without it the action resolves and nothing is destroyed");
+        }
+        // Shinjo Kinto (a Scout): "This movement will not be negated if you have Reconnaissance." The Attacker's Tamori Tamoko
+        // (a movement-negation watcher) only gets its window when the Defender's Kinto lacks Reconnaissance.
+        foreach(var recon in new[]{true,false})
+        {
+            CardInstance kinto=null!,target=null!;
+            var e=Defence((s,a,y)=>{ kinto=Add(s,"oracle-l5r-6906",1,Zone.Battlefield,province:0); target=a; Add(s,"training-tamoko",0,Zone.Battlefield,province:0); },recon,out _);
+            Accept(e,Use(e,1,"kinto-move",kinto.Id,target:target.Id));
+            if(recon)
+            {
+                Check(e.State.PendingChoice is null,"a defending Kinto with Reconnaissance: the movement is never offered for negation");
+                Eq(e.State.Cards[target.Id].Zone,Zone.Home,"and it resolves");
+            }
+            else Eq(e.State.PendingChoice?.Type,"beforeActionReaction","without Reconnaissance the Attacker's Tamoko gets a negation window");
+        }
+        // The opponent does NOT gain it: the Attacker's own Sniper, with the Defender's Yuki having granted Reconnaissance, is refused.
+        {
+            CardInstance sniper=null!,host=null!;
+            var e=Defence((s,a,y)=>{ host=a; sniper=Add(s,"oracle-l5r-3325",0,Zone.Attached,province:0,parent:a.Id); Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0); },true,out _);
+            Check(e.State.Players[1].Provinces[0].Reconnaissance[1] && !e.State.Players[1].Provinces[0].Reconnaissance[0]);
+            Accept(e,PassC(e)); // the Defender passes; the Attacker's turn
+            var defenderUnit=e.State.Cards.Values.First(c=>c.OwnerId==1 && c.DefinitionId=="training-scout-samurai");
+            Check(Error(e,Use(e,0,"hiruma-sniper-attack",sniper.Id,target:defenderUnit.Id))?.Contains("Reconnaissance")==true,"The Attacker still has none: their Sniper is refused");
+        }
+        // Training fixtures: the printed "You have Reconnaissance at the current battlefield" (either side) satisfies the Recon-gated strike.
+        foreach(var recon in new[]{true,false})
+        {
+            var s=Table();
+            var enemy=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+            var granter=Add(s,"training-scout",1,Zone.Battlefield,province:0); var striker=Add(s,"training-scout",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Select(e)); Eq(e.State.PriorityPlayerId,1);
+            var honor=e.State.Players[0].Honor;
+            if(recon) { Accept(e,Use(e,1,"training-gain-reconnaissance-here",granter.Id)); Accept(e,PassC(e)); }
+            Check(e.State.Players[1].Provinces[0].Reconnaissance[1]==recon && !e.State.Players[1].Provinces[0].Reconnaissance[0]);
+            Accept(e,Use(e,1,"training-reconnaissance-strike",striker.Id,target:enemy.Id));
+            Eq(e.State.Players[0].Honor,recon?honor-2:honor,recon?"a defender's grant sits at their own province and lets the strike land":"without it the strike does nothing");
+        }
     }
 
     private static void YukiConditions()

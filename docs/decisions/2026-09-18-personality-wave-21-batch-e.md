@@ -31,8 +31,11 @@ Remnants-style watcher does not get to react to the *created token's* entry when
 
 **Un-negatable movement is a shared check.** `MovementCannotBeNegated` suppresses every negating
 interrupt window (Tamori Tamoko's move-negation and Champion of Thunder's "all") for a command. Shinjo
-Kinto's is conditional on Reconnaissance at the current battlefield (a Defender, who can only hold
-Reconnaissance at an enemy province, never qualifies); Wrathful Ancestor's is unconditional. Wrathful
+Kinto's is conditional on Reconnaissance at the current battlefield, whichever side his controller
+fights on (this note originally said a Defender, assumed to hold Reconnaissance only at an enemy
+province, never qualifies; the rules lead's Daidoji Yuki ruling in
+`2026-09-18-battle-timing-primitives.md` decision 5 overturned that, so a Defender who gained it, e.g.
+through Yuki, gets un-negatable movement at their own province); Wrathful Ancestor's is unconditional. Wrathful
 Ancestor was previously protected from Tamoko only by omission from `MoveOrStraightenKind`, which left
 Champion of Thunder able to catch it despite the printed text; routing it here closes that gap.
 
