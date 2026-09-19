@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Build four small primitives in CardAbilities.cs/MatchEngine.cs -- a universal Ninja-action trait (Apprentice Shinobi), a new after-an-action-moves-a-card-to-this-battlefield Reaction (Legion of the Bat, plus its own Crane Clan Equip discount), a new after-a-sibling-Follower-bows Reaction (Nikutai), and a new automatic after-Attack-Phase-ends trait (Wave Man) -- and wire the four Followers that need them (Follower wave 11, 328 wired; all four were catalogued as Personality in the originating task description, but each is actually a Follower per its own scan). Crosses into src/L5R.Client/Content/Published/ only to add the four cards' own scanned art (oracle-l5r-419.jpg, oracle-l5r-4700.jpg, oracle-l5r-9872.jpg, oracle-l5r-9255.jpg), the same routine art-only cross every prior wave's handoff already makes -- no client code or UI behavior touched. Rebased three times mid-session onto three unrelated concurrent origin/main advances (follower-wave-10/issue #271, strategy-wave-10/issue #273, spell-wave-3+personality-wave-19/issue #276 follow-up); see the decision doc for two real pinned-count near-misses those rebases surfaced and how each was resolved by recomputing from scratch rather than trusting either side of the conflict.",
+  "validation": "dotnet run --project tests/L5R.Core.Tests (244/244: 177 core + 57 published + deck-format/deck-workshop, including 8 new regression cases across 4 test blocks covering all four cards' positive and negative paths) and bash tools/check.sh --skip-client (all four .NET test projects plus both Python unittest suites) both green. docs/CARD_INVENTORY.xlsx regenerated (328 wired, 4 stale BLOCKERS entries removed).",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/279",
+  "branch": "claude/279-follower-wave-11-primitives",
+  "updated": "2026-09-18T09:25:05.449465+00:00"
+}

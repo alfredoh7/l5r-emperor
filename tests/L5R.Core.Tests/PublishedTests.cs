@@ -50,6 +50,10 @@ internal static class PublishedTests
             ("OfferedActions/battle/player-0: live-deck commands and alternate targets validate", () => OfferedActions(true,0)),
             ("OfferedActions/battle/player-1: live-deck commands and alternate targets validate", () => OfferedActions(true,1)),
             ("Published full-game transcript replays deterministically", Replay),
+            ("Encircled Terrain: controller-chosen order, both sides keep one Personality, all others sent home unbowed", EncircledTerrainSelection),
+            ("Before This Battle Resolves: two simultaneous sources are ordered by the active player, one at a time", BeforeBattleResolveMultiSourceOrdering),
+            ("Looting the Ruins: unconditional return-to-hand, mid-Battle-phase and as the last battlefield ending the phase", LootingTheRuinsReturnToHand),
+            ("Vital Pathways: Attacker draws two if opposed, one if not, none unless the province was actually destroyed", VitalPathwaysDraw),
         ];
         runner.Run("published",tests.Concat(CatalogueWaves()));
     }
@@ -81,7 +85,23 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,319);
+        // SILENT MERGE TRAP CAUGHT HERE: both sides of this exact conflict independently computed
+        // 331 for entirely different reasons (HEAD: 327 + this branch's own 4; incoming: 327 + PR
+        // #283's own 4) -- a coincidental numeric match that would have made git's own 3-way merge
+        // silently pick either 331 with no conflict marker, DROPPING one side's real 4-card addition.
+        // True total: 322 (shared baseline after PR #280) + 2 (PR #277's SpellWave3 +
+        // PersonalityWave19) + 3 (PR #281's own FollowerWave11 + StrategyWave11) + 4 (PR #283's own
+        // FollowerWave12, now merged into main) + 4 (PR #284's own StrategyWave12 (2) +
+        // FollowerWave13 (1) + PersonalityWave20 (1), now merged into main) + 6 (PR #286's own
+        // FollowerWave14, issue #285) = 341 (Batch A's own baseline) + 7 (PR #288's own
+        // StrategyWave13, issue #287 Batch B -- eight cards assigned, but Surety of Purpose
+        // (oracle-l5r-7664) turned out already published in strategy-wave-6, so only 7 were new
+        // there) = 348 (Batch B's own baseline, now merged into main) + 7 (this branch's own
+        // StrategyWave14, issue #289 Batch C -- eight cards assigned again, but Wrathful Ancestor
+        // (oracle-l5r-9390) turned out already published in strategy-wave-6 too, so only 7 are new
+        // here) = 355. Recomputed from the actual current baseline each time this conflicts, never
+        // copied from either side of a merge.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,355);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
@@ -110,6 +130,7 @@ internal static class PublishedTests
             ("FollowerWave1",()=>PublishedContent.FollowerWave1,1,CardType.Follower,null),
             ("PersonalityWave4",()=>PublishedContent.PersonalityWave4,2,CardType.Personality,()=>PublishedContent.PersonalityWave3),
             ("PersonalityWave5",()=>PublishedContent.PersonalityWave5,5,CardType.Personality,()=>PublishedContent.PersonalityWave4),
+            ("StrategyWave10",()=>PublishedContent.StrategyWave10,3,CardType.Strategy,()=>PublishedContent.StrategyWave9),
         ];
         foreach(var wave in waves)
             yield return ($"CatalogueWaves/{wave.Name}: count, type, text and catalogue wiring",()=>
@@ -367,5 +388,147 @@ internal static class PublishedTests
             Accept(e,chosen.Command!);
         }
         Check(e.State.WinnerId is not null,"Published scripted match did not finish.");Eq(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));
+    }
+    // Strategy wave 10 (issue #272): the three new battle-resolution-timing primitives -- see
+    // MatchEngine.cs' own BeforeBattleResolve/AfterBattleResolve doc comments and
+    // docs/decisions/2026-09-17-battle-resolution-timing-primitives.md.
+    private static void EncircledTerrainSelection()
+    {
+        var s=State(battle:true);
+        foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+        var terrain=Add(s,"oracle-l5r-2332",0,Zone.Battlefield,province:0); // controller: the Attacker (player 0)
+        var a1=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, sent home
+        var a2=Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5, kept -- decides the battle
+        var d1=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0); // Force 3, sent home
+        var d2=Add(s,"training-bow-enemy-source",1,Zone.Battlefield,province:0); // Force 1, kept -- decides the battle
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Pass(e);
+        // Both players passed: Before This Battle Resolves opens before Army()/winner are ever
+        // computed. The TERRAIN's OWN controller (the Attacker here) chooses who selects first.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,0);
+        Reject(e,new("encircledOrder",1,e.Version,Choice:"attacker")); // only the terrain's controller may choose
+        Accept(e,new("encircledOrder",0,e.Version,Choice:"defender"));
+        Eq(e.State.PendingChoice!.Type,"encircledSelect");Eq(e.State.PendingChoice!.PlayerId,1);
+        Reject(e,new("encircledSelect",1,e.Version,TargetId:a2.Id)); // must choose your OWN Personality
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d2.Id));
+        Eq(e.State.PendingChoice!.Type,"encircledSelect");Eq(e.State.PendingChoice!.PlayerId,0);
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a2.Id));
+        // Every OTHER Personality at this battlefield was sent home unbowed BEFORE the battle's own
+        // Army() was ever read -- a1/d1 never fought at all, distinguished from a2/d2 (Force 5 vs.
+        // Force 1), the only two units that actually decided this battle: the Attacker wins outright,
+        // so a2 (Attacker) returns home bowed through the ordinary post-resolution sweep, and d2
+        // (Defender, the losing army) is actually destroyed -- proving d2, not d1, was the one still
+        // in the fight.
+        Check(Card(e,a1.Id).Zone==Zone.Home && !Card(e,a1.Id).Bowed,"a1 should be sent home unbowed by Encircled Terrain");
+        Check(Card(e,d1.Id).Zone==Zone.Home && !Card(e,d1.Id).Bowed,"d1 should be sent home unbowed by Encircled Terrain");
+        Check(Card(e,a2.Id).Zone==Zone.Home && Card(e,a2.Id).Bowed,"a2 fought, won, and returns home bowed (Attacker)");
+        Check(Card(e,d2.Id).Zone==Zone.Dead,"d2 fought and lost -- proof it (not d1) was the unit still in the battle");
+        Check(e.State.PendingBeforeBattleResolve is null);
+    }
+    private static void BeforeBattleResolveMultiSourceOrdering()
+    {
+        var s=State(battle:true);
+        foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+        // Two Encircled Terrains at the same battlefield can never happen through ordinary play (at
+        // most one Terrain per battlefield), but the core rule's own "if there are multiple... the
+        // player whose turn it is chooses the order" is written generally -- this proves the engine's
+        // own ordering primitive directly against two simultaneous sources.
+        var terrainA=Add(s,"oracle-l5r-2332",0,Zone.Battlefield,province:0);
+        var terrainB=Add(s,"oracle-l5r-2332",1,Zone.Battlefield,province:0);
+        var a1=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+        var d1=Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        var e=MatchEngine.FromTestState(s);
+        Pass(e);Pass(e);
+        Eq(e.State.PendingChoice!.Type,"beforeBattleOrder");
+        Eq(e.State.PendingChoice!.PlayerId,0); // the ACTIVE player's own choice, regardless of either terrain's controller
+        Reject(e,new("beforeBattleOrder",0,e.Version,TargetId:"not-a-real-id"));
+        Reject(e,new("beforeBattleOrder",1,e.Version,TargetId:terrainA.Id)); // only the active player orders
+        Accept(e,new("beforeBattleOrder",0,e.Version,TargetId:terrainB.Id));
+        // terrainB (owned by the Defender) resolves first: ITS OWN controller picks the select order.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,1);
+        Accept(e,new("encircledOrder",1,e.Version,Choice:"attacker"));
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a1.Id));
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d1.Id));
+        // Exactly one source (terrainA) remains: resolves directly, no second ordering choice offered.
+        Eq(e.State.PendingChoice!.Type,"encircledOrder");Eq(e.State.PendingChoice!.PlayerId,0);
+        Accept(e,new("encircledOrder",0,e.Version,Choice:"defender"));
+        Accept(e,new("encircledSelect",1,e.Version,TargetId:d1.Id));
+        Accept(e,new("encircledSelect",0,e.Version,TargetId:a1.Id));
+        Check(e.State.PendingBeforeBattleResolve is null);
+        Check(e.State.PendingChoice is null,"Both before-this-battle-resolves sources resolved; ordinary resolution should have completed.");
+    }
+    private static void LootingTheRuinsReturnToHand()
+    {
+        // Mid-Battle-phase case: a second unresolved battlefield remains after this one.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.UnresolvedBattlefields=[0,1];
+            var looting=Add(s,"oracle-l5r-10742",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(Card(e,looting.Id).Zone==Zone.Hand,"Looting the Ruins must return to hand, unconditionally, once in play when its battle resolves");
+            Check(e.State.Players[0].Hand.Contains(looting.Id));
+            Eq(e.State.Phase,Phase.BattleSelection); // another battlefield remains; the phase does not end
+        }
+        // Last-battlefield case: returns to hand THEN ends the Battle phase (order matters -- issue #272).
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.UnresolvedBattlefields=[0];
+            var looting=Add(s,"oracle-l5r-10742",1,Zone.Battlefield,province:0); // Defender-owned this time: unconditional either side
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-samurai",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(Card(e,looting.Id).Zone==Zone.Hand);
+            Check(e.State.Players[1].Hand.Contains(looting.Id));
+            Eq(e.State.Phase,Phase.Dynasty); // last battlefield: the return happens, then the Battle phase ends
+        }
+    }
+    private static void VitalPathwaysDraw()
+    {
+        // Case 1: the province is destroyed and the Defender had presence -- draw two.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=1;s.Players[1].Provinces[0].PrintedStrength=1;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0); // Attacker-owned
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5
+            Add(s,"training-bow-enemy-source",1,Zone.Battlefield,province:0); // Force 1: opposed
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,2);
+        }
+        // Case 2: the province is destroyed but the Defender had no presence -- draw one.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=1;s.Players[1].Provinces[0].PrintedStrength=1;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5, unopposed
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,1);
+        }
+        // Case 3: the province is NOT destroyed -- no draw at all, even with Vital Pathways in play.
+        {
+            var s=State(battle:true);
+            foreach(var c in s.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) s.Cards.Remove(c.Id);
+            s.Players[1].Provinces[0].Strength=20;s.Players[1].Provinces[0].PrintedStrength=20;
+            Add(s,"oracle-l5r-10403",0,Zone.Battlefield,province:0);
+            Add(s,"training-crane-veteran",0,Zone.Battlefield,province:0); // Force 5: nowhere near enough
+            for(var i=0;i<3;i++) Add(s,"training-crane-samurai",0,Zone.FateDeck);
+            var e=MatchEngine.FromTestState(s);
+            Pass(e);Pass(e);
+            Check(!e.State.Players[1].Provinces[0].Destroyed);
+            Eq(e.State.Players[0].Hand.Count,0);
+        }
     }
 }

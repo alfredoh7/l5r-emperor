@@ -38,7 +38,9 @@ public partial class Main
                 _world.GetGlobalTransform().AffineInverse() * p.GlobalPosition)));
     }
     private static IEnumerable<CardView> VisibleCards(MatchView view) => view.Players.SelectMany(p => p.Home.Concat(p.Army)
-        .Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(v=>v.Card is not null).Select(v=>v.Card!)).Append(p.Stronghold));
+        .Concat(p.Hand).Concat(p.Discard).Concat(p.Celestials ?? [])
+        .Concat(p.Provinces.Where(v=>v.Region is not null).Select(v=>v.Region!))
+        .Concat(p.Provinces.Where(v=>v.Card is not null).Select(v=>v.Card!)).Append(p.Stronghold));
     private void EndTableMotion(MotionFrame? before)
     {
         _motionView = View;

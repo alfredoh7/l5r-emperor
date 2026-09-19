@@ -73,6 +73,8 @@ public partial class Main : Node
         if (_capturePath is not null) GetWindow().GrabFocus();
         if (_captureMode == "battle-reference" && _capturePath is not null)
         { SetProcessInput(false); AddChild(new BattleArtReview(_capturePath)); SetProcess(false); return; }
+        if (_captureMode == "support-reference" && _capturePath is not null)
+        { SetProcessInput(false); AddChild(new SupportArtReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "battle-escalation-reference" && _capturePath is not null)
         { SetProcessInput(false); AddChild(new BattleEscalationReview(_capturePath)); SetProcess(false); return; }
         if (_captureMode == "threshold-reference" && _capturePath is not null)
@@ -113,6 +115,7 @@ public partial class Main : Node
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
             _session.StepPracticeReaction();
         }
+        if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-events",StringComparison.Ordinal)) { ProcessEventCapture(delta); return; }
@@ -446,6 +449,8 @@ public partial class Main : Node
             var owner = View.Players.Single(p => p.Id == card.OwnerId);
             tile.ContextHelp = $"{owner.Clan} · Province {province + 1} · {owner.Provinces.Single(p => p.Index == province).Strength} province strength";
         }
+        if (card.Zone is Zone.Region or Zone.Celestial) tile.ContextHelp = SupportContext(card);
+        tile.CelestialMount = card.Zone == Zone.Celestial;
         if (card.Zone != Zone.Hand) tile.ProjectToScreen = _tableSurface.ProjectCanvas;
         BindStatTransition(tile);
         _tiles.Add(tile); return tile;
@@ -461,6 +466,7 @@ public partial class Main : Node
             if (card.Zone == Zone.Province && card.OwnerId == 1 - View.ActivePlayerId && card.ProvinceIndex is int province) { SelectProvince(card.OwnerId, province); return; }
             SetNotice("Choose one of your highlighted units, then a highlighted province. Cancel to inspect other cards."); return;
         }
+        if (ChooseSupportTarget(card)) return;
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility", Command.CardIds: null } targeted && targeted.TargetIds?.Contains(card.Id) == true)
         {
             _chosen = targeted with { Command = targeted.Command! with { TargetId = card.Id } };
@@ -484,7 +490,7 @@ public partial class Main : Node
 
     private void Highlight()
     {
-        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => q.Card?.Id == _selected?.Id && _selected is not null)
+        var selectedProvince = View.Players.SelectMany(p => p.Provinces.Where(q => (q.Card?.Id == _selected?.Id || q.Region?.Id == _selected?.Id) && _selected is not null)
             .Select(q => $"province:{p.Id}:{q.Index}")).FirstOrDefault();
         var rootId = _selected?.AttachedTo ?? _assignmentUnit ?? _selected?.Id;
         var selectedUnit = rootId is null ? null : FindCard(rootId);
@@ -492,12 +498,13 @@ public partial class Main : Node
         if(EventDecisionActive && View.PendingChoice is {Type:"harshChoices",CardId: { } eventId} && FindCard(eventId) is {ProvinceIndex: { } eventProvince} eventCard)
             selectedProvince=$"province:{eventCard.OwnerId}:{eventProvince}";
         _matSections.Emphasize(selectedProvince ?? (provinceIndex is int p && (selectedUnit?.Zone == Zone.Battlefield || _assignments.ContainsKey(rootId!)) ? $"battle:{1 - View.ActivePlayerId}:{p}" : null));
+        var supportTargets = SupportDraftChoices().SelectMany(a => a.TargetIds ?? []).ToHashSet();
         foreach (var tile in _tiles)
         {
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type=="timesOfStrifeDiscard" && tile.Card.Id==_eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is {Type:"harshChoices",CardId: { } harshCard} && tile.Card.Id==harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
-            tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true;
+            tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
         }

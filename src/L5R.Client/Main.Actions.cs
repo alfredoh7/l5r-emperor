@@ -28,8 +28,12 @@ public partial class Main
             _inspector.AddChild(SidebarSkin.Button("Start another practice", ShowPractice, true)); return;
         }
         if (BattleTracker.InBattle(View.Phase) || _resolutionMessage is not null)
-            _sidebarHeader.AddChild(new BattleTracker { Snapshot = View, Compact = _selected is not null || _chosen is not null || View.PendingChoice is not null, ReducedMotion = _reducedMotion, ResolutionMessage = _resolutionMessage });
-        if (!BattleTracker.InBattle(View.Phase) && _resolutionMessage is null)
+        {
+            if (_selected is { } supportSelection && IsSupportCard(supportSelection) && !PresentationBusy)
+                _sidebarHeader.AddChild(Palette.Wrapped($"Province {View.CurrentBattleProvince + 1} · " + (View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act"), 16, Palette.PaperDim));
+            else _sidebarHeader.AddChild(new BattleTracker { Snapshot = View, Compact = _selected is not null || _chosen is not null || View.PendingChoice is not null, ReducedMotion = _reducedMotion, ResolutionMessage = _resolutionMessage });
+        }
+        if (!BattleTracker.InBattle(View.Phase) && _resolutionMessage is null && !(_selected is { } support && IsSupportCard(support)))
         {
             var heading = Palette.Text(HumanPhase(View.Phase), 25, title: true); heading.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(heading);
             var status = Palette.Wrapped(View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act", 18); status.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(status);
@@ -42,6 +46,7 @@ public partial class Main
             if (pending.Type == "proclaim") _inspector.AddChild(Palette.Wrapped("Honor updates when Proclaim resolves. Each player then gets an opportunity to pass.", 14, Palette.PaperDim));
         }
         if (RenderHomeReminderInspection()) { }
+        else if (RenderSupportInspection()) { }
         else if (_selected?.Definition is { } def)
         {
             var panel = new PanelContainer(); panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
@@ -87,6 +92,8 @@ public partial class Main
             foreach(var reaction in Actions.Where(a=>a.Type=="useAbility")) AddAction(_inspector,reaction);
             return;
         }
+        if (_selected is { } supportCard && IsSupportCard(supportCard) && View.PendingChoice is null)
+        { RenderSupportActions(supportCard); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
         if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
@@ -185,6 +192,8 @@ public partial class Main
     private void RenderTargeted()
     {
         var action = _chosen!;
+        if (action.CardId is { } supportId && FindCard(supportId) is { } support && IsSupportCard(support))
+        { RenderSupportDraft(support, action); return; }
         var command = action.Command!;
         var targets = action.TargetIds ?? [];
         var target = command.TargetId ?? targets.FirstOrDefault();

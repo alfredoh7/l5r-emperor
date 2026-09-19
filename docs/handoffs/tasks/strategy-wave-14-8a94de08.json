@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire strategy-wave-14 (issue #293, Batch C of the BLOCKERS audit): 7 Strategy cards (Banzai!, Pure Intent, Marshal Your Strength, Lost in Transit, Strong Defenses, Trusting Instinct, Visage of the Orochi) plus discovery that Wrathful Ancestor (oracle-l5r-9390) was already wired/published in strategy-wave-6, so its own BLOCKERS entry was simply stale and it was not re-packaged. Crosses the ui/rules path split only because the new card scans land under src/L5R.Client/Content/Published/ (pure art assets copied by the existing content pipeline, not client code) -- no L5R.Client code, scene, or UI behavior changed at all; this is the same shape every prior content wave's own scan-copy step already takes.",
+  "validation": "Full suite green: dotnet run L5R.Core.Tests (188 core / 57 published / 9 deck-format / 10 deck-workshop), L5R.AI.Tests (14/14), L5R.Server.Tests (5/5), L5R.Client.Transport.Tests (4/4), Python tools/collaboration (43) and tools/content (130) unittest suites -- bash tools/check.sh --skip-client exits 0.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/293",
+  "branch": "strategy-wave-14",
+  "updated": "2026-09-18T14:00:33.535942+00:00"
+}

@@ -1,0 +1,175 @@
+{
+  "Profile": "strategy-wave-14",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10929",
+      "Name": "Banzai!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g2:. (Pay 2 Gold to play, then remove from the game, this Discipline in your discard.)\nBattle: Give your target opposed Personality +2F.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10929.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "banzai"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9922",
+      "Name": "Pure Intent",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give your target opposed Personality a Force bonus equal to his Personal Honor. Gain 2 Honor.\nBattle: Choose your performing opposed Personality: Give him a Force bonus equal to his Personal Honor. Gain 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9922.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "pure-intent"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10946",
+      "Name": "Marshal Your Strength",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Give your target Personality Force and Chi bonuses equal to his Personal Honor, minus 1 if he is unopposed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10946.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "marshal-your-strength"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10945",
+      "Name": "Lost in Transit",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 1,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g1:. (Pay 1 Gold to play, then remove from the game, this Discipline in your discard.)\nBattle/Open: Bow a target attachment.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10945.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "lost-in-transit-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9931",
+      "Name": "Strong Defenses",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Ranged or Melee Attack is targeted: Give it -3 strength.\nBattle: Choose your performing defending Personality: Give him +5F. Straighten him before this battle resolves.\nReaction: After a Ranged or Melee Attack is targeted: Give it -3 strength.\nBattle: Choose your performing defending Personality: Give him +5F. Straighten him before this battle resolves.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9931.jpg",
+      "Keywords": [
+        "Siege"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "strong-defenses-reaction",
+        "strong-defenses-boost"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10402",
+      "Name": "Trusting Instinct",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a Ranged or Melee attack is targeted: Give it -2 strength.\nBattle: Choose your performing Personality: Move him to a battlefield where he would be opposed.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10402.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "trusting-instinct-reaction",
+        "trusting-instinct-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-9168",
+      "Name": "Visage of the Orochi",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing opposed unbowed Thunder Personality: Raise his Force to 6. You may target and bow an enemy card with lower Force and no attachments.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9168.jpg",
+      "Keywords": [
+        "Fear",
+        "Thunder"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "visage-of-the-orochi"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

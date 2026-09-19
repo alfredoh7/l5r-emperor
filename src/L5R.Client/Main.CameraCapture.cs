@@ -19,6 +19,7 @@ public partial class Main
     private const string CaptureMouseTag = "native_acceptance_mouse";
     private bool IsMouseInputCapture => _capturePath is not null &&
         (_captureMode.StartsWith("published-stabilization", StringComparison.Ordinal) ||
+         _captureMode.StartsWith("published-supports", StringComparison.Ordinal) && !_captureMode.Contains("review", StringComparison.Ordinal) ||
          _captureMode.StartsWith("published-board", StringComparison.Ordinal) &&
          (_captureMode.Contains("camera", StringComparison.Ordinal) || _captureMode.Contains("deselect", StringComparison.Ordinal)));
     private void PushCaptureMouse(InputEventMouse mouse, bool buffered = false)

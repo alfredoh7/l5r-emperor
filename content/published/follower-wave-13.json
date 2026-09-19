@@ -1,0 +1,28 @@
+{
+  "Profile": "follower-wave-13",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1595",
+      "Name": "Cultist Infiltrator",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 3,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may attach this card to a Personality you do not control.\nThis card will not be transferred.\nAfter each Straighten Phase: Give this Personality a -1C token.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1595.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [],
+      "Effect": "cultist-infiltrator"
+    }
+  ],
+  "Decks": []
+}

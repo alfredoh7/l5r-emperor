@@ -1,0 +1,58 @@
+{
+  "Profile": "follower-wave-11",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1292",
+      "Name": "Champion of Thunder",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 12,
+      "GoldProduction": 0,
+      "Force": 8,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play for 1 less Gold if you are a Mantis Clan player.\nReaction: After another player's action targets a card in this unit, negate the action's effects on this Follower.\nBattle: Ranged 6 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1292.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Storm Rider",
+        "Thunder"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "champion-of-thunder-negate",
+        "champion-of-thunder-attack"
+      ],
+      "Effect": "mantis-clan-discount"
+    },
+    {
+      "Id": "oracle-l5r-1167",
+      "Name": "Brothers of Goemon",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 1,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets a card in this unit, if you control any Rings, negate the card's bowing from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1167.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "brothers-goemon-negate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
