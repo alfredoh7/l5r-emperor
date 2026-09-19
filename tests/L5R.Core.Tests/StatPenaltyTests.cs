@@ -22,6 +22,8 @@ internal static class StatPenaltyTests
             ("A stat TOKEN with a negative amount is a penalty too: Cultist Infiltrator's -1C token at each Straighten Phase is announced (a Chi penalty) like any modifier", TokenPenalty),
             ("A Gold cost penalty is a real Gold cost: it makes a Personality equal-or-lower for Gold and Steel, and brings an attachment to 0 for Bonds of Coin; the cost never goes below 0", GoldCostIsReal),
             ("Liu-Xeung's Battle action, exactly Shamate Keep's shape: an enemy Personality with LOWER Personal Honor goes home and she gains 1 Honor -- a dishonorable Liu-Xeung is rehonored instead, and one with no lower target is not offered", BattleMoveHome),
+            ("Printed means printed (Mendon's ruling: current unless the text says printed or base): Rumormonger's \"equal to his base Personal Honor\" is the printed number even when the target is dishonorable and his current Personal Honor is 0", RumormongerReadsBasePersonalHonor),
+            ("A unit's total Gold cost is its CURRENT cost (Disgraceful Conduct's shape): a Gold cost penalty on the Personality lowers the total the price is worked from, term by term", UnitTotalGoldCostIsCurrent),
         ];
         runner.Run("stat-penalty", tests);
     }
@@ -271,5 +273,36 @@ internal static class StatPenaltyTests
         var s3 = Table(); s3.PriorityPlayerId = 0;
         var liu3 = Add(s3, LiuXeung, 0, Zone.Battlefield, province: 0); var tough = Add(s3, "training-crane-samurai", 1, Zone.Battlefield, province: 0); tough.Modifiers.Add(new("test", "honor", "PersonalHonor", 5));
         Check(!CanUse(MatchEngine.FromTestState(s3), 0, "liuxeung-move-home", liu3.Id), "no Personality with lower Personal Honor: nothing to offer");
+    }
+
+    private static void RumormongerReadsBasePersonalHonor()
+    {
+        foreach (var dishonorable in new[] { false, true })
+        {
+            var s = Table(Phase.Action, actor: 1); s.PriorityPlayerId = 1;
+            var rumormonger = Add(s, "oracle-l5r-6404", 1, Zone.Home);
+            var target = Add(s, "training-crane-clan-samurai", 0, Zone.Home); // Force 3, printed Personal Honor 3
+            target.Dishonorable = dishonorable;
+            Add(s, "training-crane-clan-low-honor", 0, Zone.Home).Dishonorable = true; // the dishonorable Personality its controller must control for the action to name anyone
+            var e = MatchEngine.FromTestState(s);
+            Check(e.GetView(0).Players[0].Home.Single(c => c.Id == target.Id).Dishonorable == dishonorable, "the fixture: the target is dishonorable only in the second case");
+            Accept(e, Offer(e, 1, "rumormonger-penalty", rumormonger.Id, target.Id));
+            Eq(e.GetView(0).Players[0].Home.Single(c => c.Id == target.Id).Force, 0, $"dishonorable={dishonorable}: the Force penalty is the printed Personal Honor, 3 (3 - 3)");
+        }
+    }
+
+    private static void UnitTotalGoldCostIsCurrent()
+    {
+        // The Personality costs 8 printed and carries a -3 Gold cost penalty; a Follower costing 2 is attached. "Total Gold cost minus 4": (8 - 3) + 2 - 4 = 3, not (8 + 2) - 4 = 6.
+        var s = GoldParityTests.Action();
+        for (var i = 0; i < 6; i++) GoldParityTests.Add(s, "training-marketplace", 0, Zone.Home);
+        GoldParityTests.Add(s, "training-cost-fixture", 0, Zone.Home);
+        var veteran = GoldParityTests.Add(s, "training-lion-veteran", 1, Zone.Home);
+        GoldParityTests.Add(s, "training-follower", 1, Zone.Attached, attachedTo: veteran.Id);
+        veteran.Modifiers.Add(new("test", "gold-cost-penalty", "GoldCost", -3));
+        var e = MatchEngine.FromTestState(s);
+        var option = e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Command?.AbilityId == "training-disgrace-bow");
+        Eq(option.TargetGold![veteran.Id].Cost, 3, "the penalty shows in the unit total");
+        Check(option.TargetGold[veteran.Id].Basis.Contains("5 + 2 = 7"), "the basis names the terms: " + option.TargetGold[veteran.Id].Basis);
     }
 }

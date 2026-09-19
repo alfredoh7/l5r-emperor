@@ -16,17 +16,22 @@ internal static class MultiTargetTests
     {
         (string Name, Action Test)[] tests = [
             ("Published shape: Yoshitada (Force 3, Chi 4, Honor Requirement 6, Cost 7, Personal Honor 3, Crane Duelist Magistrate), Bonds of Coin, Gold and Steel and Fear Me! are the printed cards, whole, with their art", PublishedShape),
-            ("Yoshitada resolves in one command: the enemy Personality bows and, only if he is dishonorable, the chosen player gains or loses 2 Honor -- every combination of direction and player, and no Honor change for an honorable target", YoshitadaResolves),
-            ("Yoshitada's rehonor rule: a gain for his own controller while HE is dishonorable rehonors him instead of gaining Honor (the usual performer rule); a loss is a plain loss", YoshitadaRehonorRule),
-            ("Yoshitada validation: every slot is required and checked on its own -- a missing, extra, doubled or wrongly typed selection, a friendly, out-of-play or absent target, two targets in a one-target slot, a conflicting TargetId are all refused atomically", YoshitadaValidation),
-            ("Yoshitada is offered as one option per direction, carrying both slots with their legal candidates (only the enemy Personalities at the battlefield; both players), a complete legal default command, and nothing when no enemy is there", YoshitadaOffered),
-            ("Every combination of the offered candidates validates and resolves on a fresh engine, and the two directions share one use per turn", EveryOfferedCombination),
+            ("Yoshitada: \"Bow him.\" is its own sentence and always happens; the player choice belongs to the second and is asked AT RESOLUTION, after the bow, only if he is dishonorable (Mendon's ruling) -- then one decision offers each player, gain or lose, and each answer is applied; an honorable target asks nothing and changes nobody's Honor", YoshitadaBowsThenAsksOnlyIfDishonorable),
+            ("The two sentences are independent: a bow negated by Stalwart does not stop the follow-up for a dishonorable target, and a target who is not dishonorable never asks -- and the follow-up is judged after the bow, on the target as he then is", SentencesAreIndependent),
+            ("Yoshitada's rehonor rule through the prompt: a gain for his own controller while HE is dishonorable rehonors him instead of gaining Honor; a loss is a plain loss; a gain for the other player is a plain gain", YoshitadaRehonorRule),
+            ("Yoshitada's command carries only the up-front slot: the target is checked on its own (friendly, absent, out of play, two targets, a conflicting TargetId are refused atomically) and the follow-up slot may NOT be answered in the command", YoshitadaValidation),
+            ("Yoshitada is offered ONCE, carrying the up-front target slot with its legal candidates and the follow-up slot as an at-resolution entry naming its condition and the answers it will offer; the default command holds only the target", YoshitadaOffered),
+            ("The open decision is answered only by the acting player and only with one of the offered options: every option validates and resolves on a fresh engine; another player, a wrong choice, a pass and any other action are refused atomically, the decision is public and nothing hidden is in it", TheDecisionIsAnsweredOnlyByTheActingPlayer),
+            ("The order is: before-action reaction windows, then the bow, then the follow-up decision, then the tail -- a reaction that negates the whole action stops both the bow and the decision", ReactionsThenBowThenDecision),
             ("Every reader of \"targets\" sees a multi-target action's target: Bofana's trigger asks the enemy for a discard when Yoshitada's Personality slot names him", BofanaSeesSlotTarget),
+            ("Each target of a multi-target action gets its OWN before-action window, in slot order (Mendon's ruling): two targets that each have a possible reactor open two windows; a target with no possible reactor opens none; a reaction played in one window is about that window's target only", OneWindowPerTarget),
+            ("Each per-target window is the alternating window of #318/#327: the first opportunity is the active player's when he holds a reaction for that target (otherwise the other player's), passes hand it over, two passes close it; negations from several windows compose and a whole-action negation skips the windows still to come", PerTargetWindowsAlternate),
             ("Bonds of Coin, Political Open: one to three attachments with a 0 Gold cost, of either player -- exactly the ones costing 0 now (a printed 0 or one taken there by a Gold cost penalty) are offered, one, two or three are destroyed together, none or four are refused", BondsOfCoinDestroys),
             ("Bonds of Coin, Favor Political Limited: bow your Stronghold and discard the Imperial Favor to draw two cards -- only with the Favor and an unbowed Stronghold, only on your own turn, and it counts as a Favor action", BondsOfCoinDraws),
             ("Gold and Steel, Battle/Open: the same up-to-three destroy, anywhere as an Open action but only at the current battlefield as a Battle one", GoldAndSteelDestroys),
             ("Gold and Steel, Battle: your performing unbowed Personality bows an enemy Personality with an equal or lower Gold cost (current cost: a penalty can bring a target under), and the paired ability also moves him home; the two share one use per turn", GoldAndSteelBows),
-            ("Fear Me!: your performing unbowed Duelist moves an enemy Personality with equal or lower Chi home and, if he moved, the chosen player gains or loses 2 Honor -- nothing if the move was negated", FearMeMoves),
+            ("Fear Me!: your performing unbowed Duelist moves an enemy Personality with equal or lower Chi home; ONLY if he moved is a player (and gain or lose) asked at resolution -- nothing is asked, and no Honor changes, if the move was negated", FearMeMoves),
+            ("\"Equal or lower Chi\" is CURRENT Chi (Mendon's ruling): a Chi modifier or an Item's Chi on either Personality flips who is a legal target of Fear Me!, Chokehold and Ring of Fire alike, while cards whose text says printed or base keep reading printed or base", CurrentChiFlipsTheResult),
             ("A slot may be ANY card category and a player, independently: a Holding, an enemy Personality and a player on one action, each judged on its own, and every card type in the wrong slot refused", MixedSlots),
             ("Up to three, including none: a zero-to-three slot accepts an empty selection and three cards but not four, and its default command is the empty one", UpToThreeIncludingNone),
             ("Hidden information: a slot that names a card in the actor's hand offers only the actor's own hand, never the opponent's -- no opponent hand card id appears in the options, and naming one is refused", HandSlotIsPrivate),
@@ -51,10 +56,22 @@ internal static class MultiTargetTests
         return new(s, y, enemy, home);
     }
 
-    private static string Gain = "yoshitada-bow-gain", Lose = "yoshitada-bow-lose";
+    private const string YoshiAbility = "yoshitada-bow", FearMeMove = "fear-me-move";
 
-    private static GameCommand Yo(MatchEngine e, YoshitadaRig r, string ability, string target, int player, int actor = 0) =>
-        Use(e, actor, ability, r.Yoshitada.Id, selections: [Pick("target", target), PickPlayer("player", player)]);
+    // Yoshitada's whole action: the command names only the target.
+    private static GameCommand Yo(MatchEngine e, YoshitadaRig r, string target, int actor = 0) =>
+        Use(e, actor, YoshiAbility, r.Yoshitada.Id, selections: Pick("target", target));
+
+    private static ActionOption[] Answers(MatchEngine e, int player) => e.QueryActions(player).Where(a => a.Type == "chooseEffect").ToArray();
+    private static bool Asked(MatchEngine e) => e.State.PendingChoice?.Type == "effectChoice";
+    private static string[] OptionIds(ActionOption[] answers) => answers.Select(a => a.Command!.Choice!).OrderBy(x => x, StringComparer.Ordinal).ToArray();
+    private static void Answer(MatchEngine e, int player, string choice)
+    {
+        var option = Answers(e, player).SingleOrDefault(a => a.Command!.Choice == choice);
+        Check(option is { Enabled: true }, $"the answer {choice} was not offered to player {player}: " + string.Join(",", Answers(e, player).Select(a => a.Command!.Choice)));
+        Accept(e, option!.Command!);
+    }
+    private static readonly string[] HonorAnswers = ["opponent-gain", "opponent-lose", "self-gain", "self-lose"];
 
     // ---- published shape ----------------------------------------------------------------------------------------------------
     private static void PublishedShape()
@@ -65,13 +82,14 @@ internal static class MultiTargetTests
         Eq(y.Force, 3); Eq(y.Chi, 4); Eq(y.HonorRequirement, 6); Eq(y.GoldCost, 7); Eq(y.PersonalHonor, 3);
         foreach (var k in new[] { "Duelist", "Crane Clan", "Magistrate", "Samurai" }) Check(y.Keywords!.Contains(k), k);
         Eq(y.Text, "Political Battle: Target an enemy Personality: Bow him. If he is dishonorable, choose a player who gains or loses 2 Honor.");
-        Check(y.Abilities!.SequenceEqual(new[] { Gain, Lose }) && y.Effect == "none");
-        foreach (var id in new[] { Gain, Lose })
+        Check(y.Abilities!.SequenceEqual(new[] { YoshiAbility }) && y.Effect == "none");
         {
-            var a = AbilityCatalog.All[id];
-            Eq(a.Timing, "Battle"); Eq(a.Target, "slots"); Eq(a.UsageKey, "yoshitada-bow"); Check(a.ActionKeywords!.SequenceEqual(new[] { "Political" }));
-            Check(a.Slots!.Select(x => (x.Id, x.Category, x.Min, x.Max)).SequenceEqual(new[] { ("target", "enemy-personality", 1, 1), ("player", "player", 1, 1) }), "an enemy Personality, then a player");
-            Check(a.IfTarget == TargetStatus.IsDishonorable, "the follow-up is conditional on the target's status");
+            var a = AbilityCatalog.All[YoshiAbility];
+            Eq(a.Timing, "Battle"); Eq(a.Target, "slots"); Check(a.ActionKeywords!.SequenceEqual(new[] { "Political" }));
+            Check(a.Slots!.Select(x => (x.Id, x.Category, x.Min, x.Max, x.AtResolution)).SequenceEqual(new[] { ("target", "enemy-personality", 1, 1, false), ("honor", "player", 0, 0, true) }),
+                "an up-front enemy Personality, then a conditional follow-up player choice asked at resolution");
+            Eq(a.Slots![1].Resolution!.Condition, BranchCondition.TargetDishonorable); Eq(a.Slots[1].Resolution!.Otherwise.Effects.Length, 0);
+            Check(a.Slots[1].Resolution!.Options.Select(o => o.Id).OrderBy(x => x, StringComparer.Ordinal).SequenceEqual(HonorAnswers), "each player, gain or lose");
         }
         var b = CardCatalog.Get(BondsOfCoin);
         Check(b.Type == CardType.Strategy && b.Name == "Bonds of Coin" && b.GoldCost == 0 && b.Focus == 4 && b.Keywords!.SequenceEqual(new[] { "Favor", "Political" }));
@@ -84,7 +102,8 @@ internal static class MultiTargetTests
         var f = CardCatalog.Get(FearMe);
         Check(f.Type == CardType.Strategy && f.Name == "Fear Me!" && f.GoldCost == 0 && f.Focus == 4 && f.Keywords!.SequenceEqual(new[] { "Fear", "Iaijutsu" }));
         Eq(f.Text, "Battle: Choose your performing unbowed Duelist and target an enemy Personality with equal or lower Chi: Move him home. If he moved, choose a player, who gains or loses 2 Honor.");
-        Check(f.Abilities!.SequenceEqual(new[] { "fear-me-gain", "fear-me-lose" }));
+        Check(f.Abilities!.SequenceEqual(new[] { FearMeMove }));
+        Check(AbilityCatalog.All[FearMeMove].Slots!.Select(x => (x.Id, x.AtResolution)).SequenceEqual(new[] { ("target", false), ("honor", true) }) && AbilityCatalog.All[FearMeMove].Slots![1].Resolution!.Condition == BranchCondition.TargetMoved, "the follow-up is asked only if he moved");
         foreach (var id in new[] { Yoshitada, BondsOfCoin, GoldAndSteel, FearMe })
         {
             Check(File.Exists(Path.Combine(RepoRoot(), "src/L5R.Client/Content/Published", id + ".jpg")), $"{id} art is shipped");
@@ -93,56 +112,84 @@ internal static class MultiTargetTests
     }
 
     // ---- Yoshitada ----------------------------------------------------------------------------------------------------------
-    private static void YoshitadaResolves()
+    private static void YoshitadaBowsThenAsksOnlyIfDishonorable()
     {
-        foreach (var (ability, player, delta) in new[] { (Gain, 0, 2), (Gain, 1, 2), (Lose, 0, -2), (Lose, 1, -2) })
+        foreach (var (choice, player, delta) in new[] { ("self-gain", 0, 2), ("opponent-gain", 1, 2), ("self-lose", 0, -2), ("opponent-lose", 1, -2) })
         {
-            var r = Yoshi();
+            var r = Yoshi(dishonorable: true);
             var e = MatchEngine.FromTestState(r.S);
             var before = new[] { Honor(e, 0), Honor(e, 1) };
-            Accept(e, Yo(e, r, ability, r.Enemy.Id, player));
-            Check(e.State.Cards[r.Enemy.Id].Bowed, "the enemy Personality is bowed");
-            Eq(Honor(e, player), before[player] + delta, $"{ability} for player {player}"); Eq(Honor(e, 1 - player), before[1 - player], "the other player's Honor is untouched");
-            Check(e.State.Cards[r.Yoshitada.Id].AbilityUses.ContainsKey("yoshitada-bow"), "the action is spent under its shared key");
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            // "Bow him." has already happened; the second sentence waits for the player.
+            Check(e.State.Cards[r.Enemy.Id].Bowed, "the bow came first");
+            Check(Asked(e) && e.State.PendingChoice!.PlayerId == 0 && e.State.PriorityPlayerId == 0, "the acting player is asked");
+            Check(Honor(e, 0) == before[0] && Honor(e, 1) == before[1], "nothing has changed yet");
+            Check(OptionIds(Answers(e, 0)).SequenceEqual(HonorAnswers), "one answer per player and direction: " + string.Join(",", OptionIds(Answers(e, 0))));
+            Check(Answers(e, 0).All(a => a.Enabled && a.Label.Contains("2 Honor")), "each says what it does");
+            Check(!e.QueryActions(0).Any(a => a.Type == "useAbility" && a.Enabled), "the action waits: nothing else is offered");
+            Answer(e, 0, choice);
+            Eq(Honor(e, player), before[player] + delta, $"{choice}"); Eq(Honor(e, 1 - player), before[1 - player], "the other player's Honor is untouched");
+            Check(e.State.PendingChoice is null && e.State.PendingEffectChoice is null, "the decision is closed");
+            Check(e.State.Cards[r.Yoshitada.Id].AbilityUses.ContainsKey(YoshiAbility), "the action is spent");
             Eq(e.State.PriorityPlayerId, 1, "priority passed on, as after any action");
+            Check(e.State.Events.Any(x => x.Type == "effectChosen"), "the answer is in the public log");
         }
         {
-            // An honorable target: the bow only -- the chosen player is chosen but nothing follows.
+            // An honorable target: the bow, then nothing -- no prompt, no Honor change, and the action finishes at once.
             var r = Yoshi(dishonorable: false);
             var e = MatchEngine.FromTestState(r.S);
             var before = new[] { Honor(e, 0), Honor(e, 1) };
-            Accept(e, Yo(e, r, Lose, r.Enemy.Id, 1));
-            Check(e.State.Cards[r.Enemy.Id].Bowed, "bowed anyway");
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            Check(e.State.Cards[r.Enemy.Id].Bowed, "bowed");
+            Check(!Asked(e) && e.State.PendingChoice is null, "nothing is asked");
             Check(Honor(e, 0) == before[0] && Honor(e, 1) == before[1], "an honorable target changes nobody's Honor");
+            Eq(e.State.PriorityPlayerId, 1, "and the action finished");
         }
         {
-            // The status is judged after the bow, and the target's own state is what counts (not his controller's other Personalities).
+            // Another, dishonorable Personality of his does not make this target dishonorable.
             var r = Yoshi(dishonorable: false);
             Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0).Dishonorable = true;
             var e = MatchEngine.FromTestState(r.S);
-            var honor = Honor(e, 1);
-            Accept(e, Yo(e, r, Lose, r.Enemy.Id, 1));
-            Eq(Honor(e, 1), honor, "another, dishonorable Personality of his does not make this target dishonorable");
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            Check(!Asked(e), "only the target's own status counts");
+        }
+    }
+
+    private static void SentencesAreIndependent()
+    {
+        {
+            // The bow is negated by Stalwart; the second sentence does not depend on it.
+            var r = Yoshi(dishonorable: true);
+            r.Enemy.GrantedKeywords.Add(new("Stalwart", "test", "Turn"));
+            var e = MatchEngine.FromTestState(r.S);
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            Check(!e.State.Cards[r.Enemy.Id].Bowed, "Stalwart negated the bow");
+            Check(Asked(e), "the follow-up is asked all the same: the sentences are independent");
+            Answer(e, 0, "opponent-lose");
+            Eq(Honor(e, 1), 4, "and applies (6 - 2)");
+        }
+        {
+            // Judged on the target as he is when the action resolves, after the bow.
+            var r = Yoshi(dishonorable: true);
+            var e = MatchEngine.FromTestState(r.S);
+            Check(Enabled(e, 0, YoshiAbility, r.Yoshitada.Id).Slots![1].Condition == BranchCondition.TargetDishonorable, "the offer names the condition");
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            Check(Asked(e), "dishonorable at resolution: asked");
         }
     }
 
     private static void YoshitadaRehonorRule()
     {
-        var r = Yoshi(); r.Yoshitada.Dishonorable = true;
-        var e = MatchEngine.FromTestState(r.S);
-        var honor = Honor(e, 0);
-        Accept(e, Yo(e, r, Gain, r.Enemy.Id, 0));
-        Eq(Honor(e, 0), honor, "no Honor gained for his own controller"); Check(!e.State.Cards[r.Yoshitada.Id].Dishonorable, "he is rehonored instead");
-        var r2 = Yoshi(); r2.Yoshitada.Dishonorable = true;
-        var e2 = MatchEngine.FromTestState(r2.S);
-        var honor2 = Honor(e2, 0);
-        Accept(e2, Yo(e2, r2, Lose, r2.Enemy.Id, 0));
-        Eq(Honor(e2, 0), honor2 - 2, "a loss is a loss"); Check(e2.State.Cards[r2.Yoshitada.Id].Dishonorable, "and does not rehonor him");
-        var r3 = Yoshi(); r3.Yoshitada.Dishonorable = true;
-        var e3 = MatchEngine.FromTestState(r3.S);
-        var opponent = Honor(e3, 1);
-        Accept(e3, Yo(e3, r3, Gain, r3.Enemy.Id, 1));
-        Eq(Honor(e3, 1), opponent + 2, "a gain for the OTHER player is a plain gain"); Check(e3.State.Cards[r3.Yoshitada.Id].Dishonorable, "and does not rehonor him");
+        foreach (var (choice, honorDelta, rehonored) in new[] { ("self-gain", 0, true), ("self-lose", -2, false), ("opponent-gain", 0, false) })
+        {
+            var r = Yoshi(); r.Yoshitada.Dishonorable = true;
+            var e = MatchEngine.FromTestState(r.S);
+            var mine = Honor(e, 0); var theirs = Honor(e, 1);
+            Accept(e, Yo(e, r, r.Enemy.Id)); Answer(e, 0, choice);
+            Eq(Honor(e, 0), mine + honorDelta, $"{choice}: his controller's Honor");
+            Eq(Honor(e, 1), choice == "opponent-gain" ? theirs + 2 : theirs, $"{choice}: the other player's Honor");
+            Eq(!e.State.Cards[r.Yoshitada.Id].Dishonorable, rehonored, $"{choice}: whether he was rehonored instead");
+        }
     }
 
     private static void YoshitadaValidation()
@@ -153,28 +200,20 @@ internal static class MultiTargetTests
         var follower = Add(r.S, "training-follower", 1, Zone.Attached, province: 0, parent: r.Enemy.Id);
         var second = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(r.S);
-        GameCommand Base(params SlotSelection[] s) => Use(e, 0, Gain, r.Yoshitada.Id, selections: s);
-        // Control: the complete, legal selection.
-        var target = Pick("target", r.Enemy.Id); var player = PickPlayer("player", 1);
-        Reject(e, Base(target)); Reject(e, Base(player)); Reject(e, Base());
-        Reject(e, Base(target, player, PickPlayer("other", 0)));
-        Reject(e, Base(target, player, player));
-        Reject(e, Base(target, target, player));
-        Reject(e, Base(target, PickPlayer("player", 2))); Reject(e, Base(target, PickPlayer("player", -1)));
-        Reject(e, Base(target, new SlotSelection("player", [r.Enemy.Id])));
-        Reject(e, Base(new SlotSelection("target", [r.Enemy.Id], 1), player));
-        Reject(e, Base(Pick("target", own.Id), player)); // a friendly Personality is not an enemy
-        Reject(e, Base(Pick("target", holding.Id), player)); Reject(e, Base(Pick("target", follower.Id), player));
-        Reject(e, Base(Pick("target", r.AtHome.Id), player)); // not at the battlefield
-        Reject(e, Base(Pick("target", r.Enemy.Id, second.Id), player)); // one target only
-        Reject(e, Base(Pick("target"), player)); // an empty slot where one card is required
-        Reject(e, Base(Pick("target", "no-such-card"), player));
-        Reject(e, Base(target, player) with { CardIds = [r.Enemy.Id] }); Reject(e, Base(target, player) with { TargetPlayerId = 1 });
-        Reject(e, Base(target, player) with { TargetId = second.Id }); // conflicts with the selection
-        Reject(e, Base(target, player) with { PerformerId = own.Id });
-        // The complete selection is accepted -- with the redundant TargetId equal to it, or without.
-        var withId = Base(target, player) with { TargetId = r.Enemy.Id };
-        Accept(e, withId);
+        GameCommand Base(params SlotSelection[] sel) => Use(e, 0, YoshiAbility, r.Yoshitada.Id, selections: sel);
+        var target = Pick("target", r.Enemy.Id);
+        Reject(e, Base()); Reject(e, Base(PickPlayer("target", 1)));
+        Reject(e, Base(target, target));
+        Reject(e, Base(target, PickPlayer("honor", 1))); Reject(e, Base(target, Pick("honor", r.Enemy.Id))); Reject(e, Base(target, new SlotSelection("honor")));
+        Reject(e, Base(target, PickPlayer("player", 1)));
+        Reject(e, Base(new SlotSelection("target", [r.Enemy.Id], 1)));
+        Reject(e, Base(Pick("target", own.Id))); Reject(e, Base(Pick("target", holding.Id))); Reject(e, Base(Pick("target", follower.Id)));
+        Reject(e, Base(Pick("target", r.AtHome.Id)));
+        Reject(e, Base(Pick("target", r.Enemy.Id, second.Id)));
+        Reject(e, Base(Pick("target"))); Reject(e, Base(Pick("target", "no-such-card")));
+        Reject(e, Base(target) with { CardIds = [r.Enemy.Id] }); Reject(e, Base(target) with { TargetPlayerId = 1 });
+        Reject(e, Base(target) with { TargetId = second.Id }); Reject(e, Base(target) with { PerformerId = own.Id });
+        Accept(e, Base(target) with { TargetId = r.Enemy.Id });
         Check(e.State.Cards[r.Enemy.Id].Bowed && !e.State.Cards[second.Id].Bowed, "the chosen target, and only that one, is bowed");
     }
 
@@ -184,49 +223,69 @@ internal static class MultiTargetTests
         Add(r.S, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
         var second = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
         var e = MatchEngine.FromTestState(r.S);
-        foreach (var (ability, defaultPlayer) in new[] { (Gain, 0), (Lose, 1) })
-        {
-            var option = Enabled(e, 0, ability, r.Yoshitada.Id);
-            Check(option.TargetIds is null, "a multi-target option offers no single TargetIds a viewer could mistake for the whole choice");
-            var slots = option.Slots!;
-            Eq(slots.Length, 2); Eq(slots[0].Slot, "target"); Eq(slots[0].Kind, "card"); Eq(slots[0].Min, 1); Eq(slots[0].Max, 1);
-            Check(slots[0].CardIds.ToHashSet().SetEquals([r.Enemy.Id, second.Id]), "the enemy Personalities AT the battlefield, no friendly one, none at home: " + string.Join(",", slots[0].CardIds));
-            Eq(slots[1].Slot, "player"); Eq(slots[1].Kind, "player"); Check(slots[1].PlayerIds.SequenceEqual(new[] { 0, 1 }));
-            Check(slots[0].Label.Length > 0 && slots[1].Label.Length > 0, "each slot says what it is for");
-            var command = option.Command!;
-            Eq(command.TargetId, command.Selections!.Single(s => s.Slot == "target").CardIds![0], "the default command carries its first target as TargetId too");
-            Eq(command.Selections!.Single(s => s.Slot == "player").PlayerId, defaultPlayer, $"the default player for {ability}");
-            var fresh = MatchEngine.FromTestState(r.S); Accept(fresh, command with { ExpectedVersion = fresh.Version });
-        }
-        // Nothing to target: the option is there, disabled with a reason, and carries no command that could be sent.
+        var options = Options(e, 0, YoshiAbility, r.Yoshitada.Id);
+        Eq(options.Length, 1, "one option -- no gain and lose variants any more");
+        var option = options.Single(); Check(option.Enabled, option.Reason ?? "");
+        Check(option.TargetIds is null, "no single TargetIds a viewer could mistake for the whole choice");
+        var slots = option.Slots!;
+        Eq(slots.Length, 2);
+        Eq(slots[0].Slot, "target"); Eq(slots[0].Kind, "card"); Eq(slots[0].Timing, "up-front"); Eq(slots[0].Min, 1); Eq(slots[0].Max, 1);
+        Check(slots[0].CardIds.ToHashSet().SetEquals([r.Enemy.Id, second.Id]), "the enemy Personalities AT the battlefield, no friendly one, none at home: " + string.Join(",", slots[0].CardIds));
+        Eq(slots[1].Slot, "honor"); Eq(slots[1].Kind, "follow-up"); Eq(slots[1].Timing, "at-resolution"); Eq(slots[1].Condition, "target-dishonorable");
+        Check(slots[1].OptionLabels!.Length == 4 && slots[1].CardIds.Length == 0 && slots[1].PlayerIds.Length == 0 && slots[1].Min == 0 && slots[1].Max == 0, "the follow-up is described, and asks for nothing now");
+        Check(slots.All(s => s.Label.Length > 0), "each slot says what it is for");
+        var command = option.Command!;
+        Check(command.Selections is [{ Slot: "target" }], "the default command holds only the up-front target");
+        Eq(command.TargetId, command.Selections![0].CardIds![0], "and carries it as TargetId too");
+        var fresh = MatchEngine.FromTestState(r.S); Accept(fresh, command with { ExpectedVersion = fresh.Version });
+        // Nothing to target: the option is there, disabled with a reason.
         var none = Yoshi(); none.S.Cards.Remove(none.Enemy.Id);
-        var e2 = MatchEngine.FromTestState(none.S);
-        var listed = Options(e2, 0, Gain, none.Yoshitada.Id).Single();
+        var listed = Options(MatchEngine.FromTestState(none.S), 0, YoshiAbility, none.Yoshitada.Id).Single();
         Check(!listed.Enabled && listed.Reason is not null && listed.Slots![0].CardIds.Length == 0, "disabled, with its reason, when no enemy is at the battlefield: " + listed.Reason);
     }
 
-    private static void EveryOfferedCombination()
+    private static void TheDecisionIsAnsweredOnlyByTheActingPlayer()
     {
         var r = Yoshi();
-        var second = Add(r.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0); second.Dishonorable = true;
         var e = MatchEngine.FromTestState(r.S);
-        var combinations = 0;
-        foreach (var ability in new[] { Gain, Lose })
-        {
-            var option = Enabled(e, 0, ability, r.Yoshitada.Id);
-            foreach (var card in option.Slots![0].CardIds)
-                foreach (var player in option.Slots[1].PlayerIds)
-                {
-                    var fresh = MatchEngine.FromTestState(r.S);
-                    Accept(fresh, option.Command! with { ExpectedVersion = fresh.Version, TargetId = card, Selections = [Pick("target", card), PickPlayer("player", player)] });
-                    Check(fresh.State.Cards[card].Bowed, "the chosen target bowed"); combinations++;
-                }
-        }
-        Eq(combinations, 8, "two directions, two targets, two players");
-        // The directions share one use a turn.
-        Accept(e, Yo(e, r, Gain, r.Enemy.Id, 0));
-        var again = MatchEngine.FromTestState(e.State);
-        Check(Options(again, 0, Lose, r.Yoshitada.Id).All(o => !o.Enabled) && Options(again, 0, Gain, r.Yoshitada.Id).All(o => !o.Enabled), "one use of either direction spends both");
+        Accept(e, Yo(e, r, r.Enemy.Id));
+        Check(Asked(e), "asked");
+        foreach (var answer in Answers(e, 0)) { var fresh = MatchEngine.FromTestState(r.S); Accept(fresh, Yo(fresh, r, r.Enemy.Id)); Accept(fresh, answer.Command! with { ExpectedVersion = fresh.Version }); Check(fresh.State.PendingChoice is null, $"{answer.Command!.Choice} closes it"); }
+        Check(Answers(e, 1).Length == 0, "the other player is offered nothing to answer");
+        Check(e.QueryActions(1).All(a => a.Type is "wait" or "concede" or "orderSeppuku"), "the other player only waits: " + string.Join(",", e.QueryActions(1).Select(a => a.Type)));
+        Reject(e, new GameCommand("chooseEffect", 1, e.Version, Choice: "self-gain"));
+        Reject(e, new GameCommand("chooseEffect", 0, e.Version, Choice: "no-such-choice")); Reject(e, new GameCommand("chooseEffect", 0, e.Version));
+        Reject(e, new GameCommand("chooseEffect", 0, e.Version, Choice: "both"));
+        Reject(e, new GameCommand("pass", 0, e.Version)); Reject(e, new GameCommand("declineReaction", 0, e.Version));
+        Reject(e, Use(e, 0, "training-bow-at-battle", r.Yoshitada.Id, r.Enemy.Id));
+        // Public: the prompt reveals no hidden card, and both views carry the same decision.
+        var json = System.Text.Json.JsonSerializer.Serialize(e.GetView(1));
+        Check(e.GetView(1).PendingChoice?.Type == "effectChoice" && e.GetView(0).PendingChoice?.Type == "effectChoice", "both players see the decision is open");
+        Answer(e, 0, "self-lose");
+    }
+
+    private static void ReactionsThenBowThenDecision()
+    {
+        // The target's controller (player 1) holds a whole-action negator: its window opens BEFORE the bow.
+        var r = Yoshi(dishonorable: true);
+        var negator = Add(r.S, "training-action-negator", 1, Zone.Home);
+        var e = MatchEngine.FromTestState(r.S);
+        Accept(e, Yo(e, r, r.Enemy.Id));
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction"); Check(!e.State.Cards[r.Enemy.Id].Bowed, "not bowed yet: the window comes first");
+        Accept(e, e.QueryActions(1).Single(a => a.Type == "declineReaction" && a.Enabled).Command!);
+        Accept(e, e.QueryActions(0).Single(a => a.Type == "declineReaction" && a.Enabled).Command!);
+        Check(e.State.Cards[r.Enemy.Id].Bowed && Asked(e), "both passed: the bow, then the decision");
+        Answer(e, 0, "self-lose");
+        // Negated whole: neither the bow nor the decision.
+        var r2 = Yoshi(dishonorable: true); Add(r2.S, "training-action-negator", 1, Zone.Home);
+        var e2 = MatchEngine.FromTestState(r2.S);
+        var honor = Honor(e2, 0);
+        Accept(e2, Yo(e2, r2, r2.Enemy.Id));
+        Accept(e2, e2.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled).Command!);
+        Accept(e2, e2.QueryActions(0).Single(a => a.Type == "declineReaction" && a.Enabled).Command!);
+        Accept(e2, e2.QueryActions(1).Single(a => a.Type == "declineReaction" && a.Enabled).Command!);
+        Check(!e2.State.Cards[r2.Enemy.Id].Bowed, "negated: not bowed"); Check(!Asked(e2) && e2.State.PendingChoice is null, "negated: nothing asked"); Eq(Honor(e2, 0), honor);
+        Check(e2.State.Cards[r2.Yoshitada.Id].AbilityUses.ContainsKey(YoshiAbility), "the action was still taken");
     }
 
     private static void BofanaSeesSlotTarget()
@@ -235,11 +294,16 @@ internal static class MultiTargetTests
         var bofana = Add(r.S, Bofana, 1, Zone.Battlefield, province: 0);
         Add(r.S, "training-farm", 0, Zone.Hand); Add(r.S, "training-farm", 0, Zone.Hand);
         var e = MatchEngine.FromTestState(r.S);
-        Accept(e, Yo(e, r, Gain, bofana.Id, 0));
+        Accept(e, Yo(e, r, bofana.Id));
         Eq(e.State.PendingChoice?.Type, "forcedDiscard"); Eq(e.State.PendingChoice?.PlayerId, 0, "Yoshitada's controller must discard: his Force 3 is below Bofana's 7");
         Check(!e.State.Cards[bofana.Id].Bowed, "the action waits for the discard, as for any action that targets him");
         Accept(e, e.QueryActions(0).First(a => a.Type == "forcedDiscard" && a.Enabled).Command!);
         Check(e.State.Cards[bofana.Id].Bowed, "and then resolves");
+        // The same action against a different card asks nothing.
+        var r2 = Yoshi(); Add(r2.S, Bofana, 1, Zone.Battlefield, province: 0); Add(r2.S, "training-farm", 0, Zone.Hand);
+        var e2 = MatchEngine.FromTestState(r2.S);
+        Accept(e2, Yo(e2, r2, r2.Enemy.Id));
+        Check(e2.State.PendingChoice?.Type != "forcedDiscard", "an action that does not target Bofana does not trigger him");
         // Not only the FIRST target: Bofana named by a LATER card slot (a Holding first, an enemy Personality second) is targeted just the same.
         var s3 = Table(Phase.Action, actor: 0); s3.PriorityPlayerId = 0;
         var source3 = Add(s3, "training-slots-source", 0, Zone.Home); var holding3 = Add(s3, "training-farm", 1, Zone.Home); var bofana3 = Add(s3, Bofana, 1, Zone.Home);
@@ -253,11 +317,100 @@ internal static class MultiTargetTests
         var e4 = MatchEngine.FromTestState(s4);
         Accept(e4, Use(e4, 0, "training-slots-mixed", source4.Id, selections: [Pick("holding", holding4.Id), Pick("personality", other4.Id), PickPlayer("player", 0)]));
         Check(e4.State.PendingChoice is null, "and not named by an action that names other cards");
-        // The same action against a different card asks nothing.
-        var r2 = Yoshi(); Add(r2.S, Bofana, 1, Zone.Battlefield, province: 0); Add(r2.S, "training-farm", 0, Zone.Hand);
-        var e2 = MatchEngine.FromTestState(r2.S);
-        Accept(e2, Yo(e2, r2, Gain, r2.Enemy.Id, 0));
-        Check(e2.State.PendingChoice is null, "an action that does not target Bofana does not trigger him");
+    }
+
+    // ---- one window per target (Mendon's ruling) ---------------------------------------------------------------------------------------
+    // Two Personalities of player 1 (the Defender, holding the opportunity is player 0 the actor): A is Akodo Kakihara (reacts only to an action that
+    // targets HIM), B has a Champion of Thunder in his unit (reacts to an action that targets a card in that unit), C has no possible reactor.
+    private const string Kakihara = "oracle-l5r-223", Champion = "oracle-l5r-1292";
+    private sealed record TwoTargets(MatchState S, CardInstance Actor, CardInstance A, CardInstance B, CardInstance C, CardInstance ChampionCard);
+    private static TwoTargets Windows()
+    {
+        var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0; // player 0 attacks and acts; player 1 defends
+        var actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+        var a = Add(s, Kakihara, 1, Zone.Battlefield, province: 0);
+        var b = Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+        var champion = Add(s, Champion, 1, Zone.Attached, province: 0, parent: b.Id);
+        var c = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        return new(s, actor, a, b, c, champion);
+    }
+    private static GameCommand Two(MatchEngine e, TwoTargets t, string first, string second) =>
+        Use(e, 0, "training-slots-two-personalities", t.Actor.Id, selections: [Pick("first", first), Pick("second", second)]);
+    private static bool WindowFor(MatchEngine e, string target) => e.State.PendingChoice is { Type: "beforeActionReaction" } w && w.CardId == target;
+    private static void Decline(MatchEngine e) => Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Type == "declineReaction" && a.Enabled).Command!);
+
+    private static void OneWindowPerTarget()
+    {
+        var t = Windows();
+        var e = MatchEngine.FromTestState(t.S);
+        var option = Enabled(e, 0, "training-slots-two-personalities", t.Actor.Id);
+        Check(option.Slots!.Length == 2 && option.Slots.All(x => x.Timing == "up-front"), "two up-front slots");
+        // A then B: two windows in slot order, the first about Kakihara, the second about the unit with the Champion.
+        Accept(e, Two(e, t, t.A.Id, t.B.Id));
+        Check(WindowFor(e, t.A.Id), "the first window is for the first target: " + e.State.PendingChoice?.Prompt);
+        Check(!e.State.Cards[t.A.Id].Bowed && !e.State.Cards[t.B.Id].Bowed, "nothing has resolved");
+        var offered = e.QueryActions(1).Where(a => a.Type == "useAbility" && a.Enabled).ToArray();
+        Check(offered.Length == 1 && offered[0].Command!.AbilityId == "kakihara-force-bonus", "only Kakihara's reaction, for HIS window: " + string.Join(",", offered.Select(o => o.Command!.AbilityId)));
+        Check(e.QueryActions(0).All(a => a.Type != "useAbility"), "the actor holds no reaction");
+        Decline(e); Decline(e);
+        Check(WindowFor(e, t.B.Id), "closing it opens the second target's window: " + e.State.PendingChoice?.Type + " " + e.State.PendingChoice?.CardId);
+        var second = e.QueryActions(1).Where(a => a.Type == "useAbility" && a.Enabled).ToArray();
+        Check(second.Length > 0 && second.All(a => a.Command!.AbilityId == "champion-of-thunder-negate"), "only the Champion's reaction, and none of Kakihara's (it is about B, not A): " + string.Join(",", second.Select(o => o.Command!.AbilityId)));
+        Check(!e.State.Cards[t.A.Id].Bowed, "still nothing resolved");
+        Decline(e); Decline(e);
+        Check(e.State.PendingChoice is null && e.State.Cards[t.A.Id].Bowed && e.State.Cards[t.B.Id].Bowed, "when the last window closes the action resolves once, on both targets");
+        Check(e.State.ReactionWindowTargetId is null && e.State.ReactionWindowRemaining.Count == 0 && e.State.PendingNegatableAbility is null, "and the window state is cleared: no stale target is left for the next action to read");
+        Check(e.State.Events.Count(x => x.Type == "reactionWindow" && x.Message.StartsWith("Before-action")) == 2, "exactly two windows opened");
+        // Order follows the slots, not the cards: B first, then A.
+        var t2 = Windows(); var e2 = MatchEngine.FromTestState(t2.S);
+        Accept(e2, Two(e2, t2, t2.B.Id, t2.A.Id));
+        Check(WindowFor(e2, t2.B.Id), "slot order: B's window first"); Decline(e2); Decline(e2);
+        Check(WindowFor(e2, t2.A.Id), "then A's"); Decline(e2); Decline(e2);
+        Check(e2.State.Cards[t2.A.Id].Bowed && e2.State.Cards[t2.B.Id].Bowed, "resolved");
+        // A target with no possible reactor opens no window.
+        var t3 = Windows(); var e3 = MatchEngine.FromTestState(t3.S);
+        Accept(e3, Two(e3, t3, t3.C.Id, t3.B.Id));
+        Check(WindowFor(e3, t3.B.Id), "C has no reactor: the first (and only) window is B's"); Decline(e3); Decline(e3);
+        Check(e3.State.PendingChoice is null && e3.State.Cards[t3.C.Id].Bowed && e3.State.Cards[t3.B.Id].Bowed, "one window, then resolved");
+        Check(e3.State.Events.Count(x => x.Type == "reactionWindow" && x.Message.StartsWith("Before-action")) == 1, "exactly one window opened");
+        var t4 = Windows(); var c2 = Add(t4.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var e4 = MatchEngine.FromTestState(t4.S);
+        Accept(e4, Two(e4, t4, t4.C.Id, c2.Id));
+        Check(e4.State.PendingChoice is null && e4.State.Cards[t4.C.Id].Bowed && e4.State.Cards[c2.Id].Bowed, "no target has a reactor: no window at all, the action resolves at once");
+        // A single-target action still opens its one window with the old prompt.
+        var t5 = Windows(); Add(t5.S, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+        var e5 = MatchEngine.FromTestState(t5.S);
+        Accept(e5, Offer(e5, 0, "training-bow-at-battle", t5.S.Cards.Values.First(c => c.DefinitionId == "training-battle-bower").Id, t5.A.Id));
+        Eq(e5.State.PendingChoice?.Prompt, "Before this action resolves: either player may use a reaction, or pass."); Eq(e5.State.PendingChoice?.CardId, null);
+    }
+
+    private static void PerTargetWindowsAlternate()
+    {
+        // The active player (0) holds a reaction for B's window only: the first opportunity there is HIS; in A's window player 1 goes first.
+        var t = Windows(); t.S.Cards[t.Actor.Id].DefinitionId = "training-slots-source";
+        var suppressor = Add(t.S, "training-action-negator", 0, Zone.Home); // reacts to an action targeting a card of ITS controller's: never here (the actor's own)
+        var e = MatchEngine.FromTestState(t.S);
+        Accept(e, Two(e, t, t.A.Id, t.B.Id));
+        Eq(e.State.PriorityPlayerId, 1, "A's window: the active player holds no reaction for A, so the other player has the first opportunity");
+        Accept(e, e.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled).Command!); // Kakihara reacts
+        Eq(e.State.PriorityPlayerId, 0, "a reaction hands the opportunity to the other player"); Check(e.State.PendingChoice?.Type == "beforeActionReaction", "same window");
+        Decline(e);
+        Eq(e.State.PriorityPlayerId, 1, "and back again"); Decline(e);
+        Check(WindowFor(e, t.B.Id), "both passed in succession: B's window");
+        Check(e.State.Cards[t.A.Id].Modifiers.Any(m => m.Effect == "kakihara-force-bonus"), "what A's reaction did stands");
+        Check(e.QueryActions(1).All(a => a.Command?.AbilityId != "kakihara-force-bonus"), "and is not offered again for B (spent, and not B's)");
+        // Negations from two windows compose: a Champion's "all" on B in the second window and Tamoko's-shape ones elsewhere; here the Champion negates the bow on B.
+        var champ = e.QueryActions(1).First(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "champion-of-thunder-negate" && a.Command.TargetId == t.B.Id);
+        Accept(e, champ.Command!); Decline(e); Decline(e);
+        Check(e.State.PendingChoice is null, "resolved"); Check(e.State.Cards[t.A.Id].Bowed && !e.State.Cards[t.B.Id].Bowed, "A bowed; B's effects negated by the Champion");
+        // A whole-action negation skips the windows still to come.
+        var t2 = Windows(); Add(t2.S, "training-action-negator", 1, Zone.Home);
+        var e2 = MatchEngine.FromTestState(t2.S);
+        Accept(e2, Two(e2, t2, t2.A.Id, t2.B.Id));
+        Check(WindowFor(e2, t2.A.Id), "the first window");
+        Accept(e2, e2.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-action").Command!);
+        Decline(e2); Decline(e2);
+        Check(e2.State.PendingChoice is null, "negated whole: B's window never opened");
+        Check(!e2.State.Cards[t2.A.Id].Bowed && !e2.State.Cards[t2.B.Id].Bowed, "and neither is bowed");
     }
 
     // ---- attachments ----------------------------------------------------------------------------------------------------------
@@ -427,49 +580,87 @@ internal static class MultiTargetTests
             return MatchEngine.FromTestState(s);
         }
         string Id(MatchEngine e, string def, int owner) => e.State.Cards.Values.First(c => c.Id.StartsWith("fx-") && c.DefinitionId == def && c.OwnerId == owner).Id;
-        foreach (var (ability, player, delta) in new[] { ("fear-me-gain", 0, 2), ("fear-me-gain", 1, 2), ("fear-me-lose", 0, -2), ("fear-me-lose", 1, -2) })
+        GameCommand Play(MatchEngine e) => Use(e, 0, FearMeMove, Id(e, FearMe, 0), performerId: Id(e, Yoshitada, 0), selections: Pick("target", Id(e, "training-lion-samurai", 1)));
+        foreach (var (choice, player, delta) in new[] { ("self-gain", 0, 2), ("opponent-gain", 1, 2), ("self-lose", 0, -2), ("opponent-lose", 1, -2) })
         {
             var e = Battle();
             var strategy = Id(e, FearMe, 0); var yoshi = Id(e, Yoshitada, 0); var enemy = Id(e, "training-lion-samurai", 1);
-            var option = Enabled(e, 0, ability, strategy, yoshi);
-            Check(option.Slots![0].CardIds.SequenceEqual(new[] { enemy }) && option.Slots[1].Kind == "player", "an enemy Personality, then a player: " + string.Join(",", option.Slots[0].CardIds) + " vs " + enemy);
+            var option = Enabled(e, 0, FearMeMove, strategy, yoshi);
+            Check(option.Slots![0].CardIds.SequenceEqual(new[] { enemy }) && option.Slots[1].Timing == "at-resolution" && option.Slots[1].Condition == "target-moved", "an enemy Personality up front; the player is a follow-up asked only if he moved");
             var before = new[] { Honor(e, 0), Honor(e, 1) };
-            Accept(e, Use(e, 0, ability, strategy, performerId: yoshi, selections: [Pick("target", enemy), PickPlayer("player", player)]));
+            Accept(e, Play(e));
             Eq(e.State.Cards[enemy].Zone, Zone.Home, "moved home"); Check(!e.State.Cards[enemy].Bowed, "Fear Me! does not bow him");
-            Eq(Honor(e, player), before[player] + delta, $"{ability} for player {player}"); Eq(Honor(e, 1 - player), before[1 - player]);
-            Eq(e.State.Cards[strategy].Zone, Zone.FateDiscard, "the Strategy is spent");
+            Check(Asked(e) && Honor(e, 0) == before[0] && Honor(e, 1) == before[1], "he moved, so the player is asked, and nothing changed yet");
+            Check(OptionIds(Answers(e, 0)).SequenceEqual(HonorAnswers), "the same four answers");
+            Answer(e, 0, choice);
+            Eq(Honor(e, player), before[player] + delta, $"{choice}"); Eq(Honor(e, 1 - player), before[1 - player]);
+            Eq(e.State.Cards[strategy].Zone, Zone.FateDiscard, "the Strategy is spent when the action completes"); Eq(e.State.PriorityPlayerId, 1);
         }
         {
-            // Equal Chi is allowed and a higher Chi is not (Yoshitada's Chi is 4; the printed value is compared, as for Chokehold).
+            // "If he moved": a negated move (Tamori Tamoko's negation) asks nothing and changes nobody's Honor.
+            var e = Battle(s => Add(s, "training-tamoko", 1, Zone.Home));
+            var before = new[] { Honor(e, 0), Honor(e, 1) };
+            Accept(e, Play(e));
+            Eq(e.State.PendingChoice?.Type, "beforeActionReaction");
+            Accept(e, e.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "tamoko-negate").Command!);
+            Decline(e); Decline(e);
+            var enemy = Id(e, "training-lion-samurai", 1);
+            Eq(e.State.Cards[enemy].Zone, Zone.Battlefield, "his movement was negated");
+            Check(!Asked(e) && e.State.PendingChoice is null, "so nothing is asked"); Check(Honor(e, 0) == before[0] && Honor(e, 1) == before[1], "and nobody's Honor changed");
+            Eq(e.State.Cards[Id(e, FearMe, 0)].Zone, Zone.FateDiscard, "the action still completed");
+        }
+        {
+            // Equal Chi is allowed and a higher Chi is not (see CurrentChiFlipsTheResult for modifiers).
             var high = Battle(enemy: "training-chi-five-personality");
-            var strategy = Id(high, FearMe, 0);
-            Check(Options(high, 0, "fear-me-gain", strategy).All(o => !o.Enabled), "a Chi 5 target is out of reach of a Chi 4 Duelist");
+            Check(Options(high, 0, FearMeMove, Id(high, FearMe, 0)).All(o => !o.Enabled), "a Chi 5 target is out of reach of a Chi 4 Duelist");
             var equal = Battle(enemy: "training-force-seven-bower");
-            Check(CanUse(equal, 0, "fear-me-gain", Id(equal, FearMe, 0)), "Chi 4 against Chi 4 is allowed");
+            Check(CanUse(equal, 0, FearMeMove, Id(equal, FearMe, 0)), "Chi 4 against Chi 4 is allowed");
         }
         {
             // The performer must be an unbowed Duelist at the battlefield.
             var notDuelist = Battle(s => { s.Cards.Values.Single(c => c.DefinitionId == Yoshitada).DefinitionId = "training-crane-samurai"; });
-            Check(Options(notDuelist, 0, "fear-me-gain", Id(notDuelist, FearMe, 0)).All(o => !o.Enabled), "no Duelist, no action");
+            Check(Options(notDuelist, 0, FearMeMove, Id(notDuelist, FearMe, 0)).All(o => !o.Enabled), "no Duelist, no action");
             var bowed = Battle(s => s.Cards.Values.Single(c => c.DefinitionId == Yoshitada).Bowed = true);
-            Check(Options(bowed, 0, "fear-me-lose", Id(bowed, FearMe, 0)).All(o => !o.Enabled), "a bowed Duelist does not perform");
-        }
-        {
-            // "If he moved": a negated move leaves him where he was and the chosen player's Honor alone.
-            var e = Battle();
-            var strategy = Id(e, FearMe, 0); var yoshi = Id(e, Yoshitada, 0); var enemy = Id(e, "training-lion-samurai", 1);
-            e = Edit(e, s => s.NegatedEffects.Add(new("move", enemy)));
-            var before = new[] { Honor(e, 0), Honor(e, 1) };
-            Accept(e, Use(e, 0, "fear-me-lose", strategy, performerId: yoshi, selections: [Pick("target", enemy), PickPlayer("player", 1)]));
-            Eq(e.State.Cards[enemy].Zone, Zone.Battlefield, "his movement was negated"); Check(Honor(e, 0) == before[0] && Honor(e, 1) == before[1], "and nobody's Honor changed");
+            Check(Options(bowed, 0, FearMeMove, Id(bowed, FearMe, 0)).All(o => !o.Enabled), "a bowed Duelist does not perform");
         }
         {
             // A gain for the performing Duelist's own controller while he is dishonorable rehonors HIM (the Duelist is the performer, not the Strategy).
             var e = Battle(s => s.Cards.Values.Single(c => c.DefinitionId == Yoshitada).Dishonorable = true);
-            var strategy = Id(e, FearMe, 0); var yoshi = Id(e, Yoshitada, 0); var enemy = Id(e, "training-lion-samurai", 1);
             var honor = Honor(e, 0);
-            Accept(e, Use(e, 0, "fear-me-gain", strategy, performerId: yoshi, selections: [Pick("target", enemy), PickPlayer("player", 0)]));
-            Eq(Honor(e, 0), honor); Check(!e.State.Cards[yoshi].Dishonorable, "the dishonorable Duelist is rehonored instead");
+            Accept(e, Play(e)); Answer(e, 0, "self-gain");
+            Eq(Honor(e, 0), honor); Check(!e.State.Cards[Id(e, Yoshitada, 0)].Dishonorable, "the dishonorable Duelist is rehonored instead");
+        }
+    }
+
+    // "Equal or lower Chi" reads CURRENT Chi: printed plus modifiers (plus Items, PersonalityChi's own reading, as personality-chi-lte-self already does)
+    // -- Mendon's ruling, issue #336. The performer and the target both have printed Chi 3; each modifier below flips whether the target is in reach.
+    private static void CurrentChiFlipsTheResult()
+    {
+        foreach (var shape in new[] { "Fear Me!", "Chokehold", "Ring of Fire" })
+        {
+            bool InReach(Action<CardInstance, CardInstance> change)
+            {
+                var s = Table(); s.PriorityPlayerId = 0;
+                var performer = Add(s, "training-duelist-personality", 0, Zone.Battlefield, province: 0); // Duelist, Chi 3
+                performer.GrantedKeywords.Add(new("Monk", "test", "Turn"));
+                var target = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); // Chi 3
+                var (ability, card) = shape switch
+                {
+                    "Fear Me!" => (FearMeMove, Add(s, FearMe, 0, Zone.Hand).Id),
+                    "Chokehold" => ("chokehold", Add(s, "oracle-l5r-1336", 0, Zone.Hand).Id),
+                    _ => ("ring-of-fire-destroy", Add(s, "oracle-l5r-6335", 0, Zone.Home).Id),
+                };
+                change(performer, target);
+                var e = MatchEngine.FromTestState(s);
+                return Options(e, 0, ability, card).Any(o => o.Enabled && (o.Slots?[0].CardIds ?? o.TargetIds)!.Contains(target.Id));
+            }
+            void Chi(CardInstance c, int amount) => c.Modifiers.Add(new("test", "chi", "Chi", amount));
+            Check(InReach((p, t) => { }), $"{shape}: equal printed Chi (3 against 3) is in reach");
+            Check(!InReach((p, t) => Chi(t, 1)), $"{shape}: +1 Chi on the target puts it out of reach (printed Chi alone would still allow it)");
+            Check(InReach((p, t) => Chi(p, 1)), $"{shape}: +1 Chi on the performer keeps it in reach");
+            Check(InReach((p, t) => { Chi(t, 1); Chi(p, 1); }), $"{shape}: +1 on both is equal again");
+            Check(!InReach((p, t) => Chi(p, -1)), $"{shape}: -1 Chi on the performer leaves a Chi 3 target out of reach (printed Chi alone would still allow it)");
+            Check(InReach((p, t) => Chi(t, -1)), $"{shape}: -1 Chi on the target keeps it in reach");
         }
     }
 
@@ -493,6 +684,7 @@ internal static class MultiTargetTests
         Reject(e, Mixed(enemy.Id, enemy.Id, 0)); Reject(e, Mixed(ownHolding.Id, ownHolding.Id, 0)); Reject(e, Mixed(ownHolding.Id, own.Id, 0));
         Reject(e, Mixed(follower.Id, enemy.Id, 0)); Reject(e, Mixed(ownHolding.Id, follower.Id, 0)); Reject(e, Mixed(ownHolding.Id, enemy.Id, 3));
         Reject(e, Use(e, 0, "training-slots-mixed", source.Id, selections: [Pick("holding", ownHolding.Id), PickPlayer("player", 0)]));
+        Reject(e, Use(e, 0, "training-slots-mixed", source.Id, selections: [Pick("holding", ownHolding.Id), Pick("personality", enemy.Id)])); // an up-front player slot is required too
         Accept(e, Mixed(enemyHolding.Id, enemy.Id, 1));
         Check(e.State.Cards[enemyHolding.Id].Bowed && e.State.Cards[enemy.Id].Bowed && !e.State.Cards[ownHolding.Id].Bowed, "each card was affected in its own role");
         Eq(Honor(e, 1), 7, "the chosen player gained 1 (6 + 1)"); Eq(Honor(e, 0), honor);
@@ -537,13 +729,15 @@ internal static class MultiTargetTests
     {
         var r = Yoshi();
         var e = MatchEngine.FromTestState(r.S);
-        var option = Enabled(e, 0, Gain, r.Yoshitada.Id);
+        var option = Enabled(e, 0, YoshiAbility, r.Yoshitada.Id);
         var back = JsonSerializer.Deserialize<ActionOption>(JsonSerializer.Serialize(option))!;
-        Check(back.Slots!.Length == 2 && back.Slots[0].CardIds.SequenceEqual(option.Slots![0].CardIds) && back.Slots[1].PlayerIds.SequenceEqual(new[] { 0, 1 }), "the option's slots survive");
-        Check(back.Command!.Selections!.Length == 2 && back.Command.Selections[1].PlayerId == 0, "and so does its default command");
-        var command = Yo(e, r, Lose, r.Enemy.Id, 1);
-        var again = JsonSerializer.Deserialize<GameCommand>(JsonSerializer.Serialize(command))!;
+        Check(back.Slots!.Length == 2 && back.Slots[0].CardIds.SequenceEqual(option.Slots![0].CardIds), "the option's slots survive");
+        Check(back.Slots[1].Timing == "at-resolution" && back.Slots[1].Condition == "target-dishonorable" && back.Slots[1].OptionLabels!.SequenceEqual(option.Slots![1].OptionLabels!), "and the follow-up's timing, condition and answers");
+        Check(back.Command!.Selections!.Length == 1 && back.Command.Selections[0].Slot == "target", "and so does its default command");
+        var again = JsonSerializer.Deserialize<GameCommand>(JsonSerializer.Serialize(Yo(e, r, r.Enemy.Id)))!;
         Accept(e, again with { ExpectedVersion = e.Version });
-        Eq(Honor(e, 1), 4, "a command that went through JSON resolves as sent (6 - 2)");
+        var answer = JsonSerializer.Deserialize<ActionOption>(JsonSerializer.Serialize(Answers(e, 0).Single(a => a.Command!.Choice == "opponent-lose")))!;
+        Accept(e, answer.Command! with { ExpectedVersion = e.Version });
+        Eq(Honor(e, 1), 4, "a command and an answer that went through JSON resolve as sent (6 - 2)");
     }
 }

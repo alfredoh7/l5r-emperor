@@ -16,8 +16,8 @@ Gold and Steel (2865, Focus 2, Cost 0): "Battle/Open: Target one to three attach
 home." is the pair gold-and-steel-bow / gold-and-steel-bow-move (the "you may" is which of the two the player plays).
 
 Fear Me! (2493, Focus 4, Cost 0, Fear * Iaijutsu): "Battle: Choose your performing unbowed Duelist and target an enemy Personality with equal or
-lower Chi: Move him home. If he moved, choose a player, who gains or loses 2 Honor." is the pair fear-me-gain / fear-me-lose, on the same
-two-target shape as Doji Yoshitada's.
+lower Chi: Move him home. If he moved, choose a player, who gains or loses 2 Honor." is the single ability fear-me-move, on the same shape
+as Doji Yoshitada's: the player choice is a conditional follow-up asked at resolution, only if he moved.
 
 Same discipline as every other wave: curated Effect/Ability mapping, hand-verified against each card's own scan, never inferred from prose.
 """
@@ -34,7 +34,7 @@ PROFILE = "strategy-wave-21"
 ABILITIES: dict[int, list[str]] = {
     1092: ["bonds-of-coin-destroy", "bonds-of-coin-draw"],  # Bonds of Coin
     2865: ["gold-and-steel-destroy", "gold-and-steel-bow", "gold-and-steel-bow-move"],  # Gold and Steel
-    2493: ["fear-me-gain", "fear-me-lose"],  # Fear Me!
+    2493: ["fear-me-move"],  # Fear Me!
 }
 EFFECTS: dict[int, str] = {}
 

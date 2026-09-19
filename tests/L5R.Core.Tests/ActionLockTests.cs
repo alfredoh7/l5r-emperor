@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using static RegressionAssertions;
 using static Batch336Support;
 using L5R.Core;
@@ -20,6 +21,10 @@ internal static class ActionLockTests
             ("The lock lasts this turn only: applied in the Action Phase, it holds through the Attack Phase and the whole End Phase (where no action exists to take) and is gone when the next turn begins -- the same reset whichever of \"this turn\" or \"the End Phase\" is read", LockLastsUntilTurnEnd),
             ("The lock is \"this turn\" even from the other player's Open action: used on the opponent's turn it ends with THAT turn, not on its controller's next one; and two locks on one card are still just a lock", LockedOnTheOpponentsTurn),
             ("Fear Open is a plain Open action: either player may take it, once a turn per card, on any Personality in play (its own controller's included), and never on a Follower, an attachment or a card out of play", FearOpenTargeting),
+            ("Innate actions are barred too (Mendon's ruling): a locked dishonorable Samurai is listed for Order Seppuku disabled with the reason and refused when sent anyway, while an unlocked one still may -- and it is available again once the lock ends", InnateActionSeppukuIsBarred),
+            ("Every innate action the engine offers is accounted for: the offered action types are pinned, and exactly two are performed by a Personality (Order Seppuku and an ability on a card) -- the rest are the player's (buying, equipping, passing, choosing) and none of them is barred by a lock on a Personality", InnateActionInventory),
+            ("Assigning to attack or defend is not an action (Mendon's ruling): a locked Personality is offered in the attack and the defense assignments, is assigned, fights the battle with his Force counted, and is still locked and unable to act in it; he can also be moved by an enemy's action", AssignmentIsNotAnAction),
+            ("A copied ability is barred too (Fukuzo's copy primitive): an ability a locked Personality copied is listed disabled with the reason and refused, its \"copied from\" label intact, and is offered as usual without the lock", CopiedAbilityIsBarred),
             ("\"X Champion\" keywords are ordinary keywords: an Item that attaches only to an Obsidian Champion goes onto Hotako and onto no other Personality, and a Strategy naming a performing Obsidian Champion offers only Hotako -- no special rule", ChampionKeywordIsOrdinary),
             ("Hotako's entry discount goes through the ONE purchase quote: a Lion Clan player pays 9 (11 - 2, term-by-term basis), a Crane player 11; the Clan discount and allegiance still stack; and the exact payment enters him play, costs the Lion 2 Honor with no Reaction offered", LionClanDiscountThroughQuotePurchase),
             ("The Clan entry discount is one general term: \"<clan>-clan-discount\" is 1 less and \"<clan>-clan-discount-N\" N less for a Purchase and for an Equip alike, only for that Clan's player, never below 0", ClanDiscountIsGeneral),
@@ -218,6 +223,145 @@ internal static class ActionLockTests
         e = Edit(e, st => st.PriorityPlayerId = 0);
         Check(!CanUse(e, 0, "hotako-fear-lock", hotako.Id), "once a turn per card");
         Check(Rejection(e, new GameCommand("useAbility", 0, e.Version, hotako.Id, TargetId: enemy.Id, AbilityId: "hotako-fear-lock")).Contains("already been used"), "a second use is refused");
+    }
+
+    // ---- innate actions (Mendon's ruling, issue #336) -----------------------------------------------------------------------------
+    // "No actions means even innate actions may not be performed by a Personality who is barred from taking actions. The Personality may still be
+    // assigned to attack or defend, as those are not actions."
+    private static void InnateActionSeppukuIsBarred()
+    {
+        var s = Table(Phase.Action, actor: 0);
+        var locked = Add(s, "training-dishonored-samurai", 0, Zone.Home); locked.Dishonorable = true; locked.ActionLocks.Add(new("test", "Turn"));
+        var free = Add(s, "training-dishonored-samurai", 0, Zone.Home); free.Dishonorable = true;
+        var honorable = Add(s, "training-dishonored-samurai", 0, Zone.Home); honorable.ActionLocks.Add(new("test", "Turn")); // locked but not dishonorable: Seppuku was never his
+        var e = MatchEngine.FromTestState(s);
+        var seppuku = e.QueryActions(0).Where(a => a.Type == "orderSeppuku").ToArray();
+        Eq(seppuku.Length, 2, "one listing per dishonorable Samurai, the locked one included");
+        var lockedOption = seppuku.Single(a => a.CardId == locked.Id);
+        Check(!lockedOption.Enabled && lockedOption.Reason is not null && lockedOption.Reason.Contains("may not perform actions"), "the locked one is listed disabled with the reason: " + lockedOption.Reason);
+        Check(seppuku.Single(a => a.CardId == free.Id).Enabled, "the unlocked one is offered as before");
+        Check(Rejection(e, new GameCommand("orderSeppuku", 0, e.Version, locked.Id)).Contains("may not perform actions"), "Order Seppuku by the locked Personality is refused when sent anyway");
+        Check(e.State.Cards[locked.Id].Zone == Zone.Home, "and nothing happened to him");
+        // The same for the other player's view of the position: a lock is public and either player's listing shows only its own cards.
+        Check(e.QueryActions(1).All(a => a.Type != "orderSeppuku"), "the other player is never offered Seppuku for a Personality that is not theirs");
+        Accept(e, new GameCommand("orderSeppuku", 0, e.Version, free.Id));
+        Eq(e.State.Cards[free.Id].Zone, Zone.Dead, "an unlocked dishonorable Samurai still performs it");
+        // Lifted: available again.
+        var lifted = Edit(e, st => st.Cards[locked.Id].ActionLocks.Clear());
+        Check(lifted.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == locked.Id).Enabled, "without the lock he may order it");
+        Accept(lifted, new GameCommand("orderSeppuku", 0, lifted.Version, locked.Id));
+        Eq(lifted.State.Cards[locked.Id].Zone, Zone.Dead);
+        // Locked by Hotako's real Fear Open on a dishonorable Samurai, end to end.
+        var s2 = Table(Phase.Action, actor: 0);
+        var hotako = Add(s2, Hotako, 0, Zone.Home); var victim = Add(s2, "training-dishonored-samurai", 0, Zone.Home); victim.Dishonorable = true;
+        var e2 = MatchEngine.FromTestState(s2);
+        Check(e2.QueryActions(0).Single(a => a.Type == "orderSeppuku").Enabled, "before Hotako's action");
+        Accept(e2, Offer(e2, 0, "hotako-fear-lock", hotako.Id, victim.Id));
+        e2 = Edit(e2, st => st.PriorityPlayerId = 0);
+        var after = e2.QueryActions(0).Single(a => a.Type == "orderSeppuku");
+        Check(!after.Enabled && after.Reason!.Contains("may not perform actions"), "after it: " + after.Reason);
+        Rejection(e2, new GameCommand("orderSeppuku", 0, e2.Version, victim.Id));
+    }
+
+    // The inventory: every action type MatchQueries offers, classified. A new one fails here until it is classified (and, if a Personality performs it,
+    // barred by the lock) -- the point of the test.
+    private static readonly string[] PerformedByAPersonality = ["orderSeppuku", "useAbility"];
+    private static readonly string[] PlayersOwnAndNotBarred =
+    [
+        "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden",
+        "chooseYourClanNeedsYouProvince", "concede", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
+        "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
+    ];
+
+    private static void InnateActionInventory()
+    {
+        var source = File.ReadAllText(Path.Combine(RepoRoot(), "src/L5R.Core/MatchQueries.cs"));
+        var offered = Regex.Matches(source, "\\bAdd\\(\"(\\w+)\"").Select(m => m.Groups[1].Value).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
+        var known = PerformedByAPersonality.Concat(PlayersOwnAndNotBarred).OrderBy(x => x, StringComparer.Ordinal).ToArray();
+        Check(offered.SequenceEqual(known), "the offered action types changed -- classify the new one (a Personality performs it: bar it under a lock; else list it as the player's): "
+            + "new [" + string.Join(", ", offered.Except(known)) + "], gone [" + string.Join(", ", known.Except(offered)) + "]");
+        // The two assignment types are built from a variable, not a literal: they are assignments, not actions (the next test).
+        Check(source.Contains("var actionType=attack?\"attack\":\"assignDefense\""), "attack and assignDefense are still the one assignment construction");
+        // Behaviour, for the one of the two that is not an ability: Order Seppuku is listed disabled for a locked Personality and every ability on him too;
+        // and a Personality's lock changes none of the player's own actions in the Dynasty and Action Phases (buying, passing).
+        var s = Table(Phase.Action, actor: 0);
+        var locked = Add(s, "training-battle-bower", 0, Zone.Home); locked.ActionLocks.Add(new("test", "Turn"));
+        var e = MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Where(a => a.Type == "useAbility" && a.CardId == locked.Id).All(a => !a.Enabled && a.Reason!.Contains("may not perform actions")), "every ability listed on him is disabled with the reason");
+        Check(e.QueryActions(0).Any(a => a.Type == "pass" && a.Enabled), "the player still passes");
+        var s2 = Table(Phase.Dynasty, actor: 0); Add(s2, "training-battle-bower", 0, Zone.Home).ActionLocks.Add(new("test", "Turn"));
+        var e2 = MatchEngine.FromTestState(s2);
+        Check(e2.QueryActions(0).Any(a => a.Type == "endDynasty" && a.Enabled), "and ends the Dynasty Phase");
+    }
+
+    private static void AssignmentIsNotAnAction()
+    {
+        // Player 1 attacks province 1 with a locked Personality (Force 12) and player 0 defends with one (Force 7). Hotako, who did the locking, is bowed.
+        var s = Table(Phase.Action, actor: 1);
+        var hotako = Add(s, Hotako, 1, Zone.Home);
+        var attacker = Add(s, "training-battle-bower", 1, Zone.Home); Force(attacker, 10);
+        var defender = Add(s, "training-battle-bower", 0, Zone.Home); Force(defender, 5); defender.ActionLocks.Add(new("test", "Turn"));
+        var e = MatchEngine.FromTestState(s);
+        Lock(e, hotako, attacker);
+        e = Edit(e, st => { st.Cards[hotako.Id].Bowed = true; st.PriorityPlayerId = 1; });
+        Check(e.GetView(1).Players[1].Home.Single(c => c.Id == attacker.Id).ActionLocked && e.GetView(0).Players[0].Home.Single(c => c.Id == defender.Id).ActionLocked, "both are locked");
+        bool sawAttack = false, sawDefense = false;
+        RunUntil(e, () => e.State.Phase == Phase.Battle, () =>
+        {
+            if (e.State.Phase == Phase.AttackDeclaration)
+            {
+                var attack = e.QueryActions(1).Where(a => a.Type == "attack" && a.Enabled).ToArray();
+                sawAttack |= attack.Length > 0 && attack.All(a => a.TargetIds!.Contains(attacker.Id));
+            }
+            if (e.State.Phase == Phase.DefenseAssignment)
+            {
+                var defend = e.QueryActions(0).Where(a => a.Type == "assignDefense" && a.Enabled).ToArray();
+                sawDefense |= defend.Length > 0 && defend.All(a => a.TargetIds!.Contains(defender.Id));
+            }
+        });
+        Check(sawAttack, "the locked attacker is offered in the attack assignment, enabled"); Check(sawDefense, "the locked defender is offered in the defense assignment, enabled");
+        Check(e.State.Cards[attacker.Id].Zone == Zone.Battlefield && e.State.Cards[attacker.Id].ProvinceIndex == 0, "he was assigned and moved to the battlefield");
+        Check(e.State.Cards[defender.Id].Zone == Zone.Battlefield && e.State.Cards[defender.Id].ProvinceIndex == 0, "and so was the locked defender");
+        Check(e.State.Cards[attacker.Id].ActionLocks.Count == 1 && e.State.Cards[defender.Id].ActionLocks.Count == 1, "neither lock was touched by assigning");
+        Check(Options(e, 0, Bow, defender.Id).All(o => !o.Enabled) && Options(e, 1, Bow, attacker.Id).All(o => !o.Enabled), "in the battle neither can act");
+        RunUntil(e, () => e.State.Events.Any(x => x.Type == "battleResolved"));
+        Check(e.State.Events.Any(x => x.Type == "battleResolved" && x.Message.Contains("attacking Force 12, defending Force 7")), "both fought with their Force counted: " + string.Join(" | ", e.State.Events.Where(x => x.Type == "battleResolved").Select(x => x.Message)));
+        // Moved by an enemy's action: still a legal target, still locked afterwards.
+        var t = Table(); t.ActivePlayerId = 1; t.PriorityPlayerId = 1; t.CurrentBattleProvince = 1; t.UnresolvedBattlefields = [0, 1, 2];
+        var predator = Add(t, "oracle-l5r-6522", 1, Zone.Battlefield, province: 1);
+        var moved = Add(t, "training-battle-bower", 0, Zone.Battlefield, province: 1); moved.ActionLocks.Add(new("test", "Turn"));
+        var e2 = MatchEngine.FromTestState(t);
+        Accept(e2, Offer(e2, 1, "predator-move", predator.Id, moved.Id) with { Province = 2 });
+        Check(e2.State.Cards[moved.Id].ProvinceIndex == 2 && e2.State.Cards[moved.Id].ActionLocks.Count == 1, "an enemy's action moved the locked Personality, and the lock stands");
+    }
+
+    private static void CopiedAbilityIsBarred()
+    {
+        // Fukuzo holds "copied from" the donor a Battle ability (F's copy primitive: a GrantedAbility with CopiedFrom); the lock is on Fukuzo.
+        foreach (var locked in new[] { true, false })
+        {
+            var s = Table();
+            var fukuzo = Add(s, "oracle-l5r-2728", 0, Zone.Battlefield, province: 0);
+            fukuzo.GrantedAbilities.Add(new(Bow, "fukuzo-wear-skin", "Copy", CopiedFrom: "training-battle-bower", CopiedFromName: "Training Battle bower"));
+            var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            if (locked) fukuzo.ActionLocks.Add(new("test", "Turn"));
+            s.PriorityPlayerId = 0;
+            var e = MatchEngine.FromTestState(s);
+            var copied = e.QueryActions(0).Where(a => a.Type == "useAbility" && a.CardId == fukuzo.Id && a.Label.EndsWith(" · copied from Training Battle bower")).ToArray();
+            Eq(copied.Length, 1, "the copied ability is listed");
+            var command = new GameCommand("useAbility", 0, e.Version, fukuzo.Id, TargetId: enemy.Id, AbilityId: Bow);
+            if (locked)
+            {
+                Check(!copied[0].Enabled && copied[0].Reason!.Contains("may not perform actions"), "listed disabled with the reason: " + copied[0].Reason);
+                Check(Rejection(e, command).Contains("may not perform actions"), "and refused when sent anyway");
+                Check(!e.State.Cards[enemy.Id].Bowed, "nothing resolved");
+            }
+            else
+            {
+                Check(copied[0].Enabled, "without the lock it is offered: " + copied[0].Reason);
+                Accept(e, command); Check(e.State.Cards[enemy.Id].Bowed, "and it resolves");
+            }
+        }
     }
 
     // ---- "X Champion" is an ordinary keyword ----------------------------------------------------------------------------------

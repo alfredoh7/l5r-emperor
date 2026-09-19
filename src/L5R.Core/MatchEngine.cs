@@ -307,6 +307,9 @@ public sealed partial class MatchEngine
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
                 {
+                    // A multi-target action's next target with a possible reactor gets its own window (TargetWindows.cs); a negated action needs no more.
+                    if (!_state.DeferredActionNegated && OpenNextRemainingTargetWindow()) return;
+                    _state.ReactionWindowTargetId=null; _state.ReactionWindowRemaining=[];
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
                     // A reaction that negated the whole action (Yoritomo Sakuma, issue #338): it is taken, its costs are paid, its effects
                     // are not applied (ActionNegation.cs).
@@ -765,6 +768,8 @@ public sealed partial class MatchEngine
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
         Require(card.Dishonorable,"Only a Dishonorable Personality may perform Seppuku.");
+        // "May not perform actions" (issue #336, Mendon: even innate actions): Order Seppuku is the one action a Personality has of its own.
+        Require(!ActionLocked(card),$"{Definition(card).Name} may not perform actions this turn.");
         Require(Keyword(card,"Samurai") || Keyword(card,"Courtier") || Keyword(card,"Shugenja"),"Only a Samurai, Courtier, or Shugenja may perform Seppuku.");
         // Honorable before destruction: this is what spares the controller the dishonorable-death
         // Honor penalty applied generally in MarkDead.

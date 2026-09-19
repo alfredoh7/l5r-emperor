@@ -20,9 +20,10 @@ internal static class MoveDestinationTests
             ("Which battlefields are legal: adjacent to the current one along the DEFENDER's province line (destroyed provinces slide together), unresolved (not one already fought, not one nobody attacked), never the current one -- and never the attacker's own province line", LegalDestinationRules),
             ("Refused, atomically: a destination that is not listed (the current battlefield, a far one, a resolved one, none, out of range), a target that is not an enemy Personality at the current battlefield, a Predator who is not there; with no legal destination the action is offered disabled", Validation),
             ("Predator used by the Defender: the same adjacency (the defender's province line decides it, not whose action it is), and the same result", DefenderUsesPredator),
-            ("If the target's movement is negated (Tamori Tamoko's effect) only the target stays: Predator still goes -- the two movements are separate effects", NegatedTargetMove),
+            ("Predator's two movements are separate effects (Mendon's ruling): negate Predator's own move and the target still moves; negate the target's (Tamori Tamoko's reaction, or a mover-negating reaction) and Predator still moves; both negated, neither moves; the WHOLE action negated, neither moves", EachMoveNegatedSeparately),
             ("The battle state follows: the current battle resolves with what remains at it, the moved units fight the battle at their new battlefield with their Force counted there, and everyone still ends the Attack Phase home", BattleStateFollowsTheMove),
             ("Every destination rule and mover shape on fixtures: current battlefield (target from home), another unresolved battlefield (target), adjacent unresolved (source alone, or performer and target), home (source and target together)", EveryRuleAndMover),
+            ("Adjacency between battlefields follows the DEFENDER's province line on every call site -- Predator's destinations, 'a Personality at an adjacent battlefield' (Battle, target) and Moto Gunso's boost -- whichever player owns the card or takes the action, with the two players' lines made to differ", AdjacencyIsTheDefendersLine),
             ("The option's Provinces (the destinations to draw) and its command's Province (the choice) survive JSON, and every offered destination validates and resolves on a fresh engine", OfferedDestinationsValidate),
         ];
         runner.Run("move-destination", tests);
@@ -156,15 +157,121 @@ internal static class MoveDestinationTests
         Eq(e.State.Cards[r.Target.Id].OwnerId, 1, "and the Attacker still controls his");
     }
 
-    private static void NegatedTargetMove()
+    // ---- negation of the two movements (Mendon's ruling, issue #336) -----------------------------------------------------------------
+    // "Move the Personality and Predator": each is its own movement, so negating one leaves the other, unless an effect also negates it or the whole
+    // action is negated. Player 0 (the target's controller) holds the reactions; the window opens for the action's target.
+    private static void Decline(MatchEngine e) => Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Type == "declineReaction" && a.Enabled).Command!);
+    private static void CloseWindows(MatchEngine e) { for (var guard = 0; guard < 10 && e.State.PendingChoice is { Type: "beforeActionReaction" }; guard++) Decline(e); Check(e.State.PendingChoice is null, "the windows closed"); }
+    private static GameCommand NegateMover(MatchEngine e, string mover)
     {
-        var r = Map();
+        var option = e.QueryActions(0).FirstOrDefault(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-mover" && a.Command.TargetId == mover);
+        Check(option is not null, $"a mover-negating reaction naming {mover} is offered: " + string.Join("; ", e.QueryActions(0).Select(a => $"{a.Type} {a.Command?.AbilityId} {a.Command?.TargetId} [{a.Enabled}]")));
+        return option!.Command!;
+    }
+
+    private static void EachMoveNegatedSeparately()
+    {
+        // (1) Predator's own movement negated: the target still moves, Predator and his Item stay.
+        var r = Map(); Add(r.S, "training-mover-negator", 0, Zone.Home);
         var e = MatchEngine.FromTestState(r.S);
-        e = Edit(e, s => s.NegatedEffects.Add(new("move", r.Target.Id)));
         Accept(e, MoveTo(e, r, 2));
-        Eq(e.State.Cards[r.Target.Id].ProvinceIndex, 1, "the target stayed"); Eq(e.State.Cards[r.TargetItem.Id].ProvinceIndex, 1, "and so did his Item");
-        Eq(e.State.Cards[r.Predator.Id].ProvinceIndex, 2, "Predator went on his own"); Eq(e.State.Cards[r.PredatorItem.Id].ProvinceIndex, 2);
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the negator opens the before-action window");
+        Accept(e, NegateMover(e, r.Predator.Id)); CloseWindows(e);
+        Eq(e.State.Cards[r.Predator.Id].ProvinceIndex, 1, "Predator stayed"); Eq(e.State.Cards[r.PredatorItem.Id].ProvinceIndex, 1, "with his Item");
+        Eq(e.State.Cards[r.Target.Id].ProvinceIndex, 2, "the target moved on his own"); Eq(e.State.Cards[r.TargetItem.Id].ProvinceIndex, 2);
         Check(e.State.Events.Any(x => x.Type == "moveNegated"), "the negation is in the log");
+        Check(e.State.Cards[r.Predator.Id].AbilityUses.ContainsKey(Move), "the action was still taken");
+        // (2) The target's movement negated by a real card (Tamori Tamoko's reaction): only the target stays, Predator goes.
+        var r2 = Map(); Add(r2.S, "training-tamoko", 0, Zone.Home);
+        var e2 = MatchEngine.FromTestState(r2.S);
+        Accept(e2, MoveTo(e2, r2, 2));
+        Accept(e2, e2.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "tamoko-negate").Command!); CloseWindows(e2);
+        Eq(e2.State.Cards[r2.Target.Id].ProvinceIndex, 1, "the target stayed"); Eq(e2.State.Cards[r2.TargetItem.Id].ProvinceIndex, 1, "and so did his Item");
+        Eq(e2.State.Cards[r2.Predator.Id].ProvinceIndex, 2, "Predator went on his own"); Eq(e2.State.Cards[r2.PredatorItem.Id].ProvinceIndex, 2);
+        // (2b) ...and the same by naming the target through the mover-negating fixture.
+        var r2b = Map(); Add(r2b.S, "training-mover-negator", 0, Zone.Home);
+        var e2b = MatchEngine.FromTestState(r2b.S);
+        Accept(e2b, MoveTo(e2b, r2b, 0)); Accept(e2b, NegateMover(e2b, r2b.Target.Id)); CloseWindows(e2b);
+        Check(e2b.State.Cards[r2b.Target.Id].ProvinceIndex == 1 && e2b.State.Cards[r2b.Predator.Id].ProvinceIndex == 0, "the target stayed, Predator went to the chosen battlefield");
+        // (3) Both negated by two effects: neither moves (the action itself is not negated -- it was taken).
+        var r3 = Map(); Add(r3.S, "training-mover-negator", 0, Zone.Home); Add(r3.S, "training-tamoko", 0, Zone.Home);
+        var e3 = MatchEngine.FromTestState(r3.S);
+        Accept(e3, MoveTo(e3, r3, 2));
+        Accept(e3, NegateMover(e3, r3.Predator.Id));
+        Decline(e3); // a reaction hands the opportunity over: player 1 passes, and player 0 plays the second
+        Accept(e3, e3.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "tamoko-negate").Command!); CloseWindows(e3);
+        Check(new[] { r3.Predator, r3.Target, r3.PredatorItem, r3.TargetItem }.All(c => e3.State.Cards[c.Id].ProvinceIndex == 1), "both negated: nothing moved");
+        Eq(e3.State.Events.Count(x => x.Type == "moveNegated"), 2, "two negations logged");
+        // (4) The whole action negated: neither moves.
+        var r4 = Map(); Add(r4.S, "training-action-negator", 0, Zone.Home);
+        var e4 = MatchEngine.FromTestState(r4.S);
+        Accept(e4, MoveTo(e4, r4, 2));
+        Accept(e4, e4.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-action").Command!); CloseWindows(e4);
+        Check(new[] { r4.Predator, r4.Target, r4.PredatorItem, r4.TargetItem }.All(c => e4.State.Cards[c.Id].ProvinceIndex == 1), "the action negated whole: neither moved");
+        Check(e4.State.Cards[r4.Predator.Id].AbilityUses.ContainsKey(Move), "it was still taken");
+        // (5) No reaction played: both move (the baseline the cases above differ from).
+        var r5 = Map(); Add(r5.S, "training-mover-negator", 0, Zone.Home);
+        var e5 = MatchEngine.FromTestState(r5.S);
+        Accept(e5, MoveTo(e5, r5, 2)); CloseWindows(e5);
+        Check(new[] { r5.Predator, r5.Target }.All(c => e5.State.Cards[c.Id].ProvinceIndex == 2), "a window passed unused: both moved");
+    }
+
+    // ---- adjacency is the DEFENDER's line (Mendon's ruling, issue #336) -------------------------------------------------------------------
+    // Player 1 attacks, player 0 defends. The two players' province lines are made to differ: whichever line the engine consults shows in the answer.
+    // Current battlefield 0; province 1 of ONE player's line is destroyed, so on that line 0 and 2 are adjacent (and on the other 0 and 1 are).
+    private static void AdjacencyIsTheDefendersLine()
+    {
+        MatchState Line(bool defenderLineSlid, bool attackerLineSlid)
+        {
+            var s = Table(); s.ActivePlayerId = 1; s.CurrentBattleProvince = 0; s.UnresolvedBattlefields = [0, 1, 2];
+            if (defenderLineSlid) s.Players[0].Provinces[1].Destroyed = true;
+            if (attackerLineSlid) s.Players[1].Provinces[1].Destroyed = true;
+            return s;
+        }
+        // (1) 'A Personality at an adjacent battlefield' (Battle, target): the card is owned by the attacker (player 1) or the defender (player 0).
+        bool Boost(bool defenderLineSlid, bool attackerLineSlid, int owner, int targetProvince)
+        {
+            var s = Line(defenderLineSlid, attackerLineSlid); s.PriorityPlayerId = owner;
+            var source = Add(s, "training-adjacent-booster", owner, Zone.Battlefield, province: 0);
+            var target = Add(s, "training-crane-samurai", 1 - owner, Zone.Battlefield, province: targetProvince);
+            var e = MatchEngine.FromTestState(s);
+            return e.Execute(new GameCommand("useAbility", owner, e.Version, CardId: source.Id, TargetId: target.Id, AbilityId: "training-adjacent-boost")).Accepted;
+        }
+        foreach (var owner in new[] { 1, 0 })
+        {
+            Check(Boost(defenderLineSlid: true, attackerLineSlid: false, owner, 2), $"owner {owner}: the defender's province 1 is destroyed, so battlefield 2 is next to 0 -- whoever owns the card");
+            Check(!Boost(defenderLineSlid: false, attackerLineSlid: true, owner, 2), $"owner {owner}: the ATTACKER's destroyed province changes nothing: 2 is not next to 0");
+            Check(Boost(defenderLineSlid: false, attackerLineSlid: true, owner, 1), $"owner {owner}: 1 is still next to 0");
+        }
+        // (2) Moto Gunso: +1F to each of his controller's other Followers at the current battlefield and each adjacent one.
+        (int at1, int at2) Gunso(bool defenderLineSlid, bool attackerLineSlid, int owner)
+        {
+            var s = Line(defenderLineSlid, attackerLineSlid); s.PriorityPlayerId = owner;
+            var host = Add(s, "training-crane-samurai", owner, Zone.Battlefield, province: 0);
+            var gunso = Add(s, "oracle-l5r-5320", owner, Zone.Attached, province: 0, parent: host.Id);
+            var host1 = Add(s, "training-crane-samurai", owner, Zone.Battlefield, province: 1); var f1 = Add(s, "training-follower", owner, Zone.Attached, province: 1, parent: host1.Id);
+            var host2 = Add(s, "training-crane-samurai", owner, Zone.Battlefield, province: 2); var f2 = Add(s, "training-follower", owner, Zone.Attached, province: 2, parent: host2.Id);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, new GameCommand("useAbility", owner, e.Version, CardId: gunso.Id, AbilityId: "moto-gunso-boost"));
+            int Boosted(CardInstance f) => e.State.Cards[f.Id].Modifiers.Count(m => m.Effect == "moto-gunso-boost");
+            return (Boosted(f1), Boosted(f2));
+        }
+        foreach (var owner in new[] { 1, 0 })
+        {
+            Check(Gunso(true, false, owner) == (0, 1), $"owner {owner}: the defender's line slid -- the Follower at battlefield 2 is boosted, the one at 1 is not");
+            Check(Gunso(false, true, owner) == (1, 0), $"owner {owner}: only the attacker's line slid -- the Follower at battlefield 1 is boosted, the one at 2 is not");
+            Check(Gunso(false, false, owner) == (1, 0), $"owner {owner}: neither slid -- 1 only");
+        }
+        // (3) Predator: the same rule, on the same two lines (a Predator owned by the attacker or by the defender).
+        foreach (var owner in new[] { 1, 0 })
+        {
+            var s = Line(defenderLineSlid: true, attackerLineSlid: false); s.PriorityPlayerId = owner;
+            var predator = Add(s, Predator, owner, Zone.Battlefield, province: 0); Add(s, "training-battle-bower", 1 - owner, Zone.Battlefield, province: 0);
+            Check(Options(MatchEngine.FromTestState(s), owner, Move, predator.Id).Single().Provinces!.SequenceEqual(new[] { 2 }), $"owner {owner}: Predator's only destination is 2 on the defender's slid line");
+            var t = Line(defenderLineSlid: false, attackerLineSlid: true); t.PriorityPlayerId = owner;
+            var predator2 = Add(t, Predator, owner, Zone.Battlefield, province: 0); Add(t, "training-battle-bower", 1 - owner, Zone.Battlefield, province: 0);
+            Check(Options(MatchEngine.FromTestState(t), owner, Move, predator2.Id).Single().Provinces!.SequenceEqual(new[] { 1 }), $"owner {owner}: and 1 on the unslid defender's line, whatever the attacker's own line looks like");
+        }
     }
 
     private static void BattleStateFollowsTheMove()

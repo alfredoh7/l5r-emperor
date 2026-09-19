@@ -13,9 +13,9 @@ by QuotePurchase and by Equip); "After Hotako enters play: Lose 2 Honor" is Entr
 "Obsidian Champion" is an ordinary keyword: nothing in the engine treats an "X Champion" keyword specially.
 
 Doji Yoshitada (2179): Force 3, Chi 4, Honor Requirement 6, Cost 7, Personal Honor 3, Crane Clan * Samurai * Duelist * Magistrate. "Political
-Battle: Target an enemy Personality: Bow him. If he is dishonorable, choose a player who gains or loses 2 Honor." is the pair of abilities
-yoshitada-bow-gain / yoshitada-bow-lose (one action; the player chooses the direction, Kitsuki Horume's established shape) on the
-general multi-target shape: a Personality slot and a player slot.
+Battle: Target an enemy Personality: Bow him. If he is dishonorable, choose a player who gains or loses 2 Honor." is the single ability
+yoshitada-bow on the general multi-target shape: an up-front Personality slot and a conditional follow-up slot (Mendon's ruling: the two
+sentences are independent, so the player and the gain-or-lose choice are asked at resolution, after the bow, only if he is dishonorable).
 
 Sea Troll Predator (6522): Force 6, Chi 4, no Honor Requirement, Cost 8, Personal Honor 0, Unaligned; Shadowlands * Nonhuman * Troll * Earth
 * Tactician. "After Predator enters play: Lose 3 Honor" is EntryHonorLoss 3; "Battle: Target a Personality opposing Predator at the current
@@ -41,7 +41,7 @@ PROFILE = "personality-wave-32"
 
 ABILITIES: dict[int, list[str]] = {
     1726: ["hotako-fear-lock"],  # Daigotsu Hotako, Experienced 3: Fear Open, the action-lock
-    2179: ["yoshitada-bow-gain", "yoshitada-bow-lose"],  # Doji Yoshitada: bow, then a chosen player gains or loses 2 Honor
+    2179: ["yoshitada-bow"],  # Doji Yoshitada: bow; if he is dishonorable, a player gains or loses 2 Honor (asked at resolution)
     6522: ["predator-move"],  # Sea Troll Predator: move the Personality and Predator to an adjacent unresolved battlefield
     9085: ["liuxeung-move-home"],  # Utaku Liu-Xeung, Experienced: move an enemy with lower Personal Honor home, gain 1 Honor
 }

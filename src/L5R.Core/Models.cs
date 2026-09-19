@@ -572,6 +572,10 @@ public sealed class MatchState
     // first and matches it; "all" is never consumed (see NegatesEffect), and the whole list is wiped right
     // after the re-invoked command returns.
     public GameCommand? PendingNegatableAbility { get; set; }
+    // A multi-target action opens one before-action window per target that has a possible reactor, in slot order (issue #336, TargetWindows.cs):
+    // the target the open window is for, and the targets still to come. Both empty for a single-target action and once the action resolves.
+    public string? ReactionWindowTargetId { get; set; }
+    public List<string> ReactionWindowRemaining { get; set; } = [];
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     // Force redirection (issue #216, Togashi Noboru): "the target's Force contributes to [Noboru's
     // controller's] army instead of his own controller's" -- battle-scoped ("for the duration of the

@@ -59,8 +59,7 @@
       ],
       "Focus": 0,
       "Abilities": [
-        "yoshitada-bow-gain",
-        "yoshitada-bow-lose"
+        "yoshitada-bow"
       ],
       "Effect": "none"
     },

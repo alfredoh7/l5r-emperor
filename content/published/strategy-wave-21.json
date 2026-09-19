@@ -76,8 +76,7 @@
       ],
       "Focus": 4,
       "Abilities": [
-        "fear-me-gain",
-        "fear-me-lose"
+        "fear-me-move"
       ],
       "Effect": "none"
     }

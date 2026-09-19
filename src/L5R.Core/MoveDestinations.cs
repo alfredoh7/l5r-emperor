@@ -16,6 +16,11 @@ public sealed record MoveSpec(string Movers, string Destination)
 
 public sealed partial class MatchEngine
 {
+    // The battlefields next to `current` (Mendon's ruling, issue #336): a battlefield is identified by the DEFENDER's province it is fought over, so
+    // adjacency follows the DEFENDER's province line -- never the line of whichever player happens to own the card or take the action. Destroyed
+    // provinces slide their neighbours together (AdjacentProvinces). The one place adjacency between battlefields is decided.
+    private IEnumerable<int> AdjacentBattlefields(int current) => AdjacentProvinces(1 - _state.ActivePlayerId, current);
+
     // The battlefields a chosen destination may name right now (empty for a destination that needs no choice, and when no battle is
     // under way). A battlefield is identified by the DEFENDER's province it is fought over, so adjacency is the defender's province line
     // (destroyed provinces slide together, AdjacentProvinces), and "unresolved" is a battlefield still to be fought this Attack Phase.
@@ -24,7 +29,7 @@ public sealed partial class MatchEngine
         if (!move.ChoosesBattlefield || _state.CurrentBattleProvince is not int current) return [];
         var unresolved = _state.UnresolvedBattlefields;
         return move.Destination == MoveSpec.AdjacentUnresolved
-            ? AdjacentProvinces(1 - _state.ActivePlayerId, current).Where(unresolved.Contains).ToArray()
+            ? AdjacentBattlefields(current).Where(unresolved.Contains).ToArray()
             : unresolved.Where(p => p != current).ToArray();
     }
 
@@ -39,20 +44,20 @@ public sealed partial class MatchEngine
     }
 
     // The effect of a move: every mover goes to the destination, the ability's own source (or its named performer) first and its target
-    // last (the arrival of the target is the one a "moved an enemy Personality to this battlefield" Reaction watches for). The source and
-    // the performer move themselves -- nothing a reaction negates -- while the target's movement is an effect on it, so a negation of its
-    // movement (Tamori Tamoko) applies to it alone and the others still move. Returns whether the TARGET moved (false when its move was
-    // negated, or there was none).
+    // last (the arrival of the target is the one a "moved an enemy Personality to this battlefield" Reaction watches for). EACH movement is its
+    // own effect and negatable on its own (Mendon's ruling, issue #336): a negation of one mover's movement (Tamori Tamoko, a Champion of Thunder's
+    // "all") leaves the others' movement alone unless an effect negates theirs too, and a negation of the whole action stops all of them (the
+    // deferred action then never reaches here). Returns whether the TARGET moved (false when its move was negated, or there was none).
     private bool ExecuteMove(GameCommand command, AbilityDefinition ability, CardInstance? source, CardInstance? target)
     {
         var move = ability.Move!;
         var battlefield = move.Destination == MoveSpec.CurrentBattlefield ? _state.CurrentBattleProvince : command.Province;
-        if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield, negatable: false);
-        if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield, negatable: false);
-        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield, negatable: true);
+        if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget) MoveByRule(source!, move, battlefield);
+        if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget) MoveByRule(Card(command.PerformerId), move, battlefield);
+        return move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget && MoveByRule(target!, move, battlefield);
     }
 
-    private bool MoveByRule(CardInstance card, MoveSpec move, int? battlefield, bool negatable)
+    private bool MoveByRule(CardInstance card, MoveSpec move, int? battlefield)
     {
         if (move.Destination == MoveSpec.Home)
         {
@@ -60,9 +65,6 @@ public sealed partial class MatchEngine
             MoveHome(card, false);
             return before != card.Zone;
         }
-        if (negatable) return TryMoveToBattlefield(card, battlefield!.Value);
-        MoveToBattlefield(card, battlefield!.Value);
-        Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {battlefield.Value + 1}.", card.OwnerId, card.Id);
-        return true;
+        return TryMoveToBattlefield(card, battlefield!.Value);
     }
 }

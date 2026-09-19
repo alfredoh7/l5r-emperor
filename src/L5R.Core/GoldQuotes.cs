@@ -127,9 +127,9 @@ public sealed partial class MatchEngine
 
     private int UnitTotalGoldCost(CardInstance card, out string breakdown)
     {
-        var parts = new List<int> { Definition(card).GoldCost };
+        var parts = new List<int> { CardGoldCost(card) };
         if (Definition(card).Type == CardType.Personality)
-            parts.AddRange(Attachments(card.Id).OrderBy(a => a.Id, StringComparer.Ordinal).Select(a => Definition(a).GoldCost));
+            parts.AddRange(Attachments(card.Id).OrderBy(a => a.Id, StringComparer.Ordinal).Select(a => CardGoldCost(a)));
         var total = parts.Sum();
         breakdown = parts.Count > 1 ? $"{string.Join(" + ", parts)} = {total}" : total.ToString();
         return total;

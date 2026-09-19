@@ -5,26 +5,43 @@ namespace L5R.Core;
 /// Target accepts, or "player" for a chosen player -- its own Min..Max count ("one to three attachments" is Min 1, Max 3;
 /// "up to three" is Min 0), and an optional TargetMustBe status. Slots are independent: each candidate is checked on its
 /// own, exactly as it would be as the ability's only target, and the selection as a whole must satisfy every slot's count.
-/// Label is the words a viewer shows for the slot.</summary>
+/// Label is the words a viewer shows for the slot.
+///
+/// Two timings (Mendon's ruling, issue #336: conditional sentences are independent, and a conditional follow-up is prompted only when its
+/// condition holds). An UP-FRONT slot (Resolution null) is chosen with the command, before anything happens: Yoshitada's enemy Personality, the
+/// up-to-three attachments. A CONDITIONAL FOLLOW-UP slot (Resolution set) is not part of the selection at all: it names a decision the engine
+/// opens when the action RESOLVES, and only if its condition holds -- Yoshitada's "choose a player who gains or loses 2 Honor" after the bow, only
+/// if he is dishonorable; Fear Me!'s only if he moved. The decision reuses the pending effect choice (EffectChoice.cs): the acting player is
+/// offered each of Resolution.Options as one action, and the action then finishes exactly as any action does.</summary>
 public sealed record TargetSlot(string Id, string Category, string Label, int Min = 1, int Max = 1, TargetStatus? MustBe = null,
-    string PlayerDefault = TargetSlot.Self)
+    ConditionalChoice? Resolution = null)
 {
-    public const string Self = "self", Opponent = "opponent";
     public bool IsPlayer => Category == TargetSlotKinds.Player;
+    public bool AtResolution => Resolution is not null;
 }
 
 public static class TargetSlotKinds
 {
     public const string Card = "card";
     public const string Player = "player";
+    public const string FollowUp = "follow-up";
 }
 
 /// <summary>What the acting player chose for one slot: the cards, or -- for a "player" slot -- the player.</summary>
 public sealed record SlotSelection(string Slot, string[]? CardIds = null, int? PlayerId = null);
 
 /// <summary>One slot as offered to the acting player: its counts and every legal candidate. Kind is "card" (CardIds holds the
-/// legal cards, each checked on its own) or "player" (PlayerIds holds the legal players).</summary>
-public sealed record TargetSlotOption(string Slot, string Label, string Kind, int Min, int Max, string[] CardIds, int[] PlayerIds);
+/// legal cards, each checked on its own), "player" (PlayerIds holds the legal players) or "follow-up". Timing "up-front" slots are answered in
+/// the command's Selections; Timing "at-resolution" slots (Kind "follow-up", Min 0, Max 0) are NOT: Condition names when the engine will ask
+/// (BranchCondition) and OptionLabels lists what the acting player will then be offered, so a viewer can say so beforehand.</summary>
+public sealed record TargetSlotOption(string Slot, string Label, string Kind, int Min, int Max, string[] CardIds, int[] PlayerIds,
+    string Timing = TargetSlotTimings.UpFront, string? Condition = null, string[]? OptionLabels = null);
+
+public static class TargetSlotTimings
+{
+    public const string UpFront = "up-front";
+    public const string AtResolution = "at-resolution";
+}
 
 public sealed partial class MatchEngine
 {
@@ -66,6 +83,8 @@ public sealed partial class MatchEngine
         foreach (var slot in slots)
         {
             var selection = selections.FirstOrDefault(s => s.Slot == slot.Id);
+            // A conditional follow-up is decided at resolution, never in the command.
+            if (slot.AtResolution) { Require(selection is null, $"{slot.Label}: this is decided when the action resolves, not chosen now."); continue; }
             if (slot.IsPlayer)
             {
                 Require(selection?.CardIds is null or { Length: 0 }, $"{slot.Label}: choose a player, not cards.");
@@ -104,10 +123,15 @@ public sealed partial class MatchEngine
         var refusals = new Dictionary<string, int>();
         foreach (var slot in ability.Slots!)
         {
+            if (slot.AtResolution)
+            {
+                options.Add(new(slot.Id, slot.Label, TargetSlotKinds.FollowUp, 0, 0, [], [], TargetSlotTimings.AtResolution, slot.Resolution!.Condition, slot.Resolution.Options.Select(o => o.Label).ToArray()));
+                continue;
+            }
             if (slot.IsPlayer)
             {
                 options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Player, slot.Min, slot.Max, [], [0, 1]));
-                if (slot.Min > 0) chosen.Add(new(slot.Id, PlayerId: slot.PlayerDefault == TargetSlot.Opponent ? 1 - prototype.PlayerId : prototype.PlayerId));
+                if (slot.Min > 0) chosen.Add(new(slot.Id, PlayerId: prototype.PlayerId));
                 continue;
             }
             var legal = new List<string>();
