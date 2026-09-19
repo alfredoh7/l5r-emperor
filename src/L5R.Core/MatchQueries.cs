@@ -18,10 +18,14 @@ public sealed partial class MatchEngine
         var players=_state.Players.Select(player=>
         {
             var owned=_state.Cards.Values.Where(c=>c.OwnerId==player.Id).ToArray();
+            // A card attached to a Personality stands in that Personality's unit, whoever owns it (issue #337: a Follower Moto Jun-Ni attached from the
+            // opponent's discard pile; Cultist Infiltrator on an enemy Personality): it is listed with the host's controller so a client that groups a unit
+            // from its own player's cards finds it. Its CardView.OwnerId is still its owner's, and it returns to that player's pile when it leaves play.
+            var units=_state.Cards.Values.Where(c=>(c.Zone==Zone.Attached && c.AttachedTo is string hostId ? Card(hostId).OwnerId : c.OwnerId)==player.Id).ToArray();
             return new PlayerView(player.Id,player.Name,player.Clan,player.Honor,player.TurnsTaken,
                 ViewCard(Card(player.StrongholdId)),
-                owned.Where(c=>c.Zone==Zone.Home || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Home).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
+                units.Where(c=>c.Zone==Zone.Home || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Home).Select(c=>ViewCard(c)).ToArray(),
+                units.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
                 player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
                     p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
                     p.RegionId is null?null:ViewCard(Card(p.RegionId)))).ToArray(),
@@ -281,6 +285,12 @@ public sealed partial class MatchEngine
             // action itself uses. Nothing to pick means no choice was ever opened (see OpenOverconfidentDrawWindow).
             foreach(var id in player.Hand.Where(id=>_state.ForcedDiscardContinuation is not { } held || !CommandNamesCard(held,id)))
                 Add("forcedDiscard",$"Discard {Definition(Card(id)).Name}",Command("forcedDiscard",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"effectChoice" })
+        {
+            // Conditional effect choice (issue #337): one option per effect the rules let the acting player pick (see EffectChoice.cs).
+            // Only they hold priority here, so the other player is told to wait and is offered nothing.
+            result.AddRange(EffectChoiceActions(playerId));
         }
         else if(_state.PendingChoice is { Type:"discardHand" })
         {

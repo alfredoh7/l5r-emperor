@@ -5,7 +5,9 @@ namespace L5R.Core;
 /// compiling unchanged; a caller that never threads CardDefinition.CreatedOnly through just never
 /// surfaces the Review() warning below, the same soft-check discipline every other deck-legality
 /// rule in this file already accepts.</summary>
-public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false)
+// CopyLimit (issue #337): the copy limit the card itself prints ("You may include up to 10 copies of this card in your deck" -- Fading
+// Shadows), read from CardDefinition.DeckCopyLimit; null, like CreatedOnly, for a caller or a card that has none, which keeps the usual 3 (1 if Unique).
+public sealed record DeckCardInfo(string Id, string Name, string[] Types, string[] Families, string[] Keywords, bool Implemented, bool CreatedOnly = false, int? CopyLimit = null)
 {
     public int ExperienceLevel => Experienced.Level(Keywords);
     public string DeckName => Experienced.DeckName(Name, Keywords);
@@ -93,8 +95,10 @@ public sealed class DeckWorkshop
         var dynasty = Total("Dynasty"); var fate = Total("Fate");
         if (dynasty < 40) warnings.Add($"Dynasty needs {40 - dynasty} more cards (40 minimum).");
         if (fate < 40) warnings.Add($"Fate needs {40 - fate} more cards (40 minimum).");
-        var limits = DeckFormat.CheckLegality(ToDeck(), name => _pool[name].Keywords);
-        foreach (var v in limits.Violations) warnings.Add($"{v.CardName}: {v.Count} exceeds the usual {v.Limit} limit. Card-specific exceptions require review.");
+        var limits = DeckFormat.CheckLegality(ToDeck(), name => _pool[name].Keywords, name => _pool[name].CopyLimit);
+        foreach (var v in limits.Violations) warnings.Add(_pool[v.CardName].CopyLimit is not null
+            ? $"{v.CardName}: {v.Count} exceeds the card's own limit of {v.Limit} copies."
+            : $"{v.CardName}: {v.Count} exceeds the usual {v.Limit} limit. Card-specific exceptions require review.");
         var unsupported = Cards.Count(c => !c.Implemented);
         if (unsupported > 0) warnings.Add($"{unsupported} selected card types are not yet implemented; this draft cannot be treated as playable.");
         // Kitsu Akai's own Lion Ancestor (issue #257): a created-only card ("May not be included in

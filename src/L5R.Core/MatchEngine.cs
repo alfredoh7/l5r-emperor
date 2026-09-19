@@ -191,6 +191,8 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
             if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
+            // A conditional effect choice (issue #337, Mirumoto Yumaru): the acting player picks one of the options the engine listed.
+            if (_state.PendingChoice.Type=="effectChoice") { ResolveEffectChoice(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it

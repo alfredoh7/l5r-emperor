@@ -1,0 +1,119 @@
+{
+  "Profile": "personality-wave-31",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4375",
+      "Name": "Kitsu Fukui",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 5,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Bow or destroy your performing Ancestor Personality, and target an enemy card: Bow it. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4375.jpg",
+      "Keywords": [
+        "Head Librarian",
+        "Lion Clan",
+        "Shugenja",
+        "Water"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fukui-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-5337",
+      "Name": "Moto Jun-Ni",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": 2,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Followers in this unit have Cavalry.\nLimited: Target a Follower in any player's discard pile: Attach it to Jun-Ni, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5337.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Commander",
+        "Demon Slayer",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jun-ni-attach"
+      ],
+      "Effect": "unit-followers-cavalry"
+    },
+    {
+      "Id": "oracle-l5r-5181",
+      "Name": "Mirumoto Yumaru",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target an enemy Personality: If Yumaru has a Weapon, you may move her home and you may move the Personality home. Otherwise, move both of them home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5181.jpg",
+      "Keywords": [
+        "Kensai",
+        "Dragon Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yumaru-move-home"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3332",
+      "Name": "Hiruma Tensin",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: If you have Reconnaissance: Ranged 4 Attack.\nBattle: Bow your performing Follower in Tensin's unit: Ranged 4 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3332.jpg",
+      "Keywords": [
+        "Crab Clan",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hiruma-sniper-attack",
+        "tensin-follower-attack"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

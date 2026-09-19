@@ -1,0 +1,35 @@
+{
+  "Profile": "follower-wave-17",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2437",
+      "Name": "Fading Shadows",
+      "Type": "Follower",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 1,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "You may include up to 10 copies of this card in your deck.\nWill only attach to a Ninja.\nAfter this Follower enters play, lose 1 Honor.\nNinja Battle: If this Follower is in your hand, target your performing Ninja and Equip it to him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2437.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fading-shadows-equip"
+      ],
+      "Effect": "none",
+      "AttachRequiresKeyword": "Ninja",
+      "EntryHonorLoss": 1,
+      "DeckCopyLimit": 10
+    }
+  ],
+  "Decks": []
+}

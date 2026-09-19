@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Kitsu Fukui (4375), Moto Jun-Ni (5337), Mirumoto Yumaru (5181), Hiruma Tensin (3332) as personality-wave-31 and Fading Shadows (2437) as follower-wave-17, on four general primitives: alternative cost (CostOptions), attach from a discard pile or from the source in hand (AttachSpec, cost modes through the Gold quote), a conditional effect choice read at resolution (Branch), and a Follower performer category; plus a per-card deck copy limit. Foothills Keep looked at and left (its Equip-of-Weapons timing passive is not built).",
+  "validation": "bash tools/check.sh --skip-client passes (216 core + 57 published + 52 new tests, AI, server, transport); 24 named mutations each fail named tests (decision doc); Godot client compiles (dotnet build) but headless import/smoke not run locally, CI runs it.",
+  "remaining": "None for the engine; ready for review. Open rules questions for Mendon are in docs/decisions/2026-09-19-alternative-costs-attach-from-discard.md. UI: issue 339 (generic choose-one prompt); not visually checked.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/337",
+  "branch": "claude/337-alt-costs-attach-discard-followers",
+  "updated": "2026-09-19T16:44:39.872538+00:00"
+}
