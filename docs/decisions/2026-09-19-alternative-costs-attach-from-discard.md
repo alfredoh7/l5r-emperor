@@ -44,13 +44,20 @@ nowhere to say so. `AbilityDefinition.CostOptions` is that place: a list of `Cos
    the battlefield, bowed or not (the destroy option does not need it unbowed). *Alternative:* the Ancestor need not be at the
    battlefield (it is at Home when Kitsu Akai creates it). I read "performing" as requiring presence like every other Battle-action
    performer; the general rule is the engine's, not a Fukui special case.
-2. **"Gain 1 Honor" is an action the performer performs**, so a dishonorable Ancestor rehonors instead (`GainHonorFromPerformer`,
-   the same rule Doji Shunya, Shamate Keep and Surety of Purpose already follow). *Alternative:* Fukui is the one gaining it.
-   When the Ancestor was destroyed as the cost, the rehonor lands on a dead card: no Honor is gained and no other effect. See
-   Open question 3.
+2. **"Gain 1 Honor" is independent of the performer (RULED by Mendon, issue #349, superseding my first reading).** Mendon: "the
+   sentences of an action are independent when they are complete sentences. ... The same is true for the bow or destroy an Ancestor
+   Personality: [Fukui] has an Honor gain that is independent of whether or not an Ancestor Personality performed any action." So
+   "Bow it." and "Gain 1 Honor." are separate sentences and the acting player simply gains 1 Honor: regardless of the Ancestor's
+   honorable or dishonorable status (no rehonor conversion), regardless of the Ancestor being destroyed as the cost, and regardless of
+   whether the target's bow succeeds or is negated. *My first reading* (the gain is the performer's action, so a dishonorable Ancestor
+   rehonors instead) used `GainHonorFromPerformer`; that call was the only thing tying the gain to the performer, and it is now a plain
+   `GainHonor` for the acting player. The general "a dishonorable performer's Honor gain becomes a rehonor" rule is untouched for cards
+   whose performer does gain the Honor (Tamori Shosei is tested as the control). The one other Honor change that can accompany the gain
+   is the ordinary Dishonorable-death penalty of a dishonorable Ancestor destroyed as the cost, which is a separate rule.
 3. **A destruction paid as a cost goes through the ordinary destruction path**, so Expendable, the Dishonorable-death penalty, Lady
    Matsu's Rage and Fields of Mercy's negation all apply as they do to any destruction by the
-   acting player's action (the same choice Ring of Fire's "destroy your performing Personality" already made). See Open question 2.
+   acting player's action (the same choice Ring of Fire's "destroy your performing Personality" already made). **RULED (issue #352): such a
+   destruction can be negated, and then the whole action is negated** -- see H2.
 4. **The target is any enemy card at the battlefield** (`enemy-card`: a Personality, an attached Follower, an attachment), and
    Stalwart negates only the bowing: the cost is still paid and the Honor still gained.
 
@@ -291,6 +298,7 @@ engine already has for Suspicions) and add a once-per-turn draw after the equip,
 |---|---|
 | Fukui offers bow and destroy as two complete commands; naming none, or one that is not offered, is refused | `alternative-costs/EachWayToPayIsOffered` |
 | Bow: the Ancestor bows and stays; destroy: it and its Followers are destroyed | `BowOption`, `DestroyOption` |
+| Fukui's Honor gain is the acting player's, independent of the Ancestor and of the bow (issue #349) | `HonorGainIsIndependentOfThePerformer` |
 | Each option is independently payable | `EachOptionIsPayableOnItsOwn` |
 | Which card pays is per option | `TheSubjectIsPerOption` |
 | The four older bow-or-bow choices are one bow option (and a bowed wielder cannot pay The Earth's Hunger) | `ExistingBowChoicesAreOneOption` |
@@ -313,7 +321,10 @@ suite re-run green):
 | two options need a choice | `AlternativeCosts.cs` | `EachWayToPayIsOffered`, `TheSubjectIsPerOption` |
 | no options refuses a named option | `AlternativeCosts.cs` | `NoOptionsMeansNoChoice` |
 | the cost is paid | `CardAbilities.cs` | `BowOption`, `CostAndHonorAreIndependentOfTheBow`, `DestroyOption`, `EachOptionIsPayableOnItsOwn`, `ExistingBowChoicesAreOneOption`, `TheSubjectIsPerOption`, `AttackReactionWindow`, `AttackTargeting`, `FollowerBowsThenAttacks` |
-| Fukui honor is the performer's action | `CardAbilities.cs` | `CostAndHonorAreIndependentOfTheBow` |
+| Fukui's gain made the performer's action again (rehonor conversion; issue #349) | `CardAbilities.cs` | `HonorGainIsIndependentOfThePerformer` |
+| No gain when the target's bow is negated (issue #349) | `CardAbilities.cs` | `CostAndHonorAreIndependentOfTheBow`, `HonorGainIsIndependentOfThePerformer` |
+| No gain when the Ancestor was destroyed as the cost (issue #349) | `CardAbilities.cs` | `CostAndHonorAreIndependentOfTheBow`, `DestroyOption`, `HonorGainIsIndependentOfThePerformer` |
+| No gain for a dishonorable Ancestor (issue #349) | `CardAbilities.cs` | `HonorGainIsIndependentOfThePerformer` |
 | subject per option | `AlternativeCosts.cs` | `TheSubjectIsPerOption` |
 | attach cost is charged | `GoldQuotes.cs` | `AttachOwnFollowerPaysThenAttaches`, `CostIsPaidBeforeTheCardLeaves`, `CostModes`, `KatagiDiscountOnlyFromHand`, `OffersEveryFollowerInEitherDiscardPile` |
 | attach legality is Equip legality | `AttachAction.cs` | `LegalityIsEquipLegality` |

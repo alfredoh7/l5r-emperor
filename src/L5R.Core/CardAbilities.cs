@@ -354,8 +354,8 @@ public static class AbilityCatalog
         // docs/decisions/2026-09-19-alternative-costs-attach-from-discard.md for every reading and the alternative to each).
         // Kitsu Fukui (oracle-l5r-4375): "Battle: Bow or destroy your performing Ancestor Personality, and target an enemy card: Bow it. Gain 1
         // Honor." The performer is the Ancestor (the printed "your performing Ancestor Personality"), not Fukui; it need not be unbowed, because
-        // the destroy option does not need it to be -- each option checks for itself (AlternativeCosts.cs). The Honor gain is an action the
-        // performer performs, so a dishonorable performer rehonors instead (GainHonorFromPerformer).
+        // the destroy option does not need it to be -- each option checks for itself (AlternativeCosts.cs). "Bow it." and "Gain 1 Honor." are
+        // independent sentences (issue #349): the gain is the acting player's, not the performer's action.
         ["fukui-bow"] = new("Battle", "Bow or destroy your performing Ancestor Personality, and target an enemy card: Bow it. Gain 1 Honor", "enemy-card",
             Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ancestor"],
             CostOptions: [new("bow", "Bow the Ancestor", CostVerb.Bow), new("destroy", "Destroy the Ancestor", CostVerb.Destroy)]),
@@ -5076,9 +5076,12 @@ public sealed partial class MatchEngine
             case "training-break-weapon":
                 foreach (var weapon in Attachments(_state.PendingNegatableAbility!.CardId!).Where(a => Keyword(a, "Weapon")).ToArray()) DestroyAttachment(weapon);
                 break;
+            // "Bow it." and "Gain 1 Honor." are independent complete sentences (Mendon's ruling, issue #349): the gain is the acting player's own,
+            // never the performing Ancestor's action, so no rehonor conversion applies, and it does not depend on whether the Ancestor was destroyed as
+            // the cost or whether the bow succeeded or was negated.
             case "fukui-bow":
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
-                GainHonorFromPerformer(Card(command.PerformerId!), 1, "Kitsu Fukui");
+                GainHonor(player.Id, 1, "Kitsu Fukui", source);
                 break;
             // Hiruma Tensin: the performing Follower's bow was paid as its cost option; the Follower then performs the Attack.
             case "tensin-follower-attack":
