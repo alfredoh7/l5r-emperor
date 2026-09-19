@@ -25,6 +25,13 @@ namespace L5R.Core;
 // the attachment's own "Will only/not attach to" and Honor Requirement (AttachmentLegalTarget), the Armor/Weapon caps (AttachmentAllowed)
 // and Unique/Singular. The attached card is a NEW entry into play: whatever the discard pile held (tokens, modifiers, granted keywords,
 // a stale once-per-turn stamp) is gone, and its "after this enters play" effects fire (OpenEntryReactionWindow), exactly like an Equip.
+//
+// Control follows the Personality (Mendon's ruling, issue #352): an attachment is controlled by the controller of the Personality it is attached to,
+// and a card taken from an ENEMY discard or dead pile into play is controlled by the player who took it, but it is always returned to its OWNER's
+// pile when it leaves play. The engine reads OwnerId as "controller" for every in-play card, so a taken card's OwnerId becomes its controller's and
+// CardInstance.OriginalOwnerId remembers the real owner (TakeControl); the card goes back the moment it is no longer in play
+// (ReturnCardsOutOfPlayToTheirOwners, run after every command, and directly where a card goes to a hand or deck). Everything the controller can do
+// with it -- use its abilities, count it for Unique/Singular, unit membership, view -- then follows from OwnerId with no further change.
 
 /// <summary>Where the attached card comes from.</summary>
 public static class AttachSource
@@ -112,6 +119,31 @@ public sealed partial class MatchEngine
         RequireAttachable(attachment, wielder, player.Id);
     }
 
+    // Control (issue #352): `controllerId` now controls `card`. The real owner is remembered the first time a card changes hands and restored when it
+    // leaves play; a card already controlled by its owner is untouched.
+    private void TakeControl(CardInstance card, int controllerId)
+    {
+        if (card.OwnerId == controllerId) return;
+        card.OriginalOwnerId ??= card.OwnerId;
+        card.OwnerId = controllerId;
+        Emit("controlTaken", $"{Player(controllerId).Name} took control of {Definition(card).Name}.", controllerId, card.Id);
+    }
+
+    // The card is no longer controlled by anyone: it is back with its owner (whose discard pile, hand or deck it is in or is entering).
+    private void RestoreOwner(CardInstance card)
+    {
+        if (card.OriginalOwnerId is not int owner) return;
+        card.OwnerId = owner; card.OriginalOwnerId = null;
+    }
+
+    // The funnel that returns every card that left play by ANY path (destroyed, discarded, removed from the game, returned to hand) to its owner's
+    // pile: run once after each command, so no exit path has to remember it. Effects of the exit itself (an Expendable draw, the destruction penalty)
+    // have already been resolved for the controller, as they should be.
+    private void ReturnCardsOutOfPlayToTheirOwners()
+    {
+        foreach (var card in _state.Cards.Values.Where(c => c.OriginalOwnerId is not null && !InPlay(c))) RestoreOwner(card);
+    }
+
     // ExecuteAbilityEffects' step: the Gold has already been paid (PayForAbility), so the card leaves its place and enters play attached.
     // Returns true when an entering-play reaction window opened (the caller returns without finishing, as Low Market does).
     private bool ExecuteAttach(GameCommand command, AttachSpec spec, PlayerState player, CardInstance? source, CardInstance? target)
@@ -124,9 +156,10 @@ public sealed partial class MatchEngine
         if (fromDiscard)
         {
             // A new entry into play: nothing the card carried while it was last in play (or since) follows it back.
-            attachment.Tokens.Clear(); attachment.Modifiers.Clear(); attachment.GrantedKeywords.Clear(); attachment.RemovedKeywords.Clear();
+            attachment.Tokens.Clear(); attachment.Modifiers.Clear(); attachment.GrantedKeywords.Clear(); attachment.GrantedAbilities.Clear(); attachment.RemovedKeywords.Clear();
             attachment.Protections.Clear(); attachment.AbilityUses.Clear(); attachment.Bowed = false; attachment.Dishonorable = false;
         }
+        TakeControl(attachment, wielder.OwnerId);
         attachment.Zone = Zone.Attached; attachment.AttachedTo = wielder.Id; attachment.FaceUp = true; attachment.ProvinceIndex = wielder.ProvinceIndex;
         if (def.AttachGrantsKeyword is string granted) GrantKeyword(wielder, granted, attachment.Id, "Attachment");
         Emit("equipped", $"{def.Name} attached to {Definition(wielder).Name}{(fromDiscard ? " from a discard pile" : "")}.", player.Id, attachment.Id);

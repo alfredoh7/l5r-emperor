@@ -240,6 +240,7 @@ AlternativeCostTests.Run(runner);
 AttachFromDiscardTests.Run(runner);
 FadingShadowsTests.Run(runner);
 EffectChoiceTests.Run(runner);
+FoothillsKeepTests.Run(runner);
 FollowerPerformerTests.Run(runner);
 CardCopyTests.Run(runner);
 EitherOrTests.Run(runner);

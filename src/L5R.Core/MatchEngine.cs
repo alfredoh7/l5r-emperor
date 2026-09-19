@@ -157,6 +157,7 @@ public sealed partial class MatchEngine
         try
         {
             Apply(command);
+            ReturnCardsOutOfPlayToTheirOwners();
             _state.Version++;
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
@@ -390,9 +391,10 @@ public sealed partial class MatchEngine
         // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
         // own check lives in ValidateAbility (so QueryActions already withholds what would be rejected), the two
         // performer-less Battle actions are barred here. A rejected command reverts this clearing with everything else.
-        if (_state.FirstActionRestriction is { } firstActionLimit && command.PlayerId==firstActionLimit.PlayerId && command.Type is "pass" or "useAbility" or "playStrategy" or "recruitReserve")
+        // A Battle-phase equip (a granted timing, TimingGrants.cs) is a Battle action too, barred like the performer-less ones.
+        if (_state.FirstActionRestriction is { } firstActionLimit && command.PlayerId==firstActionLimit.PlayerId && (command.Type is "pass" or "useAbility" or "playStrategy" or "recruitReserve" || command.Type=="equip" && _state.Phase==Phase.Battle))
         {
-            if (command.Type is "playStrategy" or "recruitReserve") throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
+            if (command.Type is "playStrategy" or "recruitReserve" or "equip") throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
             if (command.Type=="useAbility") CheckFirstActionRestriction(command);
             _state.FirstActionRestriction=null;
         }
@@ -1511,9 +1513,13 @@ public sealed partial class MatchEngine
 
     private void Equip(GameCommand command)
     {
-        Require(_state.Phase==Phase.Action && command.PlayerId==_state.ActivePlayerId,"Equip is a Limited action on your turn.");
         var card=Card(command.CardId); var target=Card(command.TargetId); var def=Definition(card);
         Require(card.OwnerId==command.PlayerId && card.Zone==Zone.Hand && def.Type is CardType.Item or CardType.Follower,"Choose a supported attachment from your hand.");
+        // Equip (Limited) -- or, with a player-level timing grant (Foothills Keep: "Equipping Weapons is a Battle/Open action for you", TimingGrants.cs), an
+        // Open equip in any player's action segment or a Battle equip: then the wielder must be a Personality at the current battlefield, not at Home.
+        var equipTimingError=EquipTimingError(command.PlayerId,card);
+        Require(equipTimingError is null,equipTimingError ?? "");
+        var inBattle=_state.Phase==Phase.Battle;
         // Cultist Infiltrator (oracle-l5r-1595): "You may attach this card to a Personality you do
         // not control" -- the one printed exception to Equip's own ordinary "your Personality"
         // restriction, an Effect-keyed override rather than a new command/ability (its own OwnerId
@@ -1522,8 +1528,8 @@ public sealed partial class MatchEngine
         // original owner's discard pile" when it and/or its host is later destroyed is already
         // correct by construction; DestroyUnits' own attachment loop below already keys off the
         // attachment's own unchanged OwnerId, never its host's).
-        Require((target.OwnerId==command.PlayerId || def.Effect=="cultist-infiltrator") && target.Zone==Zone.Home && Definition(target).Type==CardType.Personality,
-            def.Effect=="cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
+        Require((target.OwnerId==command.PlayerId || def.Effect=="cultist-infiltrator") && (inBattle ? AtBattle(target) : target.Zone==Zone.Home) && Definition(target).Type==CardType.Personality,
+            inBattle ? "Choose your Personality at the current battlefield." : def.Effect=="cultist-infiltrator" ? "Choose a Personality at home." : "Choose your Personality at home.");
         Require(def.AttachRequiresKeyword is null || KeywordOrHuman(target,def.AttachRequiresKeyword),$"Will only attach to a {def.AttachRequiresKeyword} Personality.");
         Require(def.AttachExcludesKeyword is null || !KeywordOrHuman(target,def.AttachExcludesKeyword),$"Will not attach to a {def.AttachExcludesKeyword} Personality.");
         Require(def.AttachRequiresName is null || Definition(target).Name==def.AttachRequiresName,$"Only attaches to {def.AttachRequiresName}.");
@@ -1540,9 +1546,18 @@ public sealed partial class MatchEngine
         Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds);
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
+        if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
         if(def.AttachGrantsKeyword is string granted) GrantKeyword(target,granted,card.Id,"Attachment");
         Emit("equipped",$"{def.Name} attached to {Definition(target).Name}.",command.PlayerId,card.Id);
         if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
+        if(inBattle)
+        {
+            // A Battle action like any other: it uses an Additional Action grant of this player's when one is unscoped, and otherwise forfeits them.
+            var usedGrant=ConsumeAdditionalActionGrant(command.PlayerId,null);
+            if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId));
+            return;
+        }
         NextAction(command.PlayerId);
     }
     private void PlayStrategy(GameCommand command)

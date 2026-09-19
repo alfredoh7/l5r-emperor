@@ -16,6 +16,10 @@ namespace L5R.Core;
 //   - The choice is part of the command (GameCommand.CostOption), validated with everything else, and paid at the same moment as the
 //     ability's Gold cost (PayForAbility's neighbour, PayCostOption). An ability with a single option needs no CostOption on its
 //     command: the cost-choice abilities that predate this (Xijkt, Tamori Shosei, Sutigu, The Earth's Hunger) are exactly that.
+//   - A cost can be NEGATED (Mendon's ruling, issue #352: a destruction paid as a cost CAN be negated -- Fields of Mercy and the like). When it is,
+//     the whole action is negated: it is still taken (its use is spent, a hand-played card leaves the hand) but none of it resolves, and the costs
+//     of the action that were not yet paid are not paid. This is the same reading as a blocked cost of Hida Mochitoko (#341) and the atomic cost
+//     payment of #344's follow-up, which asks the one question this file answers for a cost option: CostPaymentBlockedByNegation.
 
 /// <summary>The verbs a cost option may apply to its subject.</summary>
 public static class CostVerb
@@ -82,6 +86,26 @@ public sealed partial class MatchEngine
         };
     }
 
+    // THE SEAM (issue #352): "is paying this cost blocked by a negation?" -- the reason it is, or null. Asked BEFORE anything of the action is paid,
+    // by ExecuteAbilityEffects and by ResolveNegatedAction, so that a blocked cost negates the whole action with nothing paid after it. Today the
+    // only cost that can be blocked is a destroy cost option (a bow cannot be negated: it is paid by the card's own controller, never "an enemy's
+    // effect"); a future cost whose payment a negation can stop (an Honor-loss cost, a discard) adds its own clause here, or F's atomic cost payment
+    // replaces this method's body -- the callers do not change. The check is a pure read: it never consumes a negation and never counts a destruction.
+    private string? CostPaymentBlockedByNegation(AbilityDefinition ability, GameCommand command, CardInstance? source)
+    {
+        if (ability.CostOptions is null) return null;
+        var option = ChosenCostOption(ability, command);
+        if (option.Verb != CostVerb.Destroy) return null;
+        var subject = CostSubjectCard(option, ability, command, source);
+        return subject is not null && DestructionWouldBeNegated(subject) ? $"the destruction of {Definition(subject).Name} was negated" : null;
+    }
+
+    // Would destroying `card` right now be negated? The same two negators DestroyUnits consults, read without side effects: a negation a reaction set
+    // for this very action (Rokai's "destroy", Champion of Thunder's "all"), and Fields of Mercy's once-per-player allowance already being used up.
+    private bool DestructionWouldBeNegated(CardInstance card) =>
+        _state.NegatedEffects.Any(n => n.CardId == card.Id && n.Kind is "destroy" or "all")
+        || Definition(card).Type == CardType.Personality && FieldsOfMercyWouldNegatePersonalityDestruction(card);
+
     // ValidateAbility's step: the command names a payable option (or none, for an ability without any).
     private void ValidateCostOption(AbilityDefinition ability, GameCommand command, CardInstance? source)
     {
@@ -103,6 +127,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is null) return;
         var option = ChosenCostOption(ability, command);
         var subject = CostSubjectCard(option, ability, command, source)!;
+        if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
         switch (option.Verb)
         {
             case CostVerb.Bow:

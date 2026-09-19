@@ -21,6 +21,9 @@ internal static class AlternativeCostTests
             ("The cost-choice abilities that predate the primitive (Xijkt, Tamori Shosei, Sutigu, The Earth's Hunger) are one bow option: a command that names no option still works, naming bow works, naming destroy is refused; a bowed wielder can no longer pay The Earth's Hunger by 'bowing' him", ExistingBowChoicesAreOneOption),
             ("An ability with no cost options refuses a command that names one", NoOptionsMeansNoChoice),
             ("Which card pays is per option: \"bow this card or destroy the target attachment\" offers both, each spending a different card, and a target that cannot pay (a Personality is not an attachment) is refused", TheSubjectIsPerOption),
+            ("A destruction paid as a cost CAN be negated (Fields of Mercy; Mendon's ruling, issue #352): the whole action is then negated -- taken and spent, nothing resolves, the Ancestor survives and no Honor is gained -- while the bow option, and a first destruction, are unaffected", CostDestroyNegatedByFieldsOfMercy),
+            ("A blocked cost stops the action before anything else is paid: with a Gold cost AND a destroy cost option, a blocked destroy leaves the Gold unpaid, the sources unbowed and the effect undone; unblocked, both are paid", BlockedCostPaysNothingAfterIt),
+            ("A negated action still keeps the costs it can pay (the reaction-negated path): the destroy cost is paid and the effects are not -- unless that cost is itself blocked, when nothing is", NegatedActionKeepsPayableCosts),
             ("Every offered Fukui command validates on a fresh engine, with every alternate target", OfferedFukuiCommandsValidate),
         ];
         runner.Run("alternative-costs", tests);
@@ -236,6 +239,113 @@ internal static class AlternativeCostTests
         Accept(other, destroyTarget);
         Expect(!other.State.Cards[source.Id].Bowed && other.State.Cards[attachment.Id].Zone == Zone.FateDiscard, "the target paid; the source is not bowed");
         Expect(other.State.Events.Any(x => x.Type == "costDestroyed" && x.CardId == attachment.Id), "the destroyed cost is in the public log");
+    }
+
+    private const string FieldsOfMercy = "oracle-l5r-2530";
+
+    // A Fields of Mercy in play (player 1's Terrain at the battlefield) whose count for player 0's Personalities is `alreadyDestroyed`.
+    private static void FieldsOfMercyInPlay(MatchState s, int alreadyDestroyed)
+    {
+        var fom = Put(s, FieldsOfMercy, 1, Zone.Battlefield, province: 0);
+        s.FieldsOfMercyWatches.Add(new() { CardId = fom.Id, DestroyedCount = [alreadyDestroyed, 0] });
+    }
+
+    private static void CostDestroyNegatedByFieldsOfMercy()
+    {
+        // Its allowance for player 0 is used up: the destruction of the Ancestor as a cost is negated, so the action is.
+        var r = Battle(); FieldsOfMercyInPlay(r.S, 1);
+        var attached = Put(r.S, "training-follower", 0, Zone.Attached, province: 0, parent: r.Ancestor.Id);
+        var e = Engine(r.S);
+        var honor = e.State.Players[0].Honor;
+        Accept(e, Offer(e, 0, Ability, r.Fukui.Id, r.Enemy.Id, r.Ancestor.Id, "destroy"));
+        var s = e.State;
+        Expect(s.Cards[r.Ancestor.Id].Zone == Zone.Battlefield && !s.Cards[r.Ancestor.Id].Bowed, "the Ancestor was not destroyed (nor bowed)");
+        Eq(s.Cards[attached.Id].Zone, Zone.Attached, "and nothing of its unit was destroyed: the blocked cost pays nothing");
+        Expect(!s.Cards[r.Enemy.Id].Bowed, "the effects did not happen: the target is not bowed");
+        Eq(s.Players[0].Honor, honor, "and no Honor was gained");
+        Expect(s.Events.Any(x => x.Type == "costBlocked" && x.Message.Contains("destruction")) && s.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), "the negation is in the public log");
+        Eq(s.PriorityPlayerId, 1, "the action was still taken: priority passed");
+        Expect(Offers(e, 0, Ability).All(o => !o.Enabled), "and its use is spent for the turn, both ways");
+        // A negation a reaction set for the Ancestor itself (Rokai's "destroy", Champion of Thunder's "all") blocks the cost too, without being consumed.
+        foreach (var kind in new[] { "destroy", "all" })
+        {
+            var n = Battle();
+            var ne = Engine(n.S);
+            var negating = Edit(ne, st => st.NegatedEffects.Add(new(kind, n.Ancestor.Id)));
+            Accept(negating, Offer(negating, 0, Ability, n.Fukui.Id, n.Enemy.Id, n.Ancestor.Id, "destroy"));
+            Expect(negating.State.Cards[n.Ancestor.Id].Zone == Zone.Battlefield && !negating.State.Cards[n.Enemy.Id].Bowed, $"a '{kind}' negation on the Ancestor blocks the destruction cost, so the action is negated");
+        }
+        // The bow option is unaffected: a bow is never negated.
+        var b = Battle(); FieldsOfMercyInPlay(b.S, 1);
+        var be = Engine(b.S);
+        Accept(be, Offer(be, 0, Ability, b.Fukui.Id, b.Enemy.Id, b.Ancestor.Id, "bow"));
+        Expect(be.State.Cards[b.Ancestor.Id].Bowed && be.State.Cards[b.Enemy.Id].Bowed && be.State.Players[0].Honor == honor + 1, "bow option: paid and resolved as usual");
+        // The first destruction Fields of Mercy sees is allowed (and counted); the SECOND is the one it negates.
+        var f = Battle(); FieldsOfMercyInPlay(f.S, 0);
+        var second = Put(f.S, "training-ancestor", 0, Zone.Battlefield, province: 0);
+        var fukui2 = Put(f.S, Support337.Fukui, 0, Zone.Battlefield, province: 0);
+        var enemy2 = Put(f.S, "training-lion-courtier", 1, Zone.Battlefield, province: 0);
+        var fe = Engine(f.S);
+        Accept(fe, Offer(fe, 0, Ability, f.Fukui.Id, f.Enemy.Id, f.Ancestor.Id, "destroy"));
+        Eq(fe.State.Cards[f.Ancestor.Id].Zone, Zone.Dead, "the first destruction goes through");
+        Eq(fe.State.FieldsOfMercyWatches.Single().DestroyedCount[0], 1, "and is counted");
+        var again = Edit(fe, st => st.PriorityPlayerId = 0);
+        Accept(again, Offer(again, 0, Ability, fukui2.Id, enemy2.Id, second.Id, "destroy"));
+        Expect(again.State.Cards[second.Id].Zone == Zone.Battlefield && !again.State.Cards[enemy2.Id].Bowed, "the second is negated, so the second action is");
+    }
+
+    private static void BlockedCostPaysNothingAfterIt()
+    {
+        MatchState Rig(bool blocked)
+        {
+            var s = Table(Phase.Battle);
+            Put(s, "training-alt-cost-gold", 0, Zone.Battlefield, province: 0);
+            Put(s, "training-ancestor", 0, Zone.Battlefield, province: 0);
+            Put(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            if (blocked) FieldsOfMercyInPlay(s, 1);
+            return s;
+        }
+        foreach (var blocked in new[] { true, false })
+        {
+            var s = Rig(blocked);
+            var source = s.Cards.Values.Single(c => c.DefinitionId == "training-alt-cost-gold");
+            var ancestor = s.Cards.Values.Single(c => c.DefinitionId == "training-ancestor");
+            var e = Engine(s);
+            var command = Offer(e, 0, "training-alt-cost-gold-destroy", source.Id, performerId: ancestor.Id);
+            Expect(command.SourceIds is { Length: > 0 }, "the engine suggested the 2 Gold");
+            var hand = e.State.Players[0].Hand.Count;
+            Accept(e, command);
+            var after = e.State;
+            var paid = after.Events.Any(x => x.Type == "payment");
+            Eq(paid, !blocked, blocked ? "blocked: no Gold was charged" : "unblocked: the Gold was paid");
+            Eq(command.SourceIds!.Any(id => after.Cards[id].Bowed), !blocked, "the Gold sources are bowed only if it was paid");
+            Eq(after.Cards[ancestor.Id].Zone == Zone.Dead, !blocked, "the Ancestor is destroyed only if the cost was paid");
+            Eq(after.Players[0].Hand.Count, blocked ? hand : hand + 1, "the effect happens only if the action was not negated");
+            Eq(after.PriorityPlayerId, 1); Expect(Offers(e, 0, "training-alt-cost-gold-destroy").All(o => !o.Enabled), "spent either way");
+        }
+    }
+
+    private static void NegatedActionKeepsPayableCosts()
+    {
+        foreach (var (fom, ancestorDies) in new[] { (false, true), (true, false) })
+        {
+            var r = Battle();
+            Put(r.S, "training-before-action-suppressor", 1, Zone.Battlefield, province: 0);   // opens the before-action window on an action that targets his side
+            if (fom) FieldsOfMercyInPlay(r.S, 1);
+            var e = Engine(r.S);
+            var honor = e.State.Players[0].Honor;
+            Accept(e, Offer(e, 0, Ability, r.Fukui.Id, r.Enemy.Id, r.Ancestor.Id, "destroy"));
+            Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the action waits in the before-action window");
+            // The whole action is negated while it waits (what Yoritomo Sakuma's Political Reaction does; set directly here).
+            var negated = Edit(e, st => st.DeferredActionNegated = true);
+            while (negated.State.PendingChoice?.Type == "beforeActionReaction")
+                Accept(negated, negated.QueryActions(negated.State.PriorityPlayerId).Single(a => a.Type == "declineReaction").Command!);
+            var s = negated.State;
+            Eq(s.Cards[r.Ancestor.Id].Zone == Zone.Dead, ancestorDies, fom ? "a blocked cost is not paid even when the action is negated" : "a negated action still keeps the cost it can pay: the Ancestor is destroyed");
+            Expect(!s.Cards[r.Enemy.Id].Bowed && s.Players[0].Honor == honor, "the effects did not happen");
+            Expect(s.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), "logged as negated");
+            Eq(s.Events.Any(x => x.Type == "costBlocked"), fom, "and a blocked cost is reported as such");
+        }
     }
 
     private static void NoOptionsMeansNoChoice()

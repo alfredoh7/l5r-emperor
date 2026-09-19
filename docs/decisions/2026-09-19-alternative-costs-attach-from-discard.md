@@ -1,6 +1,7 @@
 # Alternative costs, attach from a discard pile, the conditional effect choice, the Follower performer, and five cards
 
-**Status:** implemented in the PR for issue #337 (rules lane; cross-lane authority of the rules lead). The readings below are
+**Status:** implemented in the PR for issue #337 (rules lane; cross-lane authority of the rules lead); **Mendon's rulings on the open questions are
+recorded in section H (issue #352).** The readings below are
 mine, taken from Mendon's rulings where he gave one; every one that is a judgement call carries its alternative, and the
 genuinely open ones are collected under **Open questions for Mendon**. **Issues:** #337 (engine), #339 (the one combined UI
 issue for Alfredo).
@@ -79,10 +80,9 @@ case of its own.
 - **A card returning from a discard pile is a new entry into play**: tokens, modifiers, granted and removed keywords,
   protections, once-per-turn stamps and bowed state do not follow it back, and its "after this enters play" effects fire (a
   Destined Follower draws; Fading Shadows loses 1 Honor).
-- **An opponent's Follower may be attached ("any player's discard pile")**, and stays **their** card (`OwnerId` is never
-  reassigned; see `2026-09-12-unique-singular-control-transfer.md`), so it returns to their pile when destroyed. Because the client
-  groups a unit from the host owner's own cards, `GetView` now lists an attachment with its **host's controller** (Cultist
-  Infiltrator on an enemy Personality had the same gap). `CardView.OwnerId` is still the owner's. See Open question 4.
+- **An opponent's Follower may be attached ("any player's discard pile"), and control FOLLOWS Jun-Ni** (RULED, issue #352: this superseded my
+  first reading that it stayed the opponent's card): the Follower is controlled by Jun-Ni's controller and returns to its OWNER's pile when it
+  leaves play. See H4. `GetView` lists an attachment with its host's controller (Cultist Infiltrator on an enemy Personality had the same gap).
 - **Moto Jun-Ni's "Followers in this unit have Cavalry"** is a live check in `Keyword()` (her Effect
   `unit-followers-cavalry`): an attached Follower has Cavalry exactly while it is attached to her, never a durable grant. Her unit
   is then a Cavalry unit in Cavalry Maneuvers although a Follower's own printing is Infantry (tested against a control unit).
@@ -164,16 +164,9 @@ about having an illegal quantity unless the count of Fading Shadows is > 10."
   performing Ninja: Attach it to him", "After this card enters play"). The published text is the catalogue's current oracle
   text, like every other wave; Attach versus Equip differ only in costs and this card costs 0.
 
-## F. Foothills Keep `oracle-l5r-2626` (looked at, not wired)
+## F. Foothills Keep `oracle-l5r-2626` (WIRED in issue #352, `stronghold-wave-5`)
 
-Its second line, "Battle/Open, [Gold]: Choose your performing Kensai and Equip a target Weapon in your discard pile to him", is
-built and proved (`training-attach-weapon-performer`: Battle/Open, performing Kensai, your own pile, Weapons only, full cost, the
-Weapon cap, the Weapon joins its wielder's battlefield, Katagi's from-hand discount not applying). A card is published whole, and
-its **first** line, "Equipping Weapons is a Battle/Open action for you", changes the timing of the **ordinary Equip command** (a
-Limited action from hand in the Action phase by the active player, hardcoded in `MatchEngine.Equip` and `QueryActions`) for Weapons
-only. What remains is an Effect-keyed timing override on Equip for Weapons (Open in the Action phase for whoever holds priority;
-as a Battle action, presence and a wielder at the battlefield) and its listing, plus the rules question in Open question 7. Its
-BLOCKERS entry says exactly this.
+Left unwired in #340 because its first line changes the timing of the ordinary Equip command; wired now after Mendon's ruling. See H5.
 
 ## G. Other changes this needed
 
@@ -183,6 +176,114 @@ BLOCKERS entry says exactly this.
   shape) but was never enumerated, so an ability using it could only be played by a hand-built command. Again! is now offered.
 - The training AI answers a `chooseEffect` decision (the first option offered).
 - `GetView` lists an attachment with its host's controller (see B).
+
+## H. Mendon's rulings on the open questions (issue #352)
+
+Confirmed by Mendon; the first two lines of each item are his ruling, then what was built and the alternative not taken.
+
+**H1. Yumaru: "neither" is not a legal choice** once the action has been selected. That is what was built (`EffectChoice.cs`: three options);
+closed, no change.
+
+**H2. A destruction paid as a cost CAN be negated** (Fields of Mercy and the like). If it is, the rest of the action is negated too: the whole
+action does not resolve, and costs of the action that were not yet paid are not paid. This matches the Hida Mochitoko ruling in PR #341 (a
+blocked cost negates the entire action; an Honor-loss cost is then ignored; a negated action whose costs were all paid still keeps those costs) and
+PR #344's whole-action negation (`ActionNegation.cs`). Built on what is on main, with a named seam for the atomic cost payment of #344's follow-up:
+
+- **The seam is `CostPaymentBlockedByNegation(ability, command, source)`** (`AlternativeCosts.cs`): "is paying this cost blocked by a negation?", the
+  reason or null, a **pure read** (it never consumes a negation and never counts a destruction). Today only a destroy cost option can be blocked (a
+  bow is paid by the card's own controller, never "an enemy's effect"); it asks the two negators `DestroyUnits` itself consults, without their side
+  effects: a negation a reaction set for that card (`NegatedEffects` "destroy" or "all") and Fields of Mercy's allowance being used up
+  (`FieldsOfMercyWouldNegatePersonalityDestruction`, the read-only half of the existing check). F's atomic payment should extend or replace this
+  method's body; the callers do not change.
+- **Asked BEFORE anything of the action is paid**: `ExecuteAbilityEffects` asks it first, and a blocked cost resolves the action through
+  `ResolveNegatedAction(command, costBlocked)`: the action is still TAKEN (its use is spent, a hand-played card leaves the hand, grants are
+  forfeited, priority passes, it is logged "(negated)" and `costBlocked`) but none of its costs are paid (no Gold, no Favor, no bow or destroy) and none of
+  its effects happen. `ResolveNegatedAction` also asks it, so a **reaction-negated action** (Sakuma's) pays what it can -- the Gold **and the non-Gold cost
+  option** (now generic, `PayCostOption`) -- unless that cost is itself blocked, when nothing is paid.
+- **Fields of Mercy's first destruction still goes through and is counted; the second is what it negates** (its existing rule); a blocked destroy
+  cost leaves the Ancestor **and its attachments** alone (a cost that cannot be paid pays nothing: the attachments-still-destroyed clause of Fields of
+  Mercy is about an effect, not a cost -- the alternative reading, destroying the unit's attachments anyway, would need the cost to be half-paid).
+- **The order of costs is the engine's, not a printed one** (Gold, then the cost option). No published card has both a Gold cost and a destroy option, so the
+  order is only exercised by a training fixture; when one exists the printed order should decide.
+- Not changed: an unpaid **bow** option is never blocked; the four cost-choice abilities that predate the primitive are unaffected.
+
+**H3. Fukui: closed by PR #350** (the Honor gain is independent of the performing Ancestor; the dishonorable death penalty is a separate Honor loss and
+both occur). No change here.
+
+**H4. Control FOLLOWS the Personality / the recruiting player**, for all attachments and for all recruitment from an ENEMY discard or dead pile: the
+card is controlled by the Personality's / player's controller, and returned to its OWNER (owner's discard or dead pile) when destroyed or otherwise
+leaves play. Built (`AttachAction.cs`, `CardInstance.OriginalOwnerId`):
+
+- The engine reads `OwnerId` as "controller" for every card in play (every "you control" test), so taking a card into another player's control sets its
+  `OwnerId` to the controller's and remembers the real owner in `OriginalOwnerId` (`TakeControl`, logged `controlTaken`). Everything the controller can do
+  with it then follows with no further change: its abilities are his to use (and its owner's to refuse), Unique/Singular copies count as his, it is in his unit
+  and his view, and its "after each turn begins" style effects are his.
+- **It returns to its OWNER the moment it is no longer in play**, by any path: `ReturnCardsOutOfPlayToTheirOwners` runs after every command (destroyed,
+  discarded, removed from the game), and `ReturnToHand` / `ToOwnerDeck` restore the owner first because they name a hand or deck. Effects of the exit itself
+  (an Expendable draw, the Dishonorable-death penalty) have already resolved for the controller, correctly. Tested for a Follower destroyed alone, destroyed
+  with Jun-Ni, and put into a hand (Asako Rikate): it goes to its OWNER's hand, never the controller's (see Open question 10).
+- **What else takes an opponent's card into play?** I searched every path that attaches, equips or recruits: the ordinary Equip and Low Market, Equip (Battle),
+  Soshi Neiru, Singh Remnants and Stormless Fury take from the player's OWN hand or own pile; a Region found by deck search comes from the player's own
+  deck; Cultist Infiltrator is the player's own card attached to an enemy Personality and is **deliberately left as it was** (it prints "will not be
+  transferred", and its controller stays whoever equipped it, so it already returns to its owner); Consuming Weakness, Shosuro Hawado and At Any Cost
+  reach into ANY discard or dead pile but only remove a card from the game or count its cost. **Moto Jun-Ni's discard attach is therefore the only path
+  that changed**, and no unrelated behaviour did. Any future recruit or attach from an enemy pile gets the rule for free by going through `TakeControl`.
+- The older decision `2026-09-12-unique-singular-control-transfer.md` asked that a control-transfer primitive carry the Unique/Singular check from day one:
+  one now exists for the attach path, and the check is applied at the take (`RequireAttachable` before `TakeControl`).
+
+**H5. Foothills Keep: wired** (`stronghold-wave-5`). Mendon: "During Battle, the Personality must be at the current battlefield and the Foothills Keep
+unbowed. Battle/Open actions may be performed as Battle Actions or as Open actions. This does not replace the player's Equip (Limited) ability, though it
+may be used during a player's action segment (as Open actions may be used during ANY player's Action segment)."
+
+- **(a) A player-level timing grant** (`TimingGrants.cs`): a card in play gives its controller an ADDITIONAL timing for an existing class of action.
+  `EffectTimingGrants` maps the granting card's Effect (`equip-weapons-battle-open`) to `TimingGrant(ActionClass.EquipWeapon, "BattleOrOpen", ...)`; the
+  ordinary `equip` command asks `EquipTimingError`: Equip (Limited) as ever, or an Open equip of a Weapon in the Action phase whenever the player holds priority
+  (any player's segment), or a Battle equip (a unit at the battlefield, the wielder AT the current battlefield, the Keep unbowed). QueryActions lists them
+  (`EquipActions`, labelled " · Open" / " · Battle"). A Battle equip is a Battle action like any other: it uses an unscoped Additional Action grant, is barred by
+  the first-action must-pass limit, and puts the Weapon at its wielder's battlefield. **It does not replace Equip (Limited)** (tested unchanged, with and
+  without the Keep).
+- **(b) "Battle/Open" is the existing `BattleOrOpen` timing**: a Battle action in a battle (presence, the performer at the battlefield), an Open action in the Action
+  phase in ANY player's segment (Open is `Phase.Action` with priority, not the active player) -- tested in battle, out of battle, and as the non-active player.
+- **(c) The second ability** (`foothills-equip-weapon`): performer your Kensai (at the current battlefield in a battle), the Keep unbowed (the engine's
+  bowed-source rule), a Weapon in YOUR pile, full Equip cost through the Gold flow, the Weapon joins its wielder. **The "[gold star]" symbol**: the Emperor Edition
+  scan prints no cost symbol at all -- its cost is exactly "paying all costs" -- and the catalogue's `:gstar:` is the same "pay Gold" the other attach abilities
+  use (Border Market prints it beside a separate `:bow:`, so it is not a bow). So **bowing the Keep is not a cost**; the Keep is bowed only when the player chooses
+  to pay with its own production, and the requirement that it be unbowed is the ordinary "abilities on a bowed card cannot be used". The published text is the
+  scan's ("Attach it to him, paying all costs"), not the catalogue's older "Equip a target Weapon ... to him".
+- **Published like any Stronghold**: `stronghold-wave-5` (waves 1-3 exist and 4 is unclaimed; the offset puts this at 5), Province Strength 7, Gold Production 4,
+  Starting Honor 5, Dragon. The pipeline needed nothing new.
+- **Which reading of "the Keep unbowed" for the grant** is Open question 9 (I applied it to the Battle timing only).
+
+**H6. Fading Shadows: confirmed as built** -- the performer is a Personality at a battlefield with the Ninja keyword. No change.
+
+**Mutation checks for this change** (each a one-line break of the named rule; the suite rebuilt and the named tests fail; every break reverted):
+
+| Rule broken | File | Named tests that fail |
+|---|---|---|
+| a blocked cost is checked before the action is paid | `CardAbilities.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy` |
+| a blocked cost still charges the Gold | `ActionNegation.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy`, `NegatedActionKeepsPayableCosts` |
+| the predicate reads Fields of Mercy | `CardAbilities.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy`, `NegatedActionKeepsPayableCosts` |
+| a reaction-negated action keeps the cost option it can pay | `ActionNegation.cs` | `NegatedActionKeepsPayableCosts` |
+| the predicate reads a negation set for the card | `AlternativeCosts.cs` | `CostDestroyNegatedByFieldsOfMercy` |
+| taking control changes OwnerId | `AttachAction.cs` | `ControlFollowsJunNi`, `EnemyFollowerAbilitiesBelongToTheNewController`, `TakenFollowerReturnsToItsOwner` |
+| a card leaving play returns to its owner | `AttachAction.cs` | `TakenFollowerReturnsToItsOwner` |
+| a card going to a hand goes to its owner's | `CardAbilities.cs` | `TakenFollowerReturnsToItsOwner` |
+| the Open timing works in any player's segment | `TimingGrants.cs` | `BattleEquip`, `OpenEquipInAnySegment` |
+| the Battle timing needs the granting card unbowed | `TimingGrants.cs` | `BattleEquip` |
+| the Battle wielder is at the current battlefield | `MatchEngine.cs` | `BattleEquip` |
+| Equip (Limited) is not replaced by the grant | `TimingGrants.cs` | `KatagiDiscountOnlyFromHand`, `EquipLimitedIsUnchanged` |
+| a Battle equip uses an Additional Action grant | `MatchEngine.cs` | `BattleEquipIsABattleAction` |
+| a Battle equip is barred by the first-action limit | `MatchEngine.cs` | `BattleEquipIsABattleAction` |
+| Foothills' ability is Battle/Open | `CardAbilities.cs` | `AttachAsOpenInAnySegment`, `KeepBowsOnlyWhenItPays`, `OwnWeaponControl`, `PublishedShape` |
+| a Battle equip stands at its wielder's battlefield | `MatchEngine.cs` | `BattleEquip` |
+| only Weapons are granted the timing | `TimingGrants.cs` | `BattleEquip`, `OpenEquipInAnySegment` |
+
+**Cards the player-level timing grant unblocks.** One table row (and an action class) each: **Glory of the Shogun `oracle-l5r-2824`** ("Equipping is a Battle/Open
+action (for all players), and after the first time each turn each player Equips a card with a printed Gold Cost of 5 or more, that player may draw a card")
+and **Harbingers of War `oracle-l5r-10260`** ("Equipping Followers and Items from your hand with a printed Gold Cost of 1 to 4 is a Battle/Open action for you and,
+after the first time each turn you do so, draw a card"). Both are Events that must first stay in play as an ongoing effect for the rest of the game (the Zone the
+engine already has for Suspicions) and add a once-per-turn draw after the equip, so the grant is the smaller half; neither had a BLOCKERS note. Floating Reserve
+(`10896`, published) is a reminder text of the separate Reserve rule and needs nothing. Foothills Keep itself is the first consumer.
 
 ## Rulings recorded, and the tests that hold them
 
@@ -197,6 +298,9 @@ BLOCKERS entry says exactly this.
 | Cost modes and the Foothills Keep shape; Katagi's discount only from hand | `CostModes`, `FoothillsShape`, `KatagiDiscountOnlyFromHand` |
 | Yumaru: no Weapon means no decision; a Weapon means exactly three options; condition read at resolution; negation survives; finishes like any action | `effect-choice/*` |
 | Tensin: one offer per unbowed Follower of his unit; the Follower bows, then performs a Ranged 4 Attack | `follower-performer/*` |
+| A destruction paid as a cost is negatable and negates the whole action; a blocked cost pays nothing after it; a negated action keeps the costs it can pay (issue #352) | `CostDestroyNegatedByFieldsOfMercy`, `BlockedCostPaysNothingAfterIt`, `NegatedActionKeepsPayableCosts` |
+| Control follows Jun-Ni; a taken card returns to its owner on any exit; its abilities are the controller's (issue #352) | `ControlFollowsJunNi`, `TakenFollowerReturnsToItsOwner`, `EnemyFollowerAbilitiesBelongToTheNewController` |
+| Foothills Keep: the Battle/Open attach, and the player-level timing grant that ADDS Battle/Open equips of Weapons without replacing Equip (Limited) (issue #352) | `foothills-keep/*` |
 | Fading Shadows: from hand only, to a performing Ninja, Battle only, entry Honor loss, no additional action; 10 copies clean, 11 flagged | `fading-shadows/*` |
 
 **Mutation checks** (each one-line break of the named rule, the suite rebuilt, the named tests fail; every break was reverted and the
@@ -244,23 +348,18 @@ suite re-run green):
 
 ## Open questions for Mendon
 
-1. **Yumaru, "neither".** May the player decline both moves? Printed: "you may move her home and you may move the Personality
-   home". I took your three-option statement as the ruling. Adding "neither" is one line of data.
-2. **A destruction paid as a cost and Fields of Mercy** (and the like): should a cost-destruction be immune to negation? It goes
-   through the ordinary destruction path today (Ring of Fire's precedent), so Fields of Mercy could negate it after the cost was
-   "paid".
-3. **Fukui, a dishonorable Ancestor destroyed as the cost:** the Honor gain becomes a rehonor of a dead card (no gain at all).
-   Should the gain instead be Fukui's, or be checked before the cost is paid?
-4. **Ownership of an opponent's Follower attached by Jun-Ni.** It stays the opponent's card (returns to their pile). Engine checks
-   keyed on `OwnerId` (targeting it as "an enemy card", Unique/Singular copies) therefore see it as theirs although it stands in my
-   unit. Should control follow the host?
+Answered in issue #352 (see H): 1 (Yumaru "neither"), 2 (a negated destruction cost), 3 (Fukui's Honor gain, PR #350), 4 (control of an attached
+opponent-owned Follower), 7 (Foothills Keep's timing) and 8 (Fading Shadows' wielder). Still open:
+
 5. **"Paying all costs" for a discard-pile attach** includes the attachment's own conditional discounts (Clan "enters play paying
    1 less") but not "from your hand" ones; and never waives an Honor Requirement. Confirm.
 6. **Weapon tokens** count as attachments for "without attachments"; should a Weapon token count as "has a Weapon" for Yumaru?
-7. **Foothills Keep's passive:** does "Equipping Weapons is a Battle/Open action for you" replace the Limited timing or add to it,
-   and in a battle must the wielder be at the battlefield?
-8. **Fading Shadows' wielder:** I read "your performing Ninja" at the battlefield, with no Shugenja or opposed requirement (unlike
-   `equip-battle`). Confirm.
+9. **Foothills Keep's Battle timing and a bowed Keep** (from H5): I read "During Battle, ... the Foothills Keep unbowed" as applying to the Battle
+   timing of BOTH lines (the equip grant and the attach ability), and the granted Open timing as a trait that a bowed Keep still gives. Confirm.
+10. **Put into a hand (Asako Rikate) and a card you control but do not own:** it goes to its OWNER's hand (H4), not the controller's.
+11. **Cultist Infiltrator** is an attachment too, and "control follows the Personality" for ALL attachments would make an enemy host's controller control it.
+    I left it as it was (it prints "will not be transferred" and "you may attach this card to a Personality you do not control"; its controller stays whoever
+    equipped it), the one attachment that does not follow its host. Confirm.
 
 ## Affected files
 

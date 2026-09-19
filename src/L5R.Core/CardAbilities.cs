@@ -363,6 +363,14 @@ public static class AbilityCatalog
         // "Followers in this unit have Cavalry" is her Effect, a live check in Keyword().)
         ["jun-ni-attach"] = new("Limited", "Target a Follower in any player's discard pile: Attach it to Jun-Ni, paying all costs", "attachment-in-discard",
             Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Target, AttachPile.Any, AttachWielder.Source, [CardType.Follower])),
+        // Foothills Keep (oracle-l5r-2626, issue #352): "Battle/Open: Choose your performing Kensai and target a Weapon in your discard pile: Attach it to him,
+        // paying all costs." Battle/Open (BattleOrOpen): a Battle action in a battle (the Kensai at the current battlefield, a unit there, the Keep -- the
+        // source -- unbowed, which every ability's shared bowed-source rule already asks) or an Open action in ANY player's action segment. The cost is
+        // the Weapon's Equip cost through the Gold flow (which bows the Keep only when the player pays with its own production; the scan prints no separate
+        // bow). The passive first line is the Effect equip-weapons-battle-open (TimingGrants.cs).
+        ["foothills-equip-weapon"] = new("BattleOrOpen", "Choose your performing Kensai and target a Weapon in your discard pile: Attach it to him, paying all costs", "attachment-in-discard",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Kensai"], Cost: GoldCostRule.AttachCost(),
+            Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Performer, [CardType.Item], ["Weapon"])),
         // Mirumoto Yumaru (oracle-l5r-5181): the conditional effect choice (EffectChoice.cs). Mendon's ruling: with a Weapon the player chooses
         // ONE of three effects; without one there is no choice and both go home. Whether she has a Weapon is read when the action resolves.
         ["yumaru-move-home"] = new("Battle", "Target an enemy Personality: If Yumaru has a Weapon, you may move her home and you may move the Personality home. Otherwise, move both of them home", "enemy-personality",
@@ -387,6 +395,9 @@ public static class AbilityCatalog
         // Training fixture: the two halves of a cost are independent -- WHICH card pays may differ per option ("Bow this card or destroy the target").
         ["training-alt-cost-mixed"] = new("Battle", "Training: bow this card or destroy the target attachment: draw a card", "attachment",
             CostOptions: [new("bow-source", "Bow this card", CostVerb.Bow, CostSubject.Source), new("destroy-target", "Destroy the target attachment", CostVerb.Destroy, CostSubject.Target)]),
+        // Training fixture (issue #352): a Gold cost AND a destroy cost option, so a blocked destroy shows that the Gold is not paid after it.
+        ["training-alt-cost-gold-destroy"] = new("Battle", "Training: pay 2 Gold and destroy your performing Ancestor: draw a card", "none",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ancestor"], Cost: GoldCostRule.Fixed(2), CostOptions: [new("destroy", "Destroy the Ancestor", CostVerb.Destroy)]),
         ["training-break-weapon"] = new("Reaction", "Training: before another player's action resolves, destroy the Weapons attached to its source", "none", Trigger: "before-action-resolves"),
         // Fading Shadows (oracle-l5r-2437): "Ninja Battle: If this Follower is in your hand, target your performing Ninja and Equip it to him."
         // The performing Ninja is the wielder (no separate target); the card is attached from hand through the same Equip flow and cost. The printed
@@ -3653,6 +3664,12 @@ public sealed partial class MatchEngine
     // untouched: PendingAttack.Additional and ResolveAttack already carry it across the window.
     private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
     {
+        // A cost the action needs is blocked by a negation (issue #352): the action is taken and negated, and nothing further is paid.
+        if (CostPaymentBlockedByNegation(AbilityCatalog.All[command.AbilityId!], command, command.CardId is null ? null : Card(command.CardId)) is { } blocked)
+        {
+            ResolveNegatedAction(command, blocked);
+            return;
+        }
         var pendingAttackBefore = _state.PendingAttack;
         // Asked BEFORE the effects run: a hand-played card is in a discard pile by the time the deferral below is reached.
         var fromDiscard = PlayedFromDiscard(AbilityCatalog.All[command.AbilityId!], command.CardId is null ? null : Card(command.CardId));
@@ -5055,7 +5072,7 @@ public sealed partial class MatchEngine
             // action of the performing Ancestor.
             // Training fixture (issue #337): a before-action Reaction that destroys the Weapons attached to the deferred action's source, so a
             // branch that reads "has a Weapon" is read AFTER it (the condition is evaluated at resolution).
-            case "training-alt-cost-mixed": Draw(player); break;
+            case "training-alt-cost-mixed": case "training-alt-cost-gold-destroy": Draw(player); break;
             case "training-break-weapon":
                 foreach (var weapon in Attachments(_state.PendingNegatableAbility!.CardId!).Where(a => Keyword(a, "Weapon")).ToArray()) DestroyAttachment(weapon);
                 break;
@@ -5504,6 +5521,7 @@ public sealed partial class MatchEngine
     // stayed positive thanks to an Item is destroyed once it leaves (DestroyAttachment's own rule).
     private void ReturnToHand(CardInstance card)
     {
+        RestoreOwner(card); // a card controlled by someone other than its owner goes to its OWNER's hand (issue #352)
         var wasAttachedTo = card.Zone == Zone.Attached && card.AttachedTo is string hostId ? Card(hostId) : null;
         if (wasAttachedTo is not null)
         {
@@ -5525,6 +5543,7 @@ public sealed partial class MatchEngine
     // Spell (the only other types that can appear in a Personality's "unit") goes to the Fate deck.
     private void ToOwnerDeck(CardInstance card, string position)
     {
+        RestoreOwner(card); // ...and to its OWNER's deck (issue #352)
         if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
@@ -5576,6 +5595,9 @@ public sealed partial class MatchEngine
     // it). Returns true (negate) once that copy has already seen one of `card`'s own controller's
     // Personalities fully destroyed while it has been in play; otherwise records this one as the
     // first and returns false. False with no active copy at all (the common case).
+    // The read-only half (issue #352): would the destruction be negated, without recording it as the first? See CostPaymentBlockedByNegation.
+    private bool FieldsOfMercyWouldNegatePersonalityDestruction(CardInstance card) =>
+        _state.FieldsOfMercyWatches.FirstOrDefault(w => InPlay(Card(w.CardId))) is { } watch && watch.DestroyedCount[card.OwnerId] >= 1;
     private bool FieldsOfMercyNegatesPersonalityDestruction(CardInstance card)
     {
         var watch = _state.FieldsOfMercyWatches.FirstOrDefault(w => InPlay(Card(w.CardId)));

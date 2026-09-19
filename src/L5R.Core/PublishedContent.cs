@@ -1889,6 +1889,23 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Stronghold wave 5 (issue #352): Foothills Keep (oracle-l5r-2626) -- "Equipping Weapons is a Battle/Open action for you", the first player-level timing grant (TimingGrants.cs), and a Battle/Open attach of a Weapon from your own discard pile to your performing Kensai (AttachAction.cs).</summary>
+    public static PublishedSnapshot StrongholdWave5 { get; } = LoadStrongholdWave5();
+
+    private static PublishedSnapshot LoadStrongholdWave5()
+    {
+        var snapshot = Load("L5R.Published.StrongholdWave5.json", "stronghold-wave-5", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected stronghold-wave-5 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Stronghold || card.Text.Length == 0)
+                throw new InvalidOperationException($"stronghold-wave-5 card is not a textful Stronghold: {card.Id}");
+        var othersStrongholdWave5 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrongholdWave5).Any())
+            throw new InvalidOperationException("stronghold-wave-5 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

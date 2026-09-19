@@ -29,20 +29,31 @@ public sealed partial class MatchEngine
         Emit("actionNegated", $"{Definition(negatingCard).Name} negates {Player(deferred.PlayerId).Name}'s action ({AbilityCatalog.All[deferred.AbilityId!].Label}).", negatingCard.OwnerId, negatingCard.Id);
     }
 
-    // The deferred action, resolved negated: the taking of the action without its effects (see the file comment).
-    private void ResolveNegatedAction(GameCommand command)
+    // The deferred action, resolved negated: the taking of the action without its effects (see the file comment). costBlocked (issue #352) is the
+    // reason a cost of the action was itself blocked by a negation (CostPaymentBlockedByNegation): the whole action is then negated with none of its
+    // costs paid -- "costs of the action that were not yet paid are not paid" -- because the blocked cost stops it before anything is charged. A
+    // negated action whose costs can all be paid still keeps them, including the non-Gold cost option (PayCostOption).
+    private void ResolveNegatedAction(GameCommand command, string? costBlocked = null)
     {
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);
         (source?.AbilityUses ?? player.AbilityUses)[ability.UsageKey ?? id] = _state.TurnNumber;
         var playedFromDiscard = PlayedFromDiscard(ability, source);
-        PayForAbility(command, player);
-        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
+        costBlocked ??= CostPaymentBlockedByNegation(ability, command, source);
+        if (costBlocked is null)
         {
-            _state.FavorPlayerId = null;
-            Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
+            // A cost the action's own execution pays is not paid; the ones the engine charges generically are, and the non-Gold cost option is one.
+            // A blocked cost is not (see ResolveNegatedAction's comment). The order -- Gold first -- is the engine's, not a printed one.
+            PayForAbility(command, player);
+            PayCostOption(ability, command, player, source);
+            if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
+            {
+                _state.FavorPlayerId = null;
+                Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
+            }
         }
+        else Emit("costBlocked", $"{player.Name}: {costBlocked}, so the action's costs are not paid.", player.Id, source?.Id);
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
