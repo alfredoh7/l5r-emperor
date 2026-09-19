@@ -282,6 +282,10 @@ public sealed class PendingAttack
     // immediate (non-deferred) resolution path already gets this for free via ExecuteAbilityEffects'
     // own tail, so only the deferred/reaction-window path needs this carried across.
     public bool Additional { get; set; }
+    // The declaring command, so targeted-by-action reactions can re-run the Attack's target validation; kept in step with TargetId on a redirect.
+    public GameCommand? Command { get; set; }
+    // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
+    public bool Negated { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
@@ -607,6 +611,11 @@ public sealed class MatchState
     // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
     // UseAbility carries on with it exactly where it stopped.
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    // Where the held action resumes once the discard is answered: null = announcement (UseAbility carries on), "action" = a deferred action whose window
+    // has closed, "attack" = a pending Attack whose window has closed (issue #335).
+    public string? ForcedDiscardResume { get; set; }
+    // The Bofanas the action being announced or resolved has already been judged for (the announce-time trait fires once per action per Bofana).
+    public List<string> AnnounceTraitEvaluated { get; set; } = [];
     // The card whose mandatory "after this enters play" effects wait for its open Proclaim window (see ApplyPendingEntryEffects).
     public string? PendingEntryEffectsCardId { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
@@ -762,7 +771,8 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
-    Dictionary<string, GoldQuote>? TargetGold = null);
+    Dictionary<string, GoldQuote>? TargetGold = null,
+    bool NoTarget = false);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

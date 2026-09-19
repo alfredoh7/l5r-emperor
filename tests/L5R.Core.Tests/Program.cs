@@ -74,7 +74,7 @@ var tests = new (string Name, Action Run)[]
     ("Shamate Keep moves home a Personality with equal or lower Personal Honor; gains Honor only if uncontrolled", ShamateMove),
     ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
     ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
-    ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
+    ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor if it targeted a card (Mendon, issue #335)", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
     ("A discarded dishonorable Personality can become honorably dead: rehonored, no Honor-loss penalty", MakeDeadFromDiscard),
@@ -243,6 +243,7 @@ EffectChoiceTests.Run(runner);
 FollowerPerformerTests.Run(runner);
 CardCopyTests.Run(runner);
 EitherOrTests.Run(runner);
+TargetedActionReactionTests.Run(runner);
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
@@ -3803,7 +3804,7 @@ static void CarpenterCastleAttack()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,AbilityId:"carpenter-castle-siege"));
         Check(e.State.Cards[castle.Id].Bowed,"Bowing the Castle/Siege card is a cost paid regardless of whether the Attack hits");
         Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
-        Equal(e.State.Players[0].Honor,before,"No Honor gain without a hit");
+        Equal(e.State.Players[0].Honor,before,"No Honor gain when it targeted no card");
     }
     {
         // A Personality with a Follower attached is not itself targetable; the Follower is.
