@@ -208,7 +208,7 @@ internal static class AttachFromDiscardTests
         var maneuvers = Edit(e, st => { st.Phase = Phase.CavalryDeclaration; st.PriorityPlayerId = 0; st.ActivePlayerId = 0; st.PendingChoice = null; foreach (var c in st.Cards.Values) c.Bowed = false; });
         var attack = maneuvers.QueryActions(0).First(a => a.Type == "attack");
         Expect(attack.TargetIds!.Contains(jun.Id) && !attack.TargetIds.Contains(other.Id), "Jun-Ni's unit assigns in Cavalry Maneuvers; the control unit does not");
-        var infantry = Edit(maneuvers, st => { st.Phase = Phase.AttackDeclaration; });
+        var infantry = Edit(maneuvers, st => { st.Phase = Phase.InfantryDeclaration; });
         var infantryAttack = infantry.QueryActions(0).First(a => a.Type == "attack");
         Expect(!infantryAttack.TargetIds!.Contains(jun.Id) && infantryAttack.TargetIds.Contains(other.Id), "and the reverse in Infantry Maneuvers");
         // Gone the moment it leaves her unit.

@@ -336,10 +336,12 @@ internal static class PublishedTests
     private static void CavalryAfterEmptyInfantry()
     {
         // A pass with no Infantry to assign only declines Infantry Maneuvers -- it must not skip
-        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack.
+        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack. (Declining
+        // the ATTACK is the Declaration Segment's own pass, a step earlier.)
         var s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
         var cavalry=Add(s,3623,0,Zone.Home); // Ikoma Natsu: printed Cavalry keyword.
         var e=MatchEngine.FromTestState(s);
+        Accept(e,new("declareAttack",0,e.Version));Eq(e.State.Phase,Phase.InfantryDeclaration);
         Pass(e);Eq(e.State.Phase,Phase.DefenseAssignment);
         Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);Eq(e.State.PriorityPlayerId,0);
         Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
@@ -412,7 +414,7 @@ internal static class PublishedTests
             var chosen=options.FirstOrDefault(a=>a.Type=="proclaim")??options.FirstOrDefault(a=>a.Type=="declineReaction")??options.FirstOrDefault(a=>a.Type=="chooseShinden")??options.FirstOrDefault(a=>a.Type=="discardHand")
                 ??options.FirstOrDefault(a=>a.Type=="purchase"&&!a.Command!.ClanDiscount)??options.FirstOrDefault(a=>a.Type=="purchase")??options.FirstOrDefault(a=>a.Type=="discardProvince")
                 ??options.FirstOrDefault(a=>a.Type=="useAbility"&&a.Command!.AbilityId=="border-first")
-                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
+                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="declareAttack")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
             Accept(e,chosen.Command!);
         }
         Check(e.State.WinnerId is not null,"Published scripted match did not finish.");Eq(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));

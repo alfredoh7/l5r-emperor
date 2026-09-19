@@ -37,10 +37,11 @@ with three rules narrowing it to his own wording:
 - *Kakihara himself is the target* -- not any card in his unit (that is Champion's wording, not his).
 - *Another player's action* -- an action by his own controller never triggers it, checked against the
   acting `command.PlayerId`.
-- *"Action" excludes Reactions.* A Reaction-timed ability that happens to name him as its target (Tamori
-  Ruya's `ruya-bow`, say) is not an action; treating it as one would also open a nested window from
-  inside an already-open reaction window and overwrite that window's `PendingChoice`. The Ruya case is
-  a regression test.
+- ~~*"Action" excludes Reactions.*~~ **Reversed by the rules lead (2026-09-19, `2026-09-19-battle-rulings-round-2.md` ruling 3):
+  "Reactions count as actions."** A Reaction that names him (Tamori Ruya's `ruya-bow`, say) is another player's action
+  targeting him and triggers his window like any other; the window it was played in is suspended behind his (the reason
+  for the original exclusion, "PendingChoice has no stack", is now solved by `MatchState.SuspendedWindows`) and reopened
+  afterwards. The Ruya case is still a regression test, asserting the new behaviour.
 
 **Ranged/Melee Attacks are wired, not documented away.** The primitive deliberately excludes Attack-
 classified abilities (`AttackKind(...) == ""`) because an Attack has its own separately-orderable
@@ -144,7 +145,7 @@ It is now a true multi-reaction window:
   -4F, Kakihara can react), while Kahoku's Attack target still reaches the attack window through the
   `targetId` passed to `ResolveOrDeferAttack`. Kahoku is the only such ability today (checked against the
   whole `AttackKind` list).
-- **"Action" excludes a Reaction, for every card in this window.** A Reaction-timed ability that names a card
+- **~~"Action" excludes a Reaction, for every card in this window.~~ Reversed (2026-09-19, ruling 3): a Reaction is an action, for every card in this window.** *(The original text follows, kept for the record.)* A Reaction-timed ability that names a card
   as its target never opens or joins this window (it would also overwrite an open window's `PendingChoice`).
 
 ### Remaining limits (documented, not silent)

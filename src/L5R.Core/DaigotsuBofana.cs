@@ -22,7 +22,7 @@ public sealed partial class MatchEngine
     // redirected away had already been judged at announcement and is not judged again, however many redirects there are.
     private bool OpenForcedDiscardForTargetedTrait(GameCommand command, string? resume = null)
     {
-        if (!AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) || ability.Timing == "Reaction") return false;
+        if (!AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) || !IsAction(ability)) return false;
         if (resume is null) _state.AnnounceTraitEvaluated.Clear();
         var targeted = ActionTargetIds(command).ToArray();
         if (targeted.Length == 0) return false;
@@ -34,6 +34,7 @@ public sealed partial class MatchEngine
             if (!TrySpendPhaseUse(bofana.AbilityUses, BofanaTargetedDiscardEffect)) continue;
             if (PerformingCardForce(command) >= Definition(bofana).Force) continue;
             if (!Player(command.PlayerId).Hand.Any(id => !CommandNamesCard(command, id))) continue;
+            SuspendOpenWindow();
             _state.ForcedDiscardContinuation = command; _state.ForcedDiscardResume = resume;
             _state.PendingChoice = new("forcedDiscard", command.PlayerId, bofana.Id, $"{Definition(bofana).Name}: discard a card.");
             _state.PriorityPlayerId = command.PlayerId; _state.ConsecutivePasses = 0;

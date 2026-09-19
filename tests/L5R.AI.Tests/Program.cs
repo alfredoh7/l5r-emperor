@@ -35,6 +35,24 @@ Run("resolves purchase and Proclaim with alternating reaction priority",()=>
     }
     Check(game.GetView(0).PendingChoice is null,"Reaction window stuck");
 });
+Run("declines to attack at the Declaration Segment when it has nothing to attack with, and never stalls there (issue #354)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    for(var i=0;i<12 && game.GetView(0).Phase!=Phase.AttackDeclaration;i++)
+    {
+        var mover=game.GetView(0).PriorityPlayerId;
+        var step=TrainingOpponent.Choose(game.GetView(mover),game.QueryActions(mover));
+        Check(step.Command is not null && game.Execute(step.Command).Accepted,"the AI could not reach the Declaration Segment");
+    }
+    var view=game.GetView(0); var actions=game.QueryActions(view.PriorityPlayerId);
+    if(view.Phase==Phase.AttackDeclaration)
+    {
+        Check(actions.Any(a=>a.Type=="declareAttack") && actions.Any(a=>a.Type=="pass"),"the decision is one explicit choice");
+        var decision=TrainingOpponent.Choose(game.GetView(view.PriorityPlayerId),actions);
+        Check(decision.Command?.Type=="pass","With no army the AI declines to attack");
+        Check(game.Execute(decision.Command!).Accepted && game.GetView(0).Phase==Phase.Dynasty,"and declining ends the Attack Phase");
+    }
+});
 Run("passes, never deadlocks, in a multi-reaction before-action window (issue #318)",()=>
 {
     // The legal-action listing now offers the player holding priority every reaction of their own that applies to the
@@ -234,6 +252,7 @@ static void Play(ulong seed,bool published=false)
         Check(result.Accepted,$"Illegal {decision.Command!.Type}: {result.Error}"); commands++;
     }
     Check(game.GetView(0).WinnerId is not null,$"Match exceeded 1600 decisions (turn {game.GetView(0).TurnNumber})");
+    Check(game.GetView(0).VictoryReason?.Contains("Military")!=true || game.GetView(0).Events.Any(e=>e.Type=="attackDeclared"),"A military victory needs a declared attack: the AI still declares (issue #354)");
     var replay=MatchEngine.Replay(game.ExportReplay());
     Check(JsonSerializer.Serialize(replay.GetView(0))==JsonSerializer.Serialize(game.GetView(0)),"Replay differs");
     Console.WriteLine($"  {commands} decisions; {game.GetView(0).VictoryReason}; turn {game.GetView(0).TurnNumber}");

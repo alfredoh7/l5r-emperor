@@ -900,7 +900,8 @@ internal static class BattleTimingTests
             if(segment!=BattleSteps.None) Eq(v0.AttackerPlayerId,(int?)0);
         }
         At(Phase.Action,0,BattleSteps.None,BattleSteps.None,null);
-        At(Phase.AttackDeclaration,0,BattleSteps.InfantryManeuvers,BattleSteps.AttackerAssigns,0);
+        At(Phase.AttackDeclaration,0,BattleSteps.Declaration,BattleSteps.DeclareOrDecline,0);
+        At(Phase.InfantryDeclaration,0,BattleSteps.InfantryManeuvers,BattleSteps.AttackerAssigns,0);
         At(Phase.DefenseAssignment,1,BattleSteps.InfantryManeuvers,BattleSteps.DefenderAssigns,1);
         At(Phase.CavalryDeclaration,0,BattleSteps.CavalryManeuvers,BattleSteps.AttackerAssigns,0);
         At(Phase.CavalryDefense,1,BattleSteps.CavalryManeuvers,BattleSteps.DefenderAssigns,1);

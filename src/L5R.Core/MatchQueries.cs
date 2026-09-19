@@ -219,11 +219,17 @@ public sealed partial class MatchEngine
             foreach(var target in Army(1-playerId,_state.CurrentBattleProvince!.Value))
                 Add("beforeBattleOptional",$"Bow {Definition(target).Name}",Command("beforeBattleOptional",target:target.Id) with {Choice="use"},cardId:target.Id);
         }
+        else if(_state.PendingChoice is { Type:"beforeBattleReaction" })
+        {
+            // A printed "Reaction: Before a battle resolves" (Steady Resolve, Akodo Dairuko): its owner's plays of it, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"beforeBattleOrder" })
         {
             // The active player orders the simultaneous "before this battle resolves" effects (issue #272/#310).
             foreach(var id in _state.PendingBeforeBattleResolve!.RemainingSourceIds)
-                Add("beforeBattleOrder",$"Resolve {Definition(Card(id)).Name} next",Command("beforeBattleOrder",target:id),cardId:id);
+                Add("beforeBattleOrder",$"Resolve {BeforeResolutionItemLabel(id)} next",Command("beforeBattleOrder",target:id),cardId:_state.Cards.ContainsKey(id)?id:null);
         }
         else if(_state.PendingChoice is { Type:"encircledOrder" })
         {
@@ -345,19 +351,23 @@ public sealed partial class MatchEngine
                 Add("pass","Pass action",Command("pass"));
                 break;
             case Phase.AttackDeclaration:
+                Add("declareAttack","Declare an attack",Command("declareAttack"),player.MayNotAttackThisTurn?"You may not declare an attack this turn.":null);
+                Add("pass","Decline to attack",Command("pass"));
+                break;
+            case Phase.InfantryDeclaration:
             case Phase.DefenseAssignment:
             case Phase.CavalryDeclaration:
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
                 var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
-                var attack=_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration;
+                var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",
                         Command(actionType,assignments:units.ToDictionary(id=>id,_=>province)),units.Length==0?$"No unbowed {(cavalrySegment?"Cavalry":"Infantry")} Personalities at home.":null,
                         targets:units,provinces:provinces);
-                Add("pass",attack?(cavalrySegment?"Skip Cavalry Maneuvers":"Skip attack"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"));
+                Add("pass",attack?(cavalrySegment?"Assign no Cavalry attackers":"Assign no Infantry attackers"):(cavalrySegment?"Assign no Cavalry defenders":"Assign no defenders"),Command("pass"));
                 break;
             case Phase.BattleSelection:
                 foreach(var province in _state.UnresolvedBattlefields) Add("selectBattle",$"Fight at province {province+1}",Command("selectBattle",province:province));

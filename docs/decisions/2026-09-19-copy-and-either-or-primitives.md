@@ -116,7 +116,7 @@ for that action") needs a source restricted to one action.
 
 **Reaction 2, the Political Reaction.** It is a `before-action-resolves` reaction on the in-play targeted-reaction window (#278/#318), applicable
 (`BeforeActionReactionApplies`) to **another player's Political action that targets one of his controller's Personalities** (Sakuma himself
-counts), for the acting player's `useAbility` only (a Reaction is not an action; an Attack goes through its own pipeline and is excluded, the same
+counts), for the acting player's `useAbility` only (a Reaction IS an action since `2026-09-19-battle-rulings-round-2.md`, ruling 3, so a Political Reaction that names a Personality is negatable too; an Attack goes through its own pipeline and is excluded, the same
 scope limit as Rokai/Tamoko; a movement that "will not be negated" gives him nothing to react to). "Political" is the ability's own tag
 (`ActionKeywords: ["Political"]`, the general action-keyword tag Daidoji Yuki introduced) **or** a Political card's own keyword (a Political
 Strategy's action is Political); the fourteen wired abilities printed as Political were tagged (`yogo-adi-choice`, `rin-shame`, `kodo-straighten`,

@@ -24,10 +24,10 @@ public sealed partial class MatchEngine
         attackTarget && !TargetsThroughAttackPipeline(command.AbilityId!) ? command with { CardIds = [targetId] } : command with { TargetId = targetId };
 
     // An Attack's own target is judged in the attack window, so before its cost is paid it is held here only for a bow or destroy cost it would pay with a card
-    // that may be protected (Mochitoko); a Reaction is not "an action" (no nested windows).
+    // that may be protected (Mochitoko). A Reaction is an action too (IsAction), so it is held like any other.
     private ReactionSubject? SubjectForAnnouncedAction(GameCommand command)
     {
-        if (command.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability) || ability.Timing == "Reaction") return null;
+        if (command.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability) || !IsAction(ability)) return null;
         var costOnly = TargetsThroughAttackPipeline(id);
         var target = !costOnly && command.TargetId is { } t && _state.Cards.ContainsKey(t) ? t : null;
         return target is not null || CostSubjectOf(command) is not null ? new(command, target, false) : null;
@@ -36,7 +36,7 @@ public sealed partial class MatchEngine
     // An Attack that names no card (no target, or a province) targets no card, so nothing card-targeted reacts to it.
     private ReactionSubject? SubjectForAttack(GameCommand? command, string? targetId) =>
         command?.AbilityId is { } id && targetId is not null && _state.Cards.ContainsKey(targetId)
-        && AbilityCatalog.All.TryGetValue(id, out var ability) && ability.Timing != "Reaction"
+        && AbilityCatalog.All.TryGetValue(id, out var ability) && IsAction(ability)
             ? new(WithActionTarget(command, targetId, true), targetId, true) : null;
 
     private ReactionSubject HeldAction() => OpenReactionSubject() ?? throw new RuleViolation("No action is open to this reaction.");
@@ -210,7 +210,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionApplies(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var command = subject.Command;
-        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || acting.Timing == "Reaction") return false;
+        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
         if (!InPlay(card) || HeldActionNegated(subject)) return false;
         if (abilityId == "mochitoko-negate") return MochitokoFollowers(card, subject).Any();
         if (subject.TargetId is null || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
