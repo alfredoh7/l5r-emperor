@@ -113,7 +113,11 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // check entirely, with no Clan-allegiance surcharge (that is a different, separate waiver route).
     // A data field rather than an Effect string, since Effect is single-valued and each of these cards
     // has its own separate reason to occupy it (or, like Ririko, none at all).
-    string? HonorRequirementWaiverClan = null);
+    string? HonorRequirementWaiverClan = null,
+    // "You may include up to N copies of this card in your deck" (Fading Shadows 10; issue #337): the deck-construction copy
+    // limit this card prints in place of the usual 3 (1 for a Unique card). Read only by DeckWorkshop's soft legality note;
+    // null is every card without such a line. It is a per-card limit, so it never changes what any other card is held to.
+    int? DeckCopyLimit = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>
@@ -463,6 +467,9 @@ public sealed class MatchState
     // Look at the top N cards (issue #322): see DeckLook.cs. Non-null exactly while a "look*" PendingChoice is open; the
     // player's own MatchView.PendingLook is derived from it and nobody else sees anything of it.
     public PendingLook? PendingLook { get; set; }
+    // Conditional effect choice (issue #337): see EffectChoice.cs. Non-null exactly while a "effectChoice" PendingChoice is open; it holds the
+    // resolving action (source, target, performer, the negations a reaction set) the chosen option's effects are then applied to.
+    public PendingEffectChoice? PendingEffectChoice { get; set; }
     // Deck search (issue #312): the append-only, PUBLIC record of every card a player has shown the other
     // player (a search shows what it found). Exposed to both players as MatchView.ShownCards.
     public List<ShownCard> ShownCards { get; set; } = [];
@@ -710,6 +717,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // derived cost (the engine's own GoldQuote decides those) and read only for a variable-cost ability,
     // where it must lie inside that quote's MinAmount..MaxAmount; null there means the minimum.
     int? GoldAmount = null,
+    // Alternative cost (issue #337): which of the ability's CostOptions the acting player pays ("bow" or "destroy" the
+    // performing Ancestor). Chosen up front, like the performer, because a cost is paid before anything resolves; null is
+    // only accepted when the ability has a single option, and never for an ability with none.
+    string? CostOption = null,
     // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
     // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
     SlotSelection[]? Selections = null);

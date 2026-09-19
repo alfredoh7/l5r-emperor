@@ -82,6 +82,17 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     bool Absent = false,
     // Deck search / look (issues #312, #322): appended LAST, after main's ActionKeywords/Discipline/Absent, and always passed by name.
     SearchSpec? Search = null, LookSpec? Look = null,
+    // Alternative cost (issue #337, AlternativeCosts.cs): the ways this ability's non-Gold cost may be paid -- "Bow or destroy your
+    // performing Ancestor Personality" is two options on one card, "Bow Xijkt or one of your Mines" is one option (bow) whose subject the
+    // Performer category widens. Each option is independently payable, the ability is usable when at least one is, and the chosen option
+    // is part of the command (GameCommand.CostOption).
+    CostOption[]? CostOptions = null,
+    // Attach a card to a Personality outside the ordinary Equip command (issue #337, AttachAction.cs): from a discard pile (Moto Jun-Ni,
+    // Foothills Keep) or from the source's own place in hand (Fading Shadows). The Gold cost is Cost = GoldCostRule.AttachCost(...).
+    AttachSpec? Attach = null,
+    // A branch on a condition evaluated at resolution, with the acting player's choice among engine-listed options in the "may" branch
+    // (issue #337, EffectChoice.cs): Mirumoto Yumaru.
+    ConditionalChoice? Branch = null,
     // Multi-target actions (issue #336): an ordered list of independent target slots (see TargetSlots.cs) in place of the single Target,
     // which is then "slots". Every slot has its own category and count; the command carries one SlotSelection per slot.
     TargetSlot[]? Slots = null,
@@ -397,6 +408,50 @@ public static class AbilityCatalog
         // Training-only: a Spell's own Battle ability, exercised only through the "equip-battle"
         // follow-up window above -- proves a just-attached Spell can immediately act.
         ["training-spell-force-boost"] = new("Battle", "Target your Personality at the current battlefield: +2 Force", "own-personality"),
+        // ---- Alternative costs, attach from a discard pile, conditional effect choice, Follower performers (issue #337; see
+        // docs/decisions/2026-09-19-alternative-costs-attach-from-discard.md for every reading and the alternative to each).
+        // Kitsu Fukui (oracle-l5r-4375): "Battle: Bow or destroy your performing Ancestor Personality, and target an enemy card: Bow it. Gain 1
+        // Honor." The performer is the Ancestor (the printed "your performing Ancestor Personality"), not Fukui; it need not be unbowed, because
+        // the destroy option does not need it to be -- each option checks for itself (AlternativeCosts.cs). The Honor gain is an action the
+        // performer performs, so a dishonorable performer rehonors instead (GainHonorFromPerformer).
+        ["fukui-bow"] = new("Battle", "Bow or destroy your performing Ancestor Personality, and target an enemy card: Bow it. Gain 1 Honor", "enemy-card",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ancestor"],
+            CostOptions: [new("bow", "Bow the Ancestor", CostVerb.Bow), new("destroy", "Destroy the Ancestor", CostVerb.Destroy)]),
+        // Moto Jun-Ni (oracle-l5r-5337): "Limited: Target a Follower in any player's discard pile: Attach it to Jun-Ni, paying all costs." (Her
+        // "Followers in this unit have Cavalry" is her Effect, a live check in Keyword().)
+        ["jun-ni-attach"] = new("Limited", "Target a Follower in any player's discard pile: Attach it to Jun-Ni, paying all costs", "attachment-in-discard",
+            Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Target, AttachPile.Any, AttachWielder.Source, [CardType.Follower])),
+        // Mirumoto Yumaru (oracle-l5r-5181): the conditional effect choice (EffectChoice.cs). Mendon's ruling: with a Weapon the player chooses
+        // ONE of three effects; without one there is no choice and both go home. Whether she has a Weapon is read when the action resolves.
+        ["yumaru-move-home"] = new("Battle", "Target an enemy Personality: If Yumaru has a Weapon, you may move her home and you may move the Personality home. Otherwise, move both of them home", "enemy-personality",
+            Branch: new(BranchCondition.SourceHasWeapon,
+                [new("self", "Move Yumaru home", [BranchEffect.MoveSourceHome]),
+                 new("target", "Move the targeted Personality home", [BranchEffect.MoveTargetHome]),
+                 new("both", "Move both home", [BranchEffect.MoveSourceHome, BranchEffect.MoveTargetHome])],
+                new("both", "Move both home", [BranchEffect.MoveSourceHome, BranchEffect.MoveTargetHome]))),
+        // Hiruma Tensin (oracle-l5r-3332): his first printed action ("If you have Reconnaissance: Ranged 4 Attack") is exactly the published
+        // Hiruma Sniper's hiruma-sniper-attack and is that ability; the second bows a Follower in his unit, which then performs the Attack.
+        ["tensin-follower-attack"] = new("Battle", "Bow your performing Follower in Tensin's unit: Ranged 4 Attack", "attack",
+            Performer: "own-unbowed-follower-in-source-unit", CostOptions: [CostOption.Bow]),
+        // Training fixtures for the three cost modes and the performer wielder (never on a published card): a discount ("paying 1 less Gold", floor 0), free
+        // ("ignoring costs") and the Foothills Keep shape.
+        ["training-attach-weapon-discount"] = new("Limited", "Training: target a non-Unique Weapon in your discard pile: attach it to this Personality, paying 1 less Gold", "attachment-in-discard",
+            Cost: GoldCostRule.AttachCost(-1, 0), Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Source, [CardType.Item], ["Weapon"], ["Unique"])),
+        ["training-attach-follower-free"] = new("Limited", "Training: target a Follower in any discard pile: attach it to this Personality, ignoring costs", "attachment-in-discard",
+            Attach: new(AttachSource.Target, AttachPile.Any, AttachWielder.Source, [CardType.Follower])),
+        ["training-attach-weapon-performer"] = new("BattleOrOpen", "Training: choose your performing Kensai and equip a target Weapon in your discard pile to him", "attachment-in-discard",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Kensai"], Cost: GoldCostRule.AttachCost(),
+            Attach: new(AttachSource.Target, AttachPile.Own, AttachWielder.Performer, [CardType.Item], ["Weapon"])),
+        // Training fixture: the two halves of a cost are independent -- WHICH card pays may differ per option ("Bow this card or destroy the target").
+        ["training-alt-cost-mixed"] = new("Battle", "Training: bow this card or destroy the target attachment: draw a card", "attachment",
+            CostOptions: [new("bow-source", "Bow this card", CostVerb.Bow, CostSubject.Source), new("destroy-target", "Destroy the target attachment", CostVerb.Destroy, CostSubject.Target)]),
+        ["training-break-weapon"] = new("Reaction", "Training: before another player's action resolves, destroy the Weapons attached to its source", "none", Trigger: "before-action-resolves"),
+        // Fading Shadows (oracle-l5r-2437): "Ninja Battle: If this Follower is in your hand, target your performing Ninja and Equip it to him."
+        // The performing Ninja is the wielder (no separate target); the card is attached from hand through the same Equip flow and cost. The printed
+        // "Ninja" before "Battle" needs no ActionKeywords tag: the card is itself a Ninja, and an ability inherits the keywords of the card it is on.
+        ["fading-shadows-equip"] = new("Battle", "Ninja Battle: If this Follower is in your hand, target your performing Ninja and Equip it to him", "none",
+            Performer: "own-personality-with-keyword-at-battle", RequiredKeywords: ["Ninja"],
+            Cost: GoldCostRule.AttachCost(), Attach: new(AttachSource.Self, Wielder: AttachWielder.Performer)),
         // Import wave (issue #111): Cavalry/Conqueror/Tactician-adjacent cards needing only small,
         // already-precedented extensions of existing target categories and primitives.
         ["reiyu-force-penalty"] = new("Battle", "Target enemy Force/Follower · Force penalty = Reiyu's Force", "enemy-force"),
@@ -722,11 +777,11 @@ public static class AbilityCatalog
         // Xijkt (issue #207 follow-up): the FULL "choose which of several eligible own cards to bow
         // as a cost" shape (own-source-or-unbowed-holding-with-keyword), not Kojinrue's own
         // single-card simplification above.
-        ["xijkt-bow"] = new("Battle", "Bow Xijkt or one of your Mines, and target an enemy card without attachments: Bow it.", "enemy-card-without-attachments", Performer: "own-source-or-unbowed-holding-with-keyword", RequiredKeywords: ["Mine"]),
+        ["xijkt-bow"] = new("Battle", "Bow Xijkt or one of your Mines, and target an enemy card without attachments: Bow it.", "enemy-card-without-attachments", Performer: "own-source-or-unbowed-holding-with-keyword", RequiredKeywords: ["Mine"], CostOptions: [CostOption.Bow]),
         // Tamori Shosei (issue #207 follow-up): same shape as Xijkt above, but ALSO gated on
         // controlling a Temple at all (regardless of its own bowed state -- checked separately, see
         // the id=="shosei-honor" Require) before the bow-cost choice is even offered.
-        ["shosei-honor"] = new("Limited", "If you control a Temple, bow Shosei or one of your Temple Holdings: Shosei prays to the Fortunes. Gain 1 Honor.", "none", Performer: "own-source-or-unbowed-holding-with-keyword", RequiredKeywords: ["Temple"]),
+        ["shosei-honor"] = new("Limited", "If you control a Temple, bow Shosei or one of your Temple Holdings: Shosei prays to the Fortunes. Gain 1 Honor.", "none", Performer: "own-source-or-unbowed-holding-with-keyword", RequiredKeywords: ["Temple"], CostOptions: [CostOption.Bow]),
         // Togashi Mitsu (issue #207 follow-up): "Fire Battle" is the same plain printed-keyword
         // classification moshi-ikako-attack already established (not a Ring/keyword gate) -- his own
         // fill-up-to-five token grant is BattleOrOpen like Immovable Object, dual-timing but otherwise
@@ -873,7 +928,7 @@ public static class AbilityCatalog
         // The Earth's Hunger (The Shadow's Embrace, the second Spell): "Bow this Shugenja, or bow
         // this card if he is Earth" -- see own-wielder-or-source-with-wielder-keyword's own doc
         // comment for the cost-choice shape (Xijkt's own, mirrored the other way round).
-        ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true),
+        ["earths-hunger-destroy"] = new("Battle", "Bow this Shugenja, or bow this card if he is Earth, and target an enemy card without attachments: Destroy it", "enemy-card", Performer: "own-wielder-or-source-with-wielder-keyword", RequiredKeywords: ["Earth"], RequireNoAttachments: true, CostOptions: [CostOption.Bow]),
         // Sanctuary of the Waves (oracle-l5r-10238, spell-wave-4, issue #295): the mirror-image target
         // shape of own-wielder-or-source-with-wielder-keyword above (a TARGET choice between the
         // wielder and another own Personality, gated by the wielder's own keyword, rather than a
@@ -1462,7 +1517,7 @@ public static class AbilityCatalog
         // same family as Xijkt's/Tamori Shosei's own -- here Sutigu himself or one of his own unbowed
         // Weapon-keyword attachments.
         ["sutigu-bow"] = new("Battle", "Bow Sutigu or one of his Weapons, and target an enemy card: Negate its straightening (until the turn ends) if it is an attachment. Bow it", "enemy-card",
-            Performer: "own-source-or-unbowed-attached-with-keyword", RequiredKeywords: ["Weapon"]),
+            Performer: "own-source-or-unbowed-attached-with-keyword", RequiredKeywords: ["Weapon"], CostOptions: [CostOption.Bow]),
         // Shinden Shorai (oracle-l5r-6857, a Region): the fourth caller into the shared "bring a face-up
         // province Personality into play, paying all costs" entry sequence (BringProvincePersonalityIntoPlay).
         ["shinden-shorai-recruit"] = new("Limited", "If it is not your first or second turn: Bring a face-up Personality in this province into play, paying all costs. You may ignore the Personality's Honor Requirement if he is Lion Clan", "own-personality-in-province",
@@ -1555,6 +1610,12 @@ public sealed partial class MatchEngine
         // returned to hand, ...), never a durable GrantedKeyword that would outlive the Spell.
         if (keyword == "Naval" && Definition(card).Effect == "naval-while-has-spell")
             return Attachments(card.Id).Any(a => Definition(a).Type == CardType.Spell);
+        // Moto Jun-Ni (oracle-l5r-5337, issue #337): "Followers in this unit have Cavalry" -- live too: a Follower has Cavalry exactly while it is
+        // attached to a card carrying this Effect, so it appears when it attaches (from hand, or from a discard pile by her own action) and is
+        // gone the moment it leaves her unit. Never a durable GrantedKeyword, which would follow it out of her unit.
+        if (keyword == "Cavalry" && card.Zone == Zone.Attached && Definition(card).Type == CardType.Follower
+            && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && Definition(host).Effect == "unit-followers-cavalry")
+            return true;
         // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a live conditional
         // grant, re-evaluated every time (unlike GrantedKeyword's own durable one-time grant).
         return keyword == "Cavalry" && Definition(card).Effect == "cavalry-force-while-not-your-turn" && card.OwnerId != _state.ActivePlayerId;
@@ -1718,7 +1779,9 @@ public sealed partial class MatchEngine
             // Return to Action (issue #331): the first negatable move of its Target TO the battlefield -- its
             // execution case checks NegatesEffect("move") itself (MoveToBattlefield has no such check, since
             // every other move-to-battlefield ability moves its own source/performer, never a Target).
-            or "return-to-action-move" => "move",
+            or "return-to-action-move"
+            // Mirumoto Yumaru (issue #337): one of her effects moves her target home, so the movement is negatable like any other.
+            or "yumaru-move-home" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
@@ -1767,7 +1830,9 @@ public sealed partial class MatchEngine
         or "nori-bow-personality" or "mitsuko-bow-destroy" or "sutigu-bow"
         // Personality wave 24: Kakita Kazan and Kuni Shinoda - exp each bow their target (Shinoda's
         // destroy rides on an effect condition only for what follows the bow).
-        or "kazan-shame" or "shinoda-exp-bow-destroy";
+        or "kazan-shame" or "shinoda-exp-bow-destroy"
+        // Kitsu Fukui (issue #337): bows an enemy card (the performer's bow-or-destroy is a cost, never the target).
+        or "fukui-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -1827,6 +1892,9 @@ public sealed partial class MatchEngine
             // player's action -- see its execution case.
             case "training-before-action-suppress":
                 return command.PlayerId != affected.OwnerId && !TargetsThroughAttackPipeline(command.AbilityId) && card.OwnerId == affected.OwnerId;
+            // Training fixture (issue #337): another player's action whose source carries a Weapon -- see its execution case.
+            case "training-break-weapon":
+                return command.PlayerId != card.OwnerId && command.CardId is not null && Attachments(command.CardId).Any(w => Keyword(w, "Weapon"));
             default:
                 return false;
         }
@@ -2025,7 +2093,7 @@ public sealed partial class MatchEngine
         "kamina-exp-attack" => 3 + (target is not null && (HasClanAffiliation(target, "Lion") || Keyword(target, "Unaligned")) ? 1 : 0),
         "shuji-attack" => 4 + (target is not null && HasClanAffiliation(target, "Spider") ? 1 : 0),
         "murderous-thieves-attack" => 3,
-        "horse-archers-attack" or "hiruma-sniper-attack" => 4,
+        "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => 4,
         "spawn-of-vritra-attack" => 6,
         "khol-regulars-attack" => 4,
         // Horseback Warriors: Melee 4, or 5 against a target without the Cavalry keyword -- "Infantry"
@@ -2092,7 +2160,7 @@ public sealed partial class MatchEngine
         "shiro-shiba-melee" or "stalking-tiger-attack" or "unparalleled-sword-attack" or "training-weapon-attack" => "Melee",
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
-        "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" => "Ranged",
+        "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => "Ranged",
         "moshi-ikako-attack" => "Ranged",
         "kamina-exp-attack" or "shuji-attack" => "Ranged",
         "yayu-bow-attack" or "yayu-destroy-attack" => "Ranged",
@@ -2500,7 +2568,9 @@ public sealed partial class MatchEngine
             // either zone here, narrowed to the exact one each half actually needs by its own bespoke
             // Require below (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
             // for the bow half).
-            Require(ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
+            // Fading Shadows (issue #337): an ability that attaches its OWN card is used from the hand -- and only from there (AttachSpec.Self).
+            Require(ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
+                : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
                 : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
                 // A Ring (issue #194) may use its printed action from hand too -- "you may discard
                 // this Ring from your hand to use its ability without cost" -- in addition to the
@@ -2729,7 +2799,7 @@ public sealed partial class MatchEngine
                 && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
                 "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
-        if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
+        if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "This action requires Reconnaissance at the current battlefield.");
         // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
         // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
         // belonging to the SAME player who holds this card in hand; the card itself must still
@@ -2819,6 +2889,11 @@ public sealed partial class MatchEngine
                 // Same actingAsBattle generalization as own-unbowed-personality-at-battle-with-keyword.
                 "own-personality-with-keyword-at-battle" => Definition(performer).Type == CardType.Personality &&
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
+                // Hiruma Tensin (issue #337): "your performing Follower in Tensin's unit" -- the first Performer category that is not a
+                // Personality. A Follower of the source's own unit (the source's host, when the source is itself an attachment), unbowed
+                // because bowing it is the cost. Its location is its host's, so the shared presence checks already cover it.
+                "own-unbowed-follower-in-source-unit" => Definition(performer).Type == CardType.Follower && !performer.Bowed
+                    && performer.Zone == Zone.Attached && performer.AttachedTo == UnitHostId(source!),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
                 // Naval Invasion (issue #310): "choose your performing Naval Personality" -- printed or granted
@@ -2922,6 +2997,8 @@ public sealed partial class MatchEngine
         else Require(command.PerformerId is null || command.PerformerId == command.TargetId && id is "prepared-death" or "defensive-stance" or "lobby", "Unexpected performing card.");
         // "May not perform actions" (issue #336): the performer of this action -- whoever it is -- must be free to act.
         RequireCanPerform(command, ability, source);
+        // Alternative cost (issue #337): the way the acting player pays the non-Gold cost is part of the command, and payable.
+        ValidateCostOption(ability, command, source);
         Require(command.Choice is null, "Choices are resolved by a separate decision command.");
         // Goju House Guard (issue #192): the only current DeckPosition consumer, so this stays a
         // per-id check rather than a generic AbilityDefinition flag until a second card needs it.
@@ -3115,6 +3192,13 @@ public sealed partial class MatchEngine
                     Require(AttachmentAllowed(target, Card(command.PerformerId!)), "A Personality may attach only one Armor and, without Kensai or a Kama, only one Weapon.");
                     Require(!(Keyword(target,"Unique") || Keyword(target,"Singular")) || !ControlsCopyOf(player.Id,Definition(target).Name),
                         $"You already control this {(Keyword(target,"Unique") ? "Unique" : "Singular")} card.");
+                }
+                // Moto Jun-Ni / Foothills Keep (issue #337): a card in a discard pile the ability's AttachSpec names (whose pile, which kinds).
+                // Everything else about attaching it is ValidateAttach, below.
+                else if (ability.Target == "attachment-in-discard")
+                {
+                    var attachError = AttachTargetError(ability.Attach!, player.Id, target);
+                    Require(attachError is null, attachError ?? "");
                 }
                 // Kharmic's own repeatable action: a Kharmic-keyword card the player controls, either a
                 // Fate card in hand or a face-up Dynasty card in one of their own provinces -- neither
@@ -3438,6 +3522,8 @@ public sealed partial class MatchEngine
         ValidateMove(command, ability);
         // One slot candidate has now been judged; everything below is about the whole action (its own checks and its price).
         if (slotAbility is not null) return;
+        // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
+        if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
         // Shinden Shorai (oracle-l5r-6857, issue #301): "If it is not your first or second turn" -- the
         // player's OWN turn count (PlayerState.TurnsTaken counts only that player's turns, the same
         // counter border-first's own "your first turn" reads; the global MatchState.TurnNumber advances
@@ -3678,6 +3764,8 @@ public sealed partial class MatchEngine
         // The one payment for every costed ability (issue #303): exactly the AbilityCost that validation
         // priced, so no execution case below re-hardcodes (or forgets) its own Pay(...).
         PayForAbility(command, player);
+        // The non-Gold cost the acting player chose (issue #337): bow or destroy the performer, paid right beside the Gold.
+        PayCostOption(ability, command, player, source);
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor" or "bonds-of-coin-draw")
         {
             _state.FavorPlayerId = null;
@@ -4337,8 +4425,7 @@ public sealed partial class MatchEngine
             }
             case "scouring-flood-move-home": source!.Bowed = true; MoveHome(target!, false); break;
             case "earths-hunger-destroy":
-                Card(command.PerformerId!).Bowed = true;
-                DestroyUnits([target!], actingPlayerId: player.Id);
+                DestroyUnits([target!], actingPlayerId: player.Id); // the bow is its cost option (PayCostOption)
                 break;
             case "sanctuary-of-the-waves-move":
             {
@@ -4471,7 +4558,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "sutigu-bow":
-                Card(command.PerformerId!).Bowed = true; // "Bow Sutigu or one of his Weapons": the cost, never negated
+                // "Bow Sutigu or one of his Weapons" is the cost option (PayCostOption): never negated.
                 // "Negate its straightening (until the turn ends) if it is an attachment" -- stated
                 // before "Bow it," and independent of whether the bow itself is then negated.
                 if (target!.Zone == Zone.Attached) target.StraightenBlockedTurn = _state.TurnNumber;
@@ -4873,11 +4960,9 @@ public sealed partial class MatchEngine
                 break;
             case "kojinrue-destroy": source!.Bowed = true; DestroyUnits([target!], actingPlayerId: player.Id); break;
             case "xijkt-bow":
-                Card(command.PerformerId!).Bowed = true;
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 break;
             case "shosei-honor":
-                Card(command.PerformerId!).Bowed = true;
                 GainHonorFromPerformer(source!, 1, "Tamori Shosei");
                 break;
             case "kouzei-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
@@ -5012,8 +5097,54 @@ public sealed partial class MatchEngine
             case "training-engage-gain-honor": GainHonor(player.Id, 1, "Training engage reaction", source); break;
             // Recon-action classification fixtures (issue #321): no effect of their own -- the point is what fires AFTER them.
             case "training-recon-open": case "training-plain-open": break;
-            default: throw new RuleViolation("Ability effect is not implemented.");
+            // Alternative cost / attach from a discard pile / conditional effect choice / Follower performer (issue #337).
+            // Kitsu Fukui: the bow-or-destroy cost was paid by PayCostOption; "Bow it. Gain 1 Honor" is the effect, the Honor gain being an
+            // action of the performing Ancestor.
+            // Training fixture (issue #337): a before-action Reaction that destroys the Weapons attached to the deferred action's source, so a
+            // branch that reads "has a Weapon" is read AFTER it (the condition is evaluated at resolution).
+            case "training-alt-cost-mixed": Draw(player); break;
+            case "training-break-weapon":
+                foreach (var weapon in Attachments(_state.PendingNegatableAbility!.CardId!).Where(a => Keyword(a, "Weapon")).ToArray()) DestroyAttachment(weapon);
+                break;
+            case "fukui-bow":
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                GainHonorFromPerformer(Card(command.PerformerId!), 1, "Kitsu Fukui");
+                break;
+            // Hiruma Tensin: the performing Follower's bow was paid as its cost option; the Follower then performs the Attack.
+            case "tensin-follower-attack":
+                if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
+                break;
+            default:
+                // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
+                // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.
+                if (ability.Attach is { } attachSpec)
+                {
+                    if (ExecuteAttach(command, attachSpec, player, source, target)) return;
+                    break;
+                }
+                // Any ability with a Branch (Mirumoto Yumaru) needs no case of its own either: the condition is read now, and when it holds the action
+                // pauses for the player's choice (EffectChoice.cs) and finishes from there.
+                if (ability.Branch is not null)
+                {
+                    if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                    break;
+                }
+                throw new RuleViolation("Ability effect is not implemented.");
         }
+        CompleteAbilityResolution(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
+    }
+    // Everything an action does once its own effects have applied (issue #337 extracted this from the end of RunAbilityEffects, unchanged,
+    // so an action that pauses for a decision after its effects -- the conditional effect choice, EffectChoice.cs -- finishes exactly like
+    // one that did not): the after-resolution traits, hand-played card discard, Additional Action bookkeeping, the "after this action"
+    // reaction windows, and the hand-over of priority. RunAbilityEffects reaches it at the end of its switch; a case that returns early
+    // owns calling it (or an equivalent tail) itself.
+    private void CompleteAbilityResolution(GameCommand command, AbilityDefinition ability, bool consumedGrant, bool playedFromDiscard, int? opponentHonorBeforeBattleAction,
+        HashSet<string> bowedBeforeAction, List<AdditionalActionGrant> preExistingGrants)
+    {
+        var id = command.AbilityId!;
+        var player = Player(command.PlayerId);
+        var source = command.CardId is null ? null : Card(command.CardId);
+        var target = command.TargetId is null ? null : Card(command.TargetId);
         // "After the resolution of your [keyword] action" traits (Daidoji Ebizo, issue #321): every in-play card of
         // the acting player whose Effect registers one (AfterOwnActionTraits) reacts here, the single funnel every
         // synchronously resolving ability passes through -- a deferred Attack and a duel reach the same helper from
@@ -5635,6 +5766,11 @@ public sealed partial class MatchEngine
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
                 "own-naval-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Naval")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
+                // Kitsu Fukui / Fading Shadows (issue #337): the generic "performing [Keyword] Personality", bowed or not. It was missing from
+                // this listing, so an ability that used it (Again!'s shape) could only be played by a hand-built command.
+                "own-personality-with-keyword-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c)) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                // Hiruma Tensin (issue #337): the unbowed Followers of the source's own unit.
+                "own-unbowed-follower-in-source-unit" => source is null ? [] : Attachments(UnitHostId(source)).Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
@@ -5645,15 +5781,20 @@ public sealed partial class MatchEngine
             // ability with no source card of its own to anchor a disabled entry to.
             if (id == "equip-battle" && (performers.Length == 0 || !player.Hand.Any(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")))) continue;
             if (performers.Length == 0) performers = [null];
+            // Alternative cost (issue #337): one offered action per way to pay when the ability has more than one (each with its own label and
+            // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
+            // is listed exactly as before with the choice left off the command.
+            CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray() : [null];
             foreach (var performer in performers)
+            foreach (var costOption in costOptions)
             {
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer);
+                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id);
                 // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
                 if (ability.Slots is not null)
                 {
-                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(ability, performer, source), source?.Id);
+                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(ability, performer, source, costOption), source?.Id);
                     continue;
                 }
                 string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "hand" => player.Hand.ToArray(),
@@ -5680,6 +5821,8 @@ public sealed partial class MatchEngine
                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),
                     "spell-in-hand-with-keyword" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell && HasKeywords(Card(h), ability.RequiredKeywords)).Cast<string?>().ToArray(),
+                    // Moto Jun-Ni / Foothills Keep (issue #337): every card in a discard pile the ability's AttachSpec accepts.
+                    "attachment-in-discard" => AttachCandidatesInDiscard(ability.Attach!, playerId).Select(c => (string?)c.Id).ToArray(),
                     _ => inPlay };
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
@@ -5709,7 +5852,7 @@ public sealed partial class MatchEngine
                 // the client swaps between them without a round trip.
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                var label = AbilityOptionLabel(ability, performer, source);
+                var label = AbilityOptionLabel(ability, performer, source, costOption);
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     // The battlefields a move's destination rule lists (issue #336): the province indices the assignment flow already draws.
@@ -5718,8 +5861,8 @@ public sealed partial class MatchEngine
             }
         }
     }
-    private string AbilityOptionLabel(AbilityDefinition ability, string? performer, CardInstance? source) =>
-        ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})")
+    private string AbilityOptionLabel(AbilityDefinition ability, string? performer, CardInstance? source, CostOption? costOption = null) =>
+        ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})") + (costOption is null ? "" : $" · {costOption.Label}")
         // The Discipline play of a card in a discard pile says what it is, next to its Gold quote (issue #331); so does the
         // play of one granted by Daigotsu Bofana - exp (issue #333).
         + (PlayedFromDiscard(ability, source) ? (ability.Discipline ? " · Discipline (removed from the game)" : " · from your discard pile (removed from the game)") : "");

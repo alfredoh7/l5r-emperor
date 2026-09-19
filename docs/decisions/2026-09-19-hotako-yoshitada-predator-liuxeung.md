@@ -31,7 +31,7 @@ against their receipts) and published whole:
 Published text is the catalogue text. Two differences from the period scans, both harmless: Bonds of Coin's scan prints "Political" as its keyword line and no
 "Favor" on the Limited action (the catalogue says "Favor Political Limited", and so does this change: discarding the Imperial Favor is a Favor action), and it
 prints "Open: Target one to three attachments with a 0 Gold Cost: Destroy them" for the catalogue's "Political Open: Destroy one to three target attachments
-with a 0 Gold Cost" -- the same action. Published count 409 -> 416.
+with a 0 Gold Cost" -- the same action. Published count: +7 (409 -> 416 on the 7f306655 base; 421 after merging origin/main 8b378a8d, which brought #337's five to 414).
 
 ## Mendon's rulings (the task brief, verbatim where it matters)
 
@@ -221,7 +221,7 @@ Multi-target viewer, move-destination picker with arrows, and the "may not perfo
 
 `dotnet run --project tests/L5R.Core.Tests` (216 core, 57 published, and the new suites: `action-lock` 10, `multi-target` 16, `move-destination` 9, `stat-penalty` 8),
 `L5R.AI.Tests`, `L5R.Server.Tests` and `L5R.Client.Transport.Tests` (the new command and option fields cross the wire), `bash tools/check.sh --skip-client`. Pinned published count
-409 -> 416: recounted as the distinct non-ScenarioOnly ids across `content/published/*.json` on origin/main 7f306655 (409) plus these seven. Inventory workbook regenerated (416 wired).
+421: recounted from the merged tree as the distinct non-ScenarioOnly ids across `content/published/*.json` (origin/main 8b378a8d has 414, after #337; plus these seven). Inventory workbook regenerated (421 wired).
 
 ## Mutation checks
 

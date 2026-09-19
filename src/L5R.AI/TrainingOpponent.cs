@@ -180,6 +180,9 @@ public static class TrainingOpponent
                 var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return 100+(kept?.Force??0);
             case "encircledOrder": case "beforeBattleOrder": return 50;
+            // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
+            // takes the first one the engine lists (ties keep the engine's order).
+            case "chooseEffect": return 100;
             case "beforeBattleOptional":
                 var optionalTarget=opponent.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return command.Choice=="use" ? 60+(optionalTarget?.Force??0) : 20;
