@@ -608,7 +608,7 @@ internal static class EitherOrTests
         var attacker = Add(s, "training-crane-samurai", 0, Zone.Home);
         s.ForcedPasses.Add(new(0, PrintedPhases.Instance(s.TurnNumber, Phase.AttackDeclaration), "owed"));
         e = MatchEngine.FromTestState(s);
-        var declare = e.QueryActions(0).Where(a => a.Type == "attack" && a.Enabled).ToArray();
+        var declare = e.QueryActions(0).Where(a => a.Type == "declareAttack" && a.Enabled).ToArray();
         Check(declare.Length > 0 && e.QueryActions(0).Any(a => a.Type == "pass" && a.Enabled), "declaring an attack, and passing, stay available");
         Accept(e, declare[0].Command!);
         Eq(e.State.ForcedPasses.Count, 1, "declaring is not the pass that settles it");
