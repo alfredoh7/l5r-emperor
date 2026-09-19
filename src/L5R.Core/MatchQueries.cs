@@ -80,6 +80,16 @@ public sealed partial class MatchEngine
             if(reason is null && validate) reason=AbilityRejection(command);
             Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
         }
+        // "An action targets X" reactions (issue #335, TargetedActionReactions.cs), offered in both windows an action can be held in: every one of THIS
+        // player's that applies to the held action right now, listed disabled with its reason when it cannot be used (spent, bowed, unpayable), plus --
+        // for a reaction that CHOOSES the new target (Blade of Champions) -- one option per legal target, each validated like a submitted command.
+        void AddTargetedActionReactions()
+        {
+            if(OpenReactionSubject() is not { } held) return;
+            foreach(var (card,reactionId) in TargetedActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && TargetedActionReactionApplies(x.Card,x.AbilityId,held)).ToArray())
+                foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
+                    AddReaction(card,reactionId,targetId:candidate,label:label,validate:true);
+        }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
         if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null)
@@ -132,6 +142,7 @@ public sealed partial class MatchEngine
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.
                 AddReaction(card,reactionId,used?"This reaction has already been used.":null,validate:true);
             }
+            AddTargetedActionReactions();
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"beforeActionReaction" } beforeActionPending)
@@ -153,6 +164,7 @@ public sealed partial class MatchEngine
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
+            AddTargetedActionReactions();
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"additionalActionReaction" })

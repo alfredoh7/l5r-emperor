@@ -269,6 +269,10 @@ public sealed class PendingAttack
     // immediate (non-deferred) resolution path already gets this for free via ExecuteAbilityEffects'
     // own tail, so only the deferred/reaction-window path needs this carried across.
     public bool Additional { get; set; }
+    // The command that declared this Attack (issue #335), so a reaction that answers "an action targets X" -- redirecting it, or checking its
+    // target is still legal -- can re-run the action's own target validation. Its Attack target is kept in step with TargetId when a reaction
+    // redirects the Attack. Null only for an Attack declared outside a command (never today).
+    public GameCommand? Command { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of

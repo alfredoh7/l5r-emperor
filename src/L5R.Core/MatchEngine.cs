@@ -1937,7 +1937,16 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card) => card.Dishonorable=true;
+    private void Dishonor(CardInstance card)
+    {
+        // The blanket negation of an action's effects on a card (issue #335, NegateAllEffectsOn) reaches dishonoring it.
+        if(NegatesEffect(card,"all"))
+        {
+            Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
+            return;
+        }
+        card.Dishonorable=true;
+    }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
     // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.

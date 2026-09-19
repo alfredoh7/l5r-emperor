@@ -236,6 +236,7 @@ DeckWorkshopTests.Run(runner);
 DeckSearchTests.Run(runner);
 DeckLookTests.Run(runner);
 DaigotsuBofanaTests.Run(runner);
+TargetedActionReactionTests.Run(runner);
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
