@@ -1447,6 +1447,12 @@ public static class AbilityCatalog
         // straighten is part of the card, so a bowed one is legal); the move can be negated ("move" kind in
         // MoveOrStraightenKind), and he is straightened only if he really moved (see the execution case).
         ["return-to-action-move"] = new("Battle", "If you are the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten him", "own-personality-at-home", Discipline: true, Absent: true),
+        // Daigotsu Bofana - exp (oracle-l5r-10315, issue #333): "Battle: Target a Dark Virtue in your discard pile: Take an additional action
+        // to play it for one of its Battle actions. After it resolves, remove the card from the game." The additional action is an
+        // AdditionalActionGrant scoped to the chosen card with FromDiscard (see DiscardPlayGrant); the removal is PlayedFromDiscard.
+        // His other printed ability, "After Bofana enters play: Lose 2 Honor and all other players must discard a card...", is his
+        // Effect (bofana-entry-discard) plus EntryHonorLoss -- a mandatory entry effect, not an ability here.
+        ["bofana-exp-dark-virtue"] = new("Battle", "Target a Dark Virtue in your discard pile: Take an additional action to play it for one of its Battle actions. After it resolves, remove the card from the game", "own-dark-virtue-in-discard"),
     });
 }
 
@@ -2107,10 +2113,10 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional Battle action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -2137,7 +2143,10 @@ public sealed partial class MatchEngine
     // ordinary action or one taken "out of order" as an Additional Action (see UseAbility).
     private bool ConsumeAdditionalActionGrant(int playerId, string? cardId)
     {
-        var grant = _state.AdditionalActions.FirstOrDefault(g => g.PlayerId == playerId && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)));
+        // A grant for playing this very card from a discard pile (Daigotsu Bofana - exp) goes first: it is the permission the play
+        // was validated against, and an unscoped grant must not be spent in its place.
+        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
+            .OrderByDescending(g => g.FromDiscard).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         return true;
@@ -2427,7 +2436,9 @@ public sealed partial class MatchEngine
                 // this Ring from your hand to use its ability without cost" -- in addition to the
                 // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
                 // afterward when used this way, mirroring the Strategy case just below).
-                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || DisciplineFromDiscard(ability, source) : InPlay(source) || DisciplineFromDiscard(ability, source),
+                // A card in a discard pile is a legal source only as a Discipline play, or as the Battle action a granted additional
+                // action names (Daigotsu Bofana - exp): PlayableFromDiscard.
+                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id) : InPlay(source) || PlayableFromDiscard(ability, source, player.Id),
                 "The ability's source is not in the required zone.");
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
             // Dragon Clan review (issue #207) adds three more real "even if bowed" cards. Nikutai
@@ -2455,6 +2466,9 @@ public sealed partial class MatchEngine
             // "Repeatable" (issue #194): Ring of Air/Water's own printed keyword on their in-play
             // actions, same convention as Tactical Advantage/Equip (Battle) above.
             or "ring-of-air-straighten" or "ring-of-water-move-home"
+            // Played from a discard pile as a granted additional action (Daigotsu Bofana - exp): the grant is the permission, and a
+            // card in a discard pile is not the object that was played earlier this turn.
+            || source is not null && ability.Timing == "Battle" && DiscardPlayGrant(player.Id, source) is not null
             || !uses.TryGetValue(usageKey, out var used) || used != _state.TurnNumber && id != "border-game", "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
@@ -3043,6 +3057,12 @@ public sealed partial class MatchEngine
                 else if (ability.Target == "own-kiho-strategy-in-discard")
                     Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Kiho") && target.Zone == Zone.FateDiscard,
                         "Choose a Kiho Strategy card from your Fate discard pile.");
+                // Daigotsu Bofana - exp (issue #333): "a Dark Virtue in your discard pile" -- a Strategy carrying the
+                // keyword, in the player's own Fate discard pile, that has a Battle action to be played for (a card with
+                // none would only waste the grant).
+                else if (ability.Target == "own-dark-virtue-in-discard")
+                    Require(target.OwnerId == player.Id && type == CardType.Strategy && Keyword(target, "Dark Virtue") && target.Zone == Zone.FateDiscard && HasBattleAction(target),
+                        "Choose a Dark Virtue with a Battle action from your Fate discard pile.");
                 // Scholarly Hermit's own ability (issue #194): a Ring in the player's own Fate
                 // discard pile -- not in play, so this needs its own branch too.
                 else if (ability.Target == "own-ring-in-discard")
@@ -3365,6 +3385,17 @@ public sealed partial class MatchEngine
     private void UseAbility(GameCommand command)
     {
         ValidateAbility(command);
+        AnnounceAbility(command);
+    }
+    // Everything after validation. Split out (issue #333) because a trait fired by the announcement itself -- Daigotsu
+    // Bofana's forced discard -- may stop here for a player decision and then carry on with this same command.
+    private void AnnounceAbility(GameCommand command)
+    {
+        if (OpenForcedDiscardForTargetedTrait(command)) return;
+        ContinueUseAbility(command);
+    }
+    private void ContinueUseAbility(GameCommand command)
+    {
         var ability = AbilityCatalog.All[command.AbilityId!];
         // Additional Action (issue #181): a Battle-timed use that matches one of this player's
         // currently available grants is taken "out of order" -- deferred through the same
@@ -3495,14 +3526,16 @@ public sealed partial class MatchEngine
     private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
     {
         var pendingAttackBefore = _state.PendingAttack;
+        // Asked BEFORE the effects run: a hand-played card is in a discard pile by the time the deferral below is reached.
+        var fromDiscard = PlayedFromDiscard(AbilityCatalog.All[command.AbilityId!], command.CardId is null ? null : Card(command.CardId));
         RunAbilityEffects(command, consumedGrant);
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
         {
             var spent = command.CardId is null ? null : Card(command.CardId);
             SpendHandPlayedCard(Player(command.PlayerId), spent);
-            // The same for a Discipline card played from a discard pile (issue #331): the Attack's own early return
-            // skips RunAbilityEffects' tail, so nothing there would remove it from the game.
-            if (DisciplineFromDiscard(AbilityCatalog.All[command.AbilityId!], spent)) RemoveFromGame(spent!);
+            // The same for a card played from a discard pile (a Discipline play, issue #331, or Daigotsu Bofana - exp's granted play,
+            // issue #333): the Attack's own early return skips RunAbilityEffects' tail, so nothing there would remove it from the game.
+            if (fromDiscard) RemoveFromGame(spent!);
         }
     }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
@@ -3519,20 +3552,21 @@ public sealed partial class MatchEngine
         var uses = source?.AbilityUses ?? player.AbilityUses;
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
         // Discipline (issue #331): decided once, up front, from where the card is BEFORE anything below moves it --
-        // the discard-pile mode is the one that is removed from the game after the action resolves.
-        var disciplineFromDiscard = DisciplineFromDiscard(ability, source);
+        // the discard-pile mode is the one that is removed from the game after the action resolves. So is a card played
+        // from a discard pile as the additional action Daigotsu Bofana - exp grants (issue #333).
+        var playedFromDiscard = PlayedFromDiscard(ability, source);
         // An Attack action executing spends this player's standing Attack-target grants of its kind
         // ("your NEXT Ranged Attack action", Yoritomo Ebumi) -- validated at declaration, spent here.
         if (AttackKind(id) is { Length: > 0 } declaredAttackKind) ConsumeAttackTargetGrants(player.Id, declaredAttackKind);
         // Times of Strife (issue #259): "after each time another player who controls no units at the
         // current battlefield announces a Battle action, he discards a card" -- checked here,
         // "announcing" the action, before its own effects below apply (matching the card's own
-        // "after ... announces," not "after ... resolves"). Queued (PendingTimesOfStrifeDiscards),
+        // "after ... announces," not "after ... resolves"). Queued (PendingForcedDiscards),
         // drained by OpenOverconfidentDrawWindow, rather than opened as a PendingChoice directly here,
         // since this function has no safe place to defer BEFORE its own switch runs without also
         // rewriting every case's own early-return shape.
         if (ability.Timing == "Battle" && _state.CurrentBattleProvince is int cbp && !Army(player.Id, cbp).Any() && ControlsEventEffect(1 - player.Id, "times-of-strife"))
-            _state.PendingTimesOfStrifeDiscards.Add(player.Id);
+            _state.PendingForcedDiscards.Add(new(player.Id, "Times of Strife"));
         // War Weariness (issue #259): "after the resolution of the first action each phase that one
         // or more Personalities performed, bow them." Approximated as "announced" (checked here,
         // before the switch below, alongside Times of Strife's own identical announce-timed check
@@ -3586,7 +3620,7 @@ public sealed partial class MatchEngine
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
             // A Discipline card played from a discard pile is spent the same way: out of the pile the moment it is
             // played (the duel resolves later, and the engine has no "being resolved" zone).
-            if (disciplineFromDiscard) RemoveFromGame(source!);
+            if (playedFromDiscard) RemoveFromGame(source!);
             // Most Iaijutsu Personalities duel as themselves ("Kitsuki Daisuke... Daisuke duels
             // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
             // performer. ability.Performer null means exactly this: the source card is the challenger.
@@ -4190,6 +4224,8 @@ public sealed partial class MatchEngine
             // entry window (duringEntryReaction), so CreatePersonality never returns true here.
             case "ohsuki-create": CreatePersonality(player.Id, "oracle-l5r-10023", duringEntryReaction: true); break;
             case "tokoru-create": CreatePersonality(player.Id, "oracle-l5r-10025", duringEntryReaction: true); break;
+            // Daigotsu Bofana - exp: the additional action to play the chosen Dark Virtue from the discard pile.
+            case "bofana-exp-dark-virtue": GrantAdditionalAction(player.Id, [target!.Id], fromDiscard: true); break;
             case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
             // "Destroy it if it is an attachment" is a separate clause from "Bow it" -- a Stalwart
             // attachment whose bow was negated is still destroyed.
@@ -4884,7 +4920,7 @@ public sealed partial class MatchEngine
         // Strategy, and stays in the discard pile (available to be replayed from there on a LATER turn: the
         // once-per-turn stamp on the card keeps it from being replayed the same turn, exactly as the Aftermath
         // supplement's own reminder says).
-        if (disciplineFromDiscard) RemoveFromGame(source!);
+        if (playedFromDiscard) RemoveFromGame(source!);
         // Additional Action (issue #181): an ordinary action that did not itself consume a grant
         // forfeits every one of this player's PRE-EXISTING grants outright (same as explicitly
         // passing, see MatchEngine.Pass) -- "resolve them to completion before resuming the normal
@@ -5410,7 +5446,7 @@ public sealed partial class MatchEngine
         // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
         // in one zone at a time.
         var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
-                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Discipline)))
+                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && ((Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Discipline) || DiscardPlayGrant(playerId, c) is not null)))
             .SelectMany(c => (Definition(c).Abilities ?? []).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
@@ -5490,6 +5526,7 @@ public sealed partial class MatchEngine
                     // Kharmic had -- validated, but a target in a discard pile is never in the in-play
                     // default, so the ability was never offered. Each mirrors its own Require above.
                     "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "own-dark-virtue-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Dark Virtue") && c.Zone == Zone.FateDiscard && HasBattleAction(c)).Select(c => (string?)c.Id).ToArray(),
                     "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
@@ -5523,8 +5560,9 @@ public sealed partial class MatchEngine
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
                 var label = ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})")
-                    // The Discipline play of a card in a discard pile says what it is, next to its Gold quote (issue #331).
-                    + (DisciplineFromDiscard(ability, source) ? " · Discipline (removed from the game)" : "");
+                    // The Discipline play of a card in a discard pile says what it is, next to its Gold quote (issue #331); so does the
+                    // play of one granted by Daigotsu Bofana - exp (issue #333).
+                    + (PlayedFromDiscard(ability, source) ? (ability.Discipline ? " · Discipline (removed from the game)" : " · from your discard pile (removed from the game)") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     Gold: firstQuote, TargetGold: targetQuotes);

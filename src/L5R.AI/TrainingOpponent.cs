@@ -169,6 +169,11 @@ public static class TrainingOpponent
             case "chooseSearchDiscard":
                 var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
                 return discard is null?0:100-HandValue(discard);
+            // A forced discard (Times of Strife, Daigotsu Bofana; issue #333): the same modest rule as the discard after a Terrain -- give up
+            // the least useful card in hand.
+            case "forcedDiscard":
+                var forced=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
+                return forced is null?0:100-HandValue(forced);
             // Battle Phase timing (issue #310): the before-this-battle-resolves choices. Any legal answer is acceptable to a
             // modest practice opponent: keep its strongest Personality, bow the strongest enemy one, and take effects in offered order.
             case "encircledSelect":

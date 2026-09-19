@@ -344,8 +344,15 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// their opponent in between. ScopeCardIds null means any of the player's own cards (Again!'s
 /// shape); a specific set restricts it to those cards only (Two Hands' "from cards in his unit").
 /// Consumed one at a time by NextAction/ConsumeAdditionalActionGrant; battle-scoped -- cleared at
-/// FinishBattleResolution, never carried into a later battle or turn.</summary>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds);
+/// FinishBattleResolution, never carried into a later battle or turn. FromDiscard: the one action is the play of the
+/// single scoped card FROM A DISCARD PILE (Daigotsu Bofana - exp: "take an additional action to play it ... After it
+/// resolves, remove the card from the game"); it makes that card's Battle actions available, and consumed, like any
+/// grant.</summary>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false);
+
+/// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
+/// Reason names the card or rule in the prompt and the event.</summary>
+public sealed record ForcedDiscard(int PlayerId, string Reason);
 
 /// <summary>Force redirection (issue #216, Togashi Noboru): TargetId's own Force (not its unit's
 /// Followers) contributes to ToPlayerId's own army total instead of the target's own controller's,
@@ -574,11 +581,16 @@ public sealed class MatchState
     // other reaction window ever opened, or because one that did just closed (see PassReaction).
     public List<int> PendingOverconfidentDraws { get; set; } = [];
     // Times of Strife (issue #259): "another player who controls no units at the current battlefield
-    // announces a Battle action" -- a queue of player ids owing a discard, the same drain-one-at-a-
-    // time shape PendingOverconfidentDraws above already uses (see OpenOverconfidentDrawWindow, which
-    // now drains this queue first), so it composes for free with every existing deferred-window call
-    // site instead of needing its own.
-    public List<int> PendingTimesOfStrifeDiscards { get; set; } = [];
+    // announces a Battle action" -- a queue of discards owed, the same drain-one-at-a-time shape
+    // PendingOverconfidentDraws above already uses (see OpenOverconfidentDrawWindow, which drains this queue
+    // first), so it composes for free with every existing deferred-window call site instead of needing its own.
+    // Generalized (issue #333) from a list of player ids to (player, reason): Daigotsu Bofana - exp's entry queues
+    // the same forced discard for each other player.
+    public List<ForcedDiscard> PendingForcedDiscards { get; set; } = [];
+    // Daigotsu Bofana (issue #333): a forced discard opened at the moment an action is announced (a trait resolves
+    // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
+    // UseAbility carries on with it exactly where it stopped.
+    public GameCommand? ForcedDiscardContinuation { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
     // performed" -- cleared only when Action/AttackDeclaration/Dynasty is entered (see SetPhase),
     // never by every individual Phase.Battle re-entry (once per battlefield) -- the user's own

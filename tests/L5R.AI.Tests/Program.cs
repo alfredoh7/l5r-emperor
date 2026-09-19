@@ -52,6 +52,17 @@ Run("passes, never deadlocks, in a multi-reaction before-action window (issue #3
     var decision=TrainingOpponent.Choose(view,actions);
     Check(decision.Command?.Type=="declineReaction","The practice opponent took a reaction over passing");
 });
+Run("answers a forced discard (Times of Strife, Daigotsu Bofana) with the least useful card in its hand instead of stalling (issue #333)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    var view=game.GetView(0) with { PendingChoice=new("forcedDiscard",0,null,"Daigotsu Bofana: discard a card.") };
+    var hand=view.Players[0].Hand; Check(hand.Length>1,"The starter hand has several cards");
+    var actions=hand.Select(c=>new ActionOption("forcedDiscard",$"Discard {c.Definition!.Name}",true,null,new("forcedDiscard",0,view.Version,TargetId:c.Id),c.Id)).ToArray();
+    var decision=TrainingOpponent.Choose(view,actions);
+    Check(decision.Command is {Type:"forcedDiscard"},"The practice opponent stalled instead of discarding");
+    int Value(CardView c)=>c.Definition?.Effect switch {"force-three"=>8,"bow-small"=>6,_=>c.Definition?.Type==CardType.Follower?5:4};
+    Check(Value(hand.Single(c=>c.Id==decision.Command!.TargetId))==hand.Min(Value),"It gave up a card that was not its least useful");
+});
 Run("chooses an offered free Experienced Overlay",()=>
 {
     var game=MatchEngine.CreateEconomyScenario();var view=game.GetView(0);

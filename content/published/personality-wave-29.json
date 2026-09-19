@@ -1,0 +1,71 @@
+{
+  "Profile": "personality-wave-29",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1706",
+      "Name": "Daigotsu Bofana",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the first time each phase another player's action targets Bofana: If the action was not performed by a card with (current) Force equal to or higher than Bofana's base Force, the player discards a card.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1706.jpg",
+      "Keywords": [
+        "Loyal",
+        "Dark Scion of Fire",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "bofana-targeted-discard"
+    },
+    {
+      "Id": "oracle-l5r-10315",
+      "Name": "Daigotsu Bofana",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Bofana enters play: Lose 2 Honor and all other players must discard a card, or two cards if they are Crab Clan.\nBattle: Target a Dark Virtue in your discard pile: Take an additional action to play it for one of its Battle actions. After it resolves, remove the card from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10315.jpg",
+      "Keywords": [
+        "Loyal",
+        "Unique",
+        "Dark Scion of Fire",
+        "Experienced",
+        "Imperial",
+        "Imperial Explorer",
+        "Paragon",
+        "Samurai",
+        "Scout",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "bofana-exp-dark-virtue"
+      ],
+      "Effect": "bofana-entry-discard",
+      "EntryHonorLoss": 2
+    }
+  ],
+  "Decks": []
+}

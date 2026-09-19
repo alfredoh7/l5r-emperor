@@ -190,7 +190,7 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
             if (_state.PendingChoice.Type=="overconfidentDraw") { ResolveOverconfidentDraw(command); return; }
             if (_state.PendingChoice.Type=="harshChoices") { ResolveHarshChoices(command); return; }
-            if (_state.PendingChoice.Type=="timesOfStrifeDiscard") { ResolveTimesOfStrifeDiscard(command); return; }
+            if (_state.PendingChoice.Type=="forcedDiscard") { ResolveForcedDiscard(command); return; }
             if (_state.PendingChoice.Type=="proclaim")
             {
                 // "useAbility" here resolves the entering card's own entering-play Reaction (if it
@@ -429,6 +429,10 @@ public sealed partial class MatchEngine
         // entry path (Purchase, Equip, RecruitReserve, an Experienced overlay were one to exist), not
         // just Purchase.
         if(Definition(card).Effect=="discard-other-sensei") DiscardOtherSensei(playerId,card);
+        // Daigotsu Bofana - exp (issue #333): "...all other players must discard a card, or two cards if they are Crab Clan" -- the
+        // Honor loss is his EntryHonorLoss above; each other player then owes their discards (queued, so a Proclaim or entry window
+        // already open is never overwritten -- see OpenOverconfidentDrawWindow).
+        if(Definition(card).Effect==BofanaEntryDiscardEffect) QueueOtherPlayersEntryDiscards(playerId);
     }
     // Sensei (Mirumoto Hikaro / Mirumoto Yozo, Experienced 2): "your OTHER Sensei Personalities" --
     // every OTHER Sensei-keyword Personality this same controller has, either unbowed-or-bowed in
@@ -477,6 +481,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
+            ApplyMandatoryEntryEffects(command.PlayerId,card);
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -546,6 +551,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if(quote.ProclaimEligible)
         {
+            ApplyMandatoryEntryEffects(player.Id,card);
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",player.Id,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.",proclaimResumesTo);
             _state.ConsecutivePasses=0;
@@ -692,6 +698,7 @@ public sealed partial class MatchEngine
         var reactionId=EntryReactionAbility(card);
         if (quote.ProclaimEligible)
         {
+            ApplyMandatoryEntryEffects(command.PlayerId,card);
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
             _state.PendingChoice=new("proclaim",command.PlayerId,card.Id,"After entry: Proclaim for Honor"+(reactionId is not null?", use this card's own reaction,":"")+" or pass. Each may be used once.");
             _state.ConsecutivePasses=0;
@@ -1845,21 +1852,22 @@ public sealed partial class MatchEngine
     // back normally, whether because no other reaction window ever opened here, or because one that
     // did just closed (see PassReaction). closesTo is where control resumes once the WHOLE queue (not
     // just this one offer) is empty.
-    // Times of Strife (issue #259): drains PendingTimesOfStrifeDiscards FIRST, before the
-    // Overconfident queue below -- both are simple "queue of player ids owed a deferred window"
+    // Times of Strife (issue #259): drains PendingForcedDiscards FIRST, before the
+    // Overconfident queue below -- both are simple "queue of players owed a deferred window"
     // drains sharing this one function rather than needing their own copy of every call site (there
-    // are around a dozen), so a Times of Strife discard composes for free with every existing point
-    // that already calls this to hand priority back normally.
+    // are around a dozen), so a forced discard (Times of Strife, Daigotsu Bofana - exp's entry) composes for
+    // free with every existing point that already calls this to hand priority back normally. A player with
+    // an empty hand owes nothing.
     private bool OpenOverconfidentDrawWindow(int closesTo)
     {
-        if(_state.PendingTimesOfStrifeDiscards.Count>0)
+        if(_state.PendingForcedDiscards.Count>0)
         {
-            var discardPlayerId=_state.PendingTimesOfStrifeDiscards[0];
-            _state.PendingTimesOfStrifeDiscards.RemoveAt(0);
-            if(Player(discardPlayerId).Hand.Count==0) return OpenOverconfidentDrawWindow(closesTo);
-            _state.PendingChoice=new("timesOfStrifeDiscard",discardPlayerId,null,"Times of Strife: discard a card.",closesTo);
-            _state.PriorityPlayerId=discardPlayerId;
-            Emit("timesOfStrifeDiscardOffered",$"{Player(discardPlayerId).Name} must discard a card (Times of Strife).",discardPlayerId);
+            var owed=_state.PendingForcedDiscards[0];
+            _state.PendingForcedDiscards.RemoveAt(0);
+            if(Player(owed.PlayerId).Hand.Count==0) return OpenOverconfidentDrawWindow(closesTo);
+            _state.PendingChoice=new("forcedDiscard",owed.PlayerId,null,$"{owed.Reason}: discard a card.",closesTo);
+            _state.PriorityPlayerId=owed.PlayerId;
+            Emit("forcedDiscardOffered",$"{Player(owed.PlayerId).Name} must discard a card ({owed.Reason}).",owed.PlayerId);
             return true;
         }
         if(_state.PendingOverconfidentDraws.Count==0) return false;
@@ -1878,16 +1886,30 @@ public sealed partial class MatchEngine
         _state.PendingChoice=null;
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
     }
-    private void ResolveTimesOfStrifeDiscard(GameCommand command)
+    // The one answer to a forced discard: the discarding player names a card of their own hand (private to them; the
+    // discard pile is public). A discard opened when an action was announced (Daigotsu Bofana) then lets that action
+    // carry on exactly where it stopped; a queued one hands priority back like the other deferred windows.
+    private void ResolveForcedDiscard(GameCommand command)
     {
         var pending=_state.PendingChoice!;
-        Require(command.Type=="timesOfStrifeDiscard" && command.PlayerId==pending.PlayerId && command.TargetId is not null && Player(command.PlayerId).Hand.Contains(command.TargetId),"Choose a card from your hand to discard.");
+        Require(command.Type=="forcedDiscard" && command.PlayerId==pending.PlayerId && command.TargetId is not null && Player(command.PlayerId).Hand.Contains(command.TargetId)
+            && !(_state.ForcedDiscardContinuation is { } held && CommandNamesCard(held,command.TargetId)),"Choose a card from your hand to discard.");
         var player=Player(command.PlayerId);
         player.Hand.Remove(command.TargetId!); var card=Card(command.TargetId); card.Zone=Zone.FateDiscard; card.FaceUp=true;
-        Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name} (Times of Strife).",player.Id,card.Id);
+        Emit("handDiscard",$"{player.Name} discarded {Definition(card).Name} ({pending.Prompt.Replace(": discard a card.","")}).",player.Id,card.Id);
         _state.PendingChoice=null;
+        if(_state.ForcedDiscardContinuation is { } announced)
+        {
+            _state.ForcedDiscardContinuation=null;
+            AnnounceAbility(announced);
+            return;
+        }
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
     }
+    // A card the announced command itself uses (its source, target, performer or chosen cards): never one of the hand
+    // cards an announced action could be made to discard out from under itself.
+    private static bool CommandNamesCard(GameCommand command,string cardId) =>
+        command.CardId==cardId || command.TargetId==cardId || command.PerformerId==cardId || command.CardIds?.Contains(cardId)==true;
     // Shared tail for both deferred-window resolvers above: try the next queued window, then the
     // FinishBattleResolution special case, then hand priority back normally. Factored out once a
     // second resolver (ResolveTimesOfStrifeDiscard) needed the identical sequence ResolveOverconfidentDraw

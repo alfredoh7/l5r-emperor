@@ -1804,6 +1804,23 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Personality wave 29 (issue #333): Daigotsu Bofana (oracle-l5r-1706), a mandatory once-per-phase trait -- after the first time each phase another player's action targets him, the player discards a card unless the performing card's current Force is at least his base Force -- and Daigotsu Bofana, Experienced (oracle-l5r-10315), whose entry makes every other player discard (two if Crab Clan) and whose Battle action plays a Dark Virtue from your discard pile as an additional action. The first consumers of the general once-per-phase limit (PhaseLimits.cs), the forced discard and the discard-pile additional-action grant (DaigotsuBofana.cs).</summary>
+    public static PublishedSnapshot PersonalityWave29 { get; } = LoadPersonalityWave29();
+
+    private static PublishedSnapshot LoadPersonalityWave29()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave29.json", "personality-wave-29", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected personality-wave-29 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality || card.Text.Length == 0)
+                throw new InvalidOperationException($"personality-wave-29 card is not a textful Personality: {card.Id}");
+        var othersPersonalityWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersPersonalityWave29).Any())
+            throw new InvalidOperationException("personality-wave-29 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
