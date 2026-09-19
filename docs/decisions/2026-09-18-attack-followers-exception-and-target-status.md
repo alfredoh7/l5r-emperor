@@ -74,6 +74,14 @@ declaration-time strength check sees the same action's -4F on that Personality (
 resolution-time comparison re-reads live Force. The Attack half is optional. There is no client UI yet for the second selection (the same limit
 Scorn the Weak has); the command is offered with the first legal -4F target and no Attack target.
 
+Mendon's confirmation of this reading (2026-09-19), verbatim: "Bayushi Kahoku: Targets a personality, applies a -4F to the targeted personality.
+Then, Bayushi Kahoku makes a Ranged 3 Attack. The Ranged Attack is a self contained action, so it may target a different card than the target that
+was given a -4F. Bayushi Kahoku's force is not modified by this action. If the target of the ranged attack is a dishonored personality, the ranged
+attack may target that personality regardless of whether or not they have followers attached." Each clause is pinned by `BayushiKahokuExpTrait`:
+the Attack may hit a different card (or the same one, or nothing), the -4F lands only on the `TargetId` Personality and never on Kahoku (his own Force is
+asserted unchanged, and the test fails if the -4F is applied to him), and a dishonorable followed Personality is a legal Attack target only for Attacks
+Kahoku performs, while an honorable followed one is not.
+
 ## P2 -- the target-status predicate (`TargetStatus.cs`)
 
 `TargetStatus(Honorable, Dishonorable, Keywords, Clans, ClanOrKeyword)` is a declarative ANY-OF test on a target card. Satisfying several terms is
