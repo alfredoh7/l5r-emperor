@@ -1,9 +1,10 @@
 # Redirection and protective reactions: Mirumoto Ezuno, Blade of Champions, Goju Yurishi, Yasuki Jinn-Kuen exp2, Hida Mochitoko exp
 
-Status: implemented. The rulings quoted from Mendon are his, given with the task on 2026-09-19; every other reading is a decision of
-this change, marked with its alternative, and the ones still needing his eye are listed under "Open questions". Lane: rules (mdornbrook;
-cross-lane edits under his standing authority). Issue: #335. Waves: `personality-wave-30` (Ezuno, Yurishi, Jinn-Kuen, Mochitoko) and
-`item-wave-4` (Blade of Champions). Published count 409 -> 414.
+Status: implemented; six rulings by Mendon applied and recorded below ("Mendon's six rulings"). The rulings quoted from Mendon are his,
+given with the task and after review on 2026-09-19; every other reading is a decision of this change, marked with its alternative, and the one
+question still with him is listed under "Open questions". Lane: rules (mdornbrook; cross-lane edits under his standing authority). Issue: #335.
+Waves: `personality-wave-30` (Ezuno, Yurishi, Jinn-Kuen, Mochitoko) and `item-wave-4` (Blade of Champions). Published count 417 -> 422 (on
+origin/main 05cc2493; recounted from the wave ids).
 
 > **Mirumoto Ezuno** (oracle-l5r-5086, Second City) -- Force 4, Chi 3, Honor Requirement 3, Cost 7, Personal Honor 3, Dragon Clan / Samurai /
 > Duelist / Yojimbo. Reaction: When another player's action would target one of your Shugenja at Ezuno's location, it targets Ezuno
@@ -31,6 +32,66 @@ catalogue text and matches the scans exactly. Each card is published whole. Yuri
 "After Yurishi enters play: Lose 3 Honor" carries no Reaction label, so it is the mandatory `EntryHonorLoss` 3, applied automatically like
 every other Honor-loss entry and never offered as a choice. Art: `src/L5R.Client/Content/Published/oracle-l5r-<id>.jpg`.
 
+## Mendon's six rulings (confirmed by Mendon, applied on this branch)
+
+1. **Jinn-Kuen may cancel actions of his own controller** (as built): "After an action targets your Merchant" means any action, the controller's own
+   included. (Was open question 1; Mochitoko is the same: any initiator.)
+2. **Mochitoko negates bowing and destruction regardless of who initiated the action.** If the bow or destroy he blocks is a **cost** of the action
+   (Hiruma Tensin's "bow your performing Follower" is the wired example), the **whole action is negated and pays nothing**. Implemented behind one
+   predicate, `CostPaymentBlockedByNegation(command)` (below).
+3. **An Honor-loss cost is paid when an action is negated, unless a negation blocks a cost (then everything is ignored); an Honor loss that is an
+   EFFECT is negated with the effects.** (Was open question 2.) The effect half is built here: an "all" negation of a card also stops the Honor its
+   controller would lose to ANOTHER player's running action (`HonorLossNegatedWithEffects`, checked in `GainHonor`); the acting player's own Honor cost is
+   a cost, so it is never stopped by it. The cost half (a negated action still pays its costs) is agent F's atomic cost payment, #351.
+4. **Blade of Champions may redirect to itself if that is legal.** (Was open question 3 and decision 7.) Legality is judged with the Blade bowed, since
+   bowing it is the cost of the reaction (`RedirectTargetAccepted`).
+5. **A trait that fires when an action targets a card (Daigotsu Bofana's) fires once per action per Bofana, across redirects.** (Was open question 4 and
+   decision 3.) An action redirected away from a Bofana that already fired does not fire again; one redirected ONTO a Bofana that was not yet judged is
+   judged then (below).
+6. **Ranged and Melee Attacks need no target and may target a province** (where the ability says so). Every card-target check treats "no target" and
+   "province" as **no card targeted**: no reaction that keys on a card being targeted is offered, and no window opens for the Attack.
+
+### How each is built
+
+- **Whole-action negation (agent F, `ActionNegation.cs`, #338) and per-card negation (this change, `NegateEffects`) coexist.** They answer different
+  printed texts. *Whole action* -- "negate the action's (remaining) effects" (Yoritomo Sakuma, Yasuki Jinn-Kuen): `NegateHeldAction` -> F's
+  `NegateDeferredAction` for a deferred action (sets `DeferredActionNegated`; `ResolveNegatedAction` then takes the action without its effects), and
+  `PendingAttack.Negated` for an Attack in the attack window (`ResolveAttack` then hits nothing). *Per card* -- "negate its effects on him" / "negate its
+  bowing and destruction" (Yurishi's re-check, Mochitoko): a `NegatedEffects` entry `(kind, card)` consulted by each effect that applies to that card, the
+  action itself still resolving on everything else. Jinn-Kuen was built per card first and is **now whole-action** (ruling 1's companion: "Negate the
+  action's effects"), so he needs nothing but F's primitive. `ResolveDeferredAction` clears the per-card list at the same place F's flag is consumed, so
+  neither signal survives its action. Protection (#212) stops both.
+- **The cost-block predicate (`CostPaymentBlockedByNegation`, `TargetedActionReactions.cs`).** The ONE place the rule "is this action's cost payment
+  blocked by a negation?" is asked: true when the card the action would bow or destroy as its cost (its chosen cost option's subject, `CostSubjectOf`) has
+  had that bowing or destruction negated. Mochitoko's window is opened before the cost is paid -- for an ordinary action the whole command is held, for
+  an Attack-pipeline action such as Tensin's the Attack is held cost-only with no card target until the cost is settled -- and `ExecuteAbilityEffects`
+  asks the predicate first; when it is true `AbortActionForBlockedCost` spends the use, pays nothing and applies nothing. F's follow-up (#351) makes
+  cost payment atomic and names the same extension point (`CostPaymentBlockedByNegation`): it calls this predicate before paying anything and, when it is
+  false, pays every cost even for a negated action. Nothing in Mochitoko's code needs to change when it lands; only the caller moves.
+- **Bofana once per action** (`OpenForcedDiscardForTargetedTrait`, `MatchState.AnnounceTraitEvaluated`): the Bofanas an action has been judged for are
+  recorded (reset when the next action is announced). A redirected action is judged for a Bofana not yet on the list when its reaction window CLOSES and
+  before it resolves (resume `"action"` for a deferred action, `"attack"` for an Attack -- `ForcedDiscardResume`), so the window itself never holds a second
+  decision; a Bofana already judged is skipped whatever the number of redirects.
+- **Attacks without a card target** (`ResolveOrDeferAttack`, `ReactionSubject`, `AttackTargetsProvince`, `ActionOption.NoTarget` / `Provinces`): an Attack
+  with `TargetId` null resolves at once with no window (a province Attack passes the province to the ability's own effect, `ResolveProvinceAttack`);
+  `SubjectForAttack` yields no subject when no card is targeted, so every card-target reaction is off. An Attack ability whose cost is a Follower
+  (Tensin) is held with the cost only. Legality: no target or a card (unchanged rules), or `command.Province` only when the ability allows it and
+  only the current battlefield's. The legal-action list offers "no target" on every Attack (`NoTarget`) and the province where allowed (`Provinces`).
+  No printed card in the reference catalogue (`content/oracle/catalogue-index.json`, current Oracle text) has an Attack that targets a province. Searched
+  (case-insensitive): `(Ranged|Melee)[^.]{0,80}provinc` (three hits, none a province target: Inciting Mistrust reveals a card in the province, Kaiu Onizuka's
+  Attack takes its strength FROM the province's strength, Yoritomo Tansen's is an either/or with a separate "-3 strength" effect on the province),
+  `provinc[^.]{0,80}(Ranged|Melee)` and `Attack[^.]{0,60}target[^.]{0,30}provinc` (no hits), and `target ... province` (eleven hits, all non-Attack actions:
+  Merchant Outpost, Ready the Defenses, Shosuro Hawado exp2, Shrine to Nimuro, Sudden Blockade, Two Fronts, Yoritomo Mikaru...). Shrine to Nimuro is a Limited
+  action, not an Attack. A training fixture (`training-province-attack`) covers the primitive until a card needs it. **UI gap: #355** (the picker cannot yet
+  choose "no target" or a province).
+- **Sakuma compatibility** (`sakuma-political-negate`, the `before-action-resolves` family, #338). Both families read the same held command
+  (`PendingNegatableAbility`), so after a redirect Sakuma's applicability is judged on the NEW target (a Political action redirected onto Ezuno, one of his
+  controller's Personalities, still lets him react; a redirect off a Personality of his controller's takes the reaction away). His "the player may pay 2
+  Gold" decision suspends and restores the window (`EitherOr.cs`) without touching the held command, so a redirect before or after it is unaffected.
+  Once the action has been negated as a whole (Sakuma's or Jinn-Kuen's), the targeted-by-action family offers nothing further (`HeldActionNegated`): a
+  redirect or a second negation of an action that will not resolve would be an empty reaction. Tested with Yogo Adi's Political action (Ezuno redirect
+  and Sakuma's pay/negate in both orders).
+
 ## What was built (general pieces, not per-card hacks)
 
 `TargetedActionReactions.cs` -- the **targeted-by-action** Reaction family (trigger `targeted-by-action`), beside the existing
@@ -45,7 +106,7 @@ is offered through the attack window only, every other action through the before
 | `ActionAcceptsTarget(subject, card)` | "Would the action be accepted against THIS card?" -- the action's own target validation run again (`ValidateAbility` for an ordinary action, `RequireLegalAttackTarget` for an Attack, whose costs are already paid and whose source may already be spent). The one definition of a legal target that redirection and re-checking share. |
 | `RedirectAction(subject, card, reactor)` | Make the held action target another card, if `ActionAcceptsTarget`. An Attack's strength follows the new target. |
 | `RecheckTarget(subject, card)` | After a reaction changed the game, is the card still a legal target? If not, negate the action's effects on it (`NegateAllEffectsOn`). |
-| `NegateEffects(card, kinds...)` / `NegateAllEffectsOn(card)` | Negate any set of effect kinds an action would apply to a card -- `bow`, `destroy`, `move`, `straighten`, or `all`, the blanket negation. **This is the reusable "negate the action's effects" (Yasuki Jinn-Kuen; Yoritomo Sakuma's Political Reaction needs the same): `MatchEngine.NegateAllEffectsOn` in `src/L5R.Core/TargetedActionReactions.cs`.** |
+| `NegateEffects(card, kinds...)` / `NegateAllEffectsOn(card)` | Negate any set of effect kinds an action would apply to a card -- `bow`, `destroy`, `move`, `straighten`, or `all`, the blanket negation. This is the per-CARD negation (Yurishi, Mochitoko); the whole-action one (Jinn-Kuen, Sakuma) is `NegateHeldAction` over F's `ActionNegation.cs` (see "How each is built"). |
 | `YojimboRedirectApplies` | The Yojimbo redirect (Mendon: "a common ability of cards with the Yojimbo keyword"): another player's action targets one of your [keyword] Personalities at this Personality's location, and is legal against him. Ezuno restricts it to Shugenja (`"Shugenja"`); a plain Yojimbo, Spirit of the Yojimbo's granted ability, is the same call with no keyword. |
 | `AbilityDefinition.UsesPerTurn` (`AbilityLimits.cs`) | The printed per-turn limit: 1 (default), N, or `AbilityUseLimit.Unlimited`. |
 
@@ -94,40 +155,41 @@ plain Force penalty never offers it (Brothers of Goemon's precedent).
 |---|---|---|
 | 1 | **Costs already paid.** A non-Attack action is deferred whole, so none of its costs is paid when a reaction redirects it; they are paid once, when it resolves, for the card it then targets. The payment the acting player COMMITTED still has to fit, and `ActionAcceptsTarget` checks it: a redirect to a card whose price the committed payment does not cover (or that would make a paid action free) is not legal. (Tested with a target-priced action: a dearer original may be redirected to a cheaper Ezuno; a free one may not be redirected to a costlier Ezuno.) An **Attack's** costs are paid at declaration and stay paid -- nothing is refunded or re-priced. | Re-price at the new target and let the acting player choose new sources: a new decision with no UI and no printed support. |
 | 2 | **Reactions key on the NEW target** (Mendon asked whether Kakihara-style reactions fire on the original or the new target). The window re-evaluates every reaction against the held action each time a player has priority, so after a redirect the reactions that apply are those of the new target's controller and unit (a Champion of Thunder in Ezuno's unit becomes available; one in the Shugenja's unit stops). What was already played against the old target -- a bonus, a negation -- stays with the old card and does not shield the new one. | Reactions stay with the original targeting. Rejected: "after an action targets X" is true of the new target from the redirect on, and a redirect that could not be answered would let it dodge every protection. |
-| 3 | **Announce-time traits do not re-fire on the new target.** Daigotsu Bofana's mandatory trigger (issue #333) resolves when an action is announced, before any window, so an action redirected to Bofana does not make its player discard, and one redirected away from him already did. | Fire it again for the new target -- needs a second discard flow inside an open window (the window has no stack). |
+| 3 | **Announce-time traits fire once per action per Bofana (ruling 5, confirmed by Mendon).** Daigotsu Bofana's mandatory trigger (issue #333) is judged when an action is announced; an action redirected onto a Bofana not yet judged is judged when the window closes, before it resolves; one redirected away already was. My first reading (never fire on the new target) is superseded. | -- |
 | 4 | **A Reaction cannot be redirected.** "An action" excludes a Reaction (as for Kakihara): a Reaction played inside an open window that names a card would open a nested window over the one it is played in. Also unchanged: an action taken as an **Additional Action** (non-Attack) and any action inside the Engage window are not held in a reaction window at all, so these reactions cannot answer them; an Additional-Action Attack is, because it reaches the attack window like any other. | Give the windows a stack (out of scope). |
 | 5 | **Ezuno is for another player's action, at his location, on his controller's own Shugenja, never himself.** "Location" is the engine's own (`SameLocation`): a player's Home is that player's, a battlefield is shared by both. | -- |
 | 6 | **Blade of Champions answers ANY Battle action** (its text says "a Battle action", not "another player's"), against any card in its unit -- the wielder, one of his attachments (Follower, Item, Spell), or the Blade itself -- and the new target is one of its controller's other in-play cards for which the action is legal. The Blade is bowed as the cost and legality is re-checked after it. | Only another player's action (adds a restriction the text does not print). |
-| 7 | **The Blade is not a candidate for its own redirect.** It is bowed as the cost, so what is legal against a bowed Blade cannot be judged before paying. | Allow it, judged after the cost: the offer list would then contain options the cost itself can make illegal. |
+| 7 | **The Blade IS a candidate for its own redirect if legal (ruling 4, confirmed by Mendon).** It is bowed as the cost, so legality is judged with it bowed (`RedirectTargetAccepted`), and only a target that stays legal is offered. My first reading (never a candidate) is superseded. | -- |
 | 8 | **Yurishi needs to be at a battlefield to react.** Moving home from Home is nothing, and a Battle action reaches a target at Home only through a few exempt categories. Only another player's Battle action (Timing Battle, or Battle/Open used in a battle). | Offer it at Home: an empty reaction. |
-| 9 | **Jinn-Kuen and Mochitoko answer any action** (their printed text says "an action" / "an action", not "another player's action"), including their controller's own. Mendon's paraphrase of Jinn-Kuen says another player; see Open questions. | Another player's only. |
+| 9 | **Jinn-Kuen and Mochitoko answer any action**, whoever initiated it (their printed text says "an action"), including their controller's own -- confirmed by Mendon (rulings 1 and 2). | Another player's only. |
 | 10 | **"Your Merchant / your Follower".** Any card its controller controls with the Merchant keyword (Jinn-Kuen himself qualifies); a Follower the controller controls whose host stands where Mochitoko does. The Merchant keyword is read live (printed or granted). | -- |
-| 11 | **Blanket negation is per CARD**, as Mendon states it ("the action on that target"): every effect the action applies to the targeted card -- bow, straighten, move, destruction, Force/Chi/Personal Honor changes, dishonor, tokens placed on it. It does not reach effects on the card's controller (Honor gained or lost), on other cards the action also affects, or the acting player's own costs (a cost is not an effect). | The whole action's effects: impossible without knowing, per ability, which parts are costs. |
+| 11 | **Two negations, by printed text.** "Negate the action's effects" (Jinn-Kuen, Sakuma) is the whole action (F's `ActionNegation.cs`; my first per-card reading of Jinn-Kuen is superseded). "Negate its effects on him" (Yurishi) is per CARD: every effect the action applies to that card -- bow, straighten, move, destruction, Force/Chi/Personal Honor changes, dishonor, tokens placed on it -- plus, by ruling 3, the Honor its controller would lose to the action as an EFFECT. It does not reach other cards the action also affects, or the acting player's own costs (a cost is not an effect). | -- |
 | 12 | **Use limit.** `AbilityUses[key]` still holds the turn of the latest use for every ability; an ability limited above once adds `count:<key>` = turn x 1024 + uses that turn. Spent = the count reaches the limit. The ten `id`-list exemptions in `ValidateAbility` (Tactical Advantage, Equip (Battle), Ashigaru Elite and its training twin, Elite Sentry, Kharmic, Soshi Neiru's equip, Naval Invasion, Ring of Air/Water) are now `UsesPerTurn: Unlimited` on their own definitions; a test pins that every other ability is 1 and Mochitoko's is 2. | -- |
 
 ## Open questions for Mendon
 
-1. **Jinn-Kuen and Mochitoko: any action, or another player's action?** Printed text: "After an action targets your Merchant" / "your Follower". Your Jinn-Kuen note says "every time another player targets a Merchant". Implemented as printed (any action, own included); if the own-action case should not offer it, it is one condition in `TargetedActionReactionApplies` (`command.PlayerId != card.OwnerId`). The own-action reading only ever opens a pass-only window for the acting player.
-2. **Blanket negation and Honor.** "Negate the action's effects" negates what the action does to the targeted card. An Honor loss the action inflicts on the target's controller (Bayushi Kazan's "his controller loses 2 Honor", Training honor strike) still happens. Should a negation, and Yurishi's "no longer a legal target", also stop those (an action that has no legal target has no effects at all)? It needs each Honor-changing effect to know which negation it belongs to.
-3. **Blade of Champions: itself as the new target** (decision 7), and any Battle action vs only another player's (decision 6).
-4. **Announce-time traits on a redirected action** (decision 3).
-5. **Carpenter Castle (existing behaviour, surfaced by this work):** "Ranged 5 Attack. If this targeted a card, gain 2 Honor." The engine gains the 2 Honor only when the Attack HITS. Redirected or dodged Attacks (Ezuno, Yurishi) make the difference common; the printed text reads "if this targeted a card". Not changed here.
+Questions 1-4 of the first version of this note are closed by Mendon's six rulings above (1: rulings 1 and 2; 2: ruling 3; 3: ruling 4, and the Blade answers any
+Battle action as printed -- his rulings did not change that; 4: ruling 5). One remains:
+
+5. **Carpenter Castle (existing behaviour, surfaced by this work):** "Ranged 5 Attack. If this targeted a card, gain 2 Honor." The engine gains the 2 Honor only when the Attack HITS. Redirected or dodged Attacks (Ezuno, Yurishi) make the difference common, and ruling 6 makes it commoner still (an Attack with no target targets no card: no Honor at all, which the printed text supports). The printed text reads "if this targeted a card". Not changed here; still with Mendon.
 
 ## Known limits
 
 - The in-play family only: a reaction played from a hand or discard pile ("Reaction: After another player's action targets your Personality: ..." on a Strategy -- Caught in the Act, Know No Fear, Near Miss, Well Protected, Ancestral Protection, Undetectable Enemy, Snake Tattoo) is not offered by these windows yet; the candidate scan (`TargetedActionReactionCandidates`) reads in-play cards, exactly as `AnyOutOfPlayReactionAvailable` is a separate scan for `before-attack-resolves`. Extending it is a candidate scan over the hand, no new rule.
 - A negation already played in a window stays live for the rest of that window (`NegatedEffects` is consumed by the first matching effect, "all" not at all), so a second reaction that puts an effect on the same card in the same window is negated too. Kakihara's bonus avoids it by adding its modifier directly (issue #318); the same care applies to any future reaction that puts an effect on a card a negation names.
-- Effects the blanket negation does not reach: Honor changes, granted keywords and Protection, moved tokens, and discards (question 2).
+- Effects the per-card negation does not reach: granted keywords and Protection, moved tokens, and discards. (An Honor loss that is an effect IS stopped, ruling 3.)
 - The classification lists (`BowsTarget`, `DestroysTarget`, `DestroysAttachmentTarget`) are curated, as Rokai's and Brothers of Goemon's are; a new action that bows or destroys a Follower is added to them, and until it is Mochitoko is simply not offered for it.
 
 ## UI
 
-No new UI is needed, so no issue for Alfredo. Every decision these cards need already has a prompt: the window is the existing
-before-action / attack reaction window, each reaction is a `useAbility` option with the engine's own label and Gold quote (Jinn-Kuen's
-payment panel is the ordinary one), Blade of Champions' choice of new target is one option per legal candidate labelled with the card's name
--- the shape Champion of Thunder's "choose a unit member" already ships -- and passing is the existing pass option. The engine puts nothing
-new into any player's view: the redirect and the negation are in the public event log (`actionRedirected`, `effectsNegated`), and no card
-of a hand is ever named (tested with `HiddenIdsAbsent`).
+The redirect and negation windows need no new UI: the window is the existing before-action / attack reaction window, each reaction is a `useAbility`
+option with the engine's own label and Gold quote (Jinn-Kuen's payment panel is the ordinary one), Blade of Champions' choice of new target is one option
+per legal candidate labelled with the card's name -- the shape Champion of Thunder's "choose a unit member" already ships -- and passing is the existing
+pass option. The engine puts nothing new into any player's view: the redirect and the negation are in the public event log (`actionRedirected`,
+`effectsNegated`, `actionNegated`), and no card of a hand is ever named (tested with `HiddenIdsAbsent`).
+
+**One gap, ruling 6: the Attack target picker cannot express "no target" or "a province"** (`RenderTargeted` in `Main.Actions.cs` lists only `TargetIds` and
+`Choose` defaults to the first). The engine says what is legal (`ActionOption.NoTarget`, `ActionOption.Provinces`); the client work is issue **#355** for Alfredo.
 
 ## Tests
 

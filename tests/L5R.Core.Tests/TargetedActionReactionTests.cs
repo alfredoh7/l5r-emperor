@@ -40,6 +40,9 @@ internal static class TargetedActionReactionTests
             ("Mochitoko and a Follower paid as a COST (Mendon): Hiruma Tensin's \"bow your performing Follower\" -- the window opens before the cost is paid, Mochitoko negates that bowing, and the ENTIRE action is negated and pays nothing (no effect, no Honor-loss cost, no draw); without him the cost is paid and the action resolves", MochitokoBlocksAFollowerCost),
             ("Mochitoko is offered only when it can matter: a Follower of his controller's whose host is at his location, targeted by an action that could bow or destroy it -- not an enemy Follower, a Follower elsewhere, a Personality, a pure Force penalty, while bowed, or with both uses spent", MochitokoOnlyWhenApplicable),
             ("Ranged and Melee Attacks need no card target (Mendon): every Attack is offered as legal with NO target (and the option says so), a card target as before, and -- for an ability that says so -- the current battlefield's province; an Attack that names no card (no target, or a province) opens no window although Ezuno, Yurishi, Mochitoko, the Blade and a strength reactor are all in play, while the same Attack aimed at a card does", AttacksNeedNoCardTarget),
+            ("Yoritomo Sakuma (whole-action negation, #338) beside Ezuno's redirect: a Political action redirected onto Ezuno still lets Sakuma react -- pay 2 Gold and it resolves on Ezuno, decline and it is negated as a whole -- Ezuno's redirect and Sakuma's reaction may come in either order, and once Sakuma has negated the action Ezuno is offered nothing", SakumaBesideRedirect),
+            ("Bofana's once-per-action guard holds by itself: with his once-per-phase limit wiped after the first judgement, the window's close does not judge him again for the same action, and the next action does", BofanaGuardIsPerAction),
+            ("A cost-block predicate keyed on the cost's verb (Mendon ruling 2 / #352): a Follower bowed as a cost is blocked by a negated bow (or every effect), never by a negated destruction alone; and the acting player's own Honor cost is never negated with a card's effects", CostBlockIsPerVerb),
             ("Every enabled command offered inside a redirect or negation window validates and is accepted on a fresh engine (Ezuno, Blade with every candidate, Yurishi, Jinn-Kuen, Mochitoko)", OfferedCommandsAllValidate),
         ];
         runner.Run("targeted-action-reactions", tests);
@@ -938,7 +941,28 @@ internal static class TargetedActionReactionTests
         }
     }
 
-    // ---- Hida Mochitoko - exp ------------------------------------------------------------------------------------------
+    // The once-per-action guard holds by itself, not only through the trait's once-per-phase limit: with the phase limit wiped after the first judgement, the
+    // window's close does not judge the same Bofana for the same action again, while the NEXT action (a fresh announcement) does.
+    private static void BofanaGuardIsPerAction()
+    {
+        var s = Table(); var bofana = Add(s, BofanaCard, 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: bofana.Id);
+        Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        var b1 = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); var b2 = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); GiveHand(s, 5);
+        var e = MatchEngine.FromTestState(s);
+        void WipePhaseLimit() => e = Edit(e, st => { var c = st.Cards[bofana.Id]; c.Bowed = false; foreach (var k in c.AbilityUses.Keys.Where(k => k.Contains("bofana-targeted-discard")).ToArray()) c.AbilityUses.Remove(k); });
+        Accept(e, Offer(e, 1, Bow, b1.Id, bofana.Id));
+        Check(AsksForDiscard(e), "announcing the action asks for the discard"); AnswerDiscard(e); Eq(Discards(e), 1);
+        Eq(Window(e), "beforeActionReaction", "the Blade holds the action open");
+        WipePhaseLimit();
+        ClosePassing(e);
+        Check(!AsksForDiscard(e), "the window's close does not judge Bofana a second time for the same action"); Eq(Discards(e), 1);
+        // The next action is a fresh announcement: judged afresh (the limit is wiped again, so only a stale per-action record could wrongly skip it).
+        Accept(e, new GameCommand("pass", 0, e.Version)); WipePhaseLimit();
+        Accept(e, Offer(e, 1, Bow, b2.Id, bofana.Id));
+        Check(AsksForDiscard(e), "a new action targeting him is judged again");
+    }
+
+
     private sealed record MochitokoRig(MatchState S, CardInstance Moch, CardInstance Host, CardInstance Follower);
     private static MochitokoRig MochitokoTable(Phase phase = Phase.Battle, int actor = 1)
     {
@@ -1059,6 +1083,94 @@ internal static class TargetedActionReactionTests
             Eq(e.State.Players[0].Honor, reacts ? honor : honor - 2, reacts ? "the Honor-loss cost was ignored: nothing is paid" : "control: the cost is paid");
             Eq(e.State.Players[0].Hand.Count, reacts ? hand : hand + 1, reacts ? "and no card was drawn" : "control: a card was drawn");
             Eq(e.State.Cards[follower.Id].Bowed, !reacts);
+        }
+    }
+
+    // ---- Yoritomo Sakuma (#338) beside the redirect and per-card negation reactions ---------------------------------------------------
+    private const string SakumaCard = "oracle-l5r-9624", AdiCard = "oracle-l5r-9485";
+
+    private static void SakumaBesideRedirect()
+    {
+        // Player 1's Yogo Adi (Political Open: "give your provinces +2 strength" unless the target is dishonorable) targets a Shugenja of player 0, who holds Ezuno and
+        // Sakuma at Home.
+        (MatchEngine E, CardInstance Adi, CardInstance Shugenja, CardInstance Ez, CardInstance Sakuma) Build()
+        {
+            var s = Table(Phase.Action, 1);
+            var ez = Add(s, Ezuno, 0, Zone.Home); var sakuma = Add(s, SakumaCard, 0, Zone.Home); var shugenja = Add(s, "training-shugenja", 0, Zone.Home); var adi = Add(s, AdiCard, 1, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, "yogo-adi-choice", adi.Id, shugenja.Id));
+            Eq(Window(e), "beforeActionReaction", "the window opens for player 0");
+            return (e, adi, shugenja, ez, sakuma);
+        }
+        int Strength(MatchEngine e) => e.State.Players[1].Provinces[0].Strength;
+        void Answer(MatchEngine e, string choice) =>
+            Accept(e, e.QueryActions(1).Single(a => a.Type == "chooseEitherOr" && a.Command?.Choice == choice && a.Enabled).Command!);
+
+        foreach (var pays in new[] { true, false })
+        {
+            // Ezuno first: the action now targets Ezuno, and Sakuma (a Personality of his controller's is targeted) still reacts to it.
+            var (e, adi, shugenja, ez, sakuma) = Build(); var before = Strength(e);
+            Check(Offered(e, 0, "ezuno-redirect") && Offered(e, 0, "sakuma-political-negate"), "both reactions are offered against the original target");
+            Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); Eq(e.State.PendingNegatableAbility!.TargetId, ez.Id, "redirected onto Ezuno");
+            Accept(e, new GameCommand("declineReaction", 1, e.Version));
+            Check(Offered(e, 0, "sakuma-political-negate"), "Sakuma still reacts: the action now targets Ezuno, one of his controller's Personalities");
+            Accept(e, ReactionCommand(e, 0, "sakuma-political-negate")); Eq(Window(e), "eitherOr", "the acting player decides");
+            Answer(e, pays ? "pay" : "negate");
+            Eq(Window(e), "beforeActionReaction", "the window is restored"); Eq(e.State.PendingNegatableAbility?.TargetId, ez.Id, "still held on Ezuno");
+            Check(e.State.DeferredActionNegated == !pays);
+            ClosePassing(e);
+            Eq(Strength(e), pays ? before + 2 : before, pays ? "paid: the action resolved (on Ezuno)" : "not paid: negated as a whole, nothing happened");
+            Check(e.State.Cards[adi.Id].AbilityUses.ContainsKey("yogo-adi-choice"), "the action was taken either way");
+            Check(!e.State.DeferredActionNegated && e.State.NegatedEffects.Count == 0, "no signal survives the action");
+        }
+        {
+            // Sakuma first, negating: nothing further is offered to Ezuno (an empty redirect), and the action is negated when the window closes.
+            var (e, adi, shugenja, ez, sakuma) = Build(); var before = Strength(e);
+            Accept(e, ReactionCommand(e, 0, "sakuma-political-negate")); Answer(e, "negate");
+            Check(e.State.DeferredActionNegated, "negated as a whole");
+            Accept(e, new GameCommand("declineReaction", 1, e.Version)); Eq(e.State.PriorityPlayerId, 0, "priority is Ezuno's controller's");
+            Check(!Offered(e, 0, "ezuno-redirect"), "an action already negated is not redirected");
+            ClosePassing(e);
+            Eq(Strength(e), before, "negated");
+        }
+        {
+            // Sakuma first, paying: the action stands, so Ezuno may still redirect it, and it resolves on Ezuno.
+            var (e, adi, shugenja, ez, sakuma) = Build(); var before = Strength(e);
+            Accept(e, ReactionCommand(e, 0, "sakuma-political-negate")); Answer(e, "pay");
+            Check(!e.State.DeferredActionNegated, "Sakuma was paid: the action stands");
+            Accept(e, new GameCommand("declineReaction", 1, e.Version)); Eq(e.State.PriorityPlayerId, 0);
+            Check(Offered(e, 0, "ezuno-redirect"), "and can still be redirected"); Accept(e, ReactionCommand(e, 0, "ezuno-redirect"));
+            ClosePassing(e);
+            Eq(Strength(e), before + 2, "resolved after the redirect");
+        }
+    }
+
+    private static void CostBlockIsPerVerb()
+    {
+        // Hiruma Tensin's cost is a BOW. A negated bow (or every effect) on the paying Follower blocks it; a negated destruction alone does not.
+        foreach (var (kind, blocked) in new[] { ("bow", true), ("all", true), ("destroy", false), ("move", false) })
+        {
+            var s = Table(actor: 0);
+            Add(s, Mochitoko, 0, Zone.Battlefield, province: 0); var tensin = Add(s, "oracle-l5r-3332", 0, Zone.Battlefield, province: 0);
+            var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: tensin.Id); var enemy = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "tensin-follower-attack", tensin.Id, enemy.Id, follower.Id)); Eq(Window(e), "beforeActionReaction");
+            e = Edit(e, st => st.NegatedEffects.Add(new(kind, follower.Id)));
+            ClosePassing(e);
+            Check(e.State.Cards[follower.Id].Bowed != blocked, $"negated {kind}: the bow cost is {(blocked ? "blocked" : "paid")}");
+            Check((e.State.Cards[enemy.Id].Zone == Zone.Battlefield) == blocked, $"negated {kind}: the Attack {(blocked ? "never happened" : "went ahead")}");
+        }
+        // A cost is not an effect: the acting player's own Honor-loss cost is paid even if every effect on one of his own cards has been negated.
+        {
+            var s = Table(actor: 0);
+            Add(s, Mochitoko, 0, Zone.Battlefield, province: 0); var payer = Add(s, "training-follower-payer", 0, Zone.Battlefield, province: 0);
+            var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: payer.Id); Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = e.State.Players[0].Honor;
+            var offer = e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.CardId == payer.Id && a.Command?.AbilityId == "training-follower-honor-draw" && a.Command.PerformerId == follower.Id);
+            Accept(e, offer.Command!); Eq(Window(e), "beforeActionReaction");
+            e = Edit(e, st => st.NegatedEffects.Add(new("all", payer.Id)));
+            ClosePassing(e);
+            Eq(e.State.Players[0].Honor, honor - 2, "the Honor cost of his own action is paid: a cost is never negated with a card's effects");
         }
     }
 

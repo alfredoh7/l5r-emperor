@@ -125,6 +125,11 @@ public sealed partial class MatchEngine
         else NegateDeferredAction(negator);
     }
 
+    // An action a reaction has already negated as a whole (Sakuma's, Jinn-Kuen's) will not resolve: redirecting it or negating it again would be an empty reaction, so
+    // none is offered and no window opens for one.
+    private bool HeldActionNegated(ReactionSubject subject) =>
+        subject.IsAttack ? _state.PendingAttack?.Negated == true : _state.DeferredActionNegated;
+
     /// <summary>Negates the action's effects on the card when it is no longer a legal target; returns whether it did.</summary>
     private bool RecheckTarget(ReactionSubject subject, CardInstance card)
     {
@@ -141,25 +146,27 @@ public sealed partial class MatchEngine
 
     // ---- a cost paid by a Follower a negation protects (Hida Mochitoko, decision note 2) ------------------------------------------------------
 
-    // The card an action pays a bow or destroy cost with (its chosen cost option's subject), if it names one.
-    private CardInstance? CostSubjectOf(GameCommand command)
+    // The card an action pays a bow or destroy cost with (its chosen cost option's subject) and the verb it is paid with, if it names one.
+    private (CardInstance Subject, string Verb)? CostOf(GameCommand command)
     {
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.CostOptions is null) return null;
         try
         {
             var option = ChosenCostOption(ability, command);
             var subject = CostSubjectCard(option, ability, command, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null);
-            return subject is not null && InPlay(subject) ? subject : null;
+            return subject is not null && InPlay(subject) ? (subject, option.Verb) : null;
         }
         catch (RuleViolation) { return null; }
     }
+
+    private CardInstance? CostSubjectOf(GameCommand command) => CostOf(command)?.Subject;
 
     /// <summary>Is this action's cost payment blocked by a negation? True when the card it would bow or destroy as its cost has had that negated. This is the ONE
     /// place the rule is asked: the action then does not resolve and pays nothing (AbortActionForBlockedCost), so a cost cannot be dodged while the effects are
     /// kept. A cost-payment function that pays atomically calls this first and passes its verdict on.</summary>
     private bool CostPaymentBlockedByNegation(GameCommand command) =>
-        _state.NegatedEffects.Count > 0 && CostSubjectOf(command) is { } subject
-        && _state.NegatedEffects.Any(n => n.CardId == subject.Id && n.Kind is "all" or "bow" or "destroy");
+        _state.NegatedEffects.Count > 0 && CostOf(command) is { } cost
+        && _state.NegatedEffects.Any(n => n.CardId == cost.Subject.Id && (n.Kind == "all" || n.Kind == cost.Verb)); // a bow is blocked by a negated bow, a destruction by a negated destruction
 
     // The action is negated: taken (its use is spent, priority passes) but nothing is paid and nothing happens -- no Gold, no Honor-loss cost, no discard, no effect.
     private void AbortActionForBlockedCost(GameCommand command)
@@ -204,7 +211,7 @@ public sealed partial class MatchEngine
     {
         var command = subject.Command;
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || acting.Timing == "Reaction") return false;
-        if (!InPlay(card)) return false;
+        if (!InPlay(card) || HeldActionNegated(subject)) return false;
         if (abilityId == "mochitoko-negate") return MochitokoFollowers(card, subject).Any();
         if (subject.TargetId is null || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
         switch (abilityId)
