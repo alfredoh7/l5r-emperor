@@ -505,7 +505,9 @@ public partial class Main : Node
     }
 
     private static string ShortName(CardView card) => card.Definition?.Name.Replace("training ", "").Replace("Training ", "") ?? "Hidden card";
-    private static int Production(CardView card, PlayerView owner) => (card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0;
+    // The engine's own figure (CardView.GoldProduced, which also covers a Personality that can bow for Gold while a cost is being paid: Yoritomo
+    // Sakuma, issue #338) when it sends one; the printed-card fallback is for payloads from an older engine.
+    private static int Production(CardView card, PlayerView owner) => card.GoldProduced ?? ((card.Definition?.Effect == "crane-gold" && owner.Clan == "Crane" || card.Definition?.Effect == "dragon-gold" && owner.Clan == "Dragon") ? 3 : card.Definition?.GoldProduction ?? 0);
     private static int UnitForce(CardView unit, PlayerView owner) => (unit.Bowed ? 0 : unit.Force) + owner.Home.Concat(owner.Army).Where(c => c.AttachedTo == unit.Id && c.Definition?.Type == CardType.Follower && !c.Bowed).Sum(c => c.Force);
     private CardView? FindCard(string id) => View.Players.SelectMany(p => p.Home.Concat(p.Army).Concat(p.Hand).Concat(p.Discard).Concat(p.Provinces.Where(p => p.Card is not null).Select(p => p.Card!)).Concat(p.Provinces.Where(p => p.Region is not null).Select(p => p.Region!)).Append(p.Stronghold)).FirstOrDefault(c => c.Id == id);
     private static string HumanPhase(Phase phase) => phase switch { Phase.AttackDeclaration => "Declare an attack", Phase.DefenseAssignment => "Assign defenders", Phase.BattleSelection => "Choose a battlefield", Phase.DynastyDiscard => "Dynasty · discard", _ => phase.ToString() };
