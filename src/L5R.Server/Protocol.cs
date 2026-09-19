@@ -31,28 +31,28 @@ public sealed record CommandEnvelope(string Type, string CommandId, long Expecte
 public sealed record WireGameCommand(string Type, string? CardId = null, string[]? SourceIds = null,
     int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
     Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null,
-    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null)
+    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null, SlotSelection[]? Selections = null)
 {
     public GameCommand BindToSeat(int playerId, long expectedVersion) => new(
         Type, playerId, expectedVersion, CardId, SourceIds, Province,
         ClanDiscount, ClanAllegiance, Assignments, CardIds, TargetId, AbilityId, PerformerId, Choice,
-        DeckPosition, TargetPlayerId, GoldAmount);
+        DeckPosition, TargetPlayerId, GoldAmount, Selections);
 
     public static WireGameCommand FromCore(GameCommand command) => new(command.Type,
         command.CardId, command.SourceIds, command.Province, command.ClanDiscount,
         command.ClanAllegiance, command.Assignments, command.CardIds, command.TargetId, command.AbilityId, command.PerformerId, command.Choice,
-        command.DeckPosition, command.TargetPlayerId, command.GoldAmount);
+        command.DeckPosition, command.TargetPlayerId, command.GoldAmount, command.Selections);
 }
 
 // Gold/TargetGold (issue #303): the engine's Gold quotes for the option, so an online client renders the same
 // payment panel from the server's authoritative numbers and never derives a cost.
 public sealed record AvailableAction(string Type, string Label, bool Enabled, string? Reason,
     WireGameCommand? Command, string? CardId, string[]? TargetIds, int[]? Provinces, PurchaseQuote? Quote,
-    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null)
+    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null, TargetSlotOption[]? Slots = null)
 {
     public static AvailableAction FromCore(ActionOption action) => new(action.Type, action.Label,
         action.Enabled, action.Reason, action.Command is null ? null : WireGameCommand.FromCore(action.Command),
-        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold);
+        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold, action.Slots);
 }
 
 public sealed record ServerError(string Code, string Message);

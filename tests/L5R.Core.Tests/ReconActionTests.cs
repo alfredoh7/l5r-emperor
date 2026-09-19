@@ -86,8 +86,8 @@ internal static class ReconActionTests
         Eq(scouts.GoldCost,3); Eq(scouts.Force,2); Eq(scouts.Chi,0); Eq(scouts.HonorRequirement,(int?)1); Eq(scouts.Focus,3);
         foreach(var k in new[]{"Elite","Gaijin","Scout"}) Check(scouts.Keywords!.Contains(k),$"Master Scouts printed keyword {k}");
         Eq(scouts.Text,"After the resolution of a Recon action you took: Give this card +1F."); Eq(scouts.Effect,"force-after-own-recon-action"); Eq(scouts.Abilities!.Length,0);
-        // The classification: exactly Yuki's real ability and the training fixtures print a Recon tag; every published Recon-prefixed text is tagged.
-        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords is not null).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"training-recon-attack,training-recon-duel,training-recon-open,yuki-engage-recon");
+        // The classification: exactly Yuki's real ability and the training fixtures print a Recon tag (other keywords -- Fear, Political, Favor -- are tagged elsewhere); every published Recon-prefixed text is tagged.
+        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true).Select(a=>a.Key).OrderBy(x=>x,StringComparer.Ordinal)),"training-recon-attack,training-recon-duel,training-recon-open,yuki-engage-recon");
     }
 
     // ---- the trait ----------------------------------------------------------------------------------------------

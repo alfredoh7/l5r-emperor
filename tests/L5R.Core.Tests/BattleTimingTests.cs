@@ -93,15 +93,17 @@ internal static class BattleTimingTests
         Eq(ability.Timing,"Reaction"); Eq(ability.Trigger,"after-engaging-at-own-battlefield");
         Check(ability.ActionKeywords is ["Recon"],"Yuki's ability carries the printed Recon action keyword");
         // Nothing else already wired has a printed Recon prefix (the whole published text was searched), so Yuki's is the only tagged
-        // ability of any PUBLISHED card (later synthetic training fixtures may carry tags of their own).
-        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords is not null && CardCatalog.Cards.Values.Any(c=>!c.ScenarioOnly && c.Abilities!.Contains(a.Key))).Select(a=>a.Key)),"yuki-engage-recon");
+        // Recon-tagged ability of any PUBLISHED card (later synthetic training fixtures may carry tags of their own, and other action keywords -- Fear,
+        // Political, Favor -- are tagged too, so the inventory is of the Recon tag).
+        Eq(string.Join(",",AbilityCatalog.All.Where(a=>a.Value.ActionKeywords?.Contains("Recon")==true && CardCatalog.Cards.Values.Any(c=>!c.ScenarioOnly && c.Abilities!.Contains(a.Key))).Select(a=>a.Key)),"yuki-engage-recon");
         foreach(var card in CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly))
             Check(!System.Text.RegularExpressions.Regex.IsMatch(card.Text,@"\bRecon (Battle|Open|Limited|Reaction)") || card.Id==Yuki,$"{card.Name} prints a Recon action but is not tagged");
         // Naval Invasion changes existing published play for exactly these cards (printed Naval, a granter, or a live conditional grant);
         // none is in the pinned Lion/Crane decks.
         var navalCarriers=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly && (c.Keywords!.Contains("Naval") || c.AttachGrantsKeyword=="Naval" || c.Effect=="naval-while-has-spell"))
             .Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal).ToArray();
-        string[] expected=["oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-6501","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9832","oracle-l5r-9834"];
+        // + oracle-l5r-1726 (issue #336: Daigotsu Hotako, Experienced 3, printed Naval).
+        string[] expected=["oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-1726","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-6501","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9832","oracle-l5r-9834"];
         Eq(string.Join(",",navalCarriers),string.Join(",",expected.OrderBy(x=>x,StringComparer.Ordinal)),"Every wired Naval carrier");
         var pinned=PublishedContent.Snapshot.Cards.Concat(PublishedContent.TestSnapshot.Cards).Select(c=>c.Id).ToHashSet();
         Check(!navalCarriers.Any(pinned.Contains),"No Naval card is in the pinned Lion/Crane decks");

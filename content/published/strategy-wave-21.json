@@ -1,0 +1,86 @@
+{
+  "Profile": "strategy-wave-21",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1092",
+      "Name": "Bonds of Coin",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Destroy one to three target attachments with a 0 Gold Cost.\nFavor Political Limited: Bow your Stronghold and discard the Imperial Favor to draw two cards.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1092.jpg",
+      "Keywords": [
+        "Favor",
+        "Political"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "bonds-of-coin-destroy",
+        "bonds-of-coin-draw"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2865",
+      "Name": "Gold and Steel",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle/Open: Target one to three attachments with a Gold Cost of 0: Destroy them.\nBattle: Choose your performing unbowed Personality and target an enemy Personality with an equal or lower Gold Cost: Bow him. You may move him home.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2865.jpg",
+      "Keywords": [],
+      "Focus": 2,
+      "Abilities": [
+        "gold-and-steel-destroy",
+        "gold-and-steel-bow",
+        "gold-and-steel-bow-move"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2493",
+      "Name": "Fear Me!",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing unbowed Duelist and target an enemy Personality with equal or lower Chi: Move him home. If he moved, choose a player, who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2493.jpg",
+      "Keywords": [
+        "Fear",
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "fear-me-gain",
+        "fear-me-lose"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

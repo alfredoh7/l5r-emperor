@@ -13,7 +13,7 @@ public sealed partial class MatchEngine
             var def=Definition(card);
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
-                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray());
+                def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),ActionLocked(card));
         }
         var players=_state.Players.Select(player=>
         {
@@ -78,6 +78,8 @@ public sealed partial class MatchEngine
             if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
             reason??=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
             if(reason is null && validate) reason=AbilityRejection(command);
+            // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
+            reason??=ActionLockRejection(command);
             Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja

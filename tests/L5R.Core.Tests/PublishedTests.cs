@@ -124,7 +124,10 @@ internal static class PublishedTests
         // non-ScenarioOnly ids across content/published/*.json) plus this branch's seven, and checked against the merged tree.
         // + 2 (this branch, issue #333: PersonalityWave29 Daigotsu Bofana and Daigotsu Bofana, Experienced, neither previously published) = 409,
         // recounted from origin/main c0605567 (407, distinct non-ScenarioOnly ids across content/published/*.json, #328 merged) plus this branch's two.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,409);
+        // + 7 (this branch, issue #336: PersonalityWave32 Daigotsu Hotako exp3, Doji Yoshitada, Sea Troll Predator and Utaku Liu-Xeung exp + StrategyWave21
+        // Bonds of Coin, Gold and Steel and Fear Me!, none previously published) = 416, recounted from origin/main 7f306655 (409, distinct non-ScenarioOnly
+        // ids across content/published/*.json, #334 merged) plus this branch's seven.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,416);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

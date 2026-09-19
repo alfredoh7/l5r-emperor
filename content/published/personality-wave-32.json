@@ -1,0 +1,130 @@
+{
+  "Profile": "personality-wave-32",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1726",
+      "Name": "Daigotsu Hotako",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 11,
+      "GoldProduction": 0,
+      "Force": 7,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Enters play paying 2 less Gold if you are a Lion Clan player.\nAfter Hotako enters play: Lose 2 Honor.\nFear Open: Target a Personality: He may not perform actions this turn.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1726.jpg",
+      "Keywords": [
+        "Experienced 3",
+        "Naval",
+        "Unique",
+        "Obsidian Champion",
+        "Paragon",
+        "Samurai",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "hotako-fear-lock"
+      ],
+      "Effect": "lion-clan-discount-2",
+      "EntryHonorLoss": 2
+    },
+    {
+      "Id": "oracle-l5r-2179",
+      "Name": "Doji Yoshitada",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 4,
+      "PersonalHonor": 3,
+      "HonorRequirement": 6,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Battle: Target an enemy Personality: Bow him. If he is dishonorable, choose a player who gains or loses 2 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2179.jpg",
+      "Keywords": [
+        "Duelist",
+        "Crane Clan",
+        "Magistrate",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yoshitada-bow-gain",
+        "yoshitada-bow-lose"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6522",
+      "Name": "Sea Troll Predator",
+      "Type": "Personality",
+      "Clan": "Unaligned",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 4,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Predator enters play: Lose 3 Honor.\nBattle: Target a Personality opposing Predator at the current battlefield: Move the Personality and Predator to the same adjacent unresolved battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6522.jpg",
+      "Keywords": [
+        "Tactician",
+        "Earth",
+        "Nonhuman",
+        "Shadowlands",
+        "Troll"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "predator-move"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-9085",
+      "Name": "Utaku Liu-Xeung",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 4,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of an action that gave a Force penalty to an enemy card at Liu-Xeung's battlefield: Give Liu-Xeung +1F.\nBattle: Target an enemy Personality with lower Personal Honor: Move him home. Gain 1 Honor.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9085.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Unique",
+        "Battle Maiden",
+        "Experienced",
+        "Paragon",
+        "Samurai",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "liuxeung-move-home"
+      ],
+      "Effect": "force-after-enemy-force-penalty-at-battlefield"
+    }
+  ],
+  "Decks": []
+}

@@ -139,6 +139,12 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// own Zone, matching a Permanent GrantedKeyword's own survival through death and return.</summary>
 public sealed record Protection(string Source, string Duration);
 
+/// <summary>"May not perform actions" (issue #336: Daigotsu Hotako's Fear Open, and the same gap on Tamori House Guard and
+/// Hiruma Nikaru): while any ActionLock sits in a card's list it cannot be the performer of any action -- its own, an
+/// action on one of its attachments, or one naming it as the performer -- yet it can still be targeted. Duration follows
+/// the GrantedKeyword/Protection convention: "Turn" (the default -- until the end of the turn) is swept by FinishTurn.</summary>
+public sealed record ActionLock(string Source, string Duration);
+
 /// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
 /// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
@@ -165,6 +171,7 @@ public sealed class CardInstance
     // affiliation is removed, the Personality is Unaligned for all rules checks.
     public List<string> RemovedClanAffiliations { get; set; } = [];
     public List<Protection> Protections { get; set; } = [];
+    public List<ActionLock> ActionLocks { get; set; } = [];
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
@@ -702,7 +709,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // ability whose cost is a player-chosen variable ("pay zero or more Gold"). Null for every fixed or
     // derived cost (the engine's own GoldQuote decides those) and read only for a variable-cost ability,
     // where it must lie inside that quote's MinAmount..MaxAmount; null there means the minimum.
-    int? GoldAmount = null);
+    int? GoldAmount = null,
+    // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
+    // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
+    SlotSelection[]? Selections = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
@@ -729,13 +739,18 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
-    Dictionary<string, GoldQuote>? TargetGold = null);
+    Dictionary<string, GoldQuote>? TargetGold = null,
+    // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
+    // collect the whole selection. Null for every ability with a single Target.
+    TargetSlotOption[]? Slots = null);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
     bool Bowed, int? ProvinceIndex, string? AttachedTo, int Force, int Chi = 0, bool StraightenBlocked = false,
     AppliedModifier[]? Modifiers = null, GrantedKeyword[]? GrantedKeywords = null, bool Dishonorable = false, int? UnitForce = null,
-    CardToken[]? Tokens = null);
+    CardToken[]? Tokens = null,
+    // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
+    bool ActionLocked = false);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);

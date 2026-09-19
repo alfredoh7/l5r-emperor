@@ -627,6 +627,7 @@ public sealed partial class MatchEngine
         higher.RemovedKeywords.AddRange(lower.RemovedKeywords.Where(k => !higher.RemovedKeywords.Contains(k, StringComparer.Ordinal)));
         higher.RemovedClanAffiliations.AddRange(lower.RemovedClanAffiliations.Where(c => !higher.RemovedClanAffiliations.Contains(c, StringComparer.Ordinal)));
         higher.Protections.AddRange(lower.Protections);
+        higher.ActionLocks.AddRange(lower.ActionLocks);
         higher.Tokens.AddRange(lower.Tokens);
         foreach (var use in lower.AbilityUses)
             if (!higher.AbilityUses.TryGetValue(use.Key, out var current) || use.Value > current) higher.AbilityUses[use.Key] = use.Value;
@@ -655,6 +656,7 @@ public sealed partial class MatchEngine
         lower.RemovedKeywords.Clear();
         lower.RemovedClanAffiliations.Clear();
         lower.Protections.Clear();
+        lower.ActionLocks.Clear();
         lower.Tokens.Clear();
         lower.AbilityUses.Clear();
         lower.Bowed = false;
@@ -770,10 +772,14 @@ public sealed partial class MatchEngine
             && !(ignoreHonorRequirementIfPersonalityClan is string waivedClan && HasClanAffiliation(card,waivedClan))) error="Family Honor is below the Honor Requirement; Clan allegiance may allow purchase.";
         var prosperous=def.Effect=="prosperous-discount"?_state.Cards.Values.Count(c=>c.OwnerId==playerId && InPlay(c) && Definition(c).Type==CardType.Personality):0;
         var reserveDiscount=viaReserve && def.Effect=="reserve-defender-discount"?4:0;
-        var rawCost=def.GoldCost-prosperous-reserveDiscount+(clanAllegiance?2:0)-(clanDiscount?2:0);
+        // "Enters play paying N less Gold if you are a <Clan> Clan player" (issue #336, Daigotsu Hotako exp3): a printed term of the card that
+        // stacks with the two Clan choices above; the same one ClanEntryDiscount gives Equip.
+        var entryDiscount=ClanEntryDiscount(def,player);
+        var rawCost=def.GoldCost-prosperous-reserveDiscount-(entryDiscount?.Amount??0)+(clanAllegiance?2:0)-(clanDiscount?2:0);
         var cost=Math.Max(0,rawCost);
         // The human-readable derivation the payment panel shows (issue #303), term by term.
         var basis=$"{def.Name} cost {def.GoldCost}"+(prosperous>0?$" − {prosperous} (controlled Personalities)":"")+(reserveDiscount>0?$" − {reserveDiscount} (Reserve while defending)":"")
+            +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
@@ -1365,7 +1371,7 @@ public sealed partial class MatchEngine
             // Returning to a province is a fresh start, the same reset ToDeck() already applies to a
             // card headed back into a deck -- stale Modifiers/GrantedKeywords/Tokens/AbilityUses have
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
-            card.Modifiers.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
+            card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
             card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
@@ -2119,7 +2125,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until
