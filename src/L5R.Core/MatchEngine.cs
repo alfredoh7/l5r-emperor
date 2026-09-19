@@ -2536,6 +2536,11 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
+        if(amount<0 && HonorLossNegatedWithEffects(playerId))
+        {
+            Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
+            return;
+        }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
             var reduced=Math.Min(0,amount+3);

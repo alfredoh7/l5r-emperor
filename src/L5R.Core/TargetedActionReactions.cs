@@ -1,8 +1,9 @@
 namespace L5R.Core;
 
 // "An action targets X" reactions (issue #335): redirect the action (Ezuno, Blade of Champions), re-check a target that moved (Yurishi), negate
-// the action's effects on a card (Jinn-Kuen, Mochitoko). Offered in both windows an action can be held in: the before-action window for any
-// action, the attack window for an Attack. Readings and alternatives: docs/decisions/2026-09-19-redirection-and-protective-reactions.md.
+// the action (Jinn-Kuen) or its bowing and destruction of a Follower (Mochitoko). Offered in both windows an action can be held in: the
+// before-action window for any action, the attack window for an Attack. An Attack that names no card (no target, or a province) holds no
+// window: no card is targeted. Readings and alternatives: docs/decisions/2026-09-19-redirection-and-protective-reactions.md.
 public static class ReactionTriggers
 {
     public const string TargetedByAction = "targeted-by-action";
@@ -15,18 +16,24 @@ public sealed partial class MatchEngine
     // An Attack is announced and paid for inside RunAbilityEffects and its window opens before that returns, so its reactors find the command here.
     private GameCommand? _runningCommand;
 
-    /// <summary>The held action: its command and the card it targets now. For an Attack that is the Attack's own target (Kahoku exp carries it in CardIds).</summary>
-    private sealed record ReactionSubject(GameCommand Command, string TargetId, bool IsAttack);
+    /// <summary>The held action: its command and the card it targets now (null for a non-Attack action that targets no card, whose cost may still name
+    /// a Follower of Mochitoko's). For an Attack that is the Attack's own target (Kahoku exp carries it in CardIds).</summary>
+    private sealed record ReactionSubject(GameCommand Command, string? TargetId, bool IsAttack);
 
     private static GameCommand WithActionTarget(GameCommand command, string targetId, bool attackTarget) =>
         attackTarget && !TargetsThroughAttackPipeline(command.AbilityId!) ? command with { CardIds = [targetId] } : command with { TargetId = targetId };
 
-    // An Attack-pipeline action is held in the attack window instead, and a Reaction is not "an action" (no nested windows).
-    private ReactionSubject? SubjectForAnnouncedAction(GameCommand command) =>
-        command.AbilityId is { } id && command.TargetId is { } target && _state.Cards.ContainsKey(target)
-        && AbilityCatalog.All.TryGetValue(id, out var ability) && ability.Timing != "Reaction" && !TargetsThroughAttackPipeline(id)
-            ? new(command, target, false) : null;
+    // An Attack's own target is judged in the attack window, so before its cost is paid it is held here only for a bow or destroy cost it would pay with a card
+    // that may be protected (Mochitoko); a Reaction is not "an action" (no nested windows).
+    private ReactionSubject? SubjectForAnnouncedAction(GameCommand command)
+    {
+        if (command.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability) || ability.Timing == "Reaction") return null;
+        var costOnly = TargetsThroughAttackPipeline(id);
+        var target = !costOnly && command.TargetId is { } t && _state.Cards.ContainsKey(t) ? t : null;
+        return target is not null || CostSubjectOf(command) is not null ? new(command, target, false) : null;
+    }
 
+    // An Attack that names no card (no target, or a province) targets no card, so nothing card-targeted reacts to it.
     private ReactionSubject? SubjectForAttack(GameCommand? command, string? targetId) =>
         command?.AbilityId is { } id && targetId is not null && _state.Cards.ContainsKey(targetId)
         && AbilityCatalog.All.TryGetValue(id, out var ability) && ability.Timing != "Reaction"
@@ -40,6 +47,14 @@ public sealed partial class MatchEngine
         "attackReaction" when _state.PendingAttack is { } attack => SubjectForAttack(attack.Command, attack.TargetId),
         _ => null
     };
+
+    private static bool WithReactorBowed(CardInstance reactor, Func<bool> judge)
+    {
+        var was = reactor.Bowed;
+        reactor.Bowed = true;
+        try { return judge(); }
+        finally { reactor.Bowed = was; }
+    }
 
     /// <summary>Would the held action be accepted against this card? The one definition of "legal target" for redirecting and re-checking.</summary>
     private bool ActionAcceptsTarget(ReactionSubject subject, string targetId)
@@ -58,9 +73,14 @@ public sealed partial class MatchEngine
         catch (RuleViolation) { return false; }
     }
 
+    // The redirecting card is bowed as its own cost before the new target is chosen, so legality is judged on that position -- for the card itself too.
+    private bool RedirectTargetAccepted(ReactionSubject subject, string targetId, CardInstance reactor) =>
+        WithReactorBowed(reactor, () => ActionAcceptsTarget(subject, targetId));
+
     // A non-Attack action is held whole, so its costs are paid once, at resolution, for the new target; an Attack's costs stay paid and its strength follows the target.
     private void RedirectAction(ReactionSubject subject, string newTargetId, CardInstance reactor)
     {
+        var oldTargetId = subject.TargetId ?? throw new RuleViolation("The action targets no card.");
         Require(ActionAcceptsTarget(subject, newTargetId), "The action cannot legally target that card.");
         var redirected = WithActionTarget(subject.Command, newTargetId, subject.IsAttack);
         if (subject.IsAttack)
@@ -68,24 +88,42 @@ public sealed partial class MatchEngine
             var attack = _state.PendingAttack!;
             var attacker = Player(attack.PlayerId);
             attack.Strength += EffectiveAttackStrength(attack.AbilityId, attacker, Card(newTargetId), attack.SourceId)
-                - EffectiveAttackStrength(attack.AbilityId, attacker, Card(subject.TargetId), attack.SourceId);
+                - EffectiveAttackStrength(attack.AbilityId, attacker, Card(oldTargetId), attack.SourceId);
             attack.TargetId = newTargetId;
             attack.Command = redirected;
         }
         else _state.PendingNegatableAbility = redirected;
-        Emit("actionRedirected", $"{Definition(reactor).Name}: the action now targets {Definition(Card(newTargetId)).Name} instead of {Definition(Card(subject.TargetId)).Name}.", reactor.OwnerId, newTargetId);
+        Emit("actionRedirected", $"{Definition(reactor).Name}: the action now targets {Definition(Card(newTargetId)).Name} instead of {Definition(Card(oldTargetId)).Name}.", reactor.OwnerId, newTargetId);
     }
 
-    /// <summary>Negates kinds of effect the held action would apply to a card: "bow", "destroy", "move", "straighten" or "all". Several kinds may stand at once; a kind is
-    /// consumed by the first effect of it that runs, "all" is not, and every entry is dropped when the action has resolved.</summary>
+    /// <summary>Per-card negation: kinds of effect the held action would apply to ONE card ("bow", "destroy", "move", "straighten" or "all"). Several kinds may stand at
+    /// once; a kind is consumed by the first effect of it that runs, "all" is not, and every entry is dropped when the action has resolved. An "all" entry also stops an
+    /// Honor loss the action inflicts on that card's controller (GainHonor). Whole-action negation is NegateHeldAction.</summary>
     private void NegateEffects(CardInstance card, params string[] kinds)
     {
         foreach (var kind in kinds) _state.NegatedEffects.Add(new(kind, card.Id));
         Emit("effectsNegated", $"{Definition(card).Name}: the action's {(kinds.Contains("all") ? "effects" : string.Join(" and ", kinds.Select(k => k switch { "bow" => "bowing", "destroy" => "destruction", "move" => "movement", "straighten" => "straightening", _ => k })))} on it {(kinds.Length > 1 && !kinds.Contains("all") ? "are" : "is")} negated.", card.OwnerId, card.Id);
     }
 
-    /// <summary>The reusable "negate the action's effects" (on that card): every effect kind the engine applies to a card, see decision note 11.</summary>
+    /// <summary>"Negate its effects on him": every effect kind the engine applies to that card, and Honor lost by its controller to the action.</summary>
     private void NegateAllEffectsOn(CardInstance card) => NegateEffects(card, "all");
+
+    /// <summary>"Negate the action's effects": the whole held action, whichever cards it reaches. A deferred action goes through ActionNegation.cs (issue #338, Sakuma);
+    /// an Attack is negated here as a whole, its cost already paid. Protection (issue #212) stops either.</summary>
+    private void NegateHeldAction(CardInstance negator)
+    {
+        if (_state.PendingChoice?.Type == "attackReaction" && _state.PendingAttack is { } attack)
+        {
+            if (attack.SourceId is not null && Protected(ActingPersonality(Card(attack.SourceId))))
+            {
+                Emit("actionProtected", "Protection negates the negation -- this action cannot be negated.", negator.OwnerId, negator.Id);
+                return;
+            }
+            attack.Negated = true;
+            Emit("actionNegated", $"{Definition(negator).Name} negates {Player(attack.PlayerId).Name}'s Attack.", negator.OwnerId, negator.Id);
+        }
+        else NegateDeferredAction(negator);
+    }
 
     /// <summary>Negates the action's effects on the card when it is no longer a legal target; returns whether it did.</summary>
     private bool RecheckTarget(ReactionSubject subject, CardInstance card)
@@ -93,6 +131,47 @@ public sealed partial class MatchEngine
         if (ActionAcceptsTarget(subject, card.Id)) return false;
         NegateAllEffectsOn(card);
         return true;
+    }
+
+    // Honor a negated card's controller would lose to another player's action is lost no more (decision note 3): only what the ACTION inflicts, never a cost the
+    // acting player pays himself.
+    private bool HonorLossNegatedWithEffects(int playerId) =>
+        _runningCommand is { } running && running.PlayerId != playerId
+        && _state.NegatedEffects.Any(n => n.Kind == "all" && _state.Cards.TryGetValue(n.CardId, out var negated) && negated.OwnerId == playerId);
+
+    // ---- a cost paid by a Follower a negation protects (Hida Mochitoko, decision note 2) ------------------------------------------------------
+
+    // The card an action pays a bow or destroy cost with (its chosen cost option's subject), if it names one.
+    private CardInstance? CostSubjectOf(GameCommand command)
+    {
+        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.CostOptions is null) return null;
+        try
+        {
+            var option = ChosenCostOption(ability, command);
+            var subject = CostSubjectCard(option, ability, command, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null);
+            return subject is not null && InPlay(subject) ? subject : null;
+        }
+        catch (RuleViolation) { return null; }
+    }
+
+    /// <summary>Is this action's cost payment blocked by a negation? True when the card it would bow or destroy as its cost has had that negated. This is the ONE
+    /// place the rule is asked: the action then does not resolve and pays nothing (AbortActionForBlockedCost), so a cost cannot be dodged while the effects are
+    /// kept. A cost-payment function that pays atomically calls this first and passes its verdict on.</summary>
+    private bool CostPaymentBlockedByNegation(GameCommand command) =>
+        _state.NegatedEffects.Count > 0 && CostSubjectOf(command) is { } subject
+        && _state.NegatedEffects.Any(n => n.CardId == subject.Id && n.Kind is "all" or "bow" or "destroy");
+
+    // The action is negated: taken (its use is spent, priority passes) but nothing is paid and nothing happens -- no Gold, no Honor-loss cost, no discard, no effect.
+    private void AbortActionForBlockedCost(GameCommand command)
+    {
+        var ability = AbilityCatalog.All[command.AbilityId!];
+        var player = Player(command.PlayerId);
+        var source = command.CardId is null ? null : Card(command.CardId);
+        SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
+        Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: {Definition(CostSubjectOf(command)!).Name}'s bowing or destruction as its cost was negated, so nothing is paid and nothing resolves.", player.Id, source?.Id);
+        _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
+        NextAction(player.Id);
     }
 
     private IEnumerable<(CardInstance Card, string AbilityId)> TargetedActionReactionCandidates() =>
@@ -125,7 +204,9 @@ public sealed partial class MatchEngine
     {
         var command = subject.Command;
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || acting.Timing == "Reaction") return false;
-        if (!InPlay(card) || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
+        if (!InPlay(card)) return false;
+        if (abilityId == "mochitoko-negate") return MochitokoFollowers(card, subject).Any();
+        if (subject.TargetId is null || !_state.Cards.TryGetValue(subject.TargetId, out var affected) || !InPlay(affected)) return false;
         switch (abilityId)
         {
             case "ezuno-redirect":
@@ -137,9 +218,6 @@ public sealed partial class MatchEngine
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
                 return affected.OwnerId == card.OwnerId && Keyword(affected, "Merchant");
-            case "mochitoko-negate":
-                return Definition(affected).Type == CardType.Follower && affected.Zone == Zone.Attached && affected.OwnerId == card.OwnerId
-                    && affected.AttachedTo is { } hostId && SameLocation(card, Card(hostId)) && ActionMayBowOrDestroy(command.AbilityId, subject.IsAttack);
             default:
                 return false;
         }
@@ -151,10 +229,24 @@ public sealed partial class MatchEngine
         && Definition(affected).Type == CardType.Personality && (affectedKeyword is null || Keyword(affected, affectedKeyword))
         && SameLocation(card, affected) && ActionAcceptsTarget(subject, card.Id);
 
-    // The reactor's own other in-play cards the action is legal against; not the redirecting card itself, which is bowed as the cost first.
+    // The reactor's own other in-play cards the action is legal against -- the reactor itself included, judged after it is bowed as the cost.
     private IEnumerable<CardInstance> RedirectCandidates(CardInstance card, ReactionSubject subject) =>
-        _state.Cards.Values.Where(c => c.OwnerId == card.OwnerId && c.Id != subject.TargetId && c.Id != card.Id && InPlay(c) && ActionAcceptsTarget(subject, c.Id))
+        _state.Cards.Values.Where(c => c.OwnerId == card.OwnerId && c.Id != subject.TargetId && InPlay(c) && RedirectTargetAccepted(subject, c.Id, card))
             .OrderBy(c => c.Id, StringComparer.Ordinal);
+
+    // Mochitoko's Followers: his controller's, whose host stands where he does, that the held action would bow or destroy -- as its target (an Attack always could),
+    // or as the cost it pays (a bow or destroy cost option), asked before that cost is paid. An Attack is asked twice: its cost here, its target in the attack window.
+    private IEnumerable<CardInstance> MochitokoFollowers(CardInstance card, ReactionSubject subject)
+    {
+        bool Covered(CardInstance follower) =>
+            Definition(follower).Type == CardType.Follower && follower.Zone == Zone.Attached && follower.OwnerId == card.OwnerId && InPlay(follower)
+            && follower.AttachedTo is { } hostId && SameLocation(card, Card(hostId));
+        var ids = new List<CardInstance>();
+        if (subject.TargetId is not null && _state.Cards.TryGetValue(subject.TargetId, out var target) && Covered(target) && ActionMayBowOrDestroy(subject.Command.AbilityId!, subject.IsAttack))
+            ids.Add(target);
+        if (!subject.IsAttack && CostSubjectOf(subject.Command) is { } paying && Covered(paying) && ids.All(c => c.Id != paying.Id)) ids.Add(paying);
+        return ids;
+    }
 
     // Curated like BowsTarget / DestroysTarget, which it extends: a new action that bows or destroys a Follower is added here.
     private static bool ActionMayBowOrDestroy(string abilityId, bool isAttack) =>
@@ -164,7 +256,10 @@ public sealed partial class MatchEngine
         or "tetsuo-destroy-attachment" or "tokoru-bear-bow" or "hiroto-bow";
 
     private IEnumerable<(string? TargetId, string? Label)> TargetedReactionChoices(CardInstance card, string abilityId, ReactionSubject subject) =>
-        abilityId == "blade-of-champions-redirect"
-            ? RedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})"))
-            : [(null, null)];
+        abilityId switch
+        {
+            "blade-of-champions-redirect" => RedirectCandidates(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            "mochitoko-negate" => MochitokoFollowers(card, subject).Select(c => ((string?)c.Id, (string?)$"{AbilityCatalog.All[abilityId].Label} · {Definition(c).Name} ({c.Id})")),
+            _ => [(null, null)]
+        };
 }

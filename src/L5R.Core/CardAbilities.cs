@@ -594,7 +594,7 @@ public static class AbilityCatalog
         ["yurishi-disappear"] = new("Reaction", "After another player's Battle action targets Yurishi: He disappears into the shadows. Move him home. If he is no longer a legal target for the action, negate its effects on him.", "none", Trigger: ReactionTriggers.TargetedByAction),
         ["jinn-kuen-straighten"] = new("Open", "Political Open: Target a Holding or Stronghold: Straighten it.", "holding-or-stronghold", ActionKeywords: ["Political"]),
         ["jinn-kuen-negate"] = new("Reaction", "Political Reaction: After an action targets your Merchant, pay 2 Gold: Negate the action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, Cost: GoldCostRule.Fixed(2), ActionKeywords: ["Political"]),
-        ["mochitoko-negate"] = new("Reaction", "Twice per turn, after an action targets your Follower at Mochitoko's location: Negate its bowing and destruction from that action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, UsesPerTurn: 2),
+        ["mochitoko-negate"] = new("Reaction", "Twice per turn, after an action targets your Follower at Mochitoko's location: Negate its bowing and destruction from that action's effects.", "held-action-follower", Trigger: ReactionTriggers.TargetedByAction, UsesPerTurn: 2),
         // Training fixtures (issue #335): Jinn-Kuen's reaction priced at 0 (a reduced cost must still be offered with no Gold), and bows for the negations to answer.
         ["training-negate-merchant-free"] = new("Reaction", "Training: after an action targets your Merchant, pay 0 Gold: Negate the action's effects.", "none", Trigger: ReactionTriggers.TargetedByAction, Cost: GoldCostRule.Fixed(0)),
         // Lion Clan Personality review (issue #198): every ability below reuses only primitives
@@ -653,6 +653,7 @@ public static class AbilityCatalog
         // Open-timing, usable only during the Action phase, never while AtBattle is true).
         ["training-bow-at-battle"] = new("Battle", "Training: bow a target enemy Personality at the current battlefield", "enemy-personality"),
         ["training-bow-enemy-card-at-battle"] = new("Battle", "Training: bow a target enemy card at the current battlefield", "enemy-card"),
+        ["training-follower-honor-draw"] = new("Battle", "Training: bow your performing Follower in this unit and lose 2 Honor: draw a card.", "none", Performer: "own-unbowed-follower-in-source-unit", CostOptions: [CostOption.Bow]),
         ["training-bow-enemy-card-open"] = new("Open", "Training: bow a target enemy card at any location", "enemy-card"),
         // A second, independent source (own AbilityUses dedupe scope) so a test can straighten the
         // SAME target twice in one turn -- proving Straighten() clears a consumed "next
@@ -2356,7 +2357,8 @@ public sealed partial class MatchEngine
     {
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
-        ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        if (!attack.Negated) ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        else _state.RangedAttackStrengthReductionImmune = false;
         _state.NegatedEffects.Clear();
         // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
         // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). SourceId is the
@@ -3280,9 +3282,11 @@ public sealed partial class MatchEngine
                         // bowed-state restriction on either of his own two abilities.
                         "any-holding" => type == CardType.Holding,
                         "holding-or-stronghold" => type is CardType.Holding or CardType.Stronghold,
-                        // Blade of Champions: one of the reactor's own other cards (not the Blade: it is bowed as the cost) that the held action accepts.
-                        "redirect-target-own-card" => own && target.Id != source!.Id && OpenReactionSubject() is { } redirectedAction
-                            && target.Id != redirectedAction.TargetId && ActionAcceptsTarget(redirectedAction, target.Id),
+                        // Blade of Champions: one of the reactor's own cards (the Blade included, judged bowed) that the held action accepts.
+                        "redirect-target-own-card" => own && OpenReactionSubject() is { } redirectedAction
+                            && target.Id != redirectedAction.TargetId && RedirectTargetAccepted(redirectedAction, target.Id, source!),
+                        // Hida Mochitoko: a Follower the held action would bow or destroy, as its target or as a cost it pays.
+                        "held-action-follower" => OpenReactionSubject() is { } followerAction && MochitokoFollowers(source!, followerAction).Any(f => f.Id == target.Id),
                         // Asahina Munefusa (issue #301): "your Temple Holding" -- an own Holding carrying
                         // every RequiredKeywords entry (any bow state: straightening is the whole point).
                         // own-unbowed-farm above is the hardcoded Farm-only sibling.
@@ -3666,6 +3670,8 @@ public sealed partial class MatchEngine
         var pendingAttackBefore = _state.PendingAttack;
         // Asked BEFORE the effects run: a hand-played card is in a discard pile by the time the deferral below is reached.
         var fromDiscard = PlayedFromDiscard(AbilityCatalog.All[command.AbilityId!], command.CardId is null ? null : Card(command.CardId));
+        // A cost blocked by a negation (Mochitoko): the whole action is negated and pays nothing (TargetedActionReactions.cs).
+        if (CostPaymentBlockedByNegation(command)) { AbortActionForBlockedCost(command); return; }
         var runningBefore = _runningCommand;
         _runningCommand = command;
         try { RunAbilityEffects(command, consumedGrant); }
@@ -4743,8 +4749,8 @@ public sealed partial class MatchEngine
             case "yurishi-disappear": MoveHome(source!, false); RecheckTarget(HeldAction(), source!); break;
             case "jinn-kuen-negate":
             case "training-negate-merchant-free":
-                NegateAllEffectsOn(Card(HeldAction().TargetId)); break;
-            case "mochitoko-negate": NegateEffects(Card(HeldAction().TargetId), "bow", "destroy"); break;
+                NegateHeldAction(source!); break;
+            case "mochitoko-negate": NegateEffects(target!, "bow", "destroy"); break;
             case "jinn-kuen-straighten": Straighten(target!); break;
             // Training fixture (issue #318): "after another player's action targets a card of yours, bow this
             // card and every other unbowed card you control that has a before-action reaction" -- a reaction
@@ -5089,6 +5095,7 @@ public sealed partial class MatchEngine
             case "tensin-follower-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, command.PerformerId!, consumedGrant)) return;
                 break;
+            case "training-follower-honor-draw": GainHonor(player.Id, -2, "Training Honor cost"); Draw(player); break;
             default:
                 // Any ability with an AttachSpec (Moto Jun-Ni, Fading Shadows, Foothills Keep and the training shapes) needs no case of its own: the Gold was
                 // paid by PayForAbility, so the card now leaves its place and enters play attached. An entering-play window ends the action here.

@@ -284,6 +284,8 @@ public sealed class PendingAttack
     public bool Additional { get; set; }
     // The declaring command, so targeted-by-action reactions can re-run the Attack's target validation; kept in step with TargetId on a redirect.
     public GameCommand? Command { get; set; }
+    // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
+    public bool Negated { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of

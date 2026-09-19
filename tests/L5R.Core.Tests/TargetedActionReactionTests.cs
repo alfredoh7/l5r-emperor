@@ -23,9 +23,11 @@ internal static class TargetedActionReactionTests
             ("Redirection and costs: an action's costs are paid once, when it resolves, for the card it then targets -- and a redirect is only legal if the payment the acting player committed still fits the new target's price (target-priced action: cheaper new target is fine, dearer one is not)", RedirectAndCosts),
             ("Reactions key on the NEW target after a redirect (Mendon's question): a Champion of Thunder in the Shugenja's unit is offered before the redirect and not after; one in Ezuno's unit only after -- and a negation already played on the old card stays with the old card", ReactionsFollowTheNewTarget),
             ("Blade of Champions: a Battle action targeting a card in its unit opens the window; one option per legal new target of the controller's (never the original, the Blade, an enemy card, or a card the action could not legally target); choosing bows the Blade and the action lands on the chosen card; an illegal choice is rejected", BladeRedirects),
+            ("Blade of Champions may redirect to ITSELF (Mendon): it is a candidate wherever the action accepts it, judged as though already bowed for the cost -- a bowed-card-only action still reaches the unbowed Blade", BladeMayRedirectToItself),
             ("Blade of Champions is offered only for a Battle action against a card in ITS unit, while unbowed and with a legal candidate: not for an Open action, a card outside the unit, a bowed Blade, or when no other card of the controller's could legally be targeted; a Follower or an Item in the unit counts as a card in the unit", BladeOnlyWhenApplicable),
             ("Blade of Champions and an Attack: the Attack is redirected to the chosen card, its strength follows the new target (a Destrier's -3) and the new target must be legal for it (Force within strength, no Follower to hide behind)", BladeRedirectsAnAttack),
             ("Yurishi: another player's Battle action targeting him lets him disappear -- home -- and, no longer a legal target for an action that needs him at the battlefield, the action's effects on him are negated; the action's other effects and costs stand; the event log says so", YurishiNegatesWhenNoLongerLegal),
+            ("Yurishi's negation stops an Honor loss the action inflicts on his controller (an effect of the action, Mendon), while without the reaction it is lost", YurishiNegationStopsHonorLoss),
             ("Yurishi re-checks legality rather than assuming it: an action that does not need him at the battlefield (The Earth Flows, moving a Personality to it) is still legal after he moves home and resolves on him; and Battle actions only, another player's only, from a battlefield, from an unbowed Yurishi", YurishiRecheckStillLegal),
             ("Yurishi against an Attack: he disappears and the Ranged 5 Attack that would have destroyed him misses; without the reaction he dies (control), and a Melee too weak to hit him never opens a window", YurishiEscapesAnAttack),
             ("Yurishi enters play losing 3 Honor automatically (a mandatory entry effect, never offered as a choice)", YurishiEntryHonorLoss),
@@ -34,6 +36,7 @@ internal static class TargetedActionReactionTests
             ("Jinn-Kuen's Open action straightens a Holding or a Stronghold (either side's), and nothing else", JinnKuenStraightens),
             ("Mochitoko: twice per turn, after an action targets his controller's Follower at his location, its bowing and destruction are negated -- the first use, the second use, then no more that turn (not offered, the action resolves), and the next turn resets it; the use count is exactly what the limit reads", MochitokoTwicePerTurn),
             ("Mochitoko negates bow-only, destroy-only and bow-then-destroy actions (Tokoru's Bear bows a Follower and destroys it as an attachment: both negated at once, several kinds on one action) and a Melee Attack that would destroy the Follower", MochitokoKinds),
+            ("Mochitoko and a Follower paid as a COST (Mendon): Hiruma Tensin's \"bow your performing Follower\" -- the window opens before the cost is paid, Mochitoko negates that bowing, and the ENTIRE action is negated and pays nothing (no effect, no Honor-loss cost, no draw); without him the cost is paid and the action resolves", MochitokoBlocksAFollowerCost),
             ("Mochitoko is offered only when it can matter: a Follower of his controller's whose host is at his location, targeted by an action that could bow or destroy it -- not an enemy Follower, a Follower elsewhere, a Personality, a pure Force penalty, while bowed, or with both uses spent", MochitokoOnlyWhenApplicable),
             ("Every enabled command offered inside a redirect or negation window validates and is accepted on a fresh engine (Ezuno, Blade with every candidate, Yurishi, Jinn-Kuen, Mochitoko)", OfferedCommandsAllValidate),
         ];
@@ -446,6 +449,31 @@ internal static class TargetedActionReactionTests
         }
     }
 
+    private static void BladeMayRedirectToItself()
+    {
+        {
+            // Mendon: the Blade may be the new target when it satisfies the targeting requirement. Bow-any-enemy-card accepts an Item.
+            var r = BladeTable(); var follower = Add(r.S, "training-follower", 0, Zone.Attached, province: 0, parent: r.Wielder.Id); var cardBower = Add(r.S, "training-card-bower", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(r.S);
+            Accept(e, Offer(e, 1, BowCard, cardBower.Id, follower.Id));
+            Check(BladeTargets(e).Contains(r.BladeCard.Id), "the Blade is a candidate for a redirect it satisfies");
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", r.BladeCard.Id)); ClosePassing(e);
+            Check(e.State.Cards[r.BladeCard.Id].Bowed && !e.State.Cards[follower.Id].Bowed, "the action landed on the Blade");
+        }
+        {
+            // Judged after the cost: Hida Mimori destroys a BOWED enemy card. The unbowed Blade only qualifies because bowing it is the cost of the redirect.
+            var s = Table(); var p = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); var blade = Add(s, Blade, 0, Zone.Attached, province: 0, parent: p.Id);
+            var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: p.Id, bowed: true);
+            var q = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0, bowed: true); var awake = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            var mimori = Add(s, "oracle-l5r-3150", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, "mimori-destroy", mimori.Id, follower.Id));
+            Check(BladeTargets(e).SequenceEqual(Sorted(blade.Id, q.Id)), "the unbowed Blade counts as bowed once it pays; the unbowed Shugenja does not: " + string.Join(",", BladeTargets(e)));
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", blade.Id)); ClosePassing(e);
+            Check(e.State.Cards[blade.Id].Zone != Zone.Attached && e.State.Cards[follower.Id].Zone == Zone.Attached && e.State.Cards[awake.Id].Zone == Zone.Battlefield, "the Blade itself was destroyed");
+        }
+    }
+
     private static void BladeOnlyWhenApplicable()
     {
         {
@@ -487,7 +515,7 @@ internal static class TargetedActionReactionTests
                 Accept(e, Offer(e, 1, BowCard, cardBower.Id, target.Id));
                 Eq(Window(e), "beforeActionReaction", "the " + CardCatalog.Get(target.DefinitionId).Type + " is a card in the Blade's unit");
                 var sibling = target == follower ? item : follower;
-                Check(BladeTargets(e).SequenceEqual(Sorted(r.Wielder.Id, r.Q.Id, r.R.Id, sibling.Id)), "candidates: the wielder, the other Personalities and the unit's other attachment (any enemy card is a legal bow target): " + string.Join(",", BladeTargets(e)));
+                Check(BladeTargets(e).SequenceEqual(Sorted(r.Wielder.Id, r.Q.Id, r.R.Id, sibling.Id, r.BladeCard.Id)), "candidates: the wielder, the other Personalities, the unit's other attachment and the Blade itself (any enemy card is a legal bow target): " + string.Join(",", BladeTargets(e)));
                 Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", r.Wielder.Id)); ClosePassing(e);
                 Check(e.State.Cards[r.Wielder.Id].Bowed && !e.State.Cards[target.Id].Bowed, "redirected to the wielder");
             }
@@ -552,6 +580,21 @@ internal static class TargetedActionReactionTests
             Eq(e.GetView(0).Players[0].Home.Single(c => c.Id == y.Id).Force, force, "and so was the Force penalty");
             if (ability == "kouki-force") Check(e.State.Cards[attackerCard.Id].Bowed, "the acting card's own cost still stands");
             Eq(e.State.Cards[y.Id].AbilityUses["yurishi-disappear"], e.State.TurnNumber);
+        }
+    }
+
+    private static void YurishiNegationStopsHonorLoss()
+    {
+        // Mendon: an Honor loss the action inflicts on the target's controller is an effect, negated with the rest; without the reaction it is lost.
+        foreach (var reacts in new[] { false, true })
+        {
+            var s = Table(); var y = Add(s, Yurishi, 0, Zone.Battlefield, province: 0); var striker = Add(s, "training-honor-strike-samurai", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = e.State.Players[0].Honor; var actorHonor = e.State.Players[1].Honor;
+            Accept(e, Offer(e, 1, "training-honor-strike", striker.Id, y.Id));
+            if (reacts) Accept(e, ReactionCommand(e, 0, "yurishi-disappear"));
+            ClosePassing(e);
+            Eq(e.State.Players[0].Honor, reacts ? honor : honor - 2, reacts ? "the Honor loss was negated with the effects on him" : "control: his controller loses 2 Honor");
+            Eq(e.State.Players[1].Honor, actorHonor, "the acting player's own Honor is never touched by the negation");
         }
     }
 
@@ -671,7 +714,7 @@ internal static class TargetedActionReactionTests
             Accept(e, offer.Command!);
             Check(offer.Command!.SourceIds!.All(id => e.State.Cards[id].Bowed), "the chosen sources were bowed to pay");
             Check(e.State.Events.Any(x => x.Type == "payment" && x.Message.Contains("paid 2 Gold for Yasuki Jinn-Kuen")), "paid 2 Gold, in the log");
-            Check(e.State.NegatedEffects.Any(n => n.CardId == r.Merchant.Id && n.Kind == "all"), "the action's effects on the Merchant are negated");
+            Check(e.State.DeferredActionNegated && EventLogged(e, "actionNegated"), "the whole action is negated (ActionNegation.cs), not just its effects on the Merchant");
             Check(!Offered(e, 0, "jinn-kuen-negate"), "once per turn");
             ClosePassing(e);
             Check(!e.State.Cards[r.Merchant.Id].Bowed, "the bow never happened"); Check(e.State.NegatedEffects.Count == 0);
@@ -741,7 +784,7 @@ internal static class TargetedActionReactionTests
         {
             var r = MerchantTable(); var kouki = Add(r.S, Kouki, 1, Zone.Battlefield, province: 0); var e = MatchEngine.FromTestState(r.S);
             Accept(e, Offer(e, 1, "kouki-force", kouki.Id, r.Merchant.Id)); Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate")); ClosePassing(e);
-            Eq(force(e, r.Merchant.Id), 2, "no Force penalty"); Check(e.State.Cards[kouki.Id].Bowed, "the acting card's own cost stood");
+            Eq(force(e, r.Merchant.Id), 2, "no Force penalty");
         }
         // Movement (Incapacitated, a Strategy played from hand).
         {
@@ -768,6 +811,16 @@ internal static class TargetedActionReactionTests
             if (reacts) Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate"));
             ClosePassing(e);
             Eq(e.State.Cards[merchant.Id].Tokens.Count, reacts ? 0 : 1, reacts ? "no token" : "control: the token is placed");
+        }
+        // An Honor loss the action inflicts on the target's controller is an EFFECT: negated with the rest (Mendon).
+        foreach (var reacts in new[] { false, true })
+        {
+            var r = MerchantTable(); var striker = Add(r.S, "training-honor-strike-samurai", 1, Zone.Battlefield, province: 0); var e = MatchEngine.FromTestState(r.S);
+            var honor = e.State.Players[0].Honor;
+            Accept(e, Offer(e, 1, "training-honor-strike", striker.Id, r.Merchant.Id));
+            if (reacts) Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate"));
+            ClosePassing(e);
+            Eq(e.State.Players[0].Honor, reacts ? honor : honor - 2, reacts ? "the Honor loss was negated with the effects" : "control: 2 Honor lost");
         }
         // Destruction (a Personality without attachments).
         {
@@ -900,6 +953,48 @@ internal static class TargetedActionReactionTests
             ClosePassing(e);
             Eq(e.State.Cards[r.Follower.Id].Zone == Zone.Attached, reacts, reacts ? "the Attack's destruction was negated" : "control: the Attack destroyed the Follower");
             Check(e.State.NegatedEffects.Count == 0, "no negation outlives the Attack");
+        }
+    }
+
+    private static void MochitokoBlocksAFollowerCost()
+    {
+        // Hiruma Tensin's "bow your performing Follower" is a COST. Mochitoko may negate that bowing, whoever initiated it (his controller's own action here) -- and then the
+        // ENTIRE action is negated and pays nothing: the cost cannot be dodged while the effects are kept.
+        foreach (var reacts in new[] { false, true })
+        {
+            var s = Table(actor: 0);
+            var moch = Add(s, Mochitoko, 0, Zone.Battlefield, province: 0); var tensin = Add(s, "oracle-l5r-3332", 0, Zone.Battlefield, province: 0);
+            var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: tensin.Id); var enemy = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "tensin-follower-attack", tensin.Id, enemy.Id, follower.Id));
+            Eq(Window(e), "beforeActionReaction", "held before its cost is paid: the Follower is not bowed yet");
+            Check(!e.State.Cards[follower.Id].Bowed, "nothing paid yet");
+            Check(Listed(e, 0, "mochitoko-negate").Single().Enabled && Listed(e, 0, "mochitoko-negate").Single().Command!.TargetId == follower.Id, "offered for the paying Follower");
+            if (reacts) Accept(e, ReactionCommand(e, 0, "mochitoko-negate"));
+            ClosePassing(e);
+            if (reacts)
+            {
+                Check(!e.State.Cards[follower.Id].Bowed, "the bowing was negated"); Eq(e.State.Cards[enemy.Id].Zone, Zone.Battlefield, "and the Attack never happened: the whole action is negated");
+                Eq(e.State.Cards[tensin.Id].AbilityUses["tensin-follower-attack"], e.State.TurnNumber, "it was taken (its use is spent)");
+                Check(EventLogged(e, "actionNegated") && Window(e) is null && e.State.PendingAttack is null && e.State.NegatedEffects.Count == 0);
+            }
+            else Check(e.State.Cards[follower.Id].Bowed && e.State.Cards[enemy.Id].Zone != Zone.Battlefield, "control: the Follower paid and the Attack destroyed the Shugenja");
+        }
+        // An Honor loss paid inside the action is ignored with it when the cost is blocked; without the reaction it is paid.
+        foreach (var reacts in new[] { false, true })
+        {
+            var s = Table(actor: 0);
+            Add(s, Mochitoko, 0, Zone.Battlefield, province: 0); var payer = Add(s, "training-follower-payer", 0, Zone.Battlefield, province: 0);
+            var follower = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: payer.Id); Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = e.State.Players[0].Honor; var hand = e.State.Players[0].Hand.Count;
+            var offer = e.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.CardId == payer.Id && a.Command?.AbilityId == "training-follower-honor-draw" && a.Command.PerformerId == follower.Id);
+            Accept(e, offer.Command!);
+            Eq(Window(e), "beforeActionReaction");
+            if (reacts) Accept(e, ReactionCommand(e, 0, "mochitoko-negate"));
+            ClosePassing(e);
+            Eq(e.State.Players[0].Honor, reacts ? honor : honor - 2, reacts ? "the Honor-loss cost was ignored: nothing is paid" : "control: the cost is paid");
+            Eq(e.State.Players[0].Hand.Count, reacts ? hand : hand + 1, reacts ? "and no card was drawn" : "control: a card was drawn");
+            Eq(e.State.Cards[follower.Id].Bowed, !reacts);
         }
     }
 
