@@ -101,7 +101,10 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // action. Used at most once a turn, like any Reaction. See AlternateGoldSource in GoldQuotes.cs.
     int? PaymentProduction = null,
     // The printed per-turn limit: 1 by default, N for "N times per turn", AbilityUseLimit.Unlimited for "any number of times" (AbilityLimits.cs).
-    int UsesPerTurn = 1);
+    int UsesPerTurn = 1,
+    // A Ranged/Melee Attack that may target the current battlefield's PROVINCE instead of a card (command.Province): a province is not a card, so it triggers no
+    // card-targeted reaction (issue #335). Its effect on the province belongs to the ability's own case.
+    bool AttackTargetsProvince = false);
 
 public static class AbilityCatalog
 {
@@ -275,6 +278,7 @@ public static class AbilityCatalog
         // Training-only: exercises the Honor-loss-immunity primitive's "pay Honor to use a Battle
         // ability" shape (e.g. "Battle: Lose N Honor: [Attack]") ahead of any published card needing
         // it. Played from hand like Tactical Advantage -- a Strategy card providing its own ability.
+        ["training-province-attack"] = new("Battle", "Training: Ranged 3 Attack, which may target the current battlefield's province: it loses strength equal to the Attack's", "attack", AttackTargetsProvince: true),
         ["training-honor-cost-attack"] = new("Battle", "Lose 2 Honor · Ranged 3 Attack", "attack"),
         // Training-only: exercises Again!'s "Battle abilities on his Weapons may be used a second
         // time this turn" -- a Weapon carrying its own printed Battle attack (no published one is
@@ -2117,6 +2121,7 @@ public sealed partial class MatchEngine
         // instance (Ebizo himself), read live the way legulus-legion-attack reads its own Force.
         "ebizo-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
         "training-recon-attack" => 2,
+        "training-province-attack" => 3,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         _ => 0
     };
@@ -2152,7 +2157,7 @@ public sealed partial class MatchEngine
         "shinjo-eun-sahng-attack" or "shosuro-konishi-attack" or "tsuruchi-kosoko-attack" or "tsuruchi-isas-attack" or "bayushi-kahoku-attack" or "asako-ume-attack" or "training-honor-cost-attack" => "Ranged",
         "cavalry-flankers-attack" or "murderous-thieves-attack" => "Melee",
         "dark-naga-scouts-attack" or "horse-archers-attack" or "hiruma-sniper-attack" or "tensin-follower-attack" => "Ranged",
-        "moshi-ikako-attack" => "Ranged",
+        "moshi-ikako-attack" or "training-province-attack" => "Ranged",
         "kamina-exp-attack" or "shuji-attack" => "Ranged",
         "yayu-bow-attack" or "yayu-destroy-attack" => "Ranged",
         "spawn-of-vritra-attack" or "khol-regulars-attack" => "Ranged",
@@ -2298,8 +2303,10 @@ public sealed partial class MatchEngine
     // Steps F-G of a Ranged/Melee Attack (core rules): compare strength to the target's *current*
     // Force -- re-evaluated here, not at announce time, since a Reaction may have changed either --
     // and destroy on a hit. A strength of 0 or less, or no target ever chosen, has no effect.
-    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength, string? sourceId = null)
+    private void ResolveAttackNow(string abilityId, int playerId, string? targetId, int strength, string? sourceId = null, int? province = null)
     {
+        // An Attack that targets a province targets no card (Mendon, issue #335): its effect is the ability's own.
+        if (targetId is null && province is int provinceIndex) ResolveProvinceAttack(abilityId, provinceIndex, strength);
         if (strength > 0 && targetId is not null)
         {
             var target = Card(targetId);
@@ -2337,9 +2344,11 @@ public sealed partial class MatchEngine
     private bool ResolveOrDeferAttack(string abilityId, PlayerState attacker, string? targetId, string? sourceId = null, bool additional = false, int? strengthOverride = null)
     {
         var strength = strengthOverride ?? EffectiveAttackStrength(abilityId, attacker, targetId is null ? null : Card(targetId), sourceId);
-        if (!AnyAttackReactionAvailable(attacker.Id, targetId))
+        // An Attack that targets no card (no target, or a province) opens no reaction window: nothing card-targeted can react to it (issue #335).
+        if (targetId is null || !AnyAttackReactionAvailable(attacker.Id, targetId))
         {
-            ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId);
+            var province = targetId is null && AbilityCatalog.All[abilityId].AttackTargetsProvince ? _runningCommand?.Province : null;
+            ResolveAttackNow(abilityId, attacker.Id, targetId, strength, sourceId, province);
             return false;
         }
         _state.PendingAttack = new PendingAttack { AbilityId = abilityId, PlayerId = attacker.Id, SourceId = sourceId, TargetId = targetId, Strength = strength, Kind = AttackKind(abilityId), Additional = additional, Command = _runningCommand };
@@ -3113,7 +3122,14 @@ public sealed partial class MatchEngine
                 // The legality rules (Follower-immunity and its explicit exceptions, per-kind immunity,
                 // strength) live in RequireLegalAttackTarget (AttackTargeting.cs), shared with abilities that
                 // carry their Attack target on CardIds instead of TargetId (Bayushi Kahoku - exp).
-                if (command.TargetId is not null) RequireLegalAttackTarget(id, ability, command, player, source, Card(command.TargetId));
+                // An Attack needs no target: none at all, a card, or -- where the ability says so -- the current battlefield's province.
+                if (command.Province is not null)
+                {
+                    Require(ability.AttackTargetsProvince, "This Attack cannot target a province.");
+                    Require(command.TargetId is null, "An Attack targets a card or a province, not both.");
+                    Require(command.Province == _state.CurrentBattleProvince, "An Attack may only target the current battlefield's province.");
+                }
+                else if (command.TargetId is not null) RequireLegalAttackTarget(id, ability, command, player, source, Card(command.TargetId));
             }
             // Unimpeachable Name (oracle-l5r-8989): "You MAY target and rehonor a dishonorable
             // Personality" -- an optional target, the same "not required to exist" shape as "attack"
@@ -4288,7 +4304,7 @@ public sealed partial class MatchEngine
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
             case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack": case "chiyo-attack":
-            case "ebizo-attack": case "training-recon-attack":
+            case "ebizo-attack": case "training-recon-attack": case "training-province-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
@@ -5812,7 +5828,8 @@ public sealed partial class MatchEngine
                 // Shosuro Hawado's battlefield half also needs its destination (command.Province): one
                 // candidate per battlefield not yet resolved this Battle phase -- ValidateAbility below
                 // keeps only the ones with enemy units. Every other ability has exactly one (null).
-                int?[] destinations = id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray() : [null];
+                int?[] destinations = id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
+                    : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
                 var legal = new List<GameCommand>(); string? error = null;
                 var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
                 foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
@@ -5842,7 +5859,10 @@ public sealed partial class MatchEngine
                     + (source is not null && !(Definition(source).Abilities ?? []).Contains(id) && source.GrantedAbilities.FirstOrDefault(g => g.AbilityId == id) is { CopiedFromName: { } copiedFrom } ? $" · copied from {copiedFrom}" : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
-                    Gold: firstQuote, TargetGold: targetQuotes);
+                    Gold: firstQuote, TargetGold: targetQuotes,
+                    // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
+                    Provinces: ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
+                    NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null));
             }
         }
     }

@@ -771,7 +771,8 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
-    Dictionary<string, GoldQuote>? TargetGold = null);
+    Dictionary<string, GoldQuote>? TargetGold = null,
+    bool NoTarget = false);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

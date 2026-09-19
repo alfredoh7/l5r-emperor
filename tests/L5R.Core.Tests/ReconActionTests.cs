@@ -199,9 +199,10 @@ internal static class ReconActionTests
         {
             var s=BattleTable();
             var ebizo=Add(s,Ebizo,0,Zone.Home); var actor=Add(s,Actor,0,Zone.Battlefield,province:0);
-            Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
+            Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); var reactor=Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
             var e=MatchEngine.FromTestState(s);
-            Accept(e,Use(e,0,"training-recon-attack",actor.Id));
+            // Only an Attack that targets a CARD is open to card-targeted reactions (Mendon, issue #335): declare it at the (Force 2) reactor.
+            Accept(e,Use(e,0,"training-recon-attack",actor.Id,target:reactor.Id));
             Eq(e.State.PendingChoice?.Type,"attackReaction","The Recon Attack is pending, open to reaction");
             Eq(e.State.PendingAttack!.Kind,"Ranged","a Ranged Attack (Ranged-only reactions -- Strong Defenses, Tsuruchi Yakusho -- key off this)");
             Eq(Bonuses(e,ebizo),0,"Announced, not yet resolved: no bonus yet");
@@ -283,9 +284,9 @@ internal static class ReconActionTests
         // Held open by an enemy attack reactor, the pending Attack is a Ranged one whose strength is his live Force.
         {
             var s=BattleTable();
-            var ebizo=Add(s,Ebizo,0,Zone.Battlefield,province:0); Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
+            var ebizo=Add(s,Ebizo,0,Zone.Battlefield,province:0); var victim=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
             var e=MatchEngine.FromTestState(s);
-            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id));
+            Accept(e,Use(e,0,"ebizo-attack",ebizo.Id,target:victim.Id));
             Eq(e.State.PendingAttack!.Kind,"Ranged"); Eq(e.State.PendingAttack.Strength,4,"strength = his Force (4)");
         }
         // Two Recon actions first: Ebizo is Force 6 now, so the SAME attack destroys the Force-6 target -- the strength is his live Force.

@@ -39,6 +39,7 @@ internal static class TargetedActionReactionTests
             ("Mochitoko negates bow-only, destroy-only and bow-then-destroy actions (Tokoru's Bear bows a Follower and destroys it as an attachment: both negated at once, several kinds on one action) and a Melee Attack that would destroy the Follower", MochitokoKinds),
             ("Mochitoko and a Follower paid as a COST (Mendon): Hiruma Tensin's \"bow your performing Follower\" -- the window opens before the cost is paid, Mochitoko negates that bowing, and the ENTIRE action is negated and pays nothing (no effect, no Honor-loss cost, no draw); without him the cost is paid and the action resolves", MochitokoBlocksAFollowerCost),
             ("Mochitoko is offered only when it can matter: a Follower of his controller's whose host is at his location, targeted by an action that could bow or destroy it -- not an enemy Follower, a Follower elsewhere, a Personality, a pure Force penalty, while bowed, or with both uses spent", MochitokoOnlyWhenApplicable),
+            ("Ranged and Melee Attacks need no card target (Mendon): every Attack is offered as legal with NO target (and the option says so), a card target as before, and -- for an ability that says so -- the current battlefield's province; an Attack that names no card (no target, or a province) opens no window although Ezuno, Yurishi, Mochitoko, the Blade and a strength reactor are all in play, while the same Attack aimed at a card does", AttacksNeedNoCardTarget),
             ("Every enabled command offered inside a redirect or negation window validates and is accepted on a fresh engine (Ezuno, Blade with every candidate, Yurishi, Jinn-Kuen, Mochitoko)", OfferedCommandsAllValidate),
         ];
         runner.Run("targeted-action-reactions", tests);
@@ -1104,6 +1105,79 @@ internal static class TargetedActionReactionTests
         {
             var r = MochitokoTable(Phase.Action);
             Check(!Opens(r, s => { s.Cards[r.Host.Id].Zone = Zone.Battlefield; s.Cards[r.Host.Id].ProvinceIndex = 0; s.Cards[r.Follower.Id].ProvinceIndex = 0; }, "training-card-bower", "training-bow-enemy-card-open", x => x.Follower.Id, Phase.Action), "Mochitoko at Home, the Follower at a battlefield");
+        }
+    }
+
+    // ---- Attacks that target no card (Mendon): no target, or the province -------------------------------------------------------------------
+    // Player 0 defends with everything that reacts to a targeted action or Attack; player 1 attacks. A card-target Attack would open a window here.
+    private static (MatchState S, CardInstance Shugenja) ReactiveDefence()
+    {
+        var s = Table(); Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+        Add(s, "training-attack-reactor", 0, Zone.Battlefield, province: 0); Add(s, Yurishi, 0, Zone.Battlefield, province: 0);
+        var host = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: host.Id);
+        Add(s, Mochitoko, 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: sh.Id);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        return (s, sh);
+    }
+
+    private static void AttacksNeedNoCardTarget()
+    {
+        {
+            // Ranged: offered with no target, alongside the card targets; taken with none, it opens no window although every reactor is in play and pays its cost.
+            var (s, sh) = ReactiveDefence(); var (castle, stronghold) = Siege(s);
+            var e = MatchEngine.FromTestState(s);
+            var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == stronghold && a.Command?.AbilityId == "carpenter-castle-siege" && a.Command.PerformerId == castle.Id);
+            Check(option.Enabled && option.NoTarget, "the option says an Attack may be taken with no target"); Check(option.TargetIds!.Contains(sh.Id), "and still lists its card targets");
+            Check(option.Provinces is null, "no province target for an Attack that does not name one");
+            var honor = e.State.Players[1].Honor;
+            Accept(e, option.Command! with { TargetId = null });
+            Check(Window(e) is null && e.State.PendingAttack is null && e.State.PendingNegatableAbility is null, "no card is targeted: nothing card-targeted reacts");
+            Check(e.State.Cards[castle.Id].Bowed, "the cost is paid"); Eq(e.State.Players[1].Honor, honor, "and it hit nothing (no target, no Honor)");
+            Check(e.State.Cards.Values.Where(c => c.OwnerId == 0 && c.Zone == Zone.Battlefield).Count() > 0);
+        }
+        {
+            // The same Attack aimed at the card DOES open the window (control) -- and a Melee Attack with no target does not.
+            var (s, sh) = ReactiveDefence(); var (castle, stronghold) = Siege(s); var e = MatchEngine.FromTestState(s);
+            Accept(e, SiegeAt(e, castle, stronghold, sh.Id)); Eq(Window(e), "attackReaction");
+        }
+        {
+            var (s, _) = ReactiveDefence(); var wielder = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var weapon = Add(s, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: wielder.Id);
+            var e = MatchEngine.FromTestState(s);
+            var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == weapon.Id && a.Command?.AbilityId == "training-weapon-attack");
+            Check(option.Enabled && option.NoTarget, "Melee too");
+            Accept(e, option.Command! with { TargetId = null }); Check(Window(e) is null && e.State.PendingAttack is null);
+        }
+        {
+            // Nothing to shoot at: the only legal command is the one with no target, and it is offered as the option's own command.
+            var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == stronghold && a.Command?.AbilityId == "carpenter-castle-siege" && a.Command.PerformerId == castle.Id);
+            Check(option.Enabled && option.NoTarget && option.Command!.TargetId is null && (option.TargetIds?.Length ?? 0) == 0, "a legal Attack with no target in sight");
+            Accept(e, option.Command!);
+        }
+        {
+            // The province: offered only for an ability that says so, as the current battlefield's province, and it is not a card.
+            var (s, sh) = ReactiveDefence(); Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); var attacker = Add(s, "training-province-attacker", 1, Zone.Battlefield, province: 0); var (castle, stronghold) = Siege(s); _ = sh;
+            var e = MatchEngine.FromTestState(s);
+            var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == attacker.Id && a.Command?.AbilityId == "training-province-attack");
+            Check(option.Enabled && option.NoTarget && option.Provinces!.SequenceEqual(new[] { 0 }), "no target, a card, or the province");
+            var weak = e.State.Cards.Values.First(c => c.DefinitionId == "training-crane-samurai"); Check(option.TargetIds!.Contains(weak.Id), "a card target is still offered");
+            var strength = e.State.Players[0].Provinces[0].Strength;
+            var onProvince = new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack", Province: 0);
+            Reject(e, onProvince with { TargetId = weak.Id }); Reject(e, onProvince with { Province = 1 });
+            var siegeOnProvince = new GameCommand("useAbility", 1, e.Version, CardId: stronghold, PerformerId: castle.Id, AbilityId: "carpenter-castle-siege", Province: 0);
+            Reject(e, siegeOnProvince); // an Attack that names no province cannot be aimed at one
+            Accept(e, onProvince);
+            Check(Window(e) is null && e.State.PendingAttack is null && e.State.PendingNegatableAbility is null, "a province is not a card: no card-targeted reaction, no redirect, no window");
+            Eq(e.State.Players[0].Provinces[0].Strength, Math.Max(0, strength - 3), "the Attack's own effect on the province happened");
+            Check(EventLogged(e, "provinceAttacked"));
+        }
+        {
+            // The same Attack with no target at all resolves and does nothing to the province.
+            var s = Table(); var attacker = Add(s, "training-province-attacker", 1, Zone.Battlefield, province: 0); Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var strength = e.State.Players[0].Provinces[0].Strength;
+            Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: attacker.Id, AbilityId: "training-province-attack"));
+            Eq(e.State.Players[0].Provinces[0].Strength, strength, "no target, no province: nothing happens");
         }
     }
 
