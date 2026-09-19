@@ -114,9 +114,11 @@ internal static class PublishedTests
         // exp, now merged into main) = 396 (origin/main at aa42e153 plus #319/#325, which add no cards, re-derived by
         // counting distinct non-ScenarioOnly ids across content/published/*.json, not copied from either side of the
         // conflict) + 3 (this branch's own PersonalityWave25 Daidoji Yuki Experienced, PersonalityWave26 Daidoji Ebizo and
-        // FollowerWave15 Master Scouts, issues #309/#321) = 399. Recomputed from the actual current origin/main baseline
+        // FollowerWave15 Master Scouts, issues #309/#321) = 399 (origin/main at c3ff52a0, re-derived by counting distinct
+        // non-ScenarioOnly ids across content/published/*.json) + 1 (this branch's own StrategyWave18 Return to Action,
+        // issue #331) = 400. Recomputed from the actual current origin/main baseline
         // each time this conflicts, never copied from either side of a merge (this merge's two sides said 393 and 396).
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,399);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,400);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

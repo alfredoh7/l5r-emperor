@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Discipline becomes a play mode (AbilityDefinition.Discipline: free ordinary play from hand, paid Discipline play from a discard pile then removed from the game) instead of a Timing, and Absent becomes an ability flag; Return to Action (oracle-l5r-10953, strategy-wave-18) is the first card on both. Banzai!/Lost in Transit/the fixture migrated (per-id Banzai hack deleted); Ring of Earth, Ring of Water move-home and False Ring of Air moved onto Absent. Behavior changes: Discipline cards are playable from hand; Lost in Transit in a battle now needs presence; False Ring of Air is truly Absent. Decision doc records the OPEN rules questions and what the flags unblock.",
+  "validation": "bash tools/check.sh (with the main checkout's .tools/.cache junctioned in): python unit tests, core 216/216, published 57/57 (pinned count 400 = origin/main c3ff52a0's 399 recounted from content/published + 1), gold-parity 18/18, gold-quote 20/20, battle-timing 23/23, recon-action 11/11, new discipline-absent 14/14 (13 mutations each killed by a named test), deck-format 9/9, deck-workshop 10/10, AI 15/15, Godot client C# compile succeeded; the headless Godot editor import step then segfaulted in this environment (exit 139, during Alegreya.ttf reimport, unrelated to this change), so the Godot import/smoke steps were NOT run locally. No native client visual check. Scan sha256 verified against the receipt.",
+  "remaining": "None for the engine work; ready for review. Open rules questions for Mendon are listed in docs/decisions/2026-09-19-discipline-and-absent-flags.md. Client UI unchanged (shipped card art added under src/L5R.Client/Content/Published).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/331",
+  "branch": "claude/331-return-to-action",
+  "updated": "2026-09-19T10:33:58.614455+00:00"
+}

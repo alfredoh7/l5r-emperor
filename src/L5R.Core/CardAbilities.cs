@@ -36,8 +36,9 @@ namespace L5R.Core;
 // false, matching every unrefusable duel-issuing card's own printed phrasing.
 // Cost (issue #303): the ability's Gold cost RULE, the single piece of data GoldQuotes.cs interprets to
 // price it -- validation, option generation, the quote shipped to the client and the actual payment all
-// read this one rule. Null means "no explicit rule": a Strategy source pays its own printed cost and a
-// Discipline pays its source's printed cost (GoldQuotes.ImplicitGoldRule); anything else is free.
+// read this one rule. Null means "no explicit rule": a Strategy source pays its own printed cost, a
+// Discipline ability played from a discard pile pays its source's published cost (the Discipline cost) and
+// played from hand is free (GoldQuotes.ImplicitGoldRule); anything else is free.
 // Target status (P2, see TargetStatus): IfTarget is the status the ability's own text conditions its
 // EFFECT on ("destroy him if he is dishonorable, Kolat, Ninja, or Shadowlands"; "+2 strength if the target
 // is dishonorable") -- read back through MatchEngine.EffectConditionMet. TargetMustBe is a target-LEGALITY
@@ -56,7 +57,22 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // (Ninja is read off the source CARD's keyword, Iaijutsu off a hardcoded id list, Political/Kiho/Fire nowhere);
     // this is the general tag a "was that a [keyword] action?" check reads (MatchEngine.ActionCarriesKeyword, which
     // also honours the rule that an ability inherits its card's keywords). Null for an untagged ability.
-    string[]? ActionKeywords = null);
+    string[]? ActionKeywords = null,
+    // Discipline (Aftermath supplement; issue #331): an additional way to PLAY the card's own printed action, never a
+    // Timing of its own -- Timing stays the printed verb ("Battle", "Battle/Open", ...) so its phase, presence and
+    // target rules are exactly what the card prints. The flag adds one source zone and one price: from a DISCARD
+    // pile the action may be played by paying the Discipline cost (the card's published GoldCost, priced by
+    // GoldQuotes.ImplicitGoldRule like every other cost) and the card is removed from the game after the action
+    // resolves; from HAND a Strategy is the ordinary free play (a Discipline Strategy prints no Gold Cost box of
+    // its own -- the icon IS the Discipline cost), and it is discarded afterward like any Strategy. Never both
+    // costs: the mode is decided by where the source card is when the action is played.
+    bool Discipline = false,
+    // Absent (Coils of Madness supplement, rule 9): "the action may be taken even without controlling any unit at
+    // the current battlefield" -- the acting player needs no presence there, and neither does the performing card
+    // (an Absent Battle action can be taken by a card that is not at the battlefield at all). It is still a Battle
+    // action: Battle phase only, and its own targets/performers keep whatever location rule they print. Consumed
+    // by ValidateAbility's presence Requires (the block on actingAsBattle); nothing else reads it.
+    bool Absent = false);
 
 public static class AbilityCatalog
 {
@@ -395,11 +411,13 @@ public static class AbilityCatalog
         ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none"),
         ["ring-of-air-straighten"] = new("BattleOrOpen", "Air Repeatable Battle/Open, bow: Straighten your target Personality or attachment", "personality-or-attachment"),
         ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none"),
-        // Simplified from the printed "Absent Repeatable Battle" (issue #194): the no-presence-
-        // required ("Absent") half is not modeled this pass, and only the "move home" half of the
-        // dual move effect is wired -- the "or move him to the current battlefield if he would be
-        // opposed" half is deferred. See docs/ROADMAP.md.
-        ["ring-of-water-move-home"] = new("Battle", "Move your target Personality home", "own-personality"),
+        // Simplified from the printed "Absent Repeatable Battle" (issue #194): only the "move home" half
+        // of the dual move effect is wired -- the "or move him to the current battlefield if he would be
+        // opposed" half is deferred. See docs/ROADMAP.md. Its "Absent" (no-presence-required) half was
+        // not modeled until the general Absent flag existed (issue #331); the target must still be at the
+        // current battlefield (the shared Battle-timing target rule), only the acting player's own presence
+        // is waived.
+        ["ring-of-water-move-home"] = new("Battle", "Move your target Personality home", "own-personality", Absent: true),
         // Ring of the Void (issue #194): a Limited ability (not a granted Additional Action) -- see
         // its own Require (two or fewer Rings in play) -- whose cost is discarding the player's
         // entire hand (except the Void ring itself).
@@ -414,9 +432,10 @@ public static class AbilityCatalog
         // once a winner is known (see Dueling.cs), the same simplification every other Ring recruit
         // condition already uses in place of a forced mid-resolution interrupt.
         ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none"),
-        ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality"),
+        // "Absent Battle" (issue #331: the Absent flag replaces the earlier simplification to plain Battle).
+        ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality", Absent: true),
         // Not a Reaction/grant at all (issue #194) -- a standing condition, usable any time it holds,
-        // like an ordinary Battle ability. Simplified from "Absent Battle" the same way as above.
+        // like an ordinary Battle ability. (Its printed text is a plain "Battle:", so it takes no Absent flag.)
         ["false-ring-of-water-recruit"] = new("Battle", "If the current battlefield's Province Strength is 11 or greater, put this Ring into play and lose 2 Honor", "none"),
         ["false-ring-of-water-attack"] = new("Battle", "Ranged 3 Attack", "attack"),
         // Moshi Ikako (issue #194's own review of previously Ring-blocked cards): "Fire Battle" is a
@@ -437,15 +456,18 @@ public static class AbilityCatalog
         // tie is the only resolution that ever destroys the winning side's own units too).
         ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none"),
         // "Even if you control no units at the current battlefield" waives the ordinary Battle-timing
-        // presence check (the same id-based exemption Mirumoto Michi/Togashi Rikyou use, issue #207)
-        // -- "bow this card or discard it from your hand" is not a new cost shape at all: EVERY Ring
-        // ability may already be used either from hand (discarded afterward, ExecuteAbilityEffects'
-        // own tail) or in play (bowed here) -- see ValidateAbility's own Ring case. "+3 or -3" is the
+        // presence check -- exactly rule 9's own gloss of Absent ("the action may be taken even without
+        // controlling any unit at the current battlefield"), so it carries the Absent flag (issue #331; it
+        // was an id-list entry beside Mirumoto Michi/Togashi Rikyou before, issue #207). A Ring is never a
+        // Personality, so the flag's second half (no source-AtBattle Require) never applied to it either:
+        // migrating changed nothing. "bow this card or discard it from your hand" is not a new cost
+        // shape at all: EVERY Ring ability may already be used either from hand (discarded afterward,
+        // ExecuteAbilityEffects' own tail) or in play (bowed here) -- see ValidateAbility's own Ring case. "+3 or -3" is the
         // player's own choice, the same dual-UsageKey shape as horibe-bow/horibe-straighten, applied
         // to a new "any-province" Target (an own-or-enemy generalization of the existing
         // "enemy-province" category, since this ability may target either side's own provinces).
-        ["ring-of-earth-raise"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province +3 strength", "any-province", UsageKey: "ring-of-earth-strength"),
-        ["ring-of-earth-lower"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province -3 strength", "any-province", UsageKey: "ring-of-earth-strength"),
+        ["ring-of-earth-raise"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province +3 strength", "any-province", UsageKey: "ring-of-earth-strength", Absent: true),
+        ["ring-of-earth-lower"] = new("Battle", "Even if you control no units at the current battlefield, bow this card or discard it from your hand: Give a province -3 strength", "any-province", UsageKey: "ring-of-earth-strength", Absent: true),
         // Ring of Fire's own recruitment condition reuses the exact same "destroyed one or more
         // provinces or enemy cards in this resolution" fact Ring of Water's own CheckRingOfWaterRecruit
         // already computes at each ResolveBattle call site -- no "win" requirement, same as Ring of
@@ -534,9 +556,12 @@ public static class AbilityCatalog
         ["tsukasa-straighten"] = new("Battle", "Target an enemy card in a unit (without attachments, unless you control a Terrain): Straighten it", "enemy-unit-card-terrain-conditional", UsageKey: "tsukasa-bow-straighten"),
         ["arata-force-penalty"] = new("Battle", "Target an enemy Personality or Follower: Force penalty equal to Arata's Personal Honor. Gain 1 Honor.", "enemy-force"),
         // Training-only: exercises Discipline (issue #184) -- played from a discard pile, paying the
-        // card's own printed Gold cost, then removed from the game (see the generic Timing=="Discipline"
-        // handling: zone check, cost, and post-resolution removal all key off this one Timing value).
-        ["training-discipline-ability"] = new("Discipline", "Discipline: pay this card's Gold cost, gain 1 Honor, then remove it from the game", "none"),
+        // card's own printed Gold cost, then removed from the game. Since issue #331 Discipline is a FLAG on
+        // the ability (AbilityDefinition.Discipline), not a Timing: the zone check, the cost and the post-
+        // resolution removal all key off that flag plus where the source card is. The timing is the printed
+        // verb the fixture stands in for ("Battle/Open" -- the widest phase window, exactly the one the old
+        // Discipline timing had).
+        ["training-discipline-ability"] = new("BattleOrOpen", "Discipline: pay this card's Gold cost, gain 1 Honor, then remove it from the game", "none", Discipline: true),
         // Training-only: exercises Stalwart (issue #184) -- a per-instance (not per-player) enemy-bow
         // ability, so two separate source instances can each bow the same Stalwart target once this
         // turn, isolating the keyword's own negation from the ordinary once-per-turn dedupe.
@@ -1094,16 +1119,12 @@ public static class AbilityCatalog
         // own scan confirms the plain "Give your target X" phrasing (no separate Performer), the exact
         // shape crushing-force's own-opposed Target category already established (own, opposed --
         // Army(1-player.Id, battlefield).Any(), no AtBattle check of its own). Discipline (issue #184)
-        // is already built, but every card that has exercised it so far (training-discipline-ability)
-        // carried no printed battle/open verb of its own, so the shared "Discipline" Phase switch is
-        // deliberately as permissive as BattleOrOpen (Action or Battle, no presence Require) -- correct
-        // for a card with no verb, but Banzai!'s own scan reads "Battle:" specifically, not "Battle/
-        // Open," so playing it via Discipline still needs the ordinary Battle-only phase/presence gate
-        // core rules p.489 layers Discipline on TOP of ("using one of its actions," not replacing it).
-        // See its own dedicated Require below (ValidateAbility) for that narrowing -- Lost in Transit
-        // below needs no equivalent, since its own printed "Battle/Open" already matches the shared
-        // Discipline switch's existing permissiveness exactly.
-        ["banzai"] = new("Discipline", "Discipline (2). Battle: Give your target opposed Personality +2F", "own-opposed"),
+        // layers a play mode on top of "using one of its actions," not in place of that action's own
+        // normal timing (core rules, Aftermath supplement) -- so since issue #331 the ability's Timing is
+        // simply its printed verb ("Battle": the Battle phase, with the ordinary battlefield-presence
+        // gate) and Discipline is a flag on top of it. That flag replaced the old Timing "Discipline"
+        // (permissive as BattleOrOpen) and the per-id narrowing Require this card needed under it.
+        ["banzai"] = new("Battle", "Discipline (2). Battle: Give your target opposed Personality +2F", "own-opposed", Discipline: true),
         // Pure Intent (9922, Cost 0): its own scan reads "Choose your performing opposed Personality:
         // Give him a Force bonus equal to his Personal Honor. Gain 2 Honor" -- deck-pool.json's own
         // "Give your target opposed Personality" paraphrase was misleading; the real card uses the
@@ -1122,15 +1143,16 @@ public static class AbilityCatalog
         // condition, the negation of the same Army(1-player.Id, battlefield).Any() check every other
         // "opposed" primitive here already reads -- no new helper needed, just the boolean flipped.
         ["marshal-your-strength"] = new("Battle", "Give your target Personality Force and Chi bonuses equal to his Personal Honor, minus 1 if he is unopposed", "own-personality"),
-        // Lost in Transit (10945, Discipline :g1:): "Battle/Open: Bow a target attachment." Discipline
-        // is already built, and its own shared Phase switch (Action or Battle, no presence Require) is
-        // already an exact match for a genuine "Battle/Open" verb (BattleOrOpen's own established
-        // convention: no battlefield-presence requirement either) -- no per-id narrowing needed, unlike
-        // Banzai! above. "attachment" (a standalone Target category, no dishonorable-Personality
+        // Lost in Transit (10945, Discipline :g1:): "Battle/Open: Bow a target attachment." Timing is its
+        // printed verb, BattleOrOpen (issue #331: Discipline is a flag, not a timing) -- so, like every
+        // Battle/Open card since issue #267, it needs no presence at all when played as an Open action in
+        // the Action phase, and the ordinary battlefield-presence rule when played during a battle (the old
+        // Discipline timing skipped that check in the Battle phase, which the printed verb never allowed).
+        // "attachment" (a standalone Target category, no dishonorable-Personality
         // alternative) already exists verbatim -- nubane-bow's own shape (Open, "Target an attachment:
         // bow it"), not merely "trivially small" to add as the BLOCKERS note assumed; it was already
         // there.
-        ["lost-in-transit-bow"] = new("Discipline", "Discipline (1). Battle/Open: Bow a target attachment", "attachment"),
+        ["lost-in-transit-bow"] = new("BattleOrOpen", "Discipline (1). Battle/Open: Bow a target attachment", "attachment", Discipline: true),
         // Strong Defenses (9931, Cost 0, Siege): "Reaction: After a Ranged or Melee Attack is
         // targeted: Give it -3 strength.\nBattle: Choose your performing defending Personality: Give
         // him +5F. Straighten him before this battle resolves." The Reaction half mirrors Khol
@@ -1379,12 +1401,28 @@ public static class AbilityCatalog
         // Require because a Region sits in Zone.Region, never AtBattle-eligible.
         ["brawl-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card-without-attachments", UsageKey: "brawl"),
         ["brawl-destroy"] = new("BattleOrOpen", "Target a Region (at any province) or a Terrain: Destroy it", "region-or-terrain", UsageKey: "brawl"),
+        // Return to Action (oracle-l5r-10953, issue #331; Aftermath): "Discipline :g2: ... Absent Battle: If you are
+        // the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten
+        // him." The first card on the general Discipline and Absent flags. Discipline: playable from hand (the
+        // ordinary free Strategy play) or, paying 2 Gold, from a discard pile and then removed from the game. Absent:
+        // the Defender needs no unit at the battlefield (moving one in is the whole point). Defender-only is a per-id
+        // Require in ValidateAbility; the target is a new category, own-personality-at-home (bowed or not -- the
+        // straighten is part of the card, so a bowed one is legal); the move can be negated ("move" kind in
+        // MoveOrStraightenKind), and he is straightened only if he really moved (see the execution case).
+        ["return-to-action-move"] = new("Battle", "If you are the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten him", "own-personality-at-home", Discipline: true, Absent: true),
     });
 }
 
 public sealed partial class MatchEngine
 {
     private static bool InPlay(CardInstance card) => card.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield or Zone.Attached or Zone.Region or Zone.Celestial;
+    // Discipline (issue #331): this play of the ability is the DISCARD-PILE mode -- the source sits in a discard pile.
+    // The one place that decides it, read by the zone check (ValidateAbility), the price (GoldQuotes.ImplicitGoldRule),
+    // the option listing (AbilityActions) and the removal from the game once the action has resolved. A Discipline
+    // ability played from anywhere else (a Strategy in hand) is the card's ordinary play: free of the Discipline cost,
+    // discarded afterward like any Strategy.
+    private static bool DisciplineFromDiscard(AbilityDefinition ability, CardInstance? source) =>
+        ability.Discipline && source is { Zone: Zone.FateDiscard or Zone.DynastyDiscard };
     // Tamori Yayu (issue #216): "has ... Cavalry while it is not your turn" -- a LIVE conditional
     // grant, re-evaluated every time (unlike GrantedKeywords, a durable grant that persists once
     // applied); needed an instance method (no longer static) to read _state.ActivePlayerId.
@@ -1568,7 +1606,11 @@ public sealed partial class MatchEngine
             // own acting player has Reconnaissance (MovementCannotBeNegated), checked per command.
             or "kinto-move"
             // Asahina Munefusa (issue #301): "Move him home" -- an ordinary negatable move of its Target.
-            or "munefusa-move" => "move",
+            or "munefusa-move"
+            // Return to Action (issue #331): the first negatable move of its Target TO the battlefield -- its
+            // execution case checks NegatesEffect("move") itself (MoveToBattlefield has no such check, since
+            // every other move-to-battlefield ability moves its own source/performer, never a Target).
+            or "return-to-action-move" => "move",
         "air-straighten" or "paid-straighten" or "training-keyword-conditional-straighten" or "immovable-object-straighten"
             or "defensive-stance" or "ritual-preparation-straighten" or "training-straighten-at-battle" or "horibe-straighten"
             or "furu-straighten" or "tsudoken-exp2-straighten" or "tsukasa-straighten" or "atsumichi-straighten"
@@ -2233,11 +2275,6 @@ public sealed partial class MatchEngine
         Require(ability!.Timing switch {
             "Limited" => _state.Phase == Phase.Action && command.PlayerId == _state.ActivePlayerId,
             "Open" => _state.Phase == Phase.Action,
-            // Discipline (core rules, issue #184): played from a discard pile, not in play -- see the
-            // source-zone check below (Zone.DynastyDiscard/FateDiscard, not InPlay). No printed timing
-            // restriction of its own beyond that, so both phases a card could plausibly reach a
-            // discard pile and still matter in are allowed, like BattleOrOpen.
-            "Discipline" => _state.Phase is Phase.Action or Phase.Battle,
             "Battle" => _state.Phase == Phase.Battle,
             // Printed "Battle/Open" text (e.g. Immovable Object): usable in either phase. The
             // blanket Battle-only checks below (army presence, target/performer at-battle) key off
@@ -2349,12 +2386,11 @@ public sealed partial class MatchEngine
             // for the bow half).
             Require(ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
                 : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
-                : ability.Timing == "Discipline" ? source.Zone is Zone.FateDiscard or Zone.DynastyDiscard
                 // A Ring (issue #194) may use its printed action from hand too -- "you may discard
                 // this Ring from your hand to use its ability without cost" -- in addition to the
                 // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
                 // afterward when used this way, mirroring the Strategy case just below).
-                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) : InPlay(source),
+                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || DisciplineFromDiscard(ability, source) : InPlay(source) || DisciplineFromDiscard(ability, source),
                 "The ability's source is not in the required zone.");
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
             // Dragon Clan review (issue #207) adds three more real "even if bowed" cards. Nikutai
@@ -2397,17 +2433,25 @@ public sealed partial class MatchEngine
         var actingAsBattle = ability.Timing == "Battle" || ability.Timing == "BattleOrOpen" && _state.Phase == Phase.Battle;
         if (actingAsBattle)
         {
+            // Absent (issue #331; Coils of Madness rule 9): the action "may be taken even without controlling any
+            // unit at the current battlefield" -- an ability that PRINTS that (Absent Battle, or Ring of Earth's
+            // "Even if you control no units at the current battlefield") carries AbilityDefinition.Absent and
+            // needs neither the acting player's presence nor its own source card at the battlefield. It stays a
+            // Battle action in every other respect (Battle phase only; its Target/Performer keep their own
+            // location rules -- the shared Target-AtBattle Require below is not waived by it).
+            //
+            // The id list that follows is the older, narrower thing this flag did NOT absorb: self-movers that
+            // "reinforce" a battle from elsewhere by an engine-side ruling rather than a printed Absent (see
+            // docs/decisions/2026-09-19-discipline-and-absent-flags.md for why each stayed).
+            //
             // Mirumoto Michi / Togashi Rikyou (issue #207): reinforcing a battle from elsewhere
             // entirely -- the whole point is moving in, so neither the acting player's own existing
-            // presence nor this card's own AtBattle status can be required the normal way. Ring of
-            // Earth (issue #194) waives the same presence check for an unrelated reason -- its own
-            // printed "Even if you control no units at the current battlefield" -- but needs the
-            // identical exemption from this one shared Require. Mirumoto Houken, Experienced (issue
-            // #267's own actingAsBattle generalization surfaced this): his own "move to the current
-            // battlefield if he would be opposed there" is the exact same "the resolution moves the
-            // performer there" shape -- previously masked entirely, since a BattleOrOpen ability got
+            // presence nor this card's own AtBattle status can be required the normal way. Mirumoto Houken,
+            // Experienced (issue #267's own actingAsBattle generalization surfaced this): his own "move to
+            // the current battlefield if he would be opposed there" is the exact same "the resolution moves
+            // the performer there" shape -- previously masked entirely, since a BattleOrOpen ability got
             // no presence check of any kind before this issue.
-            var reinforcesFromElsewhere = id is "michi-move" or "rikyou-move" or "ring-of-earth-raise" or "ring-of-earth-lower" or "takasho-move" or "intervening-spirit-move" or "houken-exp-straighten"
+            var reinforcesFromElsewhere = ability.Absent || id is "michi-move" or "rikyou-move" or "takasho-move" or "intervening-spirit-move" or "houken-exp-straighten"
                 // Sanctuary of the Waves (issue #295): its default target IS the wielder himself, whose
                 // whole point is moving INTO the battle -- the acting player is never assumed to already
                 // have presence there, same reasoning as Intervening Spirit's own membership above.
@@ -2463,19 +2507,15 @@ public sealed partial class MatchEngine
             else if (id == "hawado-move-home")
                 Require(command.Province is null, "Moving home names no battlefield.");
         }
-        // Banzai! (oracle-l5r-10929, issue #289): a Discipline card whose own printed action is
-        // "Battle:" only (not "Battle/Open" like Lost in Transit) -- the shared Discipline Phase check
-        // above is deliberately as permissive as BattleOrOpen (Action or Battle, no presence Require),
-        // correct for a card with no printed battle/open verb of its own (the only prior real-world
-        // Discipline case), but wrong for Banzai!'s own "Battle:" verb: core rules p.489 layers
-        // Discipline's own sourcing/cost on TOP of "using one of its actions," not in place of that
-        // action's own normal timing. actingAsBattle is unconditionally false for Timing=="Discipline"
-        // (neither switch arm matches), so this narrows it back by hand: strictly the Battle phase,
-        // plus the same battlefield-presence requirement an ordinary "Battle"-Timing ability already
-        // gets from the shared block above.
-        if (id == "banzai")
-            Require(_state.Phase == Phase.Battle && Army(player.Id, _state.CurrentBattleProvince!.Value).Any(),
-                "Banzai! is a Battle-only Discipline: it needs the Battle phase and a unit at the current battlefield.");
+        // Return to Action (oracle-l5r-10953, issue #331): "If you are the Defender" is a condition on taking the
+        // action at all (it sits before the effects colon), so it is checked here where every offer and every
+        // submitted command see it. Absent waived the presence Requires above; there must still be a battle to move
+        // him to.
+        if (id == "return-to-action-move")
+        {
+            Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
+            Require(player.Id != _state.ActivePlayerId, "Only the Defender may use Return to Action.");
+        }
         if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
@@ -3029,7 +3069,9 @@ public sealed partial class MatchEngine
                     // Brawl (issue #304): "a Region (at any province)" -- a Region sits in Zone.Region and is
                     // never AtBattle-eligible; a Terrain in play is always at the current battlefield anyway
                     // (it is discarded when its battle resolves), so exempting the whole category is exact.
-                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain")
+                    // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
+                    // -- own-personality-at-home is exempt for the same reason.
+                    if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home")
                         && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
@@ -3060,6 +3102,10 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // Return to Action (issue #331): "target your Personality at home" -- own, in Zone.Home (a
+                        // Personality out of play, at a battlefield or dead never qualifies), bowed or not: the card
+                        // straightens him afterward, so a bowed one is a legal (and the best) target.
+                        "own-personality-at-home" => personality && own && target.Zone == Zone.Home,
                         // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
                         // Personality controlled by the active player" -- "if it is not your turn" is
                         // checked separately below (a per-id Require, not part of this Target shape).
@@ -3414,7 +3460,13 @@ public sealed partial class MatchEngine
         var pendingAttackBefore = _state.PendingAttack;
         RunAbilityEffects(command, consumedGrant);
         if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
-            SpendHandPlayedCard(Player(command.PlayerId), command.CardId is null ? null : Card(command.CardId));
+        {
+            var spent = command.CardId is null ? null : Card(command.CardId);
+            SpendHandPlayedCard(Player(command.PlayerId), spent);
+            // The same for a Discipline card played from a discard pile (issue #331): the Attack's own early return
+            // skips RunAbilityEffects' tail, so nothing there would remove it from the game.
+            if (DisciplineFromDiscard(AbilityCatalog.All[command.AbilityId!], spent)) RemoveFromGame(spent!);
+        }
     }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
     // Action grant for this use. Threaded through so the tail below knows whether to keep priority
@@ -3429,6 +3481,9 @@ public sealed partial class MatchEngine
         var target = command.TargetId is null ? null : Card(command.TargetId);
         var uses = source?.AbilityUses ?? player.AbilityUses;
         uses[ability.UsageKey ?? id] = _state.TurnNumber;
+        // Discipline (issue #331): decided once, up front, from where the card is BEFORE anything below moves it --
+        // the discard-pile mode is the one that is removed from the game after the action resolves.
+        var disciplineFromDiscard = DisciplineFromDiscard(ability, source);
         // An Attack action executing spends this player's standing Attack-target grants of its kind
         // ("your NEXT Ranged Attack action", Yoritomo Ebumi) -- validated at declaration, spent here.
         if (AttackKind(id) is { Length: > 0 } declaredAttackKind) ConsumeAttackTargetGrants(player.Id, declaredAttackKind);
@@ -3492,6 +3547,9 @@ public sealed partial class MatchEngine
         if (ability.IssuesDuel)
         {
             if (source is not null && Definition(source).Type == CardType.Strategy && source.Zone == Zone.Hand) DiscardFate(player, source);
+            // A Discipline card played from a discard pile is spent the same way: out of the pile the moment it is
+            // played (the duel resolves later, and the engine has no "being resolved" zone).
+            if (disciplineFromDiscard) RemoveFromGame(source!);
             // Most Iaijutsu Personalities duel as themselves ("Kitsuki Daisuke... Daisuke duels
             // him") -- no separate Performer selection at all, unlike Steel on Steel's own chosen
             // performer. ability.Performer null means exactly this: the source card is the challenger.
@@ -3820,6 +3878,13 @@ public sealed partial class MatchEngine
                 if (Keyword(target!, "Ancestor") && Keyword(Card(source!.AttachedTo!), "Water")) GrantAdditionalAction(player.Id, null);
                 break;
             }
+            // Return to Action (issue #331): "move him to this battlefield. After he moves, straighten him." The move
+            // is a real, negatable effect on the target (Tamori Tamoko's window, Champion of Thunder's "all" --
+            // MoveOrStraightenKind); if it was negated he stays at home, and nothing is straightened: the straighten
+            // is conditional on the movement having resolved. Only HE is straightened, not his unit.
+            case "return-to-action-move":
+                if (TryMoveToBattlefield(target!, _state.CurrentBattleProvince!.Value)) Straighten(target!);
+                break;
             case "earth-flows-move":
             {
                 Require(player.Id == 1 - _state.ActivePlayerId, "The Earth Flows: only the Defender may use this.");
@@ -4760,9 +4825,13 @@ public sealed partial class MatchEngine
         // case above, so it never falls into this branch -- only "discard from hand to use the
         // printed action without cost" (issue #194) does.
         SpendHandPlayedCard(player, source);
-        // Discipline (core rules, issue #184): "played and resolved and then removed from the game" --
-        // always, whether or not its own effect above did anything else with the card.
-        if (ability.Timing == "Discipline") RemoveFromGame(source!);
+        // Discipline (core rules, issue #184; a flag since #331): "played and resolved and then removed from the
+        // game" -- always, whether or not its own effect above did anything else with the card. Only the DISCARD-
+        // PILE mode: a hand-played Discipline Strategy was just discarded by SpendHandPlayedCard above like any
+        // Strategy, and stays in the discard pile (available to be replayed from there on a LATER turn: the
+        // once-per-turn stamp on the card keeps it from being replayed the same turn, exactly as the Aftermath
+        // supplement's own reminder says).
+        if (disciplineFromDiscard) RemoveFromGame(source!);
         // Additional Action (issue #181): an ordinary action that did not itself consume a grant
         // forfeits every one of this player's PRE-EXISTING grants outright (same as explicitly
         // passing, see MatchEngine.Pass) -- "resolve them to completion before resuming the normal
@@ -5065,6 +5134,21 @@ public sealed partial class MatchEngine
         if (host.Bowed) Straighten(host);
         foreach (var attachment in Attachments(host.Id)) if (attachment.Bowed) Straighten(attachment);
     }
+    // A move TO a battlefield that an action's own effect applies to a TARGET (Return to Action, issue #331), so -- like
+    // MoveHome's own check -- Tamori Tamoko's negation and Champion of Thunder's "all" apply; false when it was
+    // negated and the card stayed put. Every other move-to-battlefield ability moves its own source or performer, which
+    // no negation window ever names, so plain MoveToBattlefield has no such check.
+    private bool TryMoveToBattlefield(CardInstance card, int province)
+    {
+        if (NegatesEffect(card, "move"))
+        {
+            Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
+            return false;
+        }
+        MoveToBattlefield(card, province);
+        Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {province + 1}.", card.OwnerId, card.Id);
+        return true;
+    }
     private void MoveHome(CardInstance card, bool bow)
     {
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his movement
@@ -5266,11 +5350,14 @@ public sealed partial class MatchEngine
     private IEnumerable<ActionOption> AbilityActions(int playerId)
     {
         var player = Player(playerId);
-        // Discipline (issue #184): a discard-pile card is only a candidate source at all if it carries
-        // a Discipline-timed ability -- ValidateAbility's own zone check (called per candidate below)
-        // is still the real gatekeeper, this is just which cards get considered in the first place.
+        // Discipline (issue #184; a flag since #331): a discard-pile card is only a candidate source at all if it
+        // carries a Discipline-flagged ability -- ValidateAbility's own zone check (called per candidate below)
+        // is still the real gatekeeper, this is just which cards get considered in the first place. A card in
+        // HAND is always a candidate (and offered as the ordinary free play); the same card in a discard pile is
+        // offered, priced and removed from the game as the Discipline play -- never both at once, since a card is
+        // in one zone at a time.
         var sources = _state.Cards.Values.Where(c => c.OwnerId == playerId && (InPlay(c) || c.Zone == Zone.Hand ||
-                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Discipline")))
+                c.Zone is Zone.FateDiscard or Zone.DynastyDiscard && (Definition(c).Abilities ?? []).Any(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Discipline)))
             .SelectMany(c => (Definition(c).Abilities ?? []).Select(id => (Card: (CardInstance?)c, Id: id))).ToList();
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
@@ -5284,7 +5371,7 @@ public sealed partial class MatchEngine
             var ability = AbilityCatalog.All[id];
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
-            var phaseOk = inEngageWindow ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            var phaseOk = inEngageWindow ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
@@ -5382,7 +5469,9 @@ public sealed partial class MatchEngine
                 // the client swaps between them without a round trip.
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                var label = ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})");
+                var label = ability.Label + (performer is null ? "" : $" · {Definition(Card(performer)).Name} ({performer})")
+                    // The Discipline play of a card in a discard pile says what it is, next to its Gold quote (issue #331).
+                    + (DisciplineFromDiscard(ability, source) ? " · Discipline (removed from the game)" : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     Gold: firstQuote, TargetGold: targetQuotes);

@@ -230,6 +230,7 @@ GoldParityTests.Run(runner);
 GoldQuoteTests.Run(runner);
 BattleTimingTests.Run(runner);
 ReconActionTests.Run(runner);
+DisciplineAndAbsentTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 return runner.Finish();
@@ -5311,7 +5312,9 @@ static void DisciplineKeyword()
         Check(e.GetView(1).Players[0].RemovedFromGame.Any(c=>c.Id==card.Id),"Visible to the opponent too, like any discard pile");
     }
     {
-        // Cannot be activated from Hand -- only from a discard pile.
+        // Cannot be activated from Hand -- only from a discard pile. (The fixture is an Item: the Discipline
+        // flag adds the discard-pile mode, and a hand play only exists for a Strategy, whose printed action is
+        // its ordinary play -- see DisciplineAndAbsentTests for the Strategy in hand.)
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var card=Add(s,"training-discipline-item",0,Zone.Hand);
         var e=MatchEngine.FromTestState(s);
@@ -9242,8 +9245,8 @@ static void StrategyWave14Primitives()
         Equal(e.State.Cards[strat.Id].Zone,Zone.RemovedFromGame,"Discipline removes itself from the game after resolving");
     }
     {
-        // Rejected during the Action phase: Banzai!'s own printed "Battle:" verb narrows the shared
-        // Discipline Phase switch's own default BattleOrOpen-like permissiveness back to Battle-only.
+        // Rejected during the Action phase: Banzai!'s printed "Battle:" verb (its ability's Timing, since
+        // issue #331 made Discipline a flag rather than a timing) is Battle-phase only.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0; s.Phase=Phase.Action;
         var strat=Add(s,"oracle-l5r-10929",0,Zone.FateDiscard);
         var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
@@ -9301,11 +9304,14 @@ static void StrategyWave14Primitives()
     }
     // Lost in Transit (oracle-l5r-10945): "Discipline (1). Battle/Open: Bow a target attachment." The
     // standalone "attachment" Target category already existed (nubane-bow's own shape) -- no new
-    // primitive, just wiring. Unlike Banzai!, no per-id presence narrowing: the shared Discipline
-    // Phase switch already matches a genuine Battle/Open verb exactly.
+    // primitive, just wiring. Issue #331 (Discipline is a flag, not a timing): its timing is its printed
+    // Battle/Open verb, so used DURING a battle it is a real Battle action and needs the acting player's
+    // presence at the battlefield like every Battle/Open card (the old Discipline timing skipped that
+    // check); this fixture therefore gives player 0 a unit there (it had none before).
     {
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0; s.PriorityPlayerId=0;
         var strat=Add(s,"oracle-l5r-10945",0,Zone.FateDiscard);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
         var host=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
         var attachment=Add(s,"training-item",1,Zone.Attached,province:0,attachedTo:host.Id);
         var e=MatchEngine.FromTestState(s);

@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-18",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10953",
+      "Name": "Return to Action",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Discipline :g2: (You may pay 2 Gold to play this Discipline from your discard pile, then remove it from the game after its action resolves.)\nAbsent Battle: If you are the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10953.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "return-to-action-move"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
