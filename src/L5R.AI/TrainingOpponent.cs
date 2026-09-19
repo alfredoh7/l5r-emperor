@@ -162,6 +162,10 @@ public static class TrainingOpponent
             // engine offers Pass (which it does only when nothing qualifies), attaches a found Region to the first
             // offered province, and discards its least useful hand card after a Terrain. Ties keep the engine's order.
             case "chooseSearchDeck": case "selectSearchCard": case "passSearch": case "chooseSearchProvince": return 100;
+            // Look at the top N cards (issue #322): a modest bot answers a look with the first arrangement the engine offers -- the
+            // simplest legal one (keep everything in order when that is legal, otherwise take the top card that may be taken) -- and
+            // picks the first offered deck.
+            case "chooseLookDeck": case "arrangeTopCards": return 100;
             case "chooseSearchDiscard":
                 var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
                 return discard is null?0:100-HandValue(discard);

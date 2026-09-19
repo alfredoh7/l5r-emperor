@@ -14,7 +14,8 @@ var cases = new (string Name, Func<Task> Test)[]
     ("persistence failures leave gameplay unchanged", PersistenceRollback),
     ("reconnect replaces old connection and rejects malformed messages", ReconnectAndMalformedInput),
     ("every command field and every Gold quote cross the wire intact (issue #303)", GoldWire),
-    ("a deck search survives a server restart: the journal recovers the shuffle exactly, and each seat sees only what it may (issue #312)", SearchAndShuffleSurviveRestart)
+    ("a deck search survives a server restart: the journal recovers the shuffle exactly, and each seat sees only what it may (issue #312)", SearchAndShuffleSurviveRestart),
+    ("a look at the opponent's top cards survives a server restart: the viewer's ordered cards reach only the viewer's seat, the arrangement is journaled (issue #322)", LookSurvivesRestart)
 };
 var failures = 0;
 foreach (var (name, test) in cases)
@@ -285,6 +286,74 @@ static async Task SearchAndShuffleSurviveRestartFor(ulong seed)
             var referenceHand = reference.GetView(0).Players[0].Hand.Select(c => c.Id).ToArray();
             Check(serverHand.SequenceEqual(referenceHand), $"Seed {seed}: the cards drawn from the shuffled Fate deck differ after a restart");
             Check(latest[0].GetProperty("view").GetProperty("events").GetRawText() == JsonSerializer.Serialize(reference.GetView(0).Events, Protocol.Json), "The public event log survives the restart unchanged");
+            foreach (var socket in sockets) socket.Dispose();
+        }
+    }
+    finally { Directory.Delete(storage, recursive: true); }
+}
+
+// Issue #322: a room journaled while a player is looking at the OPPONENT's deck is recovered by a restarted server with the look intact --
+// the viewer's ordered cards reach only the viewer's seat, the deck owner's seat gets nothing but the public log, the arrangement command
+// (CardIds tokens) is accepted over the wire, and the rearranged deck survives a second restart (the cards the owner then draws are the
+// ones the arrangement put on top).
+static async Task LookSurvivesRestart()
+{
+    var storage = NewStorage();
+    try
+    {
+        const string room = "LCKTEST2"; var hostToken = "look-host-token"; var guestToken = "look-guest-token";
+        static string HashToken(string token) => Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(token)));
+        var journal = MatchEngine.CreateDeckSearchShowcase(77); var reference = MatchEngine.CreateDeckSearchShowcase(77);
+        var source = journal.State.Cards.Values.First(c => c.OwnerId == 0 && c.DefinitionId == "training-look-source").Id;
+        foreach (var engine in new[] { journal, reference })
+            foreach (var command in new[] { new GameCommand("useAbility", 0, 0, source, AbilityId: "training-look-any"), new GameCommand("chooseLookDeck", 0, 1, Choice: "Fate", TargetPlayerId: 1) })
+                if (!engine.Execute(command).Accepted) throw new InvalidOperationException("Setup command rejected: " + command.Type);
+        var opponentTop = reference.State.Players[1].FateDeck.Take(3).Select(id => reference.State.Cards[id].DefinitionId).ToArray();
+        await new RoomStore(storage).SaveAsync(new PersistedRoom(1, room, DateTimeOffset.UtcNow, [new SeatCredential(0, HashToken(hostToken)), new SeatCredential(1, HashToken(guestToken))], journal.ExportReplay(), []));
+
+        var latest = new JsonElement[2];
+        async Task<ClientWebSocket[]> Connect(TestServer server)
+        {
+            var sockets = new ClientWebSocket[2];
+            sockets[0] = await server.ConnectAsync(new SeatReservation(room, 0, hostToken)); latest[0] = await ReadLargeTypeAsync(sockets[0], "state");
+            sockets[1] = await server.ConnectAsync(new SeatReservation(room, 1, guestToken)); latest[1] = await ReadLargeTypeAsync(sockets[1], "state");
+            latest[0] = await ReadLargeTypeAsync(sockets[0], "state", s => s.GetProperty("playersConnected").EnumerateArray().All(v => v.GetBoolean()));
+            return sockets;
+        }
+        // ---- first server: the recovered mid-look room ----
+        ClientWebSocket[] sockets;
+        await using (var first = await TestServer.StartAsync(storage))
+        {
+            sockets = await Connect(first);
+            var host = latest[0].GetProperty("view"); var guest = latest[1].GetProperty("view");
+            Check(latest[0].GetProperty("sequence").GetInt64() == 2, "The room recovered at the journal's version");
+            var look = host.GetProperty("pendingLook");
+            Check(look.ValueKind == JsonValueKind.Object && look.GetProperty("stage").GetString() == "Arrange" && !look.GetProperty("ownDeck").GetBoolean() && look.GetProperty("deckOwnerId").GetInt32() == 1, "The viewer's recovered seat holds the look at the opponent's deck");
+            Check(look.GetProperty("cards").EnumerateArray().Select(c => c.GetProperty("definitionId").GetString()).SequenceEqual(opponentTop), "The opponent's top cards, in order");
+            Check(guest.GetProperty("pendingLook").ValueKind == JsonValueKind.Null, "The deck owner's seat has no viewer");
+            var ownerText = latest[1].GetRawText();
+            // Showcase decks share common definitions with the owner's own hand, so the leak test is on the cards' instance ids.
+            foreach (var id in reference.State.Players[1].FateDeck.Take(3)) Check(!ownerText.Contains('"' + id + '"', StringComparison.Ordinal), $"The deck owner's recovered envelope carries the id of {id}, a card being looked at");
+            Check(!ownerText.Contains("rngState", StringComparison.OrdinalIgnoreCase), "No generator state on the wire");
+            // A wrong arrangement is refused by the engine behind the server; the right one is accepted.
+            await SendAsync(sockets[0], new CommandEnvelope("command", Guid.NewGuid().ToString(), 2, new WireGameCommand("arrangeTopCards", CardIds: ["0:hand", "1:top", "2:top"])));
+            Check(ErrorCode(await ReadLargeTypeAsync(sockets[0], "commandResult")) == "illegal_action", "Taking a card from the opponent's deck into the hand is refused");
+            // Discard the first card, send the second to the bottom, keep the third: the owner's top card becomes the third.
+            await SendAsync(sockets[0], new CommandEnvelope("command", Guid.NewGuid().ToString(), 2, new WireGameCommand("arrangeTopCards", CardIds: ["2:top", "0:discard", "1:bottom"])));
+            var reply = await ReadLargeTypeAsync(sockets[0], "commandResult"); Check(reply.GetProperty("accepted").GetBoolean(), reply.GetRawText());
+            for (var s = 0; s < 2; s++) latest[s] = await ReadLargeTypeAsync(sockets[s], "state", state => state.GetProperty("sequence").GetInt64() == 3);
+            Check(reference.Execute(new GameCommand("arrangeTopCards", 0, 2, CardIds: ["2:top", "0:discard", "1:bottom"])).Accepted, "The reference match accepts the same arrangement");
+            Check(latest[0].GetProperty("view").GetProperty("pendingLook").ValueKind == JsonValueKind.Null, "The look is over");
+            Check(latest[1].GetProperty("view").GetProperty("players")[1].GetProperty("fateDeckCount").GetInt32() == reference.State.Players[1].FateDeck.Count, "The owner's deck count reflects the discard");
+            foreach (var socket in sockets) socket.Dispose();
+        }
+        // ---- second server: restart; the arrangement is part of the journal ----
+        await using (var second = await TestServer.StartAsync(storage))
+        {
+            sockets = await Connect(second);
+            Check(latest[0].GetProperty("sequence").GetInt64() == 3 && latest[0].GetProperty("view").GetProperty("events").GetRawText() == JsonSerializer.Serialize(reference.GetView(0).Events, Protocol.Json), "The arrangement and its public events survive the restart");
+            var ownerView = latest[1].GetProperty("view");
+            Check(ownerView.GetProperty("events").EnumerateArray().Any(e => e.GetProperty("type").GetString() == "topCardsLooked" && e.GetProperty("message").GetString()!.Contains("Lion's Fate deck")), "The deck owner was told a look happened");
             foreach (var socket in sockets) socket.Dispose();
         }
     }

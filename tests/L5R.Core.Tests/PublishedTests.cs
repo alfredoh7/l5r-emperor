@@ -117,7 +117,10 @@ internal static class PublishedTests
         // agrees with the 390 pinned there) + 2 (this branch's own EventWave3 (Imperial Gift) + PersonalityWave27
         // (Ikoma Shizuka), issue #312: neither previously published) = 392. Recomputed from the actual current
         // origin/main baseline each time this conflicts, never copied from either side of a merge.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,392);
+        // Stacked on #328 (issue #322): + 5 (this branch's own EventWave4 (Signs and Portents) + PersonalityWave28 (Isawa
+        // Tamaki, Bayushi Kahoku exp2) + StrategyWave17 (Banish All Doubt) + HoldingWave2 (Public Records), none previously
+        // published) = 397 on top of #328's 392. Re-derive from the actual origin/main baseline once #328 has merged.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,397);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));

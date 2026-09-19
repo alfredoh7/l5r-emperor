@@ -411,6 +411,9 @@ public sealed class MatchState
     // types is open; it holds the engine-private context (which deck, which card was picked) that the
     // player's own MatchView.PendingSearch is derived from, and is never sent as-is to anyone.
     public PendingSearch? PendingSearch { get; set; }
+    // Look at the top N cards (issue #322): see DeckLook.cs. Non-null exactly while a "look*" PendingChoice is open; the
+    // player's own MatchView.PendingLook is derived from it and nobody else sees anything of it.
+    public PendingLook? PendingLook { get; set; }
     // Deck search (issue #312): the append-only, PUBLIC record of every card a player has shown the other
     // player (a search shows what it found). Exposed to both players as MatchView.ShownCards.
     public List<ShownCard> ShownCards { get; set; } = [];
@@ -698,5 +701,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     // Deck search (issue #312), see DeckSearch.cs. PendingSearch is PRIVATE to the searching player (the deck
     // viewer: remaining cards grouped with counts, eligibility per entry) and null in everyone else's view.
     // ShownCards is PUBLIC: the append-only record of every card either player has shown, identical in both views.
-    SearchView? PendingSearch = null, ShownCardView[]? ShownCards = null);
+    SearchView? PendingSearch = null, ShownCardView[]? ShownCards = null,
+    // Look at the top N cards (issue #322), see DeckLook.cs: PRIVATE to the viewing player (the top cards in order and what each
+    // may become) and null in everyone else's view, including the deck owner's when the viewer looks at the OPPONENT's deck.
+    LookView? PendingLook = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

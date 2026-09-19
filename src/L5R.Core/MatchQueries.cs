@@ -46,7 +46,7 @@ public sealed partial class MatchEngine
             _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
-            BuildSearchView(playerId),BuildShownCards());
+            BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId));
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -81,7 +81,7 @@ public sealed partial class MatchEngine
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action && _state.PendingSearch is null)
+        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
@@ -225,6 +225,11 @@ public sealed partial class MatchEngine
         {
             foreach(var id in _state.PendingConqueror!.CandidateIds)
                 Add("chooseConqueror",$"Straighten {Definition(Card(id)).Name} instead of returning home bowed",Command("chooseConqueror",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { } lookPending && IsLookChoice(lookPending.Type))
+        {
+            // Look at the top N cards (issue #322): the viewer always has a legal answer (see LookActions).
+            result.AddRange(LookActions(playerId));
         }
         else if(_state.PendingChoice is { } searchPending && IsSearchChoice(searchPending.Type))
         {

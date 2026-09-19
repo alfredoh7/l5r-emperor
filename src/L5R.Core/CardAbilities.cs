@@ -43,7 +43,10 @@ namespace L5R.Core;
 // ability starts the shared search flow: (optional deck choice) -> candidate list -> select or pass -> show ->
 // effect -> shuffle -> the action resolves. The ability's own cost (Bow Shizuka) is paid in its execution case.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
-    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null, SearchSpec? Search = null);
+    bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null, SearchSpec? Search = null,
+    // Look (issue #322): the ability's look at the top N cards of a deck, as declarative data (which deck(s), N, the dispositions
+    // each viewed card may take with their min/max, where the rest goes, whether the order may change -- see DeckLook.cs).
+    LookSpec? Look = null);
 
 public static class AbilityCatalog
 {
@@ -1306,6 +1309,25 @@ public static class AbilityCatalog
         ["training-search-cheap"] = new("Limited", "Training: search your Fate deck for a cheap non-Unique Follower or Item", "none", Search: SearchCatalog.TrainingCheap),
         ["training-search-focus"] = new("Limited", "Training: search your Fate deck for a Strategy with Focus 2 or less", "none", Search: SearchCatalog.TrainingFocus),
         ["training-search-optional"] = new("Limited", "Training: you may search your Fate deck for a Weapon", "none", Search: SearchCatalog.TrainingOptional),
+        // Look at the top N cards (issue #322). Public Records (oracle-l5r-6095, a Singular Holding): "Limited: Bow this card: Look at
+        // the top three cards of your Fate deck. Put them back in any order." Reorder only; the bow is the cost.
+        ["public-records-look"] = new("Limited", "Bow this card: look at the top three cards of your Fate deck and put them back in any order", "none", Look: LookCatalog.PublicRecords),
+        // Isawa Tamaki (oracle-l5r-3918): "Limited: Look at the top card of your Fate deck. You may put it at the bottom of the deck."
+        // The scan prints no "Void" prefix (the catalogue's "Void Limited" is a later printing's wording); Void is a plain keyword.
+        ["isawa-tamaki-look"] = new("Limited", "Look at the top card of your Fate deck; you may put it at the bottom", "none", Look: LookCatalog.IsawaTamaki),
+        // Banish All Doubt (oracle-l5r-690, Tactical Strategy): "Limited: Choose your performing unbowed Tactician: Look at the top four
+        // cards of your Fate deck. Put one of them in your hand and put the other three on the bottom of your deck in any order."
+        ["banish-all-doubt-look"] = new("Limited", "Choose your performing unbowed Tactician: look at the top four cards of your Fate deck, put one in your hand and the rest on the bottom in any order", "none",
+            Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Tactician"], Look: LookCatalog.BanishAllDoubt),
+        // Bayushi Kahoku, Experienced 2 (oracle-l5r-10479): "Limited: Look at the top three cards of your Fate deck. You may show one of
+        // them that is a Political Strategy and put it in your hand. Put the remaining cards back in any order."
+        ["kahoku-exp2-look"] = new("Limited", "Look at the top three cards of your Fate deck; you may show a Political Strategy and put it in your hand; put the rest back in any order", "none", Look: LookCatalog.BayushiKahokuExp2),
+        // Training fixtures for the look parameters (see LookCatalog).
+        ["training-look-dynasty"] = new("Limited", "Training: look at the top two cards of your Dynasty deck", "none", Look: LookCatalog.TrainingDynasty),
+        ["training-look-any"] = new("Limited", "Training: look at the top three cards of any deck", "none", Look: LookCatalog.TrainingAny),
+        ["training-look-take-item"] = new("Limited", "Training: look at the top three cards of your Fate deck and take an Item", "none", Look: LookCatalog.TrainingTakeItem),
+        ["training-look-fixed"] = new("Limited", "Training: look at the top three cards of your Fate deck; you may discard one; the order is fixed", "none", Look: LookCatalog.TrainingFixedOrder),
+        ["training-look-show"] = new("Limited", "Training: look at the top cards of your Fate deck (the count is the caller's) and show one", "none", Look: LookCatalog.TrainingShowAny),
     });
 }
 
@@ -4391,6 +4413,16 @@ public sealed partial class MatchEngine
             case "shizuka-search": source!.Bowed = true; BeginSearch(ability.Search!, source, player.Id, "ability", bowedBeforeAction); return;
             case "training-search-cheap": case "training-search-focus": case "training-search-optional":
                 BeginSearch(ability.Search!, source!, player.Id, "ability", bowedBeforeAction); return;
+            // Look at the top N cards (issue #322): like a search, the look defers through its own PendingChoice types, so the
+            // action does not finish here -- FinishLook hands priority on once the arrangement is submitted. A Strategy played from
+            // the hand is spent as it is played (the tail that would discard it is skipped by the deferral).
+            case "public-records-look": source!.Bowed = true; BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
+            case "isawa-tamaki-look": case "kahoku-exp2-look": case "training-look-dynasty": case "training-look-any": case "training-look-take-item": case "training-look-fixed":
+                BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction); return;
+            case "training-look-show": BeginLook(ability.Look!, source!, player.Id, "ability", bowedBeforeAction, count: 2); return;
+            case "banish-all-doubt-look":
+                if (source!.Zone == Zone.Hand) DiscardFate(player, source);
+                BeginLook(ability.Look!, source, player.Id, "ability", bowedBeforeAction); return;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
         // Apprentice Shinobi (issue #279): "After the resolution of a Ninja action: Give this card
