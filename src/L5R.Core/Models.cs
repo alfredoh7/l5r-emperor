@@ -358,7 +358,7 @@ public sealed class PendingBeforeBattleResolve
 /// him"): Kind "bow", "straighten", "modifier" (Stat, Amount: "give him -3C") or "destroy". It joins the one ordered set of
 /// before-resolution effects (PendingBeforeBattleResolve) and lapses with its battle, applied or not (FinishBattleResolution).
 /// PlayerId is who registered it, SourceId the card whose action did.</summary>
-public sealed record DelayedBattleEffect(int Id, string Kind, int PlayerId, string? SourceId, string TargetId, string? Stat = null, int Amount = 0);
+public sealed record DelayedBattleEffect(int Id, string Kind, int PlayerId, string? SourceId, string TargetId, string? Stat = null, int Amount = 0, string? ThenMoveId = null);
 
 /// <summary>One claim on "the first opportunity to take a Battle action or pass" in a battle (Battle Phase
 /// spec 4.3/4.4; issue #310). PlayerId is the BENEFICIARY -- who the card says gets the opportunity, not
@@ -562,6 +562,8 @@ public sealed class MatchState
     // (MatchEngine.CheckYourClanNeedsYouReturn), then removed from this list regardless of outcome.
     // A List (not a single nullable id), since more than one copy could resolve within one battle.
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
+    // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
+    public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
     // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --

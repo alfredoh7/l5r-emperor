@@ -1,0 +1,32 @@
+{
+  "Profile": "stronghold-wave-8",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-4638",
+      "Name": "Kyuden Hida",
+      "Type": "Stronghold",
+      "Clan": "Crab",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 8,
+      "StartingHonor": 3,
+      "Text": "Recon Reaction: After engaging: You have Reconnaissance at the current battlefield. Create and attach a 0F Scout Follower to each of one to three of your Personalities in your current army. Remove those Followers from the game after the battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4638.jpg",
+      "Keywords": [
+        "Experienced"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "kyuden-hida-exp-scouts"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

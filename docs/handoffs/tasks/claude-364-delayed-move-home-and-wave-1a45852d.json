@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Delayed move-home battle effect with a dependent second move; wires The Wave Persists (spell-wave-9), Holding Cells, Power of the Night, Quick Recovery, Reckless Rush, Harsh Taskmaster and Steady Resolve (strategy-wave-27), Akodo Dairuko (personality-wave-38, Melee 8) and Kyuden Hida - exp (stronghold-wave-8: Recon Reaction creating attached Scout Followers removed after the battle). The Tale of the Disgraced stays unwired (two targets in one action need the multi-target selection of PR 348). Scans came from the local reference cache after sha256 verification against the committed receipts; nothing was downloaded. Rules engine and published content only; no client, view or wire contract change.",
+  "validation": "bash tools/check.sh --skip-client passes (11 delayed-move-home-wave and 6 kyuden-hida-exp new tests, every existing suite and the Python content suites green; pinned published count 431 recounted from the JSON). Mutation checks: 21 mutations each killed by the intended tests then reverted (one redundant ownership test is an equivalent mutant). Client project not built locally; CI verifies.",
+  "remaining": "The Tale of the Disgraced (10553) needs the general multi-target selection (PR 348). A client multi-select for Kyuden Hida's second and third Scout. Created Scout Follower has no art.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/364",
+  "branch": "claude/364-delayed-move-home-and-wave",
+  "updated": "2026-09-19T23:06:46.470923+00:00"
+}

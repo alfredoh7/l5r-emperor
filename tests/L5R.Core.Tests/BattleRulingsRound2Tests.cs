@@ -564,10 +564,10 @@ internal static class BattleRulingsRound2Tests
     // ---- 4. Rebuilding Kyuden Hida ---------------------------------------------------------------------------------
     private static void KyudenHidaEventPinned()
     {
-        // The two cards are different: the Event's effect id belongs to the Event alone; the Stronghold (a Recon Reaction) is not wired.
+        // The two cards are different: the Event's effect id belongs to the Event alone; the Stronghold (a Recon Reaction, wired in stronghold-wave-8) carries its own ability.
         Eq(CardCatalog.Get(Rebuilding).Type,CardType.Event); Eq(CardCatalog.Get(Rebuilding).Effect,"rebuilding-kyuden-hida");
         Check(CardCatalog.Cards.Values.Count(c=>c.Effect=="rebuilding-kyuden-hida")==1 && CardCatalog.Cards.Values.All(c=>c.Type!=CardType.Stronghold || c.Effect!="rebuilding-kyuden-hida"),"no Stronghold carries the Event's effect");
-        Check(!CardCatalog.Cards.ContainsKey(KyudenHidaStronghold),"the Stronghold Kyuden Hida - exp is not wired: nothing confuses it with the Event");
+        Check(CardCatalog.Get(KyudenHidaStronghold).Type==CardType.Stronghold && CardCatalog.Get(KyudenHidaStronghold).Effect=="none" && CardCatalog.Get(KyudenHidaStronghold).Abilities!.SequenceEqual(["kyuden-hida-exp-scouts"]),"the Stronghold Kyuden Hida - exp is its own card with its own Recon Reaction: nothing confuses it with the Event");
         // Each way to hold the first opportunity: a claim (Sneak Attack's shape), an attacker-side Yuki, Naval Invasion.
         var grants=new (string Name,Action<MatchState> Arrange,Action<MatchEngine> Claim)[]
         {

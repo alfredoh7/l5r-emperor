@@ -32,8 +32,11 @@ def plain(value: str) -> str:
     return html.unescape(re.sub("<[^>]+>", "", value.replace("<br>", "\n"))).replace(":bow:", "Bow this card").strip()
 
 
-def find_source(root: Path, card_id: str) -> tuple[dict, str]:
+def find_source(root: Path, card_id: str, prefer_slug: str | None = None) -> tuple[dict, str]:
     """Return (catalogue card record, slug) for card_id, searching every fetched set.
+
+    prefer_slug names the set whose printing to use when the card has receipts in several (the default is the first set by name);
+    a wave whose card must ship a particular printing, say the Emperor Edition one, passes it.
 
     A card can appear in several sets' full-search catalogues even though only one set's
     image was actually fetched for it (each wave only downloads the cards it needs from a
@@ -46,6 +49,8 @@ def find_source(root: Path, card_id: str) -> tuple[dict, str]:
         for card in data["cards"]:
             if card["id"] == card_id:
                 candidates.append((card, catalogue_path.parent.name))
+    if prefer_slug is not None:
+        candidates = [c for c in candidates if c[1] == prefer_slug] or candidates
     for card, slug in candidates:
         image_id = card["image_ids"][0]
         if (root / "assets/reference/oracle" / slug / "receipts" / f"{image_id}.json").exists():
@@ -60,7 +65,7 @@ def find_receipt(root: Path, slug: str, image_id: str) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def build_definition_fields(root: Path, card_id: str, allow_text: bool = False) -> tuple[dict, dict]:
+def build_definition_fields(root: Path, card_id: str, allow_text: bool = False, prefer_slug: str | None = None) -> tuple[dict, dict]:
     """Verify and copy a card's scan, returning (CardDefinition fields minus Effect/Abilities,
     source receipt for a *-sources.json manifest). Fields include "_oracle_id" (int) so a curated
     wave can key its Effect/Ability overrides on it; callers must pop it before serializing.
@@ -69,7 +74,7 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False) 
     allow_text=True (ability waves) fails closed if it does NOT -- each wave only ever emits the
     kind of card it was built to review.
     """
-    record, slug = find_source(root, card_id)
+    record, slug = find_source(root, card_id, prefer_slug)
     c = record["source_record"]
     printing = record["selected_printings"][0]
 

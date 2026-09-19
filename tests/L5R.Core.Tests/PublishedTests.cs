@@ -129,7 +129,10 @@ internal static class PublishedTests
         // (origin/main 8b378a8d) + 3 = 417, re-derived from the merged tree (distinct non-ScenarioOnly ids across content/published/*.json), not from either side.
         // + 5 (issue #335: PersonalityWave30 Mirumoto Ezuno, Goju Yurishi, Yasuki Jinn-Kuen exp2 and Hida Mochitoko exp, and ItemWave4 Blade of Champions, none previously
         // published) = 422, recounted from the merged tree (distinct non-ScenarioOnly ids across content/published/*.json), not from either side.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,422);
+        // + 9 (issue #364: StrategyWave27 Steady Resolve, Holding Cells, Power of the Night, Quick Recovery, Reckless Rush and Harsh Taskmaster + SpellWave9 The Wave Persists +
+        // PersonalityWave38 Akodo Dairuko + StrongholdWave8 Kyuden Hida - exp, none previously published) = 431, recounted from origin/main 03fa444a (422, distinct
+        // non-ScenarioOnly ids across content/published/*.json) plus this branch's nine. The created Scout Follower is scenario-only and not counted.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,431);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
