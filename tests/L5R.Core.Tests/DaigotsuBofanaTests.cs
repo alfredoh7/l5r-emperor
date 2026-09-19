@@ -718,6 +718,9 @@ internal static class DaigotsuBofanaTests
         });
         var none = e3.QueryActions(0).Single(a => a.Label.StartsWith("Target a Dark Virtue"));
         Check(!none.Enabled, "no legal Dark Virtue: not offered as usable");
+        // ...and a command naming each of the wrong cards directly is refused too, not merely unlisted.
+        foreach (var wrong in e3.State.Cards.Values.Where(c => c.DefinitionId is "training-bow-strategy" or "training-dark-virtue-open" or "training-dark-virtue"))
+            Reject(e3, new GameCommand("useAbility", 0, e3.Version, CardId: e3.State.Cards.Values.Single(c => c.DefinitionId == BofanaExp).Id, TargetId: wrong.Id, AbilityId: "bofana-exp-dark-virtue"));
         // A Bofana that already acted this turn cannot act again (an ordinary once-per-turn Battle action).
         var (e4, _, dv4, _) = DarkVirtueTable();
         Accept(e4, e4.QueryActions(0).Single(a => a.Command?.AbilityId == "bofana-exp-dark-virtue").Command!);
