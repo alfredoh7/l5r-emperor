@@ -34,6 +34,7 @@ internal static class TargetedActionReactionTests
             ("Jinn-Kuen's Political Reaction: another player's action targeting a Merchant of his controller's -- Jinn-Kuen himself included -- offers the negation for 2 Gold through the Gold quote, and paying bows the chosen sources and negates the action's effects on the Merchant; not a non-Merchant, not another player's Merchant, not for a controller who cannot pay, and a cost of 0 is offered with no Gold at all", JinnKuenPaysAndNegates),
             ("Jinn-Kuen's negation is the blanket one: every kind of effect the action would apply to the Merchant is negated -- bow, Force penalty, movement, dishonor, destruction, an Attack's destruction -- and the acting player's own costs and the rest of the action still happen", JinnKuenBlanketNegation),
             ("Jinn-Kuen's Open action straightens a Holding or a Stronghold (either side's), and nothing else", JinnKuenStraightens),
+            ("Daigotsu Bofana's announce-time trait fires ONCE PER ACTION per Bofana (Mendon): redirected away after it fired -> no second fire; redirected onto him -> exactly one fire, judged when the window closes and before the action resolves; two redirects -> still one; an Attack redirected onto him the same", BofanaTraitFiresOncePerAction),
             ("Mochitoko: twice per turn, after an action targets his controller's Follower at his location, its bowing and destruction are negated -- the first use, the second use, then no more that turn (not offered, the action resolves), and the next turn resets it; the use count is exactly what the limit reads", MochitokoTwicePerTurn),
             ("Mochitoko negates bow-only, destroy-only and bow-then-destroy actions (Tokoru's Bear bows a Follower and destroys it as an attachment: both negated at once, several kinds on one action) and a Melee Attack that would destroy the Follower", MochitokoKinds),
             ("Mochitoko and a Follower paid as a COST (Mendon): Hiruma Tensin's \"bow your performing Follower\" -- the window opens before the cost is paid, Mochitoko negates that bowing, and the ENTIRE action is negated and pays nothing (no effect, no Honor-loss cost, no draw); without him the cost is paid and the action resolves", MochitokoBlocksAFollowerCost),
@@ -871,6 +872,68 @@ internal static class TargetedActionReactionTests
             var fresh = MatchEngine.FromTestState(s);
             Accept(fresh, option.Command! with { TargetId = target.Id, ExpectedVersion = fresh.Version });
             Check(!fresh.State.Cards[target.Id].Bowed, "straightened " + target.Id);
+        }
+    }
+
+    // ---- Daigotsu Bofana's announce-time trait on a redirected action (Mendon: once per action per Bofana) -----------------------------
+    private const string BofanaCard = "oracle-l5r-1706";
+    private static int Discards(MatchEngine e) => e.State.Events.Count(x => x.Type == "handDiscard");
+    private static bool AsksForDiscard(MatchEngine e) => e.State.PendingChoice?.Type == "forcedDiscard";
+    private static void AnswerDiscard(MatchEngine e)
+    {
+        var offer = e.QueryActions(1).First(a => a.Type == "forcedDiscard" && a.Enabled);
+        Accept(e, offer.Command!);
+    }
+    private static void GiveHand(MatchState s, int n = 3) { for (var i = 0; i < n; i++) Add(s, "training-farm", 1, Zone.Hand); }
+
+    private static void BofanaTraitFiresOncePerAction()
+    {
+        {
+            // Fired at announcement (the action targets Bofana), then redirected AWAY by the Blade: no second fire.
+            var s = Table(); var bofana = Add(s, BofanaCard, 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: bofana.Id);
+            var q = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); GiveHand(s);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, Bow, bower.Id, bofana.Id));
+            Check(AsksForDiscard(e), "announcing the action at Bofana asks for a discard first"); AnswerDiscard(e);
+            Eq(Window(e), "beforeActionReaction"); Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", q.Id)); ClosePassing(e);
+            Eq(Discards(e), 1, "redirected away: exactly the one discard"); Check(e.State.Cards[q.Id].Bowed && !e.State.Cards[bofana.Id].Bowed);
+        }
+        {
+            // Redirected ONTO Bofana (not judged at announcement): judged once when the window closes, then the action resolves on him.
+            var s = Table(); var p = Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: p.Id);
+            var bofana = Add(s, BofanaCard, 0, Zone.Battlefield, province: 0); var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); GiveHand(s);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, Bow, bower.Id, p.Id));
+            Check(!AsksForDiscard(e) && Window(e) == "beforeActionReaction", "no discard for an action that does not target him");
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", bofana.Id)); ClosePassing(e);
+            Check(AsksForDiscard(e), "the window closed on an action that now targets Bofana: his trait is judged"); Check(!e.State.Cards[bofana.Id].Bowed, "before the action resolves");
+            Eq(e.State.PendingChoice!.PlayerId, 1, "the acting player discards"); AnswerDiscard(e);
+            Check(!AsksForDiscard(e) && e.State.Cards[bofana.Id].Bowed && !e.State.Cards[p.Id].Bowed, "then the action resolves on him");
+            Eq(Discards(e), 1, "exactly one fire");
+        }
+        {
+            // Two redirects (Ezuno, then the Blade on Ezuno) ending on Bofana: still one fire.
+            var s = Table(); var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: ez.Id);
+            var shugenja = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0); var bofana = Add(s, BofanaCard, 0, Zone.Battlefield, province: 0);
+            var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0); GiveHand(s);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, Bow, bower.Id, shugenja.Id));
+            Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); Accept(e, new GameCommand("declineReaction", 1, e.Version));
+            Eq(e.State.PendingNegatableAbility!.TargetId, ez.Id);
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", bofana.Id)); ClosePassing(e);
+            Check(AsksForDiscard(e), "two redirects, the last onto Bofana: judged at the close"); AnswerDiscard(e);
+            Eq(Discards(e), 1, "exactly one fire"); Check(e.State.Cards[bofana.Id].Bowed && !e.State.Cards[ez.Id].Bowed && !e.State.Cards[shugenja.Id].Bowed);
+        }
+        {
+            // An Attack redirected onto Bofana (Force lowered to 4: Ranged 5 reaches him) is judged the same way, in the attack window's close.
+            var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var p = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0); Add(s, Blade, 0, Zone.Attached, province: 0, parent: p.Id);
+            var bofana = Add(s, BofanaCard, 0, Zone.Battlefield, province: 0); bofana.Modifiers.Add(new("test", "test", "Force", -3)); GiveHand(s);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, SiegeAt(e, castle, stronghold, p.Id)); Eq(Window(e), "attackReaction");
+            Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", bofana.Id)); ClosePassing(e);
+            Check(AsksForDiscard(e) && e.State.Cards[bofana.Id].Zone == Zone.Battlefield, "judged before the Attack resolves"); AnswerDiscard(e);
+            Eq(Discards(e), 1); Check(e.State.Cards[bofana.Id].Zone != Zone.Battlefield && e.State.PendingAttack is null, "and then the Attack destroyed him (Force 4 <= 5)");
         }
     }
 

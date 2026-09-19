@@ -14,18 +14,27 @@ public sealed partial class MatchEngine
     // once per PHASE per Bofana, replacing the default once per turn; the FIRST targeting of a phase spends it whether or not
     // the Force condition then holds (the condition is the effect's, not the trigger's). The player (the one whose action
     // it was) chooses the card. Returns true when a discard was opened; the announced action carries on once it is answered.
-    private bool OpenForcedDiscardForTargetedTrait(GameCommand command)
+    //
+    // The trait is asked ONCE PER ACTION per Bofana (issue #335, Mendon): retargeting is not a new action, only a change of target before the
+    // effect resolves. MatchState.AnnounceTraitEvaluated lists the Bofanas the current action has been judged for (reset when the next action is
+    // announced). An action redirected onto a Bofana that was not yet judged is judged when its reaction window closes (resume "action" for a
+    // deferred action, "attack" for an Attack), before it resolves -- the window holds no second decision -- and the action then carries on; one
+    // redirected away had already been judged at announcement and is not judged again, however many redirects there are.
+    private bool OpenForcedDiscardForTargetedTrait(GameCommand command, string? resume = null)
     {
         if (!AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) || ability.Timing == "Reaction") return false;
+        if (resume is null) _state.AnnounceTraitEvaluated.Clear();
         var targeted = ActionTargetIds(command).ToArray();
         if (targeted.Length == 0) return false;
         foreach (var bofana in _state.Cards.Values.Where(c => targeted.Contains(c.Id) && c.OwnerId != command.PlayerId && InPlay(c) && Definition(c).Effect == BofanaTargetedDiscardEffect)
                      .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
         {
+            if (_state.AnnounceTraitEvaluated.Contains(bofana.Id)) continue;
+            _state.AnnounceTraitEvaluated.Add(bofana.Id);
             if (!TrySpendPhaseUse(bofana.AbilityUses, BofanaTargetedDiscardEffect)) continue;
             if (PerformingCardForce(command) >= Definition(bofana).Force) continue;
             if (!Player(command.PlayerId).Hand.Any(id => !CommandNamesCard(command, id))) continue;
-            _state.ForcedDiscardContinuation = command;
+            _state.ForcedDiscardContinuation = command; _state.ForcedDiscardResume = resume;
             _state.PendingChoice = new("forcedDiscard", command.PlayerId, bofana.Id, $"{Definition(bofana).Name}: discard a card.");
             _state.PriorityPlayerId = command.PlayerId; _state.ConsecutivePasses = 0;
             Emit("forcedDiscardOffered", $"{Player(command.PlayerId).Name} must discard a card ({Definition(bofana).Name}).", command.PlayerId, bofana.Id);

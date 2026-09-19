@@ -611,6 +611,11 @@ public sealed class MatchState
     // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
     // UseAbility carries on with it exactly where it stopped.
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    // Where the held action resumes once the discard is answered: null = announcement (UseAbility carries on), "action" = a deferred action whose window
+    // has closed, "attack" = a pending Attack whose window has closed (issue #335).
+    public string? ForcedDiscardResume { get; set; }
+    // The Bofanas the action being announced or resolved has already been judged for (the announce-time trait fires once per action per Bofana).
+    public List<string> AnnounceTraitEvaluated { get; set; } = [];
     // The card whose mandatory "after this enters play" effects wait for its open Proclaim window (see ApplyPendingEntryEffects).
     public string? PendingEntryEffectsCardId { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
