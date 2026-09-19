@@ -1215,6 +1215,8 @@ public sealed partial class MatchEngine
         // grant (which genuinely is scoped to just this battle).
         _state.AdditionalActions.RemoveAll(g => !(g.ScopeCardIds is { Length: 1 } ids && Definition(Card(ids[0])).Type == CardType.Ring));
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
+        // An unused Attack-target grant ("your next Ranged Attack action this battle") ends with the battle.
+        _state.AttackTargetGrants.Clear();
         // Force redirection (issue #216) is "for the duration of the battle," same reasoning.
         _state.ForceRedirects.Clear();
         // Ring of Water's own recruitment condition (issue #194) is battle-scoped, same reasoning.

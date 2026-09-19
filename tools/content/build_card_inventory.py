@@ -52,7 +52,11 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-10894": "Needs a \"modify the next Honor change\" pending-state mechanism.",
     "oracle-l5r-1992": "Needs a Follower-eligible Performer category (existing categories are Personality-only).",
     "oracle-l5r-10335": "Needs a new tracked EnteredPlayTurn field on CardInstance.",
-    "oracle-l5r-9868": "Needs the printed Attack-vs-attachments override (explicitly deferred in #158).",
+    # Elephant Caravan (9868): the old note claimed a printed Attack-vs-attachments override (deferred in #158), but the card prints
+    # no Attack at all ("Fear Battle: Target an enemy card with equal or lower Force. If it is bowed or an attachment, destroy it.
+    # Bow it."). The real Follower-exception family (Kahoku - exp, Kosoko - exp, Ebumi, Strategic Strike, Toritaka Chokichi,
+    # Ikiryo) is now generalized as AttackFollowerException (personality-wave-24). Whatever keeps this Follower unwired is not P1/P2.
+    "oracle-l5r-9868": "Not blocked by the Attack-vs-attachments override after all (that note was stale: the card prints no Attack). Untriaged for a Follower wave; enemy-card-force-lte-self already matches its target.",
     "oracle-l5r-10679": "Needs \"grant keyword to whole unit\" (the passive Attack-strength defense half is now built -- Destrier/Singh Remnants -- and directly reusable here).",
     "oracle-l5r-10680": "The deck search primitive now exists (issue #312: a searched deck, criteria, show, effect, shuffle), but this card searches the discard pile FIRST and then the deck (\"search your discard pile, then deck, for another Enslaved Djinn\") -- a multi-source search, and a discard-pile candidate list, are not built.",
     "oracle-l5r-2437": "Needs \"Equip this Follower as a Battle action\" (not yet a general capability).",
@@ -66,7 +70,7 @@ BLOCKERS: dict[str, str] = {
     "oracle-l5r-3280": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-3413": "Needs Dueling/Focus Effects (not started at all).",
     "oracle-l5r-10588": "Needs cost-ignoring Equip tied to a named restriction (explicitly deferred since #156).",
-    "oracle-l5r-3589": "Needs the Attack-vs-attachments override plus \"last attached to\" tracking after detachment.",
+    "oracle-l5r-3589": "The Attack-vs-attachments override now exists (AttackFollowerException, personality-wave-24: an unconditional printed exception is one FollowerException: new(\"Ranged\")). Still needs \"last attached to\" tracking after detachment (the strength is that Personality's Chi, and the Honor loss and dishonor act on him).",
     "oracle-l5r-3611": "Needs a performer/wielder-keyed Attack-strength axis (already a known gap elsewhere).",
     "oracle-l5r-4118": "Needs a unit-Force-total comparison target (existing categories only compare individual card Force).",
     "oracle-l5r-10683": "Needs a per-card, permanent \"this Personality may not attack\" attachment flag (Utaku Chikako's own restriction, issue #186, is a player-and-turn-scoped flag, not directly reusable here) plus a self-destroying Limited ability. Dishonor-as-an-action is now built (Justice of the Crane) and directly reusable for its own Dishonor half.",
@@ -407,7 +411,11 @@ BLOCKERS: dict[str, str] = {
     # unwired Second City Personality left after the main #264 pass, triaged against every primitive
     # available at the time, including the Dueling/own-won-duel, Ring, and "choose a player"
     # primitives that landed during #264 itself.
-    "oracle-l5r-807": "Needs the printed Attack-vs-attachments override (the same gap as oracle-l5r-9868, explicitly deferred since #158), here scoped further to dishonorable Personalities specifically and only for Attacks performed by Kahoku himself -- a source-scoped exception layered on top of a still-unbuilt primitive.",
+    # personality-wave-24 published Bayushi Kahoku - exp (807; its old note is gone -- the source-scoped, dishonorable-only Attack-vs-Followers
+    # exception is now the generalized AttackFollowerException) together with five more Personalities whose only gap was that exception or
+    # the generalized target-status predicate (TargetStatus): Tsuruchi Kosoko - exp (9831), Yoritomo Ebumi (9832), Kakita Kazan (4185),
+    # Hiruma Nitani (3311) and Kuni Shinoda - exp (10276). None of the five had a BLOCKERS entry.
+    "oracle-l5r-10080": "Its target-status half is built (TargetStatus.IsDishonorable, an IfTarget condition) but the printed \"+3 strength\" is a province-strength stat change the core rules end with the turn, while every province-strength change in the engine (Improved Defenses, Ring of Earth, Yogo Adi, Dueling) is permanent -- needs a timed province-strength modifier first.",
     "oracle-l5r-1629": "Needs a new Reaction trigger: \"after the resolution of your Recon action\" (the same gap as oracle-l5r-4867); the Ranged Attack strength equal to Ebizo's own Force is separately wirable (AttackStrength already takes a sourceId parameter, and CardForce is a generic helper).",
     "oracle-l5r-1696": "Needs the Engage-timing Reaction window (explicitly not started, #15) for \"after engaging at Yuki's battlefield.\"",
     "oracle-l5r-1706": "Needs a broad \"after another player's action targets this card\" Reaction trigger (the same gap as oracle-l5r-223, the single largest recurring gap across multiple waves), plus a once-per-PHASE usage dedupe distinct from the engine's existing once-per-TURN AbilityUses stamp -- a second, independent gap.",
