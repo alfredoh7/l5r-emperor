@@ -176,7 +176,7 @@ public sealed partial class MatchEngine
         var source = command.CardId is null ? null : Card(command.CardId);
         SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
         Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: {Definition(CostSubjectOf(command)!).Name}'s bowing or destruction as its cost was negated, so nothing is paid and nothing resolves.", player.Id, source?.Id);
-        _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id);
     }

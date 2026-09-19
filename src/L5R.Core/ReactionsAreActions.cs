@@ -8,6 +8,13 @@ public sealed partial class MatchEngine
 {
     internal static bool IsAction(AbilityDefinition ability) => ability.Timing is "Limited" or "Open" or "Battle" or "BattleOrOpen" or "Reaction";
 
+    // Additional Actions (rules lead, 2026-09-19, docs/decisions/2026-09-19-battle-rulings-round-2.md ruling 2): each action of a burst is atomic and
+    // independent, and a Reaction played meanwhile only interrupts it. An ordinary action that is not itself one of the burst's additional actions
+    // ends the burst (its unspent additional actions are forfeited); a Reaction never does, whatever it resolves or is negated as. What does end a
+    // burst is the negation of the action that CREATED the additional actions, and that needs no forfeiture here: a negated action does not resolve,
+    // so the additional actions it would have granted are never created.
+    internal static bool ForfeitsAdditionalActions(AbilityDefinition ability) => ability.Timing != "Reaction";
+
     private bool Unspent(CardInstance card, string abilityId)
     {
         var ability = AbilityCatalog.All[abilityId];

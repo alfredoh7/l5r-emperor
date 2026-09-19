@@ -46,7 +46,7 @@ public sealed partial class MatchEngine
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
-        _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id);
     }

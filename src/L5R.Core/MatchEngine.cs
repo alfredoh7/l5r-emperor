@@ -297,12 +297,15 @@ public sealed partial class MatchEngine
                 // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
                 // already removed the grant regardless of what happens next).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
+                var holder=_state.PendingChoice.PlayerId;
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
                 {
                     var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
                     ExecuteAbilityEffects(pending,consumedGrant:true);
                 }
+                // The additional action was negated: only it is lost. The burst it was part of goes on, so the next additional action is the holder's to take.
+                else if (_state.PendingChoice is null && _state.AdditionalActions.Any(g=>g.PlayerId==holder)) { _state.PriorityPlayerId=holder; _state.ConsecutivePasses=0; }
                 return;
             }
             if (_state.PendingChoice.Type=="beforeActionReaction")
