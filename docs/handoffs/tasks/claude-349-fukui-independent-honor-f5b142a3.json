@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Kitsu Fukui: the Honor gain is the acting player's own, independent of the performing Ancestor (Mendon's sentence-independence ruling): no rehonor conversion, no dependence on the Ancestor being destroyed as the cost or on the target's bow succeeding. Decision doc closes open question 3. Shared because the change touches core, tests and docs.",
+  "validation": "bash tools/check.sh --skip-client passes; 4 named mutations of the change each fail named alternative-costs tests.",
+  "remaining": "None; ready for review. Other open questions in the decision doc remain with Mendon.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/349",
+  "branch": "claude/349-fukui-independent-honor",
+  "updated": "2026-09-19T19:09:10.726313+00:00"
+}
