@@ -302,6 +302,17 @@ internal static class TargetedActionReactionTests
             Accept(e, SiegeAt(e, castle, stronghold, sh.Id));
             Check(Window(e) is null, "Force 6 > Ranged 5: Ezuno is not a legal target, so nothing to redirect to");
         }
+        {
+            // An Attack played as a Strategy from hand: its source is discarded as the window opens, and legality (a target rule) must not depend on it.
+            var s = Table(); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var strategy = Add(s, "training-honor-cost-strategy", 1, Zone.Hand);
+            var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); ez.Modifiers.Add(new("test", "test", "Force", -1)); // Force 3, within Ranged 3
+            var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, "training-honor-cost-attack", strategy.Id, sh.Id));
+            Eq(Window(e), "attackReaction"); Eq(e.State.Cards[strategy.Id].Zone, Zone.FateDiscard, "the Strategy is already spent");
+            Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); ClosePassing(e);
+            Check(e.State.Cards[ez.Id].Zone != Zone.Battlefield && e.State.Cards[sh.Id].Zone == Zone.Battlefield, "the Ranged 3 Attack went to Ezuno (Force 3) all the same");
+        }
     }
 
     // Player 1 (Attacker) commits Gold to bow a Personality whose price depends on the target: the target unit's total Gold cost minus 4 (minimum 0).
@@ -425,6 +436,17 @@ internal static class TargetedActionReactionTests
         ClosePassing(e);
         Check(e.State.Cards[r.R.Id].Bowed, "the action resolved on the chosen card"); Check(!e.State.Cards[r.Wielder.Id].Bowed && !e.State.Cards[r.Q.Id].Bowed, "and on nobody else");
         Check(EventLogged(e, "actionRedirected"));
+        {
+            // "Another of YOUR cards" even when the action would accept anyone's: Battle straightening targets any Personality, so the enemy's Personalities
+            // (and the acting card itself) are legal targets of the action -- and still never candidates.
+            var w = BladeTable(); var straightener = Add(w.S, "training-battle-straightener", 1, Zone.Battlefield, province: 0);
+            var f = MatchEngine.FromTestState(w.S);
+            Accept(f, Offer(f, 1, "training-straighten-at-battle", straightener.Id, w.Wielder.Id));
+            Eq(Window(f), "beforeActionReaction");
+            Check(BladeTargets(f).SequenceEqual(Sorted(w.Q.Id, w.R.Id)), "only the controller's own cards: " + string.Join(",", BladeTargets(f)));
+            foreach (var enemy in new[] { w.Enemy.Id, w.Bower.Id, straightener.Id })
+                Reject(f, new GameCommand("useAbility", 0, f.Version, CardId: w.BladeCard.Id, TargetId: enemy, AbilityId: "blade-of-champions-redirect"));
+        }
     }
 
     private static void BladeOnlyWhenApplicable()
