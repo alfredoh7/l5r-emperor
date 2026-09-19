@@ -229,6 +229,7 @@ PublishedTests.Run(runner);
 GoldParityTests.Run(runner);
 GoldQuoteTests.Run(runner);
 BattleTimingTests.Run(runner);
+BattleRulingsRound2Tests.Run(runner);
 ReconActionTests.Run(runner);
 DisciplineAndAbsentTests.Run(runner);
 DeckFormatTests.Run(runner);

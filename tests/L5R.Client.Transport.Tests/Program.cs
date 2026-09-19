@@ -312,12 +312,16 @@ static async Task PublishedPlay(string url)
     Check(lion.Snapshot.View.BattleStep is { Segment: BattleSteps.None, Step: BattleSteps.None, DecisionPlayerId: null } && crane.Snapshot!.View.BattleStep is { Segment: BattleSteps.None },
         "The battle-step view crosses the live wire (outside the Attack Phase: nothing in progress).");
     var stepView = lion.Snapshot.View with { BattleStep = new BattleStepView(BattleSteps.FightBattles, BattleSteps.Engage, 0, 0, 2, 1, BattleSteps.ReasonDefenderOverride, false,
-        [new FirstOpportunityClaim(0, "Naval", "card-1"), new FirstOpportunityClaim(1, "Engage", null)], BattleSteps.LimitPerformerOnly, "card-2", 1, ["card-3"], "card-3", "engageReaction") };
+        [new FirstOpportunityClaim(0, "Naval", "card-1"), new FirstOpportunityClaim(1, "Engage", null)], BattleSteps.LimitPerformerOnly, "card-2", 1, ["card-3", "delayed:0"], "card-3", "engageReaction",
+        [new BeforeResolutionEffectView("card-3", BattleSteps.EffectTrait, 1, "card-3", "Heart of Rokugan"), new BeforeResolutionEffectView("delayed:0", BattleSteps.EffectDelayed, 0, "card-4", "bow Daidoji Yuki")]) };
+    Check(new BattleStepView(BattleSteps.Declaration, BattleSteps.DeclareOrDecline, 0, 0, null, null, null, false, [], null, null, 0, [], null, null) is { Segment: "Declaration", Step: "DeclareOrDecline" },
+        "The Declaration Segment is one of the published steps (issue #354).");
     // The same discipline the GameCommand wire test applies: a member added to the public view later cannot silently fail to cross the wire.
     using (var json = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(stepView, Protocol.Json)))
-        foreach (var type in new[] { typeof(MatchView), typeof(BattleStepView), typeof(FirstOpportunityClaim) })
+        foreach (var type in new[] { typeof(MatchView), typeof(BattleStepView), typeof(FirstOpportunityClaim), typeof(BeforeResolutionEffectView) })
         {
-            var element = type == typeof(MatchView) ? json.RootElement : type == typeof(BattleStepView) ? json.RootElement.GetProperty("battleStep") : json.RootElement.GetProperty("battleStep").GetProperty("engageClaims")[0];
+            var element = type == typeof(MatchView) ? json.RootElement : type == typeof(BattleStepView) ? json.RootElement.GetProperty("battleStep")
+                : type == typeof(BeforeResolutionEffectView) ? json.RootElement.GetProperty("battleStep").GetProperty("beforeResolutionEffects")[0] : json.RootElement.GetProperty("battleStep").GetProperty("engageClaims")[0];
             foreach (var property in type.GetProperties())
                 Check(element.TryGetProperty(System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(property.Name), out _), $"{type.Name}.{property.Name} is missing from the serialized view.");
         }
