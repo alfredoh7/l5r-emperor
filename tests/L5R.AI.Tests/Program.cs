@@ -70,6 +70,29 @@ Run("passes, never deadlocks, in a multi-reaction before-action window (issue #3
     var decision=TrainingOpponent.Choose(view,actions);
     Check(decision.Command?.Type=="declineReaction","The practice opponent took a reaction over passing");
 });
+Run("passes, never stalls or spends Gold, in a window holding a redirect or a negation (Ezuno, Blade of Champions, Yurishi, Jinn-Kuen, Mochitoko; issue #335)",()=>
+{
+    // The targeted-by-action reactions are offered as targetless useAbility options (Ezuno, Yurishi, Jinn-Kuen with its Gold quote, Mochitoko) or one
+    // option per candidate card (Blade of Champions). The practice opponent scores an ability it has no rule for below passing, so it always passes
+    // -- and never pays Jinn-Kuen's 2 Gold or redirects an action on its own -- in both windows an action can be held in.
+    var game=MatchEngine.CreateStarterMatch();
+    foreach(var window in new[]{"beforeActionReaction","attackReaction"})
+    {
+        var view=game.GetView(0) with { PendingChoice=new(window,1,null,"An action is pending: react or pass.") };
+        var own=view.Players[0].Hand.First().Id;
+        var actions=new ActionOption[]
+        {
+            new("useAbility","Ezuno",true,null,new("useAbility",0,view.Version,CardId:"ezuno",AbilityId:"ezuno-redirect"),"ezuno"),
+            new("useAbility","Blade of Champions",true,null,new("useAbility",0,view.Version,CardId:"blade",TargetId:own,AbilityId:"blade-of-champions-redirect"),"blade"),
+            new("useAbility","Yurishi",true,null,new("useAbility",0,view.Version,CardId:"yurishi",AbilityId:"yurishi-disappear"),"yurishi"),
+            new("useAbility","Jinn-Kuen",true,null,new("useAbility",0,view.Version,CardId:"jinn",AbilityId:"jinn-kuen-negate",SourceIds:["stronghold"]),"jinn"),
+            new("useAbility","Mochitoko",true,null,new("useAbility",0,view.Version,CardId:"moch",AbilityId:"mochitoko-negate"),"moch"),
+            new("declineReaction","Pass reaction",true,null,new("declineReaction",0,view.Version))
+        };
+        var decision=TrainingOpponent.Choose(view,actions);
+        Check(decision.Command?.Type=="declineReaction",$"The practice opponent took a reaction over passing in the {window} window");
+    }
+});
 Run("answers a forced discard (Times of Strife, Daigotsu Bofana) with the least useful card in its hand instead of stalling (issue #333)",()=>
 {
     var game=MatchEngine.CreateStarterMatch();

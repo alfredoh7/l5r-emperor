@@ -17,7 +17,8 @@ internal static class AlternativeCostTests
             ("Independently payable: a BOWED Ancestor cannot pay by bowing (listed disabled with the reason, refused if submitted) but can be destroyed, so the action stays usable; an unbowed one may pay either way", EachOptionIsPayableOnItsOwn),
             ("The performer is the printed \"performing Ancestor Personality\": an Ancestor at the battlefield, yours, any bow state -- not Fukui, not another Personality, not an Ancestor at home or an enemy's; with no Ancestor the action is listed disabled", PerformerIsTheAncestor),
             ("Any enemy card at the battlefield is a legal target (a Personality or an attached Follower); your own cards and an enemy at home are not", TargetsAnyEnemyCardAtTheBattlefield),
-            ("The cost is paid whatever the bow does: a Stalwart target negates only the bowing, the Ancestor is still bowed or destroyed and the Honor still gained; a dishonorable performer rehonors instead of gaining Honor", CostAndHonorAreIndependentOfTheBow),
+            ("The cost is paid whatever the bow does: a Stalwart target negates only the bowing, the Ancestor is still bowed or destroyed and the Honor still gained", CostAndHonorAreIndependentOfTheBow),
+            ("Fukui's Honor gain is independent of the performer (Mendon's sentence-independence ruling, issue #349): honorable or dishonorable Ancestor, bowed or destroyed, target bowed or negated -- the acting player gains exactly 1 Honor, the Ancestor is never rehonored by it, and a card whose performer does gain Honor still rehonors", HonorGainIsIndependentOfThePerformer),
             ("The cost-choice abilities that predate the primitive (Xijkt, Tamori Shosei, Sutigu, The Earth's Hunger) are one bow option: a command that names no option still works, naming bow works, naming destroy is refused; a bowed wielder can no longer pay The Earth's Hunger by 'bowing' him", ExistingBowChoicesAreOneOption),
             ("An ability with no cost options refuses a command that names one", NoOptionsMeansNoChoice),
             ("Which card pays is per option: \"bow this card or destroy the target attachment\" offers both, each spending a different card, and a target that cannot pay (a Personality is not an attachment) is refused", TheSubjectIsPerOption),
@@ -168,14 +169,39 @@ internal static class AlternativeCostTests
             Expect(way == "bow" ? e.State.Cards[r.Ancestor.Id].Bowed : e.State.Cards[r.Ancestor.Id].Zone == Zone.Dead, $"but the {way} cost was paid");
             Eq(e.State.Players[0].Honor, honor + 1, "and the Honor was still gained");
         }
+    }
+
+    // Mendon's ruling (issue #349): "Bow it." and "Gain 1 Honor." are independent complete sentences, so the gain is the acting player's own -- not an
+    // action the performing Ancestor performs -- whatever the Ancestor's honor status, whether it was destroyed as the cost, and whether the bow worked.
+    private static void HonorGainIsIndependentOfThePerformer()
+    {
+        foreach (var (dishonorable, way, stalwart) in new[] { (false, "bow", false), (true, "bow", false), (true, "destroy", false), (false, "destroy", false), (true, "bow", true), (true, "destroy", true) })
         {
-            var r = Battle(); r.Ancestor.Dishonorable = true;
+            var r = Battle(); r.Ancestor.Dishonorable = dishonorable;
+            if (stalwart) r.Enemy.GrantedKeywords.Add(new("Stalwart", "test", "Permanent"));
             var e = Engine(r.S);
             var honor = e.State.Players[0].Honor;
-            Accept(e, Offer(e, 0, Ability, r.Fukui.Id, r.Enemy.Id, r.Ancestor.Id, "bow"));
-            Eq(e.State.Players[0].Honor, honor, "an action a dishonorable performer performs that would give Honor rehonors him instead");
-            Expect(!e.State.Cards[r.Ancestor.Id].Dishonorable, "the performing Ancestor is rehonored");
+            var ancestorHonor = CardCatalog.Get("training-ancestor").PersonalHonor;
+            var label = $"{(dishonorable ? "dishonorable" : "honorable")} Ancestor, {way}, target {(stalwart ? "negates the bow" : "bowed")}";
+            Accept(e, Offer(e, 0, Ability, r.Fukui.Id, r.Enemy.Id, r.Ancestor.Id, way));
+            var s = e.State;
+            Expect(s.Events.Any(x => x.Type == "honorChanged" && x.PlayerId == 0 && x.Amount == 1 && x.Message.Contains("Kitsu Fukui")), $"{label}: the acting player gained 1 Honor from Fukui");
+            // The only other Honor change possible is the ordinary Dishonorable-death penalty of an Ancestor destroyed while dishonorable.
+            var deathPenalty = dishonorable && way == "destroy" ? ancestorHonor : 0;
+            Eq(s.Players[0].Honor, honor + 1 - deathPenalty, $"{label}: Honor");
+            Expect(s.Events.Count(x => x.Type == "honorChanged" && x.PlayerId == 0) == (deathPenalty > 0 ? 2 : 1), $"{label}: no other Honor change");
+            if (dishonorable && way == "bow") Expect(s.Cards[r.Ancestor.Id].Dishonorable, $"{label}: the Ancestor is NOT rehonored (the gain is not its action)");
+            Eq(s.Cards[r.Enemy.Id].Bowed, !stalwart, $"{label}: the bow of the target");
         }
+        // The general rule is untouched for a card whose performer DOES gain the Honor: Tamori Shosei's own gain still rehonors a dishonorable Shosei.
+        var t = Table(Phase.Action);
+        var shosei = Put(t, "training-shosei", 0, Zone.Home); shosei.Dishonorable = true;
+        Put(t, "training-temple-holding", 0, Zone.Home);
+        var te = Engine(t);
+        var before = te.State.Players[0].Honor;
+        Accept(te, Offer(te, 0, "shosei-honor", shosei.Id, performerId: shosei.Id));
+        Eq(te.State.Players[0].Honor, before, "a dishonorable performer's own Honor gain is still a rehonor");
+        Expect(!te.State.Cards[shosei.Id].Dishonorable, "and he is rehonored");
     }
 
     private static void ExistingBowChoicesAreOneOption()

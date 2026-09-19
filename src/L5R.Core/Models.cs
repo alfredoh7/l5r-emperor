@@ -144,6 +144,7 @@ public sealed class SuspendedWindow
     public GameCommand? OutOfPlayActionReaction { get; set; }
     public int? HonorLossReductionPlayerId { get; set; }
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    public string? ForcedDiscardResume { get; set; }
     public List<string> BowReactionCandidateIds { get; set; } = [];
     public string? MoveReactionTargetId { get; set; }
     public string? NikutaiReactionTargetId { get; set; }
@@ -294,11 +295,6 @@ public sealed class PendingAttack
     // Isas' "Move Isas home"; False Ring of Water's own discard-from-hand case). Also the performer
     // Protection (issue #212) checks before letting a Reaction negate this Attack's own strength.
     public string? SourceId { get; set; }
-    // The card the ability is printed on (command.CardId), which is not always the performer: an Item, Spell,
-    // Follower or hand Strategy performs through a Personality. Kept so a deferred Attack answers "was that a
-    // [keyword] action?" from the card whose keywords the ability inherits, exactly as a synchronous action does.
-    // Null for a player ability.
-    public string? SourceCardId { get; set; }
     public string? TargetId { get; set; }
     public int Strength { get; set; }
     public string Kind { get; set; } = "";
@@ -308,6 +304,12 @@ public sealed class PendingAttack
     // immediate (non-deferred) resolution path already gets this for free via ExecuteAbilityEffects'
     // own tail, so only the deferred/reaction-window path needs this carried across.
     public bool Additional { get; set; }
+    // The declaring command, so targeted-by-action reactions can re-run the Attack's target validation; kept in step with TargetId on a redirect. Its CardId is the
+    // card the ability is printed on (not always the performer: an Item, Spell, Follower or hand Strategy performs through a Personality), which is where the
+    // inherited keywords of "was that a [keyword] action?" are read.
+    public GameCommand? Command { get; set; }
+    // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
+    public bool Negated { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
@@ -448,7 +450,7 @@ public sealed class FieldsOfMercyWatch
 public sealed class PendingDuel
 {
     public string AbilityId { get; set; } = "";
-    // The card the challenge-issuing ability is printed on (see PendingAttack.SourceCardId); null for a player ability.
+    // The card the challenge-issuing ability is printed on (an Attack keeps it in PendingAttack.Command.CardId); null for a player ability.
     public string? SourceCardId { get; set; }
     // The player who issued the challenge -- NextAction is called with this once the duel fully
     // resolves, so priority returns exactly where it would have without the interjecting duel.
@@ -653,6 +655,11 @@ public sealed class MatchState
     // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
     // UseAbility carries on with it exactly where it stopped.
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    // Where the held action resumes once the discard is answered: null = announcement (UseAbility carries on), "action" = a deferred action whose window
+    // has closed, "attack" = a pending Attack whose window has closed (issue #335).
+    public string? ForcedDiscardResume { get; set; }
+    // The Bofanas the action being announced or resolved has already been judged for (the announce-time trait fires once per action per Bofana).
+    public List<string> AnnounceTraitEvaluated { get; set; } = [];
     // The card whose mandatory "after this enters play" effects wait for its open Proclaim window (see ApplyPendingEntryEffects).
     public string? PendingEntryEffectsCardId { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
@@ -808,7 +815,8 @@ public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Erro
 public sealed record ActionOption(string Type, string Label, bool Enabled, string? Reason,
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
-    Dictionary<string, GoldQuote>? TargetGold = null);
+    Dictionary<string, GoldQuote>? TargetGold = null,
+    bool NoTarget = false);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

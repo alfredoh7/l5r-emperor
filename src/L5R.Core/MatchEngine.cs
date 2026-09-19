@@ -282,7 +282,11 @@ public sealed partial class MatchEngine
                 // priority check already enforces whose turn it is to act or pass.
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending attack first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
-                if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
+                if (_state.PendingChoice is null && _state.PendingAttack is { } closing)
+                {
+                    if (closing.Command is not null && OpenForcedDiscardForTargetedTrait(closing.Command, "attack")) return;
+                    ResolveAttack();
+                }
                 return;
             }
             if (_state.PendingChoice.Type=="additionalActionReaction")
@@ -316,20 +320,9 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingNegatableAbility is not null)
                 {
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
-                    // A reaction that negated the whole action (Yoritomo Sakuma, issue #338): it is taken, its costs are paid, its effects
-                    // are not applied (ActionNegation.cs).
-                    var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-                    // A Reaction that waited behind this window carries on inside the window it was played in, with THIS window's negations.
-                    var negations=_state.NegatedEffects;
-                    var outer=ContinueSuspendedReaction(pending);
-                    _state.NegatedEffects=negations; var suspended=_state.SuspendedWindows.Count;
-                    if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
-                    // Defensive: a negation signal must never survive past the one re-invocation it
-                    // was set for -- if the re-invoked ability did not actually reach a matching
-                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear them here
-                    // rather than risk them leaking into a later, unrelated one. The window it was played in gets its own back.
-                    if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].NegatedEffects=outer?.NegatedEffects??[];
-                    else _state.NegatedEffects=outer?.NegatedEffects??[];
+                    // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
+                    if(OpenForcedDiscardForTargetedTrait(pending,"action")) return;
+                    ResolveDeferredActionInItsWindow(pending);
                 }
                 return;
             }
@@ -943,6 +936,16 @@ public sealed partial class MatchEngine
             _state.PriorityPlayerId=resumeTo;
         }
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
+    }
+
+    // The deferred action, once its window has closed: negated as a whole (a reaction negated it: Yoritomo Sakuma, issue #338; Jinn-Kuen, issue #335) it is taken and
+    // its costs paid but its effects are not applied (ActionNegation.cs), otherwise it resolves. A negation signal must never survive the one re-invocation it was set
+    // for, so the per-card ones are cleared here.
+    private void ResolveDeferredAction(GameCommand pending)
+    {
+        var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+        if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
+        _state.NegatedEffects.Clear();
     }
 
     private void Pass()
@@ -1993,9 +1996,10 @@ public sealed partial class MatchEngine
         _state.PendingChoice=null;
         if(_state.ForcedDiscardContinuation is { } announced)
         {
-            _state.ForcedDiscardContinuation=null;
-            ContinueSuspendedReaction(announced);
-            AnnounceAbility(announced);
+            var resume=_state.ForcedDiscardResume; _state.ForcedDiscardContinuation=null; _state.ForcedDiscardResume=null;
+            if(resume=="action") ResolveDeferredActionInItsWindow(announced);
+            else if(resume=="attack") ResolveAttack();
+            else { ContinueSuspendedReaction(announced); AnnounceAbility(announced); }
             return;
         }
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
@@ -2029,7 +2033,15 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card) => card.Dishonorable=true;
+    private void Dishonor(CardInstance card)
+    {
+        if(NegatesEffect(card,"all"))
+        {
+            Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
+            return;
+        }
+        card.Dishonorable=true;
+    }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
     // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
@@ -2567,6 +2579,11 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
+        if(amount<0 && HonorLossNegatedWithEffects(playerId))
+        {
+            Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
+            return;
+        }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
             var reduced=Math.Min(0,amount+3);

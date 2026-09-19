@@ -27,6 +27,7 @@ internal static class BattleRulingsRound2Tests
             ("Reactions are actions: a Political Engage claim that names a target is negated like any action; the claim is never recorded and the Engage window is restored", EngageClaimNegated),
             ("Reactions are actions: a Reaction whose bow triggers an 'after this action' window opens it over the window it was played in, and a spent watcher opens nothing", AfterActionWindowForReaction),
             ("Reactions are actions: a Reaction that waited behind a before-action window resolves inside the window it was played in, so what it queues is deferred to that window's close", DeferredReactionResolvesInItsWindow),
+            ("Reactions are actions: the targeted-by-action reactions (Jinn-Kuen's shape) apply to a Reaction that names their Merchant, and negate it", TargetedActionReactionsApplyToReactions),
             ("Reactions are actions: a window set aside behind a Reaction's own window is plain serialized state -- a snapshot mid-way continues identically", SuspendedWindowIsState),
             ("Rebuilding Kyuden Hida (the Event, not the Stronghold): an Attacker holding the first opportunity through Naval Invasion, Yuki or Sneak Attack must pass; that pass counts; the Defender's first normal opportunity follows", KyudenHidaEventPinned),
             ("Deferred Attack: the pending Attack keeps the ability's SOURCE card, so an Item, Spell or Follower's Recon keyword makes the Attack a Recon action -- and the performer's keywords do not", DeferredAttackSource),
@@ -520,6 +521,22 @@ internal static class BattleRulingsRound2Tests
         Eq(e.State.PendingChoice?.Type,"overconfidentDraw","and is offered once the Engage window closes");
     }
 
+    private static void TargetedActionReactionsApplyToReactions()
+    {
+        var s=Selection();
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var guard=Add(s,"training-merchant-free-guard",1,Zone.Battlefield,province:0); Add(s,"training-engage-destroy-strategy",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Take(e,0,"selectBattle");
+        Target(e,0,"training-engage-destroy",guard.Id);
+        Eq(e.State.PendingChoice?.Type,"beforeActionReaction","a Reaction that names his Merchant is an action that targets it: the guard may react");
+        Take(e,1,"useAbility",o=>o.Command!.AbilityId=="training-negate-merchant-free");
+        while(e.State.PendingChoice?.Type=="beforeActionReaction") Decline(e);
+        Eq(e.State.PendingChoice?.Type,"engageReaction","the Engage window is open again");
+        Eq(e.State.Cards[guard.Id].Zone,Zone.Battlefield,"the Reaction's destruction of him was negated");
+        Check(e.State.Events.Any(ev=>ev.Type.Contains("egated")),"and the negation is announced");
+    }
+
     private static void SuspendedWindowIsState()
     {
         var s=Selection();
@@ -593,7 +610,7 @@ internal static class BattleRulingsRound2Tests
     }
 
     // ---- 5. the deferred Attack's source card ----------------------------------------------------------------------
-    private sealed record AttackRig(MatchEngine E,CardInstance Ebizo,CardInstance Source,CardInstance Performer);
+    private sealed record AttackRig(MatchEngine E,CardInstance Ebizo,CardInstance Source,CardInstance Performer,CardInstance Target);
     // player 0's Ebizo at Home; an Attack ability (Melee 2, training-weapon-attack) on `sourceDef` performed by `performerDef`; an enemy attack reactor
     // holds the Attack open so it defers behind its reaction window.
     private static AttackRig BuildAttack(string sourceDef,string performerDef)
@@ -602,8 +619,8 @@ internal static class BattleRulingsRound2Tests
         var ebizo=Add(s,Ebizo,0,Zone.Home);
         var performer=Add(s,performerDef,0,Zone.Battlefield,province:0);
         var source=sourceDef==performerDef?performer:Add(s,sourceDef,0,CardCatalog.Get(sourceDef).Type==CardType.Follower||CardCatalog.Get(sourceDef).Type is CardType.Item or CardType.Spell?Zone.Attached:Zone.Battlefield,province:0,parent:performer.Id);
-        Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
-        return new(MatchEngine.FromTestState(s),ebizo,source,performer);
+        var target=Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0); Add(s,"training-attack-reactor",1,Zone.Battlefield,province:0);
+        return new(MatchEngine.FromTestState(s),ebizo,source,performer,target);
     }
     private static int ReconBonuses(AttackRig r)=>r.E.State.Cards[r.Ebizo.Id].Modifiers.Count(m=>m.Effect=="force-after-own-recon-action");
     private static void DeferredAttackSource()
@@ -612,9 +629,9 @@ internal static class BattleRulingsRound2Tests
         {
             var r=BuildAttack(sourceDef,"training-recon-actor");   // the performer is a Scout, not Recon: only the SOURCE card is
             Check(!CardCatalog.Get("training-recon-actor").Keywords!.Contains("Recon") && CardCatalog.Get(sourceDef).Keywords!.Contains("Recon"));
-            Accept(r.E,Use(r.E,0,"training-weapon-attack",r.Source.Id));
+            Accept(r.E,Use(r.E,0,"training-weapon-attack",r.Source.Id,target:r.Target.Id));
             Eq(r.E.State.PendingChoice?.Type,"attackReaction",$"{sourceDef}: the Attack defers behind its reaction window");
-            Eq(r.E.State.PendingAttack!.SourceCardId,r.Source.Id,$"{sourceDef}: the pending Attack keeps the card the ability is printed on");
+            Eq(r.E.State.PendingAttack!.Command!.CardId,r.Source.Id,$"{sourceDef}: the pending Attack keeps the card the ability is printed on");
             Eq(r.E.State.PendingAttack.SourceId,r.Performer.Id,$"{sourceDef}: and still the performer");
             Eq(ReconBonuses(r),0,"announced, not resolved: no bonus yet");
             Decline(r.E); Decline(r.E);
@@ -622,22 +639,22 @@ internal static class BattleRulingsRound2Tests
         }
         // The Personality-only case: a Recon Personality's own ability.
         var own=BuildAttack("training-recon-attacker","training-recon-attacker");
-        Accept(own.E,Use(own.E,0,"training-weapon-attack",own.Source.Id));
-        Eq(own.E.State.PendingAttack!.SourceCardId,own.Source.Id); Eq(ReconBonuses(own),0);
+        Accept(own.E,Use(own.E,0,"training-weapon-attack",own.Source.Id,target:own.Target.Id));
+        Eq(own.E.State.PendingAttack!.Command!.CardId,own.Source.Id); Eq(ReconBonuses(own),0);
         Decline(own.E); Decline(own.E);
         Eq(ReconBonuses(own),1,"a Personality's own Recon keyword still makes its Attack a Recon action");
         // The performer's keywords are NOT the ability's: a plain weapon wielded by a Recon Personality is no Recon action.
         var plain=BuildAttack("training-weapon-with-attack","training-recon-attacker");
-        Accept(plain.E,Use(plain.E,0,"training-weapon-attack",plain.Source.Id));
-        Eq(plain.E.State.PendingAttack!.SourceCardId,plain.Source.Id); Eq(plain.E.State.PendingAttack.SourceId,plain.Performer.Id);
+        Accept(plain.E,Use(plain.E,0,"training-weapon-attack",plain.Source.Id,target:plain.Target.Id));
+        Eq(plain.E.State.PendingAttack!.Command!.CardId,plain.Source.Id); Eq(plain.E.State.PendingAttack.SourceId,plain.Performer.Id);
         Decline(plain.E); Decline(plain.E);
         Eq(ReconBonuses(plain),0,"an ability inherits the keywords of the card it is on, not of whoever performs it");
         // Synchronous actions agree: the same weapon, nothing able to react, resolves at once and is still a Recon action by its own card.
         var s=Selection(); s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.PriorityPlayerId=0;
         var eb=Add(s,Ebizo,0,Zone.Home); var host=Add(s,"training-recon-actor",0,Zone.Battlefield,province:0); var sword=Add(s,"training-recon-weapon",0,Zone.Attached,province:0,parent:host.Id);
-        Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0);
+        var syncTarget=Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0);
         var sync=MatchEngine.FromTestState(s);
-        Accept(sync,Use(sync,0,"training-weapon-attack",sword.Id));
+        Accept(sync,Use(sync,0,"training-weapon-attack",sword.Id,target:syncTarget.Id));
         Eq(sync.State.Cards[eb.Id].Modifiers.Count(m=>m.Effect=="force-after-own-recon-action"),1);
     }
 }
