@@ -44,7 +44,8 @@ public sealed partial class MatchEngine
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
             _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
-            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck));
+            duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
+            BuildBattleStepView());
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -185,6 +186,36 @@ public sealed partial class MatchEngine
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"engageReaction" })
+        {
+            // Battle Phase timing (issue #310, spec 4.2): every legal "Engage:" action and "After engaging" Reaction this
+            // player holds (in play, or a Strategy in hand, or Naval Invasion), then the pass that ends their opportunity.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
+        {
+            // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.
+            Add("beforeBattleOptional","Decline",Command("beforeBattleOptional") with {Choice="decline"},cardId:optionalPending.CardId);
+            foreach(var target in Army(1-playerId,_state.CurrentBattleProvince!.Value))
+                Add("beforeBattleOptional",$"Bow {Definition(target).Name}",Command("beforeBattleOptional",target:target.Id) with {Choice="use"},cardId:target.Id);
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOrder" })
+        {
+            // The active player orders the simultaneous "before this battle resolves" effects (issue #272/#310).
+            foreach(var id in _state.PendingBeforeBattleResolve!.RemainingSourceIds)
+                Add("beforeBattleOrder",$"Resolve {Definition(Card(id)).Name} next",Command("beforeBattleOrder",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"encircledOrder" })
+        {
+            Add("encircledOrder","The Attacker selects a Personality first",Command("encircledOrder") with {Choice="attacker"});
+            Add("encircledOrder","The Defender selects a Personality first",Command("encircledOrder") with {Choice="defender"});
+        }
+        else if(_state.PendingChoice is { Type:"encircledSelect" })
+        {
+            foreach(var card in Army(playerId,_state.PendingBeforeBattleResolve!.ProvinceIndex))
+                Add("encircledSelect",$"Keep {Definition(card).Name} at this battlefield",Command("encircledSelect",target:card.Id),cardId:card.Id);
         }
         else if(_state.PendingChoice is { Type:"shinden" })
         {

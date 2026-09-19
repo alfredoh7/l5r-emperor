@@ -146,6 +146,16 @@ public sealed partial class MatchEngine
             // Before This Battle Resolves (issue #272): three tightly-scoped, mandatory choices, no
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
             if (_state.PendingChoice.Type=="beforeBattleOrder") { ResolveBeforeBattleOrder(command); return; }
+            if (_state.PendingChoice.Type=="beforeBattleOptional") { ResolveBeforeBattleOptional(command); return; }
+            // Battle Phase timing (issue #310, spec 4.2): "Engage:" actions and "After engaging" Reactions, open to
+            // either side; the top-level priority check above already enforces whose opportunity it is, and two
+            // passes in succession close the window (PassReaction -> CloseEngageWindow decides who acts first).
+            if (_state.PendingChoice.Type=="engageReaction")
+            {
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the Engage window first: play an Engage action or Reaction, or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="encircledOrder") { ResolveEncircledOrder(command); return; }
             if (_state.PendingChoice.Type=="encircledSelect") { ResolveEncircledSelect(command); return; }
             if (_state.PendingChoice.Type=="brashDraw") { ResolveBrashDraw(command); return; }
@@ -309,6 +319,17 @@ public sealed partial class MatchEngine
             return;
         }
         if (_state.PendingDuel is not null) { ResolveDuelCommand(command); return; }
+        // Battle Phase timing (issue #310): a limit on the first-action holder's FIRST Battle action (Naval
+        // Invasion's "which he must perform"; Rebuilding Kyuden Hida's "may not announce a Battle action before the
+        // Defender's first normal opportunity"). Consumed by the holder's next accepted command; a useAbility's
+        // own check lives in ValidateAbility (so QueryActions already withholds what would be rejected), the two
+        // performer-less Battle actions are barred here. A rejected command reverts this clearing with everything else.
+        if (_state.FirstActionRestriction is { } firstActionLimit && command.PlayerId==firstActionLimit.PlayerId && command.Type is "pass" or "useAbility" or "playStrategy" or "recruitReserve")
+        {
+            if (command.Type is "playStrategy" or "recruitReserve") throw new RuleViolation(FirstActionLimitMessage(firstActionLimit));
+            if (command.Type=="useAbility") CheckFirstActionRestriction(command);
+            _state.FirstActionRestriction=null;
+        }
         switch(command.Type)
         {
             case "pass": Pass(); break;
@@ -799,7 +820,9 @@ public sealed partial class MatchEngine
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
             // opponent, so the normal "any action cedes priority" rule still holds once it closes.
-            var resumeTo=pending.ActingPlayerId ?? _state.ActivePlayerId;
+            // The Engage window (issue #310) is the one window that decides WHO resumes: whoever holds the
+            // first opportunity once its claims resolve (the Defender by default).
+            var resumeTo=pending.Type=="engageReaction" ? CloseEngageWindow() : pending.ActingPlayerId ?? _state.ActivePlayerId;
             // Overconfident (issue #223): a chance to react to anything THIS window's own resolution
             // caused to enter or leave play (Bayushi Mugoshi entering during a Proclaim/entryReaction
             // window and being slandered elsewhere, a Reaction that destroyed something, etc.) before
@@ -944,6 +967,13 @@ public sealed partial class MatchEngine
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
         _state.CurrentBattleProvince=command.Province;
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
+        // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
+        // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
+        // Engage window (spec 4.2) opens here, before any Battle action, whenever something could be played in
+        // it; its claims can flip the first opportunity (CloseEngageWindow). Nothing playable: exactly the
+        // pre-#310 flow, event stream included.
+        _state.FirstActionPlayerId=1-_state.ActivePlayerId; _state.FirstActionReason=BattleSteps.ReasonDefault; _state.FirstActionRestriction=null;
+        if(OpenEngageWindow(command.Province!.Value)) { Emit("battleStarted",$"Battle at province {command.Province+1}: engaged."); return; }
         Emit("battleStarted",$"Battle at province {command.Province+1}: defender acts first.");
     }
     private void ResolveBattle()
@@ -963,13 +993,20 @@ public sealed partial class MatchEngine
         }
         ContinueResolveBattle(provinceIndex,attacker,defender);
     }
-    // Every in-play Terrain at this battlefield carrying a "before this battle resolves" effect --
-    // currently just Encircled Terrain, but a list (not a single nullable id) since the core rule
-    // itself is written for the general "multiple such effects" case (ordered by the active player;
-    // see AdvanceBeforeBattleResolve).
+    // Every in-play card at this battlefield carrying a "before this battle resolves / before this battle's
+    // resolution" trait (issue #310, generalizing issue #272's Encircled-Terrain-only list): a card in play
+    // on the battlefield itself (a Terrain, a Personality) or attached to a unit there, whose Abilities name an
+    // ability of Timing "BeforeResolution" -- or whose Effect names one, which is how Encircled Terrain (Effect
+    // "encircled-before-battle") is registered without touching its published data. A list, not a single id,
+    // since the rule is written for several simultaneous effects (ordered by the active player; see
+    // AdvanceBeforeBattleResolve). Ordinal-sorted so the offered order is deterministic.
     private string[] BeforeBattleResolveSourceIds(int provinceIndex) =>
-        _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex && Definition(c).Effect=="encircled-before-battle")
+        _state.Cards.Values.Where(c=>(c.Zone==Zone.Battlefield && c.ProvinceIndex==provinceIndex || c.Zone==Zone.Attached && c.ProvinceIndex==provinceIndex && Card(c.AttachedTo).Zone==Zone.Battlefield)
+                && BeforeResolutionAbilityId(c) is not null)
             .Select(c=>c.Id).Order(StringComparer.Ordinal).ToArray();
+    private static string? BeforeResolutionAbilityId(CardInstance card) =>
+        (Definition(card).Abilities??[]).FirstOrDefault(a=>AbilityCatalog.All.TryGetValue(a,out var d) && d.Timing=="BeforeResolution")
+        ?? (AbilityCatalog.All.TryGetValue(Definition(card).Effect,out var effectAbility) && effectAbility.Timing=="BeforeResolution" ? Definition(card).Effect : null);
     // Drains PendingBeforeBattleResolve.RemainingSourceIds one at a time: zero left resumes ordinary
     // resolution; exactly one left resolves it directly (no real choice to offer); two or more open
     // "beforeBattleOrder" for the ACTIVE player (the core rule's own "whose turn it is") to pick which
@@ -1007,7 +1044,13 @@ public sealed partial class MatchEngine
     private void StartBeforeBattleEffect(PendingBeforeBattleResolve pending)
     {
         var source=Card(pending.ActiveSourceId!);
-        switch(Definition(source).Effect)
+        var traitId=BeforeResolutionAbilityId(source)!;
+        var province=pending.ProvinceIndex;
+        // Each source reads the battlefield live, one at a time, so an earlier source's effect (a Personality sent
+        // home, bowed or boosted) is already reflected when the next one applies -- which is why the order the
+        // active player chooses (AdvanceBeforeBattleResolve) can change who fights.
+        Emit("beforeBattleEffect",$"Before this battle resolves: {Definition(source).Name}.",source.OwnerId,source.Id);
+        switch(traitId)
         {
             // Encircled Terrain (issue #272): "the Attacker and Defender, in the order of your
             // choice" -- "your" is THIS card's own controller, who picks whether the Attacker or the
@@ -1016,11 +1059,38 @@ public sealed partial class MatchEngine
                 pending.EncircledStage="ChooseOrder";
                 _state.PendingChoice=new("encircledOrder",source.OwnerId,source.Id,"Choose whether the Attacker or the Defender selects a Personality first.");
                 _state.PriorityPlayerId=source.OwnerId;
+                return;
+            // Training fixtures (issue #310) proving the general path: a mandatory effect, a mandatory effect that
+            // changes who fights, and an optional ("you may") one that waits for its controller's answer.
+            case "training-before-resolution-boost":
+                foreach(var own in Army(source.OwnerId,province).ToArray()) ApplyModifier(own,source.Id,traitId,"Force",2);
                 break;
-            default:
-                FinishBeforeBattleEffect(pending);
+            case "training-before-resolution-send-home":
+                foreach(var weak in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield && c.ProvinceIndex==province && Definition(c).Type==CardType.Personality && PersonalityForce(c)<=3).ToArray())
+                    ReturnHome(weak,false);
                 break;
+            case "training-before-resolution-may-bow":
+                _state.PendingChoice=new("beforeBattleOptional",source.OwnerId,source.Id,$"Before this battle resolves: you may bow one enemy Personality at this battlefield ({Definition(source).Name}).");
+                _state.PriorityPlayerId=source.OwnerId;
+                return;
         }
+        FinishBeforeBattleEffect(pending);
+    }
+    // The "you may" half of an optional before-resolution effect: its own controller either declines or names the one
+    // target it applies to. Answered with command type "beforeBattleOptional" and Choice "use" (plus TargetId) or "decline".
+    private void ResolveBeforeBattleOptional(GameCommand command)
+    {
+        var pending=_state.PendingBeforeBattleResolve!;
+        var choice=_state.PendingChoice!;
+        Require(command.Type=="beforeBattleOptional" && command.PlayerId==choice.PlayerId && command.Choice is "use" or "decline","Use the effect or decline it.");
+        if(command.Choice=="use")
+        {
+            var target=Card(command.TargetId);
+            Require(target.OwnerId!=choice.PlayerId && target.Zone==Zone.Battlefield && target.ProvinceIndex==pending.ProvinceIndex && Definition(target).Type==CardType.Personality,"Choose an enemy Personality at this battlefield.");
+            if(!StalwartNegatesBow(target,choice.PlayerId)) target.Bowed=true;
+        }
+        _state.PendingChoice=null;
+        FinishBeforeBattleEffect(pending);
     }
     private void FinishBeforeBattleEffect(PendingBeforeBattleResolve pending)
     {
@@ -1179,6 +1249,8 @@ public sealed partial class MatchEngine
         // Ashigaru Elite's boost is "for the remainder of the battle," not the turn -- a turn can
         // contain more than one battle (Infantry/Cavalry Maneuvers), so it must not carry into the next.
         _state.AshigaruBoost=new int[2];
+        // First-opportunity state (issue #310) is battle-scoped too: a later battle starts from the default again.
+        _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.

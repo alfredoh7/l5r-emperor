@@ -49,7 +49,14 @@ namespace L5R.Core;
 // Follower attached.
 public sealed record AbilityDefinition(string Timing, string Label, string Target, bool PlayerAbility = false, string? Performer = null, string? Trigger = null, string? UsageKey = null, string[]? RequiredKeywords = null, bool RequireNoAttachments = false,
     bool IssuesDuel = false, string DuelStat = "Chi", bool DuelRefusable = false, GoldCostRule? Cost = null,
-    TargetStatus? IfTarget = null, TargetStatus? TargetMustBe = null, AttackFollowerException? FollowerException = null);
+    TargetStatus? IfTarget = null, TargetStatus? TargetMustBe = null, AttackFollowerException? FollowerException = null,
+    // The ability's OWN printed action keyword(s) -- the word(s) before the designator ("Recon Reaction:", "Ninja
+    // Battle:", "Political Limited:") that describe only this action, not the whole card (core rules, Abilities).
+    // Until Daidoji Yuki (issue #309) every such word was a plain classification with no engine representation
+    // (Ninja is read off the source CARD's keyword, Iaijutsu off a hardcoded id list, Political/Kiho/Fire nowhere);
+    // this is the general tag a "was that a [keyword] action?" check reads (MatchEngine.ActionCarriesKeyword, which
+    // also honours the rule that an ability inherits its card's keywords). Null for an untagged ability.
+    string[]? ActionKeywords = null);
 
 public static class AbilityCatalog
 {
@@ -232,7 +239,53 @@ public static class AbilityCatalog
         // Training-only: exercises the Reconnaissance primitive (issue #93) ahead of any published
         // card needing it -- a per-player, per-province boolean that gates only part of an effect.
         ["training-gain-reconnaissance"] = new("Open", "Training: gain Reconnaissance in an enemy province", "enemy-province"),
+        // ...and the printed "You have Reconnaissance at the current battlefield", usable by either side of a battle.
+        ["training-gain-reconnaissance-here"] = new("Battle", "Training: you have Reconnaissance at the current battlefield", "none"),
         ["training-reconnaissance-strike"] = new("Battle", "Training: enemy Personality loses 2 Honor if you have Reconnaissance there", "enemy-personality"),
+        // ---- Battle Phase timing (issues #309/#310): the Engage window, the first-action claim, and the general
+        // "before this battle resolves" window. See docs/decisions/2026-09-18-battle-timing-primitives.md.
+        // Daidoji Yuki, Experienced (oracle-l5r-1696): "Recon Reaction: After engaging at Yuki's battlefield, if all
+        // your Personalities there are Scouts: You have Reconnaissance there. You have the first opportunity in
+        // this battle to take a Battle action or pass." "Yuki's battlefield" is the battlefield Yuki is assigned to
+        // (attacking or defending); the Scout condition sits in the constraints block, so it is a requirement to
+        // take the action at all (ValidateAbility); "Recon" is a printed action keyword on the ability.
+        ["yuki-engage-recon"] = new("Reaction", "Recon Reaction: After engaging at Yuki's battlefield, if all your Personalities there are Scouts: You have Reconnaissance there and the first opportunity in this battle to take a Battle action or pass", "none",
+            Trigger: "after-engaging-at-own-battlefield", ActionKeywords: ["Recon"]),
+        // Naval Invasion (core rules, Glossary -- Naval): the universal Reaction every player has. "After engaging,
+        // once per battle, if you are the Attacker and your current army has more Naval cards than the side opposing
+        // it, choose your performing Naval Personality: You have the first opportunity to take a Battle action, which
+        // he must perform." Once per BATTLE, not per turn (exempt from the once-per-turn dedupe; the Engage window
+        // itself enforces it), and a claim like any other: the Defender's claim overrides it.
+        ["naval-invasion"] = new("Reaction", "Naval Invasion: choose your performing Naval Personality: you have the first opportunity to take a Battle action, which he must perform", "none",
+            PlayerAbility: true, Performer: "own-naval-personality-at-battle", Trigger: "after-engaging"),
+        // Daidoji Ebizo (oracle-l5r-1629, issue #321): "Battle: Ranged Attack with strength equal to Ebizo's Force" -- the
+        // strength is his live Force (CardForce, so the trait's +1F this turn counts), read when the Attack is declared, the
+        // same self-referential shape legulus-legion-attack already established. (His first printed line is a TRAIT, not an
+        // ability: it is registered by his Effect, see MatchEngine.AfterOwnActionTraits.)
+        ["ebizo-attack"] = new("Battle", "Ranged Attack with strength equal to Ebizo's Force", "attack"),
+        // Training-only: Recon-action classification fixtures (issue #321). "Recon Open"/"Recon Battle" tag the ability itself;
+        // training-plain-open is the same effect with no tag, used both as the untagged control and on Strategies whose own
+        // Recon KEYWORD makes the action a Recon action (an ability inherits its card's keywords).
+        ["training-recon-open"] = new("Open", "Recon Open: no effect (training)", "none", ActionKeywords: ["Recon"]),
+        ["training-plain-open"] = new("Open", "Open: no effect (training)", "none"),
+        ["training-recon-attack"] = new("Battle", "Recon Battle: Ranged 2 Attack (training)", "attack", ActionKeywords: ["Recon"]),
+        // ...and a duel-issuing Recon action, whose resolution is the END of the duel (Dueling.ResolveDuel), not the announcement.
+        ["training-recon-duel"] = new("Battle", "Recon Battle: your Personality duels a target enemy Personality (training, no outcome of its own)", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Recon"]),
+        // Training-only: Sneak Attack's shape (oracle-l5r-7311, not wired) -- "Engage: The Attacker has the first
+        // opportunity to take a Battle action or pass in this battle." The beneficiary is the ATTACKER whoever plays it.
+        ["training-engage-attacker-first"] = new("Reaction", "Engage: The Attacker has the first opportunity to take a Battle action or pass in this battle", "none", Trigger: "after-engaging"),
+        // Training-only: a plain "After engaging" Reaction with a visible effect and NO claim, for the window's
+        // ordering/once-only tests.
+        ["training-engage-gain-honor"] = new("Reaction", "After engaging: gain 1 Honor", "none", Trigger: "after-engaging"),
+        // Before This Battle Resolves (spec step 5; issue #310): a mandatory or optional trait of a card in play at
+        // the battlefield, applied once both players have passed and before Force is totalled, ordered by the
+        // player whose turn it is. Encircled Terrain (issue #272) is the one real card; its card names this id as
+        // its Effect (see MatchEngine.BeforeResolutionAbilityId). Never a player-usable action: the Timing matches
+        // no ValidateAbility arm, so a command naming one is rejected.
+        ["encircled-before-battle"] = new("BeforeResolution", "Before this battle resolves, the Attacker and Defender, in the order of your choice, each choose one of their own Personalities at its battlefield; move all other Personalities there home", "none", Trigger: "before-battle-resolves"),
+        ["training-before-resolution-boost"] = new("BeforeResolution", "Before this battle resolves: give each Personality of yours at this battlefield +2F", "none", Trigger: "before-battle-resolves"),
+        ["training-before-resolution-send-home"] = new("BeforeResolution", "Before this battle resolves: move home each Personality at this battlefield with 3 or less Force", "none", Trigger: "before-battle-resolves"),
+        ["training-before-resolution-may-bow"] = new("BeforeResolution", "Before this battle resolves: you may bow one enemy Personality at this battlefield", "none", Trigger: "before-battle-resolves"),
         // Tactician (core rules Glossary): every player always has this ability, regardless of what
         // they control -- "any number of times per turn" (see the ValidateAbility exemption below)
         // is the point, so its own cost (discarding a card) is the only real limit on repeated use.
@@ -1648,16 +1701,15 @@ public sealed partial class MatchEngine
     // "all") never even gets its window opened for such a command -- the movement is never offered
     // for negation at all, rather than being offered and then overridden. Wrathful Ancestor is
     // unconditional; Kinto's is conditional on his controller having Reconnaissance at the current
-    // battlefield -- the province the current battle is being fought at is always the DEFENDER's own,
-    // so a Defender (who can only ever hold Reconnaissance at an ENEMY province, never their own) never
-    // qualifies. Wrathful Ancestor was previously protected from Tamoko only by omission from
+    // battlefield -- whichever side he fights on: an Attacker's grant sits at the Defender's province and
+    // a Defender's at their own (issue #309; this note used to say a Defender never qualifies, which the
+    // rules lead's Daidoji Yuki ruling overturned). Wrathful Ancestor was previously protected from Tamoko only by omission from
     // MoveOrStraightenKind, which left Champion of Thunder's own "all" negation able to catch it
     // anyway; routing it through this shared check closes that gap too.
     private bool MovementCannotBeNegated(GameCommand command) => command.AbilityId switch
     {
         "wrathful-ancestor-move" => true,
-        "kinto-move" => _state.CurrentBattleProvince is int province
-            && HasReconnaissance(command.PlayerId, 1 - _state.ActivePlayerId, province),
+        "kinto-move" => HasReconnaissanceAtCurrentBattlefield(command.PlayerId),
         _ => false
     };
     private bool ControlsAnyRing(int playerId) => _state.Cards.Values.Any(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Ring);
@@ -1764,7 +1816,19 @@ public sealed partial class MatchEngine
     // false, granted by an action/passive/Reaction. It gates only the portion of an ability that
     // depends on it -- the rest of that ability's effect still proceeds regardless of this check.
     // Resets to false only when the battle there resolves (see ResolveBattle).
+    // Either player may hold it at ANY battlefield (rules lead's ruling, issue #309: Daidoji Yuki grants it "regardless of
+    // whether Yuki's controller is the attacker or the defender", so a Defender holds it at their OWN province -- the
+    // engine's earlier assumption that a Defender can only hold it at an enemy province is gone). The real question every
+    // reader asks is HasReconnaissanceAtCurrentBattlefield(player); the raw (player, province owner, index) form below is
+    // only for the province-index-targeted training grant, and must never be answered with "1 - player" as the owner.
     private bool HasReconnaissance(int playerId, int provinceOwnerId, int provinceIndex) => Player(provinceOwnerId).Provinces[provinceIndex].Reconnaissance[playerId];
+    // "You have Reconnaissance at the current battlefield" (Yuki, and every Recon Reaction like him): the battlefield's
+    // province row is always the DEFENDER's (a battlefield only ever sits at a defending player's province), whichever
+    // player is being granted it -- so the owner is 1 - ActivePlayerId for the Attacker and the Defender alike.
+    private void GrantReconnaissanceAtCurrentBattlefield(int playerId)
+    {
+        if (_state.CurrentBattleProvince is int province) GrantReconnaissance(playerId, 1 - _state.ActivePlayerId, province);
+    }
     private void GrantReconnaissance(int playerId, int provinceOwnerId, int provinceIndex)
     {
         var province = Player(provinceOwnerId).Provinces[provinceIndex];
@@ -1840,6 +1904,10 @@ public sealed partial class MatchEngine
         // already established, just reading a separately-chosen card instead of the ability's own
         // source.
         "strength-of-the-divine-force" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        // Daidoji Ebizo (issue #321): "Ranged Attack with strength equal to Ebizo's Force" -- sourceId is the performing
+        // instance (Ebizo himself), read live the way legulus-legion-attack reads its own Force.
+        "ebizo-attack" => sourceId is not null ? CardForce(Card(sourceId)) : 0,
+        "training-recon-attack" => 2,
         "strength-of-the-divine-honor" => sourceId is not null ? CardPersonalHonor(Card(sourceId)) : 0,
         _ => 0
     };
@@ -1886,6 +1954,7 @@ public sealed partial class MatchEngine
         "nikutai-attack" => "Melee",
         "legulus-legion-attack" or "village-raiders-attack" or "chiyo-attack" => "Melee",
         "strength-of-the-divine-force" or "strength-of-the-divine-honor" => "Melee",
+        "ebizo-attack" or "training-recon-attack" => "Ranged",
         "kahoku-exp-attack" or "tsuruchi-kosoko-exp-attack" or "hiruma-nitani-attack" or "training-followed-recon-attack" => "Ranged",
         "training-followed-dishonorable-melee-attack" => "Melee",
         _ => ""
@@ -2076,6 +2145,10 @@ public sealed partial class MatchEngine
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
         ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
+        // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
+        // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). SourceId is the
+        // performer, the closest card the pending Attack retains for the inherited-keyword check.
+        FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.SourceId is null ? null : Card(attack.SourceId));
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
         if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId);
         NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId));
@@ -2112,6 +2185,38 @@ public sealed partial class MatchEngine
         if (stat == "Chi" && Definition(card).Type == CardType.Personality && InPlay(card) && PersonalityChi(card) <= 0) DestroyUnits([card], true);
     }
     private static void RemoveModifiers(CardInstance card, Func<AppliedModifier, bool> match) => card.Modifiers.RemoveAll(m => match(m));
+    // "Was that a [keyword] action?" (issue #321): an action carries a keyword when the ability itself prints it before
+    // its designator ("Recon Reaction:" -- AbilityDefinition.ActionKeywords) OR the card it is on has the keyword, since
+    // "an ability inherits all the keywords of the card it's on" (core rules, Abilities: a Battle ability on a Ninja
+    // Personality is a Ninja ability; a Recon Strategy's action is a Recon action). One general question, so Recon,
+    // Ninja, Kiho, Iaijutsu, Fire ... can all ask it the same way; Apprentice Shinobi's and Mirumoto Yozo's own
+    // older checks (the source card's Ninja keyword; a hardcoded Iaijutsu id list) predate it and are left as they are.
+    private bool ActionCarriesKeyword(AbilityDefinition ability, CardInstance? source, string keyword) =>
+        ability.ActionKeywords?.Contains(keyword, StringComparer.Ordinal) == true || source is not null && Keyword(source, keyword);
+    // Traits of the form "After the resolution of your [keyword] action: Give this card +nF" (Daidoji Ebizo is the first;
+    // Master Scouts is the same trait on a Follower), registered by the card's Effect. A TRAIT, not a Reaction (core
+    // rules, Traits and effects): mandatory, usable while bowed, not limited to once per turn, and resolving before any
+    // Reaction to the same trigger -- so it is applied here, automatically, on EVERY resolution of a matching action of
+    // the card's controller, for as long as the card is in play, wherever it is (Home, a battlefield, attached). The
+    // stat change is an ApplyModifier, i.e. lasts "until the end of the current turn unless a different duration is
+    // stated" (core rules, Duration) and stacks with itself -- the same convention Apprentice Shinobi's own "Give this
+    // card +1F" already follows.
+    private static readonly Dictionary<string, (string ActionKeyword, string Stat, int Amount)> AfterOwnActionTraits = new(StringComparer.Ordinal)
+    {
+        // Daidoji Ebizo (oracle-l5r-1629): "After the resolution of your Recon action: Give Ebizo +1F."
+        ["force-after-own-recon-action"] = ("Recon", "Force", 1),
+    };
+    private void FireAfterOwnActionTraits(AbilityDefinition ability, int actingPlayerId, CardInstance? source)
+    {
+        foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && AfterOwnActionTraits.ContainsKey(Definition(c).Effect))
+                     .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
+        {
+            var (keyword, stat, amount) = AfterOwnActionTraits[Definition(card).Effect];
+            if (!ActionCarriesKeyword(ability, source, keyword)) continue;
+            Emit("actionTraitFired", $"{Definition(card).Name}: after the resolution of a {keyword} action, +{amount}{(stat == "Force" ? "F" : " " + stat)} (this turn).", card.OwnerId, card.Id);
+            ApplyModifier(card, card.Id, Definition(card).Effect, stat, amount);
+        }
+    }
     private int CardForce(CardInstance card) => Definition(card).Type switch
     {
         CardType.Personality => PersonalityForce(card),
@@ -2203,10 +2308,21 @@ public sealed partial class MatchEngine
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
                 "sibling-follower-bowed" => _state.PendingChoice.Type == "nikutaiReaction"
                     && _state.PendingChoice.CardId == command.CardId && command.PlayerId == _state.PendingChoice.PlayerId,
+                // Battle Phase timing (issue #310): "After engaging" (any battlefield) and "After engaging at X's
+                // battlefield" -- open to either player for as long as the Engage window is (the top-level
+                // priority check already enforces whose turn it is to react or pass), the same broadcast shape
+                // before-attack-resolves has. The location half of the second is checked below (AtBattle(source)).
+                "after-engaging" or "after-engaging-at-own-battlefield" => _state.PendingChoice.Type == "engageReaction" && _state.PendingEngage is not null,
                 _ => false
             },
             _ => false
         }, $"{ability.Timing} timing is unavailable now.");
+        // Battle Phase timing (issue #310): the Phase is already Battle while the Engage window is open, but no Battle
+        // action may be taken until it closes (spec 4.2 precedes 4.5) -- only the Engage/"after engaging" Reactions are legal.
+        Require(_state.PendingChoice?.Type != "engageReaction" || ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield",
+            "Until the Engage window closes, only Engage actions and \"After engaging\" Reactions may be played.");
+        // ...and a one-shot limit on the first-action holder's FIRST Battle action.
+        CheckFirstActionRestriction(command);
         var player = Player(command.PlayerId);
         CardInstance? source = null;
         Dictionary<string, int> uses;
@@ -2260,6 +2376,9 @@ public sealed partial class MatchEngine
             // once-per-turn limit of its own -- equip-battle's own convention; each equip's Gold cost and
             // the Armor/Weapon caps are the only real limits.
             or "neiru-equip"
+            // Naval Invasion (issue #310): "once per BATTLE" -- a fresh use every battle, so the once-per-turn
+            // dedupe would be wrong; PendingEngage.NavalInvasionUsed enforces the printed limit instead.
+            or "naval-invasion"
             // "Repeatable" (issue #194): Ring of Air/Water's own printed keyword on their in-play
             // actions, same convention as Tactical Advantage/Equip (Battle) above.
             or "ring-of-air-straighten" or "ring-of-water-move-home"
@@ -2450,7 +2569,7 @@ public sealed partial class MatchEngine
                 && Army(source.OwnerId, source.ProvinceIndex!.Value).Any(),
                 "Fallow Lands may only react to an Attack at its own province, while its controller has presence there.");
         if (id == "cavalry-flankers-attack") Require(player.Id == _state.ActivePlayerId, "Only the Attacker may use this ability.");
-        if (id == "hiruma-sniper-attack") Require(HasReconnaissance(player.Id, 1 - player.Id, _state.CurrentBattleProvince!.Value), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
+        if (id == "hiruma-sniper-attack") Require(HasReconnaissanceAtCurrentBattlefield(player.Id), "Hiruma Sniper requires Reconnaissance at the current battlefield.");
         // Stormless Fury's own first Reaction: "choose your performing Thunder Shugenja" -- the just-
         // resolved action's own performer (BattleActionReactionPerformerId) must be a Thunder Shugenja
         // belonging to the SAME player who holds this card in hand; the card itself must still
@@ -2470,6 +2589,23 @@ public sealed partial class MatchEngine
             Require(AtBattle(source!) && !_state.BattleActionReaction1UsedCardIds.Contains(source!.Id),
                 "Stormless Fury must be at the current battlefield, and may not react against the same action that just attached it.");
         if (id == "tsuruchi-yakusho-immunity") Require(AtBattle(source!), "Tsuruchi Yakusho must be at the current battlefield.");
+        // Battle Phase timing (issue #310): the Engage window's own per-trigger and per-card conditions.
+        // "After engaging at X's battlefield": X's own battlefield is the one it is assigned to.
+        if (ability.Trigger == "after-engaging-at-own-battlefield")
+            Require(AtBattle(source!), "This card must be assigned to the battlefield being engaged.");
+        // Daidoji Yuki: "if all your Personalities there are Scouts" sits BEFORE the effects colon, so it is a
+        // requirement to take the action (core rules, constraints block), not a condition on part of the effect.
+        if (id == "yuki-engage-recon")
+            Require(Army(player.Id, _state.PendingEngage!.ProvinceIndex).All(c => Keyword(c, "Scout")), "All your Personalities at this battlefield must be Scouts.");
+        // Naval Invasion: "if you are the Attacker and your current army has more Naval cards than the side opposing it".
+        if (id == "naval-invasion")
+        {
+            var engage = _state.PendingEngage!;
+            Require(player.Id == engage.Attacker, "Only the Attacker may use Naval Invasion.");
+            Require(!engage.NavalInvasionUsed, "Naval Invasion may be used once per battle.");
+            Require(NavalCardCount(engage.Attacker, engage.ProvinceIndex) > NavalCardCount(engage.Defender, engage.ProvinceIndex),
+                "Your current army must have more Naval cards than the side opposing it.");
+        }
         // Singh Remnants' shape: attach to the just-entered Personality (the entryReaction's own
         // CardId), following the same restrictions Equip() enforces -- Honor Requirement included.
         if (ability.Trigger == "any-personality-enters-play")
@@ -2525,6 +2661,10 @@ public sealed partial class MatchEngine
                     HasKeywords(performer, ability.RequiredKeywords) && (!actingAsBattle || AtBattle(performer)),
                 // No "unbowed" qualifier printed either -- Tactical Advantage does not bow its performer.
                 "own-tactician-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Tactician"),
+                // Naval Invasion (issue #310): "choose your performing Naval Personality" -- printed or granted
+                // Naval (Keyword() covers Suitengu's Path, Scourge of the Sea, Kojiro's live conditional), in
+                // the Attacker's own army at the battlefield being engaged. Bowed is not excluded: the text says only "Naval".
+                "own-naval-personality-at-battle" => Definition(performer).Type == CardType.Personality && AtBattle(performer) && Keyword(performer, "Naval"),
                 // Equip (Battle): only a Shugenja Personality may ever hold a Spell -- a Follower with
                 // the Shugenja trait is excluded by the Type check, matching the printed restriction.
                 "own-unbowed-shugenja-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
@@ -3162,11 +3302,18 @@ public sealed partial class MatchEngine
         // beforeActionReaction below (which reacts to an already-fully-formed, about-to-apply effect),
         // matching the printed ruling that announcing "technically occurs before performers are
         // selected, costs are paid, targets are selected, and effects applied."
-        if (ResolveOrDeferAnnounceReaction(command)) return;
-        if (ResolveOrDeferBeforeActionReaction(command)) return;
-        // Unimpeachable Name (oracle-l5r-8989): checked after Rokai/Tamoko above, same shape as the
-        // Additional-Action branch -- offered against this same command before it resolves.
-        if (ResolveOrDeferUnimpeachableName(command, command.AbilityId)) return;
+        // A Reaction played INSIDE the Engage window (issue #310) is never deferred behind one of the three
+        // windows below: PendingChoice has no stack, so opening another would overwrite "engageReaction" and
+        // strand PendingEngage (its claims and the first-action decision) for good. A documented limit, shared
+        // with every other Reaction window here -- see docs/decisions/2026-09-18-battle-timing-primitives.md.
+        if (_state.PendingChoice?.Type != "engageReaction")
+        {
+            if (ResolveOrDeferAnnounceReaction(command)) return;
+            if (ResolveOrDeferBeforeActionReaction(command)) return;
+            // Unimpeachable Name (oracle-l5r-8989): checked after Rokai/Tamoko above, same shape as the
+            // Additional-Action branch -- offered against this same command before it resolves.
+            if (ResolveOrDeferUnimpeachableName(command, command.AbilityId)) return;
+        }
         ExecuteAbilityEffects(command);
     }
     // Tsuruchi Yakusho (issue #276 follow-up): the general "after you announce an action" Reaction
@@ -3626,7 +3773,7 @@ public sealed partial class MatchEngine
                 break;
             }
             case "keppo-destroy":
-                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) DestroyAttachment(target);
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) DestroyAttachment(target!);
                 break;
             case "kuronada-destroy": DestroyUnits([target!], false, player.Id); break;
             case "shosuro-ritoru-bow":
@@ -3856,6 +4003,7 @@ public sealed partial class MatchEngine
             case "dark-naga-scouts-attack": case "horse-archers-attack": case "hiruma-sniper-attack":
             case "spawn-of-vritra-attack": case "horseback-warriors-attack": case "khol-regulars-attack": case "unparalleled-sword-attack": case "training-weapon-attack": case "moshi-ikako-attack": case "kamina-exp-attack": case "shuji-attack": case "sankaku-yari-attack":
             case "shikaro-attack": case "moto-ming-gwok-attack": case "takasho-attack": case "champion-of-thunder-attack": case "nikutai-attack": case "village-raiders-attack": case "chiyo-attack":
+            case "ebizo-attack": case "training-recon-attack":
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             // Legulus's Legion (oracle-l5r-10899): "Battle, bow: Melee Attack with strength equal to
@@ -4073,8 +4221,10 @@ public sealed partial class MatchEngine
                 break;
             case "training-gain-reconnaissance": GrantReconnaissance(player.Id, 1 - player.Id, command.Province!.Value); break;
             case "training-reconnaissance-strike":
-                if (HasReconnaissance(player.Id, target!.OwnerId, target.ProvinceIndex!.Value)) GainHonor(target.OwnerId, -2, "Training Reconnaissance strike", source);
+                if (HasReconnaissanceAtCurrentBattlefield(player.Id)) GainHonor(target!.OwnerId, -2, "Training Reconnaissance strike", source);
                 break;
+            // Training-only (issue #309): "You have Reconnaissance at the current battlefield" (a Battle action of either side).
+            case "training-gain-reconnaissance-here": GrantReconnaissanceAtCurrentBattlefield(player.Id); break;
             case "tactical-advantage":
                 ApplyModifier(Card(command.PerformerId!), "tactical-advantage", "tactical-advantage", "Force", Definition(target!).Focus);
                 DiscardFate(player, target!);
@@ -4547,8 +4697,35 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "mugoshi-slander": ApplyPlayerHonorChoice(source!, command.TargetPlayerId!.Value, -1); break;
+            // Battle Phase timing (issues #309/#310): the Engage window's consumers. Every claim only RECORDS the
+            // request; who actually acts first is decided when the window closes (ResolveFirstOpportunity), so the
+            // order claims are made in never matters and claims never stack.
+            case "yuki-engage-recon":
+            {
+                // "You have Reconnaissance there": granted to Yuki's controller whether they are the Attacker or the Defender
+                // (rules lead's ruling, verbatim: the all-Scouts condition -- checked by ValidateAbility -- is what decides the grant,
+                // "regardless of whether Yuki is in an attacking or defending army"). "There" is Yuki's battlefield, which for a
+                // Defender is their OWN province; the opponent gains nothing.
+                GrantReconnaissanceAtCurrentBattlefield(player.Id);
+                ClaimFirstOpportunity(player.Id, "Engage", source);
+                break;
+            }
+            case "naval-invasion":
+                _state.PendingEngage!.NavalInvasionUsed = true;
+                _state.PendingEngage.NavalPerformerId = command.PerformerId;
+                ClaimFirstOpportunity(player.Id, "Naval", Card(command.PerformerId));
+                break;
+            case "training-engage-attacker-first": ClaimFirstOpportunity(_state.PendingEngage!.Attacker, "Engage", source); break;
+            case "training-engage-gain-honor": GainHonor(player.Id, 1, "Training engage reaction", source); break;
+            // Recon-action classification fixtures (issue #321): no effect of their own -- the point is what fires AFTER them.
+            case "training-recon-open": case "training-plain-open": break;
             default: throw new RuleViolation("Ability effect is not implemented.");
         }
+        // "After the resolution of your [keyword] action" traits (Daidoji Ebizo, issue #321): every in-play card of
+        // the acting player whose Effect registers one (AfterOwnActionTraits) reacts here, the single funnel every
+        // synchronously resolving ability passes through -- a deferred Attack and a duel reach the same helper from
+        // their own completion points (ResolveAttack, ResolveDuel).
+        FireAfterOwnActionTraits(ability, player.Id, source);
         // Apprentice Shinobi (issue #279): "After the resolution of a Ninja action: Give this card
         // +1F" -- unconditional and universal (every in-play copy, regardless of controller or
         // whether Apprentice Shinobi itself took part), checked here at the single shared execution
@@ -5098,10 +5275,16 @@ public sealed partial class MatchEngine
         if (!Definition(Card(player.StrongholdId)).ScenarioOnly)
             sources.AddRange(AbilityCatalog.All.Where(p => p.Value.PlayerAbility).Select(p => (Card: (CardInstance?)null, Id: p.Key)));
         var inPlay = _state.Cards.Values.Where(InPlay).Select(c => c.Id).ToArray();
+        // Battle Phase timing (issue #310): while the Engage window is open the only abilities on offer are
+        // the "Engage:" / "After engaging" Reactions (the Phase is Battle, but no Battle action may be taken
+        // yet); outside it those Reactions are never offered by this general listing at all.
+        var inEngageWindow = _state.PendingChoice?.Type == "engageReaction" && _state.PendingEngage is not null;
         foreach (var (source, id) in sources)
         {
             var ability = AbilityCatalog.All[id];
-            var phaseOk = ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, _ => _state.Phase == Phase.Action };
+            var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
+            if (inEngageWindow != isEngageReaction) continue;
+            var phaseOk = inEngageWindow ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" or "Discipline" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
@@ -5133,6 +5316,7 @@ public sealed partial class MatchEngine
                 "own-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-shadowlands-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && HasClanAffiliation(c, "Shadowlands") && (!actingAsBattle || AtBattle(c))).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-fire-token-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasToken(c, "Fire")).Select(c => (string?)c.Id).ToArray(),
+                "own-naval-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Naval")).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id).ToArray(),

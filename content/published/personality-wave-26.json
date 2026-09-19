@@ -1,0 +1,36 @@
+{
+  "Profile": "personality-wave-26",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1629",
+      "Name": "Daidoji Ebizo",
+      "Type": "Personality",
+      "Clan": "Crane",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 4,
+      "PersonalHonor": 2,
+      "HonorRequirement": 4,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After the resolution of your Recon action: Give Ebizo +1F.\nBattle: Ranged Attack with strength equal to Ebizo's Force.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1629.jpg",
+      "Keywords": [
+        "Bounty Hunter",
+        "Crane Clan",
+        "Iron Crane",
+        "Samurai",
+        "Scout"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ebizo-attack"
+      ],
+      "Effect": "force-after-own-recon-action"
+    }
+  ],
+  "Decks": []
+}

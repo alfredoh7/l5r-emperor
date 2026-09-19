@@ -154,6 +154,15 @@ public static class TrainingOpponent
                 if(enemyForce==0) return 0;
                 return ownForce>=enemyForce?95:ownForce+StrongestThreatProvinceStrength(self,opponent)>=enemyForce?60:self.Provinces.Count(p=>!p.Destroyed)==1?50:0;
             case "pass": return 10;
+            // Battle Phase timing (issue #310): the before-this-battle-resolves choices. Any legal answer is acceptable to a
+            // modest practice opponent: keep its strongest Personality, bow the strongest enemy one, and take effects in offered order.
+            case "encircledSelect":
+                var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return 100+(kept?.Force??0);
+            case "encircledOrder": case "beforeBattleOrder": return 50;
+            case "beforeBattleOptional":
+                var optionalTarget=opponent.Army.FirstOrDefault(c=>c.Id==command.TargetId);
+                return command.Choice=="use" ? 60+(optionalTarget?.Force??0) : 20;
             default: return -100;
         }
     }
