@@ -502,6 +502,10 @@ public sealed class MatchState
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
+    // Attack-vs-Followers exceptions granted by another card (AttackFollowerException shape (e), Yoritomo
+    // Ebumi): standing, one-shot permissions for a player's NEXT Attack action of the covered kind. Battle-
+    // scoped like AdditionalActions -- consumed when that Attack executes, cleared at FinishBattleResolution.
+    public List<AttackTargetGrant> AttackTargetGrants { get; set; } = [];
     // "Before an action resolves, negate one of its own named effects" (Mirumoto Rokai's own
     // destruction-negation; Tamori Tamoko's own movement-or-straightening-negation) -- the same
     // defer-then-reexecute shape PendingAdditionalAction uses above: the whole triggering command is
