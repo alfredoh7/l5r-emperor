@@ -31,6 +31,7 @@ internal static class BattleRulingsRound2Tests
             ("Reactions are actions: a window set aside behind a Reaction's own window is plain serialized state -- a snapshot mid-way continues identically", SuspendedWindowIsState),
             ("Rebuilding Kyuden Hida (the Event, not the Stronghold): an Attacker holding the first opportunity through Naval Invasion, Yuki or Sneak Attack must pass; that pass counts; the Defender's first normal opportunity follows", KyudenHidaEventPinned),
             ("Deferred Attack: the pending Attack keeps the ability's SOURCE card, so an Item, Spell or Follower's Recon keyword makes the Attack a Recon action -- and the performer's keywords do not", DeferredAttackSource),
+            ("Deferred duel: a duel-issuing Strategy's own Recon keyword makes it a Recon action when the duel resolves, and its performer's keywords do not", DeferredDuelSource),
         ];
         runner.Run("battle-rulings-2",tests);
     }
@@ -656,5 +657,25 @@ internal static class BattleRulingsRound2Tests
         var sync=MatchEngine.FromTestState(s);
         Accept(sync,Use(sync,0,"training-weapon-attack",sword.Id,target:syncTarget.Id));
         Eq(sync.State.Cards[eb.Id].Modifiers.Count(m=>m.Effect=="force-after-own-recon-action"),1);
+    }
+
+    private static void DeferredDuelSource()
+    {
+        int Duel(string strategyDef,string performerDef)
+        {
+            var s=Selection(); s.Phase=Phase.Battle; s.CurrentBattleProvince=0; s.PriorityPlayerId=0;
+            var eb=Add(s,Ebizo,0,Zone.Home); var performer=Add(s,performerDef,0,Zone.Battlefield,province:0); var strategy=Add(s,strategyDef,0,Zone.Hand);
+            var enemy=Add(s,"training-scout-samurai",1,Zone.Battlefield,province:0);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,Use(e,0,"steel-on-steel-duel",strategy.Id,performer.Id,enemy.Id));
+            Check(e.State.PendingDuel is not null,"the duel is under way");
+            Eq(e.State.PendingDuel!.SourceCardId,strategy.Id,"the pending duel keeps the card the ability is printed on");
+            Eq(e.State.Cards[eb.Id].Modifiers.Count(m=>m.Effect=="force-after-own-recon-action"),0,"announced, not resolved");
+            Accept(e,new GameCommand("strike",e.State.PriorityPlayerId,e.Version));
+            Check(e.State.PendingDuel is null,"the duel is over");
+            return e.State.Cards[eb.Id].Modifiers.Count(m=>m.Effect=="force-after-own-recon-action");
+        }
+        Eq(Duel("training-recon-duel-strategy","training-recon-actor"),1,"a Recon Strategy's duel is a Recon action though its performer is not Recon");
+        Eq(Duel("training-plain-duel-strategy","training-recon-attacker"),0,"a plain Strategy's duel is not, though its performer has the Recon keyword");
     }
 }
