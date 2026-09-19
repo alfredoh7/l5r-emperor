@@ -26,6 +26,7 @@ internal static class BattleRulingsRound2Tests
             ("Reactions are actions: a Recon Reaction resolving in the Engage window gives Ebizo and Master Scouts +1F, stacking with later Recon actions until the end of the turn", EngageReconReaction),
             ("Reactions are actions: a Political Engage claim that names a target is negated like any action; the claim is never recorded and the Engage window is restored", EngageClaimNegated),
             ("Reactions are actions: a Reaction whose bow triggers an 'after this action' window opens it over the window it was played in, and a spent watcher opens nothing", AfterActionWindowForReaction),
+            ("Reactions are actions: a Reaction that waited behind a before-action window resolves inside the window it was played in, so what it queues is deferred to that window's close", DeferredReactionResolvesInItsWindow),
             ("Reactions are actions: a window set aside behind a Reaction's own window is plain serialized state -- a snapshot mid-way continues identically", SuspendedWindowIsState),
             ("Rebuilding Kyuden Hida (the Event, not the Stronghold): an Attacker holding the first opportunity through Naval Invasion, Yuki or Sneak Attack must pass; that pass counts; the Defender's first normal opportunity follows", KyudenHidaEventPinned),
             ("Deferred Attack: the pending Attack keeps the ability's SOURCE card, so an Item, Spell or Follower's Recon keyword makes the Attack a Recon action -- and the performer's keywords do not", DeferredAttackSource),
@@ -284,13 +285,17 @@ internal static class BattleRulingsRound2Tests
         var e3=MatchEngine.FromTestState(st);
         Pass(e3,1); Pass(e3,0);
         Check(e3.State.PendingChoice is null && e3.State.DelayedBattleEffects.Count==0,"skipped, then cleared");
-        // A leftover effect never carries into the next battle: planted in the state as the battle's tail runs, it is cleared with the battle.
+        // A delayed effect that missed the set (registered after it was gathered) never carries into the next battle: it is cleared with its battle.
         var s4=Combat(); s4.UnresolvedBattlefields=[0,1];
-        var x4=Add(s4,"training-lion-samurai",0,Zone.Battlefield,province:0); var y4=Add(s4,"training-crane-samurai",1,Zone.Battlefield,province:0);
-        s4.DelayedBattleEffects.Add(new(99,"bow",0,null,y4.Id));
+        Add(s4,"training-lion-samurai",0,Zone.Battlefield,province:0); var y4=Add(s4,"training-crane-samurai",1,Zone.Battlefield,province:0);
+        Add(s4,"training-before-resolution-boost-terrain",0,Zone.Battlefield,province:0); Add(s4,"training-before-resolution-send-home-terrain",1,Zone.Battlefield,province:0);
         var e4=MatchEngine.FromTestState(s4);
         Pass(e4,1); Pass(e4,0);
-        Eq(e4.State.DelayedBattleEffects.Count,0,"applied or not, a delayed effect lapses with its battle"); Check(e4.State.Cards[y4.Id].Bowed);
+        Eq(e4.State.PendingChoice?.Type,"beforeBattleOrder","two traits: the active player orders them");
+        var late=e4.State; late.DelayedBattleEffects.Add(new(99,"bow",0,null,y4.Id));
+        e4=MatchEngine.FromTestState(late);
+        Take(e4,0,"beforeBattleOrder");
+        Eq(e4.State.DelayedBattleEffects.Count,0,"applied or not, a delayed effect lapses with its battle"); Check(!e4.State.Cards[y4.Id].Bowed,"it was never part of the set, so it never applied");
         Eq(e4.State.Phase,Phase.BattleSelection,"the next battlefield is chosen");
     }
 
@@ -485,6 +490,27 @@ internal static class BattleRulingsRound2Tests
         // Ruya has spent her use: her own Reaction's bow did not reopen her window over itself.
         Decline(e); Decline(e);
         Check(e.State.PendingChoice is null,"closed on two passes");
+    }
+
+    private static void DeferredReactionResolvesInItsWindow()
+    {
+        var s=Selection();
+        Add(s,"training-lion-samurai",0,Zone.Battlefield,province:0);
+        var victim=Add(s,"training-overconfident-personality",1,Zone.Battlefield,province:0); Add(s,"training-before-action-suppressor",1,Zone.Home);
+        Add(s,"training-engage-destroy-strategy",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        Take(e,0,"selectBattle");
+        Eq(e.State.PendingChoice?.Type,"engageReaction");
+        Target(e,0,"training-engage-destroy",victim.Id);
+        Eq(e.State.PendingChoice?.Type,"beforeActionReaction","the suppressor's controller may react to the targeting: the destroy waits behind that window");
+        Eq(e.State.Cards[victim.Id].Zone,Zone.Battlefield,"not yet destroyed");
+        Decline(e); Decline(e);
+        Eq(e.State.Cards[victim.Id].Zone,Zone.Dead,"then it resolved");
+        Eq(e.State.PendingChoice?.Type,"engageReaction","inside the Engage window it was played in: the draw offer its destruction queued waits for that window, as after a Reaction played directly");
+        Eq(e.State.PendingOverconfidentDraws.Count,1); Eq(e.State.SuspendedWindows.Count,0);
+        Eq(e.State.PriorityPlayerId,1,"the opportunity passed to the other player");
+        Decline(e); Decline(e);
+        Eq(e.State.PendingChoice?.Type,"overconfidentDraw","and is offered once the Engage window closes");
     }
 
     private static void SuspendedWindowIsState()

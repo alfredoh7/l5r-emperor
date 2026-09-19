@@ -322,6 +322,8 @@ public static class AbilityCatalog
         ["training-engage-gain-honor"] = new("Reaction", "After engaging: gain 1 Honor", "none", Trigger: "after-engaging"),
         // A targeted, Political Engage claim: a Reaction is an action, so another player's Reaction can negate it like any other action.
         ["training-engage-claim-political"] = new("Reaction", "Political Engage: target an enemy Personality: the Attacker has the first opportunity to take a Battle action or pass in this battle", "enemy-personality", Trigger: "after-engaging", ActionKeywords: ["Political"]),
+        // A Reaction that destroys its target, to see that a Reaction which waited behind a before-action window still resolves inside the window it was played in.
+        ["training-engage-destroy"] = new("Reaction", "After engaging: target an enemy Personality: destroy him", "enemy-personality", Trigger: "after-engaging"),
         // "Before a battle resolves" (Battle Phase spec 5): a delayed effect a Battle action registers, and the two printed Reactions of the same timing.
         ["training-delayed-bow"] = new("Battle", "Target an enemy Personality: before this battle resolves, bow him", "enemy-personality"),
         ["training-delayed-boost"] = new("Battle", "Target your Personality: before this battle resolves, give him +2F", "own-personality"),
@@ -5064,6 +5066,7 @@ public sealed partial class MatchEngine
                 break;
             case "training-engage-attacker-first": ClaimFirstOpportunity(_state.PendingEngage!.Attacker, "Engage", source); break;
             case "training-engage-gain-honor": GainHonor(player.Id, 1, "Training engage reaction", source); break;
+            case "training-engage-destroy": DestroyUnits([target!], false, player.Id); break;
             case "training-engage-claim-political": ClaimFirstOpportunity(_state.PendingEngage!.Attacker, "Engage", source); break;
             case "training-delayed-bow": RegisterDelayedBattleEffect(player.Id, source, "bow", target!); break;
             case "training-delayed-boost": RegisterDelayedBattleEffect(player.Id, source, "modifier", target!, "Force", 2); break;
