@@ -2316,9 +2316,9 @@ public sealed partial class MatchEngine
             if (InPlay(target) && AtBattle(target) && AttackComparedForce(target) <= strength)
             {
                 DestroyAttackTarget(target, playerId);
-                if (abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
             }
         }
+        AttackTargetedACard(abilityId, playerId, targetId);
         // Tsuruchi Isas: "Move Isas home" is a second, unconditional effect of the same ability --
         // it happens whether or not the Attack actually hit, so it lives outside the hit branch above.
         if (abilityId == "tsuruchi-isas-attack" && sourceId is not null) MoveHome(Card(sourceId), false);
@@ -2361,13 +2361,20 @@ public sealed partial class MatchEngine
             FirstReactionOpportunity(p => AttackReactionAvailableTo(p, attacker.Id, targetId)), "Attack reaction window opened.", attacker.Id);
         return true;
     }
+    // "If this targeted a card, ..." (Carpenter Castle: gain 2 Honor; Mendon, issue #335): an effect of the Attack's TARGETING, not of its hit. It is gained whether the
+    // Attack hits, is negated, is dodged or was redirected (it then targeted the new card), and never for an Attack that targeted no card (no target, or a province).
+    private void AttackTargetedACard(string abilityId, int playerId, string? targetId)
+    {
+        if (targetId is not null && abilityId == "carpenter-castle-siege") GainHonor(playerId, 2, "Carpenter Castle");
+    }
+
     // Called once both players pass consecutively in the attackReaction window (Apply()).
     private void ResolveAttack()
     {
         var attack = _state.PendingAttack!;
         _state.PendingAttack = null;
         if (!attack.Negated) ResolveAttackNow(attack.AbilityId, attack.PlayerId, attack.TargetId, attack.Strength, attack.SourceId);
-        else _state.RangedAttackStrengthReductionImmune = false;
+        else { AttackTargetedACard(attack.AbilityId, attack.PlayerId, attack.TargetId); _state.RangedAttackStrengthReductionImmune = false; }
         _state.NegatedEffects.Clear();
         // The deferred Attack is the action's resolution: "after the resolution of your [keyword] action" traits
         // fire now, not when it was announced (ExecuteAbilityEffects returned before its own funnel). SourceId is the

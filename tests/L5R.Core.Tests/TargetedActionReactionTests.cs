@@ -42,6 +42,7 @@ internal static class TargetedActionReactionTests
             ("Ranged and Melee Attacks need no card target (Mendon): every Attack is offered as legal with NO target (and the option says so), a card target as before, and -- for an ability that says so -- the current battlefield's province; an Attack that names no card (no target, or a province) opens no window although Ezuno, Yurishi, Mochitoko, the Blade and a strength reactor are all in play, while the same Attack aimed at a card does", AttacksNeedNoCardTarget),
             ("Yoritomo Sakuma (whole-action negation, #338) beside Ezuno's redirect: a Political action redirected onto Ezuno still lets Sakuma react -- pay 2 Gold and it resolves on Ezuno, decline and it is negated as a whole -- Ezuno's redirect and Sakuma's reaction may come in either order, and once Sakuma has negated the action Ezuno is offered nothing", SakumaBesideRedirect),
             ("Bofana's once-per-action guard holds by itself: with his once-per-phase limit wiped after the first judgement, the window's close does not judge him again for the same action, and the next action does", BofanaGuardIsPerAction),
+            ("Carpenter Castle (Mendon, closes open question 5): \"If this targeted a card, gain 2 Honor\" is a TARGETING effect, not a hit effect -- +2 Honor once when the Attack hits, is negated, is redirected (Ezuno, Blade) or dodged (Yurishi), and none when it targeted no card or a province", CarpenterHonorFollowsTargeting),
             ("A cost-block predicate keyed on the cost's verb (Mendon ruling 2 / #352): a Follower bowed as a cost is blocked by a negated bow (or every effect), never by a negated destruction alone; and the acting player's own Honor cost is never negated with a card's effects", CostBlockIsPerVerb),
             ("Every enabled command offered inside a redirect or negation window validates and is accepted on a fresh engine (Ezuno, Blade with every candidate, Yurishi, Jinn-Kuen, Mochitoko)", OfferedCommandsAllValidate),
         ];
@@ -660,7 +661,7 @@ internal static class TargetedActionReactionTests
             ClosePassing(e);
             Eq(e.State.Cards[y.Id].Zone, Zone.Home, "and misses: he is at home, no longer a legal target");
             Check(e.State.Cards[castle.Id].Bowed, "the Attack's cost stands"); Check(e.State.PendingAttack is null && e.State.NegatedEffects.Count == 0);
-            Eq(e.State.Players[1].Honor, honor, "no hit, so none of Carpenter Castle's Honor (it is only gained on a hit today: existing behaviour, see the decision note)");
+            Eq(e.State.Players[1].Honor, honor + 2, "he dodged, but the Attack targeted a card: Carpenter Castle's Honor is gained anyway (Mendon)");
         }
         {
             // Melee: Yurishi at -2 Force is within Melee 2.
@@ -1171,6 +1172,85 @@ internal static class TargetedActionReactionTests
             e = Edit(e, st => st.NegatedEffects.Add(new("all", payer.Id)));
             ClosePassing(e);
             Eq(e.State.Players[0].Honor, honor - 2, "the Honor cost of his own action is paid: a cost is never negated with a card's effects");
+        }
+    }
+
+    // ---- Carpenter Castle: "If this targeted a card, gain 2 Honor" (Mendon: a targeting effect, not a hit effect) --------------------------
+    // The Attack as the engine offers it (through QueryActions): aimed at a card, or with none.
+    private static GameCommand CarpenterOffer(MatchEngine e, CardInstance castle, string stronghold, string? targetId)
+    {
+        var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == stronghold && a.Command?.AbilityId == "carpenter-castle-siege" && a.Command.PerformerId == castle.Id);
+        Check(option.Enabled, option.Reason ?? "Carpenter Castle's Attack was not offered");
+        if (targetId is null) { Check(option.NoTarget, "an Attack may always be taken with no target"); return option.Command! with { TargetId = null }; }
+        Check(option.TargetIds!.Contains(targetId), "the card is a legal target: " + string.Join(",", option.TargetIds!));
+        return option.Command! with { TargetId = targetId };
+    }
+
+    private static void CarpenterHonorFollowsTargeting()
+    {
+        int Honor(MatchEngine e) => e.State.Players[1].Honor;
+        // A hit, with nobody able to react (the immediate path): +2, once.
+        {
+            var s = Table(); var (castle, stronghold) = Siege(s); var enemy = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, enemy.Id));
+            Eq(e.State.Cards[enemy.Id].Zone, Zone.Dead); Eq(Honor(e), honor + 2, "hit: +2 Honor, once");
+        }
+        // The same, held open by an attack reactor and passed: a hit through the window is +2 once as well.
+        {
+            var s = Table(); var (castle, stronghold) = Siege(s); var enemy = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-attack-reactor", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, enemy.Id)); Eq(Window(e), "attackReaction"); ClosePassing(e);
+            Eq(e.State.Cards[enemy.Id].Zone, Zone.Dead); Eq(Honor(e), honor + 2, "hit through the window: +2 Honor, once");
+        }
+        // Negated (Jinn-Kuen negates the Attack): nothing is destroyed, the Honor is still gained.
+        {
+            var r = MerchantTable(); var (castle, stronghold) = Siege(r.S); var e = MatchEngine.FromTestState(r.S); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, r.Merchant.Id)); Eq(Window(e), "attackReaction");
+            Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate")); Check(e.State.PendingAttack!.Negated, "the Attack is negated"); ClosePassing(e);
+            Eq(e.State.Cards[r.Merchant.Id].Zone, Zone.Battlefield, "the negated Attack destroyed nothing"); Eq(Honor(e), honor + 2, "negated: the Honor is still gained (it targeted a card)");
+        }
+        // Redirected by Ezuno: it targeted a card (the new one); +2 once, and the redirected Attack hits Ezuno.
+        {
+            var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var ez = Add(s, Ezuno, 0, Zone.Battlefield, province: 0); var sh = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, sh.Id)); Accept(e, ReactionCommand(e, 0, "ezuno-redirect")); Eq(Honor(e), honor, "nothing is gained before the Attack resolves");
+            ClosePassing(e);
+            Check(e.State.Cards[ez.Id].Zone != Zone.Battlefield && e.State.Cards[sh.Id].Zone == Zone.Battlefield); Eq(Honor(e), honor + 2, "redirected: +2 Honor, once");
+        }
+        // Redirected by the Blade (bowed as the cost) onto another of its controller's cards: the Attack targeted a card all the same.
+        {
+            var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            var p = Add(s, "training-shugenja", 0, Zone.Battlefield, province: 0); var blade = Add(s, Blade, 0, Zone.Attached, province: 0, parent: p.Id);
+            var q = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, p.Id)); Accept(e, ReactionCommand(e, 0, "blade-of-champions-redirect", q.Id));
+            Eq(e.State.PendingAttack!.TargetId, q.Id); Check(e.State.Cards[blade.Id].Bowed);
+            ClosePassing(e);
+            Eq(Honor(e), honor + 2, "redirected by the Blade: +2 Honor, once");
+        }
+        // Dodged (Yurishi): a miss, but it targeted a card.
+        {
+            var s = Table(); var (castle, stronghold) = Siege(s); Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var y = Add(s, Yurishi, 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Accept(e, CarpenterOffer(e, castle, stronghold, y.Id)); Accept(e, ReactionCommand(e, 0, "yurishi-disappear")); ClosePassing(e);
+            Eq(e.State.Cards[y.Id].Zone, Zone.Home, "he escaped"); Eq(Honor(e), honor + 2, "dodged: +2 Honor");
+        }
+        // No target: not a card, no Honor -- taken with every reactor in play, so no window either; and a province is refused for this Attack (it names none).
+        {
+            var (s, _) = ReactiveDefence(); var (castle, stronghold) = Siege(s); var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            Reject(e, new GameCommand("useAbility", 1, e.Version, CardId: stronghold, PerformerId: castle.Id, AbilityId: "carpenter-castle-siege", Province: 0));
+            Accept(e, CarpenterOffer(e, castle, stronghold, null));
+            Check(Window(e) is null && e.State.PendingAttack is null); Eq(Honor(e), honor, "no card targeted: no Honor");
+        }
+        // A province Attack (the fixture) targets no card either. It carries no Honor of its own, so the check is that a targeting-conditional effect never fires for it.
+        {
+            var s = Table(); var attacker = Add(s, "training-province-attacker", 1, Zone.Battlefield, province: 0); Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var honor = Honor(e);
+            var option = e.QueryActions(1).Single(a => a.Type == "useAbility" && a.CardId == attacker.Id && a.Command?.AbilityId == "training-province-attack");
+            Check(option.Provinces!.Contains(0)); Accept(e, option.Command! with { TargetId = null, Province = 0 }); Eq(Honor(e), honor, "a province is not a card: no Honor for a targeting effect");
         }
     }
 
