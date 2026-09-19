@@ -235,6 +235,7 @@ DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 DeckSearchTests.Run(runner);
 DeckLookTests.Run(runner);
+DaigotsuBofanaTests.Run(runner);
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
@@ -957,9 +958,10 @@ static void TimesOfStrifeProvinceClampAndDiscard()
         var handCard=Add(s,"training-farm",1,Zone.Hand).Id;
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",1,e.Version,CardId:ring.Id,AbilityId:"ring-of-earth-lower",TargetPlayerId:0,Province:0));
-        Check(e.State.PendingChoice?.Type=="timesOfStrifeDiscard","Queued, then opened as a deferred window");
+        Check(e.State.PendingChoice?.Type=="forcedDiscard","Queued, then opened as a deferred window (the general forced discard, issue #333)");
         Equal(e.State.PendingChoice!.PlayerId,1);
-        Accept(e,new GameCommand("timesOfStrifeDiscard",1,e.Version,TargetId:handCard));
+        Check(e.QueryActions(1).Any(a=>a.Type=="forcedDiscard" && a.Enabled && a.CardId==handCard && a.Command?.TargetId==handCard),"The discard is offered through QueryActions, one option per hand card");
+        Accept(e,new GameCommand("forcedDiscard",1,e.Version,TargetId:handCard));
         Check(!e.State.Players[1].Hand.Contains(handCard),"Discarded");
         Equal(e.State.Cards[handCard].Zone,Zone.FateDiscard);
     }

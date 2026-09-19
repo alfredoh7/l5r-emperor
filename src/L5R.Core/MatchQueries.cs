@@ -274,6 +274,14 @@ public sealed partial class MatchEngine
             foreach(var id in optional)
                 Add("declineStraighten",$"Leave {Definition(Card(id)).Name} bowed",Command("declineStraighten",cardIds:[id]),cardId:id);
         }
+        else if(_state.PendingChoice is { Type:"forcedDiscard" })
+        {
+            // A discard owed (Times of Strife, Daigotsu Bofana): one option per card of the discarding player's own hand -- only
+            // they hold priority here, so the other player is told to wait and never sees these -- except a card the announced
+            // action itself uses. Nothing to pick means no choice was ever opened (see OpenOverconfidentDrawWindow).
+            foreach(var id in player.Hand.Where(id=>_state.ForcedDiscardContinuation is not { } held || !CommandNamesCard(held,id)))
+                Add("forcedDiscard",$"Discard {Definition(Card(id)).Name}",Command("forcedDiscard",target:id),cardId:id);
+        }
         else if(_state.PendingChoice is { Type:"discardHand" })
         {
             var count=player.Hand.Count-8;
