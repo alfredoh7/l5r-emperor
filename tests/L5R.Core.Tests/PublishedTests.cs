@@ -114,11 +114,6 @@ internal static class PublishedTests
         }
         var owners=disk.Where(d=>d.Key!=FrozenTestSnapshot).SelectMany(d=>d.Value.Cards.Where(c=>!c.ScenarioOnly).Select(c=>(c.Id,c.Name,File:d.Key))).GroupBy(x=>x.Id).ToDictionary(g=>g.Key,g=>g.ToArray());
         foreach(var (id,files) in owners.Where(o=>o.Value.Length>1))problems.Add($"{id} is published by more than one file: {string.Join(", ",files.Select(f=>f.File))}");
-        var loaded=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
-        foreach(var (id,files) in owners.Where(o=>!loaded.Contains(o.Key)).OrderBy(o=>o.Key,StringComparer.Ordinal))problems.Add($"{id} ({files[0].Name}) is in content/published/{files[0].File}.json but not loaded into CardCatalog");
-        foreach(var id in loaded.Where(id=>!owners.ContainsKey(id)).Order(StringComparer.Ordinal))problems.Add($"{id} is in CardCatalog (not ScenarioOnly) but in no content/published file");
-        if(disk.TryGetValue(FrozenTestSnapshot,out var frozen))
-            foreach(var card in frozen.Cards.Where(c=>!owners.ContainsKey(c.Id)))problems.Add($"{card.Id} is in {FrozenTestSnapshot}.json but published by no other file");
         var embedded=typeof(PublishedContent).Assembly.GetManifestResourceNames().Where(n=>n.StartsWith("L5R.Published.",StringComparison.Ordinal)).Select(n=>
         {
             using var stream=typeof(PublishedContent).Assembly.GetManifestResourceStream(n)!;
@@ -126,6 +121,12 @@ internal static class PublishedTests
         }).ToHashSet(StringComparer.Ordinal);
         foreach(var stem in disk.Keys.Where(k=>!embedded.Contains(k)))problems.Add($"content/published/{stem}.json is not embedded in L5R.Core; add its EmbeddedResource to src/L5R.Core/L5R.Core.csproj and load it in PublishedContent.cs and CardCatalog.cs");
         foreach(var profile in embedded.Where(p=>!disk.ContainsKey(p)))problems.Add($"L5R.Core embeds profile '{profile}' but content/published/{profile}.json does not exist");
+        NoProblems(problems,"content/published files are inconsistent or not embedded in L5R.Core");
+        var loaded=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        foreach(var (id,files) in owners.Where(o=>!loaded.Contains(o.Key)).OrderBy(o=>o.Key,StringComparer.Ordinal))problems.Add($"{id} ({files[0].Name}) is in content/published/{files[0].File}.json but not loaded into CardCatalog");
+        foreach(var id in loaded.Where(id=>!owners.ContainsKey(id)).Order(StringComparer.Ordinal))problems.Add($"{id} is in CardCatalog (not ScenarioOnly) but in no content/published file");
+        if(disk.TryGetValue(FrozenTestSnapshot,out var frozen))
+            foreach(var card in frozen.Cards.Where(c=>!owners.ContainsKey(c.Id)))problems.Add($"{card.Id} is in {FrozenTestSnapshot}.json but published by no other file");
         NoProblems(problems,"Published catalogue differs from content/published/*.json");
     }
     private static void WaveManifests()
