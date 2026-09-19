@@ -3161,12 +3161,37 @@ public sealed partial class MatchEngine
         card.Zone = Zone.Attached; card.AttachedTo = target.Id; card.FaceUp = true; card.ProvinceIndex = target.ProvinceIndex;
         Emit("equipped", $"{Definition(card).Name} attached to {Definition(target).Name} (Reaction).", ownerId, card.Id);
     }
+    // Tidy Up (core rules, step G): a Strategy or Ring played from hand is discarded once its action is
+    // done. Shared by RunAbilityEffects' own tail (the ordinary, immediate path) and by
+    // ExecuteAbilityEffects below (an Attack deferred behind its reaction window).
+    private void SpendHandPlayedCard(PlayerState player, CardInstance? source)
+    {
+        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+    }
+    // Issue #320: every Attack case in RunAbilityEffects' switch does `if (ResolveOrDeferAttack(...)) return;`,
+    // so an Attack that opens the attackReaction window skips the tail that discards a hand-played
+    // Strategy/Ring, and ResolveAttack (run once both players pass) never discards it either -- the card
+    // stayed in hand for good. Detected here rather than at each Attack case so every current and future
+    // Attack (Strategic Strike, ...) is covered without boilerplate: an Attack was deferred by THIS call
+    // exactly when it left a PendingAttack that was not already there. The played card is spent as the
+    // window opens, like its Gold cost already is (PayForAbility) and like a hand-played Dueling Strategy
+    // (IssueChallenge) -- the engine has no "being resolved" zone, and the card must not sit in hand,
+    // reusable, while the opponent reacts. Step G formally follows resolution, so it is in the discard pile
+    // (not yet "in limbo") while a Reaction window is open. Additional Action bookkeeping is deliberately
+    // untouched: PendingAttack.Additional and ResolveAttack already carry it across the window.
+    private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
+    {
+        var pendingAttackBefore = _state.PendingAttack;
+        RunAbilityEffects(command, consumedGrant);
+        if (_state.PendingAttack is { } declared && !ReferenceEquals(declared, pendingAttackBefore))
+            SpendHandPlayedCard(Player(command.PlayerId), command.CardId is null ? null : Card(command.CardId));
+    }
     // consumedGrant (issue #181): true when the caller above already removed a matching Additional
     // Action grant for this use. Threaded through so the tail below knows whether to keep priority
     // with the same player instead of ceding it, on top of whatever this ability's own effects do
     // (Again!/Two Hands themselves add fresh grants directly in the switch, detected generically by
     // comparing the grant count before and after rather than a separate special case per card).
-    private void ExecuteAbilityEffects(GameCommand command, bool consumedGrant = false)
+    private void RunAbilityEffects(GameCommand command, bool consumedGrant = false)
     {
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
         var player = Player(command.PlayerId);
@@ -4407,7 +4432,7 @@ public sealed partial class MatchEngine
         // A Ring's own recruit ability already moves it out of Zone.Hand within its own execution
         // case above, so it never falls into this branch -- only "discard from hand to use the
         // printed action without cost" (issue #194) does.
-        if (source is not null && Definition(source).Type is CardType.Strategy or CardType.Ring && source.Zone == Zone.Hand) DiscardFate(player, source);
+        SpendHandPlayedCard(player, source);
         // Discipline (core rules, issue #184): "played and resolved and then removed from the game" --
         // always, whether or not its own effect above did anything else with the card.
         if (ability.Timing == "Discipline") RemoveFromGame(source!);

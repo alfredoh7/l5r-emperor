@@ -83,6 +83,7 @@ var tests = new (string Name, Action Run)[]
     ("Monastery of New Thought grants a Fire token to a Tattooed Personality and destroys one to fuel its Ranged 5 Attack", MonasteryFireTokenAndAttack),
     ("Togashi Torazu's entering-play reaction and self-performed Fire-token Ranged Attack need no Performer", TorazuFireTokensAndAttack),
     ("An Attack's strength is mutable state: a Reaction may negate or boost it before resolution, when one is available", AttackReactionWindow),
+    ("A hand-played Strategy or Ring Attack is discarded once as its reaction window opens, and the immediate path is unchanged (issue #320)", HandPlayedAttackSpentWhenWindowOpens),
     ("Import wave 1: four unconditional Ranged/Melee Attack cards need only catalog wiring", UnconditionalAttackImportWave),
     ("Tsuruchi Isas bows himself, Ranged 3 Attacks, and moves home after regardless of the hit", TsuruchiIsasAttackAndMoveHome),
     ("Import wave 2: Bayushi Kahoku's Attack strength and own Force both key off an enemy's dishonorable status", BayushiKahokuAttack),
@@ -2416,6 +2417,109 @@ static void AttackReactionWindow()
         Accept(e,new GameCommand("declineReaction",0,e.Version));
         Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead);
         Equal(e.State.Players[0].Honor,honorBefore+2,"Carpenter Castle's hit bonus still applies to a deferred resolution");
+    }
+}
+// Issue #320: ExecuteAbilityEffects' tail (which discards a Strategy/Ring played from hand) is skipped whenever an
+// Attack case returns early because ResolveOrDeferAttack opened the attackReaction window, and ResolveAttack never
+// discards it either -- so the card stayed in Hand for good. The played card is now spent as the window opens.
+static void HandPlayedAttackSpentWhenWindowOpens()
+{
+    // Strength of the Divine (Strategy) and False Ring of Water (Ring): the two published hand-played Attack cards.
+    // Each helper builds the same table with or without a player-1 Attack reactor in play, so the only variable is
+    // whether the window opens.
+    MatchEngine Divine(bool reactor,out CardInstance card,out CardInstance enemy)
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        card=Add(s,"oracle-l5r-10555",0,Zone.Hand);
+        var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // Force 3, +2 from the card
+        performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+        enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2, opposes the performer
+        if(reactor) Add(s,"training-attack-reactor",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-force"));
+        return e;
+    }
+    MatchEngine FalseRing(bool reactor,out CardInstance card,out CardInstance enemy)
+    {
+        var s=StrongholdBattle("oracle-l5r-1218");
+        card=Add(s,"training-false-ring-of-water",0,Zone.Hand);
+        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // presence for the Battle-timing check
+        enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2 <= Ranged 3
+        if(reactor) Add(s,"training-attack-reactor",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,TargetId:enemy.Id,AbilityId:"false-ring-of-water-attack"));
+        return e;
+    }
+    int Discards(MatchEngine e,CardInstance card)=>e.State.Events.Count(x=>x.Type=="fateDiscarded" && x.CardId==card.Id);
+    void Spent(MatchEngine e,CardInstance card,string when)
+    {
+        Equal(e.State.Cards[card.Id].Zone,Zone.FateDiscard,$"The played card is in the discard pile {when}");
+        Check(!e.State.Players[0].Hand.Contains(card.Id),$"The played card has left the hand {when}");
+        Equal(Discards(e,card),1,$"Discarded exactly once {when}");
+    }
+    foreach(var (name,play) in new (string,Func<bool,(MatchEngine,CardInstance,CardInstance)>)[]
+    {
+        ("Strength of the Divine",r=>{var e=Divine(r,out var c,out var en); return (e,c,en);}),
+        ("False Ring of Water",r=>{var e=FalseRing(r,out var c,out var en); return (e,c,en);}),
+    })
+    {
+        {
+            // Window opens: the card is spent at once (not left in hand while the opponent reacts), stays spent once the
+            // window closes, and the Attack itself still resolves as before.
+            var (e,card,enemy)=play(true);
+            Equal(e.State.PendingChoice?.Type,"attackReaction",$"{name}: a reactor is available, so the window opens");
+            Spent(e,card,$"{name}, while the window is open");
+            Accept(e,new GameCommand("declineReaction",1,e.Version));
+            Accept(e,new GameCommand("declineReaction",0,e.Version));
+            Check(e.State.PendingChoice is null && e.State.PendingAttack is null,$"{name}: window closed");
+            Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,$"{name}: the Attack itself still resolves");
+            Spent(e,card,$"{name}, after the window closes");
+        }
+        {
+            // A negating Reaction only zeroes the Attack's strength; the played card is spent regardless.
+            var (e,card,enemy)=play(true);
+            var reactor=e.State.Cards.Values.Single(c=>c.DefinitionId=="training-attack-reactor");
+            Accept(e,new GameCommand("useAbility",1,e.Version,CardId:reactor.Id,AbilityId:"training-attack-negate"));
+            Equal(e.State.PendingAttack?.Strength,0,$"{name}: negated");
+            Accept(e,new GameCommand("declineReaction",0,e.Version));
+            Accept(e,new GameCommand("declineReaction",1,e.Version));
+            Equal(e.State.Cards[enemy.Id].Zone,Zone.Battlefield,$"{name}: the negated Attack does not destroy its target");
+            Spent(e,card,$"{name}, after a negated Attack");
+        }
+        {
+            // No window (nothing can react): the unchanged immediate path -- resolved and discarded inline.
+            var (e,card,enemy)=play(false);
+            Check(e.State.PendingChoice is null && e.State.PendingAttack is null,$"{name}: no reactor, so no window");
+            Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,$"{name}: resolved immediately");
+            Spent(e,card,$"{name}, on the immediate path");
+        }
+    }
+    // Additional Action bookkeeping must be identical whether or not the window opens: an Attack taken as a consumed
+    // grant keeps priority while other grants remain, and an ordinary Attack forfeits the grants it did not consume.
+    foreach(var (label,grants,expectedPriority,expectedGrants) in new (string,AdditionalActionGrant[],int,int)[]
+    {
+        ("consumes one of two grants",[new(0,null),new(0,null)],0,1),
+        ("ordinary action with an unrelated pre-existing grant",[new(0,["not-this-card"])],1,0),
+    })
+    {
+        foreach(var reactor in new[]{false,true})
+        {
+            var s=StrongholdBattle("oracle-l5r-1218");
+            var card=Add(s,"oracle-l5r-10555",0,Zone.Hand);
+            var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0);
+            performer.GrantedKeywords=[new("Paragon","test-fixture","Permanent")];
+            var enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0);
+            if(reactor) Add(s,"training-attack-reactor",1,Zone.Home);
+            s.AdditionalActions.AddRange(grants);
+            var e=MatchEngine.FromTestState(s);
+            Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-force"));
+            Equal(e.State.PendingChoice?.Type=="attackReaction",reactor,$"{label}: window state (reactor={reactor})");
+            if(reactor) { Accept(e,new GameCommand("declineReaction",1,e.Version)); Accept(e,new GameCommand("declineReaction",0,e.Version)); }
+            Equal(e.State.Cards[enemy.Id].Zone,Zone.Dead,$"{label}: resolved (reactor={reactor})");
+            Equal(e.State.PriorityPlayerId,expectedPriority,$"{label}: priority (reactor={reactor})");
+            Equal(e.State.AdditionalActions.Count(g=>g.PlayerId==0),expectedGrants,$"{label}: remaining grants (reactor={reactor})");
+            Spent(e,card,$"{label} (reactor={reactor})");
+        }
     }
 }
 static void UnconditionalAttackImportWave()
