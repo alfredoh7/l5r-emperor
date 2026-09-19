@@ -45,6 +45,7 @@ public sealed partial class MatchEngine
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
             _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
+            BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
             BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId));
     }
@@ -135,24 +136,23 @@ public sealed partial class MatchEngine
         }
         else if(_state.PendingChoice is { Type:"beforeActionReaction" } beforeActionPending)
         {
-            // Mirumoto Rokai / Tamori Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara: the
-            // general in-play "before an action resolves" window is scoped to the one specific watching card by
-            // id (same single-watcher shape as announceReaction below), so only that card's own controller is
-            // offered its before-action-resolves reaction. A reaction whose own Target is a choice among the
-            // watcher's unit (Champion's "own-unit-member") gets one option per member; every other one is
-            // offered once. Each is validated exactly like a submitted command, so a reaction that cannot
-            // legally be used right now is listed disabled with its reason rather than hidden or offered blind.
-            if(beforeActionPending.PlayerId==playerId)
-            {
-                var card=Card(beforeActionPending.CardId!);
-                foreach(var reactionId in (Definition(card).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="before-action-resolves"))
+            // Rokai / Tamoko / Champion of Thunder / Brothers of Goemon / Akodo Kakihara, and any future watcher:
+            // the general in-play "before an action resolves" window is an alternating window open to EITHER
+            // player (issue #318), so whoever holds priority is offered every reaction of THEIR OWN that applies
+            // to the deferred action right now, from any number of cards, plus Pass. A reaction whose own
+            // Target is a choice among the watcher's unit (Champion's "own-unit-member") gets one option per
+            // member; every other one is offered once. Each is validated exactly like a submitted command, so a
+            // reaction that cannot legally be used right now (spent, bowed) is listed disabled with its reason
+            // rather than hidden or offered blind. Recomputed on every query, so what a played reaction changed
+            // (a bowed or destroyed source, a spent use) is already reflected at the next opportunity.
+            if(_state.PendingNegatableAbility is { } deferredAction)
+                foreach(var (card,reactionId) in BeforeActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && BeforeActionReactionApplies(x.Card,x.AbilityId,deferredAction)).ToArray())
                 {
                     var reaction=AbilityCatalog.All[reactionId];
                     string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }
-            }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
         else if(_state.PendingChoice is { Type:"additionalActionReaction" })
@@ -188,6 +188,36 @@ public sealed partial class MatchEngine
                     AddReaction(card,reactionId);
             }
             Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"engageReaction" })
+        {
+            // Battle Phase timing (issue #310, spec 4.2): every legal "Engage:" action and "After engaging" Reaction this
+            // player holds (in play, or a Strategy in hand, or Naval Invasion), then the pass that ends their opportunity.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
+        {
+            // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.
+            Add("beforeBattleOptional","Decline",Command("beforeBattleOptional") with {Choice="decline"},cardId:optionalPending.CardId);
+            foreach(var target in Army(1-playerId,_state.CurrentBattleProvince!.Value))
+                Add("beforeBattleOptional",$"Bow {Definition(target).Name}",Command("beforeBattleOptional",target:target.Id) with {Choice="use"},cardId:target.Id);
+        }
+        else if(_state.PendingChoice is { Type:"beforeBattleOrder" })
+        {
+            // The active player orders the simultaneous "before this battle resolves" effects (issue #272/#310).
+            foreach(var id in _state.PendingBeforeBattleResolve!.RemainingSourceIds)
+                Add("beforeBattleOrder",$"Resolve {Definition(Card(id)).Name} next",Command("beforeBattleOrder",target:id),cardId:id);
+        }
+        else if(_state.PendingChoice is { Type:"encircledOrder" })
+        {
+            Add("encircledOrder","The Attacker selects a Personality first",Command("encircledOrder") with {Choice="attacker"});
+            Add("encircledOrder","The Defender selects a Personality first",Command("encircledOrder") with {Choice="defender"});
+        }
+        else if(_state.PendingChoice is { Type:"encircledSelect" })
+        {
+            foreach(var card in Army(playerId,_state.PendingBeforeBattleResolve!.ProvinceIndex))
+                Add("encircledSelect",$"Keep {Definition(card).Name} at this battlefield",Command("encircledSelect",target:card.Id),cardId:card.Id);
         }
         else if(_state.PendingChoice is { Type:"shinden" })
         {

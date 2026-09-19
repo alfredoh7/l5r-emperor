@@ -307,6 +307,29 @@ static async Task PublishedPlay(string url)
     await lion.CreateOrJoin(url, crane.Seat!.RoomCode);
     await WaitFor(() => lion.Snapshot is not null && !lion.Busy && crane.Snapshot?.PlayersConnected?.All(p=>p)==true);
     Check(lion.Snapshot!.View.Scenario==PublishedContent.Scenario && lion.Snapshot.View.PriorityPlayerId==1,"Published setup reaches both clients.");
+    // Battle Phase timing (issue #310): the public battle-step view is part of every state message, identical for both seats, and survives the
+    // strict server serializer and the client's own lenient one alike (an added view field must be optional so an older payload still parses).
+    Check(lion.Snapshot.View.BattleStep is { Segment: BattleSteps.None, Step: BattleSteps.None, DecisionPlayerId: null } && crane.Snapshot!.View.BattleStep is { Segment: BattleSteps.None },
+        "The battle-step view crosses the live wire (outside the Attack Phase: nothing in progress).");
+    var stepView = lion.Snapshot.View with { BattleStep = new BattleStepView(BattleSteps.FightBattles, BattleSteps.Engage, 0, 0, 2, 1, BattleSteps.ReasonDefenderOverride, false,
+        [new FirstOpportunityClaim(0, "Naval", "card-1"), new FirstOpportunityClaim(1, "Engage", null)], BattleSteps.LimitPerformerOnly, "card-2", 1, ["card-3"], "card-3", "engageReaction") };
+    // The same discipline the GameCommand wire test applies: a member added to the public view later cannot silently fail to cross the wire.
+    using (var json = System.Text.Json.JsonDocument.Parse(System.Text.Json.JsonSerializer.Serialize(stepView, Protocol.Json)))
+        foreach (var type in new[] { typeof(MatchView), typeof(BattleStepView), typeof(FirstOpportunityClaim) })
+        {
+            var element = type == typeof(MatchView) ? json.RootElement : type == typeof(BattleStepView) ? json.RootElement.GetProperty("battleStep") : json.RootElement.GetProperty("battleStep").GetProperty("engageClaims")[0];
+            foreach (var property in type.GetProperties())
+                Check(element.TryGetProperty(System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(property.Name), out _), $"{type.Name}.{property.Name} is missing from the serialized view.");
+        }
+    foreach (var options in new[] { Protocol.Json, new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web) })
+    {
+        var message = new StateMessage("state", "ROOM", 0, 1, stepView, [], [true, true]);
+        var round = System.Text.Json.JsonSerializer.Deserialize<StateMessage>(System.Text.Json.JsonSerializer.Serialize(message, options), Protocol.Json)!;
+        Check(System.Text.Json.JsonSerializer.Serialize(round.View.BattleStep) == System.Text.Json.JsonSerializer.Serialize(stepView.BattleStep),
+            "Every BattleStepView field, claims included, round-trips through the protocol serializer.");
+        var older = System.Text.Json.JsonSerializer.Deserialize<StateMessage>(System.Text.Json.JsonSerializer.Serialize(message with { View = stepView with { BattleStep = null } }, options), Protocol.Json)!;
+        Check(older.View.BattleStep is null, "A payload without the field still deserializes.");
+    }
     var before = lion.Snapshot.View.Players[1].Provinces.Select(p=>p.Card!.Id).ToArray();
     var option = lion.Snapshot.Actions.First(a=>a.Enabled && a.Command?.AbilityId=="border-first");
     await lion.Submit(option.Command! with {CardIds=[before[0],before[2]]});

@@ -80,14 +80,19 @@ public sealed partial class MatchEngine
     private sealed record AbilityCost(GoldCostRule Rule, int Amount, string Basis, string? Error, bool NeedsTarget,
         CardInstance? Subject, int? Min = null, int? Max = null);
 
-    /// <summary>The rule for an ability that declares none: a Strategy source pays its own printed cost,
-    /// and a Discipline (played from a discard pile) pays its source's printed cost. Everything else is
-    /// free.</summary>
+    /// <summary>The rule for an ability that declares none. A Discipline ability (issue #331) has two prices
+    /// decided by where its card is: played from a discard pile it pays the Discipline cost -- the card's
+    /// published GoldCost, which for a Discipline Strategy holds the Discipline icon's amount because such a card
+    /// prints no Gold Cost of its own -- and played from hand it is the ordinary Strategy play, free of it (never
+    /// the Discipline cost). Otherwise a Strategy source pays its own printed cost. Everything else is free.
+    /// Not modeled: a Discipline card whose action ALSO has its own Gold cost, where the supplement adds the
+    /// two together (no published card does; it would need an explicit rule on the ability that
+    /// AbilityGoldCost adds the Discipline cost to).</summary>
     private static GoldCostRule? ImplicitGoldRule(AbilityDefinition ability, CardInstance? source)
     {
         if (source is null) return null;
+        if (ability.Discipline) return DisciplineFromDiscard(ability, source) ? GoldCostRule.SourcePrinted() : null;
         if (Definition(source).Type == CardType.Strategy) return GoldCostRule.SourcePrinted() with { Explicit = false };
-        if (ability.Timing == "Discipline") return GoldCostRule.SourcePrinted();
         return null;
     }
 
@@ -122,7 +127,9 @@ public sealed partial class MatchEngine
                 return new(rule, rule.Amount, "Fixed by this ability", null, false, source ?? target);
             case GoldCostBasis.SourcePrinted:
                 if (source is null) return new(rule, 0, "This ability has no source card to price.", "This ability has no source card to price.", false, null);
-                return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} cost {Definition(source).GoldCost}", null, false, source);
+                // A Discipline play from a discard pile says so, so the payment panel names the Discipline cost
+                // rather than implying a printed Gold cost the card does not have.
+                return new(rule, Definition(source).GoldCost, $"{Definition(source).Name} {(DisciplineFromDiscard(ability, source) ? "Discipline cost" : "cost")} {Definition(source).GoldCost}", null, false, source);
             case GoldCostBasis.Variable:
             {
                 var chosen = command.GoldAmount ?? rule.Amount;

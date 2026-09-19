@@ -33,6 +33,7 @@ internal static class DeckLookTests
             ("Hidden information: the viewer's list, the deck contents, instance ids and the RNG state never reach the opponent, including when the viewer looks at the OPPONENT's deck; never more than N cards are sent", HiddenInformation),
             ("No shuffle and full determinism: a look never touches the generator, keeping everything leaves the deck byte-identical, and the match replays exactly", NoShuffleAndReplay),
             ("Order Seppuku, which cuts through pending choices, is refused and not offered while a look is open", SeppukuCannotInterruptALook),
+            ("A before-action reaction window (issue #327) the opponent opens ahead of a look or a search resolves first; the deferred action then re-executes into the look or search, which ends with priority to the opponent and no window left open", BeforeActionWindowAheadOfLookAndSearch),
             ("The viewer always has a legal, offered answer at every stage (deck choice, arrangement), every offered command validates, and the options stay bounded", ViewerAlwaysHasALegalAnswer),
         ];
         runner.Run("deck-look", tests);
@@ -653,6 +654,69 @@ internal static class DeckLookTests
         Put(r, "oracle-l5r-7789", 0, Zone.Home); var tamaki = Put(r, Tamaki, 0, Zone.Home);
         var re = Engine(r); Accept(re, Use(re, tamaki.Id, "isawa-tamaki-look")); Accept(re, Arrange(re, "0:top"));
         Equal(re.State.PendingChoice, null); Equal(re.State.PriorityPlayerId, 1);
+    }
+
+    // ---- the alternating before-action window (issue #327) ----
+
+    // Unimpeachable Name is offered against ANY action of the other player (here because the reactor controls a Dishonorable
+    // Personality it could rehonor), so the reactor's window opens BEFORE a Limited look or search resolves. The whole command is
+    // deferred (never partly applied): nothing may be looked at, bowed or paid while the window is open, and once both players
+    // pass, the same command re-executes into the look or search, which must still end with priority to the opponent.
+    private static void BeforeActionWindowAheadOfLookAndSearch()
+    {
+        MatchState WithReactor(out CardInstance source, string definition)
+        {
+            var s = Start(); Deck(s, 0, Zone.FateDeck, Decoys); Deck(s, 0, Zone.DynastyDeck, "training-lion-samurai", "training-lion-courtier");
+            source = Put(s, definition, 0, Zone.Home);
+            var dishonorable = Put(s, "training-lion-courtier", 1, Zone.Home); dishonorable.Dishonorable = true;
+            Put(s, UnimpeachableName, 1, Zone.Hand);
+            return s;
+        }
+        void PassWindow(MatchEngine e)
+        {
+            Equal(e.State.PendingChoice?.Type, "unimpeachableNameReaction", "The reactor's before-action window opens first");
+            Equal(e.State.PendingChoice!.PlayerId, 1);
+            Check(e.GetView(0).PendingLook is null && e.GetView(0).PendingSearch is null && e.GetView(1).PendingLook is null && e.GetView(1).PendingSearch is null, "No look or search exists while the window is open");
+            // Rejecting a look/search answer during the window leaves it untouched.
+            Reject(e, new("arrangeTopCards", 0, e.Version, CardIds: ["0:top"])); Reject(e, new("chooseSearchDeck", 0, e.Version, Choice: "Fate"));
+            // Both players pass the window (the reactor first, as the window offers it), and the deferred action re-executes.
+            for (var i = 0; i < 4 && e.State.PendingChoice?.Type == "unimpeachableNameReaction"; i++)
+                Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version));
+        }
+
+        // A look (Isawa Tamaki).
+        var s = WithReactor(out var tamaki, Tamaki);
+        var e = Engine(s); var before = Top(e, 0, "Fate");
+        Accept(e, Use(e, tamaki.Id, "isawa-tamaki-look"));
+        PassWindow(e);
+        Equal(e.State.PendingChoice?.Type, "lookArrange", "After the window the deferred action re-executes into the look");
+        Equal(e.State.PendingChoice!.PlayerId, 0);
+        Equal(string.Join(",", Look(e).Cards!.Select(c => c.DefinitionId)), before[0], "The look shows the top card, which nothing disturbed");
+        Check(e.GetView(1).PendingLook is null, "Still private to the viewer");
+        Accept(e, Arrange(e, "0:bottom"));
+        Equal(e.State.PendingChoice, null, "No window is left open after the look"); Equal(e.State.PriorityPlayerId, 1, "Priority passes to the opponent");
+        Equal(string.Join(",", Top(e, 0, "Fate")), string.Join(",", before.Skip(1).Append(before[0])));
+
+        // The reactor may instead USE its reaction (rehonoring), and the look still follows.
+        var used = Engine(WithReactor(out var tamaki2, Tamaki)); Accept(used, Use(used, tamaki2.Id, "isawa-tamaki-look"));
+        var reactionCard = used.State.Cards.Values.First(c => c.DefinitionId == UnimpeachableName);
+        var dishonorable = used.State.Cards.Values.First(c => c.OwnerId == 1 && c.Dishonorable);
+        Accept(used, new("useAbility", 1, used.Version, CardId: reactionCard.Id, TargetId: dishonorable.Id, AbilityId: "unimpeachable-name-reaction"));
+        for (var i = 0; i < 4 && used.State.PendingChoice?.Type == "unimpeachableNameReaction"; i++) Accept(used, new("declineReaction", used.State.PriorityPlayerId, used.Version));
+        Equal(used.State.PendingChoice?.Type, "lookArrange", "The look follows a window in which a reaction was used");
+        Check(!used.State.Cards[dishonorable.Id].Dishonorable, "The reaction itself resolved");
+
+        // A search (Ikoma Shizuka bows herself as her cost -- only AFTER the window).
+        var ss = WithReactor(out var shizuka, "oracle-l5r-10292");
+        var se = Engine(ss);
+        Accept(se, Use(se, shizuka.Id, "shizuka-search"));
+        Check(!se.State.Cards[shizuka.Id].Bowed, "The cost is not paid while the before-action window is open");
+        PassWindow(se);
+        Equal(se.State.PendingChoice?.Type, "searchDeck", "After the window the deferred action re-executes into the search");
+        Check(se.State.Cards[shizuka.Id].Bowed, "The cost is paid once, when the action really resolves");
+        Accept(se, new("chooseSearchDeck", 0, se.Version, Choice: "Fate"));
+        Accept(se, new("passSearch", 0, se.Version));
+        Equal(se.State.PendingChoice, null, "No window is left open after the search"); Equal(se.State.PriorityPlayerId, 1, "Priority passes to the opponent");
     }
 
     // ---- no deadlock ----

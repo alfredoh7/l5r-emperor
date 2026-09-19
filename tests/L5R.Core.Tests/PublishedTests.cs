@@ -110,16 +110,19 @@ internal static class PublishedTests
         // PersonalityWave22 (12) + RegionWave3 (1), issue #301 Batch F: thirteen cards assigned, none
         // already published) = 388 (Batch F's own baseline, now merged into main) + 1 (StrategyWave16, issue
         // #304: Brawl, now merged into main) = 389 + 1 (PersonalityWave23, issue #305: Akodo Kakihara, now merged into
-        // main) = 390 (origin/main's own baseline, re-derived by counting distinct non-ScenarioOnly ids across
-        // content/published/*.json, not copied from either side of the conflict) + 6 (this branch's own
-        // PersonalityWave24: Kahoku - exp, Kosoko - exp, Ebumi, Kazan, Nitani, Shinoda - exp, none already
-        // published) = 396. Recomputed from the actual current origin/main baseline each time this conflicts,
-        // never copied from either side of a merge.
+        // main) = 390 + 6 (PersonalityWave24, issue #313: Kahoku - exp, Kosoko - exp, Ebumi, Kazan, Nitani, Shinoda -
+        // exp, now merged into main) = 396 (origin/main at aa42e153 plus #319/#325, which add no cards, re-derived by
+        // counting distinct non-ScenarioOnly ids across content/published/*.json, not copied from either side of the
+        // conflict) + 3 (this branch's own PersonalityWave25 Daidoji Yuki Experienced, PersonalityWave26 Daidoji Ebizo and
+        // FollowerWave15 Master Scouts, issues #309/#321) = 399 (origin/main at c3ff52a0, re-derived by counting distinct
+        // non-ScenarioOnly ids across content/published/*.json) + 1 (this branch's own StrategyWave18 Return to Action,
+        // issue #331) = 400. Recomputed from the actual current origin/main baseline
+        // each time this conflicts, never copied from either side of a merge (this merge's two sides said 393 and 396).
         // + 7 (this branch, issues #312 and #322: EventWave3 Imperial Gift + PersonalityWave27 Ikoma Shizuka + EventWave4 Signs and Portents
         // + PersonalityWave28 Isawa Tamaki and Bayushi Kahoku exp2 + StrategyWave17 Banish All Doubt + HoldingWave2 Public Records, none
-        // previously published) = 403, re-derived after merging origin/main (396 at aa42e153, counted from the JSON files) by counting
-        // distinct non-ScenarioOnly ids across content/published/*.json of the merged tree.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,403);
+        // previously published) = 407, re-derived after merging origin/main ddb58847 (400, counted from the JSON files: distinct
+        // non-ScenarioOnly ids across content/published/*.json) plus this branch's seven, and checked against the merged tree.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,407);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
