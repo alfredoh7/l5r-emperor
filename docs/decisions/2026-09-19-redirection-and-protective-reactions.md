@@ -193,14 +193,20 @@ pass option. The engine puts nothing new into any player's view: the redirect an
 
 ## Tests
 
-`tests/L5R.Core.Tests/TargetedActionReactionTests.cs` (21): published shapes; the use-limit parity pin; Ezuno on a non-Attack action (window
+`tests/L5R.Core.Tests/TargetedActionReactionTests.cs` (29, all driven through `QueryActions` / the offered commands): published shapes; the use-limit parity pin; Ezuno on a non-Attack action (window
 opens for his controller, nothing has happened yet, the acting player answers, the action resolves on Ezuno), on an Attack, and every
 "not offered" rule (own action, himself, non-Shugenja, other location, bowed, spent, not in play, illegal for Ezuno); costs; the chain
 (Champion of Thunder before/after a redirect, a negation that stays with the old card); Blade with every candidate, illegal choices
 rejected, its applicability rules and an Attack whose strength follows the new target; Yurishi negating, still-legal, against an Attack and
-his entry Honor loss; Jinn-Kuen paying through the quote, unpayable, free, blanket over eight kinds of effect and the Open half; Mochitoko's
-twice-per-turn count and reset, bow-only, destroy-only, both, an Attack, and every "not offered" rule; and every enabled offer validated on a
-fresh engine. Mutation checks (each mutation applied, the suite run, a named test failed, source restored) are listed in the PR.
+his entry Honor loss and the Honor an action inflicts as an effect; Jinn-Kuen paying through the quote, unpayable, free, whole-action negation of
+every kind of effect (and of an Attack) and the Open half; Mochitoko's twice-per-turn count and reset, bow-only, destroy-only, both, an Attack, a
+Follower paid as a COST (whole action negated, nothing paid, the Honor-loss cost ignored) and every "not offered" rule; Blade redirecting to
+itself; Bofana once per action across redirects (deferred and Attack) and the guard on its own; Attacks with no target and with a province (no
+window although every reactor is in play); Sakuma beside Ezuno in both orders; the verb-specific cost-block predicate; and every enabled offer
+validated on a fresh engine. The two Recon Attack tests in `ReconActionTests.cs` that held an Attack open for an attack reactor now declare it at
+a card, since an Attack with no target opens no window. Mutation checks (each mutation applied, the suite run, a named test failed, source
+restored) are listed in the PR body; a mutation of the Bofana per-action record is killed only by the guard test, because the trait's own
+once-per-phase limit otherwise covers the same case.
 
 ## Unblocked by the same work (unwired cards the primitives now cover)
 

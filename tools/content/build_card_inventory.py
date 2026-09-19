@@ -416,8 +416,10 @@ BLOCKERS: dict[str, str] = {
     # (AttachAction.cs), the conditional effect choice (EffectChoice.cs) and the Follower Performer -- narrow the notes of the cards named below, none of which was wired.
     # personality-wave-30 (issue #335) published Mirumoto Ezuno (5086), Goju Yurishi (2862), Yasuki Jinn-Kuen - exp2 (9445) and Hida Mochitoko - exp (3152), and
     # item-wave-4 published Blade of Champions (1004); their old notes are gone. What they built: the targeted-by-action Reaction family (redirect an action to
-    # another card, re-check a target that moved and negate its effects, blanket "negate the action's effects", several effect kinds negated at once) and the
-    # per-turn use limit (AbilityDefinition.UsesPerTurn). The notes below on cards that needed only those pieces say what is left of each.
+    # another card, re-check a target that moved and negate its effects, several effect kinds negated at once), the per-turn use limit
+    # (AbilityDefinition.UsesPerTurn), and -- after Mendon's rulings -- Attacks that need no card target (or target the current province), a cost-block predicate
+    # (CostPaymentBlockedByNegation) and once-per-action Bofana judging. "Negate the action's effects" as a WHOLE is agent F's ActionNegation.cs (Sakuma, Jinn-Kuen); the
+    # per-card negation here is for "negate its effects on him". The notes below on cards that needed only those pieces say what is left of each.
     # personality-wave-29 (issue #333) published Daigotsu Bofana (1706) and Daigotsu Bofana - exp (10315); the old note on 1706 is gone.
     # Its "broad after-another-player's-action-targets-this-card trigger" was already built for Akodo Kakihara (a Reaction window); Bofana's
     # is a mandatory TRAIT and fires when the action is announced (MatchEngine.AnnounceAbility), and his once-per-PHASE dedupe is now the
