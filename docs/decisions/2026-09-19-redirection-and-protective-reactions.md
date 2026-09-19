@@ -1,8 +1,8 @@
 # Redirection and protective reactions: Mirumoto Ezuno, Blade of Champions, Goju Yurishi, Yasuki Jinn-Kuen exp2, Hida Mochitoko exp
 
-Status: implemented; six rulings by Mendon applied and recorded below ("Mendon's six rulings"). The rulings quoted from Mendon are his,
-given with the task and after review on 2026-09-19; every other reading is a decision of this change, marked with its alternative, and the one
-question still with him is listed under "Open questions". Lane: rules (mdornbrook; cross-lane edits under his standing authority). Issue: #335.
+Status: implemented; seven rulings by Mendon applied and recorded below ("Mendon's rulings"). The rulings quoted from Mendon are his,
+given with the task and after review on 2026-09-19; every other reading is a decision of this change, marked with its alternative. No question
+is still open with him. Lane: rules (mdornbrook; cross-lane edits under his standing authority). Issue: #335.
 Waves: `personality-wave-30` (Ezuno, Yurishi, Jinn-Kuen, Mochitoko) and `item-wave-4` (Blade of Champions). Published count 417 -> 422 (on
 origin/main 05cc2493; recounted from the wave ids).
 
@@ -32,7 +32,7 @@ catalogue text and matches the scans exactly. Each card is published whole. Yuri
 "After Yurishi enters play: Lose 3 Honor" carries no Reaction label, so it is the mandatory `EntryHonorLoss` 3, applied automatically like
 every other Honor-loss entry and never offered as a choice. Art: `src/L5R.Client/Content/Published/oracle-l5r-<id>.jpg`.
 
-## Mendon's six rulings (confirmed by Mendon, applied on this branch)
+## Mendon's rulings (confirmed by Mendon, applied on this branch)
 
 1. **Jinn-Kuen may cancel actions of his own controller** (as built): "After an action targets your Merchant" means any action, the controller's own
    included. (Was open question 1; Mochitoko is the same: any initiator.)
@@ -50,6 +50,22 @@ every other Honor-loss entry and never offered as a choice. Art: `src/L5R.Client
    judged then (below).
 6. **Ranged and Melee Attacks need no target and may target a province** (where the ability says so). Every card-target check treats "no target" and
    "province" as **no card targeted**: no reaction that keys on a card being targeted is offered, and no window opens for the Attack.
+7. **Carpenter Castle** (`oracle-l5r-1218`, "Siege Battle: Bow your target Castle or Siege card: Ranged 5 Attack. If this targeted a card, gain 2 Honor."):
+   "Carpenter Castle grants honor if a card is targeted (the attack may be negated but the honor would still be gained)." The 2 Honor is a TARGETING
+   effect, not a hit effect (this closes the old open question 5; it was gained only on a hit before). Gained once whenever the Attack targeted a card --
+   hit, negated, dodged (Yurishi) or redirected (Ezuno, Blade: it then targeted the new card) -- and never for an Attack with no target or on a province
+   (`AttackTargetedACard`, called from `ResolveAttackNow` and from the negated branch of `ResolveAttack`).
+
+### Other wired Attacks read against the "if this targeted"/hit wording (ruling 7; only Carpenter Castle changed)
+
+Every wired Attack ability was read (49 abilities with target kind `attack`; the published cards' Attack text scanned for "targeted", "if it/this", "destroy",
+"hit", "negate"). Only Carpenter Castle has an "if this targeted a card" effect. The rest are unaffected and unchanged: **Ikoma Shuji** ("+1 strength if it
+targeted a Spider Clan Personality") is a strength bonus that follows the CURRENT target (a redirected Attack re-prices to the new card; no target, no bonus);
+the target-property bonuses (Bayushi Kahoku +2 if dishonorable, Hiruma Nitani +2 if Shadowlands, Horseback Warriors +1 vs Infantry, Sankaku Yari +1 vs Cavalry,
+Kamina exp +1 vs Lion or Unaligned) likewise count a card only when there is one; **Tsuruchi Isas** ("then move him home") is a second unconditional effect and
+stays outside the hit branch (it is skipped when the whole Attack is negated, as any effect of a negated action is). The Attack reactions that key on "after
+an Attack is targeted" (Archery Range, Fallow Lands, Strong Defenses, Trusting Instinct, A Close Call) now cannot answer an Attack that targets no card or a
+province, by ruling 6.
 
 ### How each is built
 
@@ -168,8 +184,8 @@ plain Force penalty never offers it (Brothers of Goemon's precedent).
 
 ## Open questions for Mendon
 
-Questions 1-4 of the first version of this note are closed by Mendon's six rulings above (1: rulings 1 and 2; 2: ruling 3; 3: ruling 4, and the Blade answers any
-Battle action as printed -- his rulings did not change that; 4: ruling 5). One remains:
+None. Questions 1-4 of the first version of this note are closed by Mendon's rulings above (1: rulings 1 and 2; 2: ruling 3; 3: ruling 4, and the Blade answers
+any Battle action as printed -- his rulings did not change that; 4: ruling 5), and question 5 (Carpenter Castle) by ruling 7. For the record, question 5 was:
 
 5. **Carpenter Castle (existing behaviour, surfaced by this work):** "Ranged 5 Attack. If this targeted a card, gain 2 Honor." The engine gains the 2 Honor only when the Attack HITS. Redirected or dodged Attacks (Ezuno, Yurishi) make the difference common, and ruling 6 makes it commoner still (an Attack with no target targets no card: no Honor at all, which the printed text supports). The printed text reads "if this targeted a card". Not changed here; still with Mendon.
 
@@ -193,7 +209,7 @@ pass option. The engine puts nothing new into any player's view: the redirect an
 
 ## Tests
 
-`tests/L5R.Core.Tests/TargetedActionReactionTests.cs` (29, all driven through `QueryActions` / the offered commands): published shapes; the use-limit parity pin; Ezuno on a non-Attack action (window
+`tests/L5R.Core.Tests/TargetedActionReactionTests.cs` (30, all driven through `QueryActions` / the offered commands): published shapes; the use-limit parity pin; Ezuno on a non-Attack action (window
 opens for his controller, nothing has happened yet, the acting player answers, the action resolves on Ezuno), on an Attack, and every
 "not offered" rule (own action, himself, non-Shugenja, other location, bowed, spent, not in play, illegal for Ezuno); costs; the chain
 (Champion of Thunder before/after a redirect, a negation that stays with the old card); Blade with every candidate, illegal choices
@@ -202,7 +218,7 @@ his entry Honor loss and the Honor an action inflicts as an effect; Jinn-Kuen pa
 every kind of effect (and of an Attack) and the Open half; Mochitoko's twice-per-turn count and reset, bow-only, destroy-only, both, an Attack, a
 Follower paid as a COST (whole action negated, nothing paid, the Honor-loss cost ignored) and every "not offered" rule; Blade redirecting to
 itself; Bofana once per action across redirects (deferred and Attack) and the guard on its own; Attacks with no target and with a province (no
-window although every reactor is in play); Sakuma beside Ezuno in both orders; the verb-specific cost-block predicate; and every enabled offer
+window although every reactor is in play); Sakuma beside Ezuno in both orders; the verb-specific cost-block predicate; Carpenter Castle's Honor on a hit, a negated Attack, a redirect (Ezuno, Blade), a dodge (Yurishi), no target and a province; and every enabled offer
 validated on a fresh engine. The two Recon Attack tests in `ReconActionTests.cs` that held an Attack open for an attack reactor now declare it at
 a card, since an Attack with no target opens no window. Mutation checks (each mutation applied, the suite run, a named test failed, source
 restored) are listed in the PR body; a mutation of the Bofana per-action record is killed only by the guard test, because the trait's own

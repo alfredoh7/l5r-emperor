@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Targeted-by-action reaction family (redirect, re-check, blanket and multi-kind negation) and a per-turn use limit; wires Mirumoto Ezuno, Goju Yurishi, Yasuki Jinn-Kuen exp2, Hida Mochitoko exp (personality-wave-30) and Blade of Champions (item-wave-4).",
-  "validation": "bash tools/check.sh --skip-client passed locally (216 core + 57 published + gold, battle timing, recon, discipline, deck, bofana and 21 new targeted-action tests, 24 AI tests, server and transport tests); 27 mutation checks each failed a named test; published count 409 -> 414 recounted from content/published/*.json; Godot client checks not run locally (no editor in this worktree), left to CI.",
-  "remaining": "None; ready for review. Open rules questions for Mendon are in docs/decisions/2026-09-19-redirection-and-protective-reactions.md.",
+  "summary": "Ezuno, Blade of Champions, Goju Yurishi, Yasuki Jinn-Kuen exp2 and Hida Mochitoko exp (personality-wave-30, item-wave-4) on general primitives, with Mendon's seven rulings applied: Jinn-Kuen negates the whole action (F's ActionNegation) beside per-card negation; Mochitoko blocks Follower costs behind CostPaymentBlockedByNegation (whole action negated, nothing paid); Blade may redirect to itself; Honor effects negated with the effects; Bofana judged once per action per Bofana across redirects; Attacks need no card target and may target a province (no window, no card-targeted reaction); Carpenter Castle's Honor is a targeting effect. Sakuma checked against redirect/re-check. Published count 422.",
+  "validation": "bash tools/check.sh --skip-client passed after merging origin/main 1f79b9d7 (216 core, 57 published, 30 targeted-action-reactions, 26 AI, server and transport). 20 new mutations this round plus 27 in the first, all killed by a named test (listed in the PR). Client not built: Godot absent; CI runs the client jobs.",
+  "remaining": "Client: the Attack target picker cannot choose no target or a province (issue #355 for Alfredo). Re-sync after agent F's atomic cost-payment PR (#351) and agent T's #348. Ready for review; not merged.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/335",
   "branch": "claude/335-redirection-protective-reactions",
-  "updated": "2026-09-19T16:46:13.784856+00:00"
+  "updated": "2026-09-19T20:14:12.754302+00:00"
 }
