@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Wire Daigotsu Hotako exp3, Doji Yoshitada, Sea Troll Predator, Utaku Liu-Xeung exp (personality-wave-32) and Bonds of Coin, Gold and Steel, Fear Me! (strategy-wave-21) on four general primitives: action-lock, multi-target action slots, move to a rule-defined destination, stat-penalty hook (plus the Clan entry discount on QuotePurchase). Published count 409 -> 416.",
+  "validation": "bash tools/check.sh --skip-client passes (216 core, 57 published, 18 gold-parity, 20 gold-quote, and new action-lock 10, multi-target 16, move-destination 9, stat-penalty 8; AI 23, server 8, transport 7); client project builds with dotnet build; 38 of 41 named mutations fail a named test (3 equivalent). Godot import/smoke not run locally (no Godot); CI runs it.",
+  "remaining": "None for the engine. The client ignores ActionOption.Slots/Provinces (default choice submitted): UI issues #345 (multi-target viewer), #346 (destination picker with arrows), #347 (action-lock indicator).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/336",
+  "branch": "claude/336-hotako-yoshitada-predator-liuxeung",
+  "updated": "2026-09-19T17:06:11.665728+00:00"
+}
