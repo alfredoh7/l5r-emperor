@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Applies Mendon's rulings on PR #344: a negated action pays ALL its costs (64 abilities' cost statements moved to declarative AbilityDefinition.Costs, paid in one place for both the normal and the whole-action-negation flow), atomically (a blocked cost negates the whole action and pays nothing, Honor loss included) with the CostPaymentBlockedByNegation extension point for #341; Fukuzo's copies also end when he is removed from the game (survive death, end on Dynasty-deck reshuffle); Unfortunate Hesitation bars Order Seppuku (listed disabled with the reason); decision doc records all rulings as confirmed and closes the open-question list.",
+  "validation": "bash tools/check.sh --skip-client passed (Core 216, published 57, gold-parity 18, gold-quote 20, battle-timing 23, recon-action 11, discipline-absent 15, deck suites, alternative-costs 12, card-copy 15, either-or 17, new negated-costs 11, client transport 7). Mutation checks: 23 mutants of the new rules, all killed by a named test (table in the decision doc); no client change.",
+  "remaining": "Unconverted cost abilities listed by id in the decision doc (hiruma-nitani-attack, tsujiken-straighten-holding, mitsu-fire-attack, improved-defenses-strength, winds-of-dismissal-choice, kano-destroy-token token); agent R fills CostPaymentBlockedByNegation in #341. Ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/351",
+  "branch": "claude/351-negation-costs-atomic",
+  "updated": "2026-09-19T19:55:28.778944+00:00"
+}

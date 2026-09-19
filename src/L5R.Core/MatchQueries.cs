@@ -91,7 +91,7 @@ public sealed partial class MatchEngine
         if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
-                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),cardId:card.Id);
+                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),OwesForcedPass(playerId)?ForcedPassReason:null,card.Id);
         if(playerId!=_state.PriorityPlayerId)
         {
             Add("wait",$"Waiting for {Player(_state.PriorityPlayerId).Name}",reason:"The other player has the action opportunity.");

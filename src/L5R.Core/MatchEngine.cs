@@ -759,6 +759,8 @@ public sealed partial class MatchEngine
         Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
         // The same for a copy in progress (its receiver could be the one destroyed) and an Either/Or choice (issue #338).
         Require(_state.PendingCopy is null && _state.PendingEitherOr is null,"Finish the pending choice before ordering Seppuku.");
+        // Unfortunate Hesitation (issue #351, Mendon): Order Seppuku is an Open action, so a player who owes a pass may not take it either.
+        Require(!OwesForcedPass(command.PlayerId),ForcedPassReason);
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");

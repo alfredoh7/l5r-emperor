@@ -1,7 +1,9 @@
 # Copying keywords and abilities, the opposing player's Either/Or choice, and Fukuzo, Yoritomo Sakuma, Unfortunate Hesitation
 
 Status: accepted (Mendon, standing authority); every reading below is an implemented reading with its alternative recorded so it can be
-flipped. Lane: shared (rules engine, view/wire contract, one client line). Issue #338 (PR: this branch). Waves: `personality-wave-33`
+flipped. **Mendon has now ruled on every question this document opened (section 6); all are recorded as confirmed by him and the open-question
+list is closed.** Lane: shared (rules engine, view/wire contract, one client line). Issue #338 (PR #344, merged) and issue #351 (the follow-up
+that applies his rulings). Waves: `personality-wave-33`
 (Fukuzo `oracle-l5r-2728`, Yoritomo Sakuma `oracle-l5r-9624`) and `strategy-wave-22` (Unfortunate Hesitation `oracle-l5r-9941`).
 The published count is **417** (414 on `origin/main` 8b378a8d, which already holds issue #337's five, plus these three, recounted from the distinct
 non-`ScenarioOnly` ids in `content/published/*.json`; it was 412 before merging #337). Follow-up UI issues for Alfredo: the reusable copy wizard (#342) and the Either/Or wizard (#343).
@@ -61,9 +63,16 @@ new donor offers anything** (the text ends the copy at the use, not at the next 
 keyword or ability the old copy provided may be chosen again. Per receiving card: a second Fukuzo's uses do not end the first one's copies.
 Alternative: any use of "this ability" by any card ends every copy. A copy with another duration (`Turn`, "this turn") is never replaced.
 
-**Persistence (recommendation, flagged).** A copy is kept when Fukuzo dies (a Personality keeps what it has, consistent with Mendon's rule and
-issue #213), still ends at his next use, and is cleared if he returns to a deck or a province as a fresh card. Alternative: copies end the moment
-he leaves play. This is a one-line change in `MarkDead`; the test `CopiesPersistAndReset` pins the current reading.
+**Persistence (Mendon: confirmed, issue #351).** Fukuzo's copies **survive his death** (a Personality keeps what it has, consistent with Mendon's
+rule and issue #213), still end at his next use, and end otherwise **only if he is reshuffled into the Dynasty deck or removed from the game**.
+In the code: `MarkDead` clears nothing (`CopiesPersistAndReset` kills a wearer and shows the copies remain); `ToOwnerDeck` resets a card to a fresh
+one (`CopiesPersistAndReset`, `CopiesEndOnRemoval`: Goju House Guard puts a Fukuzo carrying copies into his Dynasty deck); and **`RemoveFromGame`
+now clears the card's Copy-duration grants and announces it (`copyEnded`)**, which was the missing half (`CopiesEndOnRemoval`: a Fukuzo in a
+discard pile is removed as the cost of another card's copy, keeps a permanent grant, loses the copies, and the event is public). Only Copy grants
+end there: a *permanent* change of a removed card stays, so the snapshot a later copy reads still sees the donor's permanent grants (Fukuzo's own
+cost removes the donor before the snapshot). **What the engine does for the other zones:** a Personality can only be put into a *Dynasty* deck
+(`ToOwnerDeck` sends a Personality there and everything else to the Fate deck), and no effect in the engine puts a Personality into a Fate deck or a
+hand, so those cases cannot arise; if a future effect did, it would have to choose between the two and record the reading here.
 
 **A copied ability is live.** `AbilityIdsOf(card)` joins printed and granted ability ids and is used by every scan of "what abilities does this card
 have" that concerns a card in play: `ValidateAbility` ("this card provides that ability"), `AbilityActions` (the offered action, labelled "...
@@ -90,7 +99,8 @@ paid through `Pay`). The **other** player has the same decision read-only and is
 present in **both** views (what is decided, by whom, and what is on offer is not hidden information), and only the deciding player's carries
 payment quotes (`decider-only quote`, `EitherOrViewAndPrivacy`). **Auto-resolution:** when exactly one option is legal and it costs nothing (the
 player cannot pay, the Personality is already bowed) there is no decision: it is taken and announced (`eitherOrAutoResolved`). Alternative:
-always prompt; rejected because a prompt whose only answer is forced is noise and a client can show the event.
+always prompt; rejected because a prompt whose only answer is forced is noise and a client can show the event. **Mendon: confirmed -- an
+auto-resolved choice is announced, not prompted** (no change).
 
 **Two ways in, one way out.** `origin "action"` (Unfortunate Hesitation): the choice is the tail of a played action and, once answered, the action
 finishes as a search or a look does (the chosen bow gets its bow-reaction window, an Overconfident window, then priority to the other player, or
@@ -130,13 +140,12 @@ pay, or the performer has Protection (which "will not be negated", #212), there 
 
 **"Negate the action's (remaining) effects."** Read as: at this timing (before effects resolve) every effect the action would apply is negated;
 what the action has already cost is not undone. Implemented in isolation (`ActionNegation.cs`): the deferred command is marked negated and, when the
-window closes, resolved as a *taken but empty* action -- its Gold cost is paid, the Imperial Favor discard the Favor actions print is paid, a
-Strategy leaves the hand, the once-per-turn use is spent, Additional Actions are forfeited, priority passes -- and none of its effects happen.
-**Recorded limit (please rule):** a cost an ability's own execution case pays inside its effects -- bowing its source or performer, discarding a
-hand card -- is **not** paid, because those live in the code the negation skips. The alternative (pay every cost, skip every effect) needs a
-cost/effect split of every ability. This is the *whole-action* negation; Agent R's Jinn-Kuen work builds a negation of the effects on *one target*
-for the same family of cards, so the two are kept side by side under distinct names (`NegateDeferredAction` / `ResolveNegatedAction`) and the merge
-is a choice of which function each card calls.
+window closes, resolved as a *taken but empty* action -- **every cost is paid (section 6)**, a Strategy leaves the hand, the once-per-turn use is
+spent, Additional Actions are forfeited, priority passes -- and none of its effects happen. (PR #344 paid only the Gold and Favor costs and recorded
+the rest as a limit; Mendon ruled that a negated action pays ALL its costs unless the card says otherwise, and section 6 is that change.) This is
+the *whole-action* negation; Agent R's Jinn-Kuen work (`NegateAllEffectsOn`, PR #341) builds a negation of the effects on *one target* for the same
+family of cards, so the two are kept side by side under distinct names (`NegateDeferredAction` / `ResolveNegatedAction`) and the merge is a choice of
+which function each card calls. Issue #351 does not touch `NegateAllEffectsOn` or `NegatedEffects`.
 
 ## 4. Unfortunate Hesitation
 
@@ -150,7 +159,12 @@ stands, at an ordinary opportunity of that player (Action or Battle phase, they 
 every `useAbility`, played Strategy, Reserve recruit and equip is refused, and `QueryActions` lists them **disabled with the reason** rather than
 hiding them. The pass consumes one owed pass (two owed = two opportunities). Not restricted, because they are not "a Battle, Limited, or Open
 action": a Reaction in a window (tested against a before-action window), the Attack Phase's assignment decisions, Dynasty purchasing, and every
-pending decision. **Recorded limit:** Order Seppuku is an Open action the engine lets a player order without priority; it is not restricted.
+pending decision. **Order Seppuku is barred too (Mendon: confirmed, issue #351).** It is an Open action that the engine lets a player order without
+priority, so the bar is applied wherever the player is owed a pass in that phase, whether or not he holds priority: `OrderSeppuku` refuses with the
+same reason, and `QueryActions` lists it disabled with that reason (never hidden), like every other innate Battle/Limited/Open action (equip, a
+played Strategy, a Reserve recruit, `useAbility`). **Assigning to attack or defend is not an action and is unaffected** (declaring and passing at the
+Attack Phase's declaration/defense steps, Dynasty purchasing and every pending decision stay legal). The bar ends when the pass is made (one owed pass
+per pass) or the phase moves on. Tests: `SeppukuBarred`, `BarSparesNonActions`.
 
 **"May choose to bow him"**: legal only for an unbowed Personality in play; when he is already bowed there is nothing to choose and the pass is
 owed at once. The bow is the controller's own choice, so it is not "an enemy's effect" and Stalwart does not apply (alternative: it is); it does
@@ -166,21 +180,89 @@ an action deferred behind a decision skips the "after a Battle action resolves" 
 - **AI**: `TrainingOpponent` scores the new commands (pay when payable, then bow, then lose Honor, then the consequence; the first copy candidate).
 - **Seppuku** is refused (and not offered) while a copy or an Either/Or decision is open, as for searches and looks.
 
-## Open questions for Mendon
+## 6. Costs of a negated action, atomic cost payment (Mendon's rulings, issue #351)
 
-1. **Negation and costs.** Should a negated action still pay a cost its own execution case pays (bow the source, discard a card)? Today only the
-   generic costs (Gold, Favor) are paid.
-2. **Copy persistence.** Do Fukuzo's copies survive his death, as implemented (a Personality keeps what it has), or end when he leaves play?
-3. **Copy usage.** Confirm that re-copying an ability used this turn does not reset it.
-4. **Mandatory copy** with a single unwelcome keyword (Loyal, Overconfident): taken automatically, as printed.
-5. **Auto-resolved choices** are announced, not prompted. Confirm, or ask for the prompt anyway.
-6. **Hesitation** owed pass belongs to the controller, lasts the printed phase, and settles on a pass at an Action/Battle opportunity.
-7. **Order Seppuku** while a pass is owed (an Open action taken without priority): leave unrestricted, or bar it at the owner's opportunity?
+Confirmed by Mendon after PR #344 (all applied on the follow-up branch, since #344 had merged):
+
+1. **A negated action still pays ALL of its costs unless the card says otherwise; only its effects are skipped.**
+2. **Payment is atomic.** Before anything is paid, every cost the action would pay is asked "is this cost payment blocked by a negation?". If ANY is
+   blocked (Hida Mochitoko negating the bow or destruction of a Follower that is bowed or destroyed *as a cost*), the ENTIRE action is negated:
+   **nothing is paid -- no Gold, no bow, not the Honor loss -- and nothing resolves**, though the action was still taken (its use is stamped, a
+   Strategy played from the hand is discarded, priority passes; the log says "negated: a cost could not be paid, so nothing was paid"). If none
+   is blocked, every cost is paid, then the effects apply, or are skipped when the action's effects are negated.
+3. **An Honor loss that is a cost is paid even when the effects are negated; one that is an effect is negated with the other effects.** The cost
+   is `ActionCost.LoseHonor` (paid with the rest, through the ordinary Honor path, so a Honor-loss immunity still applies to it); Yogo Adi's
+   "his controller loses 1 Honor" and the Attack a Strategy makes stay effects.
+4. **Extension point for agent R (#341):** `MatchEngine.CostPaymentBlockedByNegation(ActionCost cost, CardInstance? subject)` in `AbilityCosts.cs`
+   -- "is this cost payment blocked by a negation?" `subject` is the card the verb would be applied to (null for `LoseHonor`); `cost.Verb` is
+   `CostVerb.Bow` / `CostVerb.Destroy` (a chosen alternative cost, issue #337) or a `CostVerbs.*` verb (`Sacrifice` is the destruction of a Follower
+   or Personality paid as a cost). It answers `false` today; the per-target negations already recorded in `MatchState.NegatedEffects` ("bow",
+   "destroy", "all") are what should answer it, and this is the one function to fill in. It is consulted **once, before any payment, in both flows**
+   (an action that is not negated, `RunAbilityEffects`; a negated one, `ResolveNegatedAction`), so R's negation of a cost is atomic in both. Nothing
+   else in #341 needs to change for this.
+
+**Audit: where each cost was paid.** *At announcement, in one generic place:* Gold (`PayForAbility`), a chosen alternative cost (`CostOptions`,
+issue #337) and the Imperial Favor discard -- PR #344's negated path paid Gold and Favor only; it now pays the chosen alternative cost too.
+*Inside each ability's own execution case (the problem):* "bow this card", "bow your performing X", "discard a card", "remove ... from the game",
+"destroy this Follower", "destroy a Fire token", "put this card on your Fate deck", "lose 2 Honor". Those live in the effect code a negation skips.
+
+**The change (`AbilityCosts.cs`).** `AbilityDefinition.Costs` (an `ActionCost[]`: a verb applied to the source, the chosen performer or the chosen
+target -- bow, discard, remove from the game, sacrifice, destroy a token, to a deck, lose Honor) declares them as data; `PayAbilityCosts` pays them
+all at ONE point, `RunAbilityEffects` just before an ability's effects (after the "newly bowed" snapshot, so Hizumi/Ruya see a cost bow exactly as
+before), and `ResolveNegatedAction` pays the same list and nothing else. **64 abilities were converted** and their inline cost statements
+removed (behavior of an action that is not negated is unchanged; the whole suite passes as it stood before this change):
+
+- bow this card (29): `kouki-force`, `pearl-of-embers-straighten`, `tsuruchi-isas-attack`, `cavalry-flankers-attack`, `murderous-thieves-attack`,
+  `hired-legion-draw`, `rumormonger-penalty`, `unseen-assassin-strike`, `scholarly-hermit-search`, `kano-destroy-token`, `kamina-boost`,
+  `aimi-exp-discard`, `fujimura-expose`, `kinaro-exp-bow`, `kojinrue-destroy`, `kasuru-draw`, `low-market-equip`, `scouring-flood-move-home`,
+  `sanctuary-of-the-waves-move`, `slanderer-dishonor`, `tranquil-garden-ring`, `flesh-cutter-arrows-reaction`, `nightingale-blade-bow`,
+  `legulus-legion-attack`, `maratai-statue`, `rin-shame`, `shizuka-search`, `public-records-look`, `sakuma-political-negate`;
+- bow the performer (6): `shinden-choice`, `carpenter-castle-siege`, `volcano-tattoo-destroy`, `yayu-bow-attack`, `kitsu-akai-battle`,
+  `temple-of-hotei-honor`; bow the chosen target (3): `training-ashigaru-boost`, `ashigaru-elite-boost`, `lobby`;
+- "bow this card or discard it from your hand" (7, the Rings; nothing is paid when played from the hand, where the hand play is the discard):
+  `ring-of-air-straighten`, `ring-of-water-move-home`, `ring-of-void-draw`, `false-ring-of-air-force`, `false-ring-of-water-attack`,
+  `ring-of-earth-raise`, `ring-of-earth-lower`;
+- discard a card (5): `favor-cycle`, `tactical-advantage`, `akodo-regulars-boost`, `heavy-chargers-boost`, `obote-boost`;
+- remove from the game (8): the target (`consuming-weakness`, `hawado-move-home`, `hawado-move-battlefield`, `training-copy-keyword`,
+  `training-copy-ability`, `training-copy-ability-turn`, `fukuzo-wear-skin`), this card (`hunter-of-harmony-return`);
+- lose Honor (1): `training-honor-cost-attack`;
+- several costs or verbs (5): `ring-of-fire-destroy` (bow or discard it, destroy the performer), `furugaro-charge` (destroy this Follower),
+  `torazu-fire-attack` and `monastery-fire-attack` (destroy a Fire token), `goju-house-guard-return` (put this card on the deck).
+
+**Not converted -- listed by id instead of a half-fix.** These still pay something inside their case, so when negated they do not pay it:
+`hiruma-nitani-attack` (bow Nitani *unless you have Reconnaissance*: a cost that depends on a fact read at resolution), `tsujiken-straighten-holding`
+(bowing Tsujiken is waived for a cheap target: a cost that depends on the target), `mitsu-fire-attack` ("destroy zero or more Fire tokens": the
+number of tokens is chosen and is the strength of the Attack, so the cost feeds the effect), `improved-defenses-strength` (the bow is a cost, but the
+discarded Fate card's Focus Value is the effect's value), `winds-of-dismissal-choice` (the bowed card is the wielding Shugenja, a fourth subject
+this pass does not add), and `kano-destroy-token` (the *bow* is
+converted; whether "Destroy a Master token on Kano to take two additional Battle actions" makes the token part of the cost or of the effect is
+ambiguous, so it stays in the effect). Also unchanged by design: `unseen-assassin-strike`'s "destroy this Follower and lose 2 Honor" are its
+effects (a drawback after "to destroy a target Follower"), only its bow is a cost. A Reserve recruit and an equip are their own commands, not a
+`useAbility`, so no before-action window defers them and a whole-action negation never reaches them.
+
+**Test seams (never set outside tests).** `MatchEngine.CostBlockHook` is the fake predicate behind the extension point; `MatchEngine.NegateEveryAction`
+resolves every announced action as a whole-action negation, which reaches abilities no Political action names (Sakuma can only answer Political
+actions). Sakuma's own decline path is also tested for real, in a real window.
+
+**Forced pass and innate actions (ruling 4).** See section 4: Order Seppuku is now barred (and listed disabled with the reason) at the owing
+player's opportunity, like every other innate action; assigning to attack or defend is not an action and is unaffected.
+
+## Resolved questions (all confirmed by Mendon; the list is closed)
+
+1. **Negation and costs** -- a negated action pays ALL costs unless the card says otherwise, atomically, section 6. (PR #344 had paid only Gold and Favor.)
+2. **Copy persistence** -- Fukuzo's copies survive his death and end only when he is reshuffled into the Dynasty deck or removed from the game,
+   section 1 (the removed-from-the-game half is new and tested).
+3. **Auto-resolved choices** -- announced, not prompted (section 2). No change.
+4. **Order Seppuku while a pass is owed** -- barred, with every other innate action, section 4.
+5. **Honor-loss costs and blocked costs** -- section 6 (atomic; a blocked cost negates the whole action and pays nothing).
+6. Earlier questions, answered by the accepted implementation and not contradicted: re-copying an ability used this turn does not reset it; the
+   mandatory copy takes a single unwelcome keyword as printed; the Hesitation pass belongs to the target's controller, lasts the printed phase and
+   settles on a pass at an Action or Battle opportunity.
 
 ## Tests and mutation checks
 
-`tests/L5R.Core.Tests/CardCopyTests.cs` (15), `EitherOrTests.cs` (17), one AI case; every case drives QueryActions and the commands the engine
-offers. The mutation table below lists, per key rule, the change made and the named test that failed (each restored afterwards).
+`tests/L5R.Core.Tests/CardCopyTests.cs` (15), `EitherOrTests.cs` (17), `NegatedCostTests.cs` (11, issue #351), one AI case; every case drives
+QueryActions and the commands the engine offers (or, for a raw action, the command a test names). The mutation table below lists, per key rule, the change made and the named test that failed (each restored afterwards).
 
 | Rule broken | Test that failed (named) |
 | --- | --- |
@@ -208,6 +290,19 @@ offers. The mutation table below lists, per key rule, the change made and the na
 | the forced pass never lapses with the phase | `HesitationPhaseScope` |
 | the forced pass is not consumed by the pass | `HesitationForcedPass`, `HesitationPhaseScope`, `HesitationScope` |
 | an already-bowed Personality is offered the bow | `HesitationAlreadyBowedAndOwn` |
+| a negated action pays none of the declared costs (bow, discard, remove, sacrifice, token, deck, Honor) | `negated-costs/SakumaDeclinePaysCosts`, `NegatedBowSource`, `NegatedDiscard`, `NegatedHonorLoss`, `NegatedOtherVerbs`, `AtomicCostPayment` |
+| a negated action does not pay its chosen alternative cost | `CostOptionIsPaidAndAtomic` |
+| one verb is not paid (bow / discard / remove / sacrifice / destroy a token / to a deck, one mutation each) | bow: `SakumaDeclinePaysCosts`, `NegatedBowSource`, `NegatedOtherVerbs`; discard: `NegatedDiscard`; remove: `NegatedOtherVerbs`, `CopiesEndOnRemoval`, `card-copy/FukuzoWizard`; sacrifice, token, deck: `NegatedOtherVerbs` |
+| a Ring pays its bow even when played from the hand | `NegatedOtherVerbs` |
+| Lobby's bow of the chosen Personality is not a declared cost | `NegatedOtherVerbs` |
+| an Honor-loss cost is not paid | `NegatedHonorLoss`, `AtomicCostPayment` |
+| the negated flow ignores a blocked cost | `AtomicCostPayment` |
+| the ordinary flow ignores a blocked cost | `AtomicCostPayment`, `BlockingPredicateSeesEveryCost` |
+| only the first cost is asked about | `AtomicCostPayment`, `BlockingPredicateSeesEveryCost` |
+| the chosen alternative cost is not asked about | `CostOptionIsPaidAndAtomic` |
+| Order Seppuku is not refused / is listed enabled while a pass is owed | `SeppukuBarred` |
+| removal from the game keeps Copy grants / clears permanent ones too / is not announced | `CopiesEndOnRemoval` (and `card-copy/*` for the permanent-clearing mutant) |
+| a Personality reshuffled into a deck keeps a copied keyword or ability | `CopiesPersistAndReset`, `CopiesEndOnRemoval` |
 
 One mutation survived and is an equivalent mutant, not a gap: dropping the `NextAction` that follows a restored window changes nothing
 observable, because the deciding player (the acting player) already holds priority and the count of passes was already reset when the
@@ -215,7 +310,7 @@ decision opened.
 
 ## Affected files
 
-`src/L5R.Core/CardCopy.cs`, `EitherOr.cs`, `ActionNegation.cs`, `ForcedPass.cs` (new); `CardAbilities.cs` (three catalog entries per card, the copy
+`src/L5R.Core/CardCopy.cs`, `EitherOr.cs`, `ActionNegation.cs`, `ForcedPass.cs`, `AbilityCosts.cs` (new in #351); `CardAbilities.cs` (three catalog entries per card, the copy
 and Either/Or execution cases, `AbilityIdsOf` at the in-play scans, the Political tags, the Sakuma reaction branch, two target categories),
 `GoldQuotes.cs`/`MatchEngine.cs` (the alternate Gold source, `Apply` dispatch and window close, phase pruning), `MatchQueries.cs` (decision
 listings, the view fields, the forced-pass options), `Models.cs`, `Dueling.cs`, `CardCatalog.cs`, `PublishedContent.cs`, `L5R.Core.csproj`,
