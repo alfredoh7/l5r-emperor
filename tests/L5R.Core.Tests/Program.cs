@@ -236,6 +236,13 @@ DeckWorkshopTests.Run(runner);
 DeckSearchTests.Run(runner);
 DeckLookTests.Run(runner);
 DaigotsuBofanaTests.Run(runner);
+AlternativeCostTests.Run(runner);
+AttachFromDiscardTests.Run(runner);
+FadingShadowsTests.Run(runner);
+EffectChoiceTests.Run(runner);
+FollowerPerformerTests.Run(runner);
+CardCopyTests.Run(runner);
+EitherOrTests.Run(runner);
 TargetedActionReactionTests.Run(runner);
 return runner.Finish();
 

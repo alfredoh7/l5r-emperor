@@ -96,7 +96,7 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<(CardInstance Card, string AbilityId)> TargetedActionReactionCandidates() =>
-        _state.Cards.Values.Where(InPlay).SelectMany(c => (Definition(c).Abilities ?? [])
+        _state.Cards.Values.Where(InPlay).SelectMany(c => AbilityIdsOf(c)
             .Where(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == TargetedByAction)
             .Select(id => (Card: c, AbilityId: id)));
 

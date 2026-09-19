@@ -31,17 +31,17 @@ public sealed record CommandEnvelope(string Type, string CommandId, long Expecte
 public sealed record WireGameCommand(string Type, string? CardId = null, string[]? SourceIds = null,
     int? Province = null, bool ClanDiscount = false, bool ClanAllegiance = false,
     Dictionary<string, int>? Assignments = null, string[]? CardIds = null, string? TargetId = null, string? AbilityId = null, string? PerformerId = null, string? Choice = null,
-    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null)
+    string? DeckPosition = null, int? TargetPlayerId = null, int? GoldAmount = null, string? CostOption = null)
 {
     public GameCommand BindToSeat(int playerId, long expectedVersion) => new(
         Type, playerId, expectedVersion, CardId, SourceIds, Province,
         ClanDiscount, ClanAllegiance, Assignments, CardIds, TargetId, AbilityId, PerformerId, Choice,
-        DeckPosition, TargetPlayerId, GoldAmount);
+        DeckPosition, TargetPlayerId, GoldAmount, CostOption);
 
     public static WireGameCommand FromCore(GameCommand command) => new(command.Type,
         command.CardId, command.SourceIds, command.Province, command.ClanDiscount,
         command.ClanAllegiance, command.Assignments, command.CardIds, command.TargetId, command.AbilityId, command.PerformerId, command.Choice,
-        command.DeckPosition, command.TargetPlayerId, command.GoldAmount);
+        command.DeckPosition, command.TargetPlayerId, command.GoldAmount, command.CostOption);
 }
 
 // Gold/TargetGold (issue #303): the engine's Gold quotes for the option, so an online client renders the same

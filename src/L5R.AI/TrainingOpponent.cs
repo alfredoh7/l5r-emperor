@@ -169,6 +169,11 @@ public static class TrainingOpponent
             case "chooseSearchDiscard":
                 var discard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
                 return discard is null?0:100-HandValue(discard);
+            // The opposing player's Either/Or choice (issue #338): pay when the engine offers a payable Gold option (a modest bot keeps its action), then bow the
+            // threatened Personality, then lose Honor, and only then take the consequence. Copying a keyword or ability
+            // (Fukuzo): the first candidate the engine lists.
+            case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => 70, _ => 60 };
+            case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
             // A forced discard (Times of Strife, Daigotsu Bofana; issue #333): the same modest rule as the discard after a Terrain -- give up
             // the least useful card in hand.
             case "forcedDiscard":
@@ -180,6 +185,9 @@ public static class TrainingOpponent
                 var kept=self.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return 100+(kept?.Force??0);
             case "encircledOrder": case "beforeBattleOrder": return 50;
+            // A conditional effect choice (issue #337, Mirumoto Yumaru): a modest bot never stalls on it; every offered option is legal, so it
+            // takes the first one the engine lists (ties keep the engine's order).
+            case "chooseEffect": return 100;
             case "beforeBattleOptional":
                 var optionalTarget=opponent.Army.FirstOrDefault(c=>c.Id==command.TargetId);
                 return command.Choice=="use" ? 60+(optionalTarget?.Force??0) : 20;

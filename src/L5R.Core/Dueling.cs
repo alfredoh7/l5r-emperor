@@ -334,7 +334,7 @@ public sealed partial class MatchEngine
     // card that won, the same shape own-enters-play already uses for entering-play Reactions (see
     // OpenEntryReactionWindow) -- a tie has no single winner, so there is nothing to react with here.
     private static string? DuelWonReactionAbility(CardInstance card) =>
-        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
+        AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-won-duel");
 
     // Kakita Maratai (issue #299): "After a duel ends that your Personality won" -- the same window,
     // broadened from "the winning card's OWN reaction" to also reach any OTHER in-play, unbowed card of
@@ -347,7 +347,7 @@ public sealed partial class MatchEngine
     // itself is untouched (CardId is still the winning card), so every consumer of the existing own-won-
     // duel window -- Apply()'s pass/close handling included -- needs no change.
     private static string? DuelWonBroadcastReactionAbility(CardInstance card) =>
-        (Definition(card).Abilities ?? []).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
+        AbilityIdsOf(card).FirstOrDefault(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "Reaction" && def.Trigger == "own-personality-won-duel");
 
     private bool OpenDuelWonReactionWindow(string winnerId, int winnerPlayerId, int closesTo)
     {
