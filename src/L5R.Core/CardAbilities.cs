@@ -4983,6 +4983,12 @@ public sealed partial class MatchEngine
                     // hand or a face-up province, neither of which the in-play default reaches, so the
                     // costed action could not be taken from the UI at all. Same condition ValidateAbility checks.
                     "own-kharmic-card" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Keyword(c, "Kharmic") && (c.Zone == Zone.Hand || c.Zone == Zone.Province && c.FaceUp)).Select(c => (string?)c.Id).ToArray(),
+                    // Hunter of Harmony / Scholarly Hermit / Tranquil Garden (issue #317): the same gap
+                    // Kharmic had -- validated, but a target in a discard pile is never in the in-play
+                    // default, so the ability was never offered. Each mirrors its own Require above.
+                    "own-kiho-strategy-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Strategy && Keyword(c, "Kiho") && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "own-ring-in-discard" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Ring && c.Zone == Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
+                    "ring-in-play-or-own-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Ring && (InPlay(c) || c.OwnerId == playerId && c.Zone == Zone.FateDiscard)).Select(c => (string?)c.Id).ToArray(),
                     // Shosuro Hawado / Soshi Neiru (issue #301): a Dynasty card in either player's
                     // discard pile (Zone.Dead being a Personality's own), and a matching Spell in hand.
                     "dynasty-card-in-any-discard" => _state.Cards.Values.Where(c => IsDynastyCardType(Definition(c).Type) && c.Zone is Zone.DynastyDiscard or Zone.Dead).Select(c => (string?)c.Id).ToArray(),

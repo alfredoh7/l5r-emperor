@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Offer three pile-targeted abilities from QueryActions: add the missing candidates arms for own-kiho-strategy-in-discard (Hunter of Harmony), own-ring-in-discard (Scholarly Hermit) and ring-in-play-or-own-discard (Tranquil Garden), each mirroring its ValidateAbility Require. Same gap Kharmic had (#303).",
+  "validation": "New PileTargetsAreOffered test asserts each ability is offered enabled with exactly its legal targets (wrong owner, zone and type excluded), every offered target validates as a real command, and the ability is offered disabled with no target. Mutation-checked: neutralising the three arms fails it. dotnet run tests/L5R.Core.Tests 201/201 core, 57/57 published; bash tools/check.sh --skip-client all green.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/317",
+  "branch": "claude/317-offer-pile-targets",
+  "updated": "2026-09-18T21:01:00.143013+00:00"
+}
