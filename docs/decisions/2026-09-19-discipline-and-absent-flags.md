@@ -1,7 +1,8 @@
 # Discipline as a play mode, Absent as a flag, and Return to Action
 
-**Status:** implemented in PR for issue #331 (rules lane; cross-lane authority of the rules lead). Two interpretations are
-**open rules questions for Mendon** (marked OPEN below). **Issue:** #331.
+**Status:** implemented in PR #332 for issue #331 (rules lane; cross-lane authority of the rules lead). The interpretations that were
+open rules questions are **all closed** by Mendon's rulings, recorded in
+[2026-09-19-discipline-rulings.md](2026-09-19-discipline-rulings.md) (issue #353). **Issue:** #331.
 
 ## The request
 
@@ -122,7 +123,14 @@ Oracle text instead, it is a one-line flag plus a performer-location change; tha
    same Battle-phase-plus-presence rule). As genuine `Battle` timing it is now subject to the general Battle-action machinery
    (Times of Strife's discard, first-action limits, an Additional Action grant), which is correct for a Battle action.
 
-## OPEN rules questions for Mendon
+## Rules questions (were OPEN; CLOSED by Mendon, see 2026-09-19-discipline-rulings.md)
+
+1. **CLOSED (confirmed).** A Discipline card in hand is a free ordinary Strategy play; its other printed costs still apply.
+2. **CLOSED.** Lost in Transit needs presence only as a Battle action (none in the Action phase) -- as built. False Ring of Air is a
+   true Absent Battle action and bowing the Ring is a cost -- confirmed, with a fix for the hand play.
+3. **CLOSED.** The "Discipline cost plus the action's own cost" case that was "not modeled" is now built (issue #353).
+
+The original text of the three questions follows, for the record.
 
 1. **A Discipline card in hand is a free ordinary Strategy play.** The catalogue text of all seven Discipline cards prints no
    Gold Cost; the supplement says Discipline is "an additional way" to play from the discard pile. I read that as: the base card

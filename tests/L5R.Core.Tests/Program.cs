@@ -231,6 +231,7 @@ GoldQuoteTests.Run(runner);
 BattleTimingTests.Run(runner);
 ReconActionTests.Run(runner);
 DisciplineAndAbsentTests.Run(runner);
+DisciplineRulingsTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 DeckSearchTests.Run(runner);

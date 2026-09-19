@@ -92,7 +92,7 @@ internal static class DisciplineAndAbsentTests
 
         // The flag inventory: exactly what was migrated (and nothing else), so a new flag on a card is a deliberate edit.
         string Ids(Func<AbilityDefinition, bool> flag) => string.Join(",", AbilityCatalog.All.Where(p => flag(p.Value)).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(Ids(a => a.Discipline), "banzai,lost-in-transit-bow,return-to-action-move,training-discipline-ability");
+        Eq(Ids(a => a.Discipline), "banzai,expensive-achievement-lower,expensive-achievement-raise,knowledge-and-power,lost-in-transit-bow,return-to-action-move,training-discipline-ability,two-steady-breaths-destined");
         Eq(Ids(a => a.Absent), "false-ring-of-air-force,return-to-action-move,ring-of-earth-lower,ring-of-earth-raise,ring-of-water-move-home");
         Check(!AbilityCatalog.All.Values.Any(a => a.Timing == "Discipline"), "no ability keeps the old Discipline timing");
         Eq(AbilityCatalog.All["banzai"].Timing, "Battle"); Eq(AbilityCatalog.All["lost-in-transit-bow"].Timing, "BattleOrOpen");

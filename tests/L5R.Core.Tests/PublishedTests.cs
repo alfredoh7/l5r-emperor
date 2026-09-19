@@ -127,7 +127,9 @@ internal static class PublishedTests
         // + 5 (issue #337: PersonalityWave31 Kitsu Fukui, Moto Jun-Ni, Mirumoto Yumaru and Hiruma Tensin + FollowerWave17 Fading Shadows) and + 3 (issue #338:
         // PersonalityWave33 Fukuzo and Yoritomo Sakuma, StrategyWave22 Unfortunate Hesitation), none previously published: 409 on origin/main 7f306655 + 5 = 414
         // (origin/main 8b378a8d) + 3 = 417, re-derived from the merged tree (distinct non-ScenarioOnly ids across content/published/*.json), not from either side.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,417);
+        // + 3 (issue #353: StrategyWave23 Expensive Achievement, Knowledge and Power and Two Steady Breaths, none previously published) = 420: 417 counted
+        // from origin/main 05cc2493 (distinct non-ScenarioOnly ids across content/published/*.json) plus this branch's three; recount from the merged tree, never from either side.
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,420);
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
