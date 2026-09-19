@@ -759,6 +759,16 @@ internal static class TargetedActionReactionTests
             ClosePassing(e);
             Eq(e.State.Cards[r.Merchant.Id].Dishonorable, !reacts, reacts ? "not dishonored" : "control: dishonored when nobody reacts");
         }
+        // A token placed on the Merchant (an Open action of his controller's own: the printed text says "an action").
+        foreach (var reacts in new[] { false, true })
+        {
+            var s = Table(Phase.Action, 0); Add(s, JinnKuen, 0, Zone.Home); var merchant = Add(s, "training-merchant", 0, Zone.Home); var master = Add(s, "training-token-master", 0, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "training-create-token", master.Id, merchant.Id));
+            if (reacts) Accept(e, ReactionCommand(e, 0, "jinn-kuen-negate"));
+            ClosePassing(e);
+            Eq(e.State.Cards[merchant.Id].Tokens.Count, reacts ? 0 : 1, reacts ? "no token" : "control: the token is placed");
+        }
         // Destruction (a Personality without attachments).
         {
             var r = MerchantTable(); var destroyer = Add(r.S, "training-no-attachments-destroyer", 1, Zone.Battlefield, province: 0); var e = MatchEngine.FromTestState(r.S);
