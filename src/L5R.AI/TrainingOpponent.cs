@@ -32,7 +32,7 @@ public static class TrainingOpponent
             command=action.Type switch
             {
                 "attack" or "assignDefense" => new(action.Type,self.Id,view.Version,Assignments:[]),
-                "pass" or "declineReaction" or "proclaim" or "endDynasty" => new(action.Type,self.Id,view.Version),
+                "pass" or "declineReaction" or "proclaim" or "endDynasty" or "declareAttack" => new(action.Type,self.Id,view.Version),
                 "discardProvince" when action.CardId is not null => new(action.Type,self.Id,view.Version,CardId:action.CardId),
                 "discardHand" => new(action.Type,self.Id,view.Version),
                 "purchase" when action.Quote is { Error:null,Payments.Length:>0 } q => new(action.Type,self.Id,view.Version,q.CardId,q.Payments[0].SourceIds,ClanDiscount:q.ClanDiscount,ClanAllegiance:q.ClanAllegiance),
@@ -144,6 +144,15 @@ public static class TrainingOpponent
                 if(card?.Definition?.Effect=="bow-small") return target is {Bowed:false}?90+target.Force:0;
                 if(target?.Bowed==true) return 0;
                 return 70;
+            // The Declaration Segment: declare when the whole unbowed home army would threaten the weakest province, as the old
+            // per-maneuver attack score did, otherwise decline (pass scores 10).
+            case "declareAttack":
+                var readyUnits=self.Home.Where(c=>c.Definition?.Type==CardType.Personality && !c.Bowed).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+                var declaredForce=ArmyForce(self.Home.Where(c=>readyUnits.Contains(c.Id) || c.AttachedTo is not null && readyUnits.Contains(c.AttachedTo)));
+                var weakest=opponent.Provinces.Where(p=>!p.Destroyed).OrderBy(p=>p.Strength).ThenBy(p=>p.Index).FirstOrDefault();
+                if(weakest is null || declaredForce==0) return -100;
+                var homeDefense=ArmyForce(opponent.Home);
+                return declaredForce>homeDefense+weakest.Strength?90+declaredForce-homeDefense:declaredForce>weakest.Strength && homeDefense==0?80:0;
             case "attack":
                 if(command.Assignments is not {Count:>0}) return -100;
                 var attacking=self.Home.Where(c=>command.Assignments.ContainsKey(c.Id) || c.AttachedTo is not null && command.Assignments.ContainsKey(c.AttachedTo));
@@ -228,6 +237,7 @@ public static class TrainingOpponent
         "purchase"=>"Develop Gold production early, then recruit Personalities and preserve a useful Proclaim opportunity.",
         "overlay"=>"Recruit the higher-Experience Personality for free while preserving the existing unit.",
         "proclaim"=>"Take the available once-per-turn Honor gain after the Personality enters play.",
+        "declareAttack"=>"Declare an attack when visible Force can threaten a province.",
         "attack"=>"Commit the offered unbowed army when visible Force can threaten a province.",
         "assignDefense"=>"Defend the battlefield with the largest visible attacking army.",
         "playStrategy"=>"Use a legal Battle action to improve the visible Force comparison.",

@@ -99,6 +99,12 @@ public static class CardCatalog
             // Reconnaissance Scouts/Toson are deliberately NOT wired here (see docs/decisions/2026-09-18-battle-timing-primitives.md).
             new("training-engage-claim-strategy", "Training Engage claim", CardType.Strategy, GoldCost:0, Abilities:["training-engage-attacker-first"], Text:"Synthetic first-action-claim fixture (Sneak Attack's shape): Engage: The Attacker has the first opportunity to take a Battle action or pass in this battle. Never included in a playable deck."),
             new("training-engage-honor-strategy", "Training Engage honor", CardType.Strategy, GoldCost:0, Abilities:["training-engage-gain-honor"], Text:"Synthetic Engage-window fixture: After engaging: gain 1 Honor (a Reaction with no first-action claim). Never included in a playable deck."),
+            new("training-engage-political-claim-strategy", "Training political Engage claim", CardType.Strategy, GoldCost:0, Abilities:["training-engage-claim-political"], Text:"Synthetic fixture: Political Engage: target an enemy Personality: the Attacker has the first opportunity to take a Battle action or pass (a Reaction that names a target, so it is an action other players may negate). Never included in a playable deck."),
+            // Before a battle resolves (issue #354): a Personality whose Battle actions register delayed effects, Steady Resolve's printed Reaction on a
+            // hand Strategy and Akodo Dairuko's on a Personality (the real cards are not published: the abilities are the printed ones).
+            new("training-delayed-caster", "Training delayed-effect caster", CardType.Personality, "Unaligned", GoldCost:3, Force:1, Chi:2, PersonalHonor:1, Abilities:["training-delayed-bow","training-delayed-boost"], Text:"Synthetic fixture: Battle: target an enemy Personality: before this battle resolves, bow him. Battle: target your Personality: before this battle resolves, give him +2F. Never included in a playable deck."),
+            new("training-steady-resolve", "Training Steady Resolve", CardType.Strategy, GoldCost:0, Abilities:["steady-resolve-boost"], Text:"Reaction: Before a battle resolves, choose your performing opposed Samurai Personality at the current battlefield: Give him +2F. (Steady Resolve's printed text on a synthetic card.) Never included in a playable deck."),
+            new("training-rallying-commander", "Training rallying commander", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Samurai"], Abilities:["dairuko-rally"], Text:"Tireless Reaction: Before the resolution of a battle at his battlefield, that battle's resolution will not bow cards in your army. (Akodo Dairuko's printed Reaction on a synthetic card.) Never included in a playable deck."),
             // Recon-action classification (issue #321): an actor whose Open/Battle abilities are tagged Recon or plain, and two
             // Strategies carrying the SAME plain ability -- one with the Recon KEYWORD (its action is a Recon action by
             // inheritance), one without (the control). Never included in a playable deck.
@@ -130,7 +136,7 @@ public static class CardCatalog
             new("training-cavalry", "Training cavalry", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Cavalry"], Text:"Synthetic Cavalry Maneuvers fixture: carries the Cavalry keyword. Never included in a playable deck."),
             // Brash (core rules keyword, issue #216): "the Defender may draw a card after a Brash
             // card is assigned to attack" -- a plain keyword fixture, since the effect is engine-
-            // driven (DeclareAttack), not an ability id.
+            // driven (AssignAttackers), not an ability id.
             new("training-brash-personality", "Training Brash personality", CardType.Personality, "Unaligned", GoldCost:3, Force:2, Chi:2, PersonalHonor:1, Keywords:["Brash"], Text:"Synthetic Brash fixture: carries the Brash keyword. Never included in a playable deck."),
             // Overconfident (core rules keyword, issue #223): "each other player may draw a card after
             // an Overconfident card enters or leaves play" -- a plain keyword fixture, since the

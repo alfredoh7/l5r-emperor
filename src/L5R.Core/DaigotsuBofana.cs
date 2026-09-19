@@ -16,7 +16,7 @@ public sealed partial class MatchEngine
     // it was) chooses the card. Returns true when a discard was opened; the announced action carries on once it is answered.
     private bool OpenForcedDiscardForTargetedTrait(GameCommand command)
     {
-        if (!AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) || ability.Timing == "Reaction") return false;
+        if (!AbilityCatalog.All.TryGetValue(command.AbilityId ?? "", out var ability) || !IsAction(ability)) return false;
         var targeted = ActionTargetIds(command).ToArray();
         if (targeted.Length == 0) return false;
         foreach (var bofana in _state.Cards.Values.Where(c => targeted.Contains(c.Id) && c.OwnerId != command.PlayerId && InPlay(c) && Definition(c).Effect == BofanaTargetedDiscardEffect)
@@ -25,6 +25,7 @@ public sealed partial class MatchEngine
             if (!TrySpendPhaseUse(bofana.AbilityUses, BofanaTargetedDiscardEffect)) continue;
             if (PerformingCardForce(command) >= Definition(bofana).Force) continue;
             if (!Player(command.PlayerId).Hand.Any(id => !CommandNamesCard(command, id))) continue;
+            SuspendOpenWindow();
             _state.ForcedDiscardContinuation = command;
             _state.PendingChoice = new("forcedDiscard", command.PlayerId, bofana.Id, $"{Definition(bofana).Name}: discard a card.");
             _state.PriorityPlayerId = command.PlayerId; _state.ConsecutivePasses = 0;

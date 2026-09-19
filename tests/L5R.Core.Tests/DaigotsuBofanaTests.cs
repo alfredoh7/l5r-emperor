@@ -372,7 +372,7 @@ internal static class DaigotsuBofanaTests
         var perPhase = new Dictionary<int, Phase[]>
         {
             [0] = [Phase.Straighten], [1] = [Phase.Events], [2] = [Phase.Action],
-            [3] = [Phase.AttackDeclaration, Phase.DefenseAssignment, Phase.CavalryDeclaration, Phase.CavalryDefense, Phase.BattleSelection, Phase.Battle],
+            [3] = [Phase.AttackDeclaration, Phase.InfantryDeclaration, Phase.DefenseAssignment, Phase.CavalryDeclaration, Phase.CavalryDefense, Phase.BattleSelection, Phase.Battle],
             [4] = [Phase.Dynasty, Phase.DynastyDiscard], [5] = [Phase.End],
         };
         foreach (var (printed, phases) in perPhase)
@@ -422,6 +422,7 @@ internal static class DaigotsuBofanaTests
         // Both pass: the Attack Phase begins. Player 1 attacks province 0 with two units and player 0 defends with Bofana.
         Ready(); Step(0, "pass"); Step(1, "pass");
         Eq(PrintedPhases.Of(e.State.Phase), 3, "the Attack Phase");
+        Step(1, "declareAttack");
         Accept(e, e.QueryActions(1).First(a => a.Type == "attack" && a.Enabled).Command! with { Assignments = new Dictionary<string, int> { [attacker.Id] = 0, [second.Id] = 0 } });
         Accept(e, e.QueryActions(0).First(a => a.Type == "assignDefense" && a.Enabled).Command! with { Assignments = new Dictionary<string, int> { [bofana.Id] = 0 } });
         while (e.State.Phase != Phase.BattleSelection) Step(e.State.PriorityPlayerId, "pass"); // Cavalry Maneuvers: nobody has Cavalry
@@ -464,7 +465,9 @@ internal static class DaigotsuBofanaTests
             Eq(Fired(e, r.Bofana), "unspent");
         }
         {
-            // A Reaction that names him is not an action: Tamori Ruya's bow (a Reaction) at Bofana, from the other player, inside a bow window.
+            // A Reaction that names him IS an action (rules lead: "Reactions count as actions"): Tamori Ruya's bow (a Reaction) at Bofana, from
+            // the other player, inside a bow window. It spends his once-per-phase trigger and asks for the discard, over the window it was
+            // played in, which is set aside and comes back once the action has carried on.
             var s = Table();
             var ruya = Add(s, "oracle-l5r-7789", 1, Zone.Battlefield, province: 0);
             var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
@@ -475,9 +478,15 @@ internal static class DaigotsuBofanaTests
             var e = MatchEngine.FromTestState(s);
             Accept(e, Offer(e, 1, Bow, bower.Id, bowed.Id));
             Eq(e.State.PendingChoice?.Type, "bowReaction", "Ruya's window");
+            Eq(Fired(e, bofana), "unspent", "the first action did not target him");
             Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: ruya.Id, TargetId: bofana.Id, AbilityId: "ruya-bow"));
-            Eq(e.State.PendingChoice?.Type, "bowReaction", "no discard was opened over the window");
-            Eq(Fired(e, bofana), "unspent", "a Reaction is not an action");
+            Eq(e.State.PendingChoice?.Type, "forcedDiscard", "a Reaction is an action: targeting Bofana asks for the discard");
+            Eq(e.State.SuspendedWindows.Count, 1); Eq(e.State.SuspendedWindows[0].Choice.Type, "bowReaction", "over the window it was played in");
+            Eq(Fired(e, bofana), "spent", "the first targeting of the phase spends his trigger");
+            Check(!e.State.Cards[bofana.Id].Bowed, "Ruya's bow carries on only once the discard is answered");
+            Discard(e, 1, e.State.Players[1].Hand[0]);
+            Eq(e.State.PendingChoice?.Type, "bowReaction", "the window Ruya was played in is open again"); Eq(e.State.SuspendedWindows.Count, 0);
+            Check(e.State.Cards[bofana.Id].Bowed && e.State.Players[1].Hand.Count == 0, "the Reaction resolved after the discard");
         }
         {
             // Not in play: nothing to trigger.
