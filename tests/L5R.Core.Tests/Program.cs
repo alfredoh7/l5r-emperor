@@ -2448,7 +2448,8 @@ static void AttackReactionWindow()
 // discards it either -- so the card stayed in Hand for good. The played card is now spent as the window opens.
 static void HandPlayedAttackSpentWhenWindowOpens()
 {
-    // Strength of the Divine (Strategy) and False Ring of Water (Ring): the two published hand-played Attack cards.
+    // Strength of the Divine (Strategy): the published hand-played Attack card. (False Ring of Water used to be a second one; since issue #370 a False Ring has no
+    // hand play -- its Ranged 3 Attack bows the Ring, which must be in play -- so no published Ring Attack is played from a hand any more.)
     // Each helper builds the same table with or without a player-1 Attack reactor in play, so the only variable is
     // whether the window opens.
     MatchEngine Divine(bool reactor,out CardInstance card,out CardInstance enemy)
@@ -2463,17 +2464,6 @@ static void HandPlayedAttackSpentWhenWindowOpens()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-force"));
         return e;
     }
-    MatchEngine FalseRing(bool reactor,out CardInstance card,out CardInstance enemy)
-    {
-        var s=StrongholdBattle("oracle-l5r-1218");
-        card=Add(s,"training-false-ring-of-water",0,Zone.Hand);
-        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // presence for the Battle-timing check
-        enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2 <= Ranged 3
-        if(reactor) Add(s,"training-attack-reactor",1,Zone.Home);
-        var e=MatchEngine.FromTestState(s);
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,TargetId:enemy.Id,AbilityId:"false-ring-of-water-attack"));
-        return e;
-    }
     int Discards(MatchEngine e,CardInstance card)=>e.State.Events.Count(x=>x.Type=="fateDiscarded" && x.CardId==card.Id);
     void Spent(MatchEngine e,CardInstance card,string when)
     {
@@ -2484,7 +2474,6 @@ static void HandPlayedAttackSpentWhenWindowOpens()
     foreach(var (name,play) in new (string,Func<bool,(MatchEngine,CardInstance,CardInstance)>)[]
     {
         ("Strength of the Divine",r=>{var e=Divine(r,out var c,out var en); return (e,c,en);}),
-        ("False Ring of Water",r=>{var e=FalseRing(r,out var c,out var en); return (e,c,en);}),
     })
     {
         {
