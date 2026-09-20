@@ -1,0 +1,30 @@
+{
+  "Profile": "stronghold-wave-5",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-2626",
+      "Name": "Foothills Keep",
+      "Type": "Stronghold",
+      "Clan": "Dragon",
+      "GoldCost": 0,
+      "GoldProduction": 4,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 7,
+      "StartingHonor": 5,
+      "Text": "Equipping Weapons is a Battle/Open action for you.\nBattle/Open: Choose your performing Kensai and target a Weapon in your discard pile: Attach it to him, paying all costs.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2626.jpg",
+      "Keywords": [],
+      "Focus": 0,
+      "Abilities": [
+        "foothills-equip-weapon"
+      ],
+      "Effect": "equip-weapons-battle-open"
+    }
+  ],
+  "Decks": []
+}

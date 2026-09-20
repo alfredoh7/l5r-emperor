@@ -86,7 +86,10 @@ public sealed partial class MatchEngine
     {
         bool Negated((ActionCost Cost, CardInstance? Subject) c) =>
             NegatableKind(c.Cost.Verb) is { } kind && c.Subject is { } subject && InPlay(subject)
-            && _state.NegatedEffects.Any(n => n.CardId == subject.Id && (n.Kind == "all" || n.Kind == kind));
+            && (_state.NegatedEffects.Any(n => n.CardId == subject.Id && (n.Kind == "all" || n.Kind == kind))
+                // Fields of Mercy (issue #352): once its allowance for the Personality's controller is used up, a destruction is negated, as one paid as a cost is.
+                // A pure read -- it never counts a destruction (the destruction itself, if it happens, does).
+                || kind == "destroy" && Definition(subject).Type == CardType.Personality && FieldsOfMercyWouldNegatePersonalityDestruction(subject));
         return PlannedCostsOf(command).Any(c => CostBlockHook?.Invoke(c.Cost, c.Subject) == true || Negated(c));
     }
 
