@@ -43,6 +43,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingForcedDiscards), s => s.PendingForcedDiscards.Count > 0),
         (nameof(MatchState.PendingCopy), s => s.PendingCopy is not null),
         (nameof(MatchState.PendingEitherOr), s => s.PendingEitherOr is not null),
+        (nameof(MatchState.PendingOpponentPayment), s => s.PendingOpponentPayment is not null),
         (nameof(MatchState.ForcedDiscardContinuation), s => s.ForcedDiscardContinuation is not null),
         (nameof(MatchState.SuspendedWindows), s => s.SuspendedWindows.Count > 0),
         (nameof(MatchState.ReactionWindowRemaining), s => s.ReactionWindowRemaining.Count > 0),

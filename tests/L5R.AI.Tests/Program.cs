@@ -127,6 +127,14 @@ Run("answers a conditional effect choice (Mirumoto Yumaru) with an option the en
     var decision=TrainingOpponent.Choose(view,actions);
     Check(decision.Command is {Type:"chooseEffect",Choice:"self"},"The practice opponent stalled, or took an option that was not offered first");
 });
+Run("answers the opposing player's variable payment (Virtuous Charity) with the engine's own default command instead of stalling (issue #373)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    var view=game.GetView(0) with { PendingChoice=new("opponentPayment",0,null,"Virtuous Charity: Lion paid 3 Gold. Crane, pay zero or more Gold.") };
+    var action=new ActionOption("chooseOpponentPayment","Virtuous Charity: pay zero or more Gold",true,null,new("chooseOpponentPayment",0,view.Version,GoldAmount:0,SourceIds:[]),null);
+    var decision=TrainingOpponent.Choose(view,[action]);
+    Check(decision.Command is {Type:"chooseOpponentPayment",GoldAmount:0,SourceIds.Length:0},"The practice opponent stalled instead of answering the payment");
+});
 Run("chooses an offered free Experienced Overlay",()=>
 {
     var game=MatchEngine.CreateEconomyScenario();var view=game.GetView(0);

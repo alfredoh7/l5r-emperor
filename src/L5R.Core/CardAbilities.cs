@@ -202,6 +202,7 @@ public static class AbilityCatalog
         ["training-penalty-chi"] = new("Battle", "Training: give a target enemy Personality -1 Chi", "enemy-personality"),
         ["training-penalty-honor"] = new("Battle", "Training: give a target enemy Personality -1 Personal Honor", "enemy-personality"),
         ["training-penalty-gold"] = new("Battle", "Training: give a target enemy Personality -2 Gold cost", "enemy-personality"),
+        ["training-gold-cost-token"] = new("Battle", "Training: give a target enemy Personality a -2 Gold cost Training token", "enemy-personality"),
         ["training-cost-to-zero"] = new("Battle", "Training: reduce a target enemy Personality's Gold cost to zero", "enemy-personality"),
         ["training-bonus-stats"] = new("Battle", "Training: give a target enemy Personality +2 Force, +1 Chi, +1 Personal Honor and +1 Gold cost", "enemy-personality"),
         ["training-dishonor-target"] = new("Battle", "Training: dishonor a target enemy Personality", "enemy-personality"),
@@ -827,11 +828,17 @@ public static class AbilityCatalog
         // decline), unlike a mandatory entry effect, so no new window shape is needed.
         ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(5)),
         ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(3)),
-        // Generalized Gold payment (issue #303): synthetic fixtures, one per cost shape, standing in for
-        // six real cards that are NOT wired yet (Exchange of Letters, Urgency, Virtuous Charity, At Any
-        // Cost, A Stain Cleansed, Disgraceful Conduct -- see docs/decisions/2026-09-18-generalized-gold-
-        // payment.md). Each proves that the shape prices, validates, quotes and pays through the ONE
-        // GoldCostRule path, so wiring the real card is just a catalog line plus its own effect.
+        // Strategy wave 29 (issue #373, docs/decisions/2026-09-20-gold-payment-rulings.md). "Another player" is the one opponent, so no choice is asked.
+        ["virtuous-charity-open"] = new("Open", "Open: If it is not your turn, choose another player: you, then the player, each pay zero or more Gold; whoever paid more Gold gains Honor equal to the difference between the two amounts, or 4, whichever is less", "none", Cost: GoldCostRule.Variable()),
+        ["at-any-cost-recruit"] = new("Battle", "Dark Virtue Battle: recruit your target performing dead Samurai, paying all costs (he may not be proclaimed)", "own-dead-samurai", Cost: GoldCostRule.TargetRecruit()),
+        ["disgraceful-conduct-bow"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target Personality or unit's total Gold cost minus 4: bow it", "personality",
+            Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0), Absent: true),
+        // Oracle: cost = paid - 2, so the price is cost + 2 (Mendon); the period scan reads price = cost - 2. The sign below is the one thing to flip.
+        ["a-stain-cleansed-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy card without attachments or an enemy Personality: pay Gold equal to its (unit's) current total Gold cost plus 2: destroy the card or unit",
+            "enemy-personality-or-attachment", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], Cost: GoldCostRule.TargetUnitTotal(2)),
+        // Generalized Gold payment (issue #303): synthetic fixtures, one per cost shape, standing in for the real cards (Exchange of Letters and
+        // Urgency are still unwired; the other four are wired above -- see docs/decisions/2026-09-18-generalized-gold-payment.md). Each proves that
+        // the shape prices, validates, quotes and pays through the ONE GoldCostRule path.
         ["training-urgency-draw"] = new("Limited", "Training (Urgency shape): Pay 2 Gold: draw a card", "none", Cost: GoldCostRule.Fixed(2)),
         ["training-charity-honor"] = new("Open", "Training (Virtuous Charity shape): Pay zero or more Gold: gain that much Honor", "none", Cost: GoldCostRule.Variable()),
         ["training-charity-honor-capped"] = new("Open", "Training: Pay 1 to 4 Gold: gain that much Honor", "none", Cost: GoldCostRule.Variable(1, 4)),
@@ -1708,6 +1715,7 @@ public static class AbilityCatalog
         ["training-copy-ability-turn"] = new("Open", "Training: remove a target Personality in any discard pile from the game: copy one ability that does not itself copy abilities from it (this turn)", "personality-in-any-discard", CopiesAbilities: true, Costs: ActionCost.RemoveTarget),
         // Training fixture (issue #338): opens the three-option Either/Or for the opposing player.
         ["training-either-or-three"] = new("Open", "Training: your opponent chooses to pay 2 Gold, lose 2 Honor, or let you gain 2 Honor", "none"),
+        ["training-opponent-payment"] = new("Open", "Training: pay zero or more Gold; your opponent then pays zero or more Gold; each of you gains Honor equal to what the other paid", "none", Cost: GoldCostRule.Variable()),
         // Fukuzo (oracle-l5r-2728, issue #338): "Open: Remove a target Personality in any player's discard pile from the game: Fukuzo wears
         // his skin. Until the next time this game this ability is used, Fukuzo copies one keyword, and one ability that does not itself
         // copy abilities, from the Personality." The removal is the cost (paid first); the two copies are the two independent copy
@@ -1918,7 +1926,8 @@ public sealed partial class MatchEngine
         // Personality-only gate); Mitsuko conditionally destroys hers after bowing it.
         or "mimori-destroy" or "mitsuko-bow-destroy"
         // Kuni Shinoda - exp (personality-wave-24): bows, then destroys a Shadowlands target.
-        or "shinoda-exp-bow-destroy";
+        or "shinoda-exp-bow-destroy"
+        or "a-stain-cleansed-destroy";
     private static string? MoveOrStraightenKind(string abilityId) => abilityId switch
     {
         "incapacitated" or "favor-battle" or "journeys-end-move" or "shamate-move" or "effortless-counterattack-move"
@@ -1989,7 +1998,8 @@ public sealed partial class MatchEngine
         // Kitsu Fukui (issue #337): bows an enemy card (the performer's bow-or-destroy is a cost, never the target).
         or "fukui-bow"
         // Issue #336: Doji Yoshitada, Gold and Steel's two bows and (its bow half) their target.
-        or "yoshitada-bow" or "gold-and-steel-bow" or "gold-and-steel-bow-move";
+        or "yoshitada-bow" or "gold-and-steel-bow" or "gold-and-steel-bow-move"
+        or "disgraceful-conduct-bow";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -2926,7 +2936,7 @@ public sealed partial class MatchEngine
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
         if (id == "lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
-        if (id == "tamoko-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
+        if (id is "tamoko-open" or "virtuous-charity-open") Require(_state.ActivePlayerId != player.Id, "Only usable when it is not your own turn.");
         // Ohsuki's Sparrow (oracle-l5r-10023, issue #299): "If none of your provinces were destroyed
         // since your last turn ended" -- a printed condition on USING the action, checked here rather
         // than only when it resolves (MatchState.ProvinceDestroyedSinceTurnEnd).
@@ -3484,6 +3494,8 @@ public sealed partial class MatchEngine
                 // not in play, so this needs its own branch too.
                 else if (ability.Target == "dead-personality-any-discard")
                     Require(type == CardType.Personality && target.Zone == Zone.Dead, "Choose a dead Personality in any discard pile.");
+                else if (ability.Target == "own-dead-samurai")
+                    Require(type == CardType.Personality && target.OwnerId == player.Id && target.Zone == Zone.Dead && Keyword(target, "Samurai"), "Choose one of your own dead Samurai.");
                 // Your Clan Needs You! (issue #295): "your performing Personality in one of your
                 // provinces" -- a province card is never InPlay, so this needs its own branch too, the
                 // same shape own-kharmic-card/own-kiho-strategy-in-discard already use for a target
@@ -3632,6 +3644,8 @@ public sealed partial class MatchEngine
                         "enemy-attacking-card" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
                             && Card(UnitHostId(target)).OwnerId == _state.ActivePlayerId,
                         "enemy-attachment" => !own && target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell,
+                        // A Stain Cleansed: "an enemy card without attachments or an enemy [Personality's] unit" -- an enemy Personality (whose unit is priced whole) or an enemy attachment.
+                        "enemy-personality-or-attachment" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell),
                         // Hida Mimori (issue #301): "a bowed enemy card" -- a card in a unit (the Personality
                         // or one of its attached Followers/Items/Spells), enemy-owned and currently bowed.
                         // The shared Battle-timing AtBattle Require above already resolves an attachment
@@ -4086,12 +4100,29 @@ public sealed partial class MatchEngine
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             // Generalized Gold payment fixtures (issue #303): the Gold itself was already charged by
             // PayForAbility above; a variable-cost effect reads the amount the player actually chose.
             case "training-urgency-draw": Draw(player); break;
             case "training-charity-honor": case "training-charity-honor-capped": GainHonor(player.Id, PaidGoldAmount(command), "Training charity"); break;
             case "training-at-any-cost": GainHonor(player.Id, 1, "Training At Any Cost"); break;
+            case "a-stain-cleansed-destroy":
+                if (target!.Zone == Zone.Attached) DestroyAttachment(target); else DestroyUnits([target], false, player.Id);
+                break;
+            case "at-any-cost-recruit":
+            {
+                var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
+                Require(quote.Error is null, quote.Error ?? "");
+                SpendHandPlayedCard(player, source);
+                if (BringDeadPersonalityIntoPlay(player, target, "At Any Cost")) return;
+                break;
+            }
+            case "virtuous-charity-open":
+                if (BeginOpponentPayment(OpponentPaymentSpecs.VirtuousCharity, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
+            case "training-opponent-payment":
+                if (BeginOpponentPayment(OpponentPaymentSpecs.TrainingBids, command, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
+                break;
             case "veteran-advisor-draw": Draw(player); break;
             case "hired-legion-draw":  Draw(player); break;
             case "akodo-regulars-boost":  ApplyModifier(source!, source!.Id, id, "Force", Definition(target!).Focus); break;
@@ -4129,6 +4160,7 @@ public sealed partial class MatchEngine
             case "training-penalty-chi": ApplyModifier(target!, source!.Id, id, "Chi", -1); break;
             case "training-penalty-honor": ApplyModifier(target!, source!.Id, id, "PersonalHonor", -1); break;
             case "training-penalty-gold": ApplyModifier(target!, source!.Id, id, "GoldCost", -2); break;
+            case "training-gold-cost-token": CreateToken(target!, "Training", id, "GoldCost", -2); break;
             case "training-cost-to-zero": ReduceGoldCostToZero(target!, source!.Id, id); break;
             case "training-bonus-stats":
                 ApplyModifier(target!, source!.Id, id, "Force", 2); ApplyModifier(target!, source.Id, id, "Chi", 1);
@@ -6274,6 +6306,7 @@ public sealed partial class MatchEngine
                     "attack" => inPlay.Cast<string?>().Append(null).ToArray(),
                     "discarded-personality" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone is Zone.DynastyDiscard or Zone.FateDiscard).Select(c => (string?)c.Id).ToArray(),
                     "dead-personality-any-discard" => _state.Cards.Values.Where(c => Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead).Select(c => (string?)c.Id).ToArray(),
+                    "own-dead-samurai" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Dead && Keyword(c, "Samurai")).Select(c => (string?)c.Id).ToArray(),
                     "own-personality-in-province" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && c.Zone == Zone.Province && c.FaceUp).Select(c => (string?)c.Id).ToArray(),
                     // Kharmic (issue #303): validated since #177 but never offered -- its target sits in the
                     // hand or a face-up province, neither of which the in-play default reaches, so the

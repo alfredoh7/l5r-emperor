@@ -183,6 +183,8 @@ public static class TrainingOpponent
             // (Fukuzo): the first candidate the engine lists.
             case "chooseEitherOr": return command.Choice switch { "pay" => 110, "bow" => 90, "honor" => 70, _ => 60 };
             case "chooseCopyKeyword": case "chooseCopyAbility": return 100;
+            // The opposing player's variable payment (issue #373, Virtuous Charity): a modest bot answers with the engine's default, paying nothing.
+            case "chooseOpponentPayment": return 100;
             // A forced discard (Times of Strife, Daigotsu Bofana; issue #333): the same modest rule as the discard after a Terrain -- give up
             // the least useful card in hand.
             case "forcedDiscard":
