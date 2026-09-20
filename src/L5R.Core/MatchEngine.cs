@@ -1389,6 +1389,10 @@ public sealed partial class MatchEngine
         _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
         // A delayed effect and a "will not bow" promise belong to their battle: both lapse with it, applied or not.
         _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear();
+        // "Remove those Followers from the game after the battle ends" (Kyuden Hida - exp): wherever they stand now (attached, or discarded with a destroyed host).
+        foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
+            if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
+        _state.CreatedUntilBattleEndsIds.Clear();
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
@@ -1739,7 +1743,7 @@ public sealed partial class MatchEngine
         // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
-        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"?2:0)
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
