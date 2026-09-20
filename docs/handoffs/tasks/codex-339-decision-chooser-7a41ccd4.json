@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement #339 automatic decision sidebar and grouped alternative costs on isolated approved-UI/current-mechanics preview base. Add public cost-option presentation metadata, real engine showcases and Mac review launcher. No merge into main authorized.",
-  "validation": "Baseline Core suites passed; corrected AI fixture 34/34, server 8/8, transport 8/8. Baseline native Regions/Celestials passed at 1920x1080. Client compiles with 0 warnings/errors. New alternative-cost 16/16, effect-choice 10/10, showcase 2/2 pass. Native Yumaru automatic prompt/keyboard selection/confirmation passes. See docs/handoffs/2026-09-21-decision-chooser-review.md for evidence and pending checks.",
-  "remaining": "Draft: Fukui native rerun, compact and waiting states, launcher navigation, remaining generic choice types, stale/reconnect handling, visual polish and full checks. Then seven other approved UI tasks. No main merge authorized; public metadata and inherited rules corrections require shared review.",
+  "summary": "Implement #339 automatic choice sidebar and alternative-cost flow with Mac review launcher, isolated from main. Add disabled-cost presentation metadata and real-engine review fixtures. Refresh verified catalogue art pack so launchers start offline.",
+  "validation": "Client compiles with zero warnings/errors. Full deterministic suite passed before final layout refinement; all three expanded showcase tests pass. Native Yumaru all three choices, Fukui ready and bowed Ancestor, opponent waiting, all five other generic choice types, and reduced-motion pass. Catalogue pack generated from verified originals and installed offline. Actual Mac launcher opens prepared game; Next demo works. Final compact layout rerun in progress.",
+  "remaining": "Finish final compact screenshots and verify updated launcher navigation; publish private art dependency and update PR evidence. No main merge authorized. Remaining seven approved UI tasks are pending. Shared metadata review and human rules acceptance remain distinct from tests; Windows graphical testing not performed.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/339",
   "branch": "codex/339-decision-chooser",
-  "updated": "2026-09-20T22:06:37.526801+00:00"
+  "updated": "2026-09-20T22:19:58.207228+00:00"
 }

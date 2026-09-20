@@ -6,7 +6,8 @@ internal static class DecisionShowcaseTests
 {
     public static void Run(TestRunner runner) => runner.Run("decision-showcase",[
         ("Yumaru: exactly one of three complete choices resolves and a stale answer is rejected",Yumaru),
-        ("Fukui: disabled alternative retains public grouping metadata and transport preserves it",Fukui)
+        ("Fukui: disabled alternative retains public grouping metadata and transport preserves it",Fukui),
+        ("Every generic decision fixture opens naturally and all complete engine answers execute",Generic)
     ]);
     private static void Check(bool value,string message) {if(!value)throw new Exception(message);}
     private static void Yumaru()
@@ -23,6 +24,17 @@ internal static class DecisionShowcaseTests
             Check((engine.State.Cards[pending.Command.CardId!].Zone==Zone.Home)==(choice is "self" or "both"),"Incorrect source movement");
             Check((engine.State.Cards[pending.Command.TargetId!].Zone==Zone.Home)==(choice is "target" or "both"),"Incorrect target movement");
             Reject(engine,command);
+        }
+    }
+    private static void Generic()
+    {
+        foreach(var (kind,type) in new[]{("preserving","preservingHonor"),("rin","rinShame"),("conqueror","conqueror"),("straighten","declineStraighten"),("discard","forcedDiscard")})
+        {
+            var engine=MatchEngine.CreateDecisionShowcase(kind);
+            Check(engine.State.PendingChoice?.Type==type,"Wrong pending choice: "+kind);
+            var choices=engine.QueryActions(engine.State.PriorityPlayerId).Where(a=>a.Type!="concede").ToArray();
+            Check(choices.Length>=2,"No meaningful choice: "+kind);
+            foreach(var option in choices)Accept(MatchEngine.FromTestState(engine.State),option.Command!);
         }
     }
     private static void Fukui()

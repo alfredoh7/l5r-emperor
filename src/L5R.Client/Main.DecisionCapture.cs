@@ -17,13 +17,17 @@ public partial class Main
     private static void DecisionRequire(bool ok,string message)
     { if(!ok)throw new InvalidOperationException("Decision review: "+message); }
     private Button DecisionButton(string text) => StabilizationButtons(_root).Single(b=>b.IsVisibleInTree() && b.Text==text);
-    private async Task PrepareDecisionReview(string kind,int seat=0)
+    private async Task PrepareDecisionReview(string kind,int? seat=null)
     {
         _decisionReviewCase=kind;ResetDecisionSelection();
         var engine=MatchEngine.CreateDecisionShowcase(kind);
-        await LoadSupportFixture(engine,seat);
-        if(kind.StartsWith("fukui",StringComparison.Ordinal) && seat==0)
+        await LoadSupportFixture(engine,seat??engine.State.PriorityPlayerId);
+        if(kind.StartsWith("fukui",StringComparison.Ordinal) && (seat??engine.State.PriorityPlayerId)==0)
+        {
             SelectCard(Self.Army.Single(c=>c.Definition?.Id=="oracle-l5r-4375"));
+            if(_captureMode.StartsWith("published-decisions-review",StringComparison.Ordinal))
+                Choose(Actions.First(a=>a.Enabled&&a.AlternativeCost?.AbilityId=="fukui-bow"));
+        }
         Render();await EventFrames(8);
     }
     private void AddDecisionReviewNavigation()
@@ -48,6 +52,22 @@ public partial class Main
     {
         try
         {
+            if(_captureMode.Contains("reduced")){_preferences.ReducedMotion=true;ApplyPreferences(false);}
+            if(_captureMode.EndsWith("-generic",StringComparison.Ordinal))
+            {
+                foreach(var generic in new[]{"preserving","rin","conqueror","straighten","discard"})
+                {
+                    await PrepareDecisionReview(generic);
+                    DecisionRequire(GenericDecisionActive && DecisionButton("Confirm choice").Disabled,"Generic decision missing or defaulted: "+generic);
+                    var before=View.Version;var option=Actions.First(a=>a.Enabled&&a.Command is not null&&a.Type!="concede");
+                    await SupportCapture("-"+generic);await SupportClick(DecisionButton(option.Label));
+                    DecisionRequire(View.Version==before,"Selection changed the game: "+generic);
+                    await SupportClick(DecisionButton("Confirm choice"));await WaitDecisionPresentation();
+                    DecisionRequire(View.Version==before+1,"Generic answer did not execute once: "+generic);
+                    GD.Print("GENERIC_DECISION_PASS: "+generic);
+                }
+                GD.Print("DECISION_CHOOSER_PASS: "+_captureMode);GetTree().Quit();return;
+            }
             var kind=_captureMode.Contains("fukui-bowed")?"fukui-bowed":_captureMode.Contains("fukui")?"fukui":"yumaru";
             var waiting=_captureMode.Contains("waiting");
             await PrepareDecisionReview(kind,waiting?1:0);
