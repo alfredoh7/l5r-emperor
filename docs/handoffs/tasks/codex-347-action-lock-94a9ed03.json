@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved A restriction seal (#347) using public ActionLocked only, separate prepared review launcher; stacked on #315. No merge authorized.",
+  "validation": "Read issue #347 and public engine contract, inspected approved A. Production seal derived with built-in imagegen; native implementation pending.",
+  "remaining": "Implement status seal and inspector wording, verify both seats/attachments/expiry natively, create launchable review and screenshots.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/347",
+  "branch": "codex/347-action-lock",
+  "updated": "2026-09-20T23:17:18.598654+00:00"
+}
