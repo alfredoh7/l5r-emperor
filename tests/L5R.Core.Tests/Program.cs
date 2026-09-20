@@ -1,4 +1,6 @@
 using static RegressionAssertions;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using L5R.Core;
 using L5R.Client;
@@ -225,30 +227,11 @@ var tests = new (string Name, Action Run)[]
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
 runner.Run("core",tests);
-PublishedTests.Run(runner);
-GoldParityTests.Run(runner);
-GoldQuoteTests.Run(runner);
-BattleTimingTests.Run(runner);
-BattleRulingsRound2Tests.Run(runner);
-ReconActionTests.Run(runner);
-DisciplineAndAbsentTests.Run(runner);
-BattleAbsentMovesTests.Run(runner);
-AdditionalActionBurstTests.Run(runner);
-DeckFormatTests.Run(runner);
-DeckWorkshopTests.Run(runner);
-DeckSearchTests.Run(runner);
-DeckLookTests.Run(runner);
-DaigotsuBofanaTests.Run(runner);
-AlternativeCostTests.Run(runner);
-AttachFromDiscardTests.Run(runner);
-FadingShadowsTests.Run(runner);
-EffectChoiceTests.Run(runner);
-FollowerPerformerTests.Run(runner);
-CardCopyTests.Run(runner);
-EitherOrTests.Run(runner);
-TargetedActionReactionTests.Run(runner);
-DelayedMoveHomeWaveTests.Run(runner);
-KyudenHidaExpTests.Run(runner);
+foreach(var suite in typeof(PublishedTests).Assembly.GetTypes().Where(t=>t.IsAbstract&&t.IsSealed&&t.Name.EndsWith("Tests",StringComparison.Ordinal)).OrderBy(t=>t.Name,StringComparer.Ordinal))
+{
+    var run=suite.GetMethod("Run",BindingFlags.Public|BindingFlags.Static,[typeof(TestRunner)])??throw new InvalidOperationException($"{suite.Name} has no public static Run(TestRunner), so its tests would never run");
+    try{run.Invoke(null,[runner]);}catch(TargetInvocationException e){ExceptionDispatchInfo.Capture(e.InnerException!).Throw();}
+}
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
