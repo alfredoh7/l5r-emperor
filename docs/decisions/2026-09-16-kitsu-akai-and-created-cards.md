@@ -109,3 +109,5 @@ execution cases), `DeckWorkshop.cs` (`DeckCardInfo.CreatedOnly`, `Review()`'s ne
 
 **Status:** Accepted and implemented for both cards. Created Holding/Region/Attachment entry is
 accepted-as-future-scope but not implemented.
+
+**Update 2026-09-20 (issue #387):** creation of an Item, Follower or Spell (attached to a Personality) now exists, and a creator names the created card by data, not by id; see `2026-09-20-created-cards-from-proxy-scans.md`. A created Holding, Region or Strategy is still future scope. The deck-workshop soft warning described above is gone: a created-only card is no longer in the workshop pool.
