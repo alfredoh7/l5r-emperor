@@ -106,17 +106,19 @@ public sealed partial class MatchEngine
 
     /// <summary>The resolved price of one ability command. Amount is what must be paid now; Subject is the
     /// card named in the payment event; NeedsTarget means a target-derived rule has no target yet.</summary>
+    /// <param name="LeadAmount">Discipline (issue #353): the part of Amount that is the Discipline cost, which is paid FIRST as its own payment (0 when
+    /// the price is a single payment). Amount is always the total, so every existing reader of it still sees what the whole action costs.</param>
     private sealed record AbilityCost(GoldCostRule Rule, int Amount, string Basis, string? Error, bool NeedsTarget,
-        CardInstance? Subject, int? Min = null, int? Max = null);
+        CardInstance? Subject, int? Min = null, int? Max = null, int LeadAmount = 0);
 
     /// <summary>The rule for an ability that declares none. A Discipline ability (issue #331) has two prices
     /// decided by where its card is: played from a discard pile it pays the Discipline cost -- the card's
     /// published GoldCost, which for a Discipline Strategy holds the Discipline icon's amount because such a card
     /// prints no Gold Cost of its own -- and played from hand it is the ordinary Strategy play, free of it (never
     /// the Discipline cost). Otherwise a Strategy source pays its own printed cost. Everything else is free.
-    /// Not modeled: a Discipline card whose action ALSO has its own Gold cost, where the supplement adds the
-    /// two together (no published card does; it would need an explicit rule on the ability that
-    /// AbilityGoldCost adds the Discipline cost to).</summary>
+    /// A Discipline card whose action ALSO has its own Gold cost (an explicit <c>Cost</c> on the ability: Knowledge and Power, Two Steady Breaths --
+    /// "Limited, 1 Gold") pays that too: from hand only the action's own cost, from a discard pile the Discipline cost PLUS the action's own, the
+    /// Discipline cost first (Mendon's ruling, issue #353) -- see AbilityGoldCost.</summary>
     private static GoldCostRule? ImplicitGoldRule(AbilityDefinition ability, CardInstance? source)
     {
         if (source is null) return null;
@@ -144,6 +146,27 @@ public sealed partial class MatchEngine
     /// on an unknown or partial command: a target-derived rule with no target reports NeedsTarget, and a
     /// rule that cannot be priced reports Error.</summary>
     private AbilityCost? AbilityGoldCost(GameCommand command)
+    {
+        var cost = BaseAbilityGoldCost(command);
+        if (cost is null || command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Cost is null) return cost;
+        var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
+        // Discipline (Mendon's ruling, issue #353): played from a discard pile, the Discipline cost must be paid BEFORE the action's other costs can
+        // be satisfied -- so it is a payment of its own, first, and the total is that plus the action's own cost. Played from hand only the action's
+        // own cost applies, which is what the base price already is. (An action with NO cost of its own is the base price's implicit Discipline
+        // rule, above.) A player-chosen variable cost has no combined form and no Discipline card prints one.
+        if (!DisciplineFromDiscard(ability, source) || source is null) return cost;
+        var lead = Definition(source).GoldCost;
+        if (lead <= 0) return cost;
+        if (cost.Rule.Basis == GoldCostBasis.Variable)
+            return cost with { Error = "A Discipline play cannot be combined with a player-chosen Gold amount." };
+        return cost with
+        {
+            Amount = cost.Amount + lead, LeadAmount = lead,
+            Basis = $"{Definition(source).Name} Discipline cost {lead} (paid first), then {cost.Basis} = {cost.Amount + lead} in all"
+        };
+    }
+
+    private AbilityCost? BaseAbilityGoldCost(GameCommand command)
     {
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return null;
         var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null;
@@ -217,7 +240,68 @@ public sealed partial class MatchEngine
         var cost = AbilityGoldCost(command);
         Require(command.GoldAmount is null || cost?.Rule.Basis == GoldCostBasis.Variable, "This action has no player-chosen Gold amount.");
         if (cost is not null) Require(cost.Error is null, cost.Error ?? "");
-        ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds);
+        if (cost is { LeadAmount: > 0 }) ValidateSplitPayment(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
+        else ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds);
+    }
+
+    // ---- two-part payment: the Discipline cost first, then the action's own cost (issue #353) --------------------------------------------------
+    // Gold does not carry over between payments, so the parts are separate: the sources are split into a set that covers the Discipline cost and
+    // the rest, which must cover the action's own cost. A single source producing more than the Discipline cost loses the excess -- it cannot
+    // also pay the second part -- exactly as if the two payments were made one after the other. The split is a property of the SET of sources
+    // (any order is accepted); when several splits work the one with the least excess on the Discipline part is used, deterministically.
+    private const int MaxSplitPaymentSources = 16;
+
+    private bool TrySplitPayment(int playerId, int lead, int rest, string[] ids, out string[] leadIds, out string[] restIds)
+    {
+        leadIds = []; restIds = [];
+        if (ids.Length > MaxSplitPaymentSources) return false;
+        var sorted = ids.OrderBy(id => id, StringComparer.Ordinal).ToArray();
+        var produced = sorted.Select(id => GoldProduced(id, playerId)).ToArray();
+        var total = produced.Sum();
+        (int Excess, int Count, int Mask)? best = null;
+        for (var mask = 0; mask < 1 << sorted.Length; mask++)
+        {
+            var first = 0; var count = 0;
+            for (var i = 0; i < sorted.Length; i++) if ((mask >> i & 1) == 1) { first += produced[i]; count++; }
+            if (first < lead || total - first < rest) continue;
+            var candidate = (first - lead, count, mask);
+            if (best is null || candidate.CompareTo(best.Value) < 0) best = candidate;
+        }
+        if (best is null) return false;
+        var chosen = best.Value.Mask;
+        leadIds = sorted.Where((_, i) => (chosen >> i & 1) == 1).ToArray();
+        restIds = sorted.Where((_, i) => (chosen >> i & 1) == 0).ToArray();
+        return true;
+    }
+
+    private void ValidateSplitPayment(int playerId, int lead, int rest, string[]? sourceIds)
+    {
+        var ids = sourceIds ?? [];
+        Require(ids.Distinct(StringComparer.Ordinal).Count() == ids.Length, "A Gold source cannot be used twice in one payment.");
+        var producers = Producers(playerId).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
+        Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
+        Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds) && (rest > 0 || restIds.Length == 0),
+            $"This play needs its Discipline cost ({lead} Gold) paid first and then {rest} Gold for the action itself, each from its own sources (Gold does not carry over); the selected sources cannot do that.");
+    }
+
+    private void PaySplit(int playerId, CardInstance target, int lead, int rest, string[]? sourceIds)
+    {
+        ValidateSplitPayment(playerId, lead, rest, sourceIds);
+        TrySplitPayment(playerId, lead, rest, sourceIds ?? [], out var leadIds, out var restIds);
+        Pay(playerId, target, lead, leadIds, "Discipline cost, paid first");
+        if (rest > 0) Pay(playerId, target, rest, restIds, "the action's own cost");
+    }
+
+    /// <summary>Suggested sources for a two-part payment: every alternative for the Discipline cost, each completed from the sources it leaves for the
+    /// action's own cost. Empty when either part cannot be paid (so the play is offered only when both are).</summary>
+    private PaymentOption[] SplitPaymentOptions(int playerId, int lead, int rest)
+    {
+        var options = new List<PaymentOption>();
+        foreach (var first in PaymentOptions(playerId, lead).Take(8))
+            foreach (var second in PaymentOptionsExcluding(playerId, rest, first.SourceIds.ToHashSet(StringComparer.Ordinal)).Take(4))
+                options.Add(new([.. first.SourceIds, .. second.SourceIds], first.Produced + second.Produced, lead + rest, first.Excess + second.Excess));
+        return options.OrderBy(p => p.SourceIds.Count(id => Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess).ThenBy(p => p.SourceIds.Length)
+            .ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
     }
 
     /// <summary>ExecuteAbilityEffects' payment step: charge exactly what validation priced, bowing exactly
@@ -228,7 +312,8 @@ public sealed partial class MatchEngine
         if (AbilityGoldCost(command) is not { } cost) return;
         Require(cost.Error is null, cost.Error ?? "");
         if (!cost.Rule.Explicit && cost.Amount <= 0) return;
-        Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds);
+        if (cost.LeadAmount > 0) PaySplit(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
+        else Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds);
     }
 
     /// <summary>The quote the client renders for an ability command (full or partial: a target-derived cost
@@ -245,7 +330,8 @@ public sealed partial class MatchEngine
     {
         var error = cost.Error ?? (cost.NeedsTarget ? cost.Basis : null);
         if (cost.Rule.Basis != GoldCostBasis.Variable)
-            return new(cost.Amount, cost.Rule.Kind, cost.Basis, error, error is null ? PaymentOptions(playerId, cost.Amount) : []);
+            return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
+                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount) : PaymentOptions(playerId, cost.Amount));
         var min = cost.Min ?? 0;
         var production = Producers(playerId).Sum(c => GoldProduced(c.Id, playerId));
         var max = Math.Max(min, Math.Min(cost.Max ?? int.MaxValue, production));

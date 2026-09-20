@@ -642,7 +642,11 @@ public static class AbilityCatalog
         // condition already uses in place of a forced mid-resolution interrupt.
         ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none"),
         // "Absent Battle" (issue #331: the Absent flag replaces the earlier simplification to plain Battle).
-        ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality", Absent: true, Costs: ActionCost.BowSourceUnlessInHand),
+        // Bowing the Ring is a COST of the action (Mendon's ruling, issue #353): it must be in play and unbowed (the shared "abilities on bowed cards
+        // cannot be used" Require), and it is a DECLARED cost (Costs: ActionCost.BowSource, AbilityCosts.cs), so a negated action still pays it and a
+        // blocked bow aborts the whole action. A real Ring's "discard this Ring from your hand to use its ability without cost" is not printed on a
+        // False Ring (so no BowSourceUnlessInHand), and it has no hand play (see ValidateAbility).
+        ["false-ring-of-air-force"] = new("Battle", "Absent Battle, bow: Give a target Personality -3F", "personality", Absent: true, Costs: ActionCost.BowSource),
         // Not a Reaction/grant at all (issue #194) -- a standing condition, usable any time it holds,
         // like an ordinary Battle ability. (Its printed text is a plain "Battle:", so it takes no Absent flag.)
         ["false-ring-of-water-recruit"] = new("Battle", "If the current battlefield's Province Strength is 11 or greater, put this Ring into play and lose 2 Honor", "none"),
@@ -1665,6 +1669,23 @@ public static class AbilityCatalog
         // straighten is part of the card, so a bowed one is legal); the move can be negated ("move" kind in
         // MoveOrStraightenKind), and he is straightened only if he really moved (see the execution case).
         ["return-to-action-move"] = new("Battle", "If you are the Defender, target your Personality at home and move him to this battlefield. After he moves, straighten him", "own-personality-at-home", Discipline: true, Absent: true, MovesToBattle: true),
+        // Expensive Achievement (oracle-l5r-10938, issue #353; Aftermath): "Discipline :g2: ... Battle: Give this Province +2 or -2 Strength." Two
+        // alternative effects of one action, the paired-ability shape Ring of Earth's raise/lower already use (one shared UsageKey). "This Province" is
+        // the current battlefield's province (the Aftermath supplement: "On a Battle action, 'this Province' means the current battlefield's province"),
+        // the Defender's. A plain Battle action: it needs the acting player's presence, in either play mode.
+        ["expensive-achievement-raise"] = new("Battle", "Discipline (2). Battle: Give this Province +2 Strength", "none", UsageKey: "expensive-achievement", Discipline: true),
+        ["expensive-achievement-lower"] = new("Battle", "Discipline (2). Battle: Give this Province -2 Strength", "none", UsageKey: "expensive-achievement", Discipline: true),
+        // Knowledge and Power (oracle-l5r-10942; Aftermath): "Discipline :g1: ... Limited, :g1:: Destroy one or two of a target Personality's tokens.
+        // Give him as many +1F tokens as the number of tokens this destroyed." The action's own "Limited, 1 Gold" is an explicit Cost, so a play from a
+        // discard pile pays the Discipline cost (1) first and then that 1 (GoldQuotes.AbilityGoldCost); from hand, only that 1. The target is ANY
+        // Personality with a token (the new personality-with-token category); which one or two tokens are destroyed rides on CardIds (token ids -- the
+        // Mitsu Fire-token idiom), defaulting to his first token when the command names none, so an offered command is always a legal one.
+        ["knowledge-and-power"] = new("Limited", "Discipline (1). Limited, 1 Gold: Destroy one or two of a target Personality's tokens. Give him as many +1F tokens as the number of tokens this destroyed", "personality-with-token", Cost: GoldCostRule.Fixed(1), Discipline: true),
+        // Two Steady Breaths (oracle-l5r-10961; Aftermath): "Discipline :g2: ... Limited, :g1:: Give your target face-up Personality out of play Destined."
+        // Same two-part price (Discipline 2 first, then the action's own 1). The target is the existing own-personality-in-province category (a face-up
+        // Personality in one of your provinces -- the "out of play" one that can still be recruited); Destined is granted for the turn, so the recruit
+        // in this turn's Dynasty phase draws its card (the engine's own Destined entry draw).
+        ["two-steady-breaths-destined"] = new("Limited", "Discipline (2). Limited, 1 Gold: Give your target face-up Personality out of play Destined", "own-personality-in-province", Cost: GoldCostRule.Fixed(1), Discipline: true),
         // Daigotsu Bofana - exp (oracle-l5r-10315, issue #333): "Battle: Target a Dark Virtue in your discard pile: Take an additional action
         // to play it for one of its Battle actions. After it resolves, remove the card from the game." The additional action is an
         // AdditionalActionGrant scoped to the chosen card with FromDiscard (see DiscardPlayGrant); the removal is PlayedFromDiscard.
@@ -2844,6 +2865,7 @@ public sealed partial class MatchEngine
         // action at all (it sits before the effects colon), so it is checked here where every offer and every
         // submitted command see it. Absent waived the presence Requires above; there must still be a battle to move
         // him to.
+        if (id == "false-ring-of-air-force") Require(InPlay(source!), "False Ring of Air must be in play: bowing it is the cost of this action.");
         if (id == "return-to-action-move")
         {
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
@@ -3207,7 +3229,7 @@ public sealed partial class MatchEngine
             // player chooses to destroy right now), not a static per-ability-id/target/source formula
             // AttackStrength's own switch can express. CardIds carries the chosen token ids here
             // (tokens are not entries in _state.Cards, so this is a deliberate, narrow reuse).
-            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack"
+            Require(id is "mitsu-fire-attack" or "scorn-the-weak" or "strength-in-terror" or "unexpected" or "visage-of-the-orochi" or "kahoku-exp-attack" or "knowledge-and-power"
                 || command.CardIds is null || command.CardIds.Length == 0, "This action does not select multiple cards.");
             // Bayushi Kahoku - exp (oracle-l5r-807): "Target an enemy Personality: Give him -4F. Ranged 3
             // Attack." Two SEPARATE selections, the Ranged Attack's own target being the second (per the
@@ -3222,6 +3244,15 @@ public sealed partial class MatchEngine
                 var ids = command.CardIds ?? [];
                 Require(ids.Length is 0 or 1, "Kahoku's Ranged Attack may target at most one card.");
                 if (ids.Length == 1) RequireLegalAttackTarget(id, ability, command, player, source, Card(ids[0]), command.TargetId, 4);
+            }
+            // Knowledge and Power (issue #353): "Destroy one or two of a target Personality's tokens" -- CardIds names which (token ids, on the TARGET),
+            // one or two different ones; none named means his first token, so the ability is always offered with a legal command.
+            if (id == "knowledge-and-power")
+            {
+                var kpTarget = command.TargetId is null ? throw new RuleViolation("Choose a target Personality.") : Card(command.TargetId);
+                var chosenTokens = command.CardIds ?? [];
+                Require(chosenTokens.Length <= 2 && chosenTokens.Distinct().Count() == chosenTokens.Length && chosenTokens.All(tid => kpTarget.Tokens.Any(t => t.Id == tid)),
+                    "Choose one or two different tokens on the target Personality to destroy.");
             }
             if (id == "mitsu-fire-attack")
             {
@@ -3501,6 +3532,8 @@ public sealed partial class MatchEngine
                         // Personality out of play, at a battlefield or dead never qualifies), bowed or not: the card
                         // straightens him afterward, so a bowed one is a legal (and the best) target.
                         "own-personality-at-home" => personality && own && target.Zone == Zone.Home,
+                        // Knowledge and Power (issue #353): "a target Personality's tokens" -- either side's, any Personality that has at least one token.
+                        "personality-with-token" => personality && target.Tokens.Count > 0,
                         // Tamori Tamoko's own Open action (issue #207 follow-up): "target an unbowed
                         // Personality controlled by the active player" -- "if it is not your turn" is
                         // checked separately below (a per-id Require, not part of this Target shape).
@@ -4376,6 +4409,25 @@ public sealed partial class MatchEngine
             // is a real, negatable effect on the target (Tamori Tamoko's window, Champion of Thunder's "all" --
             // MoveOrStraightenKind); if it was negated he stays at home, and nothing is straightened: the straighten
             // is conditional on the movement having resolved. Only HE is straightened, not his unit.
+            case "expensive-achievement-raise": case "expensive-achievement-lower":
+                // "This Province": the current battlefield's, always the Defender's. Like every other Province Strength change in the engine (Ring of
+                // Earth, Improved Defenses) it is applied to the province's own Strength directly.
+                Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value).Strength += id == "expensive-achievement-raise" ? 2 : -2;
+                break;
+            case "knowledge-and-power":
+            {
+                // Champion of Thunder's "negate the action's effects on this card" reaches the whole action, tokens included.
+                if (NegatesEffect(target!, "all")) break;
+                var destroyed = command.CardIds is { Length: > 0 } named ? named : [target!.Tokens[0].Id];
+                foreach (var tokenId in destroyed) DestroyToken(target!, target!.Tokens.First(t => t.Id == tokenId));
+                for (var n = 0; n < destroyed.Length; n++) CreateToken(target!, "Force", id, "Force", 1);
+                break;
+            }
+            case "two-steady-breaths-destined":
+                // "Give ... Destined": until the end of the turn like any granted keyword (the default duration), which spans this turn's Dynasty phase
+                // where he can be recruited; Destined's own mandatory draw is the engine's existing entry effect (Keyword(card, "Destined")).
+                GrantKeyword(target!, "Destined", source!.Id, "Turn");
+                break;
             case "return-to-action-move":
                 if (TryMoveToBattlefield(target!, _state.CurrentBattleProvince!.Value)) Straighten(target!);
                 break;

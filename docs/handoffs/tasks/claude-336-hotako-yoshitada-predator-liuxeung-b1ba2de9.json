@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Third sync of PR #348 with origin/main fe7f89ed (#356 atomic costs, #357 alternative-cost rulings, #367 out-of-play windows): merge (no rebase, no force-push), conflicts in CardAbilities, CardCatalog, PublishedContent, MatchQueries, TargetedActionReactions resolved keeping both sides; no count pin (main's discovery), my two wave manifests unchanged, inventory regenerated. Integration: Bonds of Coin's Favor half declares its Stronghold bow (Costs, new CostSubject.Stronghold) and is in the negated-action Favor list so a negated action pays both; the lock refuses before any payment (nothing paid, use unspent) and does not reach into an announced action; per-target windows coexist with out-of-play windows (Unimpeachable Name once per action; Sakuma, Kakihara and R's reactions once per target); Order Seppuku is disabled by the lock and by an owed Hesitation pass.",
-  "validation": "bash tools/check.sh --skip-client all green on the merged tree (216 core, 59 published, action-lock 16, multi-target 25, move-destination 12, stat-penalty 10, all main suites, AI 27, server 8, transport 7); dotnet build src/L5R.Client builds; 75 named mutations, 72 killed by a named test, 3 equivalent survivors; Godot not available locally.",
+  "summary": "Fourth (small) sync of PR #348 with origin/main 03ba3868 (#358 Discipline rulings, strategy-wave-23): conflicts only in the CardCatalog concat (both waves kept) and the inventory notes (both kept); no code interaction. Third sync (#356, #357, #367) as before: Bonds of Coin declares its Stronghold bow, the lock refuses before payment, per-target and out-of-play windows coexist. Pool 442 (435 on main + 7).",
+  "validation": "bash tools/check.sh --skip-client all green on the merged tree; dotnet build src/L5R.Client builds; 75 named mutations, 72 killed, 3 equivalent survivors; Godot not available locally.",
   "remaining": "None; ready for review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/336",
   "branch": "claude/336-hotako-yoshitada-predator-liuxeung",
-  "updated": "2026-09-20T10:40:17.780310+00:00"
+  "updated": "2026-09-20T10:46:24.367641+00:00"
 }

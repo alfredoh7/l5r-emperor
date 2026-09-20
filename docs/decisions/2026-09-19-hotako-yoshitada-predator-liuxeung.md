@@ -35,7 +35,7 @@ with a 0 Gold Cost" -- the same action. Published count: +7 (409 -> 416 on the 7
 merging origin/main 05cc2493, whose pinned count was 417 after #344's three: Fukuzo, Yoritomo Sakuma, Unfortunate Hesitation). There is no pinned total any more (#360/#361 removed it): the published
 guard derives the pool from `content/published/*.json` and each wave is pinned in its own manifest, `tests/L5R.Core.Tests/PublishedWaves/<wave>.txt`, so this change adds `personality-wave-32.txt` and
 `strategy-wave-21.txt` (written by `tools/content/pin_wave_ids.py`; neither wave number collides with a wave on main -- main has 30, 31, 33, 38 and 22, 27) and edits no shared count line. Counted from the merged
-tree for the record: **438** distinct non-ScenarioOnly ids (origin/main 7ce03fc6 has 431, plus these seven).
+tree at the last sync: **442** distinct non-ScenarioOnly ids (origin/main 03ba3868 has 435, plus these seven; 431 at 7ce03fc6).
 
 ## Mendon's rulings (the task brief, verbatim where it matters)
 
@@ -388,7 +388,7 @@ Segment of #359) and `declareAttack` in the pinned action-type inventory (the At
 **Third sync (origin/main fe7f89ed: #356 atomic cost payment, #357 the alternative-cost rulings, #367 out-of-play windows).** Text conflicts: `CardAbilities.cs` (`AbilityDefinition` gained `Costs` beside `Slots`/`Move`; Rumormonger
 kept my printed-Personal-Honor reading and main's removal of the in-case bow, now a declared cost; Sakuma reads the window's target), `CardCatalog.cs`/`PublishedContent.cs` (the wave loaders; main's Foothills Keep,
 `stronghold-wave-5`), `MatchQueries.cs` (Order Seppuku: an owed Hesitation pass and the lock each disable it), `TargetedActionReactions.cs` (the held action's subject is the window's target AND main's
-`BowOrDestroyCostSubjects`, which replaced `CostSubjectOf`), the inventory workbook (regenerated; 439 wired) -- no count pin exists any more, main's `Program.cs` suite discovery is taken, and the two manifests are
+`BowOrDestroyCostSubjects`, which replaced `CostSubjectOf`), the inventory workbook (regenerated; 442 wired after the fourth, small sync of #358, whose Discipline rulings and `strategy-wave-23` touched only the catalogue concat and the inventory notes) -- no count pin exists any more, main's `Program.cs` suite discovery is taken, and the two manifests are
 unchanged (no wave-number collision: main has personality waves 30, 31, 33, 38, strategy 22, 27 and stronghold 5, 8). **Costs of the new abilities (`Costs`).** Of the seven cards' abilities only one pays a cost that is not Gold or a played Strategy: Bonds of Coin's
 Favor half, "Bow your Stronghold and discard the Imperial Favor". Bowing the Stronghold is now declared (`ActionCost.BowStronghold`, on a new `CostSubject.Stronghold` -- the acting player's own Stronghold) and the case no
 longer bows it; the Favor discard is paid where every Favor action's is, and `bonds-of-coin-draw` is added to the negated-action list in `ResolveNegatedAction` (it was only in the executing one), so a negated Bonds of Coin
@@ -405,7 +405,7 @@ Lock and F's copy primitive: an ability a locked Fukuzo copied is barred (`Copie
 `bash tools/check.sh --skip-client` on the tree merged with origin/main fe7f89ed, all green: the Python tool suites, 216 core, the published guard (59, derived from the JSON files with the two manifests of this change), every suite of
 main (among them `negated-costs` 14, `out-of-play-reaction-window` 6, `foothills-keep` 10, `alternative-costs` 16, `targeted-action-reactions` 30, `battle-rulings-2` 18, `additional-action-bursts` 9) and the four suites of this
 change -- `action-lock` 16, `multi-target` 25, `move-destination` 12, `stat-penalty` 10 -- then `L5R.AI.Tests` 27, `L5R.Server.Tests` 8 and `L5R.Client.Transport.Tests` 7 (the command and option fields cross the wire, `NoTarget`
-and a follow-up slot included). `dotnet build src/L5R.Client/L5R.Client.csproj` builds; Godot is not available on this machine, so the client's import/smoke is CI's. Published pool: 439 distinct non-ScenarioOnly ids (see the
+and a follow-up slot included). `dotnet build src/L5R.Client/L5R.Client.csproj` builds; Godot is not available on this machine, so the client's import/smoke is CI's. Published pool: 442 distinct non-ScenarioOnly ids (origin/main 03ba3868 has 435, plus these seven) (see the
 count paragraph at the top: nothing is pinned in a shared line any more).
 
 ## Mutation checks

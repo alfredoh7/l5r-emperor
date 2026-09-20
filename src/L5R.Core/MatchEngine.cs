@@ -863,9 +863,12 @@ public sealed partial class MatchEngine
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
-    public PaymentOption[] PaymentOptions(int playerId,int cost)
+    public PaymentOption[] PaymentOptions(int playerId,int cost)=>PaymentOptionsExcluding(playerId,cost,null);
+    // The same suggestion search over the producers NOT in `exclude` -- the second half of a two-part payment (a Discipline play from a
+    // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
+    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude)
     {
-        var sources=Producers(playerId).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        var sources=Producers(playerId).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
@@ -898,7 +901,7 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null)
     {
         ValidatePayment(playerId,cost,sourceIds);
         var ids=sourceIds??[];
@@ -912,7 +915,7 @@ public sealed partial class MatchEngine
                 Emit("goldSourceUsed",$"{Definition(_state.Cards[id]).Name} bowed to produce {alternate.Amount} Gold.",playerId,id);
             }
         foreach(var id in ids) _state.Cards[id].Bowed=true;
-        Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
+        Emit("payment",$"{Player(playerId).Name} paid {cost} Gold for {Definition(target).Name}{(part is null?"":$" ({part})")}, producing {produced}; {produced-cost} excess was lost.",playerId,target.Id,produced-cost);
     }
 
     private void Proclaim(GameCommand command)
