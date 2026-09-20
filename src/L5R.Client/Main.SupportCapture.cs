@@ -176,6 +176,11 @@ public partial class Main
         var engine=(MatchEngine)typeof(MatchEngine).GetMethod("FromTestState",BindingFlags.NonPublic|BindingFlags.Static)!.Invoke(null,[state])!;
         var result=engine.Execute(new GameCommand("useAbility",0,engine.State.Version,CardId:state.Players[0].StrongholdId,PerformerId:castle.Id,TargetId:enemy.Id,AbilityId:"carpenter-castle-siege"));
         SupportRequire(result.Accepted && engine.State.PendingAttack?.Strength==5,"Reaction fixture did not open the real attack window");
+        if(engine.State.PriorityPlayerId!=1)
+        {
+            var pass=engine.QueryActions(engine.State.PriorityPlayerId).Single(a=>a.Type=="declineReaction");
+            SupportRequire(engine.Execute(pass.Command!).Accepted,"Attacker reaction pass failed");
+        }
         await LoadSupportFixture(engine,1);
         await SupportClick(_tiles.Single(t=>t.Card.Id==region.Id));
         var option=Actions.First(a=>a.Enabled&&a.CardId==region.Id&&a.Command?.AbilityId=="fallow-lands-reaction");

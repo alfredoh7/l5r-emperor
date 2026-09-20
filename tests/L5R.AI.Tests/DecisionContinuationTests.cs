@@ -10,7 +10,7 @@ internal static class DecisionContinuationTests
         foreach(var kind in new[]{"brash","bow","before"})
         {
             var s=MatchEngine.CreateEconomyScenario().State;
-            s.Phase=kind=="brash"?Phase.AttackDeclaration:Phase.Battle;s.ActivePlayerId=0;s.PriorityPlayerId=0;
+            s.Phase=kind=="brash"?Phase.InfantryDeclaration:Phase.Battle;s.ActivePlayerId=0;s.PriorityPlayerId=0;
             s.CurrentBattleProvince=0;s.UnresolvedBattlefields=[0];
             CardInstance Add(string def,int owner,Zone zone)
             {
