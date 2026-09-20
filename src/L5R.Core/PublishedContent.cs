@@ -2093,6 +2093,34 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Item wave 5 (issue #387): Water Bo (oracle-l5r-10026), the created-only Item that Bo of Water creates.</summary>
+    public static PublishedSnapshot ItemWave5 { get; } = LoadItemWave5();
+
+    private static PublishedSnapshot LoadItemWave5()
+    {
+        var snapshot = Load("L5R.Published.ItemWave5.json", "item-wave-5", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected item-wave-5 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Item || card.Text.Length == 0 || !card.CreatedOnly)
+                throw new InvalidOperationException($"item-wave-5 card is not a textful created-only Item: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>Spell wave 10 (issue #387): Bo of Water (oracle-l5r-1084), the first "create an Item" effect.</summary>
+    public static PublishedSnapshot SpellWave10 { get; } = LoadSpellWave10();
+
+    private static PublishedSnapshot LoadSpellWave10()
+    {
+        var snapshot = Load("L5R.Published.SpellWave10.json", "spell-wave-10", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected spell-wave-10 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Spell || card.Text.Length == 0)
+                throw new InvalidOperationException($"spell-wave-10 card is not a textful Spell: {card.Id}");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)
@@ -2111,6 +2139,8 @@ public static class PublishedContent
             if(deck.Dynasty.Length!=40 || deck.Fate.Length!=40 ||
                deck.Dynasty.Concat(deck.Fate).Append(deck.StrongholdId).Any(id=>!cards.ContainsKey(id)))
                 throw new InvalidOperationException("Published deck is incomplete.");
+            else if(deck.Dynasty.Concat(deck.Fate).Any(id=>cards[id].CreatedOnly))
+                throw new InvalidOperationException("A published deck lists a card that may not be included in decks.");
         return snapshot;
     }
 }

@@ -5,7 +5,7 @@ public sealed partial class MatchEngine
     // Shared by the live app scenario (PublishedContent.Snapshot) and the frozen test scenario
     // (PublishedContent.TestSnapshot) -- only which deck lists to draw from differs; card behavior for
     // any given id always resolves through the one shared CardCatalog either way.
-    private static MatchEngine CreatePublished(ulong seed, string scenario, PublishedSnapshot snapshot)
+    internal static MatchEngine CreatePublished(ulong seed, string scenario, PublishedSnapshot snapshot)
     {
         var state = new MatchState { Players = [new() { Id = 0, Name = "Crane", Clan = "Crane" }, new() { Id = 1, Name = "Lion", Clan = "Lion" }] };
         var random = new StableRandom(seed); var nextId = 0;
@@ -22,6 +22,9 @@ public sealed partial class MatchEngine
             player.Honor = stronghold.StartingHonor;
             player.StrongholdId = Add(player.Id, stronghold.Id, Zone.Stronghold, true).Id;
             Add(player.Id, "oracle-l5r-1106", Zone.Home, true);
+            // A created-only Proxy scan may not be included in decks.
+            foreach (var id in deck.Dynasty.Concat(deck.Fate))
+                if (CardCatalog.Get(id).CreatedOnly) throw new ArgumentException($"{CardCatalog.Get(id).Name} ({id}) may not be included in decks.");
             foreach (var id in deck.Dynasty) player.DynastyDeck.Add(Add(player.Id, id, Zone.DynastyDeck).Id);
             foreach (var id in deck.Fate) player.FateDeck.Add(Add(player.Id, id, Zone.FateDeck).Id);
             random.Shuffle(player.DynastyDeck); random.Shuffle(player.FateDeck);
