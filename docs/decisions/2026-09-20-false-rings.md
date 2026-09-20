@@ -124,5 +124,10 @@ your Personalities destroyed), `ring-of-fire-recruit` (provinces or enemy cards 
 unit), `false-ring-of-earth-recruit` (a duel win, `Dueling.cs`). Not grants, so unchanged: `false-ring-of-water-recruit` (a standing Province
 Strength check), `ring-of-void-recruit` (Limited), and Reserve (its own command, not a grant). No recruit grant without a battle exists.
 
+The window is a `PendingChoice` (`battleRecruit`), so Order Seppuku (issue #368) is blocked while it is open by the existing `PendingChoice` entry of the
+pending-decision table (no new `Pending*` field, so no new classification is needed; the window is also in the Battle phase). **At Any Cost** (`at-any-cost-recruit`,
+a dead-pile recruit at the current battlefield, not a grant) is untouched: it is not Absent, keeps its Battle presence requirement, and is not
+listed in the after-battle window, which lists only the six grant-based recruits.
+
 Tests: `tests/L5R.Core.Tests/RingGrantTests.cs`. Changed existing: the Ring of Air test now numbers its battle (its state is built by hand),
 the Absent-flag inventory lists the six recruits, and `TrueRingsKeepTheirHandPlay` plays Ring of Earth through `QueryActions`.

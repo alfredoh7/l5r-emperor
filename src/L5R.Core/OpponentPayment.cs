@@ -1,8 +1,9 @@
 namespace L5R.Core;
 
 // The opposing player's variable payment (issue #373; Mendon's ruling on Virtuous Charity): "You, then the player, each pay zero or more Gold."
-// The acting player's amount is an ordinary variable Gold cost (GoldCostRule.Variable, the existing quote and payment flow). The other player then holds a
-// decision that is the same thing seen from their side:
+// The acting player's amount is a variable Gold payment through the existing quote flow (GoldCostRule.Variable, validated and quoted like a cost) that is made
+// when the action RESOLVES, ahead of the second player's (Mendon: a negated action pays nothing; a negated Honor gain leaves both payments made). The other
+// player then holds a decision that is the same thing seen from their side:
 //
 //   * the engine builds it, never the client: the amount the first player paid, the card, the Honor at stake, and the paying player's own variable Gold
 //     quote (every amount from 0 up to what they can produce, each with suggested sources) together with what each amount would do;
@@ -44,6 +45,8 @@ public sealed record OpponentPaymentView(string ChoiceId, string SourceCardId, s
 public sealed partial class MatchEngine
 {
     private const int VirtuousCharityHonorCap = 4;
+    // The kind of NegatedEffects entry (on the action's source card) that negates the Honor gain of an opponent-payment action, and only that.
+    private const string HonorGainNegation = "honor-gain";
 
     private static string OpponentPaymentDetail(string specId) => specId switch
     {
@@ -89,6 +92,8 @@ public sealed partial class MatchEngine
                 OpponentHonorBefore = opponentHonorBefore, BowedBefore = bowedBefore.ToList(), PreExistingGrants = preExistingGrants.ToList()
             }
         };
+        // The first payment is part of the resolution (Mendon): a whole-action negation never gets here, and the second player's decision opens only after it.
+        PayForAbility(command, actor, atResolution: true);
         // The played Strategy is spent as it is played: it is in the discard pile, in the open, while the other player decides.
         SpendHandPlayedCard(actor, source);
         if (OpponentPaymentMax(pending) == 0)
@@ -132,8 +137,16 @@ public sealed partial class MatchEngine
         Emit("opponentPaymentChosen", amount > 0 ? $"{decider.Name} paid {amount} Gold ({name})." : $"{decider.Name} paid no Gold ({name}).", decider.Id, source.Id, amount);
         var honor = OpponentPaymentHonor(p.SpecId, p.FirstAmount, amount);
         if (honor is (0, 0)) Emit("opponentPaymentResolved", $"{name}: {actor.Name} paid {p.FirstAmount}, {decider.Name} paid {amount}: nobody gains Honor.", actor.Id, source.Id);
-        if (honor.Acting > 0) GainHonor(actor.Id, honor.Acting, name, source);
-        if (honor.Decider > 0) GainHonor(decider.Id, honor.Decider, name, source);
+        // Both payments are made; a reaction can negate only the Honor gain that follows them (Mendon).
+        _state.NegatedEffects = p.Paused.Negated.ToList();
+        if (honor != (0, 0) && NegatesEffect(source, HonorGainNegation))
+            Emit("honorGainNegated", $"{name}: the Honor gain was negated; both payments stand.", actor.Id, source.Id);
+        else
+        {
+            if (honor.Acting > 0) GainHonor(actor.Id, honor.Acting, name, source);
+            if (honor.Decider > 0) GainHonor(decider.Id, honor.Decider, name, source);
+        }
+        _state.NegatedEffects.Clear();
     }
 
     // ---- what each player sees ----

@@ -73,7 +73,8 @@
       "Keywords": [],
       "Focus": 2,
       "Abilities": [
-        "disgraceful-conduct-bow"
+        "disgraceful-conduct-bow",
+        "disgraceful-conduct-bow-unit"
       ],
       "Effect": "none"
     },

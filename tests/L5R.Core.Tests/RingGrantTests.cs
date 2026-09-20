@@ -265,8 +265,16 @@ internal static class RingGrantTests
 
     private static void AfterBattleWindow()
     {
-        var e = MatchEngine.FromTestState(TwoBattles(out var ring));
+        var table = TwoBattles(out var ring);
+        // At Any Cost (a dead-pile recruit at the current battlefield, not a grant) keeps its Battle presence requirement and is not part of the window.
+        var atAnyCost = Add(table, "oracle-l5r-639", 0, Zone.Hand); Add(table, "oracle-l5r-9539", 0, Zone.Dead);
+        Check(!AbilityCatalog.All["at-any-cost-recruit"].Absent, "At Any Cost is not Absent");
+        var e = MatchEngine.FromTestState(table);
+        Check(e.QueryActions(0).Any(a => a.Type == "useAbility" && a.CardId == atAnyCost.Id && a.Command?.AbilityId == "at-any-cost-recruit"), "At Any Cost is offered in the battle itself");
         Resolve(e);
+        Check(!e.QueryActions(0).Any(a => a.CardId == atAnyCost.Id), "and is not offered in the after-battle window");
+        // Order Seppuku is an Open action and may not interrupt an open window (the window is a PendingChoice, which SeppukuTiming already treats as pending).
+        Check(e.SeppukuTimingReason(0) is not null && e.SeppukuTimingReason(1) is not null, "no Seppuku while the window is open");
         // The window lists the recruit, and only recruits (no other action), plus the pass.
         var listed = e.QueryActions(0);
         Check(listed.Any(a => a.Type == "declineReaction"), "it can be passed");
