@@ -8,6 +8,8 @@ internal static class PublishedTests
     {
         (string Name, Action Test)[] tests = [
             ("Published pool pins card definitions and the ability-free vanilla wave", Catalogue),
+            ("Published catalogue is exactly content/published/*.json: nothing missing, extra, duplicated or unembedded", CatalogueMatchesDisk),
+            ("Published wave files match their PublishedWaves manifests: no wave dropped, shrunk or added unpinned", WaveManifests),
             ("CatalogueDecks/live: Lion and Crane retain 40/40 decks", () => CatalogueDecks(PublishedContent.Snapshot)),
             ("CatalogueDecks/frozen: Lion and Crane test fixture retains 40/40 decks", () => CatalogueDecks(PublishedContent.TestSnapshot)),
             ("Published setup pins Lion first turn, Honor, province strengths and Crane Bamboo", Setup),
@@ -85,55 +87,63 @@ internal static class PublishedTests
     private static CardView ViewCard(MatchEngine e,string id)=>e.GetView(0).Players.SelectMany(p=>p.Home.Concat(p.Army)).Single(c=>c.Id==id);
     private static void Catalogue()
     {
-        // SILENT MERGE TRAP CAUGHT HERE: both sides of this exact conflict independently computed
-        // 331 for entirely different reasons (HEAD: 327 + this branch's own 4; incoming: 327 + PR
-        // #283's own 4) -- a coincidental numeric match that would have made git's own 3-way merge
-        // silently pick either 331 with no conflict marker, DROPPING one side's real 4-card addition.
-        // True total: 322 (shared baseline after PR #280) + 2 (PR #277's SpellWave3 +
-        // PersonalityWave19) + 3 (PR #281's own FollowerWave11 + StrategyWave11) + 4 (PR #283's own
-        // FollowerWave12, now merged into main) + 4 (PR #284's own StrategyWave12 (2) +
-        // FollowerWave13 (1) + PersonalityWave20 (1), now merged into main) + 6 (PR #286's own
-        // FollowerWave14, issue #285) = 341 (Batch A's own baseline) + 7 (PR #288's own
-        // StrategyWave13, issue #287 Batch B -- eight cards assigned, but Surety of Purpose
-        // (oracle-l5r-7664) turned out already published in strategy-wave-6, so only 7 were new
-        // there) = 348 (Batch B's own baseline, now merged into main) + 7 (this branch's own
-        // StrategyWave14, issue #289 Batch C -- eight cards assigned again, but Wrathful Ancestor
-        // (oracle-l5r-9390) turned out already published in strategy-wave-6 too, so only 7 are new
-        // here) = 355 + 9 (PR #296's own StrategyWave15 (7) + SpellWave4 (1) + RingWave2 (1), issue
-        // #295 Batch D -- ten cards assigned, Bow Before My Will already published) = 364 (Batch D's
-        // own baseline, now merged into main) + 11 (this branch's own PersonalityWave21, issue #299
-        // Batch E: nine assigned Personalities, none already published, PLUS the two created-only
-        // token definitions -- Ohsuki's Sparrow and Tokoru's Bear -- which are ordinary published,
-        // non-ScenarioOnly CardDefinitions and so count here exactly like personality-wave-17's own
-        // Lion Ancestor already does) = 375 (Batch E's own baseline, now merged into main -- re-verified
-        // against origin/main by running the suite before any Batch F change) + 13 (this branch's own
-        // PersonalityWave22 (12) + RegionWave3 (1), issue #301 Batch F: thirteen cards assigned, none
-        // already published) = 388 (Batch F's own baseline, now merged into main) + 1 (StrategyWave16, issue
-        // #304: Brawl, now merged into main) = 389 + 1 (PersonalityWave23, issue #305: Akodo Kakihara, now merged into
-        // main) = 390 + 6 (PersonalityWave24, issue #313: Kahoku - exp, Kosoko - exp, Ebumi, Kazan, Nitani, Shinoda -
-        // exp, now merged into main) = 396 (origin/main at aa42e153 plus #319/#325, which add no cards, re-derived by
-        // counting distinct non-ScenarioOnly ids across content/published/*.json, not copied from either side of the
-        // conflict) + 3 (this branch's own PersonalityWave25 Daidoji Yuki Experienced, PersonalityWave26 Daidoji Ebizo and
-        // FollowerWave15 Master Scouts, issues #309/#321) = 399 (origin/main at c3ff52a0, re-derived by counting distinct
-        // non-ScenarioOnly ids across content/published/*.json) + 1 (this branch's own StrategyWave18 Return to Action,
-        // issue #331) = 400. Recomputed from the actual current origin/main baseline
-        // each time this conflicts, never copied from either side of a merge (this merge's two sides said 393 and 396).
-        // + 7 (this branch, issues #312 and #322: EventWave3 Imperial Gift + PersonalityWave27 Ikoma Shizuka + EventWave4 Signs and Portents
-        // + PersonalityWave28 Isawa Tamaki and Bayushi Kahoku exp2 + StrategyWave17 Banish All Doubt + HoldingWave2 Public Records, none
-        // previously published) = 407, re-derived after merging origin/main ddb58847 (400, counted from the JSON files: distinct
-        // non-ScenarioOnly ids across content/published/*.json) plus this branch's seven, and checked against the merged tree.
-        // + 2 (this branch, issue #333: PersonalityWave29 Daigotsu Bofana and Daigotsu Bofana, Experienced, neither previously published) = 409,
-        // recounted from origin/main c0605567 (407, distinct non-ScenarioOnly ids across content/published/*.json, #328 merged) plus this branch's two.
-        // + 5 (issue #337: PersonalityWave31 Kitsu Fukui, Moto Jun-Ni, Mirumoto Yumaru and Hiruma Tensin + FollowerWave17 Fading Shadows) and + 3 (issue #338:
-        // PersonalityWave33 Fukuzo and Yoritomo Sakuma, StrategyWave22 Unfortunate Hesitation), none previously published: 409 on origin/main 7f306655 + 5 = 414
-        // (origin/main 8b378a8d) + 3 = 417, re-derived from the merged tree (distinct non-ScenarioOnly ids across content/published/*.json), not from either side.
-        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();Eq(published.Length,417);
+        var published=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).ToArray();
         foreach(var c in published){Check(c.ArtworkKey?.EndsWith(c.Id+".jpg")==true);Check(c.Abilities is not null);Check(c.Keywords is not null);Check(c.Abilities!.All(AbilityCatalog.All.ContainsKey));}
         Eq(CardCatalog.Get(Id(3636)).GoldCost,4);Eq(CardCatalog.Get(Id(521)).GoldCost,4);Eq(CardCatalog.Get(Id(9879)).Chi,1);
         Check(CardCatalog.Get(Id(10368)).Text.Contains("performing bowed"));Check(!CardCatalog.Get(Id(2158)).Text.StartsWith("Favor"));
         var vanilla=PublishedContent.VanillaWave1.Cards;Eq(vanilla.Length,63);
         foreach(var c in vanilla){Eq(c.Effect,"none");Eq(c.Text,"");Eq(c.Abilities!.Length,0);Check(CardCatalog.Get(c.Id).Id==c.Id);}
         Check(!vanilla.Select(c=>c.Id).Intersect(PublishedContent.Snapshot.Cards.Select(c=>c.Id)).Any());
+    }
+    private const string FrozenTestSnapshot="lion-crane-test-v1";
+    private static Dictionary<string,PublishedSnapshot> DiskWaves()
+    {
+        var files=Directory.GetFiles(Path.Combine(Support337.RepoRoot(),"content","published"),"*.json").Where(f=>!f.EndsWith("-sources.json",StringComparison.Ordinal));
+        return files.OrderBy(f=>f,StringComparer.Ordinal).ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>JsonSerializer.Deserialize<PublishedSnapshot>(File.ReadAllBytes(f))!,StringComparer.Ordinal);
+    }
+    private static void NoProblems(List<string> problems,string what)=>Check(problems.Count==0,$"{what}: {problems.Count} problem(s)\n  "+string.Join("\n  ",problems.Take(25))+(problems.Count>25?$"\n  ... and {problems.Count-25} more":""));
+    private static void CatalogueMatchesDisk()
+    {
+        var disk=DiskWaves();var problems=new List<string>();
+        Check(disk.Count>0,"content/published holds no wave files");
+        foreach(var (stem,snapshot) in disk)
+        {
+            if(snapshot.Profile!=stem)problems.Add($"{stem}.json has profile '{snapshot.Profile}'; a wave's profile must equal its file name");
+            foreach(var twice in snapshot.Cards.GroupBy(c=>c.Id).Where(g=>g.Count()>1))problems.Add($"{twice.Key} is listed {twice.Count()} times in {stem}.json");
+            foreach(var card in snapshot.Cards.Where(c=>c.ScenarioOnly))problems.Add($"{card.Id} in {stem}.json is ScenarioOnly; a published file may hold only published cards");
+        }
+        var owners=disk.Where(d=>d.Key!=FrozenTestSnapshot).SelectMany(d=>d.Value.Cards.Where(c=>!c.ScenarioOnly).Select(c=>(c.Id,c.Name,File:d.Key))).GroupBy(x=>x.Id).ToDictionary(g=>g.Key,g=>g.ToArray());
+        foreach(var (id,files) in owners.Where(o=>o.Value.Length>1))problems.Add($"{id} is published by more than one file: {string.Join(", ",files.Select(f=>f.File))}");
+        var embedded=typeof(PublishedContent).Assembly.GetManifestResourceNames().Where(n=>n.StartsWith("L5R.Published.",StringComparison.Ordinal)).Select(n=>
+        {
+            using var stream=typeof(PublishedContent).Assembly.GetManifestResourceStream(n)!;
+            return JsonSerializer.Deserialize<PublishedSnapshot>(stream)!.Profile;
+        }).ToHashSet(StringComparer.Ordinal);
+        foreach(var stem in disk.Keys.Where(k=>!embedded.Contains(k)))problems.Add($"content/published/{stem}.json is not embedded in L5R.Core; add its EmbeddedResource to src/L5R.Core/L5R.Core.csproj and load it in PublishedContent.cs and CardCatalog.cs");
+        foreach(var profile in embedded.Where(p=>!disk.ContainsKey(p)))problems.Add($"L5R.Core embeds profile '{profile}' but content/published/{profile}.json does not exist");
+        NoProblems(problems,"content/published files are inconsistent or not embedded in L5R.Core");
+        var loaded=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        foreach(var (id,files) in owners.Where(o=>!loaded.Contains(o.Key)).OrderBy(o=>o.Key,StringComparer.Ordinal))problems.Add($"{id} ({files[0].Name}) is in content/published/{files[0].File}.json but not loaded into CardCatalog");
+        foreach(var id in loaded.Where(id=>!owners.ContainsKey(id)).Order(StringComparer.Ordinal))problems.Add($"{id} is in CardCatalog (not ScenarioOnly) but in no content/published file");
+        if(disk.TryGetValue(FrozenTestSnapshot,out var frozen))
+            foreach(var card in frozen.Cards.Where(c=>!owners.ContainsKey(c.Id)))problems.Add($"{card.Id} is in {FrozenTestSnapshot}.json but published by no other file");
+        NoProblems(problems,"Published catalogue differs from content/published/*.json");
+    }
+    private static void WaveManifests()
+    {
+        var disk=DiskWaves();var problems=new List<string>();
+        var dir=Path.Combine(Support337.RepoRoot(),"tests","L5R.Core.Tests","PublishedWaves");
+        Check(Directory.Exists(dir),"tests/L5R.Core.Tests/PublishedWaves is missing; it holds one manifest per wave file");
+        var pinned=Directory.GetFiles(dir,"*.txt").ToDictionary(f=>Path.GetFileNameWithoutExtension(f),f=>File.ReadAllLines(f).Where(l=>l.Length>0).ToArray(),StringComparer.Ordinal);
+        foreach(var stem in disk.Keys.Where(k=>!pinned.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"content/published/{stem}.json has no manifest; run python3 tools/content/pin_wave_ids.py and commit tests/L5R.Core.Tests/PublishedWaves/{stem}.txt");
+        foreach(var stem in pinned.Keys.Where(k=>!disk.ContainsKey(k)).Order(StringComparer.Ordinal))problems.Add($"PublishedWaves/{stem}.txt pins a wave whose content/published/{stem}.json is gone; restore the wave file with its loader, CardCatalog chain and csproj entry, or delete the manifest only if the wave was removed on purpose");
+        foreach(var (stem,ids) in pinned.Where(p=>disk.ContainsKey(p.Key)).OrderBy(p=>p.Key,StringComparer.Ordinal))
+        {
+            var actual=disk[stem].Cards.Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+            var missing=ids.Where(id=>!actual.Contains(id)).ToArray();var added=actual.Where(id=>!ids.Contains(id)).Order(StringComparer.Ordinal).ToArray();
+            if(missing.Length>0||added.Length>0)problems.Add($"{stem}.json no longer matches PublishedWaves/{stem}.txt: missing [{string.Join(", ",missing)}], not pinned [{string.Join(", ",added)}]; a card removed on purpose or added to an existing wave needs python3 tools/content/pin_wave_ids.py --update");
+        }
+        NoProblems(problems,"Published wave files differ from their manifests");
     }
     private static void CatalogueDecks(PublishedSnapshot snapshot)
     {
@@ -334,10 +344,12 @@ internal static class PublishedTests
     private static void CavalryAfterEmptyInfantry()
     {
         // A pass with no Infantry to assign only declines Infantry Maneuvers -- it must not skip
-        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack.
+        // the whole Attack Phase, or a deck with only Cavalry-keyword units could never attack. (Declining
+        // the ATTACK is the Declaration Segment's own pass, a step earlier.)
         var s=State();s.Phase=Phase.AttackDeclaration;s.PriorityPlayerId=0;
         var cavalry=Add(s,3623,0,Zone.Home); // Ikoma Natsu: printed Cavalry keyword.
         var e=MatchEngine.FromTestState(s);
+        Accept(e,new("declareAttack",0,e.Version));Eq(e.State.Phase,Phase.InfantryDeclaration);
         Pass(e);Eq(e.State.Phase,Phase.DefenseAssignment);
         Pass(e);Eq(e.State.Phase,Phase.CavalryDeclaration);Eq(e.State.PriorityPlayerId,0);
         Accept(e,new("attack",0,e.Version,Assignments:new(){[cavalry.Id]=0}));
@@ -410,7 +422,7 @@ internal static class PublishedTests
             var chosen=options.FirstOrDefault(a=>a.Type=="proclaim")??options.FirstOrDefault(a=>a.Type=="declineReaction")??options.FirstOrDefault(a=>a.Type=="chooseShinden")??options.FirstOrDefault(a=>a.Type=="discardHand")
                 ??options.FirstOrDefault(a=>a.Type=="purchase"&&!a.Command!.ClanDiscount)??options.FirstOrDefault(a=>a.Type=="purchase")??options.FirstOrDefault(a=>a.Type=="discardProvince")
                 ??options.FirstOrDefault(a=>a.Type=="useAbility"&&a.Command!.AbilityId=="border-first")
-                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
+                ??options.FirstOrDefault(a=>a.Type=="selectBattle")??options.FirstOrDefault(a=>a.Type=="endDynasty")??options.FirstOrDefault(a=>a.Type=="declareAttack")??options.FirstOrDefault(a=>a.Type=="attack")??options.First(a=>a.Type=="pass");
             Accept(e,chosen.Command!);
         }
         Check(e.State.WinnerId is not null,"Published scripted match did not finish.");Eq(Json(MatchEngine.Replay(e.ExportReplay()).State),Json(e.State));

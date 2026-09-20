@@ -12,6 +12,7 @@ internal static class NegatedCostTests
     private const string Sakuma = "oracle-l5r-9624", Fukuzo = "oracle-l5r-2728", Adi = "oracle-l5r-9485", Kamina = "oracle-l5r-224", Obote = "oracle-l5r-10848";
     private const string Furugaro = "oracle-l5r-10236", Hunter = "oracle-l5r-3522", Torazu = "oracle-l5r-8590", Slanderer = "oracle-l5r-7291", Rin = "oracle-l5r-7151";
     private const string Goju = "oracle-l5r-2851", Donor = "training-skin-donor", Receiver = "training-skin-receiver", Negate = "sakuma-political-negate";
+    private const string Mochitoko = "oracle-l5r-3152", HiredLegion = "oracle-l5r-3277", EffortlessCounterattack = "oracle-l5r-2283";
     private const string HonorCost = "training-honor-cost-attack", HonorStrategy = "training-honor-cost-strategy";
     private const string Reason = "You must pass at this opportunity (Unfortunate Hesitation).";
 
@@ -26,6 +27,9 @@ internal static class NegatedCostTests
             ("Atomic payment (the fake blocking predicate): a blocked cost negates the ENTIRE action -- nothing is paid, not the Honor loss, not the other cost -- whether or not the action was negated; an unblocked negated action pays every cost including the Honor loss", AtomicCostPayment),
             ("The alternative cost the acting player chose (Kitsu Fukui: bow or destroy the Ancestor) is a cost like any other: paid when the action is negated, and it is what a blocking predicate is asked about, in which case nothing is paid", CostOptionIsPaidAndAtomic),
             ("The blocking predicate is asked once per cost, in order, with the card the cost applies to, and only for the costs the action really pays", BlockingPredicateSeesEveryCost),
+            ("One predicate, Hida Mochitoko's rule and the atomic cost list: a Follower bowed by a declared cost (\"Bow this card\") is protected like one named as a cost option -- Mochitoko is offered, and when he negates the bow the ENTIRE action is negated and pays nothing; without him it is paid", MochitokoProtectsADeclaredCost),
+            ("The cost block is per verb through the declared list: a negated bow (or every effect) blocks a bow cost and a negated destruction alone does not; a negated destruction (or every effect) blocks a destroy-as-cost (Furugaro) and a negated bow does not; the negated-action flow asks the same question", CostBlockIsPerVerb),
+            ("A negated ADDITIONAL action still pays its costs and loses only itself: the rest of the burst goes on and is the holder's to take (Effortless Counterattack)", NegatedAdditionalActionPaysItsCosts),
             ("Fukuzo's copies end when he is removed from the game (announced), a permanent change stays, and a Personality can only be reshuffled into the Dynasty deck, never a Fate deck or a hand", CopiesEndOnRemoval),
             ("Unfortunate Hesitation bars Order Seppuku: listed disabled with the reason and refused at the owing player's opportunity (with or without priority), allowed again once the pass is made or the phase has moved on", SeppukuBarred),
             ("The Hesitation bar leaves what is not an action alone: attack and defense assignment, a Dynasty Phase command, and answering a pending decision", BarSparesNonActions),
@@ -272,7 +276,7 @@ internal static class NegatedCostTests
         Eq(Now(e, enemy1.Id).Zone, Zone.Battlefield, "and no Attack");
         Eq(Now(e, strategy.Id).Zone, Zone.FateDiscard, "the action was taken: the Strategy left the hand");
         Eq(e.State.PriorityPlayerId, 1, "and priority passed on");
-        Check(LastUse(e).Contains("nothing was paid"), "announced as negated because a cost could not be paid: " + LastUse(e));
+        Check(e.State.Events.Any(x => x.Type == "actionNegated" && x.Message.Contains("nothing is paid")), "announced as negated because a cost could not be paid");
         // Blocked AND negated: still nothing paid.
         s = HonorRig(out strategy, out enemy1);
         e = MatchEngine.FromTestState(s); e.NegateEveryAction = true; e.CostBlockHook = (cost, _) => cost.Verb == CostVerbs.LoseHonor;
@@ -353,6 +357,86 @@ internal static class NegatedCostTests
         var g = MatchEngine.FromTestState(u); var seen = 0; g.CostBlockHook = (_, _) => { seen++; return false; };
         Accept(g, new GameCommand("useAbility", 0, g.Version, CardId: handRing.Id, AbilityId: "ring-of-earth-raise", TargetPlayerId: 1, Province: 0));
         Eq(seen, 0, "from the hand the Ring bows nothing, so there is no bow cost");
+    }
+
+    private static MatchState LegionTable(out CardInstance legion, int actor = 0)
+    {
+        var s = Table(Phase.Battle, actor);
+        var host = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0);
+        legion = Add(s, HiredLegion, 0, Zone.Attached, province: 0, parent: host.Id);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+        return s;
+    }
+
+    private static void MochitokoProtectsADeclaredCost()
+    {
+        foreach (var reacts in new[] { false, true })
+        {
+            var s = LegionTable(out var legion);
+            Add(s, Mochitoko, 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s); var hand = e.State.Players[0].Hand.Count;
+            Accept(e, Offer(e, 0, "hired-legion-draw", legion.Id));
+            Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "held before its cost is paid");
+            Check(!Now(e, legion.Id).Bowed, "nothing is paid yet");
+            var negate = e.QueryActions(0).FirstOrDefault(a => a.Type == "useAbility" && a.Command?.AbilityId == "mochitoko-negate");
+            Check(negate is { Enabled: true } && negate.Command!.TargetId == legion.Id, "Mochitoko is offered for the Follower the cost would bow");
+            if (reacts) Accept(e, negate!.Command!);
+            var guard = 0;
+            while (e.State.PendingChoice is not null && guard++ < 10) Accept(e, new GameCommand("pass", e.State.PriorityPlayerId, e.Version));
+            if (reacts)
+            {
+                Check(!Now(e, legion.Id).Bowed, "the bowing was negated"); Eq(e.State.Players[0].Hand.Count, hand, "and the effect (the draw) never happened: the whole action is negated");
+                Check(e.State.Events.Any(x => x.Type == "actionNegated" && x.Message.Contains("nothing is paid")), "announced");
+                Eq(Now(e, legion.Id).AbilityUses["hired-legion-draw"], e.State.TurnNumber, "but it was taken: its use is spent");
+            }
+            else { Check(Now(e, legion.Id).Bowed, "control: paid"); Eq(e.State.Players[0].Hand.Count, hand + 1, "control: a card was drawn"); }
+        }
+    }
+
+    private static void CostBlockIsPerVerb()
+    {
+        // A bow cost (Hired Legion's "Bow this card"), through the ordinary flow and through the negated flow.
+        foreach (var negatedFlow in new[] { false, true })
+            foreach (var (kind, blocked) in new[] { ("bow", true), ("all", true), ("destroy", false), ("move", false) })
+            {
+                var s = LegionTable(out var legion); s.NegatedEffects.Add(new(kind, legion.Id));
+                var e = MatchEngine.FromTestState(s); e.NegateEveryAction = negatedFlow; var hand = e.State.Players[0].Hand.Count;
+                Accept(e, Offer(e, 0, "hired-legion-draw", legion.Id));
+                Check(Now(e, legion.Id).Bowed != blocked, $"negated {kind} (negated flow: {negatedFlow}): the bow cost is {(blocked ? "blocked" : "paid")}");
+                Eq(e.State.Players[0].Hand.Count, negatedFlow || blocked ? hand : hand + 1, $"negated {kind} (negated flow: {negatedFlow}): the effect");
+            }
+        // A destroy-as-cost (Furugaro's "Destroy this Follower", the Sacrifice verb): blocked by a negated destruction or every effect, never by a negated bow alone.
+        foreach (var (kind, blocked) in new[] { ("destroy", true), ("all", true), ("bow", false) })
+        {
+            var s = Table();
+            var host = Add(s, "training-crane-samurai", 0, Zone.Home); var furugaro = Add(s, Furugaro, 0, Zone.Attached, parent: host.Id);
+            var fudo = Add(s, "training-fudo-personality", 0, Zone.Home); s.NegatedEffects.Add(new(kind, furugaro.Id));
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, "furugaro-charge", furugaro.Id, fudo.Id));
+            Eq(Now(e, furugaro.Id).Zone, blocked ? Zone.Attached : Zone.FateDiscard, $"negated {kind}: the destruction cost is {(blocked ? "blocked" : "paid")}");
+            Eq(Now(e, fudo.Id).Tokens.Count(x => x.Type == "Charging"), blocked ? 0 : 2, $"negated {kind}: the effect");
+        }
+    }
+
+    private static void NegatedAdditionalActionPaysItsCosts()
+    {
+        // Player 0 (the Defender) holds two Additional Actions and takes one (Hired Legion's "Bow this card: draw a card"); player 1 negates it with Effortless Counterattack.
+        var s = Table(Phase.Battle, 1);
+        var host = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 0); var legion = Add(s, HiredLegion, 0, Zone.Attached, province: 0, parent: host.Id);
+        Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, EffortlessCounterattack, 1, Zone.Hand);
+        s.AdditionalActions.Add(new(0, null, false)); s.AdditionalActions.Add(new(0, null, false)); s.PriorityPlayerId = 0;
+        var e = MatchEngine.FromTestState(s); var hand = e.State.Players[0].Hand.Count;
+        Accept(e, Offer(e, 0, "hired-legion-draw", legion.Id));
+        Eq(e.State.PendingChoice?.Type, "additionalActionReaction", "an additional action is deferred behind its Reaction window");
+        Check(!Now(e, legion.Id).Bowed, "nothing is paid while it waits");
+        Accept(e, e.QueryActions(1).First(o => o.Type == "useAbility" && o.Enabled && o.Command?.AbilityId == "effortless-counterattack-negate").Command!);
+        var guard = 0;
+        while (e.State.PendingChoice is not null && guard++ < 10) Accept(e, new GameCommand("declineReaction", e.State.PriorityPlayerId, e.Version));
+        Check(Now(e, legion.Id).Bowed, "the negated additional action still paid its cost");
+        Eq(e.State.Players[0].Hand.Count, hand, "and none of its effects happened");
+        Eq(e.State.AdditionalActions.Count(g => g.PlayerId == 0), 1, "it lost only itself: the other additional action is still there");
+        Eq(e.State.PriorityPlayerId, 0, "and is the holder's to take");
+        Check(e.State.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), "logged as negated");
     }
 
     // ---- Fukuzo's end conditions ------------------------------------------------------------------------------------
@@ -442,6 +526,9 @@ internal static class NegatedCostTests
         s.ForcedPasses.Add(new(0, PrintedPhases.Instance(s.TurnNumber, Phase.AttackDeclaration), "owed"));
         s.ForcedPasses.Add(new(1, PrintedPhases.Instance(s.TurnNumber, Phase.AttackDeclaration), "owed"));
         var e = MatchEngine.FromTestState(s);
+        var declare = e.QueryActions(0).First(a => a.Type == "declareAttack");
+        Check(declare.Enabled, "declaring the attack stays enabled: " + declare.Reason);
+        Accept(e, declare.Command!);
         var attack = e.QueryActions(0).First(a => a.Type == "attack");
         Check(attack.Enabled, "declaring an attack stays enabled: " + attack.Reason);
         Accept(e, attack.Command!);

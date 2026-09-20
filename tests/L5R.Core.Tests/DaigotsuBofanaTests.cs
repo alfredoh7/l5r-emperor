@@ -26,7 +26,7 @@ internal static class DaigotsuBofanaTests
             ("Base Bofana: the first targeting of a phase spends the trigger whether or not the Force condition held or a hand existed; a second targeting the same phase does nothing; a new phase (Action -> Attack, or the same phase two turns later) fires again; each Bofana in play keeps his own", OncePerPhaseAndPerInstance),
             ("The once-per-phase limit knows the six printed phases: every sub-step of the Attack Phase (assignment, both Maneuvers, battle selection, every battle) is ONE phase, Dynasty's province discard is part of Dynasty, and each of Straighten, Events, Action, Attack, Dynasty and End is distinct within a turn and across turns", SixPrintedPhases),
             ("Base Bofana across a real turn: driven only through offered commands from the Action Phase through attack declaration, defense, battle selection and the battle, the Action Phase's first targeting fires, its second does not, the Attack Phase's first fires again and its second does not", RealTurnAcrossPhases),
-            ("Base Bofana: only ANOTHER player's action counts -- his own controller's action, an action targeting a different card, a Reaction that names him and Bofana out of play never trigger it; a bowed Bofana still does (a trait works while bowed)", OnlyAnotherPlayersActions),
+            ("Base Bofana: only ANOTHER player's action counts -- his own controller's action, an action targeting a different card and Bofana out of play never trigger it; a Reaction that names him DOES (a Reaction is an action); a bowed Bofana still does (a trait works while bowed)", OnlyAnotherPlayersActions),
             ("Base Bofana: an empty hand (or one holding only the card being played) means nothing happens and the action carries straight on; with one card left the player must discard exactly it", EmptyHandNothingHappens),
             ("Base Bofana resolves before any Reaction: with a Champion of Thunder on his unit the discard is asked first, then the before-action window opens, and the action then resolves; every offered discard validates on a fresh engine", TraitResolvesBeforeReactions),
             ("Base Bofana: Bayushi Kahoku - exp's Attack, whose own target rides in CardIds beside a separate -4F target, targets Bofana through either", KahokuAttackTargetsBofana),
@@ -372,7 +372,7 @@ internal static class DaigotsuBofanaTests
         var perPhase = new Dictionary<int, Phase[]>
         {
             [0] = [Phase.Straighten], [1] = [Phase.Events], [2] = [Phase.Action],
-            [3] = [Phase.AttackDeclaration, Phase.DefenseAssignment, Phase.CavalryDeclaration, Phase.CavalryDefense, Phase.BattleSelection, Phase.Battle],
+            [3] = [Phase.AttackDeclaration, Phase.InfantryDeclaration, Phase.DefenseAssignment, Phase.CavalryDeclaration, Phase.CavalryDefense, Phase.BattleSelection, Phase.Battle],
             [4] = [Phase.Dynasty, Phase.DynastyDiscard], [5] = [Phase.End],
         };
         foreach (var (printed, phases) in perPhase)
@@ -422,6 +422,7 @@ internal static class DaigotsuBofanaTests
         // Both pass: the Attack Phase begins. Player 1 attacks province 0 with two units and player 0 defends with Bofana.
         Ready(); Step(0, "pass"); Step(1, "pass");
         Eq(PrintedPhases.Of(e.State.Phase), 3, "the Attack Phase");
+        Step(1, "declareAttack");
         Accept(e, e.QueryActions(1).First(a => a.Type == "attack" && a.Enabled).Command! with { Assignments = new Dictionary<string, int> { [attacker.Id] = 0, [second.Id] = 0 } });
         Accept(e, e.QueryActions(0).First(a => a.Type == "assignDefense" && a.Enabled).Command! with { Assignments = new Dictionary<string, int> { [bofana.Id] = 0 } });
         while (e.State.Phase != Phase.BattleSelection) Step(e.State.PriorityPlayerId, "pass"); // Cavalry Maneuvers: nobody has Cavalry
@@ -464,7 +465,9 @@ internal static class DaigotsuBofanaTests
             Eq(Fired(e, r.Bofana), "unspent");
         }
         {
-            // A Reaction that names him is not an action: Tamori Ruya's bow (a Reaction) at Bofana, from the other player, inside a bow window.
+            // A Reaction that names him IS an action (rules lead: "Reactions count as actions"): Tamori Ruya's bow (a Reaction) at Bofana, from
+            // the other player, inside a bow window. It spends his once-per-phase trigger and asks for the discard, over the window it was
+            // played in, which is set aside and comes back once the action has carried on.
             var s = Table();
             var ruya = Add(s, "oracle-l5r-7789", 1, Zone.Battlefield, province: 0);
             var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
@@ -475,9 +478,15 @@ internal static class DaigotsuBofanaTests
             var e = MatchEngine.FromTestState(s);
             Accept(e, Offer(e, 1, Bow, bower.Id, bowed.Id));
             Eq(e.State.PendingChoice?.Type, "bowReaction", "Ruya's window");
+            Eq(Fired(e, bofana), "unspent", "the first action did not target him");
             Accept(e, new GameCommand("useAbility", 1, e.Version, CardId: ruya.Id, TargetId: bofana.Id, AbilityId: "ruya-bow"));
-            Eq(e.State.PendingChoice?.Type, "bowReaction", "no discard was opened over the window");
-            Eq(Fired(e, bofana), "unspent", "a Reaction is not an action");
+            Eq(e.State.PendingChoice?.Type, "forcedDiscard", "a Reaction is an action: targeting Bofana asks for the discard");
+            Eq(e.State.SuspendedWindows.Count, 1); Eq(e.State.SuspendedWindows[0].Choice.Type, "bowReaction", "over the window it was played in");
+            Eq(Fired(e, bofana), "spent", "the first targeting of the phase spends his trigger");
+            Check(!e.State.Cards[bofana.Id].Bowed, "Ruya's bow carries on only once the discard is answered");
+            Discard(e, 1, e.State.Players[1].Hand[0]);
+            Eq(e.State.PendingChoice?.Type, "bowReaction", "the window Ruya was played in is open again"); Eq(e.State.SuspendedWindows.Count, 0);
+            Check(e.State.Cards[bofana.Id].Bowed && e.State.Players[1].Hand.Count == 0, "the Reaction resolved after the discard");
         }
         {
             // Not in play: nothing to trigger.

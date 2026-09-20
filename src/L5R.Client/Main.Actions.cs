@@ -69,7 +69,7 @@ public partial class Main
         if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); return; }
         if (_chosen is { Type: "discardHand" }) { RenderHandDiscard(); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
-        if (View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment)
+        if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment)
         {
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
             if (action is not null) _inspector.AddChild(Palette.Button("Assign units…", () => Choose(action), true));
@@ -349,7 +349,7 @@ public partial class Main
         {
             _phaseActions.AddChild(Palette.Wrapped($"Room {_session.Snapshot.RoomCode}\nWaiting for your opponent to connect.", 16, Palette.Crane)); return;
         }
-        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden")) AddAction(_phaseActions, a);
+        foreach (var a in Actions.Where(a => a.Type is "pass" or "endDynasty" or "proclaim" or "declineReaction" or "chooseShinden" or "declareAttack")) AddAction(_phaseActions, a);
         if (View.PriorityPlayerId != View.ViewerId) _phaseActions.AddChild(Palette.Wrapped($"Waiting for {View.Players[View.PriorityPlayerId].Clan}…", 15, Palette.Crane));
         if (!_session.Online && !_autoOpponent) _phaseActions.AddChild(Palette.Button("Pass device to other player", SwitchSeat));
     }

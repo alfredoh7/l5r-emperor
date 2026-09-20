@@ -1,0 +1,130 @@
+{
+  "Profile": "personality-wave-30",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5086",
+      "Name": "Mirumoto Ezuno",
+      "Type": "Personality",
+      "Clan": "Dragon",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: When another player's action would target one of your Shugenja at Ezuno's location, it targets Ezuno instead, if legal.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5086.jpg",
+      "Keywords": [
+        "Duelist",
+        "Dragon Clan",
+        "Samurai",
+        "Yojimbo"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "ezuno-redirect"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2862",
+      "Name": "Goju Yurishi",
+      "Type": "Personality",
+      "Clan": "Spider",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 4,
+      "Chi": 3,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "After Yurishi enters play: Lose 3 Honor.\nReaction: After another player's Battle action targets Yurishi: He disappears into the shadows. Move him home. If he is no longer a legal target for the action, negate its effects on him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2862.jpg",
+      "Keywords": [
+        "Dragon Child",
+        "Ninja",
+        "Shadowlands",
+        "Spider Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "yurishi-disappear"
+      ],
+      "Effect": "none",
+      "EntryHonorLoss": 3
+    },
+    {
+      "Id": "oracle-l5r-9445",
+      "Name": "Yasuki Jinn-Kuen",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 7,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 4,
+      "PersonalHonor": 1,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Open: Target a Holding or Stronghold: Straighten it.\nPolitical Reaction: After an action targets your Merchant, pay 2 Gold: Negate the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9445.jpg",
+      "Keywords": [
+        "Experienced 2",
+        "Loyal",
+        "Unique",
+        "Courtier",
+        "Crab Clan",
+        "Daimyo",
+        "Kolat",
+        "Master Coin",
+        "Merchant"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "jinn-kuen-straighten",
+        "jinn-kuen-negate"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3152",
+      "Name": "Hida Mochitoko",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 9,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": 0,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Twice per turn, after an action targets your Follower at Mochitoko's location: Negate its bowing and destruction from that action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3152.jpg",
+      "Keywords": [
+        "Unique",
+        "Advisor to the Ruby Champion",
+        "Commander",
+        "Crab Clan",
+        "Experienced",
+        "Hero",
+        "Jade",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "mochitoko-negate"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

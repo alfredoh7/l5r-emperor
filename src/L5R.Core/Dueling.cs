@@ -318,7 +318,7 @@ public sealed partial class MatchEngine
         var challengerPlayerId = duel.ChallengerPlayerId;
         // A duel-issuing ability resolves here, not in ExecuteAbilityEffects (which returned at IssueChallenge):
         // "after the resolution of your [keyword] action" traits fire once its whole outcome has applied.
-        FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, performer);
+        FireAfterOwnActionTraits(AbilityCatalog.All[duel.AbilityId], challengerPlayerId, duel.SourceCardId is null ? null : Card(duel.SourceCardId));
         _state.PendingDuel = null;
         // The duel itself is a single, complete action from challenge to consequences (issue #209):
         // once everything above has applied, the winning card's own controller gets a chance to

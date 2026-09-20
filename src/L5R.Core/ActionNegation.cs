@@ -30,33 +30,38 @@ public sealed partial class MatchEngine
     }
 
     // The deferred action, resolved negated: the taking of the action without its effects (see the file comment). Costs are paid in full and ATOMICALLY
-    // (Mendon, AbilityCosts.cs): when any cost payment is blocked by a negation (CostPaymentBlockedByNegation) the ENTIRE action is negated -- nothing is
-    // paid, not even an Honor-loss cost -- and otherwise every cost is paid, an Honor-loss cost included, before the (skipped) effects. `costsBlocked` is
-    // true when the caller has already found a blocked cost (RunAbilityEffects); `consumedGrant`: the action was taken as an Additional Action.
-    private void ResolveNegatedAction(GameCommand command, bool costsBlocked = false, bool consumedGrant = false)
+    // (Mendon, AbilityCosts.cs): when paying any cost is blocked by a negation (CostPaymentBlockedByNegation, the one predicate) the ENTIRE action is negated --
+    // nothing is paid, not even an Honor-loss cost (AbortActionForBlockedCost) -- and otherwise every cost is paid, an Honor-loss cost included, before the
+    // (skipped) effects. `consumedGrant`: the action was taken as one of a burst of Additional Actions, and being negated loses only itself.
+    private void ResolveNegatedAction(GameCommand command, bool consumedGrant = false)
     {
         var id = command.AbilityId!; var ability = AbilityCatalog.All[id];
+        if (CostPaymentBlockedByNegation(command)) { AbortActionForBlockedCost(command, consumedGrant); return; }
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);
-        (source?.AbilityUses ?? player.AbilityUses)[ability.UsageKey ?? id] = _state.TurnNumber;
         var playedFromDiscard = PlayedFromDiscard(ability, source);
-        costsBlocked = costsBlocked || AnyCostBlocked(ability, command, source);
-        if (!costsBlocked)
+        PayForAbility(command, player);
+        PayCostOption(ability, command, player, source);
+        if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
         {
-            PayForAbility(command, player);
-            PayCostOption(ability, command, player, source);
-            if (id is "shunya-honor" or "favor-cycle" or "favor-battle" or "jakuei-bow-favor")
-            {
-                _state.FavorPlayerId = null;
-                Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
-            }
-            PayAbilityCosts(ability, command, player, source);
+            _state.FavorPlayerId = null;
+            Emit("favorDiscarded", $"{player.Name} discarded the Imperial Favor.", player.Id);
         }
-        Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} ({(costsBlocked ? "negated: a cost could not be paid, so nothing was paid" : "negated")}).", player.Id, source?.Id);
+        PayAbilityCosts(ability, command, player, source);
+        Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
+        CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);
+    }
+
+    // What a negated action still is, blocked or not: TAKEN. Its use is spent, a Strategy played from a hand (or a card played from a discard pile) is spent,
+    // priority passes -- and, as for any action, an ordinary one ends the burst of Additional Actions the player held (a Reaction never does, and an action taken
+    // as one of the burst loses only itself: the burst goes on, Mendon's ruling on #354). Nothing else of it happens.
+    private void CompleteNegatedAction(GameCommand command, AbilityDefinition ability, PlayerState player, CardInstance? source, bool playedFromDiscard, bool consumedGrant)
+    {
+        SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
         SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
-        if (!consumedGrant) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
-        NextAction(player.Id, _state.AdditionalActions.Any(g => g.PlayerId == player.Id));
+        NextAction(player.Id, ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id));
     }
 }

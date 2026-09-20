@@ -126,7 +126,7 @@ for that action") needs a source restricted to one action.
 
 **Reaction 2, the Political Reaction.** It is a `before-action-resolves` reaction on the in-play targeted-reaction window (#278/#318), applicable
 (`BeforeActionReactionApplies`) to **another player's Political action that targets one of his controller's Personalities** (Sakuma himself
-counts), for the acting player's `useAbility` only (a Reaction is not an action; an Attack goes through its own pipeline and is excluded, the same
+counts), for the acting player's `useAbility` only (a Reaction IS an action since `2026-09-19-battle-rulings-round-2.md`, ruling 3, so a Political Reaction that names a Personality is negatable too; an Attack goes through its own pipeline and is excluded, the same
 scope limit as Rokai/Tamoko; a movement that "will not be negated" gives him nothing to react to). "Political" is the ability's own tag
 (`ActionKeywords: ["Political"]`, the general action-keyword tag Daidoji Yuki introduced) **or** a Political card's own keyword (a Political
 Strategy's action is Political); the fourteen wired abilities printed as Political were tagged (`yogo-adi-choice`, `rin-shame`, `kodo-straighten`,
@@ -193,13 +193,22 @@ Confirmed by Mendon after PR #344 (all applied on the follow-up branch, since #3
 3. **An Honor loss that is a cost is paid even when the effects are negated; one that is an effect is negated with the other effects.** The cost
    is `ActionCost.LoseHonor` (paid with the rest, through the ordinary Honor path, so a Honor-loss immunity still applies to it); Yogo Adi's
    "his controller loses 1 Honor" and the Attack a Strategy makes stay effects.
-4. **Extension point for agent R (#341):** `MatchEngine.CostPaymentBlockedByNegation(ActionCost cost, CardInstance? subject)` in `AbilityCosts.cs`
-   -- "is this cost payment blocked by a negation?" `subject` is the card the verb would be applied to (null for `LoseHonor`); `cost.Verb` is
-   `CostVerb.Bow` / `CostVerb.Destroy` (a chosen alternative cost, issue #337) or a `CostVerbs.*` verb (`Sacrifice` is the destruction of a Follower
-   or Personality paid as a cost). It answers `false` today; the per-target negations already recorded in `MatchState.NegatedEffects` ("bow",
-   "destroy", "all") are what should answer it, and this is the one function to fill in. It is consulted **once, before any payment, in both flows**
-   (an action that is not negated, `RunAbilityEffects`; a negated one, `ResolveNegatedAction`), so R's negation of a cost is atomic in both. Nothing
-   else in #341 needs to change for this.
+4. **One predicate, shared with agent R (#341, Hida Mochitoko).** `MatchEngine.CostPaymentBlockedByNegation(GameCommand command)` in `AbilityCosts.cs`
+   is the only function that answers "is paying any cost of this action blocked by a negation?" (this PR first had its own per-cost extension point of the
+   same name; it was folded into R's rule when #341 merged, and the duplicate is gone). It asks about **every cost the action pays**: the chosen
+   alternative cost (issue #337) and each declared `Costs` entry, so a Follower bowed by "bow this card" is protected exactly like one named as the cost
+   option. A cost is **blocked** when the card it would apply to is in play and `MatchState.NegatedEffects` holds a negation that stops that verb: kind
+   `"bow"` blocks a bow cost, `"destroy"` blocks a destruction paid as a cost (`CostVerbs.Sacrifice` and `CostVerb.Destroy`), `"all"` blocks either -- a
+   negated destruction alone never blocks a bow, and a negated bow never blocks a destruction; verbs no negation of an effect stops (discard, remove,
+   token, to-deck, Honor loss) are never blocked. When it answers true the ENTIRE action is negated and nothing is paid, Honor-loss cost included
+   (`AbortActionForBlockedCost`, the taken-but-empty action). It is asked **once, before any payment, in both flows**: by `ExecuteAbilityEffects` for an
+   action that is not negated and by `ResolveNegatedAction` for one that is, so payment is atomic in both. The Mochitoko *window* is offered for the same
+   list (`BowOrDestroyCostSubjects`). Agent C's destroy-as-cost check (#357) is a new rule inside this one function. A test seam, `CostBlockHook`, stands a
+   fake rule in for it (asked once per cost with the card the verb applies to; null for `LoseHonor`).
+5. **A negated additional action pays its costs and loses only itself.** Effortless Counterattack used to negate by never executing the deferred additional
+   action, so nothing it cost was paid. It now marks the action negated and the window's close resolves it through `ResolveNegatedAction(consumedGrant: true)`:
+   costs are paid, effects skipped, its use spent, and -- as #363's rule says -- the rest of the burst goes on and is the holder's to take (an ordinary negated
+   action still ends a burst, a negated Reaction never does: `ForfeitsAdditionalActions`).
 
 **Audit: where each cost was paid.** *At announcement, in one generic place:* Gold (`PayForAbility`), a chosen alternative cost (`CostOptions`,
 issue #337) and the Imperial Favor discard -- PR #344's negated path paid Gold and Favor only; it now pays the chosen alternative cost too.
@@ -240,7 +249,7 @@ ambiguous, so it stays in the effect). Also unchanged by design: `unseen-assassi
 effects (a drawback after "to destroy a target Follower"), only its bow is a cost. A Reserve recruit and an equip are their own commands, not a
 `useAbility`, so no before-action window defers them and a whole-action negation never reaches them.
 
-**Test seams (never set outside tests).** `MatchEngine.CostBlockHook` is the fake predicate behind the extension point; `MatchEngine.NegateEveryAction`
+**Test seams (never set outside tests).** `MatchEngine.CostBlockHook` is the fake rule behind the one predicate; `MatchEngine.NegateEveryAction`
 resolves every announced action as a whole-action negation, which reaches abilities no Political action names (Sakuma can only answer Political
 actions). Sakuma's own decline path is also tested for real, in a real window.
 
@@ -261,7 +270,7 @@ player's opportunity, like every other innate action; assigning to attack or def
 
 ## Tests and mutation checks
 
-`tests/L5R.Core.Tests/CardCopyTests.cs` (15), `EitherOrTests.cs` (17), `NegatedCostTests.cs` (11, issue #351), one AI case; every case drives
+`tests/L5R.Core.Tests/CardCopyTests.cs` (15), `EitherOrTests.cs` (17), `NegatedCostTests.cs` (14, issue #351), one AI case; every case drives
 QueryActions and the commands the engine offers (or, for a raw action, the command a test names). The mutation table below lists, per key rule, the change made and the named test that failed (each restored afterwards).
 
 | Rule broken | Test that failed (named) |
@@ -296,15 +305,21 @@ QueryActions and the commands the engine offers (or, for a raw action, the comma
 | a Ring pays its bow even when played from the hand | `NegatedOtherVerbs` |
 | Lobby's bow of the chosen Personality is not a declared cost | `NegatedOtherVerbs` |
 | an Honor-loss cost is not paid | `NegatedHonorLoss`, `AtomicCostPayment` |
-| the negated flow ignores a blocked cost | `AtomicCostPayment` |
-| the ordinary flow ignores a blocked cost | `AtomicCostPayment`, `BlockingPredicateSeesEveryCost` |
-| only the first cost is asked about | `AtomicCostPayment`, `BlockingPredicateSeesEveryCost` |
+| the negated flow does not ask the one predicate | `AtomicCostPayment`, `CostBlockIsPerVerb` |
+| the ordinary flow does not ask it | `AtomicCostPayment`, `MochitokoProtectsADeclaredCost`, `BlockingPredicateSeesEveryCost`, `targeted-action-reactions/MochitokoBlocksAFollowerCost` |
+| only the first cost is asked about / declared Costs are not asked about | `AtomicCostPayment`, `BlockingPredicateSeesEveryCost`, `MochitokoProtectsADeclaredCost` |
+| any kind of negation blocks any verb / "all" does not block / a destruction paid as a cost is not a "destroy" | `CostBlockIsPerVerb` (both copies, `negated-costs/` and `targeted-action-reactions/`) |
+| the fake rule (`CostBlockHook`) is not consulted | `AtomicCostPayment`, `CostOptionIsPaidAndAtomic` |
+| a blocked or negated action keeps its hand-played Strategy / does not spend its use | `NegatedHonorLoss`, `AtomicCostPayment`, `MochitokoProtectsADeclaredCost`, `either-or/NegatedActionIsStillTaken` |
+| a negated additional action forfeits the burst / loses its costs (drops instead of negating) | `NegatedAdditionalActionPaysItsCosts`, `additional-action-bursts/NegatedAdditionalActionLeavesTheRest` |
+| Mochitoko is offered for a cost-option Follower only, not a declared cost | `MochitokoProtectsADeclaredCost` |
 | the chosen alternative cost is not asked about | `CostOptionIsPaidAndAtomic` |
 | Order Seppuku is not refused / is listed enabled while a pass is owed | `SeppukuBarred` |
 | removal from the game keeps Copy grants / clears permanent ones too / is not announced | `CopiesEndOnRemoval` (and `card-copy/*` for the permanent-clearing mutant) |
 | a Personality reshuffled into a deck keeps a copied keyword or ability | `CopiesPersistAndReset`, `CopiesEndOnRemoval` |
 
-One mutation survived and is an equivalent mutant, not a gap: dropping the `NextAction` that follows a restored window changes nothing
+One mutant of the merged predicate also survives, `InPlay(subject)` dropped from the block check: a cost subject that is out of play cannot be offered by
+`QueryActions` or announced, so no test can reach it (it is agent R's own guard, kept). And one from #344 is an equivalent mutant, not a gap: dropping the `NextAction` that follows a restored window changes nothing
 observable, because the deciding player (the acting player) already holds priority and the count of passes was already reset when the
 decision opened.
 

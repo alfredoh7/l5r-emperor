@@ -14,8 +14,8 @@ namespace L5R.Core;
 // the Fate deck and adds its Focus Value), is deliberately NOT declared: a half-declared cost would be paid on negation but not its effect.
 //
 // ATOMIC (Mendon): before anything is paid, every cost the action would pay -- the chosen CostOption and each declared cost -- is asked
-// "is this payment blocked by a negation?" (CostPaymentBlockedByNegation, the extension point Hida Mochitoko's negation of a bow or a destruction
-// fills in). If ANY is blocked the ENTIRE action is negated: nothing is paid (no Gold, no bow, no Honor loss) and no effect happens, though the
+// "is this payment blocked by a negation?" (CostPaymentBlockedByNegation, the one predicate below: Hida Mochitoko's negation of a bow or a destruction
+// of a card paid as a cost). If ANY is blocked the ENTIRE action is negated: nothing is paid (no Gold, no bow, no Honor loss) and no effect happens, though the
 // action was still taken (its use is spent, a Strategy played from hand is discarded). If none is blocked, every cost is paid and then the effects
 // apply -- or are skipped when the action's effects are negated. An Honor loss that is an EFFECT of the action (not a cost) is negated with the
 // other effects; one that is a cost (CostVerbs.LoseHonor) is paid even when the effects are negated.
@@ -73,12 +73,44 @@ public sealed partial class MatchEngine
     /// <summary>Test seam (issue #351): every announced action is resolved as a whole-action negation (ActionNegation.cs). Never set outside tests.</summary>
     internal bool NegateEveryAction { get; set; }
 
-    // THE EXTENSION POINT (Mendon's atomic-cost ruling). Is paying this cost blocked by a negation that applies to its subject -- Hida Mochitoko's
-    // "negate its bowing and destruction from that action's effects" when the Follower is being bowed or destroyed AS A COST? When it is, the entire
-    // action is negated and nothing is paid. Nothing negates a cost payment yet, so this answers false; the per-target negations
-    // (NegatedEffects: "bow", "destroy", "all") are what should answer it, and this is the one place to wire them in. `subject` is the card the
-    // verb would be applied to (null for LoseHonor, which has none).
-    private bool CostPaymentBlockedByNegation(ActionCost cost, CardInstance? subject) => CostBlockHook?.Invoke(cost, subject) ?? false;
+    // THE ONE PREDICATE (Mendon's atomic-cost ruling; agent R's Hida Mochitoko rule and issue #351's extension point, folded into a single function):
+    // is paying any cost of this action blocked by a negation? True when a card the action would BOW or DESTROY as a cost has had that negated in the
+    // open window -- Mochitoko's "negate its bowing and destruction" (MatchState.NegatedEffects: kind "bow" blocks a bow cost, "destroy" a destruction paid as
+    // a cost, "all" either; a negated destruction alone never blocks a bow). The costs asked about are every one the action pays: a chosen alternative cost
+    // (CostOptions, issue #337) and each declared Costs entry, so a Follower bowed as "bow this card" is as protected as one named as the performer. When it is
+    // true the ENTIRE action is negated and nothing is paid, not even an Honor-loss cost (AbortActionForBlockedCost). Asked once, before any payment, by
+    // ExecuteAbilityEffects (an action that is not negated) and by ResolveNegatedAction (one that is), so payment is atomic in both flows. This is the only place
+    // a new "this cost is blocked" rule is added. `CostBlockHook` is the test seam: a fake predicate asked once per cost with the card its verb would be applied
+    // to (null for LoseHonor).
+    private bool CostPaymentBlockedByNegation(GameCommand command)
+    {
+        bool Negated((ActionCost Cost, CardInstance? Subject) c) =>
+            NegatableKind(c.Cost.Verb) is { } kind && c.Subject is { } subject && InPlay(subject)
+            && _state.NegatedEffects.Any(n => n.CardId == subject.Id && (n.Kind == "all" || n.Kind == kind));
+        return PlannedCostsOf(command).Any(c => CostBlockHook?.Invoke(c.Cost, c.Subject) == true || Negated(c));
+    }
+
+    // The kind of negation ("bow" / "destroy", MatchState.NegatedEffects) that stops a cost verb; null for a verb no negation of an effect stops.
+    private static string? NegatableKind(string verb) => verb switch
+    {
+        CostVerb.Bow => "bow",
+        CostVerb.Destroy or CostVerbs.Sacrifice => "destroy",
+        _ => null
+    };
+
+    // Every cost the action would pay (see PlannedCosts), listed safely: empty for a command that names no valid ability or option.
+    private List<(ActionCost Cost, CardInstance? Subject)> PlannedCostsOf(GameCommand command)
+    {
+        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability)) return [];
+        var source = command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var card) ? card : null;
+        try { return PlannedCosts(ability, command, source).ToList(); }
+        catch (RuleViolation) { return []; }
+    }
+
+    // The in-play cards the action would bow or destroy as its cost, and the kind of negation that would stop each: what a protective reaction (Hida
+    // Mochitoko) is offered for, before the cost is paid.
+    private IEnumerable<CardInstance> BowOrDestroyCostSubjects(GameCommand command) =>
+        PlannedCostsOf(command).Where(c => NegatableKind(c.Cost.Verb) is not null && c.Subject is not null && InPlay(c.Subject)).Select(c => c.Subject!);
 
     // Every cost the action would pay besides Gold and the Imperial Favor (which nothing can block): the chosen CostOption (issue #337) first,
     // then the declared Costs, each with the card it applies to.
@@ -96,12 +128,8 @@ public sealed partial class MatchEngine
         }
     }
 
-    // True when ANY planned cost is blocked by a negation: the whole action is then negated and nothing is paid.
-    private bool AnyCostBlocked(AbilityDefinition ability, GameCommand command, CardInstance? source) =>
-        PlannedCosts(ability, command, source).Any(c => CostPaymentBlockedByNegation(c.Cost, c.Subject));
-
     // Applies every declared cost of the ability, in order. Nothing here re-validates (a reaction window between announcement and resolution may
-    // have changed a subject; the cost is paid as far as it still can be, like PayCostOption). The caller has already asked AnyCostBlocked.
+    // have changed a subject; the cost is paid as far as it still can be, like PayCostOption). The caller has already asked CostPaymentBlockedByNegation.
     private void PayAbilityCosts(AbilityDefinition ability, GameCommand command, PlayerState player, CardInstance? source)
     {
         if (ability.Costs is null) return;

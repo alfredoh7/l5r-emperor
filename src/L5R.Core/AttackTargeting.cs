@@ -140,6 +140,17 @@ public sealed partial class MatchEngine
     // Personality with no Followers) the two readings are identical, so nothing else depends on it.
     private int AttackComparedForce(CardInstance target) => CardForce(target);
 
+    // An Attack that targets the current battlefield's province (issue #335): no card is targeted, so no reaction to a targeted Attack applies and nothing here compares
+    // Force. The only such Attack today is the training fixture; a printed card adds its own case.
+    private void ResolveProvinceAttack(string abilityId, int provinceIndex, int strength)
+    {
+        if (abilityId != "training-province-attack") return;
+        var owner = 1 - _state.ActivePlayerId;
+        var province = Player(owner).Provinces.Single(p => p.Index == provinceIndex);
+        province.Strength = Math.Max(0, province.Strength - strength);
+        Emit("provinceAttacked", $"{Player(owner).Name}'s province {provinceIndex + 1} lost {strength} strength to a Ranged Attack.", owner);
+    }
+
     // Declaration-time legality of ONE Attack target (shared by every "attack"-category ability's own
     // TargetId and by an ability that carries its Attack target on CardIds, e.g. Bayushi Kahoku - exp,
     // whose TargetId is the separate -4F target). forcePenaltyTargetId/forcePenalty predict a Force

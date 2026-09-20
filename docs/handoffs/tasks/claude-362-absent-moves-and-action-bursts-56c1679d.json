@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Rules lead rulings on #354: actions that move Personalities to a battle are Absent Battle actions for either player (MovesToBattle flag derived from the effect cases, scan-tested; hand-kept id list removed; Earth Flows Defender-only, Munefusa explicit Absent); Reactions no longer end an Additional Action burst, after-action windows return to the burst holder, a negated additional action leaves the rest of the burst. Shared because the engine changes legal actions (rules) and the decision docs and tests span lanes; no client or view contract change.",
+  "validation": "bash tools/check.sh --skip-client passes (7 battle-absent-moves and 9 additional-action-bursts new tests; every existing suite green). Mutation checks: 12 mutations each killed by the intended tests, then reverted. Client project not built locally; CI verifies.",
+  "remaining": "None; ready for review. Follow-up PR: delayed move-home effect, Steady Resolve and Akodo Dairuko packaging, Stronghold Kyuden Hida - exp.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/362",
+  "branch": "claude/362-absent-moves-and-action-bursts",
+  "updated": "2026-09-19T22:28:03.572790+00:00"
+}

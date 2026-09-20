@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Battle rulings round 2 (#354): the Declaration Segment (declareAttack or decline; declining ends the Attack Phase, declaring creates a battlefield at every province), one ordered before-resolution set with delayed effects and 'Before a battle resolves' Reactions (Steady Resolve / Akodo Dairuko abilities built, cards not published), Reactions are actions engine-wide (IsAction; suspended/restored reaction windows), Rebuilding Kyuden Hida's forced pass pinned (the Event, not the Stronghold), the deferred Attack/duel keeps its source card.",
+  "validation": "bash tools/check.sh --skip-client: all Python, Core (18 new battle-rulings-2 tests + every existing suite), AI, Server and Client transport suites pass; the client project compiles (no Godot in this environment, so no import/smoke). 30 mutation checks each made a named test fail.",
+  "remaining": "Open questions in docs/decisions/2026-09-19-battle-rulings-round-2.md: vacuous (empty) battles, additional-action forfeiture by a Reaction, delayed-effect kinds, publishing Steady Resolve and Akodo Dairuko (needs a scan download), the Stronghold Kyuden Hida - exp. Alfredo's sidebar (#311) renders the new steps.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/354",
+  "branch": "claude/354-battle-rulings-round-2",
+  "updated": "2026-09-19T21:15:26.562369+00:00"
+}
