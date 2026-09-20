@@ -289,7 +289,7 @@ internal static class AlternativeCostTests
         Eq(s.Cards[attached.Id].Zone, Zone.Attached, "and nothing of its unit was destroyed: the blocked cost pays nothing");
         Expect(!s.Cards[r.Enemy.Id].Bowed, "the effects did not happen: the target is not bowed");
         Eq(s.Players[0].Honor, honor, "and no Honor was gained");
-        Expect(s.Events.Any(x => x.Type == "costBlocked" && x.Message.Contains("destruction")) && s.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), "the negation is in the public log");
+        Expect(s.Events.Any(x => x.Type == "actionNegated" && x.Message.Contains("paying one of its costs")), "the negation is in the public log");
         Eq(s.PriorityPlayerId, 1, "the action was still taken: priority passed");
         Expect(Offers(e, 0, Ability).All(o => !o.Enabled), "and its use is spent for the turn, both ways");
         // A negation a reaction set for the Ancestor itself (Rokai's "destroy", Champion of Thunder's "all") blocks the cost too, without being consumed.
@@ -369,8 +369,8 @@ internal static class AlternativeCostTests
             var s = negated.State;
             Eq(s.Cards[r.Ancestor.Id].Zone == Zone.Dead, ancestorDies, fom ? "a blocked cost is not paid even when the action is negated" : "a negated action still keeps the cost it can pay: the Ancestor is destroyed");
             Expect(!s.Cards[r.Enemy.Id].Bowed && s.Players[0].Honor == honor, "the effects did not happen");
-            Expect(s.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), "logged as negated");
-            Eq(s.Events.Any(x => x.Type == "costBlocked"), fom, "and a blocked cost is reported as such");
+            Eq(s.Events.Any(x => x.Type == "abilityUsed" && x.Message.Contains("(negated)")), !fom, "a negated action that paid is logged as used, negated");
+            Eq(s.Events.Any(x => x.Type == "actionNegated" && x.Message.Contains("paying one of its costs")), fom, "and a blocked cost is reported as such");
         }
     }
 
