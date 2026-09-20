@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Published-card guard (#360), a rules-lead task whose changed files (tests, tools, .gitattributes) span lanes: PublishedTests.Catalogue no longer hard-codes the published card total or carries the per-wave comment block; the catalogue is derived from content/published/*.json and compared exactly, each wave file is pinned by its own PublishedWaves/<wave>.txt manifest (new file per wave, tools/content/pin_wave_ids.py), and core test suites are discovered by reflection so a new suite needs no Program.cs registration line. No game, UI, server or client code changed.",
+  "validation": "bash tools/check.sh --skip-client passed (python tools 43+132, core 216/216 plus all suites incl. 59/59 published, ai 26/26, server 8/8, client transport 7/7). Mutation-checked: card dropped from the CardCatalog chain, id duplicated across two files, extra non-ScenarioOnly card in the catalogue, wave removed from the csproj with its JSON kept, wave file plus loader plus chain plus csproj deleted with its manifest kept, a wave card id changed; each failed by name and was reverted. Suite discovery: a new suite with Run runs, a *Tests class without Run throws. Godot client not built or run (test-project and tooling change only).",
+  "remaining": "None; ready for review. Open wave PRs #348, #357, #358, #359 (and #356 for Program.cs) each resolve one conflict by deleting their count line and suite registration line, then run python3 tools/content/pin_wave_ids.py; see docs/decisions/2026-09-19-published-count-guard.md. Auto-discovery of waves (csproj wildcard, PublishedContent/CardCatalog) is recommended for after the queue merges, not implemented.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/360",
+  "branch": "claude/360-published-count-guard",
+  "updated": "2026-09-19T21:49:08.903451+00:00"
+}

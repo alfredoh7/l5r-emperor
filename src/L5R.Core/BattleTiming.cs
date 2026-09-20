@@ -126,7 +126,8 @@ public sealed partial class MatchEngine
         string segment, step;
         switch (s.Phase)
         {
-            case Phase.AttackDeclaration: (segment, step) = (BattleSteps.InfantryManeuvers, BattleSteps.AttackerAssigns); break;
+            case Phase.AttackDeclaration: (segment, step) = (BattleSteps.Declaration, BattleSteps.DeclareOrDecline); break;
+            case Phase.InfantryDeclaration: (segment, step) = (BattleSteps.InfantryManeuvers, BattleSteps.AttackerAssigns); break;
             case Phase.DefenseAssignment: (segment, step) = (BattleSteps.InfantryManeuvers, BattleSteps.DefenderAssigns); break;
             case Phase.CavalryDeclaration: (segment, step) = (BattleSteps.CavalryManeuvers, BattleSteps.AttackerAssigns); break;
             case Phase.CavalryDefense: (segment, step) = (BattleSteps.CavalryManeuvers, BattleSteps.DefenderAssigns); break;
@@ -152,6 +153,6 @@ public sealed partial class MatchEngine
             holder, reason, resolved, (s.PendingEngage?.Claims ?? []).ToArray(),
             limit is null ? null : limit.MustPass ? BattleSteps.LimitMustPass : BattleSteps.LimitPerformerOnly, limit?.PerformerId,
             s.ConsecutivePasses, before is null ? [] : before.RemainingSourceIds.Concat(before.ActiveSourceId is null ? [] : [before.ActiveSourceId]).ToArray(),
-            before?.ActiveSourceId, s.PendingChoice?.Type);
+            before?.ActiveSourceId, s.PendingChoice?.Type, BuildBeforeResolutionEffects(before));
     }
 }

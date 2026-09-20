@@ -85,12 +85,23 @@ Only cards that print a Gold cost of their own on a Discipline action can use it
 Steady Breaths, both wired here. No other card is unblocked by it (Mercantile Conflict's action has no cost of its own; it is
 blocked on the Honor-loss primitive).
 
+## Reconciled with the merged rulings (#363, #359, #361, #365)
+
+- **Absent / `MovesToBattle` (#363).** The hand-kept id list of #332 is gone; `ValidateAbility` reads `ability.Absent || ability.MovesToBattle`.
+  Return to Action carries both (`Absent: true` because it prints Absent Battle, `MovesToBattle: true` because its effect moves a
+  Personality to the battlefield; either alone waives presence, and `BattleAbsentMovesTests` scans its `TryMoveToBattlefield` case).
+  **False Ring of Air stays an explicit `Absent`** (it prints Absent Battle and moves nothing, so it is not a mover); the bow-as-a-cost
+  fix above is independent of both flags. **Lost in Transit** is neither (Battle/Open: presence only as a Battle action, as ruled).
+  None of the three needed a change; the flag-inventory test now pins `Absent` = the merged list (with `munefusa-move`) and
+  `Discipline` = the eight Discipline abilities.
+- **Published count (#361).** This branch no longer touches any count: the pinned total is derived from `content/published/*.json`, and
+  `strategy-wave-23` is pinned by its own manifest `tests/L5R.Core.Tests/PublishedWaves/strategy-wave-23.txt` (no collision: main has
+  strategy waves 17, 18, 22 and 27). Suites are found by reflection, so `DisciplineRulingsTests` needs no registration.
+
 ## Validation and merge notes
 
 - `tools/check.sh --skip-client` and the client compile, see the PR; new tests in `tests/L5R.Core.Tests/DisciplineRulingsTests.cs`
   (10), mutation-checked (15 mutations, each killed by a named test; listed in the PR).
-- Pinned published count: 417 counted from origin/main `05cc2493` (distinct non-ScenarioOnly ids across `content/published/*.json`)
-  plus 3 = **420**. Recount if main moves.
 - Expect a trivial sync with #341, #348 and the other pending PRs: this touches `CardAbilities.cs` (new abilities and cases, one
   target category, the CardIds allow-list, three small edits), `GoldQuotes.cs` (the wrapper and the split-payment helpers) and a few
   lines of `MatchEngine.cs` (`Pay`/`PaymentOptions`).

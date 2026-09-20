@@ -1,4 +1,6 @@
 using static RegressionAssertions;
+using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text.Json;
 using L5R.Core;
 using L5R.Client;
@@ -74,7 +76,7 @@ var tests = new (string Name, Action Run)[]
     ("Shamate Keep moves home a Personality with equal or lower Personal Honor; gains Honor only if uncontrolled", ShamateMove),
     ("Plains of the Maiden gains Honor per surviving Battle Maiden after the Attacker destroys an army", PlainsOfMaiden),
     ("Law of Darkness Dojo weakens and bows a dishonorable enemy; punishes further Honor loss from a Battle action", LawOfDarknessDojo),
-    ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor only if it hit", CarpenterCastleAttack),
+    ("Carpenter Castle's Ranged Attack is legal with no target in sight; destroys a legal target and gains Honor if it targeted a card (Mendon, issue #335)", CarpenterCastleAttack),
     ("Shiro Shiba's Melee Attack strength rises with a controlled Shugenja", ShiroShibaAttack),
     ("Tokens create/move/destroy, persist across turns unlike Modifiers, and are removed when their host leaves play", TokenPrimitives),
     ("A discarded dishonorable Personality can become honorably dead: rehonored, no Honor-loss penalty", MakeDeadFromDiscard),
@@ -225,25 +227,11 @@ var tests = new (string Name, Action Run)[]
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
 runner.Run("core",tests);
-PublishedTests.Run(runner);
-GoldParityTests.Run(runner);
-GoldQuoteTests.Run(runner);
-BattleTimingTests.Run(runner);
-ReconActionTests.Run(runner);
-DisciplineAndAbsentTests.Run(runner);
-DisciplineRulingsTests.Run(runner);
-DeckFormatTests.Run(runner);
-DeckWorkshopTests.Run(runner);
-DeckSearchTests.Run(runner);
-DeckLookTests.Run(runner);
-DaigotsuBofanaTests.Run(runner);
-AlternativeCostTests.Run(runner);
-AttachFromDiscardTests.Run(runner);
-FadingShadowsTests.Run(runner);
-EffectChoiceTests.Run(runner);
-FollowerPerformerTests.Run(runner);
-CardCopyTests.Run(runner);
-EitherOrTests.Run(runner);
+foreach(var suite in typeof(PublishedTests).Assembly.GetTypes().Where(t=>t.IsAbstract&&t.IsSealed&&t.Name.EndsWith("Tests",StringComparison.Ordinal)).OrderBy(t=>t.Name,StringComparer.Ordinal))
+{
+    var run=suite.GetMethod("Run",BindingFlags.Public|BindingFlags.Static,[typeof(TestRunner)])??throw new InvalidOperationException($"{suite.Name} has no public static Run(TestRunner), so its tests would never run");
+    try{run.Invoke(null,[runner]);}catch(TargetInvocationException e){ExceptionDispatchInfo.Capture(e.InnerException!).Throw();}
+}
 return runner.Finish();
 
 static void Check(bool ok,string message="Assertion failed") { if(!ok) throw new Exception(message); }
@@ -434,14 +422,16 @@ static void Priority()
 {
     var e=MatchEngine.CreateStarterMatch(); Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.Action); Equal(e.State.PriorityPlayerId,1);
     Accept(e,Cmd(e,"pass")); Equal(e.State.Phase,Phase.AttackDeclaration);
+    // The Declaration Segment is one explicit decision (declareAttack, or pass to decline), then the attacker's Infantry Maneuvers.
+    Accept(e,Cmd(e,"declareAttack")); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.InfantryDeclaration);
     Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.DefenseAssignment);
     Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.PriorityPlayerId,0); Equal(e.State.Phase,Phase.CavalryDeclaration);
     // Infantry Maneuvers committed above; Cavalry Maneuvers follows the same attacker-then-defender order.
     Accept(e,Cmd(e,"attack",assignments:[])); Equal(e.State.PriorityPlayerId,1); Equal(e.State.Phase,Phase.CavalryDefense);
-    // Nobody ever placed a unit anywhere, Infantry or Cavalry: no battlefield is unresolved, so
-    // there is nothing to select and the turn moves straight to the Dynasty Phase.
-    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.Phase,Phase.Dynasty);
-    Equal(e.State.UnresolvedBattlefields.Count,0);
+    // Nobody ever placed a unit anywhere, but the attack WAS declared: a battlefield exists at every province
+    // regardless of assignments, so all four are still there to be fought.
+    Accept(e,Cmd(e,"assignDefense",assignments:[])); Equal(e.State.Phase,Phase.BattleSelection);
+    Equal(string.Join(",",e.State.UnresolvedBattlefields),"0,1,2,3");
 }
 static void Bamboo()
 {
@@ -1718,18 +1708,14 @@ static void FollowerWave11Primitives()
         Check(!e.State.Cards[host.Id].Bowed,"His whole unit straightens, including the host");
     }
     {
-        // Wave Man: the Attack Phase also ends when a player declines to attack outright -- no
-        // battlefield is ever created (both Infantry and Cavalry Maneuvers empty), yet Wave Man still
-        // straightens.
+        // Wave Man: the Attack Phase also ends when a player declines to attack outright (the Declaration
+        // Segment's pass) -- no battlefield is ever created, yet Wave Man still straightens.
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.AttackDeclaration; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var host=Add(s,"training-crane-samurai",0,Zone.Home,bowed:true);
         var waveMan=Add(s,"oracle-l5r-9255",0,Zone.Attached,attachedTo:host.Id,bowed:true);
         var e=MatchEngine.FromTestState(s);
-        Accept(e,Cmd(e,"attack",player:0,assignments:new()));
-        Accept(e,Cmd(e,"assignDefense",player:1,assignments:new()));
-        Accept(e,Cmd(e,"attack",player:0,assignments:new()));
-        Accept(e,Cmd(e,"assignDefense",player:1,assignments:new()));
-        Equal(e.State.Phase,Phase.Dynasty,"No battlefields were ever created -- straight to Dynasty");
+        Accept(e,Cmd(e,"pass",player:0));
+        Equal(e.State.Phase,Phase.Dynasty,"Declining ends the Attack Phase at once: no battlefields, no Maneuvers, no defender prompts");
         Check(!e.State.Cards[waveMan.Id].Bowed,"Wave Man straightens even though no battle ever happened");
     }
     {
@@ -2056,7 +2042,8 @@ static void CompleteMatch()
                 ??actions.First(a=>a.Type=="endDynasty");
         }
         else if(s.Phase==Phase.DynastyDiscard) chosen=actions.FirstOrDefault(a=>a.Type=="discardProvince")??actions.First(a=>a.Type=="endDynasty");
-        else if(s.Phase==Phase.AttackDeclaration && s.PriorityPlayerId==0) chosen=actions.FirstOrDefault(a=>a.Type=="attack")??actions.First(a=>a.Type=="pass");
+        else if(s.Phase==Phase.AttackDeclaration && s.PriorityPlayerId==0) chosen=actions.First(a=>a.Type=="declareAttack");
+        else if(s.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration && s.PriorityPlayerId==0) chosen=actions.FirstOrDefault(a=>a.Type=="attack")??actions.First(a=>a.Type=="pass");
         else if(s.Phase==Phase.BattleSelection) chosen=actions.First(a=>a.Type=="selectBattle");
         else chosen=actions.FirstOrDefault(a=>a.Type=="pass")??actions.First();
         Accept(e,chosen.Command!);
@@ -3471,6 +3458,7 @@ static void CavalryManeuversSegment()
     var pureCavalryUnit=Add(s,"training-cavalry",0,Zone.Home); // Cavalry Personality...
     Add(s,"training-cavalry-follower",0,Zone.Attached,attachedTo:pureCavalryUnit.Id); // ...+ a Cavalry Follower: Cavalry
     var e=MatchEngine.FromTestState(s);
+    Accept(e,Cmd(e,"declareAttack",player:0));
 
     // Infantry Maneuvers: only the two Infantry units (plain, and the mixed Cavalry+non-Cavalry-Follower one).
     Reject(e,Cmd(e,"attack",player:0,assignments:new(){[soloCavalry.Id]=0}));
@@ -3532,6 +3520,7 @@ static void DaigotsuKendoConquerorAndIkomaNatsuCavalry()
     var s2=MatchEngine.CreateStarterMatch().State; s2.Phase=Phase.AttackDeclaration; s2.PriorityPlayerId=0; s2.ActivePlayerId=0;
     var natsu=Add(s2,"oracle-l5r-3623",0,Zone.Home);
     var e2=MatchEngine.FromTestState(s2);
+    Accept(e2,Cmd(e2,"declareAttack",player:0));
     Reject(e2,Cmd(e2,"attack",player:0,assignments:new(){[natsu.Id]=0}));
     Accept(e2,Cmd(e2,"attack",player:0,assignments:[]));
     Accept(e2,Cmd(e2,"assignDefense",player:1,assignments:[]));
@@ -3804,7 +3793,7 @@ static void CarpenterCastleAttack()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:s.Players[0].StrongholdId,PerformerId:castle.Id,AbilityId:"carpenter-castle-siege"));
         Check(e.State.Cards[castle.Id].Bowed,"Bowing the Castle/Siege card is a cost paid regardless of whether the Attack hits");
         Check(e.State.Cards[enemy.Id].Zone==Zone.Battlefield,"An out-of-range enemy is untouched");
-        Equal(e.State.Players[0].Honor,before,"No Honor gain without a hit");
+        Equal(e.State.Players[0].Honor,before,"No Honor gain when it targeted no card");
     }
     {
         // A Personality with a Follower attached is not itself targetable; the Follower is.
@@ -5429,8 +5418,8 @@ static void UtakuChikako()
     }
     {
         // Limited: gain 2 Honor, then may not declare an attack this turn -- a broad restriction on
-        // the assignment itself, not tied to any one specific path to it. An empty (declined)
-        // assignment is always still legal. Resets at the start of the next turn.
+        // declaring the attack itself. Declining (the Declaration Segment's pass) is always still legal.
+        // Resets at the start of the next turn.
         var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=0; s.ActivePlayerId=0;
         var chikako=Add(s,"oracle-l5r-10102",0,Zone.Home);
         var unit=Add(s,"training-crane-samurai",0,Zone.Home);
@@ -5441,8 +5430,11 @@ static void UtakuChikako()
         Check(e.State.Players[0].MayNotAttackThisTurn,"Restricted for the rest of this turn");
         Accept(e,new GameCommand("pass",1,e.Version));
         Accept(e,new GameCommand("pass",0,e.Version)); // Action Phase: two consecutive passes -> Attack Declaration
-        Reject(e,new GameCommand("attack",0,e.Version,Assignments:new Dictionary<string,int>{[unit.Id]=0})); // declaring an attacker is rejected
-        Accept(e,new GameCommand("attack",0,e.Version,Assignments:[])); // declining (empty assignment) is still legal
+        Reject(e,new GameCommand("declareAttack",0,e.Version)); // declaring an attack is rejected
+        Reject(e,new GameCommand("attack",0,e.Version,Assignments:new Dictionary<string,int>{[unit.Id]=0})); // and so is assigning an attacker, wherever it is offered
+        Check(e.QueryActions(0).Any(a=>a.Type=="declareAttack" && !a.Enabled),"declaring is listed, disabled");
+        Accept(e,new GameCommand("pass",0,e.Version)); // declining is still legal: the Attack Phase simply ends
+        Equal(e.State.Phase,Phase.Dynasty);
     }
 }
 static void KihoDiscardToHand()
@@ -6253,9 +6245,10 @@ static void AkodoKakiharaReactsToNonAttackActions()
         }
     }
     {
-        // "Action" is not "Reaction": Tamori Ruya's own Reaction (ruya-bow) names Kakihara as its target, from
-        // another player, inside an already-open bowReaction window. It resolves normally -- it must neither open
-        // a nested beforeActionReaction window (that would overwrite the open one) nor trigger Kakihara.
+        // A Reaction IS an action (rules lead: "Reactions count as actions"): Tamori Ruya's own Reaction (ruya-bow) names
+        // Kakihara as its target, from another player, inside an already-open bowReaction window. It triggers his window
+        // like any other action targeting him; the bowReaction window it was played in is set aside (not overwritten) and
+        // comes back, as it was, once the Reaction has resolved.
         var s=StrongholdBattle("oracle-l5r-1218"); s.ActivePlayerId=0;
         var ruya=Add(s,"oracle-l5r-7789",0,Zone.Battlefield,province:0);
         var bower=Add(s,"training-battle-bower",0,Zone.Battlefield,province:0);
@@ -6265,8 +6258,19 @@ static void AkodoKakiharaReactsToNonAttackActions()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:bower.Id,TargetId:bowedByAction.Id,AbilityId:"training-bow-at-battle"));
         Equal(e.State.PendingChoice?.Type,"bowReaction");
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:ruya.Id,TargetId:k.Id,AbilityId:"ruya-bow"));
-        Equal(e.State.PendingChoice?.Type,"bowReaction","The open window is untouched: no nested Kakihara window");
-        Check(e.State.Cards[k.Id].Bowed && e.State.Cards[k.Id].Modifiers.Count==0,"Ruya's bow resolved, Kakihara never reacted");
+        Equal(e.State.PendingChoice?.Type,"beforeActionReaction","A Reaction that targets Kakihara opens his window");
+        ExpectBeforeActionOffer(e,k.Id);
+        Equal(e.State.SuspendedWindows.Count,1); Equal(e.State.SuspendedWindows[0].Choice.Type,"bowReaction","the window it was played in is set aside");
+        Check(!e.State.Cards[k.Id].Bowed,"Deferred: Ruya's bow has not applied yet");
+        Accept(e,new GameCommand("useAbility",1,e.Version,CardId:k.Id,AbilityId:"kakihara-force-bonus"));
+        Equal(KakiharaForce(e,k.Id),8,"+4F before the Reaction resolves");
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Equal(e.State.PendingChoice?.Type,"bowReaction","The window Ruya's Reaction was played in is open again"); Equal(e.State.SuspendedWindows.Count,0);
+        Equal(e.State.PendingChoice?.CardId,ruya.Id);
+        Equal(e.State.PriorityPlayerId,1,"and the opportunity has passed to the other player, as after any Reaction");
+        Check(e.State.Cards[k.Id].Bowed,"The Reaction resolved after Kakihara reacted");
+        Accept(e,Cmd(e,"declineReaction")); Accept(e,Cmd(e,"declineReaction"));
+        Check(e.State.PendingChoice is null,"and closes normally on two passes");
     }
     {
         // Open actions too (not just Battle actions), and the acting player must be ANOTHER player: the
@@ -8340,6 +8344,7 @@ static void BrashForceRedirectAndBowReactions()
         var plain=Add(s,"training-crane-samurai",0,Zone.Home);
         var e=MatchEngine.FromTestState(s);
         var handBefore=e.State.Players[1].Hand.Count;
+        Accept(e,Cmd(e,"declareAttack",player:0));
         Accept(e,Cmd(e,"attack",player:0,assignments:new(){[brash1.Id]=0,[brash2.Id]=1,[plain.Id]=0}));
         Equal(e.State.PendingChoice?.Type,"brashDraw");
         Equal(e.State.PendingBrashDraws,2);

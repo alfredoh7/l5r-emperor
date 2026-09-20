@@ -73,20 +73,21 @@ is by construction one the flag allows; the only parallel check there (`actingAs
 | `false-ring-of-air-force` | "Absent Battle, bow" | **behavior change**: the printed Absent was previously dropped (documented simplification #194), so it needed presence; now a player with no unit there may target an enemy Personality at the battlefield. Tested with and without presence |
 | `return-to-action-move` | "Absent Battle" | new |
 
-**Left on the old id list (`reinforcesFromElsewhere`), and why:** `michi-move`, `rikyou-move`, `takasho-move`,
-`intervening-spirit-move`, `houken-exp-straighten`, `sanctuary-of-the-waves-move`, `mai-move-force-penalty`,
-`your-clan-needs-you`, `munefusa-move`. None prints "Absent". Their exemptions are engine-side rulings that a self-moving
-Personality "reinforces" a battle, and several print "Even if this unit / Munefusa is not at the current battlefield" -- which
-is the *Home* concept (about the CARD's location, its own rule 9 keyword), not Absent (about the PLAYER's presence). Folding
-them into `Absent` would relabel a ruling as a printed keyword and blur two different rules; each keeps its existing tests.
+**Superseded (2026-09-19, rules lead; `2026-09-19-battle-rulings-round-2.md` ruling 6).** The hand-kept id list
+(`reinforcesFromElsewhere`: `michi-move`, `rikyou-move`, `takasho-move`, `intervening-spirit-move`, `houken-exp-straighten`,
+`sanctuary-of-the-waves-move`, `mai-move-force-penalty`, `your-clan-needs-you`, `munefusa-move`) is gone. The rules lead ruled that
+**any action that moves Personalities to a battle is playable as an Absent Battle action by either player**, in any battle, so the
+exemption is now derived from the effect: `AbilityDefinition.MovesToBattle`, declared on the ability whose effect case moves a
+Personality to a battlefield and checked by a test that scans those cases (an effect that moves a Personality to a battlefield
+without the flag fails the suite). `Absent` stays the flag for explicitly printed Absent cards, and `reinforcesFromElsewhere` is
+`ability.Absent || ability.MovesToBattle`. Munefusa's move-home is not a move to a battle, so it kept its old no-presence clause as an
+explicit `Absent: true` (which adds `munefusa-move` to the Absent inventory pinned by `PublishedShapeAndFlagInventory`).
 `recruitReserve` is a command, not an ability ("Reserve recruitment is an absent battle action"), and is unchanged.
 
-**Charge Into Danger is not on the flag, and the request's example does not hold.** Its *scan* (Torn Asunder #110) prints
-"Battle: Choose your performing Personality: If he assigned to, or would be opposed at, the current battlefield, move him there.
-..." -- plain Battle, which is what we publish (a period printing; we do not silently change those). The catalogue's
-`current_oracle_text` for it is a later re-templating ("Absent Battle: Target your performing Personality at any location who
-either is at, assigned to, or would be opposed at ..."). It requires presence today and keeps doing so. If Mendon wants the
-Oracle text instead, it is a one-line flag plus a performer-location change; that is a printing decision, not part of this work.
+**Charge Into Danger** printed plain "Battle" in the scan we publish (Torn Asunder #110; a period printing we do not change), and this
+document kept it on the presence rule. The 2026-09-19 ruling puts it on `MovesToBattle` by its EFFECT (it moves its performer to the
+battle), not by a changed printing: the printing is unchanged, its performer is now "your performing Personality" at any location, and
+the counted "8 wired Absent cards" below still says what the catalogue's text says.
 
 ## C. Return to Action
 
