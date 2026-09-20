@@ -97,6 +97,13 @@ ability is on. A card is locked when it, or the Personality it is **attached to*
 actions, those printed on its Items and Spells, and those printed on its Followers. Offered actions are filtered by the same method, so a blocked action is
 listed disabled with "X may not perform actions this turn." (`QueryActions`), and one sent anyway is refused atomically. A Reaction listed inside a reaction
 window is offered before `ValidateAbility` sees it, so `AddReaction` asks the lock too (`ActionLockRejection`).
+**The lock and the atomic payment of costs (#356).** #356 makes a NEGATED action pay every cost it declares (`AbilityDefinition.Costs`, `AbilityCosts.cs`) and only skip its effects, and makes payment atomic: if any
+cost is blocked by a negation (`CostPaymentBlockedByNegation`, the one predicate) the whole action is negated and pays nothing (`AbortActionForBlockedCost` -> `CompleteNegatedAction`: taken, used, its Strategy spent). The lock is a
+different thing and never reaches that machinery: an action a locked Personality may not perform is **refused in `ValidateAbility`** -- never announced, so nothing is paid (no bow, Gold, Honor or Favor) and its use is not
+spent, whether or not the same action would later have been negated (`LockedActionsPayNothing`: an ability with a declared bow cost, locked, is listed disabled and refused, the Farm unbowed and the use unspent, with and without
+the whole-action negation seam; unlocked and negated it pays the bow and not the effect). An action **announced before** the lock is taken and resolves as announced -- a lock does not reach into a window the action
+waits in (nothing places a lock from inside one today; the behaviour is pinned so a future card that does decides it on purpose). Order Seppuku is barred by the lock and, when a Hesitation pass is owed (#356), by that: the
+pass is the reason listed, and either alone bars it.
 **A Reaction IS an action (#359, `IsAction`).** The lock's check begins `if (!IsAction(ability)) return;`: the central classification (`ReactionsAreActions.cs`: Limited, Open, Battle, BattleOrOpen and
 Reaction are actions; a trait such as an `encircled-before-battle` `BeforeResolution` effect is not, and is never barred). So a locked Personality cannot perform a Reaction in **any** window, and -- the same
 principle #335 states for its own reactions, "a reaction is applicable only when it could do something, so no window opens for nothing" -- **no window opens for a Reaction nobody may play**:
@@ -230,6 +237,13 @@ for the rehonor rule.
   are not this window's business); the window is then about the new card (`FollowRedirectInWindow`) and the targets still to come are unchanged. A re-check (Yurishi) asks the same slot question of the same
   card. Tested with Merchant guard + Kakihara in both slot orders, the negation skipping the second window, Sakuma offered for Yoshitada's Political target, and Ezuno redirecting the first slot
   (`TargetedReactionsPerTarget`, `RedirectInsideASlot`). *Alternative:* a redirect that re-validates the whole action (rejected: it would refuse a legal redirect because an unrelated slot's card changed).
+- *Out-of-play windows (#367).* An out-of-play Reaction window -- Unimpeachable Name's "before the resolution of another player's action", the additional-action window -- is about the ACTION, not a target, and opens
+  only for a card that could really be played from where it is (`OutOfPlayReactions`, `AbilitySourceZoneAllows`: a Strategy in hand, a Reaction whose trigger names the discard pile, a Discipline card in a discard pile;
+  not a Strategy already played, not a card that is a Reactor only in play). Per-target windows and these do not interact: a multi-target action asks Unimpeachable Name **once**, not once per target
+  (`OutOfPlayAndPoliticalWindowsPerTarget`), and the per-target windows are built only from in-play reactors (`OwnsBeforeActionReaction`, `OwnsTargetedActionReaction`), so #367's rule cannot change which targets open a
+  window. (As before, an action that opens a before-action window is not also offered the out-of-play one at its announcement; that ordering is main's, unchanged.) Sakuma's Political reaction and Kakihara's own each
+  get one window per target that has a reactor for it: on a Political two-target action naming Kakihara and a plain Personality, the first window offers both, the second Sakuma's only, exactly two windows in all; the
+  non-Political twin opens Kakihara's window alone (the `training-slots-two-political` fixture).
 - *Nested windows (#359, `SuspendedWindows`).* A Reaction is an action, so one that names a card opens a before-action window of its own, which suspends the window it was played in. The suspended record
   now also carries the window's target and the targets still to come (`SuspendedWindow.ReactionWindowTargetId` / `ReactionWindowRemaining`, saved by `SuspendOpenWindow`, given back by `RestoreSuspendedWindow`),
   so the window is handed back exactly as it was, with its target (`NestedWindowKeepsItsTarget`: Predator's move, a mover-negating Reaction naming Predator, the Predator owner's whole-action negation of that
@@ -371,17 +385,28 @@ ability fall through to the single-target check, which the mutation table now co
 and Jinn-Kuen 9445, wired on main, were dropped; the stale #336 notes on main dropped), and `CARD_INVENTORY.xlsx` (regenerated by the script, not merged; 438 wired). Integration work beyond the text: the lock and
 `IsAction`, the per-target windows against R's reactions, Predator against `MovesToBattle`, the wire (all above), the `RunUntil` helper of my suites (it now declares the attack: `declareAttack`, the Declaration
 Segment of #359) and `declareAttack` in the pinned action-type inventory (the Attacker's own decision, not an action of a Personality). The Server and Transport tests and the client build were re-run.
+**Third sync (origin/main fe7f89ed: #356 atomic cost payment, #357 the alternative-cost rulings, #367 out-of-play windows).** Text conflicts: `CardAbilities.cs` (`AbilityDefinition` gained `Costs` beside `Slots`/`Move`; Rumormonger
+kept my printed-Personal-Honor reading and main's removal of the in-case bow, now a declared cost; Sakuma reads the window's target), `CardCatalog.cs`/`PublishedContent.cs` (the wave loaders; main's Foothills Keep,
+`stronghold-wave-5`), `MatchQueries.cs` (Order Seppuku: an owed Hesitation pass and the lock each disable it), `TargetedActionReactions.cs` (the held action's subject is the window's target AND main's
+`BowOrDestroyCostSubjects`, which replaced `CostSubjectOf`), the inventory workbook (regenerated; 439 wired) -- no count pin exists any more, main's `Program.cs` suite discovery is taken, and the two manifests are
+unchanged (no wave-number collision: main has personality waves 30, 31, 33, 38, strategy 22, 27 and stronghold 5, 8). **Costs of the new abilities (`Costs`).** Of the seven cards' abilities only one pays a cost that is not Gold or a played Strategy: Bonds of Coin's
+Favor half, "Bow your Stronghold and discard the Imperial Favor". Bowing the Stronghold is now declared (`ActionCost.BowStronghold`, on a new `CostSubject.Stronghold` -- the acting player's own Stronghold) and the case no
+longer bows it; the Favor discard is paid where every Favor action's is, and `bonds-of-coin-draw` is added to the negated-action list in `ResolveNegatedAction` (it was only in the executing one), so a negated Bonds of Coin
+bows the Stronghold and discards the Favor and draws nothing, and a blocked cost pays neither. The others declare none because they have none: Hotako's Fear Open, Yoshitada, Fear Me!, Gold and Steel, Bonds of Coin's destroy
+half, Sea Troll Predator and Liu-Xeung's Battle action bow, discard and lose nothing (the performer "choose your performing unbowed X" is a requirement, not a cost; Fear Me!'s and Gold and Steel's Strategies are spent as
+any hand-played card, which `CompleteNegatedAction` does). `NegatedActionsPayWhatTheyDeclare` runs Bonds of Coin (both halves), Yoshitada and Fear Me! under the whole-action negation seam and shows each pays exactly that and
+nothing else. *Behaviour changes:* (1) a negated Bonds of Coin Favor action now pays its Stronghold bow and Favor discard (a negated action always pays its costs, #356); (2) an owed Hesitation pass disables Order Seppuku
+whatever the lock; nothing else of this change's behaviour moved. Test-side: `InnateActionInventory` reads the equip offer from `TimingGrants.cs` (Foothills Keep moved it out of `MatchQueries.cs`).
 Re-run after the merge: `bash tools/check.sh --skip-client`, and the mutation checks below on the merged tree (including the ones touching F's areas: a copied ability exempt from the lock, whole-action negation ignored).
 Lock and F's copy primitive: an ability a locked Fukuzo copied is barred (`CopiedAbilityIsBarred`, mutation-checked).
 
 ## Validation
 
-`bash tools/check.sh --skip-client` on the tree merged with origin/main 7ce03fc6, all green: the Python tool suites, 216 core, the published guard (59 -- derived from the JSON files, with the two new wave manifests), and every suite of main
-(`additional-action-bursts` 9, `alternative-costs` 13, `attach-from-discard` 14, `battle-absent-moves` 7, `battle-rulings-2` 18, `battle-timing` 23, `card-copy` 15, `daigotsu-bofana` 19, `delayed-move-home-wave` 11,
-`discipline-absent` 15, `effect-choice` 10, `either-or` 17, `fading-shadows` 9, `follower-performer` 8, `gold-parity` 18, `gold-quote` 20, `kyuden-hida-exp` 6, `recon-action` 11, `targeted-action-reactions` 30 ...)
-and the four suites of this change -- `action-lock` 15, `multi-target` 23, `move-destination` 12, `stat-penalty` 10 -- then `L5R.AI.Tests` 27, `L5R.Server.Tests` 8 and `L5R.Client.Transport.Tests` 7 (the command and option
-fields cross the wire, `NoTarget` and a follow-up slot included). `dotnet build src/L5R.Client/L5R.Client.csproj` builds; Godot is not available on this machine, so the client's import/smoke is CI's. Published pool: 438
-distinct non-ScenarioOnly ids (see the count paragraph at the top: nothing is pinned in a shared line any more).
+`bash tools/check.sh --skip-client` on the tree merged with origin/main fe7f89ed, all green: the Python tool suites, 216 core, the published guard (59, derived from the JSON files with the two manifests of this change), every suite of
+main (among them `negated-costs` 14, `out-of-play-reaction-window` 6, `foothills-keep` 10, `alternative-costs` 16, `targeted-action-reactions` 30, `battle-rulings-2` 18, `additional-action-bursts` 9) and the four suites of this
+change -- `action-lock` 16, `multi-target` 25, `move-destination` 12, `stat-penalty` 10 -- then `L5R.AI.Tests` 27, `L5R.Server.Tests` 8 and `L5R.Client.Transport.Tests` 7 (the command and option fields cross the wire, `NoTarget`
+and a follow-up slot included). `dotnet build src/L5R.Client/L5R.Client.csproj` builds; Godot is not available on this machine, so the client's import/smoke is CI's. Published pool: 439 distinct non-ScenarioOnly ids (see the
+count paragraph at the top: nothing is pinned in a shared line any more).
 
 ## Mutation checks
 
@@ -390,7 +415,7 @@ branch before the second sync, the mutations for the six rulings and the innate-
 main's suites as well as this change's (the lock family, whole-action negation, the per-target windows and the adjacency mutations, and the older ones that the merge could have changed), plus twelve new ones for the
 integration (a locked Personality's Reaction opening a window, the lock exempting Reactions, the window's subject read from the command's primary target, the per-target window ignoring targeted-by-action reactors, a redirect that
 does not rewrite its slot or move the window, a suspended window losing its target, Predator marked `MovesToBattle`, a move to the current battlefield not marked, `NoTarget` off the wire, a slot ability falling through
-to the single-target check). Findings that led to tests in the first run: "window state survives the action" (now asserted in `OneWindowPerTarget`), "unit total Gold cost reads printed costs"
+to the single-target check). **Third, on the tree merged with origin/main fe7f89ed (#356, #357, #367):** the mutations touching merged areas re-run against the WHOLE suite with no filter (the lock family, the per-target windows, Predator and `MovesToBattle`, the slot chain), plus five new (Bonds of Coin declaring no Stronghold cost, the negated-action Favor list, the Stronghold cost subject, the lock in Order Seppuku's listing, the cost subjects in the held action's subject); all killed. "A whole-action negation is ignored" was not re-run: main now has its line twice, so the mutation no longer applies uniquely, and F's and main's own negation suites kill any change to it. Findings that led to tests in the first run: "window state survives the action" (now asserted in `OneWindowPerTarget`), "unit total Gold cost reads printed costs"
 (`UnitTotalGoldCostIsCurrent`) and "player slot not required" (through `training-slots-mixed`).
 
 | Mutation | Result |
@@ -465,8 +490,13 @@ to the single-target check). Findings that led to tests in the first run: "windo
 | duplicate cards in a slot accepted | `BondsOfCoinDestroys` |
 | Hotako Honor loss missing (packaging) | `PublishedShape`, `LionClanDiscountThroughQuotePurchase` |
 | NoTarget does not cross the wire (server test) | `every command field and every Gold quote cross the wire intact` |
+| Bonds of Coin declares no Stronghold cost | `NegatedActionsPayWhatTheyDeclare`, `BondsOfCoinDraws` |
+| a negated Bonds of Coin keeps the Favor | `NegatedActionsPayWhatTheyDeclare` |
+| the Stronghold is not a cost subject | `NegatedActionsPayWhatTheyDeclare`, `BondsOfCoinDraws` |
+| Order Seppuku ignores the lock in its listing | `InnateActionSeppukuIsBarred`, `LockedActionsPayNothing` |
+| the held action subject ignores the cost subjects of #356 | `MochitokoProtectsADeclaredCost`, `MochitokoBlocksAFollowerCost`, `CostBlockIsPerVerb` |
 
-67 of 70 mutations are killed. The three survivors are equivalent mutants, not gaps: (1) "hand slot lists every hand" -- the candidate list is a superset that `ValidateSlotCard` filters by each category's own ownership
+72 of 75 mutations are killed. The three survivors are equivalent mutants, not gaps: (1) "hand slot lists every hand" -- the candidate list is a superset that `ValidateSlotCard` filters by each category's own ownership
 rule, so the visible options are identical (the privacy test checks the serialized options); (2) "Liu-Xeung trait counts Followers" -- a Follower is `Zone.Attached`, so the "at a battlefield where she is present" clause
 already excludes it and the Personality test is belt and braces; (3) "a zero cost is reduced again" -- a `-0` modifier is not a penalty (the amount is not negative), so nothing observable changes. Two that are killed
 by a large part of main's suites as well as by ours are expected to be: "window opened for a target nobody can react to" and "the per-target window ignores targeted-by-action reactors" (every action with a reactor in play
