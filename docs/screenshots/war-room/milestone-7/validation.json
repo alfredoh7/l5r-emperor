@@ -1,0 +1,263 @@
+{
+  "created_utc": "2026-09-16T00:50:17.051327+00:00",
+  "branch": "codex/233-war-room",
+  "base_commit": "003d19239f93fb0165e4e262d7d2e61cf42ff2a4",
+  "revision": "M7 working tree identified by source hashes; committed with this evidence.",
+  "host": "macOS Apple M1 Max",
+  "renderer": "Godot 4.7.2 .NET Compatibility (OpenGL 4.1 Metal)",
+  "build": {
+    "result": "PASS",
+    "warnings": 0,
+    "errors": 0,
+    "log_sha256": "7bca4ce4282598b13852d9cf252e6a337e44408c492a5ccc994bd0e52b6cf639"
+  },
+  "godot_import": {
+    "result": "PASS",
+    "log_sha256": "72dd9d4b4e2d8a240beb0860afa92a371ffa0ae1d47bd059bab18f2c8b959b1d"
+  },
+  "native_cases_passed": 13,
+  "cases": [
+    {
+      "case": "playable",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/playable.log",
+      "log_sha256": "e26e59f91bddc5fe4b59c3aa6b4129a457744aa765dbbae5e57765712f833e90",
+      "capture_sha256": "72a65267e87508b41b74fcebc9875c42f2f4e4d5083532753c9cc1fd8dbda0eb",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/playable.png",
+        "WAR_ROOM_PROJECTION_PASS: 750 visible samples, max 0,000252 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "battle-focus",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/battle-focus.log",
+      "log_sha256": "f7316d60ff8c43d186bf5103bb0b558334ebbff0a6caca8969f077fdd99c3c76",
+      "capture_sha256": "155a2405cbec32d29e523745de02cd79fc052c11f65c64bd849f393e0766a5d2",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/battle-focus.png",
+        "WAR_ROOM_PROJECTION_PASS: 771 visible samples, max 0,000252 px; 4 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "max-zoom",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/max-zoom.log",
+      "log_sha256": "5189da08288af9423e6420006cebc12c37b46c86457a3570ae3338b61fb59fe5",
+      "capture_sha256": "47799a6aea8fe7e4b73a865661c51c0a85430c5dcd12f3f6678192e255cf2c4b",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/max-zoom.png",
+        "WAR_ROOM_PROJECTION_PASS: 741 visible samples, max 0,000244 px; 34 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "wide",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/wide.log",
+      "log_sha256": "087cc1ba85d746700a32c9dd2a400efb4066233f43b5e9452b68b61cdfdd3292",
+      "capture_sha256": "333baef91c18fabda91474f18a0a65faebe09e6d61668d2439b04a3467008702",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/wide.png",
+        "WAR_ROOM_PROJECTION_PASS: 700 visible samples, max 0,000252 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "compact",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/compact.log",
+      "log_sha256": "9fecbf0cb77af85667fbad9b5cea2691f79fd349b2247b8277587cc3920ecd82",
+      "capture_sha256": "75b3adf3a5a2352501d1e633e4f27bff4fbf08311b6a2fc1e144a4a1cb5d2e54",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/compact.png",
+        "WAR_ROOM_PROJECTION_PASS: 750 visible samples, max 0,000173 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "expanded",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/expanded.log",
+      "log_sha256": "d089faac6ec3c8d6e693a2c6544780893ee4ddd8e24314a92e5da1b54641ab4c",
+      "capture_sha256": "313b5f35f6b47319c8f9cacbb735cff68ae9a9df81502868d014a13d4c186a39",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/expanded.png",
+        "WAR_ROOM_PROJECTION_PASS: 250 visible samples, max 0,000153 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "reduced-motion",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/reduced-motion.log",
+      "log_sha256": "6d21836ec5d28a95e9e282a42ef23d3192f89d88cfdbce0fe40e4a1c33df7b75",
+      "capture_sha256": "07ba32432af99c3fee9a70e5a032947df4bfc43d0f92335c1bfe9ec0b935a0b2",
+      "markers": [
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/reduced-motion.png",
+        "WAR_ROOM_PROJECTION_PASS: 275 visible samples, max 0,000153 px; 0 offscreen/behind-eye samples excluded."
+      ]
+    },
+    {
+      "case": "composition",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/composition.log",
+      "log_sha256": "9307b7bcfbb82cfed3d52be04226466ce3d5eb740db140fb17cbd00fe3580415",
+      "capture_sha256": "ba3968c23b1376fb1cae3bc8c37663c6c99627aeb7c468e6290ac41681e6708c",
+      "markers": [
+        "ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 byte-identical; motion resumes at phase 2.",
+        "ROOM_FILM_PASS: 192 native frames at 24 fps; view=composition"
+      ],
+      "frames": 192,
+      "fps": 24,
+      "clip_sha256": "34a113c42205cfd380f801761b4bd72b8f591df6bd00a09efaa0196998f70ef3"
+    },
+    {
+      "case": "room-lantern",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/room-lantern.log",
+      "log_sha256": "421a2db46faa142b08912541c955b5f90e196b863d8a4daa804d15fe60954692",
+      "capture_sha256": "e297c33c53f08994f51922b80836bb6cb87d2a53721957ffdf52ee3204a2d65d",
+      "markers": [
+        "ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 byte-identical; motion resumes at phase 2.",
+        "ROOM_FILM_PASS: 144 native frames at 24 fps; view=room-lantern"
+      ],
+      "frames": 144,
+      "fps": 24,
+      "clip_sha256": "3ff920dbcc97a1812b69dbb6177217f2018a4781fde5d5d8194c0ebb688844eb"
+    },
+    {
+      "case": "brazier",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/brazier.log",
+      "log_sha256": "138729f7ca81603abf406bdf6e8c85b2ecd9375d6aad543352b1085767185c73",
+      "capture_sha256": "2101bde35e563035846033a3f9b655768dba12fb0fc5734fb4cefc65ae609768",
+      "markers": [
+        "ROOM_MOTION_PASS: phases 0/4 differ; disabled phases 0/8 byte-identical; motion resumes at phase 2.",
+        "ROOM_FILM_PASS: 144 native frames at 24 fps; view=brazier"
+      ],
+      "frames": 144,
+      "fps": 24,
+      "clip_sha256": "3ea7e04b6a7b418006e863a0305768457b0a9e79d1c2e43903872bea77da5f07"
+    },
+    {
+      "case": "menu",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/menu.log",
+      "log_sha256": "fd385bf8e1e898fece9325e843b4686d514dcc924eb0a5984dee9e6cc55c4ab2",
+      "capture_sha256": "0c6a861ec7d6f7b6786c7303ab0bb43aa5db8e1dbba837bd4002598e6460322c",
+      "markers": [
+        "MENU_CHECK_PASS: content clears dismissal, navigation/dismissal callback works, match unchanged.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/menu.png"
+      ]
+    },
+    {
+      "case": "guide",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/guide.log",
+      "log_sha256": "928559dba6c75eb5b9fb9bdea064b7d98ac6aefca67fef7d52ab1f7526178fe9",
+      "capture_sha256": "9712e21afef5e0900827ee5071b045d82c9cb0d5f1291b437db63efeda261cef",
+      "markers": [
+        "MENU_CHECK_PASS: content clears dismissal, navigation/dismissal callback works, match unchanged.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/guide.png"
+      ]
+    },
+    {
+      "case": "launcher",
+      "result": "PASS",
+      "log": "artifacts/war-room-work/milestone-7/launcher.log",
+      "log_sha256": "77603f683143921d976411f0ef8e39cc41a58d3586b4b41a26ee8b8c2f3753fb",
+      "capture_sha256": "fa8375ac98b37129bb53504377e4b21236895ab9b9382703b91733675c316f14",
+      "markers": [
+        "MENU_CHECK_PASS: content clears dismissal, navigation/dismissal callback works, match unchanged.",
+        "CAPTURE_RESULT: Ok /Users/alfredo/Documents/ChatGPT/Legend of Five Rings/artifacts/war-room/docs/screenshots/war-room/milestone-7/launcher.png"
+      ]
+    }
+  ],
+  "close_views_inspected": [
+    "composition-wide",
+    "floor",
+    "stone",
+    "dais",
+    "chest",
+    "shoji"
+  ],
+  "source_sha256": {
+    "src/L5R.Client/Art/WarRoom/chest-m7.glb": "18cfa233ec503f98f54f70b42e8df4f5741378e61ba78faf6507ed9f1262eb56",
+    "src/L5R.Client/Art/WarRoom/chest-m7_chest-m7_0.png": "e72d4ee673deca70387c4f8bc86f34f667bb399b09dd0bc608ada21f4c20381b",
+    "src/L5R.Client/Art/WarRoom/chest-m7_chest-m7_1.jpg": "32218e447b119a5be5572c206420d1d90dcd73d65c4dfbc763d919e5a14c5d5a",
+    "src/L5R.Client/Art/WarRoom/chest-m7_chest-m7_2.png": "86b574b73e53b2bb0a039d09fa7d7b15b47ad854bd9a695b67dbcd16ad3dd665",
+    "src/L5R.Client/Art/WarRoom/cloth.gdshader": "47009b82e7941b8136ba1515875949b0e97bd63fe65e2cc21f6d05e0f71df80a",
+    "src/L5R.Client/Art/WarRoom/column-timber-m7.glb": "e079a825074cd5256d57963dfedbbf82b138ce1eab21a135f0c500f180d57ae2",
+    "src/L5R.Client/Art/WarRoom/column-timber-m7_column-timber-m7_0.png": "e17594f297fcf4e49e0d7431abcc6a1637f66d49ea1576f951b394541363749a",
+    "src/L5R.Client/Art/WarRoom/column-timber-m7_column-timber-m7_1.jpg": "9036568d0d835c1cc209281072846c7b5692a7a7f11c361cf39ac756eed6ca1b",
+    "src/L5R.Client/Art/WarRoom/column-timber-m7_column-timber-m7_2.png": "bd120b05fe57d366f354f62f6aac3e8d6821e15cf1480789bd3be818cf684362",
+    "src/L5R.Client/Art/WarRoom/dais-fit-m7.glb": "45825b747e0fdeac5eacdc15c7e02afe845f4e1a49b86f704cd7afa0c4626db0",
+    "src/L5R.Client/Art/WarRoom/dais-fit-m7_dais-fit-m7_0.png": "b80840846f7030d7c79a312ca47229a807764190a47cd6d1babd80fc84270d3f",
+    "src/L5R.Client/Art/WarRoom/dais-fit-m7_dais-fit-m7_1.jpg": "72674ace149fc5dfbe177f1feaa10b67482202b5f75b932deeb97b712edca936",
+    "src/L5R.Client/Art/WarRoom/dais-fit-m7_dais-fit-m7_2.png": "a01799e9f49ea276ab9e7833a49787e62147799a505d3bc0481423af961aef9b",
+    "src/L5R.Client/Art/WarRoom/floor-irradiance-m7.exr": "dc113916bfa1c31167beb264675f9f6a480f024c796fe5283d4214e290b1613a",
+    "src/L5R.Client/Art/WarRoom/floor-lighting-m7.gdshader": "49001f96209ebf79009ce84a95e134d1906b312b212ba55cf81a03e1c61b967d",
+    "src/L5R.Client/Art/WarRoom/floor-lighting-m7.gdshader.uid": "dde253cde78b784889c4f7e79d587b0bb12739d33df6818ec2665a8ff308af81",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3.glb": "afda3688467b8242306db13edf1101c6ad0ae4a3214050fd99eb63538669eba1",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-a-m7_0.png": "d95cafba960cc865757af5f898c0baaaf30f234070edeeac0758847ef0f55bb3",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-a-m7_1.jpg": "d835305f4b6b404ccbf242a0374ee7ef78d49da5a51427b5a9af80ddccb1bcb3",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-a-m7_2.png": "9bf7b50a3353163840eafa0fe63c12b104637a505f8c07a22b0058e809208e67",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-b-m7_0.png": "3a832d32b3064607bd9641427112afafc21d39ff22036b62ee9cda2a1fded02e",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-b-m7_1.jpg": "8288b86e1b84f90d7270a04acf64248f8eddfe5873fe6f50400b4de2a4bf63bb",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-b-m7_2.png": "94f8154474b9ef488903cfbe62f38b9c446b429154b7c1a2ec5652d9b80aead2",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-c-m7_0.png": "173c6740050aac05c2fc5a1c8f24fa0a635b7f4a1df01ef404a7977f4b62fb99",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-c-m7_1.jpg": "a2b3809bf85bfc1ab361e103155e5cd1d956a37bb7799ee5295cf54fd565df08",
+    "src/L5R.Client/Art/WarRoom/fortress-hall-b3_floor-c-m7_2.png": "aa5e5f29b7393ba12fd431ccf6a3395d6d9ee60f95d4ef92d5985cc8698d29e3",
+    "src/L5R.Client/Art/WarRoom/layout-b3.json": "af05b2e530f24b0c7f4ab57d1a59f24c658169fb332b70f11b8ed0753eaa8a15",
+    "src/L5R.Client/Art/WarRoom/shoji-paper-m7.gdshader": "0eab3fb86864d9679dce2fbfb0e8590ab008f585095ea3513b6bfb0758de3673",
+    "src/L5R.Client/Art/WarRoom/shoji-paper-m7.gdshader.uid": "60734aea7b8d4df5a377ad25475300ef171eac2d86ad0b32a68286ff178cee16",
+    "src/L5R.Client/Art/WarRoom/stone-a-m7.glb": "7e452f96c9fa8e0f2b35329c52deb7ad47572fb8cdc7e052bf0221fa8ddf431f",
+    "src/L5R.Client/Art/WarRoom/stone-a-m7_stone-a-m7_10.jpg": "ac18bc4668b25c85b00bcb5d3d2be9b1aecd3a5edab17da08eae00f569f6d922",
+    "src/L5R.Client/Art/WarRoom/stone-a-m7_stone-a-m7_11.png": "24e49ab0a82b3ac4f5b7de8be4df49f00876a886281df44e91318fd723c70d88",
+    "src/L5R.Client/Art/WarRoom/stone-a-m7_stone-a-m7_12.png": "e569164535ec0f390811ce02bd524a8195678af034007c206a352a634b1dad1c",
+    "src/L5R.Client/Art/WarRoom/stone-b-m7.glb": "556e78203db10c1f2fb473bf34a9fc35dcf27327ab1265c24e462316cc4e3b6e",
+    "src/L5R.Client/Art/WarRoom/stone-b-m7_stone-b-m7_10.jpg": "f10b288e676225fb0c55d9055c381553eb6943f58f4d2d6404c237e522ecf5a5",
+    "src/L5R.Client/Art/WarRoom/stone-b-m7_stone-b-m7_11.png": "71a2dccc2aaacfb2deaef7ce184cc937126831a8af3ef837e17130f16a5cde1b",
+    "src/L5R.Client/Art/WarRoom/stone-b-m7_stone-b-m7_12.png": "7468d56f86e2f2f290cbf45738ccb54496a743cd8d90b0a015c33b10fcf22bf2",
+    "src/L5R.Client/CardPaper.cs": "1d76fd8a6579795db381def93f5bb951574a909c99e96c4ae8a8f9b99aee9ce1",
+    "src/L5R.Client/FortressHall.cs": "9f15d9efcd6b9eff0ae35f886154f0ed910e96c24b872c5958557ad5dd9883e9",
+    "src/L5R.Client/TableArtStage.cs": "8b635a707d4cb5bcb32fdf9228c451a051792dff31446ffeb08272bd0abff17d",
+    "src/L5R.Client/WarRoomReview.gd": "4027427c5148f8910dd0f6218dfbc4a4bde6ccb04b01a435270e52ee2901c906",
+    "src/L5R.Client/WarRoomStage.cs": "f1649e29d2ad2323cfe0973d9d52763cb9c8b696e0edd8ad0d914bbd5cf953c9",
+    "tools/blender/bake_fortress_floor.py": "4a20f4517507418c139c40803a0ddd05289d87945bc44c5b65ed62e547fc3941",
+    "tools/blender/build_fortress_dais.py": "9638ef8d26e903fd3deba75766f98d56faeb4f17576e9108d4b664dfc3444b9e",
+    "tools/blender/build_fortress_floor_panel.py": "da7b4560859b59e4b2dddb117efe5e7d8edbf25379b3794c44b249a627e0b8b9",
+    "tools/blender/build_fortress_hall.py": "9aa3e2ec6d39dff4899f735277777ace50dfbc4489a35b10bed7f59592937ddb",
+    "tools/blender/fortress_m7_geometry.py": "f06cb62bf9990c4cb942c5724acdfa2df7fdbc5021e45ae26a00767bf1a77356",
+    "tools/blender/prepare_fortress_m7.py": "ba78dca47ce22d2c9f981414a42cc9c8c0aeca211c28b5de81436383c5c2928d",
+    "tools/blender/prepare_fortress_timber.py": "aec7edde6eafa985a133d33ca75a4781c145181acf02b904049dd33b60216981",
+    "tools/blender/review_fortress_m7_assets.py": "8a36a9be086da5a9f3e311a3b6759c703be31f302a820c4b3d5ade5b7fed6773"
+  },
+  "production": {
+    "meshy_jobs": 8,
+    "credits": 155,
+    "balance_before": 1620,
+    "balance_after": 1465,
+    "rejected_jobs": [
+      "dais-m7: generated flat slab, replaced by fitted Blender stairs plus Meshy texture"
+    ],
+    "runtime_texture_limit": 2048,
+    "floor_variants": 3,
+    "stone_variants": 2,
+    "floor_bake_samples": 128,
+    "table_lamps": 0,
+    "room_practicals": 9,
+    "side_screen_leaves": 10
+  },
+  "reviewed": [
+    "Approved source beside native room and previous M6",
+    "Native floor, stone feet, dais, chest and side screens; corrected chest/column clearance",
+    "Playable, wide, expanded units, maximum zoom, menus and table guide",
+    "Native fire frames at different phases and exact reduced-motion freeze/resume"
+  ],
+  "launcher_invocation": "env PATH=/usr/bin:/bin:/usr/sbin:/sbin /bin/bash 'Play Latest.command' --resolution 1920x1080 -- --capture=<absolute-output.png> --capture-mode=published-lacquer-menu",
+  "validation_correction": "The first guide invocation used an unsupported published-lacquer-guide name and captured the board. It is excluded from passing cases. The guide was rerun with published-rules and its MENU_CHECK_PASS marker and actual guide image verified.",
+  "remaining": [
+    "User visual milestone feedback; no claim of literal pixel-identical reconstruction.",
+    "Native Windows graphical testing and sustained performance profiling.",
+    "New-commit CI and applicable review before merge.",
+    "Fixed-pitch architecture and rear matte; floor-only light bake with native modulation, not whole-room dynamic GI."
+  ]
+}

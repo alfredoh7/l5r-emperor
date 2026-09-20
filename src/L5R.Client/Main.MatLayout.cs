@@ -9,7 +9,7 @@ public partial class Main
     private InkMatSections _matSections = null!;
     private float _playLeft, _playWidth;
     private int _matMatchEpoch;
-    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth;
+    private float _enemyProvinceY, _reservedBattleHeight, _reservedHoldingWidth, _regionLayoutExtent;
     private readonly Dictionary<int, float> _reservedHomeBands = [];
     private readonly float[] _reservedLaneWidths = new float[4];
     private readonly Dictionary<int, Rect2> _battleCourts = [];
@@ -43,6 +43,9 @@ public partial class Main
     private void MeasureTableLayout()
     {
         var oldSize = new Vector2(WorldWidth, _worldHeight);
+        var oldRegionExtent = _regionLayoutExtent;
+        _regionLayoutExtent = View.Players.SelectMany(p => p.Provinces).Sum(ProvinceCardWidth);
+        var oldPersistentExtent = new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1));
         if (!_tableLayoutSeen)
         {
             _matMatchEpoch++; _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths);
@@ -53,12 +56,14 @@ public partial class Main
         if (!BattleActive && !PresentationBusy)
         { _reservedBattleHeight = 0; _reservedHoldingWidth = 0; _reservedHomeBands.Clear(); Array.Clear(_reservedLaneWidths); }
         _matTargets.Clear(); _battleCourts.Clear(); _battlePlacements.Clear();
+        MeasurePersistentHome();
         for (var i = 0; i < 4; i++)
         {
             var unitWidth = View.Players.SelectMany(p => CourtUnits(p, i)
                 .Select(c => UnitWidth(c, p))).DefaultIfEmpty(154).Max();
             _laneWidths[i] = _reservedLaneWidths[i] = Math.Max(_reservedLaneWidths[i],
-                Math.Max(210, ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
+                Math.Max(View.Players.Max(p => ProvinceCardWidth(p.Provinces.Single(v => v.Index == i))) + 24,
+                    ArmyColumns(i) * (unitWidth + CardGap) + MatPadding * 2 + 10));
         }
         // This inner play area mirrors by seat. Holdings deliberately remain on
         // screen-left for both owners and never enter this mirrored slot system.
@@ -79,7 +84,7 @@ public partial class Main
             _homeHeights[player.Id] = Math.Max(118, MatRowsHeight(_homeRows[player.Id], player));
             if (BattleActive || PresentationBusy)
             {
-                var returning = player.Home.Concat(player.Army).Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding)
+                var returning = player.Home.Concat(player.Army).Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding && !IsPersistentHomeCard(c))
                     .Select(c => c with { Bowed = true }).ToArray();
                 _homeHeights[player.Id] = _reservedHomeBands[player.Id] = Math.Max(_reservedHomeBands.GetValueOrDefault(player.Id),
                     Math.Max(_homeHeights[player.Id], MatRowsHeight(PackMatRows(returning, player, _playWidth - 2 * MatPadding), player)));
@@ -88,7 +93,7 @@ public partial class Main
         }
         holdingWidth = _reservedHoldingWidth = Math.Max(holdingWidth, _reservedHoldingWidth);
         _playLeft = MatPadding + holdingWidth + MatGap;
-        WorldWidth = _playLeft + _playWidth + MatPadding;
+        WorldWidth = _playLeft + _playWidth + MatPadding + (_persistentWidth > 0 ? MatGap + _persistentWidth : 0);
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         var provinceHeight = MatHeader + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding;
         // Restore the original table-facing Home rows and compact province
@@ -107,12 +112,13 @@ public partial class Main
         var courtBand = _battleHeight > 0 ? _battleHeight + neckGap : 0;
         _battleY = MatPadding + provinceHeight + neckGap;
         _enemyHomeY = MatPadding + provinceHeight + MatGap + (enemyDefends ? courtBand : 0);
-        var enemyBandBottom = Math.Max(_enemyHomeY + _homeHeights[enemy.Id], MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy));
+        var enemyBandBottom = Math.Max(Math.Max(_enemyHomeY + _homeHeights[enemy.Id], MatPadding + MatRowsHeight(_holdingRows[enemy.Id], enemy)), MatPadding + _persistentHeights[enemy.Id]);
         _selfHomeY = enemyBandBottom + MatGap;
         if (!enemyDefends) _battleY = _selfHomeY + _homeHeights[Self.Id] + MatGap;
         _selfProvinceY = _selfHomeY + _homeHeights[Self.Id] + MatGap + MatHeader + (!enemyDefends ? courtBand : 0);
         _worldHeight = Math.Max(_selfProvinceY + PlaneHeight(CardHeight) + ProvinceThresholdArt.Footer + MatPadding,
             _selfHomeY + MatRowsHeight(_holdingRows[Self.Id], Self)) + MatPadding;
+        _worldHeight = Math.Max(_worldHeight, _selfHomeY + _persistentHeights[Self.Id] + MatPadding);
 
         foreach (var player in View.Players)
         {
@@ -123,15 +129,22 @@ public partial class Main
                 holdingWidth, MatRowsHeight(_holdingRows[player.Id], player));
             _matTargets.Add(new($"holdings:{player.Id}", "Holdings", _holdingBounds[player.Id]));
             _matTargets.Add(new($"home:{player.Id}", "Home", _homeBounds[player.Id]));
+            if (HasPersistentHome(player))
+            {
+                var persistent = new Rect2(_playLeft + _playWidth + MatGap, player.Id == Self.Id ? _selfHomeY : MatPadding,
+                    _persistentWidth, _persistentHeights[player.Id]);
+                _persistentBounds[player.Id] = persistent;
+                _matTargets.Add(new($"persistent:{player.Id}", "Persistent Home", persistent));
+            }
             // Each surviving province has its own fixed identity and C threshold.
             // Destroying one never shifts or renumbers its surviving neighbours.
             foreach (var province in player.Provinces.Where(p => !p.Destroyed))
             {
-                var bayWidth = Math.Min(CardHeight + 8, _laneWidths[province.Index] - 12);
+                var bayWidth = Math.Min(ProvinceCardWidth(province) + 8, _laneWidths[province.Index] - 12);
                 _matTargets.Add(new($"province:{player.Id}:{province.Index}", $"Province {province.Index + 1}",
                     new Rect2(SlotX(player, province.Index + 2) + (CardHeight - bayWidth) / 2,
                         ProvinceRowY(player) - MatHeader, bayWidth, provinceHeight),
-                    ProvinceNumber: province.Index + 1, ConnectionAbove: player.Id == Self.Id,
+                    ProvinceNumber: province.Index + 1, RegionPair: province.Region is not null, ConnectionAbove: player.Id == Self.Id,
                     Connected: BattleActive && player.Id != View.ActivePlayerId &&
                         (View.CurrentBattleProvince == province.Index || View.Players.Any(p => CourtUnits(p, province.Index).Any()))));
             }
@@ -170,9 +183,14 @@ public partial class Main
             }
         }
 
+        MeasureRemovedPiles();
+
         // Keep a player's camera steady while ink and cards change positions.
-        // Fit/Home remains explicit and always frames the complete new layout.
-        if (_tableLayoutSeen && _cameraFitted && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
+        // An overview stays fitted when the contextual Home area appears or grows,
+        // so a newly gained Favor cannot appear behind the sidebar. A manually
+        // positioned camera remains under player control.
+        var persistentChanged = oldPersistentExtent.DistanceTo(new Vector3(_persistentWidth, _persistentHeights.GetValueOrDefault(0), _persistentHeights.GetValueOrDefault(1))) > 1;
+        if (_tableLayoutSeen && _cameraFitted && !persistentChanged && Math.Abs(oldRegionExtent - _regionLayoutExtent) < 1 && oldSize.DistanceTo(new Vector2(WorldWidth, _worldHeight)) > 1) _cameraFitted = false;
         _tableLayoutSeen = true;
         _board.Size = new Vector2(WorldWidth, _worldHeight); _world.Size = _board.Size; _pileHud.Size = _board.Size; _battleDecor.Size = _board.Size;
     }

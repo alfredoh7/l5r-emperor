@@ -105,15 +105,16 @@ public partial class TokenRailProbe : Control
             if(_stage==0)
             {
                 ReadingTooltip.LastText=null;
-                Input.ParseInputEvent(new InputEventMouseMotion { Position=point });
+                GetWindow().GrabFocus();GetViewport().NotifyMouseEntered();GetViewport().WarpMouse(point);
+                GetViewport().PushInput(new InputEventMouseMotion { Position=point,GlobalPosition=point },true);
                 _stage=1;_clock=0;return;
             }
             if(_stage==1)
             {
                 if(!_perspective && ReadingTooltip.LastText?.Contains("Tokens")!=true)throw new Exception("Native token tooltip did not open");
-                Input.ParseInputEvent(new InputEventMouseButton { Position=point,ButtonIndex=MouseButton.Left,Pressed=true });
-                Input.ParseInputEvent(new InputEventMouseButton { Position=point,ButtonIndex=MouseButton.Left,Pressed=false });
-                Input.ParseInputEvent(new InputEventMouseMotion { Position=new Vector2(5,5) });
+                GetViewport().PushInput(new InputEventMouseButton { Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=true },true);
+                GetViewport().PushInput(new InputEventMouseButton { Position=point,GlobalPosition=point,ButtonIndex=MouseButton.Left,Pressed=false },true);
+                GetViewport().PushInput(new InputEventMouseMotion { Position=new Vector2(5,5),GlobalPosition=new Vector2(5,5) },true);
                 _stage=2;_clock=0;return;
             }
             if(_clicks!=1)throw new Exception($"Native rail click selects owner exactly once: {_clicks}");

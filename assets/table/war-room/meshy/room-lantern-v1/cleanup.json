@@ -1,0 +1,50 @@
+{
+  "kind": "room",
+  "raw_sha256": "a18f4d29778ffbd16e2dae2edf2f50cc6258b6de21ce132562c8a8743b885d5f",
+  "raw_bounds": [
+    [
+      -0.49632900953292847,
+      -0.427623987197876,
+      -0.9520090222358704
+    ],
+    [
+      0.49559101462364197,
+      0.42764899134635925,
+      0.9509429931640625
+    ]
+  ],
+  "raw_triangles": 519876,
+  "mesh_count": 1,
+  "materials": [
+    {
+      "name": "Material_0",
+      "textures": [
+        {
+          "name": "Image_0",
+          "size": [
+            4096,
+            4096
+          ]
+        },
+        {
+          "name": "Image_1",
+          "size": [
+            2048,
+            2048
+          ]
+        },
+        {
+          "name": "Image_2",
+          "size": [
+            4096,
+            4096
+          ]
+        }
+      ]
+    }
+  ],
+  "removed_bulb_vertices": 4124,
+  "cleaned_triangles": 55599,
+  "cleaned_sha256": "89d1f9cbc2d0dc5b9d3003b33756e9eea70084dc9198121d5b1571a9459fd5cd",
+  "cleanup": "Grounded unit-height pivot; preserved generated material images/UVs; simplified triangulation to ~60k. Original retained in ignored download with durable hash. Native translucent panes and candle light assembled separately."
+}

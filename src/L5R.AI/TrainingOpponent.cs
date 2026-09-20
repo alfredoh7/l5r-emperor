@@ -105,6 +105,13 @@ public static class TrainingOpponent
         var card=self.Provinces.Select(p=>p.Card).Concat(self.Hand).FirstOrDefault(c=>c?.Id==command.CardId);
         switch(action.Type)
         {
+            // A conservative practice choice, not an automatic choice for the human.
+            case "harshChoices": return command.Choice=="decline"?150:20;
+            case "timesOfStrifeDiscard":
+                var eventDiscard=self.Hand.FirstOrDefault(c=>c.Id==command.TargetId);
+                return eventDiscard is null?-1000:150-HandValue(eventDiscard);
+            case "brashDraw":
+            case "overconfidentDraw": return command.Choice=="draw"?150:100;
             case "chooseShinden":
                 var threatened=self.Home.Concat(self.Army).FirstOrDefault(c=>c.Id==view.PendingChoice?.CardId);
                 return command.Choice=="honor" ? (opponent.Honor<35 && threatened is {Bowed:false,Force:>0} ? 150 : 80) : 100;
@@ -236,6 +243,9 @@ public static class TrainingOpponent
     private static int HandValue(CardView card)=>card.Definition?.Effect switch {"force-three"=>8,"bow-small"=>6,_=>card.Definition?.Type==CardType.Follower?5:4};
     private static string Explain(string type)=>type switch
     {
+        "harshChoices"=>"Preserve the province instead of exchanging it for cards.",
+        "timesOfStrifeDiscard"=>"Resolve the mandatory discard with a lower-value card from my own hand.",
+        "overconfidentDraw"=>"Accept the offered optional draw.",
         "purchase"=>"Develop Gold production early, then recruit Personalities and preserve a useful Proclaim opportunity.",
         "overlay"=>"Recruit the higher-Experience Personality for free while preserving the existing unit.",
         "proclaim"=>"Take the available once-per-turn Honor gain after the Personality enters play.",

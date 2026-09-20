@@ -1,0 +1,152 @@
+[
+  {
+    "clan": "phoenix",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 1,
+    "source_url": "https://images.oracleofthevoid.com/l5r/02/23/printing_9716_5_master.jpg",
+    "source_sha256": "99516abcbd7f53edef34866eb1868ae6a73bf1f7b8a18e0a800eba1d04468983",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/phoenix.webp",
+    "runtime_sha256": "d4006183579ced1da450751b00e75ed5fce581f97e2a9af76cd4abad0ce47b1e",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "crane",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 2,
+    "source_url": "https://images.oracleofthevoid.com/l5r/35/25/printing_9716_5_master.jpg",
+    "source_sha256": "26a89ba89779ec8511fd55a0ec9c51913ba36330d78e5dd442c4923eb6fc865e",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/crane.webp",
+    "runtime_sha256": "c02a57ef396901311e7737779cc221772923d8ca4c353792ed6fa901b026bc7a",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "scorpion",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 3,
+    "source_url": "https://images.oracleofthevoid.com/l5r/59/c1/printing_9716_5_master.jpg",
+    "source_sha256": "379e9dd9291d48c002473daed5ced9587f9c141a18122124c7d19481da699d59",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/scorpion.webp",
+    "runtime_sha256": "7a22ffdc2fba0615fcc7e60d6968069f7b331c8c6792e218c315cb5764b4d8d5",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "neutral",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 4,
+    "source_url": "https://images.oracleofthevoid.com/l5r/77/ff/printing_9716_5_master.jpg",
+    "source_sha256": "e7759564f9444209fa047a2db84705fc0f2a83db522283bee98e124195b27e2b",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/neutral.webp",
+    "runtime_sha256": "333688143ba4627699893b095695bfe86998a8c080cbc21da8231d266c9074fc",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "crab",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 5,
+    "source_url": "https://images.oracleofthevoid.com/l5r/9a/03/printing_9716_5_master.jpg",
+    "source_sha256": "dced1da43ee1cfd4eb2fd66becf5468161aef7f2812d26f8f007dceb18c5dcc5",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/crab.webp",
+    "runtime_sha256": "d04aabeeaf93227239382470969d67de60073f4999b0537e35fc987cc04f1b36",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "spider",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 6,
+    "source_url": "https://images.oracleofthevoid.com/l5r/b2/9b/printing_9716_5_master.jpg",
+    "source_sha256": "e772ce58811a230bcac54f733e35115f19090289a2ab9b59bcbbc68cb3b69fde",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/spider.webp",
+    "runtime_sha256": "3d451a99ab666524765b1be2cf1703979fbf4b6da1327d286ea8456c1a8567ff",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "unicorn",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 7,
+    "source_url": "https://images.oracleofthevoid.com/l5r/d2/72/printing_9716_5_master.jpg",
+    "source_sha256": "5e4349446ab6a8cdb3953d1feac8fc0b6f833e8e035f8be68e3e28316fe6e1ed",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/unicorn.webp",
+    "runtime_sha256": "06e6a0ed7fb0c0f6e94a0ea504a66006d8eb7ce3a4eb634bbe0033ee2fe2e22e",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "mantis",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 8,
+    "source_url": "https://images.oracleofthevoid.com/l5r/f5/c9/printing_9716_5_master.jpg",
+    "source_sha256": "9c37f5105aaeaa9da2eb38ead3429a1f59b892d2a94bb1a982ab15f15dd14534",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/mantis.webp",
+    "runtime_sha256": "3a6b8118af5d8f95901f325ae4e158bf690c87b940ec8b367989154d203af373",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "dragon",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 9,
+    "source_url": "https://images.oracleofthevoid.com/l5r/f9/e3/printing_9716_5_master.jpg",
+    "source_sha256": "85ba4d24b2ebdb670717ea5fad2650f1be2402fe8395cf72cc23af948ac6ccf2",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/dragon.webp",
+    "runtime_sha256": "42b845bf263f5c94e84e3832c1632ce8700cd91e6c4670fa8fb0cf0d3930b6e3",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  },
+  {
+    "clan": "lion",
+    "printing_id": "5",
+    "printing_set": "Promotional\u2013Celestial",
+    "image_index": 10,
+    "source_url": "https://images.oracleofthevoid.com/l5r/fb/b1/printing_9716_5_master.jpg",
+    "source_sha256": "f2883391b608abb80e56d8505b79d7f0c31c0c3e2e8612c152c72891b1bd9e83",
+    "runtime_path": "src/L5R.Client/Art/PersistentHome/Favor/lion.webp",
+    "runtime_sha256": "acb3ce8ae3b32be37824db0509255d035ea25d872b9eaea5c92e46c6113c99ea",
+    "webp_quality": 85,
+    "dimensions": [
+      750,
+      1050
+    ]
+  }
+]

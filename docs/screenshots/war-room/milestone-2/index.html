@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>War room · Live board milestone</title>
+<style>
+@font-face{font-family:Alegreya;src:url('../../../../src/L5R.Client/Art/Fonts/Alegreya.ttf')}
+*{box-sizing:border-box}body{margin:0;background:#100e0c;color:#e9dfcd;font:17px/1.5 Alegreya,Georgia,serif}main{max-width:1900px;margin:auto;padding:30px}h1{font-size:34px;color:#dec087;margin:0}p{max-width:1000px;color:#bdb5a8}a{color:#e2c896}nav{display:flex;gap:24px;margin:20px 0 28px;flex-wrap:wrap}.pair,.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}figure{margin:0 0 22px;min-width:0}img{display:block;width:100%;border:1px solid #655036}figcaption{padding:10px 0;color:#d6bea0}small{display:block;color:#a79f91}h2{color:#dec087;font-size:24px;margin-top:34px}.note{border-left:2px solid #967445;padding:8px 20px;margin:20px 0}a:focus-visible{outline:2px solid #dec087;outline-offset:5px}@media(max-width:950px){.pair,.grid{grid-template-columns:1fr}main{padding:18px}}
+</style>
+<main>
+<h1>The room around the live board</h1>
+<p>Milestone 2 · Godot camera and interaction review · 15 September 2026</p>
+<nav><a href="../../../../Play%20Latest.command">Play this checkout</a><a href="#comparison">Source comparison</a><a href="#views">Camera checks</a><a href="../../../../assets/table/war-room/README.md">Scope and validation</a></nav>
+<div class="note">Review the space, the board framing and movement. Cabinets are placement models; the aged Meshy furnishings, distressed room materials and final cinematic lighting are the next pass. This is a working 3D integration, not a claim of finished concept fidelity.</div>
+<h2 id="comparison">Approved direction / native game</h2>
+<div class="pair">
+<figure><a href="../../../../assets/table/war-room/approved-command-chamber.png"><img src="../../../../assets/table/war-room/approved-command-chamber.png" alt="Approved candlelit command chamber concept"></a><figcaption>Approved source · 1672 × 941<small>The later request for a larger room is incorporated in the native layout.</small></figcaption></figure>
+<figure><a href="review.png"><img src="review.png" alt="Real Godot game board surrounded by the enlarged 3D room"></a><figcaption>Live game · 1672 × 942<small>macOS rounded the window height to 942. Game cards and state remain live; the concept is not projected onto the room.</small></figcaption></figure>
+</div>
+<h2 id="views">Native camera checks</h2>
+<div class="grid">
+<figure><a href="playable.png"><img loading="lazy" src="playable.png" alt="Normal fitted board · 1920 × 1080"></a><figcaption>Normal fitted board · 1920 × 1080</figcaption></figure>
+<figure><a href="wide.png"><img loading="lazy" src="wide.png" alt="Widest zoom-out · 2560 × 1080"></a><figcaption>Widest zoom-out · 2560 × 1080</figcaption></figure>
+<figure><a href="compact.png"><img loading="lazy" src="compact.png" alt="Compact window · 1440 × 900"></a><figcaption>Compact window · 1440 × 900</figcaption></figure>
+<figure><a href="battle-focus.png"><img loading="lazy" src="battle-focus.png" alt="Battle focus · cards and frame stay aligned"></a><figcaption>Battle focus · cards and frame stay aligned</figcaption></figure>
+<figure><a href="max-zoom.png"><img loading="lazy" src="max-zoom.png" alt="Maximum zoom · original cloth and frame detail"></a><figcaption>Maximum zoom · original cloth and frame detail</figcaption></figure>
+<figure><a href="expanded.png"><img loading="lazy" src="expanded.png" alt="Expanded attachments · physical card layout preserved"></a><figcaption>Expanded attachments · physical card layout preserved</figcaption></figure>
+<figure><a href="reduced-motion.png"><img loading="lazy" src="reduced-motion.png" alt="Reduced motion · two candle phases produced identical frames"></a><figcaption>Reduced motion · two candle phases produced identical frames</figcaption></figure>
+</div>
+<p>Native Mac checks cover cursor-anchored zoom, middle/empty-cloth/Space dragging, arrow pan, Home reset, upright/bowed card targeting, fixed HUD and modal isolation. The room's projected ground points agree with the card plane within 0.001 pixels in this suite. No native Windows or expert full-match acceptance is claimed. Click images for their original resolution.</p>
+</main></html>

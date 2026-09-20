@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Fix Fallen strips and clan placards being obscured by table/hand cards: align draw/GUI order, exclude visible HUD bounds from projected mouse routing, cancel outside releases. Shared classification is from Main.cs and inherited #262; this patch is UI/input only, with no rules, state or protocol changes.",
+  "validation": "Client build: 0 warnings/errors; Godot import passed. Before-fix native reproduction failed on covered-card wheel input. All 5 corrected native runs passed: overlap 1080p, overlap 720p, opposite seat, own counter/fitted table, and Play Latest launcher. Verified hover/wheel exclusion, gallery owner, modal blocking, unchanged session, uncovered zoom and drag release. Screenshots reviewed; audit passed.",
+  "remaining": "Alfredo visual review and CI/review on PR #263. Stacked on #262; parent shared mechanics review remains there. Native Windows graphical test not performed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/221",
+  "branch": "codex/221-fallen-hud-overlap",
+  "updated": "2026-09-16T22:14:05.291534+00:00"
+}

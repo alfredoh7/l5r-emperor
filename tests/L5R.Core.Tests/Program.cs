@@ -7,6 +7,8 @@ using L5R.Client;
 
 var tests = new (string Name, Action Run)[]
 {
+    ("Granted-effect view is public, detached, duration-accurate and absent from hidden cards/older payloads", GrantedEffectPresentationView),
+    ("Public hand limit matches End Phase enforcement, follows visible modifiers and preserves hand privacy", PublicHandLimitView),
     ("Battle journal groups public effects and actual destinations without duplicating snapshots", BattleJournalProjection),
     ("Accepted battle and reaction passes publish their actor; rejected passes remain atomic", PublicPassEvents),
     ("BowedPersonalityResolution/attacker: two Native Guides win and destroy the province", () => BowedPersonalityResolution(0,true,10,1)),
@@ -103,6 +105,7 @@ var tests = new (string Name, Action Run)[]
     ("Conqueror straightens the sole eligible attacker automatically; with two eligible, the attacker must choose", ConquerorStraightensAfterVictory),
     ("Kensai raises the Weapon cap to two; Kama independently raises it to two but does not stack with Kensai", KensaiAndKamaWeaponCap),
     ("Cavalry Maneuvers follows Infantry Maneuvers; a unit is Cavalry only if the Personality and every attached Follower carry the keyword", CavalryManeuversSegment),
+    ("Infantry and Cavalry defender queries offer all declared battlefields, and every offered assignment executes", DefenderAssignmentQueries),
     ("A Two-Handed Weapon overrides Kensai and Kama entirely: at most one Weapon whenever one is involved, either way round", TwoHandedWeaponOverridesKensaiAndKama),
     ("Daigotsu Kendo's Conqueror keeps him unbowed after a win; Ikoma Natsu's Cavalry assigns during Cavalry Maneuvers", DaigotsuKendoConquerorAndIkomaNatsuCavalry),
     ("Mirumoto Reiyu gives an enemy Force/Follower a Force penalty equal to her own current Force", MirumotoReiyuForcePenalty),
@@ -223,6 +226,7 @@ var tests = new (string Name, Action Run)[]
     ("Personality wave 22 / region-wave-3 (issue #301): passives, equip and recruit -- Isawa Kojiro's live conditional Naval (appears and disappears with an attached Spell, never a durable grant); Yoritomo Minori's self-received per-other-Magistrate Force bonus (army-scoped, printed or granted, bowed counting, attacking or defending); Soshi Neiru's Open-timed Air-Spell equip (fixed wielder, no once-per-turn limit, usable by the non-active player, never in Battle); Shinden Shorai as the fourth caller of the shared province-Personality entry sequence (the player's OWN turn count, the Lion-Clan-Personality Honor Requirement waiver keyed on the recruit rather than the player, same province, full cost, Proclaim resuming to the opponent)", BatchFPassivesEquipAndRecruit),
     ("Strategy wave 16 (issue #304): Brawl -- its \"Needs Regions (not built)\" blocker was stale. The destroy half's new region-or-terrain Target (a Region at ANY province, either owner's, destroyed to its owner's Dynasty discard with its static strength bonus going with it; a Terrain through the shared DiscardTerrain removal, meeting Ring of Water's destroyed-a-Terrain condition; never a Personality; offered targets exactly the Region and the Terrain; disabled with nothing to destroy), usable at Open timing outside a Battle while the Battle-only bow half is not, and the bow half's reuse of enemy-card-without-attachments (an unattached enemy bows; an attached one and your own card do not)", StrategyWave16Primitives),
     ("Pile-targeted abilities are offered by QueryActions (issue #317): Hunter of Harmony's own-kiho-strategy-in-discard, Scholarly Hermit's own-ring-in-discard and Tranquil Garden's ring-in-play-or-own-discard each had a ValidateAbility branch but no candidates arm, so a target in a discard pile was never offered -- each is now offered enabled with exactly its legal targets (wrong owner, wrong zone and wrong type excluded), every offered target validates, and with no target the ability is offered disabled", PileTargetsAreOffered)
+
 };
 var runner=new TestRunner(args);
 if(!runner.Valid) return 2;
@@ -589,6 +593,30 @@ static void FallowLandsRegion()
 }
 static void LowMarketEquip()
 {
+    // Query-to-command contract: each offered price covers every target in that option.
+    // The client changes only the chosen target and payment; it never computes discounts.
+    {
+        var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action;
+        var region=Add(s,"oracle-l5r-4777",0,Zone.Region,province:0); s.Players[0].Provinces[0].RegionId=region.Id;
+        var hero=Add(s,"training-crane-clan-samurai",0,Zone.Home);
+        var cheap=Add(s,"training-item",0,Zone.Hand);
+        var costly=Add(s,"training-follower-crane-guard",0,Zone.Hand);
+        var e=MatchEngine.FromTestState(s);
+        var options=e.QueryActions(0).Where(a=>a.CardId==region.Id && a.Enabled && a.Command?.PerformerId==hero.Id).ToArray();
+        Check(options.Any(a=>a.TargetGold?[cheap.Id].Cost==1 && a.TargetIds!.Contains(cheap.Id)),"Minimum-one discount must be quoted");
+        Check(options.Any(a=>a.TargetGold?[costly.Id].Cost==2 && a.TargetIds!.Contains(costly.Id)),"Four-Gold attachment must be quoted as two");
+        foreach(var option in options)
+        foreach(var target in option.TargetIds!)
+        {
+            var expected=Math.Max(1,CardCatalog.Get(e.State.Cards[target].DefinitionId).GoldCost-2);
+            var quote=option.TargetGold![target];
+            Equal(quote.Cost,expected,"Target has its own authoritative quote");
+            var copy=MatchEngine.FromTestState(s);
+            Accept(copy,option.Command! with {TargetId=target,SourceIds=quote.Payments.First().SourceIds});
+            Check(copy.State.Cards[region.Id].Bowed,"Offered command pays the Region's bow cost");
+            Equal(copy.State.Cards[target].AttachedTo,hero.Id);
+        }
+    }
     // "Attach it to him, paying 2 less Gold" -- a genuine reduction (4 -> 2), not a no-op; bowing
     // itself is the entire cost/limiter (no separate UsageKey), so a second use this turn is rejected.
     {
@@ -1011,10 +1039,8 @@ static void SecondCityStrategyWave6()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"dispensing-justice-destroy",PerformerId:performer.Id));
         Equal(e.State.Cards[target.Id].Zone,Zone.Home,"Not eligible for destruction (Honorable, no qualifying keyword): moved home instead");
     }
-    // Bow Before My Will: bows the target and costs 2 Honor; no wired Shadowlands-clan card exists
-    // yet to exercise the conditional negated-straightening half, so this only confirms the
-    // baseline (non-Shadowlands performer) case -- HasClanAffiliation itself is already proven
-    // correct elsewhere (e.g. kamina-exp-attack).
+    // Bow Before My Will: baseline without the Shadowlands keyword. StabilizationTests
+    // also covers its conditional straightening block with a Shadowlands performer.
     {
         var s=StrongholdBattle("oracle-l5r-1218");
         var strat=Add(s,"oracle-l5r-1121",0,Zone.Hand);
@@ -1463,7 +1489,8 @@ static void BattleOpenPresencePrimitive()
         var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
         var performer=Add(s,"training-crane-samurai",0,Zone.Home); // base Force 3
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
-        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Force 4, different from the performer's base Force
+        var target=Add(s,"training-lion-samurai",1,Zone.Home); // Modified below its own printed Force
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
         Check(e.State.Cards[target.Id].Bowed,"Was unbowed: toggled to bowed, via the Open route with no battle in progress at all");
@@ -1475,7 +1502,8 @@ static void BattleOpenPresencePrimitive()
         var strat=Add(s,"oracle-l5r-8425",0,Zone.Hand);
         var performer=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // base Force 3
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
-        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0); // Force 4
+        var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,bowed:true,province:0); // Modified below its own printed Force
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
         Check(!e.State.Cards[target.Id].Bowed,"Was bowed: toggled to straightened, via the Battle route with the performer present");
@@ -1486,10 +1514,11 @@ static void BattleOpenPresencePrimitive()
         var performer=Add(s,"training-crane-samurai",0,Zone.Home); // NOT at the current battlefield
         performer.GrantedKeywords=[new("Monk","test-fixture","Permanent")];
         var target=Add(s,"training-lion-samurai",1,Zone.Battlefield,province:0);
+        target.Modifiers.Add(new("fixture","Turn","Force",-1));
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,TargetId:target.Id,AbilityId:"weakness-of-man-toggle",PerformerId:performer.Id));
     }
-    // The Target's own comparison is against the performer's BASE Force (the printed stat), and the
+    // The target's current Force must differ from that same target's printed Force, and the
     // target itself must also be at the current battlefield during the Battle half.
     {
         var s=StrongholdBattle("oracle-l5r-1218");
@@ -3478,6 +3507,33 @@ static void CavalryManeuversSegment()
     Accept(e,Cmd(e,"assignDefense",player:1,assignments:[]));
     Equal(e.State.Phase,Phase.BattleSelection,"Both Maneuvers segments complete before Battle Selection");
 }
+static void DefenderAssignmentQueries()
+{
+    foreach(var cavalry in new[]{false,true})
+    {
+        var s=MatchEngine.CreateStarterMatch().State;
+        s.Phase=cavalry?Phase.CavalryDeclaration:Phase.InfantryDeclaration;
+        s.ActivePlayerId=0; s.PriorityPlayerId=0;s.UnresolvedBattlefields=[0,1,2,3];
+        var attacker=Add(s,cavalry?"training-cavalry":"training-crane-samurai",0,Zone.Home);
+        var defender=Add(s,cavalry?"training-cavalry":"training-lion-veteran",1,Zone.Home);
+        var e=MatchEngine.FromTestState(s);
+        Check(e.QueryActions(0).Where(a=>a.Type=="attack" && a.Enabled)
+            .SelectMany(a=>a.Provinces!).Distinct().Order().SequenceEqual(new[]{0,1,2,3}),"An attacker may create a battlefield at any surviving province");
+        Accept(e,Cmd(e,"attack",assignments:new(){[attacker.Id]=2}));
+        Equal(e.State.Phase,cavalry?Phase.CavalryDefense:Phase.DefenseAssignment);
+        var options=e.QueryActions(1).Where(a=>a.Type=="assignDefense" && a.Enabled).ToArray();
+        Check(options.Length>0,"The available defender must be offered an assignment");
+        foreach(var option in options)
+        {
+            Check(option.Provinces!.SequenceEqual(new[]{0,1,2,3}),"Declaration created a battlefield at each surviving province");
+            var replay=MatchEngine.FromTestState(e.State);
+            Accept(replay,option.Command!);
+            Equal(replay.State.Cards[defender.Id].Zone,Zone.Battlefield);
+            Equal(replay.State.Cards[defender.Id].ProvinceIndex,option.Command!.Assignments![defender.Id]);
+        }
+
+    }
+}
 static void TwoHandedWeaponOverridesKensaiAndKama()
 {
     // A Kensai may attach a Two-Handed Weapon as their only Weapon...
@@ -3776,6 +3832,43 @@ static void OverconfidentPrimitive()
         Equal(e.State.Players[0].Hand.Count,9);
     }
 }
+static void PublicHandLimitView()
+{
+    var state = MatchEngine.CreateEconomyScenario().State;
+    var tsugio = PublishedContent.PersonalityWave13.Cards.Single(c => c.Name == "Asahina Tsugio").Id;
+    var baseline = MatchEngine.FromTestState(state).GetView(0);
+    Check(baseline.Players.All(p => p.HandLimit is { Base: 8, Maximum: 8, Modifiers.Length: 0 }));
+    var first = Add(state, tsugio, 1, Zone.Home);
+    var second = Add(state, tsugio, 1, Zone.Battlefield, province: 0);
+    Add(state, tsugio, 1, Zone.Hand); // Concealed copies neither modify the limit nor leak into sources.
+    var engine = MatchEngine.FromTestState(state);
+    foreach (var viewer in new[] { 0, 1 })
+    {
+        var view = engine.GetView(viewer);
+        Equal(view.Players[0].HandLimit!.Maximum, 10);
+        Equal(view.Players[1].HandLimit!.Maximum, 8, "The controller does not gain their own modifier");
+        Equal(view.Players[0].HandLimit!.Modifiers.Length, 2);
+        Check(view.Players[0].HandLimit!.Modifiers.All(m => m.CardId == first.Id || m.CardId == second.Id));
+        Equal(view.Players[1-viewer].Hand.Length, 0, "Public counts must not reveal concealed cards");
+        var roundTrip = JsonSerializer.Deserialize<MatchView>(JsonSerializer.Serialize(view))!;
+        Equal(roundTrip.Players[0].HandLimit!.Maximum, 10);
+        Equal(roundTrip.Players[0].HandLimit!.Modifiers[0].CardName, "Asahina Tsugio");
+    }
+    // Leaving play updates both public presentation and the very same End Phase threshold.
+    state.Cards[first.Id].Zone = Zone.Dead;
+    state.Cards[second.Id].Zone = Zone.DynastyDiscard;
+    engine = MatchEngine.FromTestState(state);
+    Equal(engine.GetView(0).Players[0].HandLimit!.Maximum, 8);
+    while (state.Players[0].Hand.Count < 9) Add(state, "training-rally", 0, Zone.Hand);
+    engine = MatchEngine.FromTestState(state);
+    Accept(engine, Cmd(engine, "endDynasty"));
+    var maximum = engine.GetView(0).Players[0].HandLimit!.Maximum;
+    Equal(engine.State.PendingChoice!.Prompt, $"Discard {engine.State.Players[0].Hand.Count-maximum} card(s) to return to {maximum}.");
+    var legacy = System.Text.Json.Nodes.JsonNode.Parse(JsonSerializer.Serialize(baseline.Players[0]))!.AsObject();
+    legacy.Remove("HandLimit");
+    Check(JsonSerializer.Deserialize<PlayerView>(legacy.ToJsonString())!.HandLimit is null, "Old snapshots report an unknown limit");
+}
+
 static void CarpenterCastleAttack()
 {
     {
@@ -9243,6 +9336,39 @@ static void StrategyWave13Primitives()
         Equal(e.State.Players[0].Hand.Count,handBefore,"The Strategy card itself leaves hand (-1) but the draw (+1) nets back to even");
     }
 }
+
+static void GrantedEffectPresentationView()
+{
+    var state=MatchEngine.CreateEconomyScenario().State;
+    var card=Add(state,"training-crane-samurai",0,Zone.Home);
+    card.GrantedKeywords=[new("Berserker","source","Permanent")];
+    card.Protections=[new("source","Permanent"),new("temporary-source","Turn")];
+    var hidden=state.Cards.Values.First(c=>c.Zone==Zone.Province&&!c.FaceUp);
+    hidden.Protections=[new("hidden-source","Permanent")];
+    var engine=MatchEngine.FromTestState(state);
+    foreach(var viewer in new[]{0,1})
+    {
+        var view=engine.GetView(viewer);
+        var visible=view.Players[0].Home.Single(c=>c.Id==card.Id);
+        Equal(visible.GrantedEffects!.Length,2);
+        Check(visible.GrantedEffects.Any(e=>e.Duration=="Permanent"&&e.Source=="source"));
+        Check(visible.GrantedEffects.All(e=>e.Text.Contains("will not be negated")));
+        Check(view.Players.SelectMany(p=>p.Provinces).Where(p=>p.Card?.Definition is null).All(p=>p.Card?.GrantedEffects is null),"Hidden provinces never carry metadata");
+        visible.GrantedEffects[0]=new("Changed","Not engine text","x","Turn");
+        Check(engine.GetView(viewer).Players[0].Home.Single(c=>c.Id==card.Id).GrantedEffects![0].Name=="Action protection","Detached view does not mutate the engine");
+    }
+    var snapshot=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    var encoded=JsonSerializer.Serialize(snapshot);
+    var decoded=JsonSerializer.Deserialize<CardView>(encoded)!;
+    Equal(decoded.GrantedEffects!.Length,2);
+    var old=System.Text.Json.Nodes.JsonNode.Parse(encoded)!.AsObject();old.Remove("GrantedEffects");
+    Check(JsonSerializer.Deserialize<CardView>(old.ToJsonString())!.GrantedEffects is null,"Older snapshots remain readable");
+    SkipToDynasty(engine);Accept(engine,Cmd(engine,"endDynasty"));
+    var after=engine.GetView(0).Players[0].Home.Single(c=>c.Id==card.Id);
+    Equal(after.GrantedEffects!.Length,1);Equal(after.GrantedEffects[0].Duration,"Permanent");
+    Equal(after.GrantedKeywords!.Single().Duration,"Permanent");
+}
+
 static void StrategyWave14Primitives()
 {
     // Banzai! (oracle-l5r-10929): "Discipline (2). Battle: Give your target opposed Personality +2F."
@@ -9464,6 +9590,7 @@ static void StrategyWave14Primitives()
         var e=MatchEngine.FromTestState(s);
         Reject(e,new GameCommand("useAbility",0,e.Version,CardId:strat.Id,AbilityId:"visage-of-the-orochi",PerformerId:performer.Id,CardIds:[withAttachment.Id]));
     }
+
 }
 static void BatchDPrimitives()
 {

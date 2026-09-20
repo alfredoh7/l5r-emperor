@@ -33,7 +33,7 @@ public partial class PhaseTrack : Control
     public static int SegmentFor(Phase phase) => phase switch
     {
         Phase.Straighten => 0, Phase.Events => 1, Phase.Action => 2,
-        Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle => 3,
+        Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle => 3,
         Phase.Dynasty or Phase.DynastyDiscard => 4, Phase.End => 5,
         Phase.Finished => -1, _ => -1
     };

@@ -15,7 +15,9 @@ public sealed partial class MatchEngine
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
                 card.GrantedAbilities.Count==0?null:card.GrantedAbilities.Select(g=>new GrantedAbilityView(g.AbilityId,AbilityCatalog.All[g.AbilityId].Label,AbilityCatalog.All[g.AbilityId].Timing,g.Source,g.Duration,g.CopiedFrom,g.CopiedFromName)).ToArray(),
-                GoldSourceProduction(card),ActionLocked(card));
+                GoldSourceProduction(card),ActionLocked(card),
+                card.Protections.Select(p=>new GrantedEffectView("Action protection",
+                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
         }
         var players=_state.Players.Select(player=>
         {
@@ -44,12 +46,13 @@ public sealed partial class MatchEngine
                 // focused-card list has no comparable positional slot).
                 owned.Where(c=>c.Zone==Zone.Focused && (player.Id==playerId || (_state.PendingDuel?.Struck ?? false))).Select(c=>ViewCard(c)).ToArray(),
                 owned.Where(c=>c.Zone==Zone.EventInPlay).Select(c=>ViewCard(c)).ToArray(),
-                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray());
+                owned.Where(c=>c.Zone==Zone.Celestial).Select(c=>ViewCard(c)).ToArray())
+                { HandLimit = HandLimitFor(player.Id) };
         }).ToArray();
         var duel=_state.PendingDuel;
         return new(ContentVersion,_scenario,_state.Version,_state.TurnNumber,playerId,_state.ActivePlayerId,_state.PriorityPlayerId,
             _state.Phase,_state.PendingChoice,_state.CurrentBattleProvince,_state.UnresolvedBattlefields.ToArray(),
-            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
+            _state.WinnerId,_state.VictoryReason,players,_state.Events.ToArray(),_scenario == CustomPractice.Scenario ? ["Custom Practice: validated deck construction and implemented cards. Not historical tournament certification."] : _scenario is PublishedContent.Scenario or PublishedContent.TestScenario?["Published Lion/Crane playtest: all 40 definitions supported under the pinned Emperor profile.","Other imported decks remain reference-only; this profile is not tournament certification."]:[..Limits],_state.FavorPlayerId,
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
@@ -111,7 +114,26 @@ public sealed partial class MatchEngine
             return result.ToArray();
         }
         var player=Player(playerId);
-        if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
+        if(_state.PendingChoice is { Type:"harshChoices" } harsh)
+        {
+            Add("harshChoices","Keep province",Command("harshChoices") with {Choice="decline"},cardId:harsh.CardId);
+            var last=player.Provinces.Count(p=>!p.Destroyed)==1;
+            Add("harshChoices",last?"Destroy last province · Defeat":"Destroy province · Draw 3",
+                Command("harshChoices") with {Choice="destroy"},cardId:harsh.CardId,
+                provinces:harsh.CardId is not null && _state.Cards.TryGetValue(harsh.CardId,out var eventSource) && eventSource.ProvinceIndex is int province?[province]:[]);
+        }
+        else if(_state.PendingChoice is { Type:"overconfidentDraw" or "brashDraw" } draw)
+        {
+            Add(draw.Type,"Draw 1 card",Command(draw.Type) with {Choice="draw"});
+            Add(draw.Type,"Decline draw",Command(draw.Type) with {Choice="decline"});
+        }
+        else if(_state.PendingChoice is { Type:"bowReaction" })
+        {
+            // Use the execution validator for the exact watcher, targets, costs and usage limits.
+            result.AddRange(AbilityActions(playerId,reactionsOnly:true).Where(a=>a.Enabled));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"proclaim" or "entryReaction" } pending)
         {
             if(pending.PlayerId==playerId)
             {
@@ -360,8 +382,9 @@ public sealed partial class MatchEngine
             case Phase.CavalryDefense:
                 var cavalrySegment=_state.Phase is Phase.CavalryDeclaration or Phase.CavalryDefense;
                 var units=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && !c.Bowed && Definition(c).Type==CardType.Personality && IsCavalryUnit(c)==cavalrySegment).Select(c=>c.Id).ToArray();
-                var provinces=Player(1-_state.ActivePlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
                 var attack=_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration;
+                var provinces=Player(1-_state.ActivePlayerId).Provinces
+                    .Where(p=>!p.Destroyed).Select(p=>p.Index).ToArray();
                 var actionType=attack?"attack":"assignDefense";
                 foreach(var province in provinces)
                     Add(actionType,$"{(attack?"Attack":"Defend")} province {province+1} · {units.Length} {(cavalrySegment?"Cavalry":"Infantry")} units",

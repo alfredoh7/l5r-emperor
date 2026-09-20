@@ -13,7 +13,7 @@ public static class LibraryDialog
             var screen=new CatalogueScreen();layer.AddChild(screen);screen.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
             screen.Closed+=layer.QueueFree;
         }
-        catch(Exception e){layer.QueueFree();GD.PushError("Catalogue: "+e.Message);var alert=new AcceptDialog {DialogText="The catalogue could not be loaded. Please verify the game content bundle.",Title="Card library"};parent.AddChild(alert);alert.CloseRequested+=alert.QueueFree;alert.Confirmed+=alert.QueueFree;alert.Canceled+=alert.QueueFree;alert.PopupCentered();}
+        catch(Exception e){layer.QueueFree();GD.PushError("Catalogue: "+e.Message);var alert=new AcceptDialog {Theme=SidebarSkin.Theme(),DialogText="The catalogue could not be loaded. Please verify the game content bundle.",Title="Card library"};parent.AddChild(alert);alert.CloseRequested+=alert.QueueFree;alert.Confirmed+=alert.QueueFree;alert.Canceled+=alert.QueueFree;alert.PopupCentered();}
     }
 }
 
