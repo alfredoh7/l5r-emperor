@@ -118,7 +118,9 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     // "You may include up to N copies of this card in your deck" (Fading Shadows 10; issue #337): the deck-construction copy
     // limit this card prints in place of the usual 3 (1 for a Unique card). Read only by DeckWorkshop's soft legality note;
     // null is every card without such a line. It is a per-card limit, so it never changes what any other card is held to.
-    int? DeckCopyLimit = null);
+    int? DeckCopyLimit = null,
+    // Bo of Water: the Elite effect (never the Elite keyword) goes to the wielder only while he has this keyword ("While this Shugenja is Water, he contributes Force even if bowed").
+    string? AttachGrantsEliteEffectWhileWielderHas = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
 /// specific prior effect instead of only ever resetting a flat running total.</summary>

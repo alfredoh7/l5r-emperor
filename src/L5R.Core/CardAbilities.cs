@@ -116,14 +116,18 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // which is then "slots". Every slot has its own category and count; the command carries one SlotSelection per slot.
     TargetSlot[]? Slots = null,
     // A move to a destination the ability's own rule defines, of its source, its target or both together (see MoveDestinations.cs).
-    MoveSpec? Move = null);
+    MoveSpec? Move = null,
+    // "Create a [card]" (issue #387): the card the printed text says this action creates, as data; the engine instantiates the Proxy scan that fits (CreatedCards.cs).
+    CreatedCardSpec? Creates = null,
+    // Once per game, per source card (Border Keep's refresh, Bo of Water).
+    bool OncePerGame = false);
 
 public static class AbilityCatalog
 {
     public static IReadOnlyDictionary<string, AbilityDefinition> All { get; } = new ReadOnlyDictionary<string, AbilityDefinition>(new Dictionary<string, AbilityDefinition>
     {
         ["border-first"] = new("Limited", "First-turn province refresh", "provinces"),
-        ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces"),
+        ["border-game"] = new("Limited", "Once-per-game province refresh", "provinces", OncePerGame: true),
         ["shinden-choice"] = new("Open", "Offer bowing or 1 Honor", "shinden", Performer: "shugenja", Costs: ActionCost.BowPerformer),
         ["air-straighten"] = new("Open", "Straighten an Air Personality", "air"),
         // Training fixture for the generic keyword-satisfaction primitive (Immovable Object: "Battle/
@@ -1065,7 +1069,8 @@ public static class AbilityCatalog
         // MatchEngine.CreatePersonality, no target of its own (the created card is not chosen, only
         // named by the effect itself, the same "none" shape kano-token already uses for a no-target
         // Limited action).
-        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none"),
+        ["kitsu-akai-create"] = new("Limited", "Create a 2F/2C/3PH Lion Clan · Samurai · Ancestor · Spirit Personality", "none",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Lion Clan", "Samurai", "Ancestor", "Spirit"])),
         // "Bow your performing Ancestor Personality" -- own-unbowed-personality-at-battle-with-keyword
         // already covers exactly this shape (Volcano Tattoo's own generic Performer category), just
         // with a single RequiredKeywords entry instead of two. The created Lion Ancestor is the usual
@@ -1580,8 +1585,10 @@ public static class AbilityCatalog
         // Create a ... Personality" -- Kitsu Akai's own kitsu-akai-create (MatchEngine.CreatePersonality,
         // issue #257) as an entering-play Reaction instead of a Limited action, so it is created from
         // inside its creator's own already-open entry window (CreatePersonality's duringEntryReaction).
-        ["ohsuki-create"] = new("Reaction", "After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Sparrow · Cavalry · Spirit Personality", "none", Trigger: "own-enters-play"),
-        ["tokoru-create"] = new("Reaction", "After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan · Nonhuman · Bear · Spirit Personality", "none", Trigger: "own-enters-play"),
+        ["ohsuki-create"] = new("Reaction", "After Ohsuki enters play: Create a 0F/2C/3PH Mantis Clan · Nonhuman · Sparrow · Cavalry · Spirit Personality", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 0, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Nonhuman", "Sparrow", "Cavalry", "Spirit"])),
+        ["tokoru-create"] = new("Reaction", "After Tokoru enters play: Create a 4F/2C/3PH Mantis Clan · Nonhuman · Bear · Spirit Personality", "none", Trigger: "own-enters-play",
+            Creates: new(CardType.Personality, Force: 4, Chi: 2, PersonalHonor: 3, Keywords: ["Mantis Clan", "Nonhuman", "Bear", "Spirit"])),
         // Ohsuki's Sparrow (oracle-l5r-10023): "Limited: If none of your provinces were destroyed since
         // your last turn ended: Gain 3 Honor." The condition precedes the colon, so it gates USING the
         // action at all (a per-id Require in ValidateAbility, the way horibe-bow's own "If opposed"
@@ -1593,6 +1600,10 @@ public static class AbilityCatalog
         // "attacking" category is Personality-only; this one also reaches an attacking unit's own
         // Followers/Items/Spells).
         ["tokoru-bear-bow"] = new("Battle", "Target an attacking enemy card: Bow it. Destroy it if it is an attachment", "enemy-attacking-card"),
+        // Bo of Water (oracle-l5r-1084, issue #387): creates Water Bo (oracle-l5r-10026, found by its Creates spec) attached to one of your Personalities.
+        ["bo-of-water-create"] = new("Limited", "Once per game: Create a +2F/+0C Water · Weapon Item with the ability \"Battle: Target an enemy card without attachments: Bow it\" and attach it to one of your Personalities", "own-personality", OncePerGame: true,
+            Creates: new(CardType.Item, Force: 2, Chi: 0, Keywords: ["Water", "Weapon"], AbilityText: "Battle: Target an enemy card without attachments: Bow it")),
+        ["water-bo-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card", RequireNoAttachments: true),
 
         // Personality wave 22 / region-wave-3 (issue #301, Batch F of the "Not blocked; deferred for
         // scope" BLOCKERS audit -- the final batch).
@@ -1978,7 +1989,7 @@ public sealed partial class MatchEngine
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
         or "soshi-conditional-bow" or "kinaro-exp-bow" or "nubane-bow" or "xijkt-bow" or "kouzei-bow" or "mitoshi-bow" or "jinai-bow"
-        or "muzu-bow" or "hiroto-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
+        or "muzu-bow" or "hiroto-bow" or "water-bo-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
         // Strategy wave 13 (issue #287): Strength of the Bear and Unexpected both bow their own
         // target unconditionally; The Strength of the Spider bows its target conditionally (only
         // when not already destroyed by its own alternate branch) -- still counts as "bows the
@@ -2858,9 +2869,9 @@ public sealed partial class MatchEngine
                 or "dairuko-rally", "Abilities on bowed cards cannot be used.");
             uses = source.AbilityUses;
         }
-        // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). Border Keep's once-per-GAME refresh never resets: any stamp spends it.
+        // The per-turn limit is AbilityDefinition.UsesPerTurn (AbilityLimits.cs). A once-per-GAME ability (AbilityDefinition.OncePerGame: Border Keep's refresh, Bo of Water) never resets: any stamp spends it.
         var usageKey = ability.UsageKey ?? id;
-        Require(id == "border-game" ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
+        Require(ability.OncePerGame ? !uses.ContainsKey(usageKey) : !AbilityUseSpent(uses, ability, usageKey), "This ability has already been used within its limit.");
         if (id == "border-first") Require(player.TurnsTaken == 1, "This Border Keep ability is only available on your first turn.");
         // Battle/Open presence primitive (issue #267): a printed "Battle/Open" ability carries no
         // battlefield-presence requirement at all when used as its OPEN half (performed from Home,
@@ -2896,7 +2907,9 @@ public sealed partial class MatchEngine
             // Battle ability needs its own equivalent: AtBattle(source) already resolves an ATTACHED
             // card's own parent correctly (same helper Khol Regulars' own Reaction uses), so this is
             // exactly "the attachment's own wielder is at this battlefield."
-            if (id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
+            // An action on an attachment is performed by its wielder (core rules), so any attached card's Battle ability needs him at the battle.
+            if (!reinforcesFromElsewhere && source is { Zone: Zone.Attached }
+                || id is "scouring-flood-move-home" or "earths-hunger-destroy" or "nightingale-blade-bow" or "fubatsu-plate-straighten" or "fubatsu-plate-move")
                 Require(AtBattle(source!), "This attachment's own wielder must be at the current battlefield.");
             if (id == "earth-flows-move") Require(player.Id != _state.ActivePlayerId, "Only the Defender may use The Earth Flows.");
             // Overgrown Grove (issue #264): a Region sits in Zone.Region, never AtBattle-eligible at
@@ -3815,6 +3828,8 @@ public sealed partial class MatchEngine
         if (slotAbility is not null) return;
         // Attach (issue #337): the wielder and the Equip legality of the attachment (see AttachAction.cs).
         if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
+        // A created attachment must be one the chosen Personality could be equipped with.
+        if (ability.Creates is { } createdSpec) ValidateCreate(command, createdSpec, player);
         // Shinden Shorai (oracle-l5r-6857, issue #301): "If it is not your first or second turn" -- the
         // player's OWN turn count (PlayerState.TurnsTaken counts only that player's turns, the same
         // counter border-first's own "your first turn" reads; the global MatchState.TurnNumber advances
@@ -4108,7 +4123,7 @@ public sealed partial class MatchEngine
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
-            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": case "water-bo-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "disgraceful-conduct-bow-unit":
                 foreach (var member in Attachments(target!.Id).Prepend(target)) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
                 break;
@@ -4812,13 +4827,9 @@ public sealed partial class MatchEngine
                 }
                 break;
             }
-            case "kitsu-akai-create": if (CreatePersonality(player.Id, "oracle-l5r-9785")) return; break;
             // Personality wave 21 (issue #299, Batch E). Akodo Chiyo's "chiyo-attack" shares the
             // attack-execution case below.
-            // Kitsune Ohsuki / Kitsune Tokoru: created from INSIDE this Personality's own already-open
-            // entry window (duringEntryReaction), so CreatePersonality never returns true here.
-            case "ohsuki-create": CreatePersonality(player.Id, "oracle-l5r-10023", duringEntryReaction: true); break;
-            case "tokoru-create": CreatePersonality(player.Id, "oracle-l5r-10025", duringEntryReaction: true); break;
+            // Kitsu Akai / Ohsuki / Tokoru create through their Creates spec (default branch below).
             // Daigotsu Bofana - exp: the additional action to play the chosen Dark Virtue from the discard pile.
             case "bofana-exp-dark-virtue": GrantAdditionalAction(player.Id, [target!.Id], fromDiscard: true); break;
             case "ohsuki-sparrow-honor": GainHonor(player.Id, 3, "Ohsuki's Sparrow", source); break;
@@ -5603,6 +5614,12 @@ public sealed partial class MatchEngine
                     if (BeginConditionalChoice(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants)) return;
                     break;
                 }
+                // Any ability with a Creates spec (Kitsu Akai, Kitsune Ohsuki/Tokoru, Bo of Water) creates the scan that fits it (CreatedCardEntry.cs).
+                if (ability.Creates is { } createdSpec)
+                {
+                    if (ExecuteCreate(ability, createdSpec, player, target)) return;
+                    break;
+                }
                 throw new RuleViolation("Ability effect is not implemented.");
         }
         CompleteAbilityResolution(command, ability, consumedGrant, playedFromDiscard, opponentHonorBeforeBattleAction, bowedBeforeAction, preExistingGrants);
@@ -5991,10 +6008,8 @@ public sealed partial class MatchEngine
     // Personality's controller; nothing entered play from a zone, so there is no entry window to open (the created Scout has no "after entering play" text).
     private CardInstance CreateAttachedFollower(CardInstance host, string definitionId)
     {
-        var card = new CardInstance { Id = $"created-{++_state.CreatedCardSequence:D4}", DefinitionId = definitionId, OwnerId = host.OwnerId, Zone = Zone.Attached, AttachedTo = host.Id, ProvinceIndex = host.ProvinceIndex, FaceUp = true };
-        _state.Cards.Add(card.Id, card);
+        var card = MintAttachedCard(host, CardCatalog.Get(definitionId));
         _state.CreatedUntilBattleEndsIds.Add(card.Id);
-        Emit("cardCreated", $"{Player(host.OwnerId).Name} created {Definition(card).Name} and attached it to {Definition(host).Name}.", host.OwnerId, card.Id);
         return card;
     }
     private void MoveHome(CardInstance card, bool bow)

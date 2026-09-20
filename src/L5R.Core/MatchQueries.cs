@@ -82,14 +82,22 @@ public sealed partial class MatchEngine
         // "own-unit-member": one option per unit member); both default to the plain single-option shape.
         void AddReaction(CardInstance card,string abilityId,string? reason=null,string? targetId=null,string? label=null,bool validate=false)
         {
-            var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,AbilityId:abilityId);
-            var gold=QuoteAbilityGold(command);
-            if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
-            reason??=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
-            if(reason is null && validate) reason=AbilityRejection(command);
-            // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
-            reason??=ActionLockRejection(command);
-            Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
+            // "Choose a player" (issue #389): the player is a command parameter (TargetPlayerId), not a card, so a Reaction whose Target is a player is offered
+            // once per legal player -- either player (you, or your opponent), each carrying the id the command needs -- and validated as quoted.
+            var chosenPlayers=AbilityCatalog.All[abilityId].Target=="player" ? new int?[]{playerId,1-playerId} : new int?[]{null};
+            foreach(var chosenPlayer in chosenPlayers)
+            {
+                var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:targetId,TargetPlayerId:chosenPlayer,AbilityId:abilityId);
+                var gold=QuoteAbilityGold(command);
+                if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
+                var why=reason ?? (gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null));
+                if(why is null && (validate || chosenPlayer is not null)) why=AbilityRejection(command);
+                // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
+                why??=ActionLockRejection(command);
+                var text=label??AbilityCatalog.All[abilityId].Label;
+                if(chosenPlayer is int who) text+=who==playerId ? " · you" : " · your opponent";
+                Add("useAbility",text,command,why,card.Id,gold:gold);
+            }
         }
         // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
         void AddTargetedActionReactions()
@@ -143,10 +151,11 @@ public sealed partial class MatchEngine
                     Add("proclaim",$"Proclaim · gain {honor} Honor",Command("proclaim"),player.ProclaimUsedTurn==_state.TurnNumber?"Already used Proclaim this turn.":null,pending.CardId);
                 }
                 var enteringCard=Card(pending.CardId);
-                var reactionId=(Definition(enteringCard).Abilities??[]).FirstOrDefault(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play");
-                if(reactionId is not null)
+                // Every "own enters play" Reaction the card prints (issue #389: Horume's gain AND lose; before, only the first was listed). One that shares a
+                // once-per-window usage key with another (Horume's "gain or lose") is used once for the pair.
+                foreach(var reactionId in (Definition(enteringCard).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play"))
                 {
-                    var used=enteringCard.AbilityUses.ContainsKey(reactionId);
+                    var used=enteringCard.AbilityUses.ContainsKey(AbilityCatalog.All[reactionId].UsageKey??reactionId);
                     AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
