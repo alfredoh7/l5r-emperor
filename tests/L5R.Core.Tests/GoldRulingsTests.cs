@@ -10,7 +10,7 @@ using L5R.Core;
 internal static class GoldRulingsTests
 {
     private const string Charity = "oracle-l5r-10181", AtAnyCost = "oracle-l5r-639", Disgrace = "oracle-l5r-2020", Stain = "oracle-l5r-82";
-    private const string CharityAbility = "virtuous-charity-open", RecruitAbility = "at-any-cost-recruit", DisgraceAbility = "disgraceful-conduct-bow", StainAbility = "a-stain-cleansed-destroy";
+    private const string CharityAbility = "virtuous-charity-open", RecruitAbility = "at-any-cost-recruit", DisgraceAbility = "disgraceful-conduct-bow", DisgraceUnitAbility = "disgraceful-conduct-bow-unit", StainAbility = "a-stain-cleansed-destroy";
     private const string Ebizo = "oracle-l5r-1629", Genshin = "oracle-l5r-2078", Sakuma = "oracle-l5r-9624", Kazuo = "oracle-l5r-10282", Doho = "oracle-l5r-9539";
     private const string Yozo = "oracle-l5r-10287", Hikaro = "oracle-l5r-5095", Hotako = "oracle-l5r-1726", Dairuko = "oracle-l5r-200", Kijo = "oracle-l5r-10074";
 
@@ -27,15 +27,17 @@ internal static class GoldRulingsTests
             ("The second player's decision blocks Seppuku and every other command until answered, and the action then finishes: priority passes on, the Strategy is already in the discard pile", DecisionBlocksAndFinishes),
             ("A second spec proves the primitive is general: a fixture whose two amounts each become Honor for the other player, on the acting player's own turn", GeneralPrimitiveFixture),
             ("The scripted showcase reaches the decision in ordinary play (Crane passes, the Lion plays Virtuous Charity, the Crane pays) and replays deterministically", ShowcaseFlow),
-            ("A unit's total Gold cost is the total of the CURRENT cost of every card in it: Disgraceful Conduct is priced term by term from the Personality and each attachment, with modifiers and tokens", DisgracefulUnitTotal),
-            ("A cost reduced to 0 counts as 0, an attachment's own reduction counts, entry discounts are not cost changes, and the price never goes below 0", DisgracefulZeroAndFloor),
-            ("Disgraceful Conduct: Absent Battle action for either side's Personality, pays the price, bows the target (and only him), and needs a Personality at the battlefield", DisgracefulResolves),
-            ("A Stain Cleansed prices a target at its current total Gold cost plus 2: Daidoji Ebizo alone costs 11 (9 + 2), a unit with attachments the whole total, a reduced unit follows the current cost", StainPrice),
+            ("Virtuous Charity's payments are part of its resolution: an action negated whole (a reaction, or the test seam) pays nothing for either player and opens no decision", CharityActionNegated),
+            ("A negated Honor gain leaves both payments made: the acting player pays when the action resolves, only then does the second player's decision open, and nobody gains Honor", CharityHonorGainNegated),
+            ("The player chooses the Personality or the unit for Disgraceful Conduct: the Personality mode is priced from his own current cost minus 4, the unit mode from the unit's total current cost minus 4 and is offered only for a Personality with attachments (a bare one is offered once)", DisgracefulModes),
+            ("Both Disgraceful Conduct prices follow the CURRENT costs: modifiers, tokens, an attachment's own reduction, 0 counting as 0, entry discounts not being cost changes, and the price never below 0", DisgracefulCurrentCosts),
+            ("Disgraceful Conduct resolves: an Absent Battle action for either side's Personality; the Personality mode bows only him, the unit mode bows him and every card attached to him; the price is paid from the chosen sources", DisgracefulResolves),
+            ("A Stain Cleansed prices a target at its current total Gold cost minus 2 (the scan governs): Daidoji Ebizo alone costs 7 (9 - 2), a unit with attachments the whole total, a reduced unit follows the current cost", StainPrice),
             ("A Stain Cleansed offers only affordable targets: an unaffordable one is left out of the per-target quotes, and with none affordable the action is disabled with the reason", StainAffordable),
             ("A Stain Cleansed needs your performing unbowed Magistrate at the battlefield and an enemy target; nothing else performs it", StainPerformer),
             ("A Stain Cleansed destroys the card or the unit: a Personality's whole unit dies, an attachment alone goes and its Personality stays; the payment is exactly the quote and bows the chosen sources", StainDestroys),
-            ("A Stain Cleansed's sign is one number: the Oracle text prices cost + 2 (the target's cost is what was paid minus 2); flipping that number to -2 gives the period scan's price", StainSignIsOneConstant),
-            ("At Any Cost recruits your own dead Samurai for the recruit price, at Home, and he may not be proclaimed even when a province recruit of him could be", AtAnyCostRecruits),
+            ("A Stain Cleansed's sign is one number: the scan governs (price = total - 2, floor 0), and the same rule with +2 prices Ebizo at 11", StainSignIsOneConstant),
+            ("At Any Cost recruits your own dead Samurai for the recruit price into play at the current battlefield, and he may not be proclaimed even when a province recruit of him could be; he is a unit there at once", AtAnyCostRecruits),
             ("At Any Cost keeps every recruit restriction: Unique and Singular, Honor Requirement (no Clan allegiance bypass), Loyal, and only your own dead Samurai; each lists disabled with the recruit path's own reason", AtAnyCostRestrictions),
             ("At Any Cost's entry effects run as for any recruit: Sensei discards your other Sensei, Hotako's Lion discount prices him and his Honor loss applies, and a dead Personality returns as a new card", AtAnyCostEntry),
             ("At Any Cost is a Battle action: it needs a unit at the battlefield, is payable only with the recruit price, and QuotePurchase of a dead card says so", AtAnyCostBattleAndPrice),
@@ -89,6 +91,7 @@ internal static class GoldRulingsTests
         Check(c.Abilities!.SequenceEqual(new[] { CharityAbility }));
         var a = AbilityCatalog.All[CharityAbility];
         Eq(a.Timing, "Open"); Eq(a.Target, "none"); Eq(a.Cost!.Basis, GoldCostBasis.Variable); Eq(a.Cost.Amount, 0); Check(a.Cost.MaxAmount is null);
+        Check(a.Cost.AtResolution && a.Costs is null, "the payments are part of the resolution, not a cost paid when the action is announced");
 
         var r = CardCatalog.Get(AtAnyCost);
         Eq(r.Name, "At Any Cost"); Eq(r.GoldCost, 0); Eq(r.Focus, 1); Check(r.Keywords!.SequenceEqual(new[] { "Dark Virtue", "Will" }));
@@ -99,9 +102,13 @@ internal static class GoldRulingsTests
         var d = CardCatalog.Get(Disgrace);
         Eq(d.Name, "Disgraceful Conduct"); Eq(d.GoldCost, 0); Eq(d.Focus, 2);
         Eq(d.Text, "Battle: Even if you control no units at the current battlefield, pay Gold equal to a target Personality or unit's total Gold cost minus 4: Bow it.");
+        Check(d.Abilities!.SequenceEqual(new[] { DisgraceAbility, DisgraceUnitAbility }), "the player chooses the Personality or the unit");
         var da = AbilityCatalog.All[DisgraceAbility];
         Eq(da.Timing, "Battle"); Eq(da.Target, "personality"); Check(da.Absent, "Even if you control no units");
-        Eq(da.Cost!.Basis, GoldCostBasis.TargetUnitTotal); Eq(da.Cost.Modifier, -4); Eq(da.Cost.Floor, 0);
+        Eq(da.Cost!.Basis, GoldCostBasis.TargetCurrent); Eq(da.Cost.Modifier, -4); Eq(da.Cost.Floor, 0);
+        var du = AbilityCatalog.All[DisgraceUnitAbility];
+        Eq(du.Timing, "Battle"); Eq(du.Target, "personality-with-attachment"); Check(du.Absent);
+        Eq(du.Cost!.Basis, GoldCostBasis.TargetUnitTotal); Eq(du.Cost.Modifier, -4); Eq(du.Cost.Floor, 0);
 
         var s = CardCatalog.Get(Stain);
         Eq(s.Name, "A Stain Cleansed"); Eq(s.Focus, 1);
@@ -109,6 +116,7 @@ internal static class GoldRulingsTests
         var sa = AbilityCatalog.All[StainAbility];
         Eq(sa.Timing, "Battle"); Eq(sa.Performer, "own-unbowed-personality-at-battle-with-keyword"); Check(sa.RequiredKeywords!.SequenceEqual(new[] { "Magistrate" }));
         Eq(sa.Target, "enemy-personality-or-attachment");
+        Eq(sa.Cost!.Basis, GoldCostBasis.TargetUnitTotal); Eq(sa.Cost.Modifier, -2); Eq(sa.Cost.Floor, 0);
 
         foreach (var id in new[] { Charity, AtAnyCost, Disgrace, Stain })
         {
@@ -282,6 +290,73 @@ internal static class GoldRulingsTests
         Check(!Options(e, 0, CharityAbility).Any(a => a.Enabled));
     }
 
+    // Announces Virtuous Charity for 5 with a reactor (player 1's fixture Personality) in play, and returns the engine with the before-action window open.
+    private static (MatchEngine E, CardInstance Card, CardInstance Reactor, string[] Sources) CharityWithReactor(string reactorDefinition)
+    {
+        CardInstance reactor = null!;
+        var (e, card) = CharityTable(s => { reactor = Add(s, reactorDefinition, 1, Zone.Home); });
+        var option = Enabled(e, 0, CharityAbility, card.Id);
+        var sources = option.Gold!.PaymentsByAmount![5][0].SourceIds;
+        Accept(e, PayAmount(option, 5));
+        return (e, card, reactor, sources);
+    }
+
+    // The reactor plays its Reaction in the open window, then both players pass and the window closes.
+    private static void ReactAndClose(MatchEngine e, CardInstance reactor, string ability)
+    {
+        Eq(e.State.PendingChoice!.Type, "beforeActionReaction");
+        var player = e.State.PriorityPlayerId;
+        Accept(e, Enabled(e, player, ability, reactor.Id).Command!);
+        for (var guard = 0; guard < 4 && e.State.PendingChoice?.Type == "beforeActionReaction"; guard++)
+            Accept(e, e.QueryActions(e.State.PriorityPlayerId).Single(a => a.Type == "declineReaction").Command!);
+    }
+
+    private static void CharityActionNegated()
+    {
+        // Whole-action negation through the reaction window: it is taken (the card is spent) but NEITHER player pays anything and no decision opens.
+        var (e, card, reactor, sources) = CharityWithReactor("training-untargeted-negator");
+        Eq(e.State.PendingChoice!.Type, "beforeActionReaction", "the announced action is held for reactions");
+        foreach (var id in sources) Check(!e.State.Cards[id].Bowed, "nothing has been paid while the action can still be negated");
+        Check(e.State.PendingOpponentPayment is null && !e.State.Events.Any(x => x.Type == "payment"));
+        ReactAndClose(e, reactor, "training-negate-untargeted-action");
+        Check(e.State.Events.Any(x => x.Type == "actionNegated"), "the action was negated");
+        Check(e.State.PendingChoice is null && e.State.PendingOpponentPayment is null, "no decision for the second player");
+        foreach (var id in sources) Check(!e.State.Cards[id].Bowed, "the acting player paid nothing");
+        Check(!e.State.Events.Any(x => x.Type == "payment" || x.Type == "opponentPaymentOffered"), "no payment by anyone");
+        Eq(Honor(e, 0), 8); Eq(Honor(e, 1), 6);
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was still played");
+        // The same through the whole-action test seam: no reaction needed.
+        var (t, seamCard) = CharityTable();
+        t.NegateEveryAction = true;
+        var seamSources = Enabled(t, 0, CharityAbility, seamCard.Id).Gold!.PaymentsByAmount![5][0].SourceIds;
+        Accept(t, PayAmount(Enabled(t, 0, CharityAbility, seamCard.Id), 5));
+        foreach (var id in seamSources) Check(!t.State.Cards[id].Bowed);
+        Check(t.State.PendingChoice is null && !t.State.Events.Any(x => x.Type == "payment"));
+    }
+
+    private static void CharityHonorGainNegated()
+    {
+        var (e, card, reactor, sources) = CharityWithReactor("training-honor-gain-negator");
+        foreach (var id in sources) Check(!e.State.Cards[id].Bowed, "nothing is paid while the window is open");
+        Check(e.State.PendingOpponentPayment is null, "the second player's decision waits for the first payment");
+        ReactAndClose(e, reactor, "training-negate-honor-gain");
+        // The action resolves: the acting player pays FIRST, and only then does the second player's decision open.
+        foreach (var id in sources) Check(e.State.Cards[id].Bowed, "the acting player's payment stands");
+        Eq(e.State.PendingChoice!.Type, "opponentPayment"); Eq(e.State.PendingChoice.PlayerId, 1);
+        Check(e.State.Events.Count(x => x.Type == "payment") == 1, "one payment made so far");
+        var action = DeciderAction(e);
+        Accept(e, action.Command! with { GoldAmount = 2, SourceIds = action.Gold!.PaymentsByAmount![2][0].SourceIds });
+        Check(e.State.Events.Count(x => x.Type == "payment") == 2, "both payments were made");
+        Check(e.State.Events.Any(x => x.Type == "honorGainNegated"), "and the Honor gain was negated");
+        Eq(Honor(e, 0), 8, "no Honor for the acting player who paid more"); Eq(Honor(e, 1), 6);
+        Check(e.State.PendingChoice is null && e.State.NegatedEffects.Count == 0, "nothing lingers");
+        Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard);
+        // Control: without the reaction the same amounts give the Honor.
+        var (c, _) = CharityPlayed(5);
+        Accept(c, DeciderAction(c).Command! with { GoldAmount = 2, SourceIds = DeciderAction(c).Gold!.PaymentsByAmount![2][0].SourceIds });
+        Eq(Honor(c, 0), 8 + 3);
+    }
+
     private static void GeneralPrimitiveFixture()
     {
         var s = Table(Phase.Action, actor: 0);
@@ -324,12 +399,12 @@ internal static class GoldRulingsTests
     // Battle at province 0: player 0 (the Defender, holding the opportunity) holds `strategy` and has `own` (a Personality of the given definition) there;
     // player 1 has Daidoji Ebizo there, plus whatever `more` adds. Player 0 produces 9 Gold plus `extra` Marketplaces' 3 each.
     private sealed record Rig(MatchState S, CardInstance Card, CardInstance Enemy, CardInstance Own);
-    private static Rig Battle(string strategy, string own = Genshin, int extra = 0, Action<Rig>? more = null)
+    private static Rig Battle(string strategy, string? own = Genshin, int extra = 0, Action<Rig>? more = null)
     {
         var s = Table(); s.PriorityPlayerId = 0;
         for (var i = 0; i < extra; i++) Add(s, "training-marketplace", 0, Zone.Home);
         var card = Add(s, strategy, 0, Zone.Hand);
-        var ownCard = Add(s, own, 0, Zone.Battlefield, province: 0);
+        var ownCard = own is null ? null! : Add(s, own, 0, Zone.Battlefield, province: 0);
         var enemy = Add(s, Ebizo, 1, Zone.Battlefield, province: 0);
         var rig = new Rig(s, card, enemy, ownCard);
         more?.Invoke(rig);
@@ -339,44 +414,64 @@ internal static class GoldRulingsTests
         (Add(r.S, "training-follower", host.OwnerId, Zone.Attached, province: 0, parent: host.Id), Add(r.S, "training-item", host.OwnerId, Zone.Attached, province: 0, parent: host.Id));
 
     private static ActionOption Disgrace1(MatchEngine e, Rig r) => Enabled(e, 0, DisgraceAbility, r.Card.Id);
+    private static ActionOption DisgraceUnit1(MatchEngine e, Rig r) => Enabled(e, 0, DisgraceUnitAbility, r.Card.Id);
+    private static bool UnitOffered(MatchEngine e, Rig r) => CanUse(e, 0, DisgraceUnitAbility, r.Card.Id);
     private static ActionOption Stain1(MatchEngine e, Rig r) => Enabled(e, 0, StainAbility, r.Card.Id, r.Own.Id);
     private static int Price(ActionOption option, CardInstance target) => option.TargetGold![target.Id].Cost;
 
-    private static void DisgracefulUnitTotal()
+    private static void DisgracefulModes()
     {
-        // Ebizo (9) alone: 9 - 4.
-        var r = Battle(Disgrace);
-        var e = MatchEngine.FromTestState(r.S);
-        var option = Disgrace1(e, r);
-        Eq(Price(option, r.Enemy), 5); Check(option.TargetGold![r.Enemy.Id].Basis.Contains("total cost 9 − 4"), option.TargetGold[r.Enemy.Id].Basis);
-        // Plus a Follower (2) and an Item (2): the whole unit, 13 - 4.
-        var withUnit = Battle(Disgrace, more: x => Attach(x, x.Enemy));
-        var unit = Disgrace1(MatchEngine.FromTestState(withUnit.S), withUnit);
-        Eq(Price(unit, withUnit.Enemy), 9); Check(unit.TargetGold![withUnit.Enemy.Id].Basis.Contains("9 + 2 + 2 = 13 − 4"), unit.TargetGold[withUnit.Enemy.Id].Basis);
-        // A Gold cost penalty on the Personality (an action's -2), a Gold cost token (-2), and both: the price follows the CURRENT costs.
-        var modified = Battle(Disgrace, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); });
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(modified.S), modified), modified.Enemy), 7, "a Gold cost modifier lowers the unit's total");
-        var token = Battle(Disgrace, more: x => { Attach(x, x.Enemy); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(token.S), token), token.Enemy), 7, "a Gold cost token lowers it too");
-        var both = Battle(Disgrace, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(both.S), both), both.Enemy), 5, "and they add up");
-        // A bonus raises it: the current cost is what counts, either way.
-        var raised = Battle(Disgrace, more: x => x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", 3)));
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(raised.S), raised), raised.Enemy), 8);
+        // Ebizo (9) alone: both modes are the same number, so the choice is offered once (the Personality mode only).
+        var bare = Battle(Disgrace);
+        var e = MatchEngine.FromTestState(bare.S);
+        var only = Disgrace1(e, bare);
+        Eq(Price(only, bare.Enemy), 5); Check(only.TargetGold![bare.Enemy.Id].Basis.Contains("cost 9 − 4"), only.TargetGold[bare.Enemy.Id].Basis);
+        Check(!UnitOffered(e, bare), "no unit mode for a Personality with no attachments");
+        // With a Follower (2) and an Item (2): two offered options with their own quotes -- his own 9 - 4, or the unit's 13 - 4.
+        var unit = Battle(Disgrace, more: x => Attach(x, x.Enemy));
+        var eu = MatchEngine.FromTestState(unit.S);
+        var personality = Disgrace1(eu, unit); var whole = DisgraceUnit1(eu, unit);
+        Eq(Price(personality, unit.Enemy), 5, "the Personality alone: his own current cost minus 4");
+        Eq(Price(whole, unit.Enemy), 9, "the unit: 9 + 2 + 2 = 13, minus 4"); Check(whole.TargetGold![unit.Enemy.Id].Basis.Contains("9 + 2 + 2 = 13 − 4"), whole.TargetGold[unit.Enemy.Id].Basis);
+        Eq(personality.TargetGold![unit.Enemy.Id].Kind, GoldCostKind.Derived);
+        // Two enemy Personalities, one with attachments: the Personality mode lists both, the unit mode only the one that has a unit to speak of.
+        CardInstance lone = null!;
+        var mixed = Battle(Disgrace, more: x => { Attach(x, x.Enemy); lone = Add(x.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0); });
+        var em = MatchEngine.FromTestState(mixed.S);
+        Check(Disgrace1(em, mixed).TargetIds!.ToHashSet().SetEquals(new[] { mixed.Enemy.Id, lone.Id, mixed.Own.Id }), "the Personality mode: every Personality at the battlefield");
+        Check(DisgraceUnit1(em, mixed).TargetIds!.ToHashSet().SetEquals(new[] { mixed.Enemy.Id }), "the unit mode: only the one with attachments");
+        // A hand-built unit-mode command against a bare Personality is rejected by the engine.
+        Rejection(em, DisgraceUnit1(em, mixed).Command! with { TargetId = lone.Id, SourceIds = [] });
     }
 
-    private static void DisgracefulZeroAndFloor()
+    private static void DisgracefulCurrentCosts()
     {
-        // An attachment reduced to 0 counts as 0 (and a reduction below 0 never counts as negative): 9 + 2 + 0.
-        var r = Battle(Disgrace, more: x => { var (_, item) = Attach(x, x.Enemy); item.Modifiers.Add(new("test-source", "test", "GoldCost", -5)); });
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(r.S), r), r.Enemy), 7, "9 + 2 + 0 = 11, minus 4");
-        // The Personality reduced to 0: only the attachments are left.
+        // A Gold cost penalty on the Personality (an action's -2), a Gold cost token (-2), and both: each price follows the CURRENT costs.
+        var modified = Battle(Disgrace, extra: 2, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); });
+        var m = MatchEngine.FromTestState(modified.S);
+        Eq(Price(Disgrace1(m, modified), modified.Enemy), 3, "his own 7 - 4"); Eq(Price(DisgraceUnit1(m, modified), modified.Enemy), 7, "the unit's 11 - 4");
+        var token = Battle(Disgrace, extra: 2, more: x => { Attach(x, x.Enemy); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
+        var t = MatchEngine.FromTestState(token.S);
+        Eq(Price(Disgrace1(t, token), token.Enemy), 3); Eq(Price(DisgraceUnit1(t, token), token.Enemy), 7);
+        var both = Battle(Disgrace, extra: 2, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
+        var b = MatchEngine.FromTestState(both.S);
+        Eq(Price(Disgrace1(b, both), both.Enemy), 1, "5 - 4"); Eq(Price(DisgraceUnit1(b, both), both.Enemy), 5, "9 - 4");
+        // A raise counts as well.
+        var raised = Battle(Disgrace, extra: 2, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", 3)); });
+        var r3 = MatchEngine.FromTestState(raised.S);
+        Eq(Price(Disgrace1(r3, raised), raised.Enemy), 8); Eq(Price(DisgraceUnit1(r3, raised), raised.Enemy), 12);
+        // An attachment reduced to 0 counts as 0 in the unit (9 + 2 + 0 = 11), and does not touch the Personality's own price.
+        var item0 = Battle(Disgrace, more: x => { var (_, item) = Attach(x, x.Enemy); item.Modifiers.Add(new("test-source", "test", "GoldCost", -5)); });
+        var i0 = MatchEngine.FromTestState(item0.S);
+        Eq(Price(DisgraceUnit1(i0, item0), item0.Enemy), 7, "9 + 2 + 0 = 11, minus 4"); Eq(Price(Disgrace1(i0, item0), item0.Enemy), 5);
+        // The Personality reduced to 0: his own price is the floor, the unit is only the attachments (0 + 2 + 2 - 4).
         var zeroed = Battle(Disgrace, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -20)); });
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(zeroed.S), zeroed), zeroed.Enemy), 0, "0 + 2 + 2 = 4, minus 4");
+        var z = MatchEngine.FromTestState(zeroed.S);
+        Eq(Price(Disgrace1(z, zeroed), zeroed.Enemy), 0, "0 - 4 is floored at 0"); Eq(Price(DisgraceUnit1(z, zeroed), zeroed.Enemy), 0, "4 - 4");
         // "Enters play paying 1 less Gold if you are a Crane Clan player" is a payment discount, not a change of the card's cost: it counts in full.
         var bat = Battle(Disgrace, extra: 2, more: x => Add(x.S, "oracle-l5r-4700", 1, Zone.Attached, province: 0, parent: x.Enemy.Id));
-        Eq(Price(Disgrace1(MatchEngine.FromTestState(bat.S), bat), bat.Enemy), 9 + CardCatalog.Get("oracle-l5r-4700").GoldCost - 4, "Legion of the Bat's printed cost is in the total whoever controls the unit");
-        // The floor: a unit totalling less than 4 is free, and needs no sources.
+        Eq(Price(DisgraceUnit1(MatchEngine.FromTestState(bat.S), bat), bat.Enemy), 9 + CardCatalog.Get("oracle-l5r-4700").GoldCost - 4, "Legion of the Bat's printed cost is in the total whoever controls the unit");
+        // The floor: a Personality costing less than 4 is free, and needs no sources.
         CardInstance kijoCard = null!;
         var cheap = Battle(Disgrace, more: x => { kijoCard = Add(x.S, Kijo, 1, Zone.Battlefield, province: 0); });
         var e = MatchEngine.FromTestState(cheap.S);
@@ -386,13 +481,12 @@ internal static class GoldRulingsTests
         Eq(command.SourceIds!.Length, 0);
         Accept(e, command);
         Check(e.State.Cards[kijoCard.Id].Bowed, "a free bow still bows him");
-        Check(!e.State.Events.Any(x => x.Type == "payment" && x.Message.Contains("Disgraceful Conduct") && !x.Message.Contains("paid 0")), "nothing was paid");
     }
 
     private static void DisgracefulResolves()
     {
-        // Absent: player 0 has NO unit at the battlefield (only the enemy's), and the action is still offered; either side's Personality is a target.
-        var r = Battle(Disgrace, more: x => x.S.Cards.Remove(x.Own.Id));
+        // Absent: player 0 has NO unit at the battlefield (only the enemy's), and the action is still offered.
+        var r = Battle(Disgrace, own: null, more: null);
         var e = MatchEngine.FromTestState(r.S);
         var option = Disgrace1(e, r);
         Check(option.TargetIds!.SequenceEqual(new[] { r.Enemy.Id }));
@@ -402,22 +496,34 @@ internal static class GoldRulingsTests
         Check(e.State.Cards[r.Enemy.Id].Bowed, "bowed"); foreach (var id in paid) Check(e.State.Cards[id].Bowed, "and the price was paid from the chosen sources");
         Check(e.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 5 Gold"));
         Eq(e.State.Cards[r.Card.Id].Zone, Zone.FateDiscard);
-        // His unit is only bowed as its Personality: the attachments stay as they were.
-        var withUnit = Battle(Disgrace, more: x => { Attach(x, x.Enemy); });
+        // The Personality mode bows him only: the attachments stay as they were.
+        CardInstance follower = null!, item = null!;
+        var withUnit = Battle(Disgrace, more: x => { (follower, item) = Attach(x, x.Enemy); });
         var e2 = MatchEngine.FromTestState(withUnit.S);
         Accept(e2, Retarget(Disgrace1(e2, withUnit), withUnit.Enemy.Id));
-        var unitCards = e2.State.Cards.Values.Where(c => c.AttachedTo == withUnit.Enemy.Id).ToArray();
-        Check(unitCards.Length == 2 && e2.State.Cards[withUnit.Enemy.Id].Bowed && unitCards.All(c => !c.Bowed), "only the Personality bowed");
-        // Either side: his own Personality may be the target too.
-        var both = Battle(Disgrace);
-        var opt = Disgrace1(MatchEngine.FromTestState(both.S), both);
-        Check(opt.TargetIds!.ToHashSet().SetEquals(new[] { both.Enemy.Id, both.Own.Id }), "a target Personality, either side's");
-        Eq(Price(opt, both.Own), 3, "Doji Genshin 7 - 4");
+        Check(e2.State.Cards[withUnit.Enemy.Id].Bowed && !e2.State.Cards[follower.Id].Bowed && !e2.State.Cards[item.Id].Bowed, "only the Personality bowed");
+        // The unit mode bows the Personality and every card attached to him, paying the unit's price.
+        var whole = Battle(Disgrace, more: x => { (follower, item) = Attach(x, x.Enemy); });
+        var e3 = MatchEngine.FromTestState(whole.S);
+        var unitOption = DisgraceUnit1(e3, whole);
+        var unitSources = unitOption.TargetGold![whole.Enemy.Id].Payments[0].SourceIds;
+        Accept(e3, Retarget(unitOption, whole.Enemy.Id));
+        Check(e3.State.Cards[whole.Enemy.Id].Bowed && e3.State.Cards[follower.Id].Bowed && e3.State.Cards[item.Id].Bowed, "the whole unit bowed");
+        foreach (var id in unitSources) Check(e3.State.Cards[id].Bowed);
+        Check(e3.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 9 Gold"), "the unit's 13 - 4");
+        // The unit mode is Absent too: offered with no unit of yours at the battlefield.
+        var absentUnit = Battle(Disgrace, own: null, more: x => Attach(x, x.Enemy));
+        Check(UnitOffered(MatchEngine.FromTestState(absentUnit.S), absentUnit), "the unit mode needs no unit of yours either");
+        // A unit of yours is bowed the same way (either side's).
+        var both = Battle(Disgrace, more: x => Attach(x, x.Own));
+        var opt = DisgraceUnit1(MatchEngine.FromTestState(both.S), both);
+        Check(opt.TargetIds!.ToHashSet().SetEquals(new[] { both.Own.Id }), "only Genshin's unit has attachments here");
+        Eq(Price(opt, both.Own), 7 + 2 + 2 - 4, "Doji Genshin's unit");
         // A payment that produces less than the price is rejected; nothing changes.
-        var e3 = MatchEngine.FromTestState(both.S);
-        Rejection(e3, Retarget(Disgrace1(e3, both), both.Enemy.Id) with { SourceIds = [] });
+        var e4 = MatchEngine.FromTestState(both.S);
+        Reject(e4, Retarget(Disgrace1(e4, both), both.Enemy.Id) with { SourceIds = [] });
         // No Personality at the battlefield to target: disabled, with the reason.
-        var empty = Battle(Disgrace, more: x => { x.S.Cards.Remove(x.Enemy.Id); x.S.Cards.Remove(x.Own.Id); });
+        var empty = Battle(Disgrace, own: null, more: x => x.S.Cards.Remove(x.Enemy.Id));
         var none = Options(MatchEngine.FromTestState(empty.S), 0, DisgraceAbility, empty.Card.Id).Single();
         Check(!none.Enabled, none.Reason ?? "");
         // Not in the Action phase: it is a Battle action.
@@ -427,35 +533,38 @@ internal static class GoldRulingsTests
 
     private static void StainPrice()
     {
-        // Mendon's example: Daidoji Ebizo (Gold cost 9) with no attachments costs 9 + 2 = 11.
+        // Mendon's example on the scan's reading: Daidoji Ebizo (Gold cost 9) with no attachments costs 9 - 2 = 7.
         var r = Battle(Stain, extra: 4);
         var e = MatchEngine.FromTestState(r.S);
         var option = Stain1(e, r);
-        Eq(Price(option, r.Enemy), 11); Check(option.TargetGold![r.Enemy.Id].Basis.Contains("total cost 9 + 2"), option.TargetGold[r.Enemy.Id].Basis);
+        Eq(Price(option, r.Enemy), 7); Check(option.TargetGold![r.Enemy.Id].Basis.Contains("total cost 9 − 2"), option.TargetGold[r.Enemy.Id].Basis);
         Eq(option.TargetGold[r.Enemy.Id].Kind, GoldCostKind.Derived);
-        // With a Follower and an Item: the unit's total 13, plus 2.
+        // With a Follower and an Item: a Personality WITH attachments is priced by his unit's total 13, minus 2.
         var unit = Battle(Stain, extra: 4, more: x => Attach(x, x.Enemy));
         var u = Stain1(MatchEngine.FromTestState(unit.S), unit);
-        Eq(Price(u, unit.Enemy), 15); Check(u.TargetGold![unit.Enemy.Id].Basis.Contains("9 + 2 + 2 = 13 + 2"), u.TargetGold[unit.Enemy.Id].Basis);
+        Eq(Price(u, unit.Enemy), 11); Check(u.TargetGold![unit.Enemy.Id].Basis.Contains("9 + 2 + 2 = 13 − 2"), u.TargetGold[unit.Enemy.Id].Basis);
         // A cost-reduced unit: the price follows the current cost (modifier, token, both).
         var mod = Battle(Stain, extra: 4, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); });
-        Eq(Price(Stain1(MatchEngine.FromTestState(mod.S), mod), mod.Enemy), 13);
+        Eq(Price(Stain1(MatchEngine.FromTestState(mod.S), mod), mod.Enemy), 9);
         var tok = Battle(Stain, extra: 4, more: x => { Attach(x, x.Enemy); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
-        Eq(Price(Stain1(MatchEngine.FromTestState(tok.S), tok), tok.Enemy), 13);
+        Eq(Price(Stain1(MatchEngine.FromTestState(tok.S), tok), tok.Enemy), 9);
         var both = Battle(Stain, extra: 4, more: x => { Attach(x, x.Enemy); x.Enemy.Modifiers.Add(new("test-source", "test", "GoldCost", -2)); x.Enemy.Tokens.Add(new("token-1", "Training", "test", "GoldCost", -2)); });
-        Eq(Price(Stain1(MatchEngine.FromTestState(both.S), both), both.Enemy), 11);
-        // An attachment as the target is a single card: its own current cost, plus 2 (Follower 2, reduced by a token to 0).
+        Eq(Price(Stain1(MatchEngine.FromTestState(both.S), both), both.Enemy), 7);
+        // An attachment as the target is a single card: its own current cost minus 2, never below 0 (Follower 2 -> 0; an Item reduced to 0 -> 0).
         CardInstance follower = null!, itemCard = null!;
-        var single = Battle(Stain, extra: 4, more: x => { (follower, itemCard) = Attach(x, x.Enemy); });
+        var single = Battle(Stain, extra: 4, more: x => { (follower, itemCard) = Attach(x, x.Enemy); Add(x.S, "oracle-l5r-4700", 1, Zone.Attached, province: 0, parent: x.Enemy.Id); });
         itemCard.Tokens.Add(new("token-2", "Training", "test", "GoldCost", -5));
+        var bat5 = single.S.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-4700" && c.AttachedTo == single.Enemy.Id);
         var s = Stain1(MatchEngine.FromTestState(single.S), single);
-        Eq(Price(s, follower), 4, "Follower 2 + 2"); Eq(Price(s, itemCard), 2, "an Item reduced to 0 costs 0 + 2");
-        Check(s.TargetGold![follower.Id].Basis.Contains("total cost 2 + 2"), s.TargetGold[follower.Id].Basis);
+        Eq(Price(s, follower), 0, "Follower 2 - 2"); Eq(Price(s, itemCard), 0, "an Item reduced to 0 costs 0"); Eq(Price(s, bat5), 3, "Legion of the Bat 5 - 2");
+        Check(s.TargetGold![bat5.Id].Basis.Contains("total cost 5 − 2"), s.TargetGold[bat5.Id].Basis);
+        // A Personality with no attachments is the same number whichever way he is read.
+        Eq(Price(Stain1(MatchEngine.FromTestState(r.S), r), r.Enemy), CardCatalog.Get(Ebizo).GoldCost - 2);
     }
 
     private static void StainAffordable()
     {
-        // Player 0 has 9 Gold: Ebizo (11) is out of reach, a 5-cost Lion samurai (7) and a Follower (4) are not.
+        // Player 0 has 9 Gold: Ebizo's unit (13 - 2 = 11) is out of reach, a 5-cost Lion samurai (3) is not.
         CardInstance lion = null!;
         var r = Battle(Stain, more: x => { lion = Add(x.S, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Attach(x, x.Enemy); });
         var e = MatchEngine.FromTestState(r.S);
@@ -463,11 +572,11 @@ internal static class GoldRulingsTests
         Check(!option.TargetIds!.Contains(r.Enemy.Id), "the unaffordable unit is not offered");
         Check(option.TargetIds!.Contains(lion.Id));
         Check(!option.TargetGold!.ContainsKey(r.Enemy.Id), "and has no quote");
-        Eq(Price(option, lion), 7);
+        Eq(Price(option, lion), 3);
         // The engine's own answer to submitting the unaffordable target with borrowed sources is a rejection.
-        Rejection(e, option.Command! with { TargetId = r.Enemy.Id, SourceIds = option.TargetGold[lion.Id].Payments[0].SourceIds });
+        Reject(e, option.Command! with { TargetId = r.Enemy.Id, SourceIds = option.TargetGold[lion.Id].Payments[0].SourceIds });
         // Nothing affordable: disabled, with the reason.
-        var poor = Battle(Stain, more: x => Attach(x, x.Enemy));
+        var poor = Battle(Stain);
         foreach (var c in poor.S.Cards.Values.Where(c => c.OwnerId == 0 && c.Zone is Zone.Home or Zone.Stronghold)) c.Bowed = true;
         var disabled = Options(MatchEngine.FromTestState(poor.S), 0, StainAbility, poor.Card.Id, poor.Own.Id).Single();
         Check(!disabled.Enabled && !string.IsNullOrEmpty(disabled.Reason) && (disabled.TargetIds?.Length ?? 0) == 0, "disabled with a reason and no target: " + disabled.Reason);
@@ -494,13 +603,13 @@ internal static class GoldRulingsTests
         var s = Table(Phase.Action, actor: 0); var card = Add(s, Stain, 0, Zone.Hand); var genshin = Add(s, Genshin, 0, Zone.Home); Add(s, Ebizo, 1, Zone.Home);
         Check(!CanUse(MatchEngine.FromTestState(s), 0, StainAbility, card.Id, genshin.Id));
         // A Stain Cleansed takes the Absent flag of no one: without a unit of his own at the battlefield there is no Magistrate to choose.
-        var alone = Battle(Stain, extra: 4, more: x => x.S.Cards.Remove(x.Own.Id));
+        var alone = Battle(Stain, own: null, extra: 4);
         Check(Options(MatchEngine.FromTestState(alone.S), 0, StainAbility, alone.Card.Id).All(a => !a.Enabled));
     }
 
     private static void StainDestroys()
     {
-        // The unit: Ebizo, his Follower and his Item all go; the price is exactly 15 and bows exactly the chosen sources.
+        // The unit: Ebizo, his Follower and his Item all go; the price is exactly 11 and bows exactly the chosen sources.
         CardInstance unitFollower = null!;
         var r = Battle(Stain, extra: 4, more: x => { (unitFollower, _) = Attach(x, x.Enemy); });
         var e = MatchEngine.FromTestState(r.S);
@@ -512,37 +621,37 @@ internal static class GoldRulingsTests
         Check(!e.State.Cards.Values.Any(c => c.AttachedTo == r.Enemy.Id));
         foreach (var id in sources) Check(e.State.Cards[id].Bowed);
         var payment = e.State.Events.Last(x => x.Type == "payment");
-        Check(payment.Message.Contains("paid 15 Gold"), payment.Message);
+        Check(payment.Message.Contains("paid 11 Gold"), payment.Message);
         Eq(e.State.Cards[r.Card.Id].Zone, Zone.FateDiscard);
-        // An attachment as the target: it alone is destroyed, its Personality stays.
-        CardInstance item = null!;
-        var one = Battle(Stain, extra: 4, more: x => { (_, item) = Attach(x, x.Enemy); });
+        // An attachment as the target: it alone is destroyed, its Personality stays (Legion of the Bat, 5 - 2).
+        CardInstance bat = null!;
+        var one = Battle(Stain, extra: 4, more: x => { bat = Add(x.S, "oracle-l5r-4700", 1, Zone.Attached, province: 0, parent: x.Enemy.Id); });
         var e2 = MatchEngine.FromTestState(one.S);
-        Accept(e2, Retarget(Stain1(e2, one), item.Id));
-        Eq(e2.State.Cards[item.Id].Zone, Zone.FateDiscard); Check(e2.State.Cards[one.Enemy.Id].Zone == Zone.Battlefield, "his Personality stays");
-        Check(e2.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 4 Gold"), "the Item's 2 plus 2");
-        // Excess production is lost as in every payment, but too little is rejected: Ebizo alone costs 11.
+        Accept(e2, Retarget(Stain1(e2, one), bat.Id));
+        Eq(e2.State.Cards[bat.Id].Zone, Zone.FateDiscard); Check(e2.State.Cards[one.Enemy.Id].Zone == Zone.Battlefield, "his Personality stays");
+        Check(e2.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 3 Gold"), "the attachment's own 5 minus 2");
+        // Excess production is lost as in every payment, but too little is rejected: Ebizo alone costs 7.
         var alone = Battle(Stain, extra: 4);
         var e3 = MatchEngine.FromTestState(alone.S);
         var stainOption = Stain1(e3, alone);
-        var short10 = e3.PaymentOptions(0, 10).First().SourceIds.Take(3).ToArray();
-        Rejection(e3, Retarget(stainOption, alone.Enemy.Id) with { SourceIds = short10 });
+        var stronghold = alone.S.Players[0].StrongholdId;
+        Reject(e3, Retarget(stainOption, alone.Enemy.Id) with { SourceIds = [stronghold] });
         var everything = e3.State.Cards.Values.Where(c => c.OwnerId == 0 && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold && CardCatalog.Get(c.DefinitionId).GoldProduction > 0).Select(c => c.Id).ToArray();
         Accept(e3, Retarget(stainOption, alone.Enemy.Id) with { SourceIds = everything });
         Eq(e3.State.Cards[alone.Enemy.Id].Zone, Zone.Dead);
-        Check(e3.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 11 Gold"), "the price is exactly 11");
+        Check(e3.State.Events.Last(x => x.Type == "payment").Message.Contains("paid 7 Gold"), "the price is exactly 7");
     }
 
     private static void StainSignIsOneConstant()
     {
         var cost = AbilityCatalog.All[StainAbility].Cost!;
-        Eq(cost.Basis, GoldCostBasis.TargetUnitTotal); Eq(cost.Modifier, 2); Check(cost.Floor is null);
-        // The period scan's reading -- the price is the total MINUS 2 -- is the same rule with the opposite sign: Ebizo (9) alone would cost 7.
+        Eq(cost.Basis, GoldCostBasis.TargetUnitTotal); Eq(cost.Modifier, -2); Eq(cost.Floor, 0);
         var r = Battle(Stain, extra: 4);
         var e = MatchEngine.FromTestState(r.S);
-        Eq(Price(Stain1(e, r), r.Enemy), 11);
-        var flipped = new GoldCostRule(GoldCostBasis.TargetUnitTotal, Modifier: -2);
-        Eq(flipped.Modifier, -2);
+        Eq(Price(Stain1(e, r), r.Enemy), 7, "the scan governs: Ebizo (9) alone costs 7");
+        // The Oracle wording read the other way -- the target's cost is what was paid MINUS 2 -- is the same rule with the opposite sign: Ebizo would cost 11.
+        var flipped = new GoldCostRule(GoldCostBasis.TargetUnitTotal, Modifier: 2);
+        Eq(flipped.Modifier, 2);
     }
 
     // ---- At Any Cost ---------------------------------------------------------------------------------------------------------------------------------
@@ -585,7 +694,7 @@ internal static class GoldRulingsTests
         var sources = option.TargetGold[genshin.Id].Payments[0].SourceIds;
         Accept(e, Retarget(option, genshin.Id));
         var recruited = e.State.Cards[genshin.Id];
-        Eq(recruited.Zone, Zone.Home, "he enters play at Home"); Check(recruited.FaceUp && !recruited.Bowed);
+        Eq(recruited.Zone, Zone.Battlefield, "he enters play at the battlefield At Any Cost was played at"); Eq(recruited.ProvinceIndex, 0); Check(recruited.FaceUp && !recruited.Bowed);
         Check(e.State.PendingChoice is null || e.State.PendingChoice.Type != "proclaim", "no Proclaim window");
         Eq(Honor(e, 0), honorBefore, "no Honor from Proclaim");
         foreach (var id in sources) Check(e.State.Cards[id].Bowed);
@@ -594,8 +703,19 @@ internal static class GoldRulingsTests
         Eq(e.State.Cards[r.Card.Id].Zone, Zone.FateDiscard, "the Strategy is spent");
         Eq(e.State.Cards[doho.Id].Zone, Zone.Dead, "the other dead Samurai stays dead");
         Eq(e.State.PriorityPlayerId, 1, "priority passes on");
-        // The player views him in play at Home.
-        Check(e.GetView(1).Players[0].Home.Any(c => c.Id == genshin.Id), "the opponent sees him enter play");
+        // Both players see him in the army at that battlefield: he is a unit there at once.
+        Check(e.GetView(1).Players[0].Army.Any(c => c.Id == genshin.Id && c.ProvinceIndex == 0), "the opponent sees him enter play at the battlefield");
+        Check(e.GetView(0).Players[0].Army.Single(c => c.Id == genshin.Id).UnitForce > 0, "and his Force is in the army");
+        // Unit-eligible there: he can perform a Battle action at once (the Magistrate performing A Stain Cleansed), which needs a unit at the battlefield.
+        var stainTable = Recruit(more: x => { Add(x.S, Stain, 0, Zone.Hand); });
+        var deadGenshin = Dead(stainTable, Genshin);
+        var stainCard = stainTable.S.Cards.Values.Single(c => c.DefinitionId == Stain);
+        var se = MatchEngine.FromTestState(stainTable.S);
+        Check(!CanUse(se, 0, StainAbility, stainCard.Id), "before: no Magistrate at the battlefield");
+        Accept(se, Retarget(Enabled(se, 0, RecruitAbility, stainTable.Card.Id), deadGenshin.Id));
+        Eq(se.State.PriorityPlayerId, 1); var afterState = se.State; afterState.PriorityPlayerId = 0;
+        var after = MatchEngine.FromTestState(afterState);
+        Check(CanUse(after, 0, StainAbility, stainCard.Id, deadGenshin.Id), "after: the recruited Magistrate performs a Battle action at once");
     }
 
     private static void AtAnyCostRestrictions()
@@ -658,7 +778,7 @@ internal static class GoldRulingsTests
         var other = sensei.S.Cards.Values.Single(c => c.DefinitionId == "training-sensei-personality");
         var option = Enabled(e, 0, RecruitAbility, sensei.Card.Id);
         Accept(e, Retarget(option, yozo.Id));
-        Eq(e.State.Cards[yozo.Id].Zone, Zone.Home); Eq(e.State.Cards[other.Id].Zone, Zone.DynastyDiscard, "the other Sensei was discarded");
+        Eq(e.State.Cards[yozo.Id].Zone, Zone.Battlefield); Eq(e.State.Cards[other.Id].Zone, Zone.DynastyDiscard, "the other Sensei was discarded");
         Check(e.State.Events.Any(x => x.Type == "cardDiscarded" && x.CardId == other.Id && x.Message.Contains("Sensei")));
         // With no other Sensei nothing is discarded.
         var alone = Recruit(more: x => Add(x.S, "training-lion-samurai", 0, Zone.Home)); Dead(alone, Yozo);
@@ -674,7 +794,7 @@ internal static class GoldRulingsTests
         Eq(hOption.TargetGold![hotako.Id].Cost, 9, "printed 11, Lion Clan discount 2"); Check(hOption.TargetGold[hotako.Id].Basis.Contains("− 2 (Lion Clan)"), hOption.TargetGold[hotako.Id].Basis);
         var lionHonor = Honor(le, 1);
         Accept(le, Retarget(hOption, hotako.Id));
-        Eq(le.State.Cards[hotako.Id].Zone, Zone.Home); Eq(Honor(le, 1), lionHonor - 2, "Hotako's 'After Hotako enters play: lose 2 Honor'");
+        Eq(le.State.Cards[hotako.Id].Zone, Zone.Battlefield); Eq(Honor(le, 1), lionHonor - 2, "Hotako's 'After Hotako enters play: lose 2 Honor'");
 
         // A dead Personality returns as a new card: nothing of his earlier life follows him.
         var fresh = Recruit(); var dead = Dead(fresh, Genshin);
@@ -687,7 +807,7 @@ internal static class GoldRulingsTests
 
     private static void AtAnyCostBattleAndPrice()
     {
-        // No unit at the battlefield: a Battle action needs one.
+        // No unit at the battlefield: a Battle action needs one (At Any Cost is not Absent: the scan's "if you control any units at the current battlefield").
         var r = Recruit(unit: false);
         Dead(r, Doho);
         var e = MatchEngine.FromTestState(r.S);

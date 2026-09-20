@@ -8,23 +8,27 @@ Dawn and Emperor Edition printings). The published text is the catalogue (curren
 
 * At Any Cost prints "Battle: If you control any units at the current battlefield, choose your performing dead Samurai: Bring him into play at
   the current battlefield, paying all costs." The catalogue reads "Dark Virtue Battle, :gstar:: Recruit your target performing dead Samurai."
-  Mendon's ruling is on the catalogue's Recruit: the same entry requirements as any recruit action, and the Personality may not be proclaimed.
-  The unit-at-the-battlefield condition is every Battle action's own requirement.
-* Virtuous Charity, Disgraceful Conduct and A Stain Cleansed read the same as their scans.
+  Mendon's rulings: the same entry requirements as any recruit action, the Personality may not be proclaimed, and he enters play at the current
+  battlefield at which At Any Cost is played. The unit-at-the-battlefield condition is every Battle action's own requirement.
+* A Stain Cleansed: the catalogue reads "with Gold Cost equal to what you paid minus 2", but the scan reads "pay Gold equal to the card or unit's
+  total Gold Cost minus 2". Mendon re-read it: the scan governs, so the price is the target's current total Gold cost MINUS 2.
+* Virtuous Charity and Disgraceful Conduct read the same as their scans.
 
 Virtuous Charity (10181, Focus 3, Cost 0): "Open: If it is not your turn, choose another player: ... You, then the player, each pay zero or more
 Gold. Whoever paid more Gold gains Honor equal to the difference between the two amounts paid, or 4, whichever is less." is
-virtuous-charity-open: a variable Gold cost for the acting player, then the opposing player's variable payment decision (OpponentPayment.cs).
+virtuous-charity-open: both payments are part of the action's resolution (a variable amount for the acting player, then the opposing player's
+variable payment decision, OpponentPayment.cs), so an action negated whole pays nothing and a negated Honor gain leaves both payments made.
 
-At Any Cost (639, Focus 1, Cost 0, Dark Virtue Will): at-any-cost-recruit -- the recruit price of the target dead Samurai, entering play not
-proclaimed, through the ordinary recruit validation.
+At Any Cost (639, Focus 1, Cost 0, Dark Virtue Will): at-any-cost-recruit -- the recruit price of the target dead Samurai, entering play at the
+current battlefield, not proclaimed, through the ordinary recruit validation.
 
 Disgraceful Conduct (2020, Focus 2, printed cost "*"): "Battle: Even if you control no units at the current battlefield, pay Gold equal to a
-target Personality or unit's total Gold cost minus 4: Bow it." is disgraceful-conduct-bow (Absent, priced from the target's current unit total).
+target Personality or unit's total Gold cost minus 4: Bow it." The player chooses the Personality or the unit (Mendon): disgraceful-conduct-bow
+(the Personality's current cost minus 4, only he bows) and disgraceful-conduct-bow-unit (the unit's current total minus 4, every card in it bows;
+offered only for a Personality that has attachments). Both are Absent.
 
-A Stain Cleansed (82, Focus 1, no printed cost): "Battle, :gstar:: Target your performing unbowed Magistrate to target an enemy card without
-attachments with Gold Cost equal to what you paid minus 2 or an enemy Personality whose unit's total Gold Cost is equal what you paid minus 2.
-Destroy the card or unit." is a-stain-cleansed-destroy: priced from the target's current cost (a Personality's unit total) plus 2.
+A Stain Cleansed (82, Focus 1, no printed cost): a-stain-cleansed-destroy: the target's current cost (a Personality's whole unit's current
+total, or a card without attachments' own) minus 2.
 
 Same discipline as every other wave: curated Effect/Ability mapping, hand-verified against each card's own scan, never inferred from prose.
 """
@@ -41,7 +45,7 @@ PROFILE = "strategy-wave-29"
 ABILITIES: dict[int, list[str]] = {
     10181: ["virtuous-charity-open"],  # Virtuous Charity
     639: ["at-any-cost-recruit"],  # At Any Cost
-    2020: ["disgraceful-conduct-bow"],  # Disgraceful Conduct
+    2020: ["disgraceful-conduct-bow", "disgraceful-conduct-bow-unit"],  # Disgraceful Conduct
     82: ["a-stain-cleansed-destroy"],  # A Stain Cleansed
 }
 EFFECTS: dict[int, str] = {}

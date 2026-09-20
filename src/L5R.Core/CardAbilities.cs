@@ -224,6 +224,9 @@ public static class AbilityCatalog
         ["training-bow-guard"] = new("Reaction", "Training: before an action resolves, negate the bowing of your Personality it targets", "none", Trigger: "before-action-resolves"),
         ["training-negate-mover"] = new("Reaction", "Training: before an action resolves, target a Personality it would move: negate his movement from the action's effects", "deferred-action-mover", Trigger: "before-action-resolves"),
         ["training-negate-action"] = new("Reaction", "Training: after another player's action targets a card of yours: negate the action's effects", "none", Trigger: "before-action-resolves"),
+        // Issue #373 fixtures: reactions to an action that names no card (Virtuous Charity). No printed card negates either yet.
+        ["training-negate-untargeted-action"] = new("Reaction", "Training: before another player's action resolves: negate the action's effects", "none", Trigger: "before-action-resolves"),
+        ["training-negate-honor-gain"] = new("Reaction", "Training: before another player's opponent-payment action resolves: negate its Honor gain (the payments are still made)", "none", Trigger: "before-action-resolves"),
         ["training-slots-discard"] = new("Open", "Training: discard a target card from your hand", "slots", Slots: [new("card", "hand", "A card from your hand")]),
         ["training-move-current"] = new("Battle", "Training: move a target Personality of yours at home to the current battlefield", "own-personality-at-home", Move: new(MoveSpec.Target, MoveSpec.CurrentBattlefield), MovesToBattle: true),
         ["training-move-anywhere"] = new("Battle", "Training: move a target enemy Personality to another unresolved battlefield", "enemy-personality", Move: new(MoveSpec.Target, MoveSpec.AnyUnresolved)),
@@ -829,13 +832,16 @@ public static class AbilityCatalog
         ["clay-kshatriya-invest"] = new("Reaction", "Invest 5 Gold: give this Follower two +1F tokens", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(5)),
         ["training-invest"] = new("Reaction", "Training: Invest 3 Gold: give this Follower a +1F token", "none", Trigger: "own-enters-play", Cost: GoldCostRule.Fixed(3)),
         // Strategy wave 29 (issue #373, docs/decisions/2026-09-20-gold-payment-rulings.md). "Another player" is the one opponent, so no choice is asked.
-        ["virtuous-charity-open"] = new("Open", "Open: If it is not your turn, choose another player: you, then the player, each pay zero or more Gold; whoever paid more Gold gains Honor equal to the difference between the two amounts, or 4, whichever is less", "none", Cost: GoldCostRule.Variable()),
-        ["at-any-cost-recruit"] = new("Battle", "Dark Virtue Battle: recruit your target performing dead Samurai, paying all costs (he may not be proclaimed)", "own-dead-samurai", Cost: GoldCostRule.TargetRecruit()),
-        ["disgraceful-conduct-bow"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target Personality or unit's total Gold cost minus 4: bow it", "personality",
-            Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0), Absent: true),
-        // Oracle: cost = paid - 2, so the price is cost + 2 (Mendon); the period scan reads price = cost - 2. The sign below is the one thing to flip.
-        ["a-stain-cleansed-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy card without attachments or an enemy Personality: pay Gold equal to its (unit's) current total Gold cost plus 2: destroy the card or unit",
-            "enemy-personality-or-attachment", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], Cost: GoldCostRule.TargetUnitTotal(2)),
+        ["virtuous-charity-open"] = new("Open", "Open: If it is not your turn, choose another player: you, then the player, each pay zero or more Gold; whoever paid more Gold gains Honor equal to the difference between the two amounts, or 4, whichever is less", "none", Cost: GoldCostRule.Variable(atResolution: true)),
+        ["at-any-cost-recruit"] = new("Battle", "Dark Virtue Battle: recruit your target performing dead Samurai into play at this battlefield, paying all costs (he may not be proclaimed)", "own-dead-samurai", Cost: GoldCostRule.TargetRecruit()),
+        // The player chooses the Personality or the unit (Mendon): two abilities, the second offered only for a Personality that has attachments (for a bare one the modes are the same).
+        ["disgraceful-conduct-bow"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target Personality's Gold cost minus 4: bow him", "personality",
+            Cost: GoldCostRule.TargetCurrent(-4, floor: 0), Absent: true, UsageKey: "disgraceful-conduct"),
+        ["disgraceful-conduct-bow-unit"] = new("Battle", "Even if you control no units at the current battlefield, pay Gold equal to a target unit's total Gold cost minus 4: bow the Personality and every card attached to him", "personality-with-attachment",
+            Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0), Absent: true, UsageKey: "disgraceful-conduct"),
+        // The scan governs (Mendon): pay the card or unit's current total Gold cost minus 2. The sign below is the one number.
+        ["a-stain-cleansed-destroy"] = new("Battle", "Choose your performing unbowed Magistrate and target an enemy card without attachments or an enemy Personality: pay Gold equal to its (unit's) current total Gold cost minus 2: destroy the card or unit",
+            "enemy-personality-or-attachment", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Magistrate"], Cost: GoldCostRule.TargetUnitTotal(-2, floor: 0)),
         // Generalized Gold payment (issue #303): synthetic fixtures, one per cost shape, standing in for the real cards (Exchange of Letters and
         // Urgency are still unwired; the other four are wired above -- see docs/decisions/2026-09-18-generalized-gold-payment.md). Each proves that
         // the shape prices, validates, quotes and pays through the ONE GoldCostRule path.
@@ -1715,7 +1721,7 @@ public static class AbilityCatalog
         ["training-copy-ability-turn"] = new("Open", "Training: remove a target Personality in any discard pile from the game: copy one ability that does not itself copy abilities from it (this turn)", "personality-in-any-discard", CopiesAbilities: true, Costs: ActionCost.RemoveTarget),
         // Training fixture (issue #338): opens the three-option Either/Or for the opposing player.
         ["training-either-or-three"] = new("Open", "Training: your opponent chooses to pay 2 Gold, lose 2 Honor, or let you gain 2 Honor", "none"),
-        ["training-opponent-payment"] = new("Open", "Training: pay zero or more Gold; your opponent then pays zero or more Gold; each of you gains Honor equal to what the other paid", "none", Cost: GoldCostRule.Variable()),
+        ["training-opponent-payment"] = new("Open", "Training: pay zero or more Gold; your opponent then pays zero or more Gold; each of you gains Honor equal to what the other paid", "none", Cost: GoldCostRule.Variable(atResolution: true)),
         // Fukuzo (oracle-l5r-2728, issue #338): "Open: Remove a target Personality in any player's discard pile from the game: Fukuzo wears
         // his skin. Until the next time this game this ability is used, Fukuzo copies one keyword, and one ability that does not itself
         // copy abilities, from the Personality." The removal is the cost (paid first); the two copies are the two independent copy
@@ -1999,7 +2005,7 @@ public sealed partial class MatchEngine
         or "fukui-bow"
         // Issue #336: Doji Yoshitada, Gold and Steel's two bows and (its bow half) their target.
         or "yoshitada-bow" or "gold-and-steel-bow" or "gold-and-steel-bow-move"
-        or "disgraceful-conduct-bow";
+        or "disgraceful-conduct-bow" or "disgraceful-conduct-bow-unit";
     // Whether the command's TargetId is an Attack's OWN target, which reacts through the separate attackReaction
     // window instead of this one: an Attack-classified ability whose Target category is "attack". Bayushi Kahoku
     // - exp (issue #313) is Attack-classified too, but its TargetId is the separate "-4F" target (an ordinary
@@ -2037,6 +2043,10 @@ public sealed partial class MatchEngine
     private bool BeforeActionReactionApplies(CardInstance card, string abilityId, GameCommand command, string? affectedId = null)
     {
         affectedId ??= ReactionAffectedId(command);
+        // Issue #373 fixtures: they react to another player's action whatever it targets, an action that names no card included.
+        if (abilityId is "training-negate-untargeted-action" or "training-negate-honor-gain")
+            return command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var anyAction) && IsAction(anyAction) && InPlay(card) && command.PlayerId != card.OwnerId
+                && (abilityId != "training-negate-honor-gain" || command.AbilityId is "virtuous-charity-open" or "training-opponent-payment");
         if (command.AbilityId is null || affectedId is null || !_state.Cards.TryGetValue(affectedId, out var affected)) return false;
         if (!InPlay(card) || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var acting) || !IsAction(acting)) return false;
         var negatable = !MovementCannotBeNegated(command);
@@ -4073,6 +4083,9 @@ public sealed partial class MatchEngine
                 return; // The action does not finish until the opponent answers.
             case "air-straighten": case "paid-straighten": case "training-keyword-conditional-straighten": case "immovable-object-straighten": case "training-stain-straighten": Straighten(target!); break;
             case "paid-bow": case "unorthodox-attack": case "chokehold": case "immovable-object-bow": case "naga-remnants-bow": case "training-disgrace-bow": case "disgraceful-conduct-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
+            case "disgraceful-conduct-bow-unit":
+                foreach (var member in Attachments(target!.Id).Prepend(target)) if (!StalwartNegatesBow(member, player.Id)) member.Bowed = true;
+                break;
             // Generalized Gold payment fixtures (issue #303): the Gold itself was already charged by
             // PayForAbility above; a variable-cost effect reads the amount the player actually chose.
             case "training-urgency-draw": Draw(player); break;
@@ -4086,7 +4099,7 @@ public sealed partial class MatchEngine
                 var quote = QuotePurchase(player.Id, target!.Id, fromDeadPile: true);
                 Require(quote.Error is null, quote.Error ?? "");
                 SpendHandPlayedCard(player, source);
-                if (BringDeadPersonalityIntoPlay(player, target, "At Any Cost")) return;
+                if (BringDeadPersonalityIntoPlay(player, target, "At Any Cost", _state.CurrentBattleProvince!.Value)) return;
                 break;
             }
             case "virtuous-charity-open":
@@ -4166,6 +4179,8 @@ public sealed partial class MatchEngine
             case "training-bow-guard": NegateEffects(Card(ReactionAffectedId(_state.PendingNegatableAbility!)!), "bow"); break;
             case "training-negate-mover": _state.NegatedEffects.Add(new("move", target!.Id)); break;
             case "training-negate-action": NegateDeferredAction(source!); break;
+            case "training-negate-untargeted-action": NegateDeferredAction(source!); break;
+            case "training-negate-honor-gain": _state.NegatedEffects.Add(new("honor-gain", _state.PendingNegatableAbility!.CardId!)); break;
             case "training-slots-discard": foreach (var discarded in SlotCards(command, "card").ToArray()) DiscardFate(player, discarded); break;
             case "training-move-current": case "training-move-anywhere": case "training-move-source-adjacent": case "training-move-both-home": case "training-move-performer-and-target":
                 ExecuteMove(command, ability, source, target); break;
