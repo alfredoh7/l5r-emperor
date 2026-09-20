@@ -2059,6 +2059,23 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>Strategy wave 29 (issue #373): Virtuous Charity (oracle-l5r-10181), At Any Cost (639), Disgraceful Conduct (2020) and A Stain Cleansed (82), the four variable- and derived-Gold Strategies wired once Mendon answered the generalized Gold payment's open questions (docs/decisions/2026-09-20-gold-payment-rulings.md): the opposing player's variable payment, a dead-pile recruit through the ordinary recruit validation, and prices worked from a unit's current total Gold cost.</summary>
+    public static PublishedSnapshot StrategyWave29 { get; } = LoadStrategyWave29();
+
+    private static PublishedSnapshot LoadStrategyWave29()
+    {
+        var snapshot = Load("L5R.Published.StrategyWave29.json", "strategy-wave-29", requireDecks: false);
+        if(snapshot.Cards.Length != 4)
+            throw new InvalidOperationException("Unexpected strategy-wave-29 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Strategy || card.Text.Length == 0)
+                throw new InvalidOperationException($"strategy-wave-29 card is not a textful Strategy: {card.Id}");
+        var othersStrategyWave29 = Snapshot.Cards.Concat(VanillaWave1.Cards).Concat(StrongholdWave1.Cards).Concat(StrongholdWave2.Cards).Concat(StrongholdWave3.Cards).Concat(PersonalityWave1.Cards).Concat(PersonalityWave2.Cards).Concat(PersonalityWave3.Cards).Concat(FollowerWave1.Cards).Concat(PersonalityWave4.Cards).Concat(PersonalityWave5.Cards).Concat(StrategyWave1.Cards).Concat(FollowerWave2.Cards).Concat(FollowerWave3.Cards).Concat(FollowerWave4.Cards).Concat(FollowerWave5.Cards).Concat(ItemWave1.Cards).Concat(StrategyWave2.Cards).Concat(PersonalityWave6.Cards).Concat(FollowerWave6.Cards).Concat(PersonalityWave7.Cards).Concat(PersonalityWave8.Cards).Concat(StrategyWave3.Cards).Concat(FollowerWave7.Cards).Concat(FollowerWave8.Cards).Concat(ItemWave2.Cards).Concat(StrategyWave4.Cards).Concat(StrategyWave5.Cards).Concat(PersonalityWave9.Cards).Concat(PersonalityWave10.Cards).Concat(PersonalityWave11.Cards).Concat(PersonalityWave12.Cards).Concat(PersonalityWave13.Cards).Concat(RingWave1.Cards).Concat(PersonalityWave14.Cards).Concat(FollowerWave9.Cards).Concat(PersonalityWave15.Cards).Concat(PersonalityWave16.Cards).Concat(EventWave1.Cards).Concat(RegionWave1.Cards).Concat(CelestialWave1.Cards).Concat(SpellWave1.Cards).Concat(PersonalityWave17.Cards).Concat(EventWave2.Cards).Concat(StrategyWave6.Cards).Concat(PersonalityWave18.Cards).Concat(HoldingWave1.Cards).Concat(ItemWave3.Cards).Concat(RegionWave2.Cards).Concat(SpellWave2.Cards).Concat(StrategyWave7.Cards).Concat(StrategyWave8.Cards).Concat(StrategyWave9.Cards).Concat(FollowerWave10.Cards).Concat(StrategyWave10.Cards).Concat(SpellWave3.Cards).Concat(PersonalityWave19.Cards).Concat(FollowerWave11.Cards).Concat(StrategyWave11.Cards).Concat(FollowerWave12.Cards).Concat(StrategyWave12.Cards).Concat(FollowerWave13.Cards).Concat(PersonalityWave20.Cards).Concat(FollowerWave14.Cards).Concat(StrategyWave13.Cards).Concat(StrategyWave14.Cards).Concat(StrategyWave15.Cards).Concat(SpellWave4.Cards).Concat(RingWave2.Cards).Concat(PersonalityWave21.Cards).Concat(PersonalityWave22.Cards).Concat(RegionWave3.Cards).Concat(StrategyWave16.Cards).Concat(PersonalityWave23.Cards).Concat(PersonalityWave24.Cards).Concat(PersonalityWave25.Cards).Concat(PersonalityWave26.Cards).Concat(FollowerWave15.Cards).Concat(StrategyWave18.Cards).Concat(EventWave3.Cards).Concat(PersonalityWave27.Cards).Concat(EventWave4.Cards).Concat(PersonalityWave28.Cards).Concat(StrategyWave17.Cards).Concat(HoldingWave2.Cards).Concat(PersonalityWave29.Cards).Concat(PersonalityWave31.Cards).Concat(FollowerWave17.Cards).Concat(PersonalityWave33.Cards).Concat(StrategyWave22.Cards).Concat(PersonalityWave30.Cards).Concat(ItemWave4.Cards).Concat(StrongholdWave8.Cards).Concat(StrategyWave27.Cards).Concat(SpellWave9.Cards).Concat(PersonalityWave38.Cards).Concat(StrongholdWave5.Cards).Concat(StrategyWave23.Cards).Concat(PersonalityWave32.Cards).Concat(StrategyWave21.Cards).Select(c=>c.Id);
+        if(snapshot.Cards.Select(c=>c.Id).Intersect(othersStrategyWave29).Any())
+            throw new InvalidOperationException("strategy-wave-29 duplicates a card already published elsewhere.");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

@@ -53,7 +53,7 @@ public sealed partial class MatchEngine
             duel is null?null:new DuelView(duel.ChallengerPlayerId,duel.ChallengedPlayerId,duel.ChallengerId,duel.ChallengedId,duel.Stat,duel.Stage,duel.TurnPlayerId,duel.Struck),
             BuildBattleStepView(),
             // Deck search (issue #312): the deck viewer is private to the searcher; the shown-cards record is public.
-            BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId));
+            BuildSearchView(playerId),BuildShownCards(),BuildLookView(playerId),BuildCopyView(playerId),BuildEitherOrView(playerId),BuildOpponentPaymentView(playerId));
     }
 
     /// <summary>Returns exact proposed commands plus customization targets. Command validation remains authoritative.</summary>
@@ -98,7 +98,7 @@ public sealed partial class MatchEngine
         }
         // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
         // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
+        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null && _state.PendingOpponentPayment is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),
@@ -297,6 +297,11 @@ public sealed partial class MatchEngine
             // The opposing player's Either/Or choice (issue #338): one option per option the engine offers, the unavailable ones
             // listed disabled with the reason.
             result.AddRange(EitherOrActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"opponentPayment" })
+        {
+            // The opposing player's variable payment (issue #373): one action carrying the variable quote; the paying player always has the legal answer of paying nothing.
+            result.AddRange(OpponentPaymentActions(playerId));
         }
         else if(_state.PendingChoice is { } searchPending && IsSearchChoice(searchPending.Type))
         {

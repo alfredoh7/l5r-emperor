@@ -81,7 +81,8 @@ def build_definition_fields(root: Path, card_id: str, allow_text: bool = False, 
     def num(key: str, default: int = 0) -> int:
         value = c.get(key, [str(default)])
         value = value[0] if value else str(default)
-        return int(value) if value not in ("-", "") else default
+        # "*" is a printed variable cost (Disgraceful Conduct): its text sets the price, so the card has no fixed Gold Cost.
+        return int(value) if value not in ("-", "", "*") else default
 
     text = plain("\n".join(c.get("text", []) + printing.get("text", [])))
     if text and not allow_text:
