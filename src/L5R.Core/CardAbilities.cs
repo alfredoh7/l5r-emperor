@@ -4398,6 +4398,9 @@ public sealed partial class MatchEngine
                 break;
             }
             case "preserving-honor":
+                // Issue #380: the action does not finish here, and ResolvePreservingHonor's own tail never discards it either -- so the Strategy is spent as the
+                // choice opens (the same shape as Unfortunate Hesitation), not left in the hand.
+                SpendHandPlayedCard(player, source);
                 _state.PendingChoice = new("preservingHonor", target!.OwnerId, target.Id,
                     $"{Definition(target).Name} ({target.Id}): bow him, or choose another location and move him there.", player.Id);
                 _state.PriorityPlayerId = target.OwnerId; _state.ConsecutivePasses = 0;
@@ -4411,6 +4414,10 @@ public sealed partial class MatchEngine
                 // The shared entry sequence (issue #301: factored out once Shinden Shorai became its
                 // fourth caller) -- unchanged behavior, straight into the current battlefield.
                 _state.YourClanNeedsYouWatchIds.Add(card.Id);
+                // Issue #380: a recruit that opens a window (Proclaim, its own entering-play Reaction, an Overconfident draw) returns from this case before the
+                // tail that discards a hand-played Strategy, which then stayed in the hand. Spent as the recruit enters, like At Any Cost and Unfortunate Hesitation
+                // (the engine has no "being resolved" zone); a no-op for the tail once the card has left the hand.
+                SpendHandPlayedCard(player, source);
                 if (BringProvincePersonalityIntoPlay(player, card, quote, _state.CurrentBattleProvince!.Value, "Your Clan Needs You!")) return;
                 break;
             }
