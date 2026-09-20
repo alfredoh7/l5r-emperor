@@ -33,6 +33,9 @@ public static class GoldCostBasis
     public const string SourcePrinted = "source-printed";
     /// <summary>The targeted card's own printed Gold Cost (Equip (Battle), Soshi Neiru, Low Market).</summary>
     public const string TargetPrinted = "target-printed";
+    /// <summary>The targeted card's own CURRENT Gold Cost alone (its printed cost and every Gold cost modifier and token), whatever is attached to it:
+    /// Disgraceful Conduct's "the Personality" mode.</summary>
+    public const string TargetCurrent = "target-current";
     /// <summary>The targeted card's grouped total: a Personality plus everything attached to it (its unit),
     /// or a single card's own cost when the target is not a Personality (Disgraceful Conduct, A Stain
     /// Cleansed).</summary>
@@ -51,11 +54,14 @@ public static class GoldCostBasis
 /// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
 /// amount = basis value + Modifier, raised to Floor when one is given, never below 0.</summary>
 /// <param name="Amount">The constant (Fixed basis) or the minimum (Variable basis).</param>
+/// <param name="AtResolution">True for a payment that is part of the action's RESOLUTION, not a cost paid when it is announced (Virtuous Charity: "you, then
+/// the player, each pay zero or more Gold"). It is validated and quoted like any cost, but paid by the action's own effect, so an action that is negated whole
+/// pays nothing; PayForAbility skips it.</param>
 /// <param name="Explicit">False only for the rules GoldQuotes synthesizes for abilities that carry no rule
 /// (a Strategy source paying its own printed cost): those charge nothing, and emit no payment event, when
 /// that cost is 0.</param>
 public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0, int? Floor = null,
-    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true)
+    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false)
 {
     public static GoldCostRule Fixed(int amount) => new(GoldCostBasis.Fixed, amount);
     public static GoldCostRule SourcePrinted() => new(GoldCostBasis.SourcePrinted);
@@ -63,13 +69,14 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public static GoldCostRule TargetUnitTotal(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetUnitTotal, Modifier: modifier, Floor: floor);
     public static GoldCostRule TargetRecruit(int modifier = 0, int? floor = null, string? honorWaiverClan = null) =>
         new(GoldCostBasis.TargetRecruit, Modifier: modifier, Floor: floor, HonorWaiverClan: honorWaiverClan);
-    public static GoldCostRule Variable(int min = 0, int? max = null) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max);
+    public static GoldCostRule TargetCurrent(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetCurrent, Modifier: modifier, Floor: floor);
+    public static GoldCostRule Variable(int min = 0, int? max = null, bool atResolution = false) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max, AtResolution: atResolution);
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
 
     public string Kind => Basis switch
     {
         GoldCostBasis.Variable => GoldCostKind.Variable,
-        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost => GoldCostKind.Derived,
+        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetCurrent or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost => GoldCostKind.Derived,
         _ => GoldCostKind.Fixed
     };
 }
@@ -214,6 +221,11 @@ public sealed partial class MatchEngine
                 var printed = Definition(target).GoldCost;
                 return new(rule, Clamp(printed + rule.Modifier, rule.Floor), $"{name} cost {printed}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
             }
+            case GoldCostBasis.TargetCurrent:
+            {
+                var current = CardGoldCost(target);
+                return new(rule, Clamp(current + rule.Modifier, rule.Floor), $"{name} cost {current}{Modified(rule.Modifier, rule.Floor)}", null, false, target);
+            }
             case GoldCostBasis.TargetUnitTotal:
             {
                 var total = UnitTotalGoldCost(target, out var breakdown);
@@ -308,9 +320,9 @@ public sealed partial class MatchEngine
     /// <summary>ExecuteAbilityEffects' payment step: charge exactly what validation priced, bowing exactly
     /// the sources the player chose. A free implicit rule (a 0-cost Strategy) charges nothing and, as it
     /// always has, leaves no payment event.</summary>
-    private void PayForAbility(GameCommand command, PlayerState player)
+    private void PayForAbility(GameCommand command, PlayerState player, bool atResolution = false)
     {
-        if (AbilityGoldCost(command) is not { } cost) return;
+        if (AbilityGoldCost(command) is not { } cost || cost.Rule.AtResolution != atResolution) return;
         Require(cost.Error is null, cost.Error ?? "");
         if (!cost.Rule.Explicit && cost.Amount <= 0) return;
         if (cost.LeadAmount > 0) PaySplit(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);

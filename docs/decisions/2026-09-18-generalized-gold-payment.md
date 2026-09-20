@@ -62,8 +62,8 @@ Six of the seven were wired later. Paid Off was wired with this change; Virtuous
 | Urgency | fixed | "Limited: Pay 2 Gold: Draw a card" is an ability-fixed cost: `Cost: GoldCostRule.Fixed(2)` on the Limited ability. Proven by the `training-urgency-draw` fixture. |
 | Virtuous Charity (oracle-l5r-10181, wired #373) | variable | `Cost: GoldCostRule.Variable()` for the acting player, then the opposing player's own variable payment decision (`OpponentPayment.cs`). Fixture: `training-charity-honor`. |
 | At Any Cost (oracle-l5r-639, wired #373) | derived | `Cost: GoldCostRule.TargetRecruit()` on an `own-dead-samurai` target: `QuotePurchase(..., fromDeadPile: true)` prices it and applies every recruit restriction. (The earlier plan, `TargetPrinted`, could not carry the restrictions.) Fixture: `training-at-any-cost`. |
-| A Stain Cleansed (oracle-l5r-82, wired #373) | derived (grouped total) | `Cost: GoldCostRule.TargetUnitTotal(2)`: the target's current total Gold cost plus 2. Fixture: `training-stain-straighten`. |
-| Disgraceful Conduct (oracle-l5r-2020, wired #373) | derived (grouped total) | `Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0)`, an Absent Battle action. Fixture: `training-disgrace-bow`. |
+| A Stain Cleansed (oracle-l5r-82, wired #373) | derived (grouped total) | `Cost: GoldCostRule.TargetUnitTotal(-2, floor: 0)`: the target's current total Gold cost minus 2 (the scan governs). Fixture: `training-stain-straighten` (plus 2, its own shape). |
+| Disgraceful Conduct (oracle-l5r-2020, wired #373) | derived | The player chooses: the Personality (`TargetCurrent(-4, floor: 0)`) or the unit (`TargetUnitTotal(-4, floor: 0)`, bowing every card in it); Absent Battle actions. Fixture: `training-disgrace-bow`. |
 
 ## Open questions: answered (Mendon, 2026-09-20)
 
@@ -71,8 +71,8 @@ Answered in [2026-09-20-gold-payment-rulings.md](2026-09-20-gold-payment-rulings
 
 1. **Virtuous Charity's opponent payment.** Answered: the second player sees the first player's amount and pays any amount, including 0, from their own Gold sources.
 2. **"Total Gold cost" of a unit.** Answered: the total of the CURRENT cost of every card in the unit (tokens, actions and every other Gold cost modifier included). It was already so on main (`CardGoldCost`, issue #336); the paragraph above that said "printed costs" described the first version of this change and is superseded.
-3. **A Stain Cleansed direction.** Answered: the price is the target's current cost plus 2 (a 9-cost unit costs 11): the earlier "target total + 2" reading was right. One caveat, recorded in the new doc: the period scan reads the other way.
-4. **At Any Cost restrictions.** Answered: the dead recruit has every ordinary recruit restriction (Unique/Singular, Sensei, Honor Requirement, Loyal) and may not be proclaimed. They are not part of the price but of the same recruit quote, so one path validates both.
+3. **A Stain Cleansed direction.** Answered: the scan governs, so the price is the target's current total Gold cost MINUS 2 (a 9-cost unit costs 7). The earlier "target total + 2" reading is superseded (it survives only in the `training-stain-straighten` fixture).
+4. **At Any Cost restrictions.** Answered: the dead recruit has every ordinary recruit restriction (Unique/Singular, Sensei, Honor Requirement, Loyal), may not be proclaimed, and enters play at the current battlefield. They are not part of the price but of the same recruit quote, so one path validates both.
 
 ## Behavior changes
 
