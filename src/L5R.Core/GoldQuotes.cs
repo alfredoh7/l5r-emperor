@@ -37,8 +37,8 @@ public static class GoldCostBasis
     /// or a single card's own cost when the target is not a Personality (Disgraceful Conduct, A Stain
     /// Cleansed).</summary>
     public const string TargetUnitTotal = "target-unit-total";
-    /// <summary>The recruit quote of a face-up province Personality, so every recruit discount and
-    /// surcharge QuotePurchase knows about applies (Your Clan Needs You!, Shinden Shorai).</summary>
+    /// <summary>The recruit quote of a face-up province Personality, or of one of the player's own dead Personalities (At Any Cost), so every
+    /// recruit discount, surcharge and restriction QuotePurchase knows about applies (Your Clan Needs You!, Shinden Shorai).</summary>
     public const string TargetRecruit = "target-recruit";
     /// <summary>Chosen by the player between Amount (the minimum) and MaxAmount.</summary>
     public const string Variable = "variable";
@@ -222,8 +222,9 @@ public sealed partial class MatchEngine
             }
             case GoldCostBasis.TargetRecruit:
             {
-                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan);
-                return new(rule, Clamp(recruit.Cost + rule.Modifier, rule.Floor), $"{name} recruit cost {recruit.Cost}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
+                var recruit = QuotePurchase(command.PlayerId, target.Id, ignoreHonorRequirementIfPersonalityClan: rule.HonorWaiverClan, fromDeadPile: target.Zone == Zone.Dead);
+                var derivation = recruit.Error is null && recruit.Cost != Definition(target).GoldCost && recruit.Basis is { } terms ? $" ({terms})" : "";
+                return new(rule, Clamp(recruit.Cost + rule.Modifier, rule.Floor), $"{name} recruit cost {recruit.Cost}{derivation}{Modified(rule.Modifier, rule.Floor)}", recruit.Error, false, target);
             }
         }
         return new(rule, 0, "Unsupported Gold cost rule.", "Unsupported Gold cost rule.", false, null);
@@ -332,17 +333,23 @@ public sealed partial class MatchEngine
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
                 error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount) : PaymentOptions(playerId, cost.Amount));
-        var min = cost.Min ?? 0;
+        return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error);
+    }
+
+    /// <summary>A "pay zero or more Gold" quote for whoever pays it: every amount from min up to what the player can produce (capped at cap),
+    /// each with the engine's suggested sources, so the acting player's own variable cost and the opposing player's payment share one shape.</summary>
+    private GoldQuote VariableGoldQuote(int playerId, int min, int? cap, int chosen, string basis, string? error = null)
+    {
         var production = Producers(playerId).Sum(c => GoldProduced(c.Id, playerId));
-        var max = Math.Max(min, Math.Min(cost.Max ?? int.MaxValue, production));
+        var max = Math.Max(min, Math.Min(cap ?? int.MaxValue, production));
         var byAmount = new Dictionary<int, PaymentOption[]>();
         for (var amount = min; amount <= max && error is null; amount++)
         {
             var options = PaymentOptions(playerId, amount).Take(VariablePaymentOptionsPerAmount).ToArray();
             if (options.Length > 0) byAmount[amount] = options;
         }
-        var payments = error is null && byAmount.TryGetValue(cost.Amount, out var chosen) ? chosen : [];
-        return new(cost.Amount, GoldCostKind.Variable, cost.Basis, error, payments, min, max, byAmount);
+        var payments = error is null && byAmount.TryGetValue(chosen, out var suggested) ? suggested : [];
+        return new(chosen, GoldCostKind.Variable, basis, error, payments, min, max, byAmount);
     }
 
     /// <summary>Wraps a purchase/recruit quote in the general shape the payment panel renders, so the

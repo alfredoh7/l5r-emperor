@@ -777,6 +777,8 @@ public sealed class MatchState
     // The opposing player's Either/Or choice (issue #338, Yoritomo Sakuma, Unfortunate Hesitation): non-null exactly while an
     // "eitherOr" PendingChoice is open. See EitherOr.cs; MatchView.PendingEitherOr is derived from it for BOTH players.
     public PendingEitherOr? PendingEitherOr { get; set; }
+    // The opposing player's variable payment (issue #373, Virtuous Charity): non-null exactly while an "opponentPayment" PendingChoice is open. See OpponentPayment.cs.
+    public PendingOpponentPayment? PendingOpponentPayment { get; set; }
     // Whole-action negation (issue #338, Yoritomo Sakuma): set on the deferred command's window while a reaction has negated the
     // action's effects; the window's close then resolves it with everything but its costs skipped (ActionNegation.cs).
     public bool DeferredActionNegated { get; set; }
@@ -938,5 +940,8 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     CopyView? PendingCopy = null,
     // The opposing player's Either/Or choice (issue #338, see EitherOr.cs): PUBLIC -- both players see what is being decided and
     // by whom; only the deciding player's view carries the payment quotes.
-    EitherOrView? PendingEitherOr = null);
+    EitherOrView? PendingEitherOr = null,
+    // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
+    // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
+    OpponentPaymentView? PendingOpponentPayment = null);
 public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);

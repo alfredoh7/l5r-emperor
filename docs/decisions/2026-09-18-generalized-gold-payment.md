@@ -53,24 +53,26 @@ What the drift had cost, found by pinning behavior on unmodified `origin/main` (
 
 ## The seven cards
 
-Only Paid Off is wired today. The other six are **not wired by this change** (out of scope, recorded here so it is not silently expanded); each would be a catalog line plus its own effect.
+Six of the seven were wired later. Paid Off was wired with this change; Virtuous Charity, At Any Cost, A Stain Cleansed and Disgraceful Conduct were wired in issue #373 once Mendon answered the open questions below (strategy-wave-29, [2026-09-20-gold-payment-rulings.md](2026-09-20-gold-payment-rulings.md)); Exchange of Letters and Urgency are still unwired (each is a catalog line plus its own effect).
 
 | Card | Cost kind | How it plugs in |
 | --- | --- | --- |
 | Paid Off (oracle-l5r-5861, wired) | fixed | Strategy source: implicit `source-printed`, printed cost 4. No metadata needed; now shown in the panel with its basis. |
 | Exchange of Letters | fixed | Printed cost 1 on a Strategy: implicit `source-printed`, nothing to add. |
 | Urgency | fixed | "Limited: Pay 2 Gold: Draw a card" is an ability-fixed cost: `Cost: GoldCostRule.Fixed(2)` on the Limited ability. Proven by the `training-urgency-draw` fixture. |
-| Virtuous Charity | variable | `Cost: GoldCostRule.Variable()`; the effect reads the amount actually paid through `PaidGoldAmount(command)`. Proven by `training-charity-honor` (and a 1..4 capped variant). **The opponent's payment is not built** (open question below). |
-| At Any Cost | derived | "Recruit a dead Samurai, paying that Personality's cost": `Cost: GoldCostRule.TargetPrinted()` on a `dead-personality-any-discard` target. The recruit quote cannot be used because a dead card is not in a province. Proven by `training-at-any-cost`. |
-| A Stain Cleansed | derived (grouped total) | "Target's total Gold Cost = what you paid minus 2" is, per target, a fixed payment of the target's total plus 2: `Cost: GoldCostRule.TargetUnitTotal(2)`. Proven by `training-stain-straighten`. |
-| Disgraceful Conduct | derived (grouped total) | "Pay Gold equal to a target Personality or unit's total Gold cost minus 4": `Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0)`. Proven by `training-disgrace-bow`. |
+| Virtuous Charity (oracle-l5r-10181, wired #373) | variable | `Cost: GoldCostRule.Variable()` for the acting player, then the opposing player's own variable payment decision (`OpponentPayment.cs`). Fixture: `training-charity-honor`. |
+| At Any Cost (oracle-l5r-639, wired #373) | derived | `Cost: GoldCostRule.TargetRecruit()` on an `own-dead-samurai` target: `QuotePurchase(..., fromDeadPile: true)` prices it and applies every recruit restriction. (The earlier plan, `TargetPrinted`, could not carry the restrictions.) Fixture: `training-at-any-cost`. |
+| A Stain Cleansed (oracle-l5r-82, wired #373) | derived (grouped total) | `Cost: GoldCostRule.TargetUnitTotal(2)`: the target's current total Gold cost plus 2. Fixture: `training-stain-straighten`. |
+| Disgraceful Conduct (oracle-l5r-2020, wired #373) | derived (grouped total) | `Cost: GoldCostRule.TargetUnitTotal(-4, floor: 0)`, an Absent Battle action. Fixture: `training-disgrace-bow`. |
 
-## Open questions (rules decisions we do not have)
+## Open questions: answered (Mendon, 2026-09-20)
 
-1. **Virtuous Charity's opponent payment.** "You, then the player, each pay zero or more Gold" needs a prompt asking the *opponent* to pay, which needs a decision: does the second payer see the first payer's amount? Not built. The variable-cost machinery for the acting player is what it will reuse.
-2. **"Total Gold cost" of a unit.** Implemented as printed costs: the Personality plus every attached card (Followers, Items, Spells). Whether it should use paid or modified costs, and whether a destroyed/bowed attachment counts, is unconfirmed.
-3. **A Stain Cleansed direction.** Read as a per-target derived payment (target total + 2). If the printed intent is that the player picks an amount first and then a target whose total equals it minus 2, that is a variable cost with a target filter; the same `GoldAmount` field would carry it.
-4. **At Any Cost restrictions.** Unique/Singular, Honor Requirement and Loyal checks on the dead recruit are not part of the price; they belong with that card's own entry primitive.
+Answered in [2026-09-20-gold-payment-rulings.md](2026-09-20-gold-payment-rulings.md), with the rulings verbatim:
+
+1. **Virtuous Charity's opponent payment.** Answered: the second player sees the first player's amount and pays any amount, including 0, from their own Gold sources.
+2. **"Total Gold cost" of a unit.** Answered: the total of the CURRENT cost of every card in the unit (tokens, actions and every other Gold cost modifier included). It was already so on main (`CardGoldCost`, issue #336); the paragraph above that said "printed costs" described the first version of this change and is superseded.
+3. **A Stain Cleansed direction.** Answered: the price is the target's current cost plus 2 (a 9-cost unit costs 11): the earlier "target total + 2" reading was right. One caveat, recorded in the new doc: the period scan reads the other way.
+4. **At Any Cost restrictions.** Answered: the dead recruit has every ordinary recruit restriction (Unique/Singular, Sensei, Honor Requirement, Loyal) and may not be proclaimed. They are not part of the price but of the same recruit quote, so one path validates both.
 
 ## Behavior changes
 

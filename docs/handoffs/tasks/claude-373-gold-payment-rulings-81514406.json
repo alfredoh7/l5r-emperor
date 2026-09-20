@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Gold payment rulings (#373): the opposing player's variable payment (Virtuous Charity; OpponentPayment.cs, MatchView.PendingOpponentPayment, chooseOpponentPayment, showcase scenario), dead-pile recruit through the ordinary recruit quote (At Any Cost), current-cost unit totals pinned (Disgraceful Conduct, A Stain Cleansed at cost + 2); strategy-wave-29, decision docs, UI issue #377.",
+  "validation": "bash tools/check.sh --skip-client: all suites pass incl. 22 new gold-rulings tests and 1 new AI test; client project compiles; 25 mutation checks on the new rules (23 killed by named tests, 2 equivalent: amount bound duplicated by Pay, own-dead-only duplicated by QuotePurchase); not run: Godot headless/native visual (no client UI change).",
+  "remaining": "Client decision surface for the second player (issue #377). Mendon to confirm: A Stain Cleansed sign (Oracle cost+2 implemented, period scan reads cost-2), At Any Cost destination (Home vs current battlefield), Disgraceful Conduct bows the Personality only.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/373",
+  "branch": "claude/373-gold-payment-rulings",
+  "updated": "2026-09-20T19:05:18.835419+00:00"
+}

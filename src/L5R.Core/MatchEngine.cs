@@ -38,6 +38,11 @@ public sealed partial class MatchEngine
     public static MatchEngine CreateEitherOrShowcase(ulong seed = 20260906) => Create(seed, EitherOrShowcaseScenario);
     public const string CopyShowcaseScenario = "copy-showcase";
     public const string EitherOrShowcaseScenario = "either-or-showcase";
+    /// <summary>Fixture match for the opposing player's variable payment (issue #373): player 1 (the Lion) holds Virtuous Charity and both players have several
+    /// Gold sources at home; player 0 (the Crane) has the Action Phase. Player 0 passes, player 1 plays Virtuous Charity (it is not their turn) and chooses an
+    /// amount, and player 0 then decides how much to pay.</summary>
+    public static MatchEngine CreateOpponentPaymentShowcase(ulong seed = 20260906) => Create(seed, OpponentPaymentShowcaseScenario);
+    public const string OpponentPaymentShowcaseScenario = "opponent-payment-showcase";
     // Frozen deck lists (PublishedContent.TestSnapshot) for the C# test suite only -- never used by the
     // client or RoomManager. Editing the live deck (CreatePublishedMatch) for manual playtesting must
     // never silently change what this exercises.
@@ -61,7 +66,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -141,6 +146,11 @@ public sealed partial class MatchEngine
             var hesitation = Add(0,"oracle-l5r-9941",Zone.Hand,true); state.Players[0].Hand.Add(hesitation.Id);
             Add(1,"oracle-l5r-9485",Zone.Home,true); Add(1,"training-either-or-source",Zone.Home,true);
         }
+        if (scenario == OpponentPaymentShowcaseScenario)
+        {
+            var charity = Add(1,"oracle-l5r-10181",Zone.Hand,true); state.Players[1].Hand.Add(charity.Id);
+            foreach (var player in state.Players) for (var n = 0; n < 3; n++) Add(player.Id,"training-marketplace",Zone.Home,true);
+        }
         engine.StartTurn();
         if(scenario=="economy") { state.Phase=Phase.Dynasty; engine.Emit("scenario","Economy exercise: choose one payment at a time; Gold never carries over."); }
         return engine;
@@ -200,6 +210,8 @@ public sealed partial class MatchEngine
             if (IsCopyChoice(_state.PendingChoice.Type)) { ResolveCopyCommand(command); return; }
             // The opposing player's Either/Or choice (issue #338): answered by the deciding player, who holds priority (EitherOr.cs).
             if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
+            // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
+            if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -599,14 +611,33 @@ public sealed partial class MatchEngine
     {
         var province=player.Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
+        EnterPlayFromRecruit(player,card,battlefield,via);
+        Refill(player,province);
+        return OpenRecruitEntryWindows(player,card,quote.ProclaimEligible,proclaimResumesTo);
+    }
+
+    // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, at Home (the ordinary recruit destination), through the same entry sequence as a
+    // province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
+    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via)
+    {
+        ResetCardState(card);
+        EnterPlayFromRecruit(player,card,null,via);
+        return OpenRecruitEntryWindows(player,card,false,null);
+    }
+
+    private void EnterPlayFromRecruit(PlayerState player,CardInstance card,int? battlefield,string via)
+    {
         card.Zone=battlefield is null?Zone.Home:Zone.Battlefield; card.ProvinceIndex=battlefield; card.FaceUp=true;
         card.Bowed=Definition(card).Effect=="enters-bowed";
         if(Definition(card).Effect=="enters-dishonored") Dishonor(card);
         Emit("cardEnteredPlay",$"{player.Name} brought {Definition(card).Name} into play via {via}{(card.Bowed?" bowed":"")}.",player.Id,card.Id);
         QueueOverconfidentDraw(card);
-        Refill(player,province);
+    }
+
+    private bool OpenRecruitEntryWindows(PlayerState player,CardInstance card,bool proclaimEligible,int? proclaimResumesTo)
+    {
         var reactionId=EntryReactionAbility(card);
-        if(quote.ProclaimEligible)
+        if(proclaimEligible)
         {
             _state.PendingEntryEffectsCardId=card.Id;
             if(reactionId is not null) card.AbilityUses.Remove(reactionId);
@@ -709,19 +740,25 @@ public sealed partial class MatchEngine
 
         // The transferred state belongs only to the replacement. Clearing the terminal card avoids
         // retaining a second, stale copy in Removed from Game.
-        lower.Modifiers.Clear();
-        lower.GrantedKeywords.Clear();
-        lower.GrantedAbilities.Clear();
-        lower.RemovedKeywords.Clear();
-        lower.RemovedClanAffiliations.Clear();
-        lower.Protections.Clear();
-        lower.ActionLocks.Clear();
-        lower.Tokens.Clear();
-        lower.AbilityUses.Clear();
-        lower.Bowed = false;
-        lower.Dishonorable = false;
-        lower.StraightenBlockedTurn = -1;
-        lower.AssignedToAttackTurn = -1;
+        ResetCardState(lower);
+    }
+
+    // A card that will enter play again (a dead Personality recruited, issue #373) is a new object: nothing of its earlier life follows it.
+    private static void ResetCardState(CardInstance card)
+    {
+        card.Modifiers.Clear();
+        card.GrantedKeywords.Clear();
+        card.GrantedAbilities.Clear();
+        card.RemovedKeywords.Clear();
+        card.RemovedClanAffiliations.Clear();
+        card.Protections.Clear();
+        card.ActionLocks.Clear();
+        card.Tokens.Clear();
+        card.AbilityUses.Clear();
+        card.Bowed = false;
+        card.Dishonorable = false;
+        card.StraightenBlockedTurn = -1;
+        card.AssignedToAttackTurn = -1;
     }
 
     // Reserve (core rules, issue #184): a Dynasty Personality with this keyword may be recruited as an
@@ -813,16 +850,17 @@ public sealed partial class MatchEngine
     // and keyed on the RECRUITED Personality's own Clan alignment, the opposite axis from
     // CardDefinition.HonorRequirementWaiverClan (a waiver printed on the Personality itself and keyed on
     // the recruiting PLAYER's Clan). Never set by an ordinary Purchase/Reserve recruit.
-    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null)
+    // fromDeadPile (issue #373, At Any Cost): recruiting one of the player's own dead Personalities. Only where the card is differs: every restriction below,
+    // the price with all its discounts, and Unique/Singular apply as for a province card -- except that such a Personality may not be proclaimed.
+    public PurchaseQuote QuotePurchase(int playerId,string cardId,bool clanDiscount=false,bool clanAllegiance=false,bool viaReserve=false,string? ignoreHonorRequirementIfPersonalityClan=null,bool fromDeadPile=false)
     {
         if (playerId is <0 or >1 || !_state.Cards.TryGetValue(cardId,out var card)) return new(cardId,0,clanDiscount,clanAllegiance,false,"Unknown card or player.",[]);
         var def=Definition(card); var player=Player(playerId);
-        if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
-            return new(cardId,0,clanDiscount,clanAllegiance,false,"Choose your face-up province card.",[]);
+        if(fromDeadPile ? card.OwnerId!=playerId || card.Zone!=Zone.Dead : card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp)
+            return new(cardId,0,clanDiscount,clanAllegiance,false,fromDeadPile?"Choose one of your own dead Personalities.":"Choose your face-up province card.",[]);
         string? error=null;
         var inClan=def.Type==CardType.Personality && ClanAlignments(card).Contains(player.Clan);
-        if(card.OwnerId!=playerId || card.Zone!=Zone.Province || !card.FaceUp) error="Choose your face-up province card.";
-        else if(def.Type is not (CardType.Personality or CardType.Holding)) error="This card cannot be purchased.";
+        if(fromDeadPile ? def.Type!=CardType.Personality : def.Type is not (CardType.Personality or CardType.Holding)) error=fromDeadPile?"Only a Personality can be recruited from the dead pile.":"This card cannot be purchased.";
         // Loyal (core rules Glossary): a Personality with one or more Clan affiliations may only be
         // controlled by a matching Clan. With none remaining it is Unaligned, so Loyal imposes no
         // Clan restriction, including for a player whose Stronghold represents no Clan.
@@ -846,7 +884,7 @@ public sealed partial class MatchEngine
             +(entryDiscount is {} entry?$" − {entry.Amount} ({entry.Clan} Clan)":"")
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
-        var eligible=error is null && inClan && !clanDiscount && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
+        var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
         return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : [],basis);
     }
 
