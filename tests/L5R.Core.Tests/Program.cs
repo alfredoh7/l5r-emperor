@@ -5643,7 +5643,7 @@ static void RingOfAir()
     var e=MatchEngine.FromTestState(s);
     Accept(e,new GameCommand("useAbility",0,e.Version,CardId:shunya.Id,AbilityId:"shunya-honor")); // this turn's 2nd Favor action
     Check(e.State.AdditionalActions.Any(g=>g.PlayerId==0 && g.ScopeCardIds!=null && g.ScopeCardIds.Contains(ring.Id)),"Grants an Additional Battle Action scoped to the Ring");
-    var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0;
+    var s2=e.State; s2.Phase=Phase.Battle; s2.PriorityPlayerId=0; s2.BattleNumber=1; // the grant made in the Action phase belongs to the next battle (#379): the one SelectBattle numbers 1
     var e2=MatchEngine.FromTestState(s2);
     Accept(e2,new GameCommand("useAbility",0,e2.Version,CardId:ring.Id,AbilityId:"ring-of-air-recruit"));
     Equal(e2.State.Cards[ring.Id].Zone,Zone.Home,"Recruited into play"); Check(!e2.State.Players[0].Hand.Contains(ring.Id));

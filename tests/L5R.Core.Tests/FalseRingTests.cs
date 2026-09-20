@@ -245,8 +245,10 @@ internal static class FalseRingTests
         var s = BattleTable();
         var earth = Add(s, "oracle-l5r-6334", 0, Zone.Hand);
         var e = MatchEngine.FromTestState(s);
-        // (Its province target is a command parameter QueryActions does not enumerate -- an existing gap, not part of this ruling -- so the play is submitted directly.)
-        Accept(e, new GameCommand("useAbility", 0, e.Version, CardId: earth.Id, AbilityId: "ring-of-earth-raise", TargetPlayerId: 1, Province: 0));
+        // Its province target is enumerated by QueryActions (issue #379): one option per Province owner, the Provinces listed on it; Ring of Earth's own tests are RingGrantTests.
+        var raise = e.QueryActions(0).Single(a => a.Type == "useAbility" && a.CardId == earth.Id && a.Command?.AbilityId == "ring-of-earth-raise" && a.Command.TargetPlayerId == 1);
+        Check(raise.Enabled, raise.Reason ?? "offered enabled from the hand");
+        Accept(e, raise.Command! with { Province = 0 });
         Eq(e.State.Cards[earth.Id].Zone, Zone.FateDiscard, "discarded instead of bowed");
         // Ring of Air (Battle/Open): "straighten your target Personality or attachment".
         var t = MatchEngine.CreateEconomyScenario().State; t.Phase = Phase.Action; t.ActivePlayerId = 0; t.PriorityPlayerId = 0;
