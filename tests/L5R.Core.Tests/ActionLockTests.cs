@@ -25,6 +25,7 @@ internal static class ActionLockTests
             ("Every innate action the engine offers is accounted for: the offered action types are pinned, and exactly two are performed by a Personality (Order Seppuku and an ability on a card) -- the rest are the player's (buying, equipping, passing, choosing) and none of them is barred by a lock on a Personality", InnateActionInventory),
             ("Assigning to attack or defend is not an action (Mendon's ruling): a locked Personality is offered in the attack and the defense assignments, is assigned, fights the battle with his Force counted, and is still locked and unable to act in it; he can also be moved by an enemy's action", AssignmentIsNotAnAction),
             ("Reactions ARE actions (#359, IsAction): a locked Personality cannot perform a Reaction in any window -- a curated before-action Reaction (Akodo Kakihara), a \"targeted by an action\" Reaction (a Merchant's negation, #335) and a before-resolution Reaction (Akodo Dairuko's shape) -- and no window opens for a Reaction nobody may play; unlocked, each window opens as before", LockCoversReactionsInEveryWindow),
+            ("An action barred by the lock is refused, not negated (#356): a Personality whose ability declares a cost (bow a Farm) is listed disabled and refused when locked, and nothing is paid and its use is not spent, negated or not; an action announced BEFORE the lock is still taken; Order Seppuku is barred by the lock and by an owed Hesitation pass, each on its own", LockedActionsPayNothing),
             ("A copied ability is barred too (Fukuzo's copy primitive): an ability a locked Personality copied is listed disabled with the reason and refused, its \"copied from\" label intact, and is offered as usual without the lock", CopiedAbilityIsBarred),
             ("\"X Champion\" keywords are ordinary keywords: an Item that attaches only to an Obsidian Champion goes onto Hotako and onto no other Personality, and a Strategy naming a performing Obsidian Champion offers only Hotako -- no special rule", ChampionKeywordIsOrdinary),
             ("Hotako's entry discount goes through the ONE purchase quote: a Lion Clan player pays 9 (11 - 2, term-by-term basis), a Crane player 11; the Clan discount and allegiance still stack; and the exact payment enters him play, costs the Lion 2 Honor with no Reaction offered", LionClanDiscountThroughQuotePurchase),
@@ -277,7 +278,9 @@ internal static class ActionLockTests
     private static void InnateActionInventory()
     {
         var source = File.ReadAllText(Path.Combine(RepoRoot(), "src/L5R.Core/MatchQueries.cs"));
-        var offered = Regex.Matches(source, "\\bAdd\\(\"(\\w+)\"").Select(m => m.Groups[1].Value).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
+        // The player-level timing grant (#352, TimingGrants.cs) offers the equip action from its own file.
+        var granted = File.ReadAllText(Path.Combine(RepoRoot(), "src/L5R.Core/TimingGrants.cs"));
+        var offered = Regex.Matches(source, "\\bAdd\\(\"(\\w+)\"").Concat(Regex.Matches(granted, "\\bnew\\(\"(equip)\"")).Select(m => m.Groups[1].Value).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
         var known = PerformedByAPersonality.Concat(PlayersOwnAndNotBarred).OrderBy(x => x, StringComparer.Ordinal).ToArray();
         Check(offered.SequenceEqual(known), "the offered action types changed -- classify the new one (a Personality performs it: bar it under a lock; else list it as the player's): "
             + "new [" + string.Join(", ", offered.Except(known)) + "], gone [" + string.Join(", ", known.Except(offered)) + "]");
@@ -404,6 +407,61 @@ internal static class ActionLockTests
             {
                 Eq(e.State.PendingChoice?.Type, "beforeBattleReaction", "unlocked: the before-resolution Reaction is asked"); Eq(e.State.PendingChoice?.CardId, commander.Id);
             }
+        }
+    }
+
+    // ---- the lock and the atomic payment of costs (#356) -----------------------------------------------------------------------------------------
+    // An action a locked Personality "may not perform" is REFUSED, not negated: it is never announced, so nothing of it is paid (no bow, no Gold, no Honor) and its
+    // use is not spent -- the payment machinery of #356 (a negated action pays all its declared costs; a blocked cost aborts atomically) never sees it. An action
+    // that WAS announced is taken: the lock does not reach back into a window it waits in.
+    private static void LockedActionsPayNothing()
+    {
+        (MatchEngine E, CardInstance Source, CardInstance Farm) Rig(bool locked, bool negated)
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var source = Add(s, "training-ashigaru-boost-source", 0, Zone.Battlefield, province: 0); var farm = Add(s, "training-farm", 0, Zone.Home);
+            Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            if (locked) source.ActionLocks.Add(new("test", "Turn"));
+            var e = MatchEngine.FromTestState(s); e.NegateEveryAction = negated;
+            return (e, source, farm);
+        }
+        const string Boost = "training-ashigaru-boost";
+        // (1) Unlocked, negated: the declared cost (bow the Farm) is paid, the effect is not -- the baseline the locked case must differ from.
+        var (e1, s1, f1) = Rig(false, true);
+        Accept(e1, Offer(e1, 0, Boost, s1.Id, f1.Id));
+        Check(e1.State.Cards[f1.Id].Bowed && !e1.State.Cards[s1.Id].Modifiers.Any(m => m.Effect == Boost), "unlocked and negated: the Farm was bowed as the cost, no effect");
+        // (2) Locked: listed disabled with the reason, refused when sent, and NOTHING was paid -- negated or not.
+        foreach (var negated in new[] { false, true })
+        {
+            var (e, source, farm) = Rig(true, negated);
+            var options = Options(e, 0, Boost, source.Id);
+            Check(options.Length == 1 && !options[0].Enabled && options[0].Reason!.Contains("may not perform actions"), $"negated={negated}: listed disabled with the reason");
+            Check(Rejection(e, new GameCommand("useAbility", 0, e.Version, source.Id, TargetId: farm.Id, AbilityId: Boost)).Contains("may not perform actions"), "refused when sent");
+            Check(!e.State.Cards[farm.Id].Bowed && !e.State.Cards[source.Id].AbilityUses.ContainsKey(Boost), "the Farm was not bowed and the use was not spent");
+            Check(e.State.PendingChoice is null && e.State.PriorityPlayerId == 0, "nothing happened: priority did not pass");
+        }
+        // (3) Announced first, locked while the action waits in a before-action window: the action was taken, so it resolves (and pays) as announced.
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var source = Add(s, "training-ashigaru-boost-source", 0, Zone.Battlefield, province: 0); var farm = Add(s, "training-farm", 0, Zone.Home);
+            var kakihara = Add(s, "oracle-l5r-223", 1, Zone.Battlefield, province: 0); var bower = Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, Bow, bower.Id, kakihara.Id));
+            Eq(e.State.PendingChoice?.Type, "beforeActionReaction");
+            var st = e.State; st.Cards[bower.Id].ActionLocks.Add(new("test", "Turn")); e = MatchEngine.FromTestState(st);
+            while (e.State.PendingChoice?.Type == "beforeActionReaction") Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Type == "declineReaction" && a.Enabled).Command!);
+            Check(e.State.Cards[kakihara.Id].Bowed, "the announced action resolved: it had been taken before the lock");
+            Check(Options(e, 0, Bow, bower.Id).All(o => !o.Enabled), "but the locked Personality performs nothing further");
+        }
+        // (4) Order Seppuku is barred by the lock AND, when a Hesitation pass is owed (#356), by that: the pass is the reason shown, and either alone bars it.
+        {
+            var s = Table(Phase.Action, actor: 0); s.PriorityPlayerId = 0;
+            var locked = Add(s, "training-dishonored-samurai", 0, Zone.Home); locked.Dishonorable = true; locked.ActionLocks.Add(new("test", "Turn"));
+            var free = Add(s, "training-dishonored-samurai", 0, Zone.Home); free.Dishonorable = true;
+            var e = MatchEngine.FromTestState(s);
+            Check(!e.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == locked.Id).Enabled && e.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == free.Id).Enabled, "the lock bars one Samurai; the other still may");
+            var owed = Edit(e, st => st.ForcedPasses.Add(new ForcedPass(0, PrintedPhases.Instance(st.TurnNumber, st.Phase), "test")));
+            Check(owed.QueryActions(0).Where(a => a.Type == "orderSeppuku").All(a => !a.Enabled), "with a pass owed neither may");
         }
     }
 

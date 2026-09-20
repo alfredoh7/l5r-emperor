@@ -192,6 +192,11 @@ public sealed class CardInstance
     public string Id { get; set; } = "";
     public string DefinitionId { get; set; } = "";
     public int OwnerId { get; set; }
+    // Control follows the Personality (issue #352): a card attached to a Personality is controlled by that Personality's controller, and a card
+    // brought into play from an ENEMY discard or dead pile is controlled by the player who brought it. While such a card is in play OwnerId is
+    // its CONTROLLER (every "you control" check in the engine reads OwnerId); this is its real OWNER, whose pile it returns to the moment it
+    // leaves play. Null for every card in its owner's control, which is nearly all of them.
+    public int? OriginalOwnerId { get; set; }
     public Zone Zone { get; set; }
     public int? ProvinceIndex { get; set; }
     public bool FaceUp { get; set; }

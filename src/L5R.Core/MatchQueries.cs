@@ -101,7 +101,8 @@ public sealed partial class MatchEngine
         if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
-                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",Command("orderSeppuku",card.Id),ActionLocked(card)?$"{Definition(card).Name} may not perform actions this turn.":null,card.Id);
+                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),
+                    OwesForcedPass(playerId)?ForcedPassReason:ActionLocked(card)?$"{Definition(card).Name} may not perform actions this turn.":null,card.Id);
         if(playerId!=_state.PriorityPlayerId)
         {
             Add("wait",$"Waiting for {Player(_state.PriorityPlayerId).Name}",reason:"The other player has the action opportunity.");
@@ -179,10 +180,9 @@ public sealed partial class MatchEngine
         {
             // Additional Action (issue #181): open to either side, same shape as attackReaction above
             // -- list this player's own eligible before-additional-action-resolves Reactions, played
-            // from hand (Effortless Counterattack's shape), not in play.
-            foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Hand)
-                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
-                .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-additional-action-resolves"))
+            // from where they can be (Effortless Counterattack's shape: hand, not in play; a Discipline one
+            // also from a discard pile), the same list whose existence opened this window.
+            foreach(var (card,reactionId) in OutOfPlayReactions(playerId,"before-additional-action-resolves"))
                 AddReaction(card,reactionId);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
@@ -333,25 +333,9 @@ public sealed partial class MatchEngine
         else switch(_state.Phase)
         {
             case Phase.Action:
-                if(playerId==_state.ActivePlayerId)
-                {
-                    var targets=_state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Home && Definition(c).Type==CardType.Personality).ToArray();
-                    foreach(var card in player.Hand.Select(Card).Where(c=>Definition(c).Type is CardType.Item or CardType.Follower))
-                    {
-                        var def=Definition(card);
-                        var legalTargets=targets.Where(t=>AttachmentAllowed(card,t) && AttachmentLegalTarget(def,t)).Select(t=>t.Id).ToArray();
-                        // One Gold quote per candidate wielder (issue #303): Katagi's discount depends on the
-                        // wielder, so the price can differ per target and the client swaps quotes on retarget.
-                        var equipQuotes=legalTargets.ToDictionary(id=>id,id=>QuoteEquipGold(playerId,card,Card(id)));
-                        var affordable=legalTargets.Where(id=>equipQuotes[id].Payments.Length>0).ToArray();
-                        var reason=legalTargets.Length==0?"No Personality meets the attachment requirements.":affordable.Length==0?"Insufficient unbowed Gold production.":null;
-                        var firstTarget=affordable.FirstOrDefault();
-                        var firstQuote=firstTarget is null?null:equipQuotes[firstTarget];
-                        Add("equip",$"Equip {def.Name} · {firstQuote?.Cost??def.GoldCost} Gold",reason is null?Command("equip",card.Id,firstQuote!.Payments[0].SourceIds,target:firstTarget):null,
-                            reason,card.Id,reason is null?affordable:legalTargets,gold:firstQuote,
-                            targetGold:affordable.Any(id=>equipQuotes[id].Kind==GoldCostKind.Derived)?affordable.ToDictionary(id=>id,id=>equipQuotes[id]):null);
-                    }
-                }
+                // Equip (Limited) on the active player's own turn, and -- with a player-level timing grant (Foothills Keep, TimingGrants.cs) -- an
+                // Open equip of a Weapon in ANY player's action segment. The per-attachment timing is decided in EquipActions.
+                result.AddRange(EquipActions(playerId));
                 Add("pass","Pass action",Command("pass"));
                 break;
             case Phase.AttackDeclaration:
@@ -418,6 +402,8 @@ public sealed partial class MatchEngine
                             reason is null?Command("recruitReserve",card.Id,payment!.SourceIds,discount:discount,allegiance:allegiance):null,reason,card.Id,quote:quote,gold:ToGoldQuote(quote));
                     }
                 }
+                // A Battle-timing equip granted by a card in play (Foothills Keep, TimingGrants.cs): a Weapon from hand to a Personality at the battlefield.
+                result.AddRange(EquipActions(playerId));
                 Add("pass","Pass battle action",Command("pass"));
                 break;
             case Phase.Dynasty:

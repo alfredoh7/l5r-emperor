@@ -28,6 +28,8 @@ internal static class MultiTargetTests
             ("Each per-target window is the alternating window of #318/#327: the first opportunity is the active player's when he holds a reaction for that target (otherwise the other player's), passes hand it over, two passes close it; negations from several windows compose and a whole-action negation skips the windows still to come", PerTargetWindowsAlternate),
             ("Per-target windows meet R's \"targeted by an action\" reactions (#335) and the curated before-action ones (#318): a two-target action whose first target is a Merchant with Jinn-Kuen's shape of negation and whose second is Akodo Kakihara opens the Merchant's window, then Kakihara's, each offering only ITS reactor; the negation of the whole action played in the first window skips the second; Sakuma's Political reaction reads the window's target", TargetedReactionsPerTarget),
             ("Ezuno's redirect (#335) on a multi-target action: the window's target is replaced IN ITS SLOT (the selection and the primary TargetId follow), the window is then about Ezuno, the other targets keep their windows, and the action resolves on Ezuno, the untouched second target and not the Shugenja; a redirect onto a card the slot already holds or an illegal one is not offered", RedirectInsideASlot),
+            ("Negated actions pay what they declare (#356): Bonds of Coin's Favor half declares \"bow your Stronghold\" as a cost (Costs) and discards the Favor, so a negated one still bows the Stronghold and discards the Favor but draws nothing; every other action of this change declares no cost beyond its Gold and its Strategy, so negated it changes nothing and is still taken", NegatedActionsPayWhatTheyDeclare),
+            ("A multi-target action is ONE action to out-of-play windows (#367): Unimpeachable Name is asked once for the action, not once per target, and only while a copy can really be played from where it is; Sakuma's Political reaction and Kakihara's own each get one window per target that has them", OutOfPlayAndPoliticalWindowsPerTarget),
             ("Bonds of Coin, Political Open: one to three attachments with a 0 Gold cost, of either player -- exactly the ones costing 0 now (a printed 0 or one taken there by a Gold cost penalty) are offered, one, two or three are destroyed together, none or four are refused", BondsOfCoinDestroys),
             ("Bonds of Coin, Favor Political Limited: bow your Stronghold and discard the Imperial Favor to draw two cards -- only with the Favor and an unbowed Stronghold, only on your own turn, and it counts as a Favor action", BondsOfCoinDraws),
             ("Gold and Steel, Battle/Open: the same up-to-three destroy, anywhere as an Open action but only at the current battlefield as a Battle one", GoldAndSteelDestroys),
@@ -503,6 +505,108 @@ internal static class MultiTargetTests
         var e3 = Fresh(out var actor3, out _, out var ezuno3, out var other3);
         Accept(e3, Use(e3, 0, "training-slots-two-personalities", actor3.Id, selections: [Pick("first", ezuno3.Id), Pick("second", other3.Id)]));
         Check(e3.State.PendingChoice is null || !e3.QueryActions(1).Any(a => a.Command?.AbilityId == "ezuno-redirect" && a.Enabled), "an action that targets Ezuno himself is not redirected onto him");
+    }
+
+    // ---- negated actions and the costs they declare (#356), out-of-play windows (#367) -------------------------------------------------------------
+    private static void NegatedActionsPayWhatTheyDeclare()
+    {
+        // (1) Bonds of Coin's Favor half: a declared cost (bow the Stronghold) and the Favor discard are paid negated or not; only the draws are its effect.
+        foreach (var negated in new[] { false, true })
+        {
+            var s = Table(Phase.Action, actor: 0); s.PriorityPlayerId = 0; s.FavorPlayerId = 0;
+            var card = Add(s, BondsOfCoin, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s); e.NegateEveryAction = negated;
+            var hand = e.State.Players[0].Hand.Count; var deck = e.State.Players[0].FateDeck.Count;
+            Accept(e, Enabled(e, 0, "bonds-of-coin-draw", card.Id).Command!);
+            Check(e.State.Cards[e.State.Players[0].StrongholdId].Bowed, $"negated={negated}: the Stronghold is bowed either way (a cost)");
+            Check(e.State.FavorPlayerId is null, $"negated={negated}: the Imperial Favor is discarded either way");
+            Eq(e.State.Cards[card.Id].Zone, Zone.FateDiscard, "the Strategy was played");
+            Eq(e.State.Players[0].Hand.Count, negated ? hand - 1 : hand + 1, "the draws are the effect: not when negated"); Eq(e.State.Players[0].FateDeck.Count, negated ? deck : deck - 2);
+        }
+        // (2) Atomic: a blocked cost negates the whole action and pays NOTHING -- not the Stronghold bow, not the Favor.
+        {
+            var s = Table(Phase.Action, actor: 0); s.PriorityPlayerId = 0; s.FavorPlayerId = 0;
+            var card = Add(s, BondsOfCoin, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            e.CostBlockHook = (cost, _) => cost.Verb == CostVerb.Bow;
+            var hand = e.State.Players[0].Hand.Count;
+            Accept(e, Enabled(e, 0, "bonds-of-coin-draw", card.Id).Command!);
+            Check(!e.State.Cards[e.State.Players[0].StrongholdId].Bowed && e.State.FavorPlayerId == 0, "blocked: nothing was paid");
+            Eq(e.State.Players[0].Hand.Count, hand - 1, "and nothing was drawn; the Strategy was still played");
+        }
+        // (3) Yoshitada negated: not bowed, nothing asked, no Honor changed, the action taken.
+        {
+            var r = Yoshi(dishonorable: true);
+            var e = MatchEngine.FromTestState(r.S); e.NegateEveryAction = true;
+            var honor = new[] { Honor(e, 0), Honor(e, 1) };
+            Accept(e, Yo(e, r, r.Enemy.Id));
+            Check(!e.State.Cards[r.Enemy.Id].Bowed && e.State.PendingChoice is null && Honor(e, 0) == honor[0] && Honor(e, 1) == honor[1], "Yoshitada negated: no bow, nothing asked, no Honor");
+            Check(e.State.Cards[r.Yoshitada.Id].AbilityUses.ContainsKey(YoshiAbility) && !e.State.Cards[r.Yoshitada.Id].Bowed, "the action was taken and cost him nothing");
+        }
+        // (4) Fear Me! negated: the Strategy is spent, the target is not moved, nothing asked.
+        {
+            var s = Table(); s.PriorityPlayerId = 0;
+            var yoshi = Add(s, Yoshitada, 0, Zone.Battlefield, province: 0); var enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); var strategy = Add(s, FearMe, 0, Zone.Hand);
+            var e = MatchEngine.FromTestState(s); e.NegateEveryAction = true;
+            Accept(e, Use(e, 0, FearMeMove, strategy.Id, performerId: yoshi.Id, selections: Pick("target", enemy.Id)));
+            Check(e.State.Cards[enemy.Id].Zone == Zone.Battlefield && e.State.PendingChoice is null, "Fear Me! negated: not moved, nothing asked");
+            Eq(e.State.Cards[strategy.Id].Zone, Zone.FateDiscard, "the Strategy was still played"); Check(!e.State.Cards[yoshi.Id].Bowed, "and the performer paid nothing");
+        }
+        // (5) Bonds of Coin's destroy half negated: nothing is destroyed, the Strategy is played.
+        {
+            var r = Attachments(BondsOfCoin);
+            var e = MatchEngine.FromTestState(r.S); e.NegateEveryAction = true;
+            Accept(e, Use(e, 0, "bonds-of-coin-destroy", r.Strategy.Id, selections: Pick("attachments", r.Free.Take(2).Select(c => c.Id).ToArray())));
+            Check(r.Free.Take(2).All(c => e.State.Cards[c.Id].Zone == Zone.Attached), "negated: nothing destroyed"); Eq(e.State.Cards[r.Strategy.Id].Zone, Zone.FateDiscard);
+        }
+    }
+
+    private static void OutOfPlayAndPoliticalWindowsPerTarget()
+    {
+        // (a) Unimpeachable Name (an out-of-play Reaction in hand) is asked ONCE for the multi-target action -- "before the resolution of another player's action" --
+        // not once per target; declining it lets the action resolve on both.
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+            var a = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); a.Dishonorable = true; var b = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            Add(s, "oracle-l5r-8989", 1, Zone.Hand);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Use(e, 0, "training-slots-two-personalities", actor.Id, selections: [Pick("first", a.Id), Pick("second", b.Id)]));
+            Eq(e.State.PendingChoice?.Type, "unimpeachableNameReaction", "asked once, for the action");
+            for (var i = 0; i < 4 && e.State.PendingChoice?.Type == "unimpeachableNameReaction"; i++) Accept(e, new("declineReaction", e.State.PriorityPlayerId, e.Version)); // the out-of-play window: both pass
+            Check(e.State.PendingChoice is null && e.State.Cards[a.Id].Bowed && e.State.Cards[b.Id].Bowed, "declined: the action resolved on both targets, without a second window: " + e.State.PendingChoice?.Type + " " + e.State.Cards[a.Id].Bowed + e.State.Cards[b.Id].Bowed);
+            Eq(e.State.Events.Count(x => x.Type == "reactionWindow" && x.Message.StartsWith("Out-of-play")), 1, "one out-of-play window in all");
+        }
+        // (b) Sakuma (a Political reaction) and Kakihara (his own): Political action on Kakihara (first) and a plain Personality (second). Kakihara's window offers both
+        // reactions, the second target's only Sakuma's -- one window per target that has a reactor, each with its own.
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+            var kakihara = Add(s, Kakihara, 1, Zone.Battlefield, province: 0); var plain = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            Add(s, "oracle-l5r-9624", 1, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Use(e, 0, "training-slots-two-political", actor.Id, selections: [Pick("first", kakihara.Id), Pick("second", plain.Id)]));
+            Check(WindowFor(e, kakihara.Id), "Kakihara's window first: " + e.State.PendingChoice?.Prompt);
+            Check(OfferedTo(e, 1).SequenceEqual(new[] { "kakihara-force-bonus", "sakuma-political-negate" }), "both reactions for him: " + string.Join(",", OfferedTo(e, 1)));
+            Decline(e); Decline(e);
+            Check(WindowFor(e, plain.Id), "then the second target's");
+            Check(OfferedTo(e, 1).SequenceEqual(new[] { "sakuma-political-negate" }), "only Sakuma's for a plain Personality: " + string.Join(",", OfferedTo(e, 1)));
+            Decline(e); Decline(e);
+            Check(e.State.PendingChoice is null && e.State.Cards[kakihara.Id].Bowed && e.State.Cards[plain.Id].Bowed, "resolved on both");
+            Eq(e.State.Events.Count(x => x.Type == "reactionWindow" && x.Message.StartsWith("Before-action")), 2, "exactly two windows, one per target");
+        }
+        // (c) The non-Political twin: Sakuma is offered nothing, so only Kakihara's window opens.
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+            var kakihara = Add(s, Kakihara, 1, Zone.Battlefield, province: 0); var plain = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            Add(s, "oracle-l5r-9624", 1, Zone.Home);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Two(e, new(s, actor, kakihara, plain, plain, plain), kakihara.Id, plain.Id));
+            Check(WindowFor(e, kakihara.Id) && OfferedTo(e, 1).SequenceEqual(new[] { "kakihara-force-bonus" }), "not Political: Kakihara's own reaction only");
+            Decline(e); Decline(e);
+            Check(e.State.PendingChoice is null, "and no window for the second target");
+        }
     }
 
     // ---- attachments ----------------------------------------------------------------------------------------------------------

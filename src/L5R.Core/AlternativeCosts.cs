@@ -16,11 +16,15 @@ namespace L5R.Core;
 //   - The choice is part of the command (GameCommand.CostOption), validated with everything else, and paid at the same moment as the
 //     ability's Gold cost (PayForAbility's neighbour, PayCostOption). An ability with a single option needs no CostOption on its
 //     command: the cost-choice abilities that predate this (Xijkt, Tamori Shosei, Sutigu, The Earth's Hunger) are exactly that.
+//   - A cost can be NEGATED (Mendon's ruling, issue #352: a destruction paid as a cost CAN be negated -- Fields of Mercy and the like). When it is,
+//     the whole action is negated: it is still taken (its use is spent, a hand-played card leaves the hand) but none of it resolves, and the costs
+//     of the action that were not yet paid are not paid. This is the same reading as a blocked cost of Hida Mochitoko (#341) and the atomic cost
+//     payment of #356, whose one predicate (CostPaymentBlockedByNegation, AbilityCosts.cs) asks it of the chosen cost option and of each declared cost.
 
 /// <summary>The verbs a cost option may apply to its subject.</summary>
 public static class CostVerb
 {
-    /// <summary>The subject must be unbowed; it becomes bowed. Never negated (a cost is paid by its own controller, not "an enemy's effect").</summary>
+    /// <summary>The subject must be unbowed; it becomes bowed. A negated bow of the subject blocks the payment (CostPaymentBlockedByNegation).</summary>
     public const string Bow = "bow";
     /// <summary>The subject must be in play; it is destroyed as the cost (through the ordinary destruction path, so Expendable, Lady Matsu's Rage
     /// and the Dishonorable-death penalty all apply as they do to any other destruction by the acting player's action).</summary>
@@ -37,6 +41,8 @@ public static class CostSubject
     public const string Source = "source";
     /// <summary>The ability's chosen target: "bow or destroy his target Armor" (Well Protected).</summary>
     public const string Target = "target";
+    /// <summary>The acting player's own Stronghold: "Bow your Stronghold" (Bonds of Coin, issue #336).</summary>
+    public const string Stronghold = "stronghold";
 }
 
 /// <summary>One way to pay an ability's non-Gold cost. <paramref name="Id"/> is what GameCommand.CostOption names; <paramref name="Label"/> is
@@ -55,6 +61,7 @@ public sealed partial class MatchEngine
     {
         CostSubject.Source => source,
         CostSubject.Target => command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : null,
+        CostSubject.Stronghold => Player(command.PlayerId).StrongholdId is { } strongholdId && _state.Cards.TryGetValue(strongholdId, out var stronghold) ? stronghold : null,
         _ => ability.Performer is not null ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null) : source
     };
 
@@ -103,6 +110,7 @@ public sealed partial class MatchEngine
         if (ability.CostOptions is null) return;
         var option = ChosenCostOption(ability, command);
         var subject = CostSubjectCard(option, ability, command, source)!;
+        if (!InPlay(subject)) return; // a reaction between announcement and resolution already took it out of play: nothing is left to pay with
         switch (option.Verb)
         {
             case CostVerb.Bow:

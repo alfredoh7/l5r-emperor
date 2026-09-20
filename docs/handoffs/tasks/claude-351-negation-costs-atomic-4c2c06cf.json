@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Applies Mendon's rulings on PR #344 and syncs with main (#341 R's Mochitoko rule, #359, #363, #365, #361): a negated action pays ALL its costs (64 abilities' cost statements moved to declarative AbilityDefinition.Costs), atomically, through ONE predicate CostPaymentBlockedByNegation(GameCommand) that folds R's Mochitoko block and this PR's cost list (asked over the chosen cost option and every declared cost, in both the ordinary and the whole-action-negation flow); a blocked action, a Sakuma-negated action and a negated additional action (Effortless Counterattack, which now pays its costs and loses only itself) share one taken-but-empty path. Fukuzo's copies end on removal from the game; Unfortunate Hesitation bars Order Seppuku; the decision doc records all rulings as confirmed.",
+  "validation": "bash tools/check.sh --skip-client passed on the merge with origin/main 7ce03fc6+ (Core 216, negated-costs 14, targeted-action-reactions 30, additional-action-bursts 9, card-copy 15, either-or 17, published 59, AI 27, server 8, client transport 7). Mutation checks: 16 mutants of the merged predicate/negated flow killed by named tests, one equivalent survivor (InPlay guard); earlier 23 mutants killed. No client change.",
+  "remaining": "Unconverted cost abilities listed by id in the decision doc. Agent C's #357 re-syncs to the single predicate. Ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/351",
+  "branch": "claude/351-negation-costs-atomic",
+  "updated": "2026-09-20T08:49:46.474434+00:00"
+}
