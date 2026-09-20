@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Ring of Earth's Absent Battle action is now enumerated by QueryActions (province choice per owner), hand and in-play; every Ring recruit grant carries the battle it belongs to and lapses with it (after-battle recruit window, standing permission within its battle); Absent on the six grant-based recruits",
+  "validation": "bash tools/check.sh --skip-client passed (43+132 python tests, core suites incl. new ring-grants 10/10, 7 client transport checks); 16 mutations of the new logic all killed; Godot editor import not run locally (client untouched)",
+  "remaining": "None; ready for review. Noticed, not changed: the 'player' target category (Horume, Mugoshi) is likewise not enumerated by AbilityActions.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/379",
+  "branch": "claude/379-ring-of-earth-grants",
+  "updated": "2026-09-20T20:06:07.489790+00:00"
+}
