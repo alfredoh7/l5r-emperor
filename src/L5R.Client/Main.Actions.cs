@@ -34,7 +34,7 @@ public partial class Main
                 _sidebarHeader.AddChild(Palette.Wrapped($"Province {View.CurrentBattleProvince + 1} · " + (View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act"), 16, Palette.PaperDim));
             else _sidebarHeader.AddChild(new BattleTracker { Snapshot = View, Compact = _selected is not null || _chosen is not null || View.PendingChoice is not null, ReducedMotion = _reducedMotion, ResolutionMessage = _resolutionMessage });
         }
-        if (!BattleTracker.InBattle(View.Phase) && _resolutionMessage is null && !(_selected is { } support && IsSupportCard(support)))
+        if (!BattleTracker.InBattle(View.Phase) && _resolutionMessage is null && _selected is not {ActionLocked:true} && !(_selected is { } support && IsSupportCard(support)))
         {
             var heading = Palette.Text(HumanPhase(View.Phase), 25, title: true); heading.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(heading);
             var status = Palette.Wrapped(View.PriorityPlayerId == View.ViewerId ? "Your decision" : "Opponent may act", 18); status.HorizontalAlignment = HorizontalAlignment.Center; _sidebarHeader.AddChild(status);
@@ -48,6 +48,7 @@ public partial class Main
         }
         if (RenderHomeReminderInspection()) { }
         else if (RenderSupportInspection()) { }
+        else if (_selected is {ActionLocked:true,Definition:not null} locked) RenderLockedInspection(locked);
         else if (_selected?.Definition is { } def)
         {
             var panel = new PanelContainer(); panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
@@ -96,6 +97,8 @@ public partial class Main
         if (_selected is { } supportCard && IsSupportCard(supportCard) && View.PendingChoice is null)
         { RenderSupportActions(supportCard); return; }
         foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
+        if(_selected is {ActionLocked:true,Definition:not null} inspected)
+            _inspector.AddChild(SidebarSkin.Button("Inspect card",()=>InspectLockedCard(inspected)));
         if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
             var action = Actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Enabled);
@@ -380,6 +383,8 @@ public partial class Main
         button.TooltipText = RulesHelp.Tooltip((option.Reason is { } reasonText ? "Unavailable: " + reasonText + "\n\n" : option.Label + "\n\n") + RulesHelp.ActionGuide(option.Type));
         button.AutowrapMode = TextServer.AutowrapMode.WordSmart;
         button.ClipText = true; container.AddChild(button);
+        if(_selected is {ActionLocked:true} locked && option.CardId==locked.Id && !option.Enabled && option.Reason is {} reason)
+            container.AddChild(Palette.Wrapped(reason,15,Palette.PaperDim));
     }
 
     private void RenderPhaseActions()

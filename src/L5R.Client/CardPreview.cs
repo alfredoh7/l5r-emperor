@@ -41,6 +41,12 @@ public static class CardPreview
         }
         var body = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; row.AddChild(body);
         body.AddChild(Palette.Wrapped(def.Name, 22, Palette.Paper));
+        if(card.ActionLocked)
+        {
+            var status=new HBoxContainer();status.AddThemeConstantOverride("separation",10);body.AddChild(status);
+            status.AddChild(ActionLockStatus.Icon(38));
+            var words=ActionLockStatus.Explanation(card);words.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;status.AddChild(words);
+        }
         body.AddChild(Palette.Text(def.Type + " · " + (card.Bowed ? "BOWED" : "UNBOWED"), 12, Palette.Gold));
         if (def.Type == CardType.Personality)
             body.AddChild(Palette.Wrapped($"Current: {card.Force} Force · {card.Chi} Chi\n{def.PersonalHonor} Personal Honor", 14));

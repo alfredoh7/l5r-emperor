@@ -65,6 +65,10 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
+        if(!UprightPreview && ActionLockStatus.VisibleOn(Card))
+        {
+            RestrictionSeal=new ActionLockSeal {CardAnchor=this};AddChild(RestrictionSeal);
+        }
         if (ShowTokenRail && CardTokenRail.HasRail(Card))
         {
             AlignUnitRightEdge = true;
@@ -81,7 +85,7 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered()!=true;
+        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered()!=true && RestrictionSeal?.IsHovered()!=true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -108,6 +112,7 @@ public partial class CardTile : Button
     public CardTile[] TokenRailCompanions { get; set; } = [];
     public Func<string,string?>? TokenSourceName { get; set; }
     public CardTokenRail? TokenRail { get; private set; }
+    public ActionLockSeal? RestrictionSeal { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)
     {

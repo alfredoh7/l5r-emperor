@@ -119,6 +119,7 @@ public partial class Main : Node
         }
         if (_capturePath is not null && _captureMode.StartsWith("published-decisions",StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
