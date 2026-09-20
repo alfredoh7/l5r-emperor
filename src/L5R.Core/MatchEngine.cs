@@ -616,12 +616,12 @@ public sealed partial class MatchEngine
         return OpenRecruitEntryWindows(player,card,quote.ProclaimEligible,proclaimResumesTo);
     }
 
-    // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, at Home (the ordinary recruit destination), through the same entry sequence as a
-    // province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
-    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via)
+    // At Any Cost (issue #373): a dead Personality is recruited as a fresh card, into play at the battlefield the action was played at (Mendon), through the same
+    // entry sequence as a province recruit. It may not be proclaimed, so its quote is never Proclaim-eligible. Returns true exactly when a window was opened.
+    private bool BringDeadPersonalityIntoPlay(PlayerState player,CardInstance card,string via,int battlefield)
     {
         ResetCardState(card);
-        EnterPlayFromRecruit(player,card,null,via);
+        EnterPlayFromRecruit(player,card,battlefield,via);
         return OpenRecruitEntryWindows(player,card,false,null);
     }
 
