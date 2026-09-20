@@ -31,8 +31,11 @@ against their receipts) and published whole:
 Published text is the catalogue text. Two differences from the period scans, both harmless: Bonds of Coin's scan prints "Political" as its keyword line and no
 "Favor" on the Limited action (the catalogue says "Favor Political Limited", and so does this change: discarding the Imperial Favor is a Favor action), and it
 prints "Open: Target one to three attachments with a 0 Gold Cost: Destroy them" for the catalogue's "Political Open: Destroy one to three target attachments
-with a 0 Gold Cost" -- the same action. Published count: +7 (409 -> 416 on the 7f306655 base; 421 after merging origin/main 8b378a8d, which brought #337's five to 414; **424** after
-merging origin/main 05cc2493, whose pinned count is 417 after #344's three: Fukuzo, Yoritomo Sakuma, Unfortunate Hesitation -- recounted from the merged tree, 417 + 7).
+with a 0 Gold Cost" -- the same action. Published count: +7 (409 -> 416 on the 7f306655 base; 421 after merging origin/main 8b378a8d, which brought #337's five to 414; 424 after
+merging origin/main 05cc2493, whose pinned count was 417 after #344's three: Fukuzo, Yoritomo Sakuma, Unfortunate Hesitation). There is no pinned total any more (#360/#361 removed it): the published
+guard derives the pool from `content/published/*.json` and each wave is pinned in its own manifest, `tests/L5R.Core.Tests/PublishedWaves/<wave>.txt`, so this change adds `personality-wave-32.txt` and
+`strategy-wave-21.txt` (written by `tools/content/pin_wave_ids.py`; neither wave number collides with a wave on main -- main has 30, 31, 33, 38 and 22, 27) and edits no shared count line. Counted from the merged
+tree for the record: **438** distinct non-ScenarioOnly ids (origin/main 7ce03fc6 has 431, plus these seven).
 
 ## Mendon's rulings (the task brief, verbatim where it matters)
 
@@ -94,6 +97,12 @@ ability is on. A card is locked when it, or the Personality it is **attached to*
 actions, those printed on its Items and Spells, and those printed on its Followers. Offered actions are filtered by the same method, so a blocked action is
 listed disabled with "X may not perform actions this turn." (`QueryActions`), and one sent anyway is refused atomically. A Reaction listed inside a reaction
 window is offered before `ValidateAbility` sees it, so `AddReaction` asks the lock too (`ActionLockRejection`).
+**A Reaction IS an action (#359, `IsAction`).** The lock's check begins `if (!IsAction(ability)) return;`: the central classification (`ReactionsAreActions.cs`: Limited, Open, Battle, BattleOrOpen and
+Reaction are actions; a trait such as an `encircled-before-battle` `BeforeResolution` effect is not, and is never barred). So a locked Personality cannot perform a Reaction in **any** window, and -- the same
+principle #335 states for its own reactions, "a reaction is applicable only when it could do something, so no window opens for nothing" -- **no window opens for a Reaction nobody may play**:
+`BeforeActionReactionAvailable` and `TargetedActionReactionAvailable` (what the before-action and the targeted-by-action windows are opened on) both ask `ActionLocked(card)`, and a before-resolution Reaction
+(Akodo Dairuko's shape, #363) has no legal option through `AbilityActions`, so it never becomes an item of the battle's before-resolution set. Tested for all three window kinds, locked and unlocked
+(`LockCoversReactionsInEveryWindow`), and for a Reaction of a Personality locked while its window is already open (listed disabled with the reason, refused when sent).
 *Alternatives considered:* (a) a locked *Follower's own* lock does not block its host's actions (yes: only an action by, or through, the locked card; the
 Personality's Items and Spells are performed by the Personality, not the Follower); (b) a lock blocking the Personality but not the actions printed on its
 Followers (rejected: Mendon's list names Followers).
@@ -211,9 +220,20 @@ for the rehonor rule.
   (`NegateDeferredAction`, Sakuma) skips the windows still to come -- there is nothing left to react to. Window state (`ReactionWindowTargetId`, `ReactionWindowRemaining`) is public and
   cleared when the deferred action resolves. Proven with a two-target action whose targets each have a different reactor, in both slot orders, a target with no reactor, no reactor at all,
   the alternation inside a window and both kinds of negation (`OneWindowPerTarget`, `PerTargetWindowsAlternate`).
-- *Isolation, for PR #341* (agent R's unmerged "targeted by an action" trigger, redirect and `RecheckTarget`): all of it lives in `TargetWindows.cs` plus one call in
-  `ResolveOrDeferBeforeActionReaction` and one in the `beforeActionReaction` handler; the reactions themselves changed only by reading `ReactionAffectedId(command)` where they read
-  `command.TargetId`. R's trigger should be raised per window target from the same place, and a redirect should update the window's target list (`ReactionWindowRemaining`) -- the seam.
+- *Beside R's "targeted by an action" reactions (#335, merged after this change was first written).* Merged, not layered: the window for a target is opened when **either** family has a possible
+  reactor for THAT target -- the curated before-action reactions (`OwnsBeforeActionReaction(player, command, target)`) or R's (`OwnsTargetedActionReaction(player, subject)`, the subject being the
+  held action as it stands for the window's target: `SubjectForWindowTarget`, and `SubjectForAnnouncedAction`/`OpenReactionSubject` read the open window's target through `ReactionAffectedId`). So Jinn-Kuen's
+  Merchant-guard, Ezuno, Blade of Champions, Yurishi, Mochitoko and Sakuma (#338, the Political reaction) are judged per target with no change to their own cases. An action that names no card is a list of
+  one "no card" entry, so a Mochitoko-protected *cost* still opens its window exactly as before. **A negation of the whole action** (`NegateHeldAction`, R's and Sakuma's) skips the windows still to come, as
+  above. **A redirect** (Ezuno, Blade) on a multi-target action replaces the window's target **in its slot** (`RetargetSlotAction`: the selection and the primary `TargetId` follow, so every reader of "the target" and
+  Bofana's trait see the new card), judged for that slot alone (`SlotActionAcceptsTarget`: the slot's category, and not a card that same slot already holds -- the other slots are independent and their cards
+  are not this window's business); the window is then about the new card (`FollowRedirectInWindow`) and the targets still to come are unchanged. A re-check (Yurishi) asks the same slot question of the same
+  card. Tested with Merchant guard + Kakihara in both slot orders, the negation skipping the second window, Sakuma offered for Yoshitada's Political target, and Ezuno redirecting the first slot
+  (`TargetedReactionsPerTarget`, `RedirectInsideASlot`). *Alternative:* a redirect that re-validates the whole action (rejected: it would refuse a legal redirect because an unrelated slot's card changed).
+- *Nested windows (#359, `SuspendedWindows`).* A Reaction is an action, so one that names a card opens a before-action window of its own, which suspends the window it was played in. The suspended record
+  now also carries the window's target and the targets still to come (`SuspendedWindow.ReactionWindowTargetId` / `ReactionWindowRemaining`, saved by `SuspendOpenWindow`, given back by `RestoreSuspendedWindow`),
+  so the window is handed back exactly as it was, with its target (`NestedWindowKeepsItsTarget`: Predator's move, a mover-negating Reaction naming Predator, the Predator owner's whole-action negation of that
+  Reaction). Opening the *next* target's window never suspends anything (no window is open then).
 
 **Bonds of Coin / Gold and Steel.** One slot, `zero-cost-attachment`, 1..3: an attachment (Follower, Item, Spell) whose **current** Gold cost is 0 -- printed cost plus
 every `GoldCost` modifier (`CardGoldCost`), so a Gold cost penalty can take an attachment there. They are destroyed in the order chosen; one already gone with a
@@ -254,6 +274,14 @@ negated (Tamori Tamoko's reaction, a Champion of Thunder's "all", the `training-
 action counts as taken. Tested in the three cases plus both-negated (`EachMoveNegatedSeparately`). *Alternative:* a negated movement cancelling its partner's (rejected by the ruling:
 nothing in the text ties them). He needs no target beyond an enemy Personality at the current battlefield (the shared
 presence Require puts Predator there too); "opposing Predator" is read as "on the other side at the current battlefield".
+**Predator and #363's `MovesToBattle` flag (decided here).** #363 (rules lead: "actions that move Personalities to a battle may be played as Absent Battle actions by either player") marks the abilities whose point is to
+bring a unit INTO the current battle, so neither the acting player's presence nor the source's can be required. **Predator's `predator-move` is not marked, and the reason is in his text:** it targets "a Personality
+opposing Predator at the current battlefield", so he must himself be at the current battlefield facing the target (the presence rule the flag would waive is exactly the one his text states), and his move takes
+two units OUT of the current battle to an adjacent unresolved one rather than into it. Marked, he could act from home against any enemy at the battlefield -- which the card does not allow. Tested:
+refused and listed disabled from home, and a friendly unit elsewhere at the battlefield does not stand in for him; present, he needs no other unit of his side (`PredatorIsNotAbsent`). The general rule for a
+`MoveSpec`, enforced by `BattleAbsentMovesTests` (whose effect-case scan now also reads `MoveSpec`s): a move whose **destination is the current battlefield** (`training-move-current`; the cards #363 wired
+carry the flag by hand) brings Personalities to the battle and is marked; a move to another battlefield, or home, is not, unless the card's text does not require the mover to be present, in which case
+whoever wires it marks it. Flagged in the pinned inventory: `training-move-current` (a fixture).
 **Battle state.** Nothing about a battle is stored per card: `Army()` reads positions when the battle resolves, so the current battle is decided by what is left at it and the moved
 units fight the battle at their new battlefield with their Force (attachments included) counted there -- `BattleStateFollowsTheMove` drives both battles to their
 `battleResolved` events (Predator 6 + Item 1 + C 1 = 8 against T 3 + Item 1 + E 1 = 5) and shows everyone home at the end.
@@ -304,6 +332,14 @@ No other printed/base comparison was found in the wired abilities.
 None. The six questions of the first version were answered on PR #348 (see "Rulings on PR #348"). One point is stated for completeness rather than asked: the two rules-not-text sites in
 section 6 (Proclaim's gain and a dishonorable death's loss) keep the printed Personal Honor; say if they should read current.
 
+## Wire: `Slots`, `Provinces` and R's no-target Attacks
+
+R's Attacks may be taken with no target or, for an ability that says so, on the current battlefield's province: `ActionOption.NoTarget` and `Provinces` (the province indices) on an `attack` ability. This change puts move
+destinations in the same `Provinces` field. They cannot meet: an ability is an Attack (`Target == "attack"`) or has a `Move` spec, never both, and only a `Slots` ability carries `Slots` (an Attack has none). The
+option builder computes `Provinces` in one place for both, with the two cases in one conditional (`AbilityActions`). `NoTarget` was core-only in #335 (never mapped into the server's `AvailableAction`, so an
+online client could not learn that an Attack may be taken with no target); it now crosses the wire beside `Slots` (`AvailableAction.NoTarget`, and a follow-up slot's `Timing`/`Condition`/`OptionLabels` are proven to
+cross with it in the server test). A client tells the meanings apart by `Type`/`CardId`'s ability: an `attack` option's `Provinces` are targets, a move ability's are destinations.
+
 ## UI issues for Alfredo (none of the three is built in the client)
 
 Multi-target viewer (#345, updated: it says which slots are up-front and which are conditional follow-ups asked at resolution, and describes the per-target reaction windows), move-destination picker
@@ -327,32 +363,41 @@ Yoritomo Sakuma's whole-action negation, Unfortunate Hesitation's forced pass). 
   `content/published/*.json`.
 - `tools/content/build_card_inventory.py` -- two conflicting BLOCKERS hunks: this branch's edits (the seven #336 cards' notes removed, the multi-target/movement/lock notes on the still-blocked cards
   updated) were kept, and the stale note for oracle-l5r-9624 (Yoritomo Sakuma, wired on main by #344) dropped from them; the workbook was regenerated (424 wired).
+**Second sync (origin/main 7ce03fc6: #341 targeted-by-action reactions, #359 Reactions are actions, #363 Absent moves and additional-action bursts, #365 delayed move-home, #361 the published-count guard).** Text conflicts:
+`CardAbilities.cs` (`AbilityDefinition` gained `UsesPerTurn`, `AttackTargetsProvince`, `MovesToBattle` beside `Slots`/`Move`; `BeforeActionReactionApplies` takes both `IsAction` and `affectedId`; the option builder
+offers a slot ability, a move's destinations and an Attack's provinces/`NoTarget` from one place; `ValidateAbility`'s `Slots ... else if own-army-personalities ... else if provinces` chain -- a plain `if` there let a slot
+ability fall through to the single-target check, which the mutation table now covers), `CardCatalog.cs`, `PublishedContent.cs`, the csproj (wave loaders, both kept), `Models.cs` (`ActionOption ... Slots, NoTarget`),
+`Program.cs` and `PublishedTests.cs` (**the count: deleted my edits and took main's guard and suite discovery, no number chosen**), `build_card_inventory.py` (the BLOCKERS I had kept for Yurishi 2862, Mochitoko 3152
+and Jinn-Kuen 9445, wired on main, were dropped; the stale #336 notes on main dropped), and `CARD_INVENTORY.xlsx` (regenerated by the script, not merged; 438 wired). Integration work beyond the text: the lock and
+`IsAction`, the per-target windows against R's reactions, Predator against `MovesToBattle`, the wire (all above), the `RunUntil` helper of my suites (it now declares the attack: `declareAttack`, the Declaration
+Segment of #359) and `declareAttack` in the pinned action-type inventory (the Attacker's own decision, not an action of a Personality). The Server and Transport tests and the client build were re-run.
 Re-run after the merge: `bash tools/check.sh --skip-client`, and the mutation checks below on the merged tree (including the ones touching F's areas: a copied ability exempt from the lock, whole-action negation ignored).
 Lock and F's copy primitive: an ability a locked Fukuzo copied is barred (`CopiedAbilityIsBarred`, mutation-checked).
 
 ## Validation
 
-`bash tools/check.sh --skip-client` on the merged tree, all green: the Python tool suites (43, 130), 216 core, 57 published, `gold-parity` 18, `gold-quote` 20, `battle-timing` 23, `recon-action` 11,
-`discipline-absent` 15, `deck-format` 9, `deck-workshop` 10, `deck-search` 22, `deck-look` 15, `daigotsu-bofana` 19, `alternative-costs` 12, `attach-from-discard` 14, `fading-shadows` 9, `effect-choice` 10,
-`follower-performer` 8, `card-copy` 15, `either-or` 17 and the four suites of this change -- `action-lock` 14, `multi-target` 21, `move-destination` 10, `stat-penalty` 10 -- then `L5R.AI.Tests` 25,
-`L5R.Server.Tests` and `L5R.Client.Transport.Tests` 7 (the new command and option fields cross the wire). `dotnet build src/L5R.Client/L5R.Client.csproj` builds (the hand-resolved `Selections`
-mapping in `MatchSession.ToWire`); Godot is not available on this machine, so the client's import/smoke is CI's. Pinned published count **424**: the distinct non-ScenarioOnly ids across `content/published/*.json`
-of the merged tree (origin/main 05cc2493 has 417, after #337 and #344; plus these seven). Inventory workbook regenerated (424 wired).
+`bash tools/check.sh --skip-client` on the tree merged with origin/main 7ce03fc6, all green: the Python tool suites, 216 core, the published guard (59 -- derived from the JSON files, with the two new wave manifests), and every suite of main
+(`additional-action-bursts` 9, `alternative-costs` 13, `attach-from-discard` 14, `battle-absent-moves` 7, `battle-rulings-2` 18, `battle-timing` 23, `card-copy` 15, `daigotsu-bofana` 19, `delayed-move-home-wave` 11,
+`discipline-absent` 15, `effect-choice` 10, `either-or` 17, `fading-shadows` 9, `follower-performer` 8, `gold-parity` 18, `gold-quote` 20, `kyuden-hida-exp` 6, `recon-action` 11, `targeted-action-reactions` 30 ...)
+and the four suites of this change -- `action-lock` 15, `multi-target` 23, `move-destination` 12, `stat-penalty` 10 -- then `L5R.AI.Tests` 27, `L5R.Server.Tests` 8 and `L5R.Client.Transport.Tests` 7 (the command and option
+fields cross the wire, `NoTarget` and a follow-up slot included). `dotnet build src/L5R.Client/L5R.Client.csproj` builds; Godot is not available on this machine, so the client's import/smoke is CI's. Published pool: 438
+distinct non-ScenarioOnly ids (see the count paragraph at the top: nothing is pinned in a shared line any more).
 
 ## Mutation checks
 
-Each mutation was applied to the engine source (or the published JSON) alone, the suites rebuilt and run, and the source restored; the runs are throwaway scripts, not committed. Run on the **merged**
-tree, after the six rulings and the innate-action ruling: the new mutations (locks, current/base stats, follow-ups, per-mover negation, per-target windows, adjacency) run against the suites of this change
-plus `published`, `gold-`, `daigotsu`, `card-copy`, `either-or`, `effect-choice`, `follower-performer`, `battle-timing` and the older core tests that touch them; the mutations of the first version of this document
-that still apply were re-run the same way (three of them changed shape with the rulings: the gain/lose ability pair and the "player default" of a slot no longer exist, and the Yoshitada/Fear Me! condition
-mutations are now the follow-up ones). Two mutations first survived and led to tests: "window state survives the action" (now asserted in `OneWindowPerTarget`) and "unit total Gold cost reads printed costs"
-(`UnitTotalGoldCostIsCurrent`); "player slot not required" survived once no shipped card had an up-front player slot and is now killed through the `training-slots-mixed` fixture.
+Each mutation was applied to the engine source (or the published JSON, or the wire mapping) alone, the suites rebuilt and run, and the source restored; the runs are throwaway scripts, not committed. Two runs. **First**, on the
+branch before the second sync, the mutations for the six rulings and the innate-action ruling. **Second, on the tree merged with origin/main 7ce03fc6**: every mutation that touches a merged area was re-run against ALL of
+main's suites as well as this change's (the lock family, whole-action negation, the per-target windows and the adjacency mutations, and the older ones that the merge could have changed), plus twelve new ones for the
+integration (a locked Personality's Reaction opening a window, the lock exempting Reactions, the window's subject read from the command's primary target, the per-target window ignoring targeted-by-action reactors, a redirect that
+does not rewrite its slot or move the window, a suspended window losing its target, Predator marked `MovesToBattle`, a move to the current battlefield not marked, `NoTarget` off the wire, a slot ability falling through
+to the single-target check). Findings that led to tests in the first run: "window state survives the action" (now asserted in `OneWindowPerTarget`), "unit total Gold cost reads printed costs"
+(`UnitTotalGoldCostIsCurrent`) and "player slot not required" (through `training-slots-mixed`).
 
 | Mutation | Result |
 |---|---|
 | lock ignores the host of an attachment | `LockBlocksEveryKindOfAction`, `LockedCanBeTargeted`, `LockBlocksReactions` |
 | lock ignores the performer a Strategy names | `LockBlocksEveryKindOfAction` |
-| lock never refuses | `LockBlocksEveryKindOfAction`, `LockBlocksReactions`, `LockLastsUntilTurnEnd`, `AssignmentIsNotAnAction`, `CopiedAbilityIsBarred` |
+| lock never refuses | `LockBlocksEveryKindOfAction`, `LockBlocksReactions`, `LockLastsUntilTurnEnd`, `AssignmentIsNotAnAction`, `LockCoversReactionsInEveryWindow`, `CopiedAbilityIsBarred` |
 | a copied ability is exempt from the lock | `CopiedAbilityIsBarred` |
 | turn end does not clear the lock | `LockLastsUntilTurnEnd`, `LockedOnTheOpponentsTurn` |
 | a Reaction listing ignores the lock | `LockBlocksReactions` |
@@ -369,17 +414,28 @@ mutations are now the follow-up ones). Two mutations first survived and led to t
 | Predator's own move ignores a negation | `MovesBothToTheChosenBattlefield`, `EachMoveNegatedSeparately`, `EveryRuleAndMover` |
 | the target's negated move stops Predator too | `EachMoveNegatedSeparately` |
 | Predator's negated move stops the target too | `EachMoveNegatedSeparately` |
-| a whole-action negation is ignored | `PoliticalReactionNegated`, `CannotPayAutoNegates`, `NegatedActionIsStillTaken`, `ReactionsThenBowThenDecision`, `PerTargetWindowsAlternate`, `EachMoveNegatedSeparately` |
-| windows collapse to the first target | `OneWindowPerTarget`, `PerTargetWindowsAlternate` |
+| a whole-action negation is ignored | `NegatedCreatingActionEndsTheBurst`, `NegatedReactionDoesNotForfeit`, `EngageClaimNegated`, `TargetedActionReactionsApplyToReactions`, `PoliticalReactionNegated`, `CannotPayAutoNegates`, and 8 more |
+| windows collapse to the first target | `OneWindowPerTarget`, `PerTargetWindowsAlternate`, `TargetedReactionsPerTarget`, `RedirectInsideASlot` |
 | window opened for a target nobody can react to | `FollowerWave3Cards`, `KeywordMechanics`, `SuitengusPathNavalGrant`, `ExpendableFollowers`, `Shinden`, `ShindenHonor`, and 104 more |
-| reactions judged on the command's own target | `OneWindowPerTarget`, `PerTargetWindowsAlternate` |
-| the later windows are never opened | `OneWindowPerTarget`, `PerTargetWindowsAlternate` |
-| a negated action still opens the later windows | `PerTargetWindowsAlternate` |
-| window state survives the action | `OneWindowPerTarget` |
+| reactions judged on the command's own target | `OneWindowPerTarget`, `PerTargetWindowsAlternate`, `TargetedReactionsPerTarget` |
+| the later windows are never opened | `OneWindowPerTarget`, `PerTargetWindowsAlternate`, `TargetedReactionsPerTarget` |
+| a negated action still opens the later windows | `PerTargetWindowsAlternate`, `TargetedReactionsPerTarget` |
+| window state survives the action | `OneWindowPerTarget`, `TargetedReactionsPerTarget` |
 | adjacency along the attacker line | `ProvinceAdjacency`, `LegalDestinationRules`, `DefenderUsesPredator`, `AdjacencyIsTheDefendersLine` |
 | adjacent-battlefield target uses its owner's line | `AdjacencyIsTheDefendersLine` |
 | Moto Gunso uses his controller's line | `AdjacencyIsTheDefendersLine` |
 | the current battlefield is a destination | `MovesBothToTheChosenBattlefield`, `LegalDestinationRules`, `Validation`, `DefenderUsesPredator`, `EveryRuleAndMover`, `AdjacencyIsTheDefendersLine` |
+| a locked Personality before-action Reaction still opens a window | `LockCoversReactionsInEveryWindow` |
+| a locked Personality targeted-by-action Reaction still opens a window | `LockCoversReactionsInEveryWindow` |
+| the lock exempts Reactions | `LockBlocksReactions`, `LockCoversReactionsInEveryWindow` |
+| the held action subject is the command primary target | `TargetedReactionsPerTarget` |
+| the per-target window ignores targeted-by-action reactors | `LockCoversReactionsInEveryWindow`, `NegatedCreatingActionEndsTheBurst`, `NegatedReactionDoesNotForfeit`, `TargetedActionReactionsApplyToReactions`, `TargetedReactionsPerTarget`, `RedirectInsideASlot`, and 20 more |
+| a redirect does not rewrite the slot | `RedirectInsideASlot` |
+| a redirect does not move the window to the new target | `RedirectInsideASlot`, `ReactionsFollowTheNewTarget`, `BofanaTraitFiresOncePerAction` |
+| a suspended window loses its target | `NestedWindowKeepsItsTarget` |
+| Predator is an Absent Battle action | `FlagMatchesEffectCases`, `MarkedInventoryPinned`, `RealCardsOfferedWithoutPresence`, `Validation`, `PredatorIsNotAbsent` |
+| a move to the current battlefield is not marked MovesToBattle | `FlagMatchesEffectCases`, `MarkedInventoryPinned`, `PredatorIsNotAbsent` |
+| a slot ability falls through to the generic target check | `YoshitadaBowsThenAsksOnlyIfDishonorable`, `SentencesAreIndependent`, `YoshitadaRehonorRule`, `YoshitadaValidation`, `YoshitadaOffered`, `TheDecisionIsAnsweredOnlyByTheActingPlayer`, and 15 more |
 | entry discount is always 1 | `LionClanDiscountThroughQuotePurchase`, `ClanDiscountIsGeneral` |
 | entry discount for any Clan | `LionClanDiscountThroughQuotePurchase`, `ClanDiscountIsGeneral` |
 | purchase quote has no entry discount | `LionClanDiscountThroughQuotePurchase` |
@@ -408,22 +464,35 @@ mutations are now the follow-up ones). Two mutations first survived and led to t
 | conflicting TargetId accepted | `YoshitadaValidation` |
 | duplicate cards in a slot accepted | `BondsOfCoinDestroys` |
 | Hotako Honor loss missing (packaging) | `PublishedShape`, `LionClanDiscountThroughQuotePurchase` |
+| NoTarget does not cross the wire (server test) | `every command field and every Gold quote cross the wire intact` |
 
-55 of 58 mutations are killed.
+67 of 70 mutations are killed. The three survivors are equivalent mutants, not gaps: (1) "hand slot lists every hand" -- the candidate list is a superset that `ValidateSlotCard` filters by each category's own ownership
+rule, so the visible options are identical (the privacy test checks the serialized options); (2) "Liu-Xeung trait counts Followers" -- a Follower is `Zone.Attached`, so the "at a battlefield where she is present" clause
+already excludes it and the Personality test is belt and braces; (3) "a zero cost is reduced again" -- a `-0` modifier is not a penalty (the amount is not negative), so nothing observable changes. Two that are killed
+by a large part of main's suites as well as by ours are expected to be: "window opened for a target nobody can react to" and "the per-target window ignores targeted-by-action reactors" (every action with a reactor in play
+changes). `IsAction(ability)` at the top of the lock's check has no mutation of its own: no `BeforeResolution` trait reaches `ValidateAbility` today, so removing it changes nothing observable; it is the rule's single
+definition, kept so a future non-action timing is never barred.
 
-The three survivors are equivalent mutants, not gaps: (1) "hand slot lists every hand" -- the candidate list is a superset that `ValidateSlotCard` filters by each category's own ownership rule, so the
-visible options are identical (the privacy test checks the serialized options); (2) "Liu-Xeung trait counts Followers" -- a Follower is `Zone.Attached`, so the "at a battlefield where she is present" clause
-already excludes it and the Personality test is belt and braces; (3) "a zero cost is reduced again" -- a `-0` modifier is not a penalty (the amount is not negative), so nothing observable changes.
-"Window opened for a target nobody can react to" is killed by a large part of the core suite as well as by `OneWindowPerTarget` (every action with a reactor in play opens extra windows), which is expected.
+## Not wired here: The Tale of the Disgraced (oracle-l5r-10553)
+
+"Battle: Bow your target unbowed Personality. Bow a target enemy card. If your Personality is Fallen or a Magistrate, straighten him before this battle resolves." Could it be wired on this primitive with little work? **Yes.** It is
+two up-front card slots -- `own` (`own-personality` with `TargetMustBe` unbowed, at the battlefield) and `enemy` (`enemy-card`) -- and one effect case: bow the first (Stalwart applies as for any bow), bow the second,
+then, if the first is `Fallen` or a `Magistrate` (readable keywords), `RegisterDelayedBattleEffect(player.Id, source, "straighten", own)` (the delayed straighten of #354/#365 exists). Selection, per-slot legality, the option's
+`Slots`, the wire, the default command, one before-action window per target (with R's redirect and Sakuma-style negation working per target) and Bofana's readers all come from this change. What is left is the ability
+entry, the case, a Strategy wave package (scan on hand; `tools/content/package_*` plus `pin_wave_ids.py`) and about six tests -- an hour or two, no new primitive. One reading to confirm with Mendon when it is wired: "your
+target unbowed Personality" is chosen up front but bowed by the action's effect, not paid as a cost, so a negated bow (Champion of Thunder's, Stalwart) does not stop the second bow or the straighten -- the same
+independent-sentences rule as ruling 3. Not wired, as instructed; the inventory note says so.
 
 ## Affected files
 
 New: `src/L5R.Core/ActionLock.cs`, `TargetSlots.cs`, `TargetWindows.cs`, `MoveDestinations.cs`, `StatPenalties.cs`, `ClanEntryDiscount.cs`; `content/published/personality-wave-32*.json`, `strategy-wave-21*.json` and
 the seven art files; `tools/content/package_personality_wave_32.py`, `package_strategy_wave_21.py`; `tests/L5R.Core.Tests/ActionLockTests.cs`, `MultiTargetTests.cs`, `MoveDestinationTests.cs`,
-`StatPenaltyTests.cs`, `Batch336Support.cs`.
+`StatPenaltyTests.cs`, `Batch336Support.cs`, and the two wave manifests `tests/L5R.Core.Tests/PublishedWaves/personality-wave-32.txt`, `strategy-wave-21.txt`.
 Changed: `EffectChoice.cs` (the follow-up conditions and `HonorChoice`, `BeginConditionalChoice`'s `targetMoved`), `CardAbilities.cs` (the abilities and effect cases, the per-window `BeforeActionReactionApplies`, `deferred-action-mover`, `AbilityDefinition.Slots`/`Move`, `ValidateAbility`'s lock/slot/move hooks and target categories, `UseAbility`, `ApplyModifier`/`CreateToken`
 hooks, `AbilityActions`' slot and destination offers and the extracted `AbilityOptionLabel`, the Favor lists, nineteen `training-*` abilities), `Models.cs` (`ActionLock`, `CardInstance.ActionLocks`,
 `GameCommand.Selections`, `ActionOption.Slots`, `CardView.ActionLocked`), `MatchEngine.cs` (`FinishTurn`, overlay transfer, `QuotePurchase`), `GoldQuotes.cs` (`EquipGoldCost`), `MatchQueries.cs`
 (the view flag, `AddReaction`), `DaigotsuBofana.cs` (`ActionTargetIds`), `CardCatalog.cs` (fourteen `training-*` fixture cards), `PublishedContent.cs`, `L5R.Core.csproj`, `src/L5R.Server/Protocol.cs` and
 `src/L5R.Client/MatchSession.cs` (the two new wire fields), `tools/content/build_card_inventory.py` and `docs/CARD_INVENTORY.xlsx`, `BattleTimingTests.cs`/`ReconActionTests.cs` (the Recon-tag inventories),
-`PublishedTests.cs` (count), the Server and Transport tests (the wire samples).
+the Server and Transport tests (the wire samples). Touching main's files at the second sync: `ReactionsAreActions.cs` (`SuspendedWindow` carries the window's target and remaining targets), `TargetedActionReactions.cs` (the held
+action's subject is the window's target; slot-wise legality and redirect), `Models.cs` (`SuspendedWindow`), `BattleAbsentMovesTests.cs` (the scan reads `MoveSpec`s; `training-move-current` in the pinned set), `src/L5R.Server/Protocol.cs`
+(`NoTarget`). `PublishedTests.cs` is identical to main's (no count); `Program.cs` differs from main only in the two `ProvinceAdjacency` lines of ruling 6 (no suite list: main's discovery finds the four suites).
