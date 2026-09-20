@@ -860,7 +860,8 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
     bool ActionLocked = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
-public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
+public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
+    string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);

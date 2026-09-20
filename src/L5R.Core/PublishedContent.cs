@@ -2113,4 +2113,6 @@ public static class PublishedContent
                 throw new InvalidOperationException("Published deck is incomplete.");
         return snapshot;
     }
+    /// <summary>Spirit of the Monk: first permanent, predefined ability grant (#386).</summary>
+    public static PublishedSnapshot StrategyWave30 { get; } = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
 }

@@ -14,7 +14,7 @@ public sealed partial class MatchEngine
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
-                card.GrantedAbilities.Count==0?null:card.GrantedAbilities.Select(g=>new GrantedAbilityView(g.AbilityId,AbilityCatalog.All[g.AbilityId].Label,AbilityCatalog.All[g.AbilityId].Timing,g.Source,g.Duration,g.CopiedFrom,g.CopiedFromName)).ToArray(),
+                GrantedAbilityViews(card),
                 GoldSourceProduction(card),ActionLocked(card));
         }
         var players=_state.Players.Select(player=>

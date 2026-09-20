@@ -1489,6 +1489,7 @@ public sealed partial class MatchEngine
         // return-to-hand always happens before the UnresolvedBattlefields.Count==0 branch below ends
         // the Battle phase, exactly the order Looting the Ruins' own printed text requires.
         ResolveAfterBattleResolveEffects();
+        foreach (var card in _state.Cards.Values) card.GrantedAbilities.RemoveAll(g => g.Duration == GrantDuration.Battle);
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -2299,7 +2300,7 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until
