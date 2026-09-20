@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin #315 approved B shown-card history sidebar and prepared Mac review launcher, stacked on tested #339 preview; no merge into main authorized.",
+  "validation": "Read current engine ShownCards contract, existing public-record/privacy regressions, approved concept B and issue #315. Implementation not yet complete.",
+  "remaining": "Build sidebar/history badge and large-card inspection, real-engine review fixture, native and reconnect verification, screenshots and dedicated launcher.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/315",
+  "branch": "codex/315-shown-card-history",
+  "updated": "2026-09-20T22:44:22.530974+00:00"
+}
