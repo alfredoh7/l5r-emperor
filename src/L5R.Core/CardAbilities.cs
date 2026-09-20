@@ -213,6 +213,14 @@ public static class AbilityCatalog
         // A Political variant (issue #336): Yoritomo Sakuma reacts to another player's POLITICAL action that targets one of his controller's Personalities, once per target.
         ["training-slots-two-political"] = new("Battle", "Training: Political: bow two independent target Personalities", "slots", ActionKeywords: ["Political"],
             Slots: [new("first", "personality", "The first Personality"), new("second", "personality", "The second Personality")]),
+        // The Tale of the Disgraced (oracle-l5r-10553, issue #369): "Battle: Bow your target unbowed Personality. Bow a target enemy card. If your Personality is Fallen or a
+        // Magistrate, straighten him before this battle resolves." Two up-front slots on the multi-target primitive (#336) and the delayed straighten of #354/#365. Mendon:
+        // "The first bowing ... is not a cost, it is an effect" -- so the three sentences are independent effects, each negatable on its own (a negated first bow stops
+        // neither the second nor the straighten), and nothing here is paid but the Strategy's own Gold and its hand play.
+        ["tale-of-the-disgraced"] = new("Battle", "Bow your target unbowed Personality. Bow a target enemy card. If your Personality is Fallen or a Magistrate, straighten him before this battle resolves", "slots",
+            Slots: [new("own", "own-unbowed-personality", "Your unbowed Personality to bow"), new("enemy", "enemy-card", "Enemy card to bow")]),
+        // Training-only: protects its controller's Personality from the bow of an action (a reaction for the first slot of the Tale, whose target is the ACTING player's own).
+        ["training-bow-guard"] = new("Reaction", "Training: before an action resolves, negate the bowing of your Personality it targets", "none", Trigger: "before-action-resolves"),
         ["training-negate-mover"] = new("Reaction", "Training: before an action resolves, target a Personality it would move: negate his movement from the action's effects", "deferred-action-mover", Trigger: "before-action-resolves"),
         ["training-negate-action"] = new("Reaction", "Training: after another player's action targets a card of yours: negate the action's effects", "none", Trigger: "before-action-resolves"),
         ["training-slots-discard"] = new("Open", "Training: discard a target card from your hand", "slots", Slots: [new("card", "hand", "A card from your hand")]),
@@ -1961,7 +1969,7 @@ public sealed partial class MatchEngine
         // when not already destroyed by its own alternate branch) -- still counts as "bows the
         // target" at this ability-id level, the same "a specific instance might not end up bowing"
         // allowance costly-feud's own doc comment above already establishes.
-        or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider"
+        or "strength-of-the-bear" or "unexpected" or "strength-of-the-spider" or "tale-of-the-disgraced"
         // Brawl (issue #304): bows its enemy target unconditionally.
         or "brawl-bow"
         // Fires of Turmoil (issue #295): the same conditional-bow-or-straighten shape as Strategic
@@ -2055,6 +2063,8 @@ public sealed partial class MatchEngine
             // that negates the whole action against a card of its controller's.
             case "training-negate-mover":
                 return negatable && command.PlayerId != card.OwnerId && acting.Move is not null;
+            case "training-bow-guard":
+                return Definition(affected).Type == CardType.Personality && affected.OwnerId == card.OwnerId && BowsTarget(command.AbilityId);
             case "training-negate-action":
                 return command.PlayerId != affected.OwnerId && card.OwnerId == affected.OwnerId && !TargetsThroughAttackPipeline(command.AbilityId);
             // Training fixture (issue #337): another player's action whose source carries a Weapon -- see its execution case.
@@ -3536,6 +3546,8 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // The Tale of the Disgraced (issue #369): "your target unbowed Personality".
+                        "own-unbowed-personality" => personality && own && !target.Bowed,
                         // The Wave Persists (issue #364): "target your Personality there" -- a Reaction has no Battle-timing location Require of its own.
                         "own-personality-at-battle" => personality && own && AtBattle(target),
                         // Quick Recovery (issue #364): "a bowed card in his unit (which may be him)" -- the chosen performer or one of his attachments.
@@ -4108,6 +4120,18 @@ public sealed partial class MatchEngine
                 break;
             // Training fixtures: a reaction that names one of the cards the deferred action would move and negates its movement, and one that negates the
             // whole action (the deferred action is still taken; none of its effects happen).
+            case "tale-of-the-disgraced":
+            {
+                // Three independent effects, in the printed order: each bow is its own (Champion of Thunder's, Brothers of Goemon's, Stalwart's negation of one leaves the
+                // other and the straighten alone), and the condition of the third is read NOW, when this sentence resolves -- the Personality's own Fallen or Magistrate
+                // keyword, whether or not his bow happened -- the delayed straighten then belongs to this battle and lapses with it.
+                var own = SlotCards(command, "own").Single(); var enemy = SlotCards(command, "enemy").Single();
+                if (!StalwartNegatesBow(own, player.Id)) own.Bowed = true;
+                if (!StalwartNegatesBow(enemy, player.Id)) enemy.Bowed = true;
+                if (InPlay(own) && (Keyword(own, "Fallen") || Keyword(own, "Magistrate"))) RegisterDelayedBattleEffect(player.Id, source, "straighten", own);
+                break;
+            }
+            case "training-bow-guard": NegateEffects(Card(ReactionAffectedId(_state.PendingNegatableAbility!)!), "bow"); break;
             case "training-negate-mover": _state.NegatedEffects.Add(new("move", target!.Id)); break;
             case "training-negate-action": NegateDeferredAction(source!); break;
             case "training-slots-discard": foreach (var discarded in SlotCards(command, "card").ToArray()) DiscardFate(player, discarded); break;
