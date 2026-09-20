@@ -90,18 +90,19 @@ public partial class Main
 
     private void AddBattleAction(ActionOption option)
     {
-        AddAction(_inspector,option);
+        var count=_inspector.GetChildCount();AddAction(_inspector,option);
+        if(_inspector.GetChildCount()==count)return;
         var button=_inspector.GetChildren().OfType<Button>().Last();
         var source=option.CardId is { } id?FindCard(id)?.Definition?.Name:null;
         if(source is null)return;
-        button.Text=source+"\n"+option.Label;
+        button.Text=source+"\n"+(option.AlternativeCost?.ActionLabel??option.Label);
         foreach(var state in new[]{"font_color","font_hover_color","font_pressed_color","font_focus_color","font_disabled_color"})button.AddThemeColorOverride(state,Colors.Transparent);
         var margin=new MarginContainer {MouseFilter=Control.MouseFilterEnum.Ignore};button.AddChild(margin);
         margin.SetAnchorsAndOffsetsPreset(Control.LayoutPreset.FullRect);
         margin.OffsetLeft=20;margin.OffsetRight=-20;margin.OffsetTop=12;margin.OffsetBottom=-12;
         var column=new VBoxContainer {MouseFilter=Control.MouseFilterEnum.Ignore};margin.AddChild(column);
         var title=Palette.Wrapped(source,19);title.AddThemeFontOverride("font",SidebarSkin.Bold);title.MouseFilter=Control.MouseFilterEnum.Ignore;column.AddChild(title);
-        var text=Palette.Wrapped(option.Label,16,Palette.PaperDim);text.MouseFilter=Control.MouseFilterEnum.Ignore;column.AddChild(text);
+        var text=Palette.Wrapped(option.AlternativeCost?.ActionLabel??option.Label,16,Palette.PaperDim);text.MouseFilter=Control.MouseFilterEnum.Ignore;column.AddChild(text);
         button.CustomMinimumSize=new Vector2(0,110);
         column.MinimumSizeChanged+=()=> { if(IsInstanceValid(button))button.CustomMinimumSize=new Vector2(0,Math.Max(90,column.GetCombinedMinimumSize().Y+24)); };
     }

@@ -843,6 +843,8 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
     int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+// Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
+public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -855,7 +857,7 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,

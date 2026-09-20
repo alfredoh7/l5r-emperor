@@ -12,7 +12,8 @@ public partial class Main
         _guide.Visible = View.PendingChoice is not null || _chosen is not null;
         _guide.TooltipText = RulesHelp.Tooltip(RulesHelp.PhaseGuide(View.Phase) + "\n\n" + RulesHelp.Topic("targets"));
         if (RenderEventDecision()) return;
-        if (RenderBattleFlow()) return;
+        if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
+        if (RenderBattleFlow()) { AddDecisionReviewNavigation(); return; }
         if (PresentationBusy)
         {
             _guide.Visible = false;
@@ -83,7 +84,7 @@ public partial class Main
         if (_chosen is { Type: "purchase" or "recruitReserve", Quote: not null }) { RenderPurchase(); return; }
         if (_chosen is { Type: "attack" or "assignDefense" }) { RenderAssignments(); return; }
         if (_chosen is { Type: "useAbility", Command.CardIds: not null }) { RenderProvinceRefresh(); return; }
-        if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); return; }
+        if (_chosen is { Type: "equip" or "playStrategy" or "useAbility" }) { RenderTargeted(); AddDecisionReviewNavigation(); return; }
         if (_chosen is { Type: "discardHand" }) { RenderHandDiscard(); return; }
         // An inspected reminder must never hide a new engine decision (e.g. hand limit).
         if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
@@ -101,6 +102,7 @@ public partial class Main
             if (action is not null) _inspector.AddChild(SidebarSkin.Button("Assign units…", () => Choose(action), true));
         }
         foreach (var action in Actions.Where(a => a.Type is "selectBattle" or "discardHand" || a.Type == "useAbility" && a.CardId is null)) AddAction(_inspector, action);
+        AddDecisionReviewNavigation();
     }
 
     // The recruit review for purchase and recruitReserve: their own mode picker and Proclaim notes (from the
@@ -162,6 +164,7 @@ public partial class Main
     // the suggested sources all follow, instantly and without a round trip.
     private void ChooseTarget(string id)
     {
+        _alternativeCostConfirmed=false;
         if (_chosen?.Command is not { } command) return;
         var priced = _chosen.TargetGold?.ContainsKey(id) == true;
         _chosen = _chosen with { Command = command with { TargetId = id } };
@@ -296,6 +299,11 @@ public partial class Main
             picker.ItemSelected += i => ChooseTarget(targets[(int)i]);
             _inspector.AddChild(picker);
         }
+        if(action.AlternativeCost is not null && !_alternativeCostConfirmed)
+        {
+            _decisionActions.AddChild(SidebarSkin.Button("Review cost choices",()=>{_reviewingAlternativeCost=true;_decisionSelection=null;RenderInspector();},true));
+            _decisionActions.AddChild(SidebarSkin.Button("Cancel action",CancelChoice));return;
+        }
         var (required, ready) = RenderGoldPanel(action);
         AddConfirm("Confirm action", required, ready, () => command with { SourceIds = required > 0 ? _sources.ToArray() : [], TargetId = target }, "Cancel action", action.Enabled);
     }
@@ -343,10 +351,23 @@ public partial class Main
         _decisionActions.AddChild(SidebarSkin.Button("Cancel selection", CancelChoice));
     }
 
-    private void CancelChoice() { SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
+    private void CancelChoice() { ResetDecisionSelection(); SetNotice("Selection cancelled. No action was taken."); _selected = null; _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); }
 
     private void AddAction(VBoxContainer container, ActionOption option)
     {
+        if(option.AlternativeCost is { } cost)
+        {
+            var key=$"{option.CardId}/{cost.AbilityId}/{cost.PerformerId}";
+            if(container.GetChildren().Any(c=>c.HasMeta("alternative_cost_group") && c.GetMeta("alternative_cost_group").AsString()==key)) return;
+            var choices=AlternativeCosts(option);
+            var representative=choices.FirstOrDefault(a=>a.Enabled)??option;
+            var grouped=SidebarSkin.Button(cost.ActionLabel+(cost.PerformerId is { } id && FindCard(id) is { } performer?" · "+performer.Definition?.Name:""),()=>Choose(representative));
+            grouped.SetMeta("alternative_cost_group",key);grouped.Disabled=!representative.Enabled || !DecisionCanSubmit;
+            grouped.TooltipText=representative.Reason??cost.ActionLabel;
+            container.AddChild(grouped);
+            if(!representative.Enabled)container.AddChild(Palette.Wrapped(representative.Reason??"No available way to pay.",15,Palette.PaperDim));
+            return;
+        }
         var label = option.Type == "discardProvince" ? "Discard from province…" : option.Type is "purchase" or "recruitReserve" ? "Review payment…" : option.Label;
         var button = SidebarSkin.Button(label, () =>
         {
@@ -367,7 +388,7 @@ public partial class Main
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
-        if (_chosen is not null || EventDecisionActive) return;
+        if (_chosen is not null || EventDecisionActive || GenericDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());
         if (_session.Online && !_session.Connected)
         {

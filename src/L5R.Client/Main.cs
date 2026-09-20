@@ -116,6 +116,7 @@ public partial class Main : Node
             // nothing for them to weigh — unlike the opponent's move above, it needs no "thinking" pause.
             _session.StepPracticeReaction();
         }
+        if (_capturePath is not null && _captureMode.StartsWith("published-decisions",StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
@@ -509,6 +510,9 @@ public partial class Main : Node
             tile.DecisionSelected = OwnEventDecision && View.PendingChoice!.Type=="forcedDiscard" && tile.Card.Id==_eventDiscardId;
             tile.LegalTarget = EventDecisionActive && View.PendingChoice is {Type:"harshChoices",CardId: { } harshCard} && tile.Card.Id==harshCard;
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
+            tile.Highlighted |= GenericDecisionActive && tile.Card.Id==View.PendingChoice?.CardId;
+            tile.LegalTarget |= GenericDecisionActive && tile.Card.Id==View.PendingChoice?.CardId;
+            tile.DecisionSelected |= GenericDecisionActive && tile.Card.Id==_decisionSelection?.Command?.TargetId;
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
             tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
@@ -533,6 +537,7 @@ public partial class Main : Node
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
         if (option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
             option = option with { Command = command with { TargetId = target } };
+        ResetDecisionSelection();
         _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
         if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();

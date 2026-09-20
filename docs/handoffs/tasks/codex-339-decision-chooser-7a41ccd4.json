@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Integrate approved UI lineage with current mechanics for eight isolated review previews; no main merge authorized. Adapt Gold quotes, separate attack declaration, reaction discovery, and forced-discard presentation. This commit is the shared preview baseline, not completion of #339.",
-  "validation": "Client build: 0 warnings/errors. Godot headless import passed. Latest focused regressions for assignment discovery, action classification and Seppuku timing passed. Full deterministic rerun and native baseline checks are in progress; no native readiness claimed.",
-  "remaining": "Validate integrated baseline, then implement and natively verify all eight approved UI tasks with individual Mac review launchers. All changes require explicit Alfredo merge approval; inherited rules corrections remain subject to shared review.",
+  "summary": "Implement #339 automatic decision sidebar and grouped alternative costs on isolated approved-UI/current-mechanics preview base. Add public cost-option presentation metadata, real engine showcases and Mac review launcher. No merge into main authorized.",
+  "validation": "Baseline Core suites passed; corrected AI fixture 34/34, server 8/8, transport 8/8. Baseline native Regions/Celestials passed at 1920x1080. Client compiles with 0 warnings/errors. New alternative-cost 16/16, effect-choice 10/10, showcase 2/2 pass. Native Yumaru automatic prompt/keyboard selection/confirmation passes. See docs/handoffs/2026-09-21-decision-chooser-review.md for evidence and pending checks.",
+  "remaining": "Draft: Fukui native rerun, compact and waiting states, launcher navigation, remaining generic choice types, stale/reconnect handling, visual polish and full checks. Then seven other approved UI tasks. No main merge authorized; public metadata and inherited rules corrections require shared review.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/339",
   "branch": "codex/339-decision-chooser",
-  "updated": "2026-09-20T21:55:39.580978+00:00"
+  "updated": "2026-09-20T22:06:37.526801+00:00"
 }
