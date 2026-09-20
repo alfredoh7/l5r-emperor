@@ -1,0 +1,33 @@
+{
+  "Profile": "spell-wave-10",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1084",
+      "Name": "Bo of Water",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Water, he contributes Force to his army even if bowed.\nLimited: Once per game: Create a +2F/+0C Water • Weapon Item with the ability, \"Battle: Target an enemy card without attachments: Bow it\" and attach it to one of your Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1084.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "bo-of-water-create"
+      ],
+      "Effect": "none",
+      "AttachGrantsEliteEffectWhileWielderHas": "Water"
+    }
+  ],
+  "Decks": []
+}

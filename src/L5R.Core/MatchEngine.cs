@@ -168,6 +168,7 @@ public sealed partial class MatchEngine
         {
             Apply(command);
             ReturnCardsOutOfPlayToTheirOwners();
+            RemoveCreatedCardsLeftInPiles();
             _state.Version++;
             _commands.Add(Copy(command));
             return new(true,null,_state.Version,_state.Events.Skip(firstEvent).ToArray());
@@ -591,10 +592,9 @@ public sealed partial class MatchEngine
     // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
     // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
-    private bool CreatePersonality(int ownerId, string definitionId, bool duringEntryReaction = false)
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false)
     {
-        var definition=CardCatalog.Get(definitionId);
-        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definitionId,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
         _state.Cards.Add(card.Id,card);
         Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
@@ -1977,7 +1977,8 @@ public sealed partial class MatchEngine
     // EliteEffect: true for a card with the actual printed/granted Elite keyword, but also for a
     // wielder carrying an attachment that grants only Elite's effect without the keyword itself
     // (Seppun Heavy Elite's shape -- see AttachGrantsEliteEffect).
-    private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect);
+    private bool EliteEffect(CardInstance card) => Keyword(card,"Elite") || Attachments(card.Id).Any(a=>Definition(a).AttachGrantsEliteEffect
+        || Definition(a).AttachGrantsEliteEffectWhileWielderHas is string wielderKeyword && Keyword(card,wielderKeyword));
     private int PersonalityBattleContribution(CardInstance card) => card.Bowed && !EliteEffect(card) ? 0 : PersonalityForce(card);
     private int FollowerBattleContribution(CardInstance card) => Attachments(card.Id)
         .Where(c=>(!c.Bowed || EliteEffect(c)) && Definition(c).Type==CardType.Follower)
