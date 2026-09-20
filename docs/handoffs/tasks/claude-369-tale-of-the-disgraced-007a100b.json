@@ -1,0 +1,9 @@
+{
+  "lane": "rules",
+  "summary": "Wired The Tale of the Disgraced (oracle-l5r-10553, strategy-wave-28) on the multi-target primitive: two up-front slots (your unbowed Personality via a new own-unbowed-personality category, an enemy card) and the existing delayed straighten, per Mendon's ruling that the first bow is an effect, so the two bows and the straighten are independent effects (a negated first bow stops neither the second bow nor the straighten). Fallen and Magistrate are keywords; the condition is read when the action resolves. Packaged as strategy-wave-28 with the art sha-checked against the receipt, per-wave manifest, BLOCKERS removed, inventory regenerated (443).",
+  "validation": "bash tools/check.sh --skip-client all green (216 core, 59 published, tale-of-the-disgraced 12, all main suites, AI, server, transport); dotnet build src/L5R.Client builds; 23 named mutations all killed by named tests; Godot not available locally.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/369",
+  "branch": "claude/369-tale-of-the-disgraced",
+  "updated": "2026-09-20T18:53:45.981124+00:00"
+}
