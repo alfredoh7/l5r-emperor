@@ -257,8 +257,17 @@ public sealed partial class MatchEngine
                 break;
             case SearchEffect.ToHandThenDiscard:
                 MoveSearchedCardToHand(search, card);
+                // Mendon's ruling (issue #368): the Terrain that was just found cannot be the card discarded to its own effect (it is not
+                // "a card in your hand" for this purpose). When no OTHER card is in the hand the discard cannot be satisfied: nothing is
+                // discarded and there is no error -- the search simply carries on to its shuffle.
+                if (SearchDiscardCandidates(search).Length == 0)
+                {
+                    Emit("searchDiscardSkipped", $"{player.Name} has no other card in hand to discard.", player.Id);
+                    FinishSearch(search);
+                    break;
+                }
                 search.Stage = SearchStage.ChooseDiscard;
-                _state.PendingChoice = new("searchDiscard", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: discard a card from your hand.");
+                _state.PendingChoice = new("searchDiscard", search.PlayerId, search.SourceCardId, $"{Definition(Card(search.SourceCardId)).Name}: discard a card from your hand other than the card you found.");
                 break;
             case SearchEffect.AttachRegion:
                 BeginRegionAttach(search, card);
@@ -342,9 +351,14 @@ public sealed partial class MatchEngine
     {
         var player = Player(search.PlayerId);
         Require(command.Type == "chooseSearchDiscard" && command.TargetId is not null && player.Hand.Contains(command.TargetId), "Choose a card from your hand to discard.");
+        Require(command.TargetId != search.SelectedCardId, "The card you found cannot be the one you discard to its own effect.");
         DiscardFate(player, Card(command.TargetId));
         FinishSearch(search);
     }
+
+    /// <summary>The hand cards that may be discarded after a Terrain is found: every card except the one just found (issue #368).</summary>
+    private string[] SearchDiscardCandidates(PendingSearch search) =>
+        Player(search.PlayerId).Hand.Where(id => id != search.SelectedCardId).ToArray();
 
     // 3. SHUFFLE, then the action resolves and play continues. Reached from every path out of a search: a card
     // taken and its effect done, a Region discarded, and a pass.
@@ -498,7 +512,7 @@ public sealed partial class MatchEngine
                         Command("chooseSearchProvince", province: p.Index, sources: quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds), region.Id, Provinces: [p.Index], Gold: quote);
                 break;
             case SearchStage.ChooseDiscard:
-                foreach (var id in player.Hand)
+                foreach (var id in SearchDiscardCandidates(search))
                     yield return new("chooseSearchDiscard", $"Discard {Definition(Card(id)).Name}", true, null, Command("chooseSearchDiscard", target: id), id);
                 break;
         }

@@ -48,7 +48,7 @@ var tests = new (string Name, Action Run)[]
     ("Seppuku requires Samurai, Courtier, or Shugenja", OrderSeppukuRequiresKeyword),
     ("Seppuku requires a Dishonorable Personality", OrderSeppukuRequiresDishonorable),
     ("Seppuku destroys honorably with no Honor change", OrderSeppukuHonorableDeath),
-    ("Seppuku is an Open action, available without priority", OrderSeppukuIsOpenAction),
+    ("Seppuku is an Open action taken at the player's own turn to act: refused while the other player holds the opportunity (issue #368), and once taken the opportunity passes", OrderSeppukuIsOpenAction),
     ("Seppuku cannot be ordered for an opponent's Personality", CannotOrderSeppukuForOpponentsPersonality),
     ("A Dishonorable Personality's death (other than Seppuku) costs its controller Honor", DishonorableDeathLosesHonor),
     ("Battle winner gains two Honor per destroyed card including attachments", BattleHonor),
@@ -1950,12 +1950,21 @@ static void OrderSeppukuHonorableDeath()
 }
 static void OrderSeppukuIsOpenAction()
 {
-    // Available regardless of who holds priority.
+    // Issue #368 (Mendon): an Open action is taken as an ACTION at the player's own turn to act. It was available regardless of who held
+    // priority; it may no longer interrupt the other player's opportunity.
     var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1;
     var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home); samurai.Dishonorable=true;
     var e=MatchEngine.FromTestState(s);
-    Accept(e,Cmd(e,"orderSeppuku",player:0,id:samurai.Id));
-    Equal(e.State.Cards[samurai.Id].Zone,Zone.Dead);
+    Check(!e.QueryActions(0).Any(a=>a.Type=="orderSeppuku"),"Not offered while the other player holds the action opportunity");
+    Reject(e,Cmd(e,"orderSeppuku",player:0,id:samurai.Id));
+    Equal(e.State.Cards[samurai.Id].Zone,Zone.Home);
+    // At their own turn to act it is accepted, and as an action it hands the opportunity to the other player.
+    var t=MatchEngine.CreateEconomyScenario().State; t.Phase=Phase.Action; t.PriorityPlayerId=0;
+    var mine=Add(t,"training-dishonored-samurai",0,Zone.Home); mine.Dishonorable=true;
+    var f=MatchEngine.FromTestState(t);
+    Accept(f,Cmd(f,"orderSeppuku",player:0,id:mine.Id));
+    Equal(f.State.Cards[mine.Id].Zone,Zone.Dead);
+    Equal(f.State.PriorityPlayerId,1);
 }
 static void CannotOrderSeppukuForOpponentsPersonality()
 {

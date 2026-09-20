@@ -488,19 +488,21 @@ internal static class NegatedCostTests
         Check(!seppuku.Enabled && seppuku.Reason == Reason, "listed disabled with the reason: " + seppuku.Enabled + " / " + seppuku.Reason);
         Reject(e, new GameCommand("orderSeppuku", 0, e.Version, CardId: samurai.Id));
         Check(Now(e, samurai.Id).Zone == Zone.Home, "nothing happened to him");
-        // Without priority too (Seppuku ignores priority, so the bar must too).
+        // Without priority (issue #368: Seppuku is only ever taken at one's own turn to act, so it is not even offered to the waiting player, owing a pass or not).
         var t = Table(Phase.Action, 1);
         var other = Dishonorable(t, 0);
         t.ForcedPasses.Add(new(0, PrintedPhases.Instance(t.TurnNumber, Phase.Action), "owed"));
         var f = MatchEngine.FromTestState(t);
-        var waiting = f.QueryActions(0).Single(a => a.Type == "orderSeppuku");
-        Check(!waiting.Enabled && waiting.Reason == Reason, "listed disabled for the waiting player as well");
+        Check(!f.QueryActions(0).Any(a => a.Type == "orderSeppuku"), "not offered to the waiting player");
         Reject(f, new GameCommand("orderSeppuku", 0, f.Version, CardId: other.Id));
         // Every other innate action is barred at the same opportunity (the existing rule).
         Check(e.QueryActions(0).Where(a => a.Type is "useAbility" or "playStrategy" or "recruitReserve" or "equip").All(a => !a.Enabled), "no other action is enabled");
-        // The pass ends the bar: he may then order Seppuku.
+        // The pass ends the bar: he may then order Seppuku -- at his next turn to act (the pass handed the opportunity to the other player, and
+        // Seppuku is only taken at one's own turn to act, issue #368; the opportunity is handed back here, since the point is the settled debt).
         Pass(e, 0);
         Eq(e.State.ForcedPasses.Count, 0, "the debt is settled");
+        Check(!e.QueryActions(0).Any(a => a.Type == "orderSeppuku"), "not offered while the opportunity is the other player's");
+        { var st = e.State; st.PriorityPlayerId = 0; st.ConsecutivePasses = 0; e = MatchEngine.FromTestState(st); }
         var again = e.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == samurai.Id);
         Check(again.Enabled && again.Reason is null, "Seppuku is offered enabled once the pass is made");
         Accept(e, new GameCommand("orderSeppuku", 0, e.Version, CardId: samurai.Id));
