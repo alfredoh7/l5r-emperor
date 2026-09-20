@@ -175,10 +175,9 @@ public sealed partial class MatchEngine
         {
             // Additional Action (issue #181): open to either side, same shape as attackReaction above
             // -- list this player's own eligible before-additional-action-resolves Reactions, played
-            // from hand (Effortless Counterattack's shape), not in play.
-            foreach(var (card,reactionId) in _state.Cards.Values.Where(c=>c.OwnerId==playerId && c.Zone==Zone.Hand)
-                .SelectMany(c=>(Definition(c).Abilities??[]).Select(a=>(Card:c,Id:a)))
-                .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-additional-action-resolves"))
+            // from where they can be (Effortless Counterattack's shape: hand, not in play; a Discipline one
+            // also from a discard pile), the same list whose existence opened this window.
+            foreach(var (card,reactionId) in OutOfPlayReactions(playerId,"before-additional-action-resolves"))
                 AddReaction(card,reactionId);
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }

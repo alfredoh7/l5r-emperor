@@ -694,6 +694,9 @@ public static class AbilityCatalog
         // verb the fixture stands in for ("Battle/Open" -- the widest phase window, exactly the one the old
         // Discipline timing had).
         ["training-discipline-ability"] = new("BattleOrOpen", "Discipline: pay this card's Gold cost, gain 1 Honor, then remove it from the game", "none", Discipline: true),
+        // Training-only: a Discipline REACTION (no published card is one yet), so a Reaction window has a discard-pile copy that really can be
+        // played from there -- the case AnyOutOfPlayReactionAvailable must keep counting (Effortless Counterattack's trigger, same negate effect).
+        ["training-discipline-counter-negate"] = new("Reaction", "Discipline: before an additional Battle action resolves: negate its effects", "none", Trigger: "before-additional-action-resolves", Discipline: true),
         // Training-only: exercises Stalwart (issue #184) -- a per-instance (not per-player) enemy-bow
         // ability, so two separate source instances can each bow the same Stalwart target once this
         // turn, isolating the keyword's own negation from the ordinary once-per-turn dedupe.
@@ -2286,9 +2289,22 @@ public sealed partial class MatchEngine
     // first -- whether one applies always needs checking when the specific triggering event occurs;
     // callers open a window whenever their own trigger condition occurs, gated by this existence
     // check (not per-card AbilityUses, since a played reaction leaves hand/discard and can't recur).
-    private bool AnyOutOfPlayReactionAvailable(int playerId, string trigger) => _state.Cards.Values.Any(c =>
-        c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard &&
-        (Definition(c).Abilities ?? []).Any(id => AbilityCatalog.All.TryGetValue(id, out var a) && a.Timing == "Reaction" && a.Trigger == trigger));
+    //
+    // A card counts only where it could really be played from (OutOfPlayReactions, i.e. ValidateAbility's own zone rule): a Strategy in hand,
+    // a Reaction whose printed trigger names the discard pile (Singh Remnants), a Discipline ability in a discard pile. Not a Strategy already
+    // played -- it sits in the Fate discard pile and cannot be played from there (Effortless Counterattack, A Close Call) -- and not a card that
+    // is only a Reactor while in play (Akodo Kakihara) held in hand. Counting those opened a window on every later action of the kind in which
+    // both players could only decline.
+    private bool AnyOutOfPlayReactionAvailable(int playerId, string trigger) => OutOfPlayReactions(playerId, trigger).Any();
+    // Every (card, ability) of this player's, out of play, that could be played as a Reaction with this trigger from where the card is now.
+    // Both the window's existence check above and the reactions a window then offers (MatchQueries) are built on it.
+    private IEnumerable<(CardInstance Card, string AbilityId)> OutOfPlayReactions(int playerId, string trigger)
+    {
+        var player = Player(playerId);
+        return _state.Cards.Values.Where(c => c.OwnerId == playerId && c.Zone is Zone.Hand or Zone.FateDiscard or Zone.DynastyDiscard)
+            .SelectMany(c => AbilityIdsOf(c).Select(id => (Card: c, AbilityId: id)))
+            .Where(x => AbilityCatalog.All.TryGetValue(x.AbilityId, out var a) && a.Timing == "Reaction" && a.Trigger == trigger && AbilitySourceZoneAllows(a, x.Card, player));
+    }
     private bool AnyPersonalityEntryReactionAvailable(int playerId) => AnyOutOfPlayReactionAvailable(playerId, "any-personality-enters-play");
     // Additional Action (issue #181): a grant is a Battle action the named player may take without
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
@@ -2507,6 +2523,34 @@ public sealed partial class MatchEngine
     };
     private int PersonalityChi(CardInstance card) => Definition(card).Chi + StatModifier(card, "Chi") + Attachments(card.Id).Where(c => Definition(c).Type == CardType.Item).Sum(c => Definition(c).Chi);
 
+    // Where an ability's source card may be when the ability is used -- the ONE rule ValidateAbility enforces and every "could anyone play
+    // this Reaction from out of play?" question asks (OutOfPlayReactions, so the window that opens for a Reaction and the offer inside it can
+    // never disagree about whether a card in this zone counts).
+    // A Strategy source is normally used straight from hand (the usual one-shot pattern), but
+    // a Terrain stays in play afterward (Zone.Battlefield) -- its own abilities, including an
+    // entering-play Reaction, must still be usable from there. Singh Remnants' shape is the
+    // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
+    // Stormless Fury (issue #276 follow-up): "after-battle-action-resolves" covers BOTH an
+    // out-of-play half (stormless-fury-attach, Singh Remnants' own out-of-play shape) and an
+    // ordinary in-play half (stormless-fury-bow) sharing one trigger -- broadened to accept
+    // either zone here, narrowed to the exact one each half actually needs by its own bespoke
+    // Require in ValidateAbility (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
+    // for the bow half).
+    // Fading Shadows (issue #337): an ability that attaches its OWN card is used from the hand -- and only from there (AttachSpec.Self).
+    private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
+        ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
+            : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
+            : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
+            // A Ring (issue #194) may use its printed action from hand too -- "you may discard
+            // this Ring from your hand to use its ability without cost" -- in addition to the
+            // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
+            // afterward when used this way, mirroring the Strategy case just below).
+            // A card in a discard pile is a legal source only as a Discipline play, or as the Battle action a granted additional
+            // action names (Daigotsu Bofana - exp): PlayableFromDiscard. A non-Strategy, non-Ring card (a Personality, Item, Follower) is
+            // not usable from hand at all, only in play or by those two ways.
+            : Definition(source).Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id)
+            : InPlay(source) || PlayableFromDiscard(ability, source, player.Id);
+
     // Shared by action discovery and execution: an offered target obeys exactly the same constraints.
     private void ValidateAbility(GameCommand command)
     {
@@ -2619,28 +2663,7 @@ public sealed partial class MatchEngine
             source = Card(command.CardId);
             var def = Definition(source);
             Require(source.OwnerId == player.Id && AbilityIdsOf(source).Contains(id), "This card does not provide that ability to you.");
-            // A Strategy source is normally used straight from hand (the usual one-shot pattern), but
-            // a Terrain stays in play afterward (Zone.Battlefield) -- its own abilities, including an
-            // entering-play Reaction, must still be usable from there. Singh Remnants' shape is the
-            // opposite of ordinary: its whole point is reacting from OUTSIDE play (hand or discard).
-            // Stormless Fury (issue #276 follow-up): "after-battle-action-resolves" covers BOTH an
-            // out-of-play half (stormless-fury-attach, Singh Remnants' own out-of-play shape) and an
-            // ordinary in-play half (stormless-fury-bow) sharing one trigger -- broadened to accept
-            // either zone here, narrowed to the exact one each half actually needs by its own bespoke
-            // Require below (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
-            // for the bow half).
-            // Fading Shadows (issue #337): an ability that attaches its OWN card is used from the hand -- and only from there (AttachSpec.Self).
-            Require(ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
-                : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
-                : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
-                // A Ring (issue #194) may use its printed action from hand too -- "you may discard
-                // this Ring from your hand to use its ability without cost" -- in addition to the
-                // ordinary in-play case once recruited (ExecuteAbilityEffects' own tail discards it
-                // afterward when used this way, mirroring the Strategy case just below).
-                // A card in a discard pile is a legal source only as a Discipline play, or as the Battle action a granted additional
-                // action names (Daigotsu Bofana - exp): PlayableFromDiscard.
-                : def.Type is CardType.Strategy or CardType.Ring ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id) || InPlay(source) || PlayableFromDiscard(ability, source, player.Id) : InPlay(source) || PlayableFromDiscard(ability, source, player.Id),
-                "The ability's source is not in the required zone.");
+            Require(AbilitySourceZoneAllows(ability, source, player), "The ability's source is not in the required zone.");
             // "Tireless"/"Even if bowed" (issue #198): Akodo Tsudoken's own two Experienced printings.
             // Dragon Clan review (issue #207) adds three more real "even if bowed" cards. Nikutai
             // (issue #279) adds a fourth: "Even if this card is bowed, after a Follower in this unit
@@ -4236,7 +4259,7 @@ public sealed partial class MatchEngine
                 _state.NoNewAdditionalActionsThisBattle = true;
                 break;
             }
-            case "effortless-counterattack-negate":
+            case "effortless-counterattack-negate": case "training-discipline-counter-negate":
                 // Protection (issue #212): a no-op against a protected performer's own action, the
                 // same "still legal to play, its own effect just does nothing" shape StalwartNegatesBow
                 // already uses -- PendingAdditionalAction is left set, so it resolves normally once
