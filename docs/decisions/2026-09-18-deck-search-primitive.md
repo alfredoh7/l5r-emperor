@@ -1,6 +1,6 @@
 # Deck search primitive: search a deck, select a legal card, show it, apply the effect, shuffle
 
-Status: accepted for the engine (Mendon, standing authority; the rules lead's own specification, issue #312). The rules interpretations under "Open rules questions" are decisions the engine had to make to be complete and are **awaiting Mendon's confirmation**. Lane: shared (rules engine, wire contract; the two UIs are Alfredo's #314 and #315). Issue #312.
+Status: accepted for the engine (Mendon, standing authority; the rules lead's own specification, issue #312). The rules interpretations under "Open rules questions" were decisions the engine had to make to be complete; **Mendon has answered every one (issue #368)**, and the section below records each answer. Lane: shared (rules engine, wire contract; the two UIs are Alfredo's #314 and #315). Issue #312.
 
 ## Decision
 
@@ -39,7 +39,7 @@ Deck search reuses existing fields, so `WireGameCommand`, `MatchSession.ToWire` 
 | `searchSelect` | `selectSearchCard` | `Choice = the card's definition id` | Definition id, not an instance id: the list is grouped, and an instance id would be a handle into the deck |
 | `searchSelect` | `passSearch` | none | Legal only when nothing qualifies (or the search is Optional) |
 | `searchRegionProvince` | `chooseSearchProvince` | `Province`, `SourceIds` (the Gold payment) | Only provinces that are not destroyed and hold no Region |
-| `searchDiscard` | `chooseSearchDiscard` | `TargetId = a card in your hand` | Any card, the found Terrain included |
+| `searchDiscard` | `chooseSearchDiscard` | `TargetId = a card in your hand` | Any hand card EXCEPT the Terrain just found (issue #368); when none is left the stage is not opened at all (public event `searchDiscardSkipped`) |
 
 Which copy of a card is taken when several remain: the one with the lowest instance id, so the choice never depends on deck order.
 
@@ -77,7 +77,7 @@ A pass is public ("found no eligible card in their Fate deck"): that is the rule
 
 Both verified against the scans (the WebP working copies' sha256 match the receipts). Shizuka: Force 2, Chi 3, Honor Requirement 3, Personal Honor 2, Cost 5 (the top corners are Force and Chi; the bottom row is Honor Requirement, Cost, Personal Honor). The catalogue's "Search you Dynasty or Fate deck" is a typo; the scan prints "your". Imperial Gift's scan prints only "Gain 2 Honor and search your Fate deck for an Item, show it, and put it into your hand." (`Imperial * Unique`).
 
-**Ikoma Shizuka.** Limited, bow Shizuka as the cost (a bowed Shizuka is rejected; the action is once per turn). Dynasty deck: criteria Region only; the Region is shown, then attached to a province of the player's choice that is not destroyed and has no Region, through the same `AttachRegionToProvince` the Events Phase reveal uses (so it is public and its static effects, e.g. Fallow Lands' +2 strength, apply at once); when no province can take it the Region is shown and goes to the Dynasty discard pile; the Dynasty deck is then shuffled. Fate deck: criteria Terrain only (a Strategy with the Terrain keyword); the Terrain is shown, put into the hand, the player discards a card, the Fate deck is shuffled. Nothing qualifying: Pass, shuffle, the action resolves. After the search resolves, a "your action bowed a Personality" Reaction (Tamori Ruya) gets its window, as after any action.
+**Ikoma Shizuka.** Limited, bow Shizuka as the cost (a bowed Shizuka is rejected; the action is once per turn). Dynasty deck: criteria Region only; the Region is shown, then attached to a province of the player's choice that is not destroyed and has no Region, through the same `AttachRegionToProvince` the Events Phase reveal uses (so it is public and its static effects, e.g. Fallow Lands' +2 strength, apply at once); when no province can take it the Region is shown and goes to the Dynasty discard pile; the Dynasty deck is then shuffled. Fate deck: criteria Terrain only (a Strategy with the Terrain keyword); the Terrain is shown, put into the hand, the player discards a card **other than the Terrain just found** (issue #368: if no other card is in the hand nothing is discarded, with no error), the Fate deck is shuffled. Nothing qualifying: Pass, shuffle, the action resolves. After the search resolves, a "your action bowed a Personality" Reaction (Tamori Ruya) gets its window, as after any action.
 
 **Region cost ("paying all costs").** A Region attached by a search pays its own printed Gold cost through the payment path merged in #307: `QuoteRegionGold` builds one Fixed `GoldQuote`; the `chooseSearchProvince` option carries it in `ActionOption.Gold` with the engine's suggested sources pre-filled in `Command.SourceIds`; `Pay()` validates and charges exactly the chosen sources and emits the one public `payment` event. A costed Region always asks for the province even when only one is free (the payment needs the player's sources); a free Region with exactly one free province attaches without a decision. An unpaid Region is never charged.
 
@@ -128,16 +128,18 @@ The UIs read these and compute nothing. All are on the `MatchView` the client al
 
 Until #314 lands the shipped client can open a search (Shizuka's action is offered on her card) but cannot answer it: an unknown pending choice renders as "REACTION WINDOW" with the engine's prompt and no buttons for these action types. Shizuka is in no pinned deck; a custom deck (#262) containing her is the way to reach it.
 
-## Open rules questions (awaiting Mendon)
+## Rules questions: answered by Mendon (issue #368)
 
-1. **An unaffordable Region.** The engine discards a found Region when it cannot be attached for any reason (no free province, **or its Gold cost cannot be paid**), after showing it and without charging anything, mirroring `ResolveRegion`'s own "any Region that fails to attach for any reason is discarded". The alternative is to make an unaffordable Region ineligible in the list. Every published Region costs 0, so no card is affected today.
-2. **A Region found when no province can take it is still "found"** (eligible and shown), per the request, and only then discarded.
-3. **The deck is shuffled after every search**, including one that found a Region and attached it, per the generic rule in the request.
-4. **"Discard a card" after a Terrain** may discard any hand card, including the Terrain just found.
-5. **Both decks are always choosable**, even an empty one (the search then ends in Pass and a shuffle).
-6. **Imperial Gift resolves when revealed**, one province at a time as every other Event does, not after all reveals. The two orders differ only when several Events are revealed in one Events Phase.
-7. **Which identical copy is taken** is the lowest instance id (no rules effect: identical cards in a deck are interchangeable).
-8. **Order Seppuku is refused while a search is open** (it cuts through every other pending choice, and its Overconfident window would overwrite the search's).
+Every question below was answered; where the answer changed the engine, the change and its test are named.
+
+1. **An unaffordable Region** -- **answered: correct as built.** A found Region that cannot be attached or paid for is discarded (shown first, nothing charged). Every published Region costs 0, so no card is affected today.
+2. **A Region found when no province can take it is still "found"** -- **answered: correct as built** (same ruling: a Region that cannot be attached is discarded).
+3. **The deck is shuffled after every search**, including one that found a Region and attached it -- **answered: correct as built.** A search always shuffles; a look does not (see the look decision).
+4. **"Discard a card" after a Terrain** -- **answered, CHANGED.** The found Terrain may NOT be discarded to its own "discard a card": a Terrain played is placed in play and is no longer in the hand. The engine excludes the found Terrain (that one instance -- a second copy already in the hand may be discarded) from the offered discards (`QueryActions` / `SearchView`) and refuses it if sent. When no other card is in the hand the discard cannot be satisfied: **nothing is discarded, there is no error and no stage to answer**; the search emits the public `searchDiscardSkipped` event, shuffles, and the action resolves. Tests: `TerrainCannotBeDiscardedToItsOwnEffect` (offered and accepted discards through `QueryActions`, the refusal leaves the state untouched, a second copy, exactly one other card, the empty case) and the updated `FateTerrainToHandAndDiscard`; mutation-checked (the Terrain offered again, the command no longer refusing it, the empty case still opening the stage).
+5. **Both decks are always choosable, even an empty one** -- **answered: correct as built** (the search then ends in Pass and a shuffle).
+6. **Imperial Gift resolves when revealed**, one province at a time like every other Event -- **answered: correct as built.**
+7. **Which identical copy is taken** (the lowest instance id) -- not put to Mendon: no rules effect, identical cards in a deck are interchangeable. Stands.
+8. **Order Seppuku** -- **answered, CHANGED, and generalized beyond a search.** Seppuku is an Open action, available only as an action on a player's own turn to act during the Action phase (unless a card allows it in another phase; no wired card does). It may not interrupt other players' actions, the current player's action, or any pending decision or reaction window. It was refused only while a search or look was open; it is now governed by ONE predicate for every case, `MatchEngine.SeppukuTimingReason` in `src/L5R.Core/SeppukuTiming.cs`: the Action phase, the player holds priority, and nothing pending. The full rule and its consequences are in the look decision (question 7), which is where the tests are.
 
 ## Things found on the way (not changed)
 

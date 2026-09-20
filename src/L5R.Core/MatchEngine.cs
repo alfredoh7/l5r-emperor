@@ -195,7 +195,8 @@ public sealed partial class MatchEngine
     private void ApplyCore(GameCommand command)
     {
         if (command.Type=="concede") { Win(1-command.PlayerId,"Concession"); return; }
-        // Open action: cuts through the normal priority gate and any pending choice, same as concede.
+        // Order Seppuku (issue #368): an action at the player's own turn to act, with nothing pending. Dispatched ahead of the pending-choice
+        // handlers only so that its ONE timing predicate (SeppukuTimingReason) gives the reason, whatever is open.
         if (command.Type=="orderSeppuku") { OrderSeppuku(command); return; }
         Require(command.PlayerId==_state.PriorityPlayerId,"Wait for your action opportunity.");
         if (_state.PendingChoice is not null)
@@ -811,12 +812,11 @@ public sealed partial class MatchEngine
 
     private void OrderSeppuku(GameCommand command)
     {
-        Require(_state.Phase==Phase.Action,"Order Seppuku is only available during the Action Phase.");
-        // Deck search (issue #312): Seppuku cuts through pending choices, but a search is a private, multi-step decision whose
-        // pending choice a destruction-triggered window (Overconfident) would overwrite, orphaning it -- finish the search first.
-        Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
-        // The same for a copy in progress (its receiver could be the one destroyed) and an Either/Or choice (issue #338).
-        Require(_state.PendingCopy is null && _state.PendingEitherOr is null && _state.PendingOpponentPayment is null,"Finish the pending choice before ordering Seppuku.");
+        // Issue #368 (Mendon): Order Seppuku is an Open action taken as an action at the player's own turn to act in the Action Phase, with
+        // nothing pending -- it never interrupts another player's action, the current action, a reaction window or any pending decision.
+        // ONE predicate decides that moment for the command, the offered actions and the AI (SeppukuTiming.cs).
+        var timing=SeppukuTimingReason(command.PlayerId);
+        Require(timing is null,timing ?? "");
         // Unfortunate Hesitation (issue #351, Mendon): Order Seppuku is an Open action, so a player who owes a pass may not take it either.
         Require(!OwesForcedPass(command.PlayerId),ForcedPassReason);
         var card=Card(command.CardId);
@@ -829,14 +829,14 @@ public sealed partial class MatchEngine
         // Honorable before destruction: this is what spares the controller the dishonorable-death
         // Honor penalty applied generally in MarkDead.
         Rehonor(card);
-        // Seppuku is an Open action, cutting through the normal priority gate (see Apply()) -- it
-        // never touches priority on its own, so an Overconfident window it triggers (issue #223,
-        // MarkDead already queued it inside DestroyUnits below) must resume back to whoever already
-        // held it, not to either specific player.
-        var resumeTo=_state.PriorityPlayerId;
+        // Seppuku is an action like any other (issue #368): once it has resolved, the opportunity passes to the other player. An
+        // Overconfident window it triggers (issue #223, MarkDead already queued it inside DestroyUnits below) closes to that player.
         DestroyUnits([card],actingPlayerId:command.PlayerId);
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
-        OpenOverconfidentDrawWindow(resumeTo);
+        if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
+        // An ordinary action forfeits the player's own still-unused Additional Action grants, same as every other action's tail.
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        NextAction(command.PlayerId);
     }
 
     // viaReserve (issue #216, Tamori Shinji): true only for a Reserve recruit made as an absent

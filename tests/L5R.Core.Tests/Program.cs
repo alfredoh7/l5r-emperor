@@ -48,7 +48,7 @@ var tests = new (string Name, Action Run)[]
     ("Seppuku requires Samurai, Courtier, or Shugenja", OrderSeppukuRequiresKeyword),
     ("Seppuku requires a Dishonorable Personality", OrderSeppukuRequiresDishonorable),
     ("Seppuku destroys honorably with no Honor change", OrderSeppukuHonorableDeath),
-    ("Seppuku is an Open action, available without priority", OrderSeppukuIsOpenAction),
+    ("Seppuku is an Open action taken at the player's own turn to act: refused while the other player holds the opportunity (issue #368), and once taken the opportunity passes", OrderSeppukuIsOpenAction),
     ("Seppuku cannot be ordered for an opponent's Personality", CannotOrderSeppukuForOpponentsPersonality),
     ("A Dishonorable Personality's death (other than Seppuku) costs its controller Honor", DishonorableDeathLosesHonor),
     ("Battle winner gains two Honor per destroyed card including attachments", BattleHonor),
@@ -1950,12 +1950,21 @@ static void OrderSeppukuHonorableDeath()
 }
 static void OrderSeppukuIsOpenAction()
 {
-    // Available regardless of who holds priority.
+    // Issue #368 (Mendon): an Open action is taken as an ACTION at the player's own turn to act. It was available regardless of who held
+    // priority; it may no longer interrupt the other player's opportunity.
     var s=MatchEngine.CreateEconomyScenario().State; s.Phase=Phase.Action; s.PriorityPlayerId=1;
     var samurai=Add(s,"training-dishonored-samurai",0,Zone.Home); samurai.Dishonorable=true;
     var e=MatchEngine.FromTestState(s);
-    Accept(e,Cmd(e,"orderSeppuku",player:0,id:samurai.Id));
-    Equal(e.State.Cards[samurai.Id].Zone,Zone.Dead);
+    Check(!e.QueryActions(0).Any(a=>a.Type=="orderSeppuku"),"Not offered while the other player holds the action opportunity");
+    Reject(e,Cmd(e,"orderSeppuku",player:0,id:samurai.Id));
+    Equal(e.State.Cards[samurai.Id].Zone,Zone.Home);
+    // At their own turn to act it is accepted, and as an action it hands the opportunity to the other player.
+    var t=MatchEngine.CreateEconomyScenario().State; t.Phase=Phase.Action; t.PriorityPlayerId=0;
+    var mine=Add(t,"training-dishonored-samurai",0,Zone.Home); mine.Dishonorable=true;
+    var f=MatchEngine.FromTestState(t);
+    Accept(f,Cmd(f,"orderSeppuku",player:0,id:mine.Id));
+    Equal(f.State.Cards[mine.Id].Zone,Zone.Dead);
+    Equal(f.State.PriorityPlayerId,1);
 }
 static void CannotOrderSeppukuForOpponentsPersonality()
 {
@@ -2448,7 +2457,8 @@ static void AttackReactionWindow()
 // discards it either -- so the card stayed in Hand for good. The played card is now spent as the window opens.
 static void HandPlayedAttackSpentWhenWindowOpens()
 {
-    // Strength of the Divine (Strategy) and False Ring of Water (Ring): the two published hand-played Attack cards.
+    // Strength of the Divine (Strategy): the published hand-played Attack card. (False Ring of Water used to be a second one; since issue #370 a False Ring has no
+    // hand play -- its Ranged 3 Attack bows the Ring, which must be in play -- so no published Ring Attack is played from a hand any more.)
     // Each helper builds the same table with or without a player-1 Attack reactor in play, so the only variable is
     // whether the window opens.
     MatchEngine Divine(bool reactor,out CardInstance card,out CardInstance enemy)
@@ -2463,17 +2473,6 @@ static void HandPlayedAttackSpentWhenWindowOpens()
         Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,PerformerId:performer.Id,TargetId:enemy.Id,AbilityId:"strength-of-the-divine-force"));
         return e;
     }
-    MatchEngine FalseRing(bool reactor,out CardInstance card,out CardInstance enemy)
-    {
-        var s=StrongholdBattle("oracle-l5r-1218");
-        card=Add(s,"training-false-ring-of-water",0,Zone.Hand);
-        Add(s,"training-crane-samurai",0,Zone.Battlefield,province:0); // presence for the Battle-timing check
-        enemy=Add(s,"training-lion-courtier",1,Zone.Battlefield,province:0); // Force 2 <= Ranged 3
-        if(reactor) Add(s,"training-attack-reactor",1,Zone.Home);
-        var e=MatchEngine.FromTestState(s);
-        Accept(e,new GameCommand("useAbility",0,e.Version,CardId:card.Id,TargetId:enemy.Id,AbilityId:"false-ring-of-water-attack"));
-        return e;
-    }
     int Discards(MatchEngine e,CardInstance card)=>e.State.Events.Count(x=>x.Type=="fateDiscarded" && x.CardId==card.Id);
     void Spent(MatchEngine e,CardInstance card,string when)
     {
@@ -2484,7 +2483,6 @@ static void HandPlayedAttackSpentWhenWindowOpens()
     foreach(var (name,play) in new (string,Func<bool,(MatchEngine,CardInstance,CardInstance)>)[]
     {
         ("Strength of the Divine",r=>{var e=Divine(r,out var c,out var en); return (e,c,en);}),
-        ("False Ring of Water",r=>{var e=FalseRing(r,out var c,out var en); return (e,c,en);}),
     })
     {
         {

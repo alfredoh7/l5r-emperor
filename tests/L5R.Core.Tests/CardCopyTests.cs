@@ -555,7 +555,7 @@ internal static class CardCopyTests
         Reject(e, new GameCommand("chooseCopyKeyword", 0, e.Version, Choice: "Tactician"));
         Reject(e, new GameCommand("pass", 0, e.Version));
         Reject(e, e.QueryActions(0).First(a => a.Type == "chooseCopyAbility").Command! with { ExpectedVersion = e.Version - 1 });
-        // Seppuku (an Open action that cuts through pending choices) is not offered, and is refused, while a copy is open: its receiver could be the
+        // Seppuku (an Open action taken only at one's own turn to act with nothing pending, issue #368) is not offered, and is refused, while a copy is open: its receiver could be the
         // Personality destroyed.
         Check(!e.QueryActions(0).Any(a => a.Type == "orderSeppuku"), "Seppuku is not offered mid-copy");
         Reject(e, new GameCommand("orderSeppuku", 0, e.Version, CardId: sacrificial.Id));

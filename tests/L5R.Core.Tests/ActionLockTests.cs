@@ -248,8 +248,10 @@ internal static class ActionLockTests
         Check(e.QueryActions(1).All(a => a.Type != "orderSeppuku"), "the other player is never offered Seppuku for a Personality that is not theirs");
         Accept(e, new GameCommand("orderSeppuku", 0, e.Version, free.Id));
         Eq(e.State.Cards[free.Id].Zone, Zone.Dead, "an unlocked dishonorable Samurai still performs it");
-        // Lifted: available again.
-        var lifted = Edit(e, st => st.Cards[locked.Id].ActionLocks.Clear());
+        // Lifted: available again. (Ordering Seppuku is an action, so the opportunity passed to the other player when the free one died -- issue #368;
+        // it is handed back to player 0 here, since the point is the lock, not whose turn it is.)
+        Eq(e.State.PriorityPlayerId, 1, "the action passed the opportunity on");
+        var lifted = Edit(e, st => { st.Cards[locked.Id].ActionLocks.Clear(); st.PriorityPlayerId = 0; });
         Check(lifted.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == locked.Id).Enabled, "without the lock he may order it");
         Accept(lifted, new GameCommand("orderSeppuku", 0, lifted.Version, locked.Id));
         Eq(lifted.State.Cards[locked.Id].Zone, Zone.Dead);
