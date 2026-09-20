@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Complete #339 review candidate: automatic choice sidebar, alternative-cost flow, prepared Mac demo launcher, verified scan dependency. Isolated preview PR #392; no merge into main.",
-  "validation": "Full deterministic check passed before final presentation refinement; 3/3 expanded showcase regressions passed. Final client build has zero warnings/errors and Godot import passed. Native Mac checks cover all Yumaru outcomes, both Fukui payments, bowed-option reason, opponent waiting, five other generic decisions, reduced motion, keyboard confirmation and compact 1280x800 review navigation. Actual Mac app opens the prepared demo. Private art dependency upload and offline installation verified.",
-  "remaining": "Alfredo UI acceptance and Mendon shared-contract review pending. Normal main-target CI has not run for preview-base PR; routing skipped. Multiplayer reconnect and native Windows graphical checks not performed. Seven other approved UI tasks remain pending. No main merge is authorized.",
+  "summary": "Complete #339 individual review candidate with prepared Mac launcher. Integrate current main 0d694f02 into isolated preview base 1ab2d75a, retaining latest proxy-card and player-target fixes. No merge into main.",
+  "validation": "Final full deterministic suite passes on refreshed main, including showcase 3/3, created-card/player-target suites, AI 34/34, server 8/8 and transport 8/8. Client compiles with zero warnings/errors; Godot import passes. Native Mac Yumaru, both Fukui costs and compact review navigation rerun pass after main refresh. Earlier all-three-choice, generic-five-type, waiting and reduced-motion checks pass. Actual Mac app opens prepared demo. Refreshed 2897-scan pack installs and verifies offline.",
+  "remaining": "Alfredo UI acceptance and Mendon shared-contract review pending. GitHub Mac/Windows CI is running; routing check skipped. Multiplayer reconnect and native Windows graphical checks not performed. Seven other approved UI tasks remain pending. No main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/339",
   "branch": "codex/339-decision-chooser",
-  "updated": "2026-09-20T22:32:12.688070+00:00"
+  "updated": "2026-09-20T22:38:47.097715+00:00"
 }

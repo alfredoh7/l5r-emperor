@@ -12,7 +12,7 @@ The local app is generated, not checked into Git. On another Mac checkout, run:
 python3 tools/create-review-launcher.py 'Review Decision Chooser.command' 'L5R Decision Chooser - Review'
 ```
 
-Or open the checked-in `Review Decision Chooser.command`. This builds this review checkout, verifies the artwork dependency, then opens the prepared Yumaru choice. It never fetches another branch or merges main. The artwork is installed locally for offline launches; the private dependency is [catalogue-art-ui-eight-20260921](https://github.com/alfredoh7/l5r-emperor/releases/tag/catalogue-art-ui-eight-20260921).
+Or open the checked-in `Review Decision Chooser.command`. This builds this review checkout, verifies the artwork dependency, then opens the prepared Yumaru choice. It never fetches another branch or merges main. The artwork is installed locally for offline launches; the private dependency is [catalogue-art-ui-eight-20260921-r2](https://github.com/alfredoh7/l5r-emperor/releases/tag/catalogue-art-ui-eight-20260921-r2).
 
 ## Short review checklist
 
@@ -34,13 +34,13 @@ Or open the checked-in `Review Decision Chooser.command`. This builds this revie
 
 ## Verified evidence
 
-- `bash tools/check.sh --skip-client`: all requested deterministic checks passed (`artifacts/decision-full-check.log`), including 34/34 AI, 8/8 server and 8/8 transport. This run preceded the final presentation-only compact footer refinement and expanded generic fixtures.
+- `bash tools/check.sh --skip-client`: all requested deterministic checks passed (`artifacts/decision-current-main-check.log`), including the expanded showcase regressions, the newly merged created-card/player-target suites, 34/34 AI, 8/8 server and 8/8 transport. This final run includes main `0d694f02` and the compact footer refinement.
 - Expanded focused showcase checks: 3/3 passed (`artifacts/decision-fixtures.log`), covering all three Yumaru consequences, stale-command rejection, opponent privacy, disabled-cost metadata serialization and all five additional generic decision types. Earlier focused suites: 16/16 alternative-cost and 10/10 effect-choice passed.
 - Final client build: zero warnings/errors; Godot headless import passed.
 - Native Mac: all three Yumaru outcomes, Fukui destruction and bow payments, bowed-option reason, opponent waiting, all five other generic types, explicit confirmation and reduced motion passed. Resolutions exercised: 1920×1080 and 1280×800.
-- Final compact demo check: all option buttons fully inside the visible scroll area; restart, next-demo cycle and clearing the draft via Back all passed (`artifacts/checks/decisions/review-check.log`). Both final source-row compact cases and the bow-payment follow-up passed.
+- Final compact demo check: all option buttons fully inside the visible scroll area; restart, next-demo cycle and clearing the draft via Back all passed (`artifacts/checks/decisions/review-check.log`). After refreshing main, Yumaru, both Fukui cost paths and the complete review-navigation cycle passed again (`artifacts/decision-current-main-native.log`). Godot regenerated the two newly shipped scan import UIDs during that import; those native values are retained.
 - Actual `.app` launch verified through the Mac UI: it builds and opens the prepared Yumaru decision. Full source inspection and demo navigation were also checked in the native window.
-- Updated artwork dependency: 2,895 verified scans, private prerelease asset uploaded; offline installation verified. Bulk artwork stays out of Git.
+- Updated artwork dependency: 2,897 verified scans, private prerelease asset uploaded; offline installation verified. Bulk artwork stays out of Git.
 
 ![Yumaru review at 1280×800](../screenshots/decision-chooser/yumaru-review.png)
 
@@ -48,6 +48,6 @@ Or open the checked-in `Review Decision Chooser.command`. This builds this revie
 
 ## Boundaries and remaining review
 
-The preview baseline integrates main `20708c37` with the approved UI lineage, on `codex/ui-eight-preview-base` (`59437b01`). Its inherited stabilization rules candidates remain unapproved; see the eight-task review plan. Main and the root checkout were not modified.
+The preview baseline integrates current main `0d694f02` (including PRs #390 and #391) with the approved UI lineage, on `codex/ui-eight-preview-base` (`1ab2d75a`). Its inherited stabilization rules candidates remain unapproved; see the eight-task review plan. Main and the root checkout were not modified.
 
-The PR uses a preview base; the current GitHub routing check is skipped, and normal main-target CI has not run. Local results above are not a CI-pass claim. A multiplayer reconnect session, native Windows graphical play and expert rules acceptance have not been performed for this preview. Alfredo's individual UI acceptance and Mendon's shared-contract review remain outstanding. **No merge permission has been granted.**
+The PR uses a preview base. The routing check is skipped; GitHub Mac/Windows verification jobs are running and the context/handoff check passed on the prior pushed revision. Local results above are not a CI-pass claim; check the PR for the latest revision status. A multiplayer reconnect session, native Windows graphical play and expert rules acceptance have not been performed for this preview. Alfredo's individual UI acceptance and Mendon's shared-contract review remain outstanding. **No merge permission has been granted.**

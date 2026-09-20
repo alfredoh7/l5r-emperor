@@ -19,7 +19,7 @@ Approved concepts and prompts are in the local `artifacts/ui-eight-design-review
 
 ## Isolated preview baseline
 
-The task branch starts at main `20708c37` and integrates the original Regions/Celestials UI lineage `7360ff1c` (including prior UI consolidation and stabilization). Original ancestry avoids replaying the squashed stabilization stack against newer mechanics. This does not merge any work into main or alter existing review branches.
+The task branch starts at main `20708c37` and integrates the original Regions/Celestials UI lineage `7360ff1c` (including prior UI consolidation and stabilization). Original ancestry avoids replaying the squashed stabilization stack against newer mechanics. Before delivery, main was refreshed to `0d694f02` (merged #390/#391); the preview base is now `1ab2d75a`. This does not merge any work into main or alter existing review branches.
 
 Compatibility work:
 

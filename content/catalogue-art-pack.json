@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
   "repository": "alfredoh7/l5r-emperor",
-  "tag": "catalogue-art-ui-eight-20260921",
+  "tag": "catalogue-art-ui-eight-20260921-r2",
   "asset": "L5R-Catalogue-WebP85.zip",
-  "sha256": "c230272d1fb27d1ee91457bbc6342e992c227a18595b30d767a7b18e2aceb8e4",
-  "bytes": 394961056,
-  "images": 2895,
+  "sha256": "f2bc1e8fe28d2db344855a52834c2a9dbd9fe96bef532b15c73c264b5481c8a7",
+  "bytes": 395220970,
+  "images": 2897,
   "quality": 85
 }
