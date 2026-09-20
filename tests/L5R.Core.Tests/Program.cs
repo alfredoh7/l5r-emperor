@@ -232,6 +232,8 @@ BattleTimingTests.Run(runner);
 BattleRulingsRound2Tests.Run(runner);
 ReconActionTests.Run(runner);
 DisciplineAndAbsentTests.Run(runner);
+BattleAbsentMovesTests.Run(runner);
+AdditionalActionBurstTests.Run(runner);
 DeckFormatTests.Run(runner);
 DeckWorkshopTests.Run(runner);
 DeckSearchTests.Run(runner);
