@@ -129,9 +129,9 @@ public sealed partial class MatchEngine
 
     private int UnitTotalGoldCost(CardInstance card, out string breakdown)
     {
-        var parts = new List<int> { Definition(card).GoldCost };
+        var parts = new List<int> { CardGoldCost(card) };
         if (Definition(card).Type == CardType.Personality)
-            parts.AddRange(Attachments(card.Id).OrderBy(a => a.Id, StringComparer.Ordinal).Select(a => Definition(a).GoldCost));
+            parts.AddRange(Attachments(card.Id).OrderBy(a => a.Id, StringComparer.Ordinal).Select(a => CardGoldCost(a)));
         var total = parts.Sum();
         breakdown = parts.Count > 1 ? $"{string.Join(" + ", parts)} = {total}" : total.ToString();
         return total;
@@ -378,9 +378,9 @@ public sealed partial class MatchEngine
         // Champion of Thunder (the general in-play unit-targeting Reaction primitive's own proof
         // case): "Enters play paying 1 less Gold if you are a Mantis Clan player" -- the same shape,
         // keyed off a different Clan.
-        if (def.Effect == "lion-clan-discount" && player.Clan == "Lion") { raw -= 1; basis += " − 1 (Lion Clan)"; }
-        if (def.Effect == "crane-clan-discount" && player.Clan == "Crane") { raw -= 1; basis += " − 1 (Crane Clan)"; }
-        if (def.Effect == "mantis-clan-discount" && player.Clan == "Mantis") { raw -= 1; basis += " − 1 (Mantis Clan)"; }
+        // Daigotsu Hotako exp3 (issue #336): the same term for a Personality, and for any N ("<clan>-clan-discount-N"): ClanEntryDiscount
+        // reads all of them, here and in QuotePurchase, so an entry discount by Clan has one definition.
+        if (ClanEntryDiscount(def, player) is { } clanEntry) { raw -= clanEntry.Amount; basis += $" − {clanEntry.Amount} ({clanEntry.Clan} Clan)"; }
         if (raw < 0) basis += " (min 0)";
         return (Math.Max(0, raw), basis, kind);
     }

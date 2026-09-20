@@ -25,11 +25,14 @@ public sealed partial class MatchEngine
 
     // An Attack's own target is judged in the attack window, so before its cost is paid it is held here only for a bow or destroy cost it would pay with a card
     // that may be protected (Mochitoko). A Reaction is an action too (IsAction), so it is held like any other.
-    private ReactionSubject? SubjectForAnnouncedAction(GameCommand command)
+    // A multi-target action holds one window per target (issue #336, TargetWindows.cs): the subject is the target the open window is for (ReactionAffectedId).
+    private ReactionSubject? SubjectForAnnouncedAction(GameCommand command) => SubjectForWindowTarget(command, ReactionAffectedId(command));
+
+    private ReactionSubject? SubjectForWindowTarget(GameCommand command, string? windowTarget)
     {
         if (command.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability) || !IsAction(ability)) return null;
         var costOnly = TargetsThroughAttackPipeline(id);
-        var target = !costOnly && command.TargetId is { } t && _state.Cards.ContainsKey(t) ? t : null;
+        var target = !costOnly && windowTarget is { } t && _state.Cards.ContainsKey(t) ? t : null;
         return target is not null || BowOrDestroyCostSubjects(command).Any() ? new(command, target, false) : null;
     }
 
@@ -60,6 +63,7 @@ public sealed partial class MatchEngine
     private bool ActionAcceptsTarget(ReactionSubject subject, string targetId)
     {
         if (!_state.Cards.TryGetValue(targetId, out var target)) return false;
+        if (SlotActionOf(subject) is { } slotAbility) return SlotActionAcceptsTarget(subject, slotAbility, targetId);
         var command = WithActionTarget(subject.Command, targetId, subject.IsAttack);
         if (!subject.IsAttack) return AbilityRejection(command) is null;
         // Only the target rules: an Attack's costs are paid and its source may be spent already (a Strategy is discarded as the window opens).
@@ -82,7 +86,7 @@ public sealed partial class MatchEngine
     {
         var oldTargetId = subject.TargetId ?? throw new RuleViolation("The action targets no card.");
         Require(ActionAcceptsTarget(subject, newTargetId), "The action cannot legally target that card.");
-        var redirected = WithActionTarget(subject.Command, newTargetId, subject.IsAttack);
+        var redirected = SlotActionOf(subject) is not null ? RetargetSlotAction(subject.Command, oldTargetId, newTargetId) : WithActionTarget(subject.Command, newTargetId, subject.IsAttack);
         if (subject.IsAttack)
         {
             var attack = _state.PendingAttack!;
@@ -92,7 +96,7 @@ public sealed partial class MatchEngine
             attack.TargetId = newTargetId;
             attack.Command = redirected;
         }
-        else _state.PendingNegatableAbility = redirected;
+        else { _state.PendingNegatableAbility = redirected; FollowRedirectInWindow(oldTargetId, newTargetId); }
         Emit("actionRedirected", $"{Definition(reactor).Name}: the action now targets {Definition(Card(newTargetId)).Name} instead of {Definition(Card(oldTargetId)).Name}.", reactor.OwnerId, newTargetId);
     }
 
@@ -169,7 +173,7 @@ public sealed partial class MatchEngine
     private bool TargetedActionReactionAvailable(CardInstance card, string abilityId, ReactionSubject subject)
     {
         var ability = AbilityCatalog.All[abilityId];
-        return !card.Bowed && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
+        return !card.Bowed && !ActionLocked(card) && !AbilityUseSpent(card.AbilityUses, ability, ability.UsageKey ?? abilityId)
             && TargetedActionReactionApplies(card, abilityId, subject) && CanPayReaction(card, abilityId);
     }
 

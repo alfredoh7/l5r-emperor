@@ -119,7 +119,7 @@ static async Task Reconnect(string url)
 static void OutgoingPayload()
 {
     var command = new GameCommand("useAbility", 1, 9, "card", ["source"], 2, true, true, new() { ["unit"] = 1 }, ["card-a"], "target",
-        "ability", "performer", "choice", "Top", 1, 4, "destroy");
+        "ability", "performer", "choice", "Top", 1, 4, "destroy", [new SlotSelection("slot", ["card-b"], 1)]);
     var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
     var json = System.Text.Json.JsonSerializer.Serialize(MatchSession.ToWire(command), web);
     using var document = System.Text.Json.JsonDocument.Parse(json);

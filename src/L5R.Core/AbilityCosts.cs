@@ -60,6 +60,8 @@ public sealed record ActionCost(string Verb, string Subject = CostSubject.Source
     public static ActionCost[] RemoveTarget { get; } = [new(CostVerbs.Remove, CostSubject.Target)];
     /// <summary>"Remove this card from the game".</summary>
     public static ActionCost[] RemoveSource { get; } = [new(CostVerbs.Remove)];
+    /// <summary>"Bow your Stronghold" (Bonds of Coin's Favor half).</summary>
+    public static ActionCost[] BowStronghold { get; } = [new(CostVerb.Bow, CostSubject.Stronghold)];
     /// <summary>"Lose N Honor".</summary>
     public static ActionCost[] LoseHonor(int amount) => [new(CostVerbs.LoseHonor, Amount: amount)];
 }

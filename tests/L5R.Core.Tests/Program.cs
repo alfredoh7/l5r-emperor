@@ -7490,7 +7490,7 @@ static void ProvinceAdjacency()
     bool IsLegal(int currentProvince,int[] destroyed,int targetProvince)
     {
         var s=MatchEngine.CreateEconomyScenario().State;
-        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0; s.ActivePlayerId=1; // player 1 attacks, so player 0's province line is the one the battlefields follow (issue #336)
         foreach(var d in destroyed) s.Players[0].Provinces[d].Destroyed=true;
         var source=Add(s,"training-adjacent-booster",0,Zone.Battlefield,province:currentProvince);
         var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:targetProvince);
@@ -7523,7 +7523,7 @@ static void ProvinceAdjacency()
     {
         var s=MatchEngine.CreateEconomyScenario().State;
         while(s.Players[0].Provinces.Count<provinceCount) s.Players[0].Provinces.Add(new(){Index=s.Players[0].Provinces.Count,Strength=6});
-        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0;
+        s.Phase=Phase.Battle; s.CurrentBattleProvince=currentProvince; s.UnresolvedBattlefields=[..new[]{currentProvince,targetProvince}.Distinct()]; s.PriorityPlayerId=0; s.ActivePlayerId=1; // player 1 attacks, so player 0's province line is the one the battlefields follow (issue #336)
         foreach(var d in destroyed) s.Players[0].Provinces[d].Destroyed=true;
         var source=Add(s,"training-adjacent-booster",0,Zone.Battlefield,province:currentProvince);
         var target=Add(s,"training-crane-samurai",0,Zone.Battlefield,province:targetProvince);

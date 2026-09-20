@@ -31,11 +31,13 @@ public sealed partial class MatchEngine
             OutOfPlayActionReaction = _state.PendingOutOfPlayActionReaction, HonorLossReductionPlayerId = _state.HonorLossReductionPlayerId,
             ForcedDiscardContinuation = _state.ForcedDiscardContinuation, ForcedDiscardResume = _state.ForcedDiscardResume, BowReactionCandidateIds = _state.BowReactionCandidateIds,
             MoveReactionTargetId = _state.MoveReactionTargetId, NikutaiReactionTargetId = _state.NikutaiReactionTargetId,
+            ReactionWindowTargetId = _state.ReactionWindowTargetId, ReactionWindowRemaining = _state.ReactionWindowRemaining,
         });
         _state.PendingChoice = null;
         _state.PendingNegatableAbility = null; _state.DeferredActionNegated = false; _state.NegatedEffects = [];
         _state.PendingOutOfPlayActionReaction = null; _state.HonorLossReductionPlayerId = null; _state.ForcedDiscardContinuation = null; _state.ForcedDiscardResume = null;
         _state.BowReactionCandidateIds = []; _state.MoveReactionTargetId = null; _state.NikutaiReactionTargetId = null;
+        _state.ReactionWindowTargetId = null; _state.ReactionWindowRemaining = [];
     }
 
     private SuspendedWindow RestoreSuspendedWindow(bool handOn)
@@ -47,6 +49,7 @@ public sealed partial class MatchEngine
         _state.PendingOutOfPlayActionReaction = window.OutOfPlayActionReaction; _state.HonorLossReductionPlayerId = window.HonorLossReductionPlayerId;
         _state.ForcedDiscardContinuation = window.ForcedDiscardContinuation; _state.ForcedDiscardResume = window.ForcedDiscardResume; _state.BowReactionCandidateIds = window.BowReactionCandidateIds;
         _state.MoveReactionTargetId = window.MoveReactionTargetId; _state.NikutaiReactionTargetId = window.NikutaiReactionTargetId;
+        _state.ReactionWindowTargetId = window.ReactionWindowTargetId; _state.ReactionWindowRemaining = window.ReactionWindowRemaining;
         _state.ConsecutivePasses = handOn ? 0 : window.ConsecutivePasses;
         _state.PriorityPlayerId = handOn ? 1 - window.ReactingPlayerId : window.ReactingPlayerId;
         return window;

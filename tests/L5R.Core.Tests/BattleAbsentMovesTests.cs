@@ -80,6 +80,10 @@ internal static class BattleAbsentMovesTests
     {
         var found = IdsMovingToABattlefield(out var groups);
         Check(groups.Count >= 12, "the scan found the effect cases (" + groups.Count + ")");
+        // A move whose destination rule is "the current battlefield" (MoveDestinations.cs, issue #336) brings Personalities to the battle just as a direct
+        // MoveToBattlefield case does, through ExecuteMove -- so it is scanned by its MoveSpec. (Predator's adjacent-battlefield move is not one: it takes units OUT
+        // of the current battle, and its text requires him to be at it; see MoveDestinationTests.PredatorIsNotAbsent.)
+        foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.Move?.Destination == MoveSpec.CurrentBattlefield)) { found.Add(id); groups.Add([id]); }
         foreach (var group in groups)
             Check(group.Any(id => AbilityCatalog.All[id].MovesToBattle), $"an effect that moves a Personality to a battlefield ({string.Join(",", group)}) is not on an ability marked MovesToBattle");
         foreach (var flagged in AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key))
@@ -89,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,takasho-move,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }

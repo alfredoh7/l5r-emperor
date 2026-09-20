@@ -101,7 +101,8 @@ internal static class BattleTimingTests
         // none is in the pinned Lion/Crane decks.
         var navalCarriers=CardCatalog.Cards.Values.Where(c=>!c.ScenarioOnly && (c.Keywords!.Contains("Naval") || c.AttachGrantsKeyword=="Naval" || c.Effect=="naval-while-has-spell"))
             .Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal).ToArray();
-        string[] expected=["oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-6501","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9832","oracle-l5r-9834"];
+        // + oracle-l5r-1726 (issue #336: Daigotsu Hotako, Experienced 3, printed Naval).
+        string[] expected=["oracle-l5r-10133","oracle-l5r-10299","oracle-l5r-10853","oracle-l5r-10857","oracle-l5r-1726","oracle-l5r-3850","oracle-l5r-5285","oracle-l5r-6501","oracle-l5r-8840","oracle-l5r-8879","oracle-l5r-8895","oracle-l5r-9539","oracle-l5r-9605","oracle-l5r-9610","oracle-l5r-9832","oracle-l5r-9834"];
         Eq(string.Join(",",navalCarriers),string.Join(",",expected.OrderBy(x=>x,StringComparer.Ordinal)),"Every wired Naval carrier");
         var pinned=PublishedContent.Snapshot.Cards.Concat(PublishedContent.TestSnapshot.Cards).Select(c=>c.Id).ToHashSet();
         Check(!navalCarriers.Any(pinned.Contains),"No Naval card is in the pinned Lion/Crane decks");

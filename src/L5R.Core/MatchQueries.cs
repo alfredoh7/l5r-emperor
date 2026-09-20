@@ -15,7 +15,7 @@ public sealed partial class MatchEngine
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
                 card.GrantedAbilities.Count==0?null:card.GrantedAbilities.Select(g=>new GrantedAbilityView(g.AbilityId,AbilityCatalog.All[g.AbilityId].Label,AbilityCatalog.All[g.AbilityId].Timing,g.Source,g.Duration,g.CopiedFrom,g.CopiedFromName)).ToArray(),
-                GoldSourceProduction(card));
+                GoldSourceProduction(card),ActionLocked(card));
         }
         var players=_state.Players.Select(player=>
         {
@@ -84,6 +84,8 @@ public sealed partial class MatchEngine
             if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
             reason??=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
             if(reason is null && validate) reason=AbilityRejection(command);
+            // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
+            reason??=ActionLockRejection(command);
             Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
         }
         // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
@@ -99,7 +101,8 @@ public sealed partial class MatchEngine
         if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
-                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),OwesForcedPass(playerId)?ForcedPassReason:null,card.Id);
+                Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),
+                    OwesForcedPass(playerId)?ForcedPassReason:ActionLocked(card)?$"{Definition(card).Name} may not perform actions this turn.":null,card.Id);
         if(playerId!=_state.PriorityPlayerId)
         {
             Add("wait",$"Waiting for {Player(_state.PriorityPlayerId).Name}",reason:"The other player has the action opportunity.");
@@ -164,7 +167,9 @@ public sealed partial class MatchEngine
                 foreach(var (card,reactionId) in BeforeActionReactionCandidates().Where(x=>x.Card.OwnerId==playerId && BeforeActionReactionApplies(x.Card,x.AbilityId,deferredAction)).ToArray())
                 {
                     var reaction=AbilityCatalog.All[reactionId];
-                    string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray():[null];
+                    string?[] candidates=reaction.Target=="own-unit-member"?UnitMembers(card).Select(c=>(string?)c.Id).ToArray()
+                        // Issue #336 fixture: one option per Personality the deferred action would move.
+                        :reaction.Target=="deferred-action-mover"?ActionMovers(deferredAction).Select(c=>(string?)c).ToArray():[null];
                     foreach(var candidate in candidates)
                         AddReaction(card,reactionId,targetId:candidate,label:candidate is null?null:$"{reaction.Label} · {Definition(Card(candidate)).Name} ({candidate})",validate:true);
                 }

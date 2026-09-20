@@ -1,0 +1,29 @@
+[
+  {
+    "card_id": "oracle-l5r-1092",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=1092",
+    "image_path": "assets/reference/oracle/second-city/webp/oracle-l5r-1092-printing-1-image-1.webp",
+    "image_sha256": "69fd655737d7a7b6b5d8f7370e71e3ff25604aae880ecdbacd70ec4b1dd2a5af"
+  },
+  {
+    "card_id": "oracle-l5r-2865",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2865",
+    "image_path": "assets/reference/oracle/emperor-edition/webp/oracle-l5r-2865-printing-1-image-1.webp",
+    "image_sha256": "29141140abceab5a9155ec1c9bba1545c4f206b2912994d2d5e0569c30dcbd5e"
+  },
+  {
+    "card_id": "oracle-l5r-2493",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=2493",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-2493-printing-1-image-1.webp",
+    "image_sha256": "f8fef61b9faeaab96c0d1f3324fecd432ab192b5d55f43cda0db17eeeaa17d5a"
+  }
+]

@@ -41,6 +41,8 @@ public static class CostSubject
     public const string Source = "source";
     /// <summary>The ability's chosen target: "bow or destroy his target Armor" (Well Protected).</summary>
     public const string Target = "target";
+    /// <summary>The acting player's own Stronghold: "Bow your Stronghold" (Bonds of Coin, issue #336).</summary>
+    public const string Stronghold = "stronghold";
 }
 
 /// <summary>One way to pay an ability's non-Gold cost. <paramref name="Id"/> is what GameCommand.CostOption names; <paramref name="Label"/> is
@@ -59,6 +61,7 @@ public sealed partial class MatchEngine
     {
         CostSubject.Source => source,
         CostSubject.Target => command.TargetId is not null && _state.Cards.TryGetValue(command.TargetId, out var target) ? target : null,
+        CostSubject.Stronghold => Player(command.PlayerId).StrongholdId is { } strongholdId && _state.Cards.TryGetValue(strongholdId, out var stronghold) ? stronghold : null,
         _ => ability.Performer is not null ? (command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performer) ? performer : null) : source
     };
 

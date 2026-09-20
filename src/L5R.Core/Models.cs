@@ -148,6 +148,9 @@ public sealed class SuspendedWindow
     public List<string> BowReactionCandidateIds { get; set; } = [];
     public string? MoveReactionTargetId { get; set; }
     public string? NikutaiReactionTargetId { get; set; }
+    // The window's own target and the targets still to come (issue #336, TargetWindows.cs): a Reaction that opens a window of its own must not clobber them.
+    public string? ReactionWindowTargetId { get; set; }
+    public List<string> ReactionWindowRemaining { get; set; } = [];
 }
 
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
@@ -170,6 +173,12 @@ public sealed record GrantedAbility(string AbilityId, string Source, string Dura
 /// the same place ("Turn") FinishTurn already clears GrantedKeywords -- regardless of the card's
 /// own Zone, matching a Permanent GrantedKeyword's own survival through death and return.</summary>
 public sealed record Protection(string Source, string Duration);
+
+/// <summary>"May not perform actions" (issue #336: Daigotsu Hotako's Fear Open, and the same gap on Tamori House Guard and
+/// Hiruma Nikaru): while any ActionLock sits in a card's list it cannot be the performer of any action -- its own, an
+/// action on one of its attachments, or one naming it as the performer -- yet it can still be targeted. Duration follows
+/// the GrantedKeyword/Protection convention: "Turn" (the default -- until the end of the turn) is swept by FinishTurn.</summary>
+public sealed record ActionLock(string Source, string Duration);
 
 /// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
 /// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
@@ -205,6 +214,7 @@ public sealed class CardInstance
     // affiliation is removed, the Personality is Unaligned for all rules checks.
     public List<string> RemovedClanAffiliations { get; set; } = [];
     public List<Protection> Protections { get; set; } = [];
+    public List<ActionLock> ActionLocks { get; set; } = [];
     public List<CardToken> Tokens { get; set; } = [];
     public bool Dishonorable { get; set; }
     public int StraightenBlockedTurn { get; set; } = -1;
@@ -618,6 +628,10 @@ public sealed class MatchState
     // first and matches it; "all" is never consumed (see NegatesEffect), and the whole list is wiped right
     // after the re-invoked command returns.
     public GameCommand? PendingNegatableAbility { get; set; }
+    // A multi-target action opens one before-action window per target that has a possible reactor, in slot order (issue #336, TargetWindows.cs):
+    // the target the open window is for, and the targets still to come. Both empty for a single-target action and once the action resolves.
+    public string? ReactionWindowTargetId { get; set; }
+    public List<string> ReactionWindowRemaining { get; set; } = [];
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
     // Windows set aside behind a nested one, most recent last (SuspendedWindow; empty outside a Reaction's own follow-on windows).
     public List<SuspendedWindow> SuspendedWindows { get; set; } = [];
@@ -795,7 +809,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     // Alternative cost (issue #337): which of the ability's CostOptions the acting player pays ("bow" or "destroy" the
     // performing Ancestor). Chosen up front, like the performer, because a cost is paid before anything resolves; null is
     // only accepted when the ability has a single option, and never for an ability with none.
-    string? CostOption = null);
+    string? CostOption = null,
+    // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
+    // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
+    SlotSelection[]? Selections = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
@@ -823,6 +840,9 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     GameCommand? Command = null, string? CardId = null, string[]? TargetIds = null,
     int[]? Provinces = null, PurchaseQuote? Quote = null, GoldQuote? Gold = null,
     Dictionary<string, GoldQuote>? TargetGold = null,
+    // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
+    // collect the whole selection. Null for every ability with a single Target.
+    TargetSlotOption[]? Slots = null,
     bool NoTarget = false);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
@@ -834,7 +854,9 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     GrantedAbilityView[]? GrantedAbilities = null,
     // Authoritative Gold this card can produce for a payment right now (a printed producer, or a card that can bow to produce Gold
     // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
-    int? GoldProduced = null);
+    int? GoldProduced = null,
+    // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
+    bool ActionLocked = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
