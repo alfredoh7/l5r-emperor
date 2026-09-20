@@ -377,6 +377,14 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
                 return;
             }
+            if (_state.PendingChoice.Type=="battleRecruit")
+            {
+                // After a battle resolved (issue #379): the players holding a Ring's recruit grant of this battle may put it into play (a
+                // Battle-timed useAbility, spending the grant) or pass; two consecutive passes close the window (PassReaction).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Put a Ring into play or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
+                return;
+            }
             if (_state.PendingChoice.Type=="duelWonReaction")
             {
                 // A duel is a single, complete action from challenge to consequences (issue #209):
@@ -806,7 +814,7 @@ public sealed partial class MatchEngine
         else if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
         // An ordinary action (never itself an Additional Action) forfeits any of this player's own
         // still-unused grants, same rule as ExecuteAbilityEffects' own tail and MatchEngine.Pass.
-        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
         NextAction(command.PlayerId);
     }
 
@@ -835,7 +843,7 @@ public sealed partial class MatchEngine
         Emit("seppuku",$"{Definition(card).Name} performed Seppuku, dying honorably.",command.PlayerId,card.Id);
         if(OpenOverconfidentDrawWindow(1-command.PlayerId)) return;
         // An ordinary action forfeits the player's own still-unused Additional Action grants, same as every other action's tail.
-        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
+        _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
         NextAction(command.PlayerId);
     }
 
@@ -980,6 +988,8 @@ public sealed partial class MatchEngine
             _state.ConsecutivePasses=0;
             if(pending.Type=="proclaim") ApplyPendingEntryEffects();
             Emit("reactionClosed","Both players passed; the reaction window closed.");
+            // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
+            if(pending.Type=="battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
@@ -1032,7 +1042,7 @@ public sealed partial class MatchEngine
                 // Additional Action (issue #181): passing forfeits any of this player's own still-
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
                 // whole point of an Additional Action is that it resolves immediately, in a burst.
-                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId);
+                _state.AdditionalActions.RemoveAll(g=>g.PlayerId==_state.PriorityPlayerId && Forfeitable(g));
                 if(++_state.ConsecutivePasses==2) ResolveBattle(); else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
             case Phase.Dynasty:
@@ -1153,7 +1163,7 @@ public sealed partial class MatchEngine
     {
         Require(_state.Phase==Phase.BattleSelection,"Battle order may be chosen between battles.");
         Require(command.Province is int && _state.UnresolvedBattlefields.Contains(command.Province.Value),"Choose an unresolved battlefield.");
-        _state.CurrentBattleProvince=command.Province;
+        _state.CurrentBattleProvince=command.Province; _state.BattleNumber++;
         SetPhase(Phase.Battle,1-_state.ActivePlayerId);
         // Battle Phase timing (issue #310): the Defender holds the first opportunity by default (spec 4.4).
         // "Engaging" is exactly this moment -- the Attacker has just selected the battle (spec 4.1) -- so the
@@ -1456,7 +1466,9 @@ public sealed partial class MatchEngine
         // BEFORE this same call) must survive this Clear() -- it represents a right earned as of THIS
         // battle's own conclusion, to be used in a later window, unlike an ordinary Additional Action
         // grant (which genuinely is scoped to just this battle).
-        _state.AdditionalActions.RemoveAll(g => !(g.ScopeCardIds is { Length: 1 } ids && Definition(Card(ids[0])).Type == CardType.Ring));
+        // (Issue #379: only a recruit grant -- the one kind that carries a battle -- survives: this battle's is kept for the aftermath window that
+        // follows (OpenBattleRecruitWindow), where it is the last chance to use it, and lapses there.)
+        _state.AdditionalActions.RemoveAll(Forfeitable);
         _state.PendingAdditionalAction=null; _state.NoNewAdditionalActionsThisBattle=false;
         // An unused Attack-target grant ("your next Ranged Attack action this battle") ends with the battle.
         _state.AttackTargetGrants.Clear();
@@ -1489,6 +1501,15 @@ public sealed partial class MatchEngine
         // return-to-hand always happens before the UnresolvedBattlefields.Count==0 branch below ends
         // the Battle phase, exactly the order Looting the Ruins' own printed text requires.
         ResolveAfterBattleResolveEffects();
+        // "After the resolution of a battle...: you may put this Ring into play" (issue #379): the recruit grants this battle produced get their
+        // window here, still inside the battle, and lapse with it.
+        if(OpenBattleRecruitWindow(attacker)) return;
+        CompleteBattleTransition(attacker);
+    }
+    // The last step of a battle: the next battlefield is chosen, or the Battle phase ends. Split from FinishBattleReturnHomeAndTransition so the
+    // recruit window's close (PassReaction) can continue exactly here.
+    private void CompleteBattleTransition(int attacker)
+    {
         if(_state.UnresolvedBattlefields.Count==0)
         {
             foreach(var card in _state.Cards.Values.Where(c=>c.Zone==Zone.Battlefield).ToArray()) ReturnHome(card,card.OwnerId==attacker);
@@ -1656,8 +1677,8 @@ public sealed partial class MatchEngine
         {
             // A Battle action like any other: it uses an Additional Action grant of this player's when one is unscoped, and otherwise forfeits them.
             var usedGrant=ConsumeAdditionalActionGrant(command.PlayerId,null);
-            if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId);
-            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId));
+            if(!usedGrant) _state.AdditionalActions.RemoveAll(g=>g.PlayerId==command.PlayerId && Forfeitable(g));
+            NextAction(command.PlayerId,usedGrant && _state.AdditionalActions.Any(g=>g.PlayerId==command.PlayerId && Forfeitable(g)));
             return;
         }
         NextAction(command.PlayerId);
@@ -2300,6 +2321,8 @@ public sealed partial class MatchEngine
     }
     private void FinishTurn()
     {
+        // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
+        _state.AdditionalActions.Clear();
         foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration=="Turn"); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's

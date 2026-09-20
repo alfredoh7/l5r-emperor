@@ -217,6 +217,12 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"battleRecruit" })
+        {
+            // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"beforeBattleOptional" } optionalPending)
         {
             // Before This Battle Resolves, an optional ("you may") effect: decline it, or name its one target.
