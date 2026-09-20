@@ -658,7 +658,7 @@ public static class AbilityCatalog
         // Not a Reaction/grant at all (issue #194) -- a standing condition, usable any time it holds,
         // like an ordinary Battle ability. (Its printed text is a plain "Battle:", so it takes no Absent flag.)
         ["false-ring-of-water-recruit"] = new("Battle", "If the current battlefield's Province Strength is 11 or greater, put this Ring into play and lose 2 Honor", "none"),
-        ["false-ring-of-water-attack"] = new("Battle", "Ranged 3 Attack", "attack", Costs: ActionCost.BowSourceUnlessInHand),
+        ["false-ring-of-water-attack"] = new("Battle", "Ranged 3 Attack", "attack", Costs: ActionCost.BowSource),
         // Moshi Ikako (issue #194's own review of previously Ring-blocked cards): "Fire Battle" is a
         // plain printed-keyword classification (same treatment as Kiho/Recon), not a Ring-gated
         // Timing as an earlier blocker note speculated -- confirmed now that Rings are actually
@@ -2660,8 +2660,16 @@ public sealed partial class MatchEngine
     // Require in ValidateAbility (source.Zone==Hand for the attach half; AtBattle, which implies InPlay,
     // for the bow half).
     // Fading Shadows (issue #337): an ability that attaches its OWN card is used from the hand -- and only from there (AttachSpec.Self).
+    // An ability whose cost is bowing ITS OWN source ("Bow this card:") with no "or discard it from your hand" alternative can only be paid by a card in
+    // play: a card in a hand or a discard pile has nothing to bow and no printed way to pay instead (the False Rings' second ability -- Mendon's ruling,
+    // issue #370; a real Ring prints "bow this card or discard it from your hand" and declares UnlessInHand). Derived from the declared cost, so it is a
+    // property of the data, never an id list; read by the source-zone rule and by the option listing (a card that could not pay it is not offered).
+    private static bool RequiresSourceInPlay(AbilityDefinition ability) =>
+        ability.Costs?.Any(c => c.Verb == CostVerb.Bow && c.Subject == CostSubject.Source && !c.UnlessInHand) == true;
+
     private bool AbilitySourceZoneAllows(AbilityDefinition ability, CardInstance source, PlayerState player) =>
-        ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
+        RequiresSourceInPlay(ability) ? InPlay(source)
+        : ability.Attach?.Card == AttachSource.Self ? source.Zone == Zone.Hand && player.Hand.Contains(source.Id)
             : ability.Trigger is "any-personality-enters-play" or "before-any-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard
             : ability.Trigger == "after-battle-action-resolves" ? source.Zone is Zone.Hand or Zone.FateDiscard || InPlay(source)
             // A Ring (issue #194) may use its printed action from hand too -- "you may discard
@@ -2875,7 +2883,11 @@ public sealed partial class MatchEngine
         // action at all (it sits before the effects colon), so it is checked here where every offer and every
         // submitted command see it. Absent waived the presence Requires above; there must still be a battle to move
         // him to.
-        if (id == "false-ring-of-air-force") Require(InPlay(source!), "False Ring of Air must be in play: bowing it is the cost of this action.");
+        // A Ring is PUT INTO PLAY from the hand (never from play, and never from a discard pile): every "...-recruit" ability, real or False, needs its Ring in
+        // the hand (issue #370: a Ring already in play could otherwise "put itself into play" again -- a False Ring paying its 2 Honor each time).
+        if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "ring-of-void-recruit"
+            or "false-ring-of-air-recruit" or "false-ring-of-earth-recruit" or "false-ring-of-water-recruit")
+            Require(source!.Zone == Zone.Hand && player.Hand.Contains(source.Id), "A Ring is put into play from your hand.");
         if (id == "return-to-action-move")
         {
             Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to move him to.");
@@ -4636,7 +4648,7 @@ public sealed partial class MatchEngine
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "false-ring-of-water-attack":
-                 // the discard-from-hand case is handled generically in the tail below
+                // its cost, bowing the Ring, is the declared Costs entry (BowSource: a False Ring has no hand play, issue #370)
                 if (ResolveOrDeferAttack(id, player, target?.Id, ActionPerformer(ability, command, source).Id, consumedGrant)) return;
                 break;
             case "bayushi-kahoku-attack": case "asako-ume-attack":
@@ -6151,6 +6163,8 @@ public sealed partial class MatchEngine
             var ability = AbilityCatalog.All[id];
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
+            // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
+            if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
             var phaseOk = inEngageWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;

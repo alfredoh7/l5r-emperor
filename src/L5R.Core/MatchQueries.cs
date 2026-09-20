@@ -96,9 +96,10 @@ public sealed partial class MatchEngine
                 foreach(var (candidate,label) in TargetedReactionChoices(card,reactionId,held))
                     AddReaction(card,reactionId,targetId:candidate,label:label,validate:true);
         }
-        // Order Seppuku is an Open action: available to any Dishonorable Samurai/Courtier/Shugenja
-        // the querying player controls during the Action Phase, independent of who holds priority.
-        if(_state.Phase==Phase.Action && _state.PendingSearch is null && _state.PendingLook is null && _state.PendingCopy is null && _state.PendingEitherOr is null)
+        // Order Seppuku is an Open action (issue #368): offered for any Dishonorable Samurai/Courtier/Shugenja the querying player controls, but
+        // ONLY at their own turn to act in the Action Phase with nothing pending -- the same single predicate the command handler uses
+        // (SeppukuTiming.cs), so an offered Seppuku is never one the engine would refuse for its timing.
+        if(SeppukuTimingReason(playerId) is null)
             foreach(var card in _state.Cards.Values.Where(c=>c.OwnerId==playerId && InPlay(c) && c.Dishonorable && Definition(c).Type==CardType.Personality &&
                 (Keyword(c,"Samurai") || Keyword(c,"Courtier") || Keyword(c,"Shugenja"))))
                 Add("orderSeppuku",$"Order Seppuku · {Definition(card).Name}",OwesForcedPass(playerId)?null:Command("orderSeppuku",card.Id),

@@ -25,7 +25,7 @@ internal static class EitherOrTests
             ("A negated action is still TAKEN: the Gold cost is paid, a Strategy played from hand is spent, the once-per-turn use is stamped and Additional Actions are forfeited -- but the effects (and costs an ability pays inside its own effects) are not", NegatedActionIsStillTaken),
             ("The Either/Or is public and its quote private: both players see what is being decided and by whom, the deciding player's options carry the payment quote and the other player's do not, the waiting player has no decision, and no hidden card id crosses to either", EitherOrViewAndPrivacy),
             ("The general primitive with three options (pay 2 Gold / lose 2 Honor / let the opponent gain 2 Honor): each is applied and announced, an unavailable one is listed disabled with the reason, one legal option resolves by itself, and every offered command validates on a fresh engine", ThreeWayChoice),
-            ("Either/Or rejections leave the state untouched: the wrong player, an unknown or unavailable option, a payment that is short, wrong or unnecessary, a stale version -- and Seppuku, an Open action that cuts through pending choices, is refused while one is open", EitherOrRejections),
+            ("Either/Or rejections leave the state untouched: the wrong player, an unknown or unavailable option, a payment that is short, wrong or unnecessary, a stale version -- and Seppuku, an Open action taken only at one's own turn to act with nothing pending (issue #368), is refused while one is open", EitherOrRejections),
             ("Unfortunate Hesitation, the controller bows him: the Personality bows, nothing is owed, and priority passes on; the Strategy left the hand as it was played and is a public discard", HesitationBow),
             ("Unfortunate Hesitation, the controller does not: he owes a pass at his next opportunity this phase -- only pass is legal (every Battle, Limited, Open action, played Strategy, Reserve recruit and equip listed disabled with the reason), and that pass settles it", HesitationForcedPass),
             ("Unfortunate Hesitation has nothing to choose when the Personality is already bowed (the pass is simply owed), and works on his controller's own Personality (the acting player is then the one who decides)", HesitationAlreadyBowedAndOwn),
@@ -447,7 +447,7 @@ internal static class EitherOrTests
         Reject(e, pay with { ExpectedVersion = e.Version - 1 });                // stale
         Reject(e, pay with { Choice = "honor" });                               // a free option with sources it does not need
         Reject(e, new GameCommand("pass", 1, e.Version));                       // not an answer
-        Reject(e, new GameCommand("orderSeppuku", 1, e.Version, CardId: sacrificial.Id)); // cuts through pending choices, but not this one
+        Reject(e, new GameCommand("orderSeppuku", 1, e.Version, CardId: sacrificial.Id)); // an Open action is not available while a decision is pending
         Check(!e.QueryActions(1).Any(a => a.Type == "orderSeppuku"), "Seppuku is not offered mid-choice");
         // A disabled option cannot be forced through a hand-built command.
         var s2 = Table(Phase.Action, 0); Add(s2, "training-either-or-source", 0, Zone.Home); BowAllGold(s2, 1);

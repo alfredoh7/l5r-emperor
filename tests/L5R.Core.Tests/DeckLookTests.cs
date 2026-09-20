@@ -32,7 +32,7 @@ internal static class DeckLookTests
             ("A fixed-order look keeps each group's viewed order; a caller-chosen count overrides the spec's N; a shown card is taken", FixedOrderAndCountOverride),
             ("Hidden information: the viewer's list, the deck contents, instance ids and the RNG state never reach the opponent, including when the viewer looks at the OPPONENT's deck; never more than N cards are sent", HiddenInformation),
             ("No shuffle and full determinism: a look never touches the generator, keeping everything leaves the deck byte-identical, and the match replays exactly", NoShuffleAndReplay),
-            ("Order Seppuku, which cuts through pending choices, is refused and not offered while a look is open", SeppukuCannotInterruptALook),
+            ("Order Seppuku is refused and not offered while a look is open (an Open action is only taken at one's own turn to act with nothing pending, issue #368)", SeppukuCannotInterruptALook),
             ("A before-action reaction window (issue #327) the opponent opens ahead of a look or a search resolves first; the deferred action then re-executes into the look or search, which ends with priority to the opponent and no window left open", BeforeActionWindowAheadOfLookAndSearch),
             ("The viewer always has a legal, offered answer at every stage (deck choice, arrangement), every offered command validates, and the options stay bounded", ViewerAlwaysHasALegalAnswer),
         ];

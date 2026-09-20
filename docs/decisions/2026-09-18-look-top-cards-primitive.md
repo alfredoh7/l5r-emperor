@@ -1,6 +1,6 @@
 # Look at the top N cards: view, arrange, put back
 
-Status: accepted for the engine (Mendon, standing authority; the rules lead's own specification, issue #322). The rules interpretations under "Open rules questions" are decisions the engine had to make to be complete and are **awaiting Mendon's confirmation**. Lane: shared (rules engine, wire contract; the UI is Alfredo's #323). Issue #322. Stacked on the deck search primitive (#312 / PR #328).
+Status: accepted for the engine (Mendon, standing authority; the rules lead's own specification, issue #322). The rules interpretations under "Rules questions" were decisions the engine had to make to be complete; **Mendon has answered every one (issue #368)**, and the section records each answer. Lane: shared (rules engine, wire contract; the UI is Alfredo's #323). Issue #322. Stacked on the deck search primitive (#312 / PR #328).
 
 ## Decision
 
@@ -137,18 +137,34 @@ Every card whose text says "look at the top ..." was read from the catalogue. No
 
 Corrections to the #312 decision doc's note on these cards: it lists Signs and Portents under searches; it is a look and is wired here (event-wave-4).
 
-## Open rules questions (awaiting Mendon)
+## Rules questions: answered by Mendon (issue #368)
 
-1. **Hand and show only from your own deck.** A card looked at in the opponent's deck may be kept, bottomed or discarded, never taken. No printed card contradicts it; Signs and Portents only discards.
-2. **Discarding a card from the opponent's deck** puts it in the opponent's Fate discard pile (its owner's), publicly, and the event names it.
-3. **An empty deck resolves the look at once** ("no cards remain"), without a prompt; a deck with fewer than N cards shows what is left and the rules' minimums are capped to what is possible.
-4. **N is conditional through the caller.** The spec carries a default and the ability may override it. No published card uses it today.
-5. **Every card must be named in the arrangement**, even the ones staying on top ("keep on top" is a disposition, not a default), so the order is always explicit.
-6. **Signs and Portents resolves when revealed**, province by province as Imperial Gift does, and the Event is discarded afterwards.
-7. **Order Seppuku is refused (and not offered) while a look is open**, as for a search.
-8. **A look does not shuffle** and does not consume the random generator, so a look never perturbs a later shuffle. A card printed with a shuffle after its look would compose the two flows.
+1. **Hand and show only from your own deck** -- **acknowledged, no change.** A card looked at in the opponent's deck may only be kept, bottomed or discarded.
+2. **Discarding a card from the opponent's deck** puts it in its owner's Fate discard pile, publicly -- **correct, no change.**
+3. **An empty deck resolves the look at once; fewer than N shows what is left** -- **correct, no change.**
+4. **N is conditional through the caller** -- **noted, no change.**
+5. **Every card must be named in the arrangement** -- **correct, no change.**
+6. **Signs and Portents resolves when revealed** -- **correct, no change.**
+7. **Order Seppuku** -- **answered, CHANGED (and generalized beyond a look or search).** See "Order Seppuku" below.
+8. **A look does not shuffle; a search shuffles** -- **correct, no change.** If a look card ever instructs a shuffle, the shuffle happens after everything before it in the text has resolved (no wired card does; a look would then call `ShuffleDeck` at the end of `ApplyArrangement`, before the action resolves).
 
-The three open questions from the deck search (#312): an unaffordable Region is discarded after being shown with nothing charged; Imperial Gift resolves on reveal province by province; "discard a card" after a Terrain may discard the Terrain just found. They remain open there and are repeated in this PR's report only.
+The three questions this work had carried over from the deck search (#312) are answered in that decision (`2026-09-18-deck-search-primitive.md`): an unaffordable Region is discarded (correct), Imperial Gift resolves on reveal (correct), and the Terrain just found may NOT be discarded to its own "discard a card" (changed).
+
+### Order Seppuku (issue #368)
+
+Seppuku is an OPEN action, available only as an action on a player's own turn to act during the Action phase (unless a card allows it in another phase). It may not interrupt other players' actions or the current player's action. Before, the engine let it "cut through every other pending choice" and refused it only while a search or look was open.
+
+**One predicate, `MatchEngine.SeppukuTimingReason(playerId)` in `src/L5R.Core/SeppukuTiming.cs`** (null when it is that player's time, otherwise the reason). It is available only when ALL of these hold:
+
+- **(a)** the phase is the Action phase. No wired card lets Seppuku be ordered in another phase (no published card mentions seppuku at all; a tripwire test fires the day one does, so its text is read and its allowance added beside the phase test);
+- **(b)** the player holds priority: it is their turn to act (the Action phase alternates the opportunity; the active player is not the test);
+- **(c)** nothing is pending: `PendingChoice` (every reaction window and every Overconfident / Brash / Harsh Choices / Times of Strife / search / look / copy / Either/Or / Engage / before-resolution decision) and the other decision-holding states named in `DecisionStates` (a pending Attack, Conqueror or duel, a deferred action or announced action, a queued draw or discard, a set-aside window ...). A guard test fails when a new `Pending*` field is added to `MatchState` without being classified in that file.
+
+The three entry points all use it, so what is offered is what is accepted: the command handler (`MatchEngine.OrderSeppuku`), the offered actions (`QueryActions`; an unavailable Seppuku is not listed, while the card-level reasons stay listed-disabled as before) and, through `QueryActions`, the training AI (which never picks it) and the client. What is judged separately, unchanged: the card (Dishonorable, Samurai / Courtier / Shugenja, in play, not locked from acting -- #336) and the pass owed to Unfortunate Hesitation (#351/#356), which is checked beside the predicate, never instead of it.
+
+**Consequence to know about:** as an ACTION, Seppuku now hands the opportunity to the other player once it has resolved (an Overconfident window it triggers closes to that player), exactly as every other action does. It used to leave priority where it was, which let a player order any number of Seppukus in a row on one opportunity.
+
+**Existing tests adapted because the ruling demands it** (each listed in the PR): `core/OrderSeppukuIsOpenAction` (was "available without priority"), `negated-costs/SeppukuBarred` (the without-priority case and the after-the-pass case), `action-lock/InnateActionSeppukuIsBarred` (the lifted-lock case needs the turn to act back), `deck-search/SeppukuCannotInterruptASearch` (it was "available again once the search is over"). The descriptions of the deck-look, either-or and card-copy Seppuku tests were reworded; their assertions did not change.
 
 ## Things found on the way (not changed)
 

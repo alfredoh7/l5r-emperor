@@ -164,7 +164,7 @@ priority, so the bar is applied wherever the player is owed a pass in that phase
 same reason, and `QueryActions` lists it disabled with that reason (never hidden), like every other innate Battle/Limited/Open action (equip, a
 played Strategy, a Reserve recruit, `useAbility`). **Assigning to attack or defend is not an action and is unaffected** (declaring and passing at the
 Attack Phase's declaration/defense steps, Dynasty purchasing and every pending decision stay legal). The bar ends when the pass is made (one owed pass
-per pass) or the phase moves on. Tests: `SeppukuBarred`, `BarSparesNonActions`.
+per pass) or the phase moves on. Tests: `SeppukuBarred`, `BarSparesNonActions`. **Superseded in part by issue #368:** Seppuku is no longer orderable without priority -- it is offered and accepted only at the player's own turn to act in the Action phase with nothing pending (`MatchEngine.SeppukuTimingReason`, see `2026-09-18-look-top-cards-primitive.md`). The Hesitation bar still applies at that opportunity and is checked beside the timing predicate.
 
 **"May choose to bow him"**: legal only for an unbowed Personality in play; when he is already bowed there is nothing to choose and the pass is
 owed at once. The bow is the controller's own choice, so it is not "an enemy's effect" and Stalwart does not apply (alternative: it is); it does
@@ -293,7 +293,7 @@ QueryActions and the commands the engine offers (or, for a raw action, the comma
 | a single legal option still opens a decision | `CannotPayAutoNegates`, `ThreeWayChoice`, `HesitationAlreadyBowedAndOwn` |
 | the interrupted reaction window is not restored | `PoliticalReactionPaid`, `PoliticalReactionNegated`, `NegatedActionIsStillTaken` |
 | the payment quote reaches the waiting player | `PoliticalReactionPaid`, `EitherOrViewAndPrivacy` |
-| Seppuku cuts through an open copy or Either/Or decision | `card-copy/OffersValidateAndRejections`, `either-or/EitherOrRejections` |
+| Seppuku is refused while a copy or Either/Or decision is open (issue #368: it is never available inside a pending decision) | `card-copy/OffersValidateAndRejections`, `either-or/EitherOrRejections` |
 | an unpayable option is legal | `ThreeWayChoice` |
 | the forced pass is not enforced | `HesitationForcedPass`, `HesitationPhaseScope`, `HesitationScope` |
 | the forced pass never lapses with the phase | `HesitationPhaseScope` |
