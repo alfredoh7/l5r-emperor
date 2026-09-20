@@ -382,7 +382,9 @@ static Task GoldWire()
         new Dictionary<int, PaymentOption[]> { [0] = [new PaymentOption([], 0, 0, 0)], [3] = [new PaymentOption(["a"], 4, 3, 1)] });
     var option = new ActionOption("useAbility", "Pay", true, null, command, "card", ["t1", "t2"], null, null, quote,
         new Dictionary<string, GoldQuote> { ["t1"] = quote, ["t2"] = quote with { Cost = 5, Kind = GoldCostKind.Derived } },
-        [new TargetSlotOption("attachments", "One to three attachments", TargetSlotKinds.Card, 1, 3, ["t1", "t2"], []), new TargetSlotOption("player", "A player", TargetSlotKinds.Player, 1, 1, [], [0, 1])]);
+        [new TargetSlotOption("attachments", "One to three attachments", TargetSlotKinds.Card, 1, 3, ["t1", "t2"], []), new TargetSlotOption("player", "A player", TargetSlotKinds.Player, 1, 1, [], [0, 1]),
+            new TargetSlotOption("honor", "If he is dishonorable: a player gains or loses 2 Honor", TargetSlotKinds.FollowUp, 0, 0, [], [], TargetSlotTimings.AtResolution, BranchCondition.TargetDishonorable, ["You gain 2 Honor", "Your opponent loses 2 Honor"])],
+        NoTarget: true);
     var action = AvailableAction.FromCore(option);
     var wire = JsonSerializer.Serialize(action, Protocol.Json);
     var back = JsonSerializer.Deserialize<AvailableAction>(wire, Protocol.Json)!;
@@ -390,7 +392,9 @@ static Task GoldWire()
     Check(back.TargetGold!["t2"].Cost == 5 && back.TargetGold["t2"].Kind == GoldCostKind.Derived, "Per-target quotes cross the wire.");
     Check(back.Command!.GoldAmount == 4, "The chosen amount is part of the wire command.");
     Check(back.Command!.Selections is [{ Slot: "slot", PlayerId: 1 }] && back.Command.Selections[0].CardIds![0] == "card-b", "Multi-target selections are part of the wire command (issue #336).");
-    Check(back.Slots is [{ Slot: "attachments", Min: 1, Max: 3 }, { Slot: "player", Kind: TargetSlotKinds.Player }] && back.Slots[0].CardIds.SequenceEqual(new[] { "t1", "t2" }) && back.Slots[1].PlayerIds.SequenceEqual(new[] { 0, 1 }), "The slots of a multi-target action cross the wire with their candidates (issue #336).");
+    Check(back.Slots is [{ Slot: "attachments", Min: 1, Max: 3 }, { Slot: "player", Kind: TargetSlotKinds.Player }, _] && back.Slots[0].CardIds.SequenceEqual(new[] { "t1", "t2" }) && back.Slots[1].PlayerIds.SequenceEqual(new[] { 0, 1 }), "The slots of a multi-target action cross the wire with their candidates (issue #336).");
+    Check(back.Slots![2] is { Kind: TargetSlotKinds.FollowUp, Timing: TargetSlotTimings.AtResolution, Condition: BranchCondition.TargetDishonorable } && back.Slots[2].OptionLabels!.SequenceEqual(new[] { "You gain 2 Honor", "Your opponent loses 2 Honor" }), "A conditional follow-up slot (its timing, condition and the answers it will offer) crosses the wire (issue #336).");
+    Check(back.NoTarget, "An Attack that may be taken with no target says so on the wire (issue #335), beside the slots of a multi-target action (issue #336).");
     return Task.CompletedTask;
 }
 

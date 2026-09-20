@@ -23,6 +23,8 @@ internal static class MoveDestinationTests
             ("Predator's two movements are separate effects (Mendon's ruling): negate Predator's own move and the target still moves; negate the target's (Tamori Tamoko's reaction, or a mover-negating reaction) and Predator still moves; both negated, neither moves; the WHOLE action negated, neither moves", EachMoveNegatedSeparately),
             ("The battle state follows: the current battle resolves with what remains at it, the moved units fight the battle at their new battlefield with their Force counted there, and everyone still ends the Attack Phase home", BattleStateFollowsTheMove),
             ("Every destination rule and mover shape on fixtures: current battlefield (target from home), another unresolved battlefield (target), adjacent unresolved (source alone, or performer and target), home (source and target together)", EveryRuleAndMover),
+            ("Predator is NOT an Absent Battle action (#363's MovesToBattle, decided here): his text needs him at the current battlefield opposing the target and his move takes units OUT of that battle to an adjacent one, so he keeps the ordinary presence rule -- refused from home and from another battlefield, offered with no unit of the acting player's needed beyond his own; a move whose destination IS the current battlefield is MovesToBattle and needs no presence", PredatorIsNotAbsent),
+            ("A Reaction played in a per-target window that opens a window of its own (#359 SuspendedWindows) hands the first window back as it was, with its target: Predator's move, a mover-negating Reaction naming Predator, and the Predator owner's whole-action negation of that Reaction", NestedWindowKeepsItsTarget),
             ("Adjacency between battlefields follows the DEFENDER's province line on every call site -- Predator's destinations, 'a Personality at an adjacent battlefield' (Battle, target) and Moto Gunso's boost -- whichever player owns the card or takes the action, with the two players' lines made to differ", AdjacencyIsTheDefendersLine),
             ("The option's Provinces (the destinations to draw) and its command's Province (the choice) survive JSON, and every offered destination validates and resolves on a fresh engine", OfferedDestinationsValidate),
         ];
@@ -214,6 +216,66 @@ internal static class MoveDestinationTests
         var e5 = MatchEngine.FromTestState(r5.S);
         Accept(e5, MoveTo(e5, r5, 2)); CloseWindows(e5);
         Check(new[] { r5.Predator, r5.Target }.All(c => e5.State.Cards[c.Id].ProvinceIndex == 2), "a window passed unused: both moved");
+    }
+
+    // ---- Predator and #363's MovesToBattle ---------------------------------------------------------------------------------------------------
+    private static void PredatorIsNotAbsent()
+    {
+        Check(!AbilityCatalog.All[Move].MovesToBattle, "Predator's ability is not marked MovesToBattle");
+        Check(AbilityCatalog.All["training-move-current"].MovesToBattle, "a move whose destination is the current battlefield is");
+        foreach (var id in new[] { "training-move-anywhere", "training-move-source-adjacent", "training-move-both-home", Move })
+            Check(!AbilityCatalog.All[id].MovesToBattle, $"{id}: a move between battlefields or home is not a move to the battle");
+        // Predator at home: he is not at the current battlefield, so nothing is offered enabled and a command sent anyway is refused.
+        var r = Map();
+        r.S.Cards[r.Predator.Id].Zone = Zone.Home; r.S.Cards[r.Predator.Id].ProvinceIndex = null; r.S.Cards[r.PredatorItem.Id].ProvinceIndex = null;
+        var e = MatchEngine.FromTestState(r.S);
+        Check(Options(e, 1, Move, r.Predator.Id).All(o => !o.Enabled), "from home he is offered disabled");
+        Reject(e, new GameCommand("useAbility", 1, e.Version, r.Predator.Id, AbilityId: Move, TargetId: r.Target.Id, Province: 2));
+        // Another unit of his side at the battlefield does not stand in for him: the action is HIS presence and the source's own.
+        var r2 = Map();
+        r2.S.Cards[r2.Predator.Id].Zone = Zone.Home; r2.S.Cards[r2.Predator.Id].ProvinceIndex = null; r2.S.Cards[r2.PredatorItem.Id].ProvinceIndex = null;
+        Add(r2.S, "training-lion-samurai", 1, Zone.Battlefield, province: 1);
+        var e2 = MatchEngine.FromTestState(r2.S);
+        Check(Options(e2, 1, Move, r2.Predator.Id).All(o => !o.Enabled), "a friendly unit at the battlefield does not make Predator's action Absent either");
+        // Present he needs nothing else: alone at the battlefield with the target (no other unit of his side) he is offered enabled.
+        var r3 = Map();
+        var e3 = MatchEngine.FromTestState(r3.S);
+        Check(Options(e3, 1, Move, r3.Predator.Id).Any(o => o.Enabled), "present, he is offered enabled");
+        // The contrast: a move whose destination IS the current battlefield needs no presence -- no unit of the acting player's anywhere, the source at home.
+        var s = Table(); s.PriorityPlayerId = 1; s.CurrentBattleProvince = 0; s.UnresolvedBattlefields = [0];
+        var source = Add(s, "training-move-source", 1, Zone.Home); var body = Add(s, "training-crane-samurai", 1, Zone.Home);
+        var e4 = MatchEngine.FromTestState(s);
+        var offer = Options(e4, 1, "training-move-current", source.Id).FirstOrDefault(o => o.Enabled);
+        Check(offer is not null, "a move to the current battlefield is offered with no unit at the battlefield: " + string.Join("; ", Options(e4, 1, "training-move-current", source.Id).Select(o => o.Reason)));
+        Accept(e4, offer!.Command! with { TargetId = body.Id });
+        Check(e4.State.Cards[body.Id].Zone == Zone.Battlefield && e4.State.Cards[body.Id].ProvinceIndex == 0, "and it brings the Personality in");
+        // Whereas a move between battlefields, from the same position, keeps the ordinary presence rule.
+        var s2 = Table(); s2.PriorityPlayerId = 1; s2.CurrentBattleProvince = 0; s2.UnresolvedBattlefields = [0, 1];
+        var source2 = Add(s2, "training-move-source", 1, Zone.Home); Add(s2, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+        var e5 = MatchEngine.FromTestState(s2);
+        Check(Options(e5, 1, "training-move-anywhere", source2.Id).All(o => !o.Enabled), "a move to another battlefield needs the acting player at the current one");
+    }
+
+    // ---- a Reaction that opens a window of its own, over a per-target window ----------------------------------------------------------------------
+    private static void NestedWindowKeepsItsTarget()
+    {
+        var r = Map();
+        Add(r.S, "training-mover-negator", 0, Zone.Home);   // player 0 (the target's controller): a Reaction naming a card the action moves
+        Add(r.S, "training-action-negator", 1, Zone.Home);  // player 1 (Predator's): after another player's action targets a card of his, negate its effects
+        var e = MatchEngine.FromTestState(r.S);
+        Accept(e, MoveTo(e, r, 2));
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction"); Eq(e.State.ReactionWindowTargetId, r.Target.Id, "the window is about Predator's target");
+        // Player 0 plays his Reaction naming PREDATOR (a card of player 1's): a Reaction is an action, so it opens a window of its own for player 1's reactor.
+        Accept(e, NegateMover(e, r.Predator.Id));
+        Eq(e.State.SuspendedWindows.Count, 1, "the first window is set aside, not overwritten");
+        Eq(e.State.SuspendedWindows[0].ReactionWindowTargetId, r.Target.Id, "with the target it was about");
+        Eq(e.State.ReactionWindowTargetId, r.Predator.Id, "the new window is about Predator");
+        Accept(e, e.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-action").Command!);
+        Decline(e); Decline(e);
+        Eq(e.State.SuspendedWindows.Count, 0, "the nested window closed and gave the first one back");
+        Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "the first window is open again"); Eq(e.State.ReactionWindowTargetId, r.Target.Id, "still about Predator's target");
+        CloseWindows(e);
+        Check(new[] { r.Predator, r.Target }.All(c => e.State.Cards[c.Id].ProvinceIndex == 2), "player 1 negated player 0's Reaction: nobody's movement was negated, both moved");
     }
 
     // ---- adjacency is the DEFENDER's line (Mendon's ruling, issue #336) -------------------------------------------------------------------

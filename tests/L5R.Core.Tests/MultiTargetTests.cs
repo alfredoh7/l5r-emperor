@@ -26,6 +26,8 @@ internal static class MultiTargetTests
             ("Every reader of \"targets\" sees a multi-target action's target: Bofana's trigger asks the enemy for a discard when Yoshitada's Personality slot names him", BofanaSeesSlotTarget),
             ("Each target of a multi-target action gets its OWN before-action window, in slot order (Mendon's ruling): two targets that each have a possible reactor open two windows; a target with no possible reactor opens none; a reaction played in one window is about that window's target only", OneWindowPerTarget),
             ("Each per-target window is the alternating window of #318/#327: the first opportunity is the active player's when he holds a reaction for that target (otherwise the other player's), passes hand it over, two passes close it; negations from several windows compose and a whole-action negation skips the windows still to come", PerTargetWindowsAlternate),
+            ("Per-target windows meet R's \"targeted by an action\" reactions (#335) and the curated before-action ones (#318): a two-target action whose first target is a Merchant with Jinn-Kuen's shape of negation and whose second is Akodo Kakihara opens the Merchant's window, then Kakihara's, each offering only ITS reactor; the negation of the whole action played in the first window skips the second; Sakuma's Political reaction reads the window's target", TargetedReactionsPerTarget),
+            ("Ezuno's redirect (#335) on a multi-target action: the window's target is replaced IN ITS SLOT (the selection and the primary TargetId follow), the window is then about Ezuno, the other targets keep their windows, and the action resolves on Ezuno, the untouched second target and not the Shugenja; a redirect onto a card the slot already holds or an illegal one is not offered", RedirectInsideASlot),
             ("Bonds of Coin, Political Open: one to three attachments with a 0 Gold cost, of either player -- exactly the ones costing 0 now (a printed 0 or one taken there by a Gold cost penalty) are offered, one, two or three are destroyed together, none or four are refused", BondsOfCoinDestroys),
             ("Bonds of Coin, Favor Political Limited: bow your Stronghold and discard the Imperial Favor to draw two cards -- only with the Favor and an unbowed Stronghold, only on your own turn, and it counts as a Favor action", BondsOfCoinDraws),
             ("Gold and Steel, Battle/Open: the same up-to-three destroy, anywhere as an Open action but only at the current battlefield as a Battle one", GoldAndSteelDestroys),
@@ -411,6 +413,96 @@ internal static class MultiTargetTests
         Decline(e2); Decline(e2);
         Check(e2.State.PendingChoice is null, "negated whole: B's window never opened");
         Check(!e2.State.Cards[t2.A.Id].Bowed && !e2.State.Cards[t2.B.Id].Bowed, "and neither is bowed");
+    }
+
+    // ---- per-target windows beside R's "targeted by an action" reactions (#335) ------------------------------------------------------------------
+    // Player 0 acts (Battle, province 0) with `training-slots-two-personalities` on two Personalities of player 1's.
+    private static string[] OfferedTo(MatchEngine e, int player) =>
+        e.QueryActions(player).Where(a => a.Type == "useAbility" && a.Enabled).Select(a => a.Command!.AbilityId!).Distinct().OrderBy(x => x, StringComparer.Ordinal).ToArray();
+
+    private static void TargetedReactionsPerTarget()
+    {
+        MatchEngine Fresh(out TwoTargets t, out CardInstance guard)
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+            guard = Add(s, "training-merchant-free-guard", 1, Zone.Battlefield, province: 0);
+            var kakihara = Add(s, Kakihara, 1, Zone.Battlefield, province: 0);
+            t = new(s, actor, guard, kakihara, kakihara, kakihara);
+            return MatchEngine.FromTestState(s);
+        }
+        // (1) Both windows open, each with only its own reactor.
+        var e = Fresh(out var t, out var guard);
+        Accept(e, Two(e, t, guard.Id, t.B.Id));
+        Check(WindowFor(e, guard.Id), "the Merchant's window first (slot order): " + e.State.PendingChoice?.Prompt);
+        Check(OfferedTo(e, 1).SequenceEqual(new[] { "training-negate-merchant-free" }), "only the Merchant's negation, none of Kakihara's: " + string.Join(",", OfferedTo(e, 1)));
+        Decline(e); Decline(e);
+        Check(WindowFor(e, t.B.Id), "Kakihara's window second");
+        Check(OfferedTo(e, 1).SequenceEqual(new[] { "kakihara-force-bonus" }), "only Kakihara's reaction now: " + string.Join(",", OfferedTo(e, 1)));
+        Decline(e); Decline(e);
+        Check(e.State.PendingChoice is null && e.State.Cards[guard.Id].Bowed && e.State.Cards[t.B.Id].Bowed, "resolved on both");
+        Check(e.State.ReactionWindowTargetId is null && e.State.ReactionWindowRemaining.Count == 0, "window state cleared");
+        // (2) The Merchant's negation of the whole action skips Kakihara's window.
+        var e2 = Fresh(out var t2, out var guard2);
+        Accept(e2, Two(e2, t2, guard2.Id, t2.B.Id));
+        Accept(e2, e2.QueryActions(1).Single(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-merchant-free").Command!);
+        Decline(e2); Decline(e2);
+        Check(e2.State.PendingChoice is null, "negated as a whole: Kakihara's window never opened");
+        Check(!e2.State.Cards[guard2.Id].Bowed && !e2.State.Cards[t2.B.Id].Bowed, "and nobody was bowed");
+        Check(e2.State.Cards[t2.Actor.Id].AbilityUses.ContainsKey("training-slots-two-personalities"), "the action was still taken");
+        // (3) A target that is a Merchant only as the SECOND slot still gets its window (the first has no reactor): the window is not the primary target's.
+        var e3 = Fresh(out var t3, out var guard3);
+        Accept(e3, Two(e3, t3, t3.B.Id, guard3.Id));
+        Check(WindowFor(e3, t3.B.Id), "slot order: Kakihara first"); Decline(e3); Decline(e3);
+        Check(WindowFor(e3, guard3.Id), "then the Merchant, whose reactor reads the window's target and not the command's first");
+        Check(OfferedTo(e3, 1).SequenceEqual(new[] { "training-negate-merchant-free" }), string.Join(",", OfferedTo(e3, 1)));
+        Decline(e3); Decline(e3);
+        Check(e3.State.PendingChoice is null && e3.State.Cards[guard3.Id].Bowed, "resolved");
+        // (4) Sakuma's Political reaction (#338) reads the window's target too: Yoshitada's Political action names an enemy Personality, and Sakuma (in play, his
+        // controller's) is offered his reaction for it -- and for nobody else's target.
+        var r = Yoshi(dishonorable: false);
+        var sakuma = Add(r.S, "oracle-l5r-9624", 1, Zone.Home);
+        var e4 = MatchEngine.FromTestState(r.S);
+        Accept(e4, Yo(e4, r, r.Enemy.Id));
+        Check(WindowFor(e4, r.Enemy.Id) || e4.State.PendingChoice?.Type == "beforeActionReaction", "a window opens for the Political action's target: " + e4.State.PendingChoice?.Type);
+        Check(OfferedTo(e4, 1).Contains("sakuma-political-negate"), "Sakuma is offered his reaction for the Political action's target: " + string.Join(",", OfferedTo(e4, 1)));
+    }
+
+    private static void RedirectInsideASlot()
+    {
+        MatchEngine Fresh(out CardInstance actor, out CardInstance shugenja, out CardInstance ezuno, out CardInstance other)
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            actor = Add(s, "training-slots-source", 0, Zone.Battlefield, province: 0);
+            shugenja = Add(s, "training-shugenja", 1, Zone.Battlefield, province: 0);
+            ezuno = Add(s, "oracle-l5r-5086", 1, Zone.Battlefield, province: 0);
+            other = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            return MatchEngine.FromTestState(s);
+        }
+        var e = Fresh(out var actor, out var shugenja, out var ezuno, out var other);
+        GameCommand Cmd(string first, string second) => Use(e, 0, "training-slots-two-personalities", actor.Id, selections: [Pick("first", first), Pick("second", second)]);
+        Accept(e, Cmd(shugenja.Id, other.Id));
+        Check(WindowFor(e, shugenja.Id), "the Shugenja's window: " + e.State.PendingChoice?.Prompt);
+        var redirect = e.QueryActions(1).Where(a => a.Type == "useAbility" && a.Command!.AbilityId == "ezuno-redirect").ToArray();
+        Check(redirect.Length == 1 && redirect[0].Enabled, "Ezuno's redirect is offered, once: " + string.Join("; ", redirect.Select(a => a.Reason)));
+        Accept(e, redirect[0].Command!);
+        var held = e.State.PendingNegatableAbility!;
+        Check(held.Selections!.Single(x => x.Slot == "first").CardIds!.SequenceEqual(new[] { ezuno.Id }) && held.Selections!.Single(x => x.Slot == "second").CardIds!.SequenceEqual(new[] { other.Id }), "the first slot now holds Ezuno; the second is untouched");
+        Eq(held.TargetId, ezuno.Id, "and the primary target follows");
+        Eq(e.State.ReactionWindowTargetId, ezuno.Id, "the window is now about Ezuno"); Eq(e.State.PendingChoice?.CardId, ezuno.Id);
+        Check(e.State.Cards[ezuno.Id].AbilityUses.ContainsKey("ezuno-redirect"), "Ezuno is spent");
+        Decline(e); Decline(e);
+        Check(e.State.PendingChoice is null, "no reactor for the second target: the action resolves");
+        Check(e.State.Cards[ezuno.Id].Bowed && e.State.Cards[other.Id].Bowed && !e.State.Cards[shugenja.Id].Bowed, "it resolved on Ezuno and the second target, and left the Shugenja alone");
+        // Another slot already holds Ezuno: slots are independent, so he may still take the Shugenja's place in his own slot (only a card the SAME slot holds is refused).
+        var e2 = Fresh(out var actor2, out var shugenja2, out var ezuno2, out var other2);
+        Accept(e2, Use(e2, 0, "training-slots-two-personalities", actor2.Id, selections: [Pick("first", shugenja2.Id), Pick("second", ezuno2.Id)]));
+        Check(WindowFor(e2, shugenja2.Id), "the Shugenja's window");
+        Check(e2.QueryActions(1).Any(a => a.Type == "useAbility" && a.Command!.AbilityId == "ezuno-redirect" && a.Enabled), "slots are independent: Ezuno may take the Shugenja's place in his own slot");
+        // An action at Ezuno himself (the window is Ezuno's own): never offered.
+        var e3 = Fresh(out var actor3, out _, out var ezuno3, out var other3);
+        Accept(e3, Use(e3, 0, "training-slots-two-personalities", actor3.Id, selections: [Pick("first", ezuno3.Id), Pick("second", other3.Id)]));
+        Check(e3.State.PendingChoice is null || !e3.QueryActions(1).Any(a => a.Command?.AbilityId == "ezuno-redirect" && a.Enabled), "an action that targets Ezuno himself is not redirected onto him");
     }
 
     // ---- attachments ----------------------------------------------------------------------------------------------------------

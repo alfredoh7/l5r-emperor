@@ -97,6 +97,7 @@ internal static class Batch336Support
             var actor = e.State.PendingChoice?.PlayerId ?? e.State.PriorityPlayerId;
             var actions = e.QueryActions(actor).Where(a => a.Enabled && a.Command is not null).ToArray();
             var option = actions.FirstOrDefault(a => a.Type is "attack" or "assignDefense" && a.Command!.Assignments!.Values.All(p => p == 0) && a.Command.Assignments.Count > 0 && (a.Type == "attack" || e.State.UnresolvedBattlefields.Contains(0)))
+                ?? actions.FirstOrDefault(a => a.Type == "declareAttack") // the Declaration Segment (#359): declare, never decline
                 ?? actions.FirstOrDefault(a => a.Type is "pass" or "endDynasty" or "selectBattle" or "declineReaction" or "chooseConqueror" or "discardHand");
             Check(option is not null, $"nothing to choose for player {actor} in {e.State.Phase} ({e.State.PendingChoice?.Type})");
             var command = option!.Command!;

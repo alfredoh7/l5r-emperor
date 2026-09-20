@@ -15,7 +15,7 @@ public partial class BattleTracker : Control
     private static Texture2D? _plate;
     private double _clock;
     public int Stage => ActionOutcome ? 1 : ResolutionMessage is not null ? 2 : Snapshot.Phase == Phase.Battle ? 1 : 0;
-    public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    public static bool InBattle(Phase phase) => phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
     public override void _Ready()
     {
         MouseFilter = MouseFilterEnum.Stop;

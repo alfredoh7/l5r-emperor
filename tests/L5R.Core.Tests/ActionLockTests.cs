@@ -24,6 +24,7 @@ internal static class ActionLockTests
             ("Innate actions are barred too (Mendon's ruling): a locked dishonorable Samurai is listed for Order Seppuku disabled with the reason and refused when sent anyway, while an unlocked one still may -- and it is available again once the lock ends", InnateActionSeppukuIsBarred),
             ("Every innate action the engine offers is accounted for: the offered action types are pinned, and exactly two are performed by a Personality (Order Seppuku and an ability on a card) -- the rest are the player's (buying, equipping, passing, choosing) and none of them is barred by a lock on a Personality", InnateActionInventory),
             ("Assigning to attack or defend is not an action (Mendon's ruling): a locked Personality is offered in the attack and the defense assignments, is assigned, fights the battle with his Force counted, and is still locked and unable to act in it; he can also be moved by an enemy's action", AssignmentIsNotAnAction),
+            ("Reactions ARE actions (#359, IsAction): a locked Personality cannot perform a Reaction in any window -- a curated before-action Reaction (Akodo Kakihara), a \"targeted by an action\" Reaction (a Merchant's negation, #335) and a before-resolution Reaction (Akodo Dairuko's shape) -- and no window opens for a Reaction nobody may play; unlocked, each window opens as before", LockCoversReactionsInEveryWindow),
             ("A copied ability is barred too (Fukuzo's copy primitive): an ability a locked Personality copied is listed disabled with the reason and refused, its \"copied from\" label intact, and is offered as usual without the lock", CopiedAbilityIsBarred),
             ("\"X Champion\" keywords are ordinary keywords: an Item that attaches only to an Obsidian Champion goes onto Hotako and onto no other Personality, and a Strategy naming a performing Obsidian Champion offers only Hotako -- no special rule", ChampionKeywordIsOrdinary),
             ("Hotako's entry discount goes through the ONE purchase quote: a Lion Clan player pays 9 (11 - 2, term-by-term basis), a Crane player 11; the Clan discount and allegiance still stack; and the exact payment enters him play, costs the Lion 2 Honor with no Reaction offered", LionClanDiscountThroughQuotePurchase),
@@ -269,7 +270,7 @@ internal static class ActionLockTests
     private static readonly string[] PlayersOwnAndNotBarred =
     [
         "beforeBattleOptional", "beforeBattleOrder", "chooseConqueror", "choosePreservingHonor", "chooseRikateDetach", "chooseRinShame", "chooseShinden",
-        "chooseYourClanNeedsYouProvince", "concede", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
+        "chooseYourClanNeedsYouProvince", "concede", "declareAttack", "declineReaction", "declineStraighten", "discardHand", "discardProvince", "encircledOrder", "encircledSelect",
         "endDynasty", "equip", "forcedDiscard", "overlay", "pass", "playStrategy", "proclaim", "purchase", "recruitReserve", "selectBattle", "wait",
     ];
 
@@ -308,7 +309,7 @@ internal static class ActionLockTests
         bool sawAttack = false, sawDefense = false;
         RunUntil(e, () => e.State.Phase == Phase.Battle, () =>
         {
-            if (e.State.Phase == Phase.AttackDeclaration)
+            if (e.State.Phase == Phase.InfantryDeclaration) // the Attacker's Infantry Maneuvers (the Declaration Segment before it only declares)
             {
                 var attack = e.QueryActions(1).Where(a => a.Type == "attack" && a.Enabled).ToArray();
                 sawAttack |= attack.Length > 0 && attack.All(a => a.TargetIds!.Contains(attacker.Id));
@@ -333,6 +334,77 @@ internal static class ActionLockTests
         var e2 = MatchEngine.FromTestState(t);
         Accept(e2, Offer(e2, 1, "predator-move", predator.Id, moved.Id) with { Province = 2 });
         Check(e2.State.Cards[moved.Id].ProvinceIndex == 2 && e2.State.Cards[moved.Id].ActionLocks.Count == 1, "an enemy's action moved the locked Personality, and the lock stands");
+    }
+
+    // ---- Reactions are actions (#359: IsAction) ------------------------------------------------------------------------------------------------
+    private static void LockCoversReactionsInEveryWindow()
+    {
+        // (1) A curated before-action Reaction: Akodo Kakihara's, for an action that targets HIM. Player 0 bows him with a Battle action.
+        foreach (var locked in new[] { false, true })
+        {
+            var s = Table(); s.PriorityPlayerId = 0; s.ActivePlayerId = 0;
+            var bower = Add(s, "training-battle-bower", 0, Zone.Battlefield, province: 0);
+            var kakihara = Add(s, "oracle-l5r-223", 1, Zone.Battlefield, province: 0);
+            if (locked) kakihara.ActionLocks.Add(new("test", "Turn"));
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 0, Bow, bower.Id, kakihara.Id));
+            if (locked)
+            {
+                Check(e.State.PendingChoice is null && e.State.Cards[kakihara.Id].Bowed, "locked Kakihara: no window opens for a Reaction nobody may play, and the bow resolves");
+                Check(!e.State.Events.Any(x => x.Type == "reactionWindow" && x.Message.StartsWith("Before-action")), "no window was announced");
+            }
+            else
+            {
+                Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "unlocked: his window opens");
+                Check(e.QueryActions(1).Any(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "kakihara-force-bonus"), "and his Reaction is offered");
+            }
+        }
+        // (2) A "targeted by an action" Reaction (#335): a Merchant's negation, paid at no cost. Player 1 bows the Merchant with a Battle action.
+        foreach (var locked in new[] { false, true })
+        {
+            var s = Table();
+            var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            var guard = Add(s, "training-merchant-free-guard", 0, Zone.Battlefield, province: 0);
+            if (locked) guard.ActionLocks.Add(new("test", "Turn"));
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, Bow, bower.Id, guard.Id));
+            if (locked) Check(e.State.PendingChoice is null && e.State.Cards[guard.Id].Bowed, "locked Merchant: no window, the bow resolves on him");
+            else
+            {
+                Eq(e.State.PendingChoice?.Type, "beforeActionReaction", "unlocked: the window opens");
+                Check(e.QueryActions(0).Any(a => a.Type == "useAbility" && a.Enabled && a.Command!.AbilityId == "training-negate-merchant-free"), "and the negation is offered");
+            }
+        }
+        // (2b) A Reaction listed inside a window that is open anyway (an unlocked Merchant guards a second card): the locked one's Reaction is listed disabled
+        // with the reason, and refused when sent.
+        {
+            var s = Table();
+            var bower = Add(s, "training-battle-bower", 1, Zone.Battlefield, province: 0);
+            var open = Add(s, "training-merchant-free-guard", 0, Zone.Battlefield, province: 0);
+            var e = MatchEngine.FromTestState(s);
+            Accept(e, Offer(e, 1, Bow, bower.Id, open.Id));
+            var st = e.State; st.Cards[open.Id].ActionLocks.Add(new("test", "Turn")); // locked while its window is open
+            e = MatchEngine.FromTestState(st);
+            var listed = e.QueryActions(0).Where(a => a.Type == "useAbility" && a.Command?.AbilityId == "training-negate-merchant-free").ToArray();
+            Check(listed.Length == 0 || listed.All(a => !a.Enabled && a.Reason!.Contains("may not perform actions")), "a Reaction of a Personality locked while its window is open is not playable: " + string.Join(";", listed.Select(a => a.Reason)));
+            Reject(e, new GameCommand("useAbility", 0, e.Version, open.Id, AbilityId: "training-negate-merchant-free"));
+        }
+        // (3) A before-resolution Reaction (Akodo Dairuko's shape, #363): "Before the resolution of a battle at her battlefield". Both players pass, and the
+        // window for it opens -- unless its Personality is locked, then the battle resolves.
+        foreach (var locked in new[] { false, true })
+        {
+            var s = Table();
+            var commander = Add(s, "training-rallying-commander", 0, Zone.Battlefield, province: 0);
+            Add(s, "training-lion-samurai", 0, Zone.Battlefield, province: 0); Add(s, "training-crane-samurai", 1, Zone.Battlefield, province: 0);
+            if (locked) commander.ActionLocks.Add(new("test", "Turn"));
+            var e = MatchEngine.FromTestState(s);
+            for (var i = 0; i < 2; i++) Accept(e, e.QueryActions(e.State.PriorityPlayerId).First(a => a.Type == "pass" && a.Enabled).Command!);
+            if (locked) Check(e.State.PendingChoice is null && e.State.Events.Any(x => x.Type == "battleResolved"), "locked: the battle resolves without asking for his Reaction");
+            else
+            {
+                Eq(e.State.PendingChoice?.Type, "beforeBattleReaction", "unlocked: the before-resolution Reaction is asked"); Eq(e.State.PendingChoice?.CardId, commander.Id);
+            }
+        }
     }
 
     private static void CopiedAbilityIsBarred()

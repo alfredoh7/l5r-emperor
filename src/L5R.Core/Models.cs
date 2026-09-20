@@ -5,9 +5,10 @@ namespace L5R.Core;
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum CardType { Stronghold, Holding, Personality, Strategy, Follower, Item, Spell, Event, Celestial, Region, Ring }
 [JsonConverter(typeof(JsonStringEnumConverter))]
-// AttackDeclaration/DefenseAssignment is the Infantry Maneuvers segment; CavalryDeclaration/
-// CavalryDefense is the Cavalry Maneuvers segment that follows it (core rules Attack Phase, step C).
-public enum Phase { Straighten, Events, Action, AttackDeclaration, DefenseAssignment, CavalryDeclaration, CavalryDefense, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
+// AttackDeclaration is the Declaration Segment (the Attacker declares an attack or declines, and declining ends the
+// Attack Phase); InfantryDeclaration/DefenseAssignment is the Infantry Maneuvers segment that follows a declared attack;
+// CavalryDeclaration/CavalryDefense is the Cavalry Maneuvers segment after it (core rules Attack Phase, steps A-C).
+public enum Phase { Straighten, Events, Action, AttackDeclaration, InfantryDeclaration, DefenseAssignment, CavalryDeclaration, CavalryDefense, BattleSelection, Battle, Dynasty, DynastyDiscard, End, Finished }
 [JsonConverter(typeof(JsonStringEnumConverter))]
 // RemovedFromGame (issue #184 -- core rules Glossary): a card here can never be targeted or used
 // again under any circumstance, distinct from Dead/DynastyDiscard/FateDiscard -- both Fate and
@@ -128,6 +129,30 @@ public sealed record AppliedModifier(string Source, string Effect, string Stat, 
 /// Thunder: every effect the action applies to that card, live for the whole re-invocation).</summary>
 public sealed record NegatedEffect(string Kind, string CardId);
 
+/// <summary>A reaction window set aside while a Reaction played inside it (an action, like any other) has a window of its own to deal
+/// with -- a before-action window, a forced discard, Unimpeachable Name, an "after this action" window. PendingChoice holds one window,
+/// so the waiting one is kept here, with the transient state that belongs to it, and reopened as it was when the new one is done
+/// (see ReactionsAreActions.cs). ReactingPlayerId is who was playing the Reaction, i.e. who held priority in it.</summary>
+public sealed class SuspendedWindow
+{
+    public PendingChoice Choice { get; set; } = null!;
+    public int ReactingPlayerId { get; set; }
+    public int ConsecutivePasses { get; set; }
+    public GameCommand? NegatableAbility { get; set; }
+    public bool ActionNegated { get; set; }
+    public List<NegatedEffect> NegatedEffects { get; set; } = [];
+    public GameCommand? OutOfPlayActionReaction { get; set; }
+    public int? HonorLossReductionPlayerId { get; set; }
+    public GameCommand? ForcedDiscardContinuation { get; set; }
+    public string? ForcedDiscardResume { get; set; }
+    public List<string> BowReactionCandidateIds { get; set; } = [];
+    public string? MoveReactionTargetId { get; set; }
+    public string? NikutaiReactionTargetId { get; set; }
+    // The window's own target and the targets still to come (issue #336, TargetWindows.cs): a Reaction that opens a window of its own must not clobber them.
+    public string? ReactionWindowTargetId { get; set; }
+    public List<string> ReactionWindowRemaining { get; set; } = [];
+}
+
 /// <summary>A keyword granted by another card rather than printed. Duration is "Attachment"
 /// (lasts until that attachment moves or is destroyed), "Turn" (cleared at turn end, the default
 /// for an action-granted keyword), or "Permanent" (only when the granting text says so).</summary>
@@ -236,8 +261,8 @@ public sealed class PlayerState
     public int ProclaimUsedTurn { get; set; } = -1;
     public bool DishonorLossPending { get; set; }
     // Utaku Chikako's own Limited ability (issue #186): "You may not declare an attack this turn" --
-    // a broad restriction (not just her own printed card's interaction), so it blocks DeclareAttack
-    // outright regardless of what grants the assignment opportunity. Reset every StartTurn.
+    // a broad restriction (not just her own printed card's interaction), so it blocks declaring an
+    // attack (and, defensively, any attacker assignment) outright regardless of what grants the opportunity. Reset every StartTurn.
     public bool MayNotAttackThisTurn { get; set; }
     // Ring of Air's own recruitment condition (issue #194): "after you resolve two or more Favor
     // actions in one turn." Incremented at each Favor-consuming ability's own execution case
@@ -289,6 +314,12 @@ public sealed class PendingAttack
     // immediate (non-deferred) resolution path already gets this for free via ExecuteAbilityEffects'
     // own tail, so only the deferred/reaction-window path needs this carried across.
     public bool Additional { get; set; }
+    // The declaring command, so targeted-by-action reactions can re-run the Attack's target validation; kept in step with TargetId on a redirect. Its CardId is the
+    // card the ability is printed on (not always the performer: an Item, Spell, Follower or hand Strategy performs through a Personality), which is where the
+    // inherited keywords of "was that a [keyword] action?" are read.
+    public GameCommand? Command { get; set; }
+    // The whole Attack was negated by a reaction (Yasuki Jinn-Kuen): it resolves without effect.
+    public bool Negated { get; set; }
 }
 
 /// <summary>Conqueror (core rules Glossary): open only when the attacker won and more than one of
@@ -308,10 +339,13 @@ public sealed class PendingConqueror
 /// 'before this battle resolves' effects in play at a battlefield, the player whose turn it is
 /// chooses the order." Opened by ResolveBattle itself, before Army()/ArmyForces are ever computed --
 /// deliberately BEFORE the battle's own participants are read, since Encircled Terrain's own effect
-/// (sending every other Personality home) changes who actually fights. RemainingSourceIds holds every
-/// not-yet-resolved source's own card id, still to be ordered by the active player (via the
+/// (sending every other Personality home) changes who actually fights. ONE set, ordered by the active
+/// player (rules lead: there is no alternating reaction round): a card's trait (its own card id), a
+/// delayed effect a Battle action registered ("delayed:N", DelayedBattleEffect) and a printed
+/// "Reaction: Before a battle resolves" ("reaction:CARD:ABILITY", optional, its owner decides). RemainingSourceIds
+/// holds every not-yet-resolved item's id, still to be ordered by the active player (via the
 /// "beforeBattleOrder" PendingChoice) whenever more than one remains; ActiveSourceId is whichever one
-/// is currently resolving. The Encircled* fields are that one source's own sub-stage -- a future
+/// is currently resolving; ActiveItemSpent is set once its owner has used or declined a Reaction item. The Encircled* fields are that one source's own sub-stage -- a future
 /// second "before this battle resolves" card with a different shape gets its own such fields, never
 /// reusing these by coincidence of type.</summary>
 public sealed class PendingBeforeBattleResolve
@@ -321,6 +355,7 @@ public sealed class PendingBeforeBattleResolve
     public int Defender { get; set; }
     public List<string> RemainingSourceIds { get; set; } = [];
     public string? ActiveSourceId { get; set; }
+    public bool ActiveItemSpent { get; set; }
     // Encircled Terrain's own sub-stage while ActiveSourceId is its id: "ChooseOrder" (its own
     // controller picks who selects first) -> "FirstSelect" -> "SecondSelect" (each side chooses one
     // Personality of their own at this battlefield to keep) -> resolved (every other Personality here
@@ -328,6 +363,12 @@ public sealed class PendingBeforeBattleResolve
     public string? EncircledStage { get; set; }
     public string? EncircledFirstSelectedId { get; set; }
 }
+
+/// <summary>An effect a Battle action registered for the moment its battle is about to resolve ("Before this battle resolves, bow
+/// him"): Kind "bow", "straighten", "modifier" (Stat, Amount: "give him -3C") or "destroy". It joins the one ordered set of
+/// before-resolution effects (PendingBeforeBattleResolve) and lapses with its battle, applied or not (FinishBattleResolution).
+/// PlayerId is who registered it, SourceId the card whose action did.</summary>
+public sealed record DelayedBattleEffect(int Id, string Kind, int PlayerId, string? SourceId, string TargetId, string? Stat = null, int Amount = 0, string? ThenMoveId = null);
 
 /// <summary>One claim on "the first opportunity to take a Battle action or pass" in a battle (Battle Phase
 /// spec 4.3/4.4; issue #310). PlayerId is the BENEFICIARY -- who the card says gets the opportunity, not
@@ -419,6 +460,8 @@ public sealed class FieldsOfMercyWatch
 public sealed class PendingDuel
 {
     public string AbilityId { get; set; } = "";
+    // The card the challenge-issuing ability is printed on (an Attack keeps it in PendingAttack.Command.CardId); null for a player ability.
+    public string? SourceCardId { get; set; }
     // The player who issued the challenge -- NextAction is called with this once the duel fully
     // resolves, so priority returns exactly where it would have without the interjecting duel.
     public int ChallengerPlayerId { get; set; }
@@ -498,6 +541,12 @@ public sealed class MatchState
     // (ordering choices, Encircled Terrain's own selection sub-stages); cleared before the battle's
     // actual winner/casualties are ever computed.
     public PendingBeforeBattleResolve? PendingBeforeBattleResolve { get; set; }
+    // Effects registered by Battle actions for THIS battle's before-resolution set (DelayedBattleEffect); cleared when the battle ends.
+    public List<DelayedBattleEffect> DelayedBattleEffects { get; set; } = [];
+    public int NextDelayedEffectId { get; set; }
+    // "That battle's resolution will not bow cards in your army" (Akodo Dairuko): the players whose army the resolution does not bow;
+    // cleared when the battle ends.
+    public List<int> ResolutionWillNotBowPlayerIds { get; set; } = [];
     // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
     // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
     // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),
@@ -523,6 +572,8 @@ public sealed class MatchState
     // (MatchEngine.CheckYourClanNeedsYouReturn), then removed from this list regardless of outcome.
     // A List (not a single nullable id), since more than one copy could resolve within one battle.
     public List<string> YourClanNeedsYouWatchIds { get; set; } = [];
+    // Cards an action created "until the battle ends" (Kyuden Hida - exp's Scout Followers): removed from the game when their battle is over, wherever they are.
+    public List<string> CreatedUntilBattleEndsIds { get; set; } = [];
     // Ashigaru Elite's shape: a per-player counter of the current battle's Force boost to each of the
     // performer's own Ashigaru-keyword Personalities/Followers at this battlefield, incremented once
     // per use (stacks, tireless). Reset to zero whenever a battle resolves (FinishBattleResolution) --
@@ -577,6 +628,8 @@ public sealed class MatchState
     public string? ReactionWindowTargetId { get; set; }
     public List<string> ReactionWindowRemaining { get; set; } = [];
     public List<NegatedEffect> NegatedEffects { get; set; } = [];
+    // Windows set aside behind a nested one, most recent last (SuspendedWindow; empty outside a Reaction's own follow-on windows).
+    public List<SuspendedWindow> SuspendedWindows { get; set; } = [];
     // Force redirection (issue #216, Togashi Noboru): "the target's Force contributes to [Noboru's
     // controller's] army instead of his own controller's" -- battle-scoped ("for the duration of the
     // battle," core rules' own default for an in-battle condition), so cleared at
@@ -590,8 +643,8 @@ public sealed class MatchState
     // assigned to attack" -- once independently per Brash card in ONE attack declaration, so this is
     // a plain countdown (every offer is identical: draw or don't), not per-card state. Non-zero only
     // while PendingChoice.Type=="brashDraw" is open; the deferred phase transition (which of
-    // DefenseAssignment/CavalryDefense DeclareAttack would otherwise have moved to) resumes once it
-    // reaches zero -- read off _state.Phase itself (still AttackDeclaration/CavalryDeclaration until
+    // DefenseAssignment/CavalryDefense AssignAttackers would otherwise have moved to) resumes once it
+    // reaches zero -- read off _state.Phase itself (still InfantryDeclaration/CavalryDeclaration until
     // then), so no separate field is needed to remember it.
     public int PendingBrashDraws { get; set; }
     // Bow reaction (issue #216, Togashi Hizumi): while PendingChoice.Type=="bowReaction" is open on
@@ -618,6 +671,11 @@ public sealed class MatchState
     // before any Reaction to the same trigger) holds the announced command here until the discard is answered, when
     // UseAbility carries on with it exactly where it stopped.
     public GameCommand? ForcedDiscardContinuation { get; set; }
+    // Where the held action resumes once the discard is answered: null = announcement (UseAbility carries on), "action" = a deferred action whose window
+    // has closed, "attack" = a pending Attack whose window has closed (issue #335).
+    public string? ForcedDiscardResume { get; set; }
+    // The Bofanas the action being announced or resolved has already been judged for (the announce-time trait fires once per action per Bofana).
+    public List<string> AnnounceTraitEvaluated { get; set; } = [];
     // The card whose mandatory "after this enters play" effects wait for its open Proclaim window (see ApplyPendingEntryEffects).
     public string? PendingEntryEffectsCardId { get; set; }
     // War Weariness (issue #259): "the first action each phase that one or more Personalities
@@ -779,7 +837,8 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     Dictionary<string, GoldQuote>? TargetGold = null,
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
-    TargetSlotOption[]? Slots = null);
+    TargetSlotOption[]? Slots = null,
+    bool NoTarget = false);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
@@ -820,20 +879,22 @@ public sealed record DuelView(int ChallengerPlayerId, int ChallengedPlayerId, st
 /// Phase (issue #310). A client keys its sidebar off these constants and never infers timing itself.</summary>
 public static class BattleSteps
 {
-    // Segments (spec steps 1-5). "None" is any moment outside the Attack Phase. The spec's Declaration
-    // Segment is not a separate decision in this engine: the attacker's Infantry assignment prompt IS the
-    // declaration (an empty assignment declines) -- see docs/decisions/2026-09-18-battle-timing-primitives.md.
-    public const string None = "None", InfantryManeuvers = "InfantryManeuvers", CavalryManeuvers = "CavalryManeuvers",
+    // Segments (spec steps 1-5). "None" is any moment outside the Attack Phase. Declaration is one explicit decision by
+    // the Attacker (DeclareOrDecline): declining ends the Attack Phase at once (the view then reads None), declaring
+    // creates a battlefield at every one of the Defender's provinces and moves on to Infantry Maneuvers.
+    public const string None = "None", Declaration = "Declaration", InfantryManeuvers = "InfantryManeuvers", CavalryManeuvers = "CavalryManeuvers",
         FightBattles = "FightBattles", Resolution = "Resolution";
-    // Steps. AttackerAssigns/DefenderAssigns are the Maneuvers decisions; ChooseBattle is 4.1; Engage is 4.2;
+    // Steps. DeclareOrDecline is the Declaration decision; AttackerAssigns/DefenderAssigns are the Maneuvers decisions; ChooseBattle is 4.1; Engage is 4.2;
     // BattleActions is 4.5 (the first-action holder of 4.3/4.4 is in FirstActionPlayerId); BeforeResolution and
     // Aftermath are the two observable halves of Resolution (5) -- the Force comparison itself is instantaneous.
-    public const string AttackerAssigns = "AttackerAssigns", DefenderAssigns = "DefenderAssigns", ChooseBattle = "ChooseBattle",
+    public const string DeclareOrDecline = "DeclareOrDecline", AttackerAssigns = "AttackerAssigns", DefenderAssigns = "DefenderAssigns", ChooseBattle = "ChooseBattle",
         Engage = "Engage", BattleActions = "BattleActions", BeforeResolution = "BeforeResolution", Aftermath = "Aftermath";
     // FirstActionReason values.
     public const string ReasonDefault = "Default", ReasonNaval = "Naval", ReasonEngageGrant = "EngageGrant", ReasonDefenderOverride = "DefenderOverride";
     // FirstActionLimit values.
     public const string LimitMustPass = "MustPass", LimitPerformerOnly = "PerformerOnly";
+    // BeforeResolutionEffectView.Kind: the three kinds of item in the one ordered set of before-resolution effects.
+    public const string EffectTrait = "Trait", EffectDelayed = "Delayed", EffectReaction = "Reaction";
 }
 
 /// <summary>Public, read-only Battle Phase timing (issue #310): everything a battle sidebar needs, derived from
@@ -848,7 +909,14 @@ public static class BattleSteps
 public sealed record BattleStepView(string Segment, string Step, int? DecisionPlayerId, int? AttackerPlayerId,
     int? BattlefieldProvince, int? FirstActionPlayerId, string? FirstActionReason, bool FirstActionResolved,
     FirstOpportunityClaim[] EngageClaims, string? FirstActionLimit, string? FirstActionPerformerId,
-    int ConsecutivePasses, string[] BeforeResolutionSourceIds, string? ActiveBeforeResolutionSourceId, string? Window);
+    int ConsecutivePasses, string[] BeforeResolutionSourceIds, string? ActiveBeforeResolutionSourceId, string? Window,
+    BeforeResolutionEffectView[]? BeforeResolutionEffects = null);
+
+/// <summary>One item of the ordered set of before-resolution effects still to apply (BattleStepView.BeforeResolutionEffects; its Id is the
+/// one in BeforeResolutionSourceIds and the one a "beforeBattleOrder" names). Kind is EffectTrait (a card's trait), EffectDelayed (registered
+/// by a Battle action) or EffectReaction (a printed "Before a battle resolves" Reaction, optional); PlayerId is whose it is (the active player
+/// orders the whole set), CardId the card behind it when there is one, Label a name for it.</summary>
+public sealed record BeforeResolutionEffectView(string Id, string Kind, int PlayerId, string? CardId, string Label);
 public sealed record MatchView(string ContentVersion, string Scenario, long Version, int TurnNumber,
     int ViewerId, int ActivePlayerId, int PriorityPlayerId, Phase Phase, PendingChoice? PendingChoice,
     int? CurrentBattleProvince, int[] UnresolvedBattlefields, int? WinnerId, string? VictoryReason,

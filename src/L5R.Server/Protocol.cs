@@ -48,11 +48,11 @@ public sealed record WireGameCommand(string Type, string? CardId = null, string[
 // payment panel from the server's authoritative numbers and never derives a cost.
 public sealed record AvailableAction(string Type, string Label, bool Enabled, string? Reason,
     WireGameCommand? Command, string? CardId, string[]? TargetIds, int[]? Provinces, PurchaseQuote? Quote,
-    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null, TargetSlotOption[]? Slots = null)
+    GoldQuote? Gold = null, Dictionary<string, GoldQuote>? TargetGold = null, TargetSlotOption[]? Slots = null, bool NoTarget = false)
 {
     public static AvailableAction FromCore(ActionOption action) => new(action.Type, action.Label,
         action.Enabled, action.Reason, action.Command is null ? null : WireGameCommand.FromCore(action.Command),
-        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold, action.Slots);
+        action.CardId, action.TargetIds, action.Provinces, action.Quote, action.Gold, action.TargetGold, action.Slots, action.NoTarget);
 }
 
 public sealed record ServerError(string Code, string Message);

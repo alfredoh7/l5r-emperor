@@ -19,13 +19,15 @@ public sealed partial class MatchEngine
     private bool ActionLocked(CardInstance card) =>
         card.ActionLocks.Count > 0 || card.Zone == Zone.Attached && card.AttachedTo is string hostId && _state.Cards.TryGetValue(hostId, out var host) && host.ActionLocks.Count > 0;
 
-    // ValidateAbility's check, for every action there is -- an ability on a card, a Reaction, a Strategy naming its performer -- because they
-    // all reach the engine as an ability command. Who performs is the card the ability names as its performer when that is a
+    // ValidateAbility's check, for every action there is -- an ability on a card, a Reaction (a Reaction IS an action: IsAction, ReactionsAreActions.cs, the one
+    // classification), a Strategy naming its performer -- because they all reach the engine as an ability command. A trait or a mandatory effect is not an
+    // action (IsAction is false for it) and is never barred. Who performs is the card the ability names as its performer when that is a
     // Personality or a Follower ("choose your performing Samurai"), otherwise the card the ability is on (an Item's or Spell's action is
     // performed through the Personality it is attached to, which ActionLocked follows). A performer that is only a cost (a Holding to bow
     // instead of the source) does not perform: the action is still the source's.
     private void RequireCanPerform(GameCommand command, AbilityDefinition ability, CardInstance? source)
     {
+        if (!IsAction(ability)) return;
         var named = ability.Performer is not null && command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var chosen) ? chosen : null;
         var actor = named is not null && Definition(named).Type is CardType.Personality or CardType.Follower ? named : source;
         if (actor is not null) Require(!ActionLocked(actor), $"{Definition(actor).Name} may not perform actions this turn.");

@@ -174,7 +174,14 @@ public sealed partial class MatchEngine
     }
 
     private CommandResult Reject(string error) => new(false,error,_state.Version,[]);
+    // A window a Reaction set aside (ReactionsAreActions.cs) is reopened the moment nothing that Reaction started is still waiting.
     private void Apply(GameCommand command)
+    {
+        ApplyCore(command);
+        ResumeIdleSuspendedWindow();
+        FinishSpentBeforeBattleItem();
+    }
+    private void ApplyCore(GameCommand command)
     {
         if (command.Type=="concede") { Win(1-command.PlayerId,"Concession"); return; }
         // Open action: cuts through the normal priority gate and any pending choice, same as concede.
@@ -206,6 +213,7 @@ public sealed partial class MatchEngine
             // "useAbility"/pass alternative -- see PendingBeforeBattleResolve's own doc comment.
             if (_state.PendingChoice.Type=="beforeBattleOrder") { ResolveBeforeBattleOrder(command); return; }
             if (_state.PendingChoice.Type=="beforeBattleOptional") { ResolveBeforeBattleOptional(command); return; }
+            if (_state.PendingChoice.Type=="beforeBattleReaction") { ResolveBeforeBattleReaction(command); return; }
             // Battle Phase timing (issue #310, spec 4.2): "Engage:" actions and "After engaging" Reactions, open to
             // either side; the top-level priority check above already enforces whose opportunity it is, and two
             // passes in succession close the window (PassReaction -> CloseEngageWindow decides who acts first).
@@ -274,7 +282,11 @@ public sealed partial class MatchEngine
                 // priority check already enforces whose turn it is to act or pass.
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending attack first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
-                if (_state.PendingChoice is null && _state.PendingAttack is not null) ResolveAttack();
+                if (_state.PendingChoice is null && _state.PendingAttack is { } closing)
+                {
+                    if (closing.Command is not null && OpenForcedDiscardForTargetedTrait(closing.Command, "attack")) return;
+                    ResolveAttack();
+                }
                 return;
             }
             if (_state.PendingChoice.Type=="additionalActionReaction")
@@ -285,12 +297,15 @@ public sealed partial class MatchEngine
                 // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
                 // already removed the grant regardless of what happens next).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
+                var holder=_state.PendingChoice.PlayerId;
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
                 {
                     var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
                     ExecuteAbilityEffects(pending,consumedGrant:true);
                 }
+                // The additional action was negated: only it is lost. The burst it was part of goes on, so the next additional action is the holder's to take.
+                else if (_state.PendingChoice is null && _state.AdditionalActions.Any(g=>g.PlayerId==holder)) { _state.PriorityPlayerId=holder; _state.ConsecutivePasses=0; }
                 return;
             }
             if (_state.PendingChoice.Type=="beforeActionReaction")
@@ -311,15 +326,9 @@ public sealed partial class MatchEngine
                     if (!_state.DeferredActionNegated && OpenNextRemainingTargetWindow()) return;
                     _state.ReactionWindowTargetId=null; _state.ReactionWindowRemaining=[];
                     var pending=_state.PendingNegatableAbility; _state.PendingNegatableAbility=null;
-                    // A reaction that negated the whole action (Yoritomo Sakuma, issue #338): it is taken, its costs are paid, its effects
-                    // are not applied (ActionNegation.cs).
-                    var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
-                    if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
-                    // Defensive: a negation signal must never survive past the one re-invocation it
-                    // was set for -- if the re-invoked ability did not actually reach a matching
-                    // MoveHome/Straighten/DestroyUnits call (a classification mismatch), clear them here
-                    // rather than risk them leaking into a later, unrelated one.
-                    _state.NegatedEffects.Clear();
+                    // A redirect may have made a Bofana the target of an action his trait was not yet judged for (issue #335).
+                    if(OpenForcedDiscardForTargetedTrait(pending,"action")) return;
+                    ResolveDeferredActionInItsWindow(pending);
                 }
                 return;
             }
@@ -334,8 +343,12 @@ public sealed partial class MatchEngine
                 if (_state.PendingChoice is null && _state.PendingOutOfPlayActionReaction is not null)
                 {
                     var pending=_state.PendingOutOfPlayActionReaction; _state.PendingOutOfPlayActionReaction=null;
+                    var reduction=_state.HonorLossReductionPlayerId;
+                    var outer=ContinueSuspendedReaction(pending);
+                    _state.HonorLossReductionPlayerId=reduction; var suspended=_state.SuspendedWindows.Count;
                     ExecuteAbilityEffects(pending);
-                    _state.HonorLossReductionPlayerId=null;
+                    if(_state.SuspendedWindows.Count>suspended) _state.SuspendedWindows[^1].HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
+                    else _state.HonorLossReductionPlayerId=outer?.HonorLossReductionPlayerId;
                 }
                 return;
             }
@@ -406,7 +419,8 @@ public sealed partial class MatchEngine
             case "overlay": Overlay(command); break;
             case "discardProvince": DiscardProvince(command); break;
             case "endDynasty": Require(_state.Phase is Phase.Dynasty or Phase.DynastyDiscard,"Not in the Dynasty Phase."); EndTurn(); break;
-            case "attack": DeclareAttack(command); break;
+            case "declareAttack": DeclareAttackPhase(command); break;
+            case "attack": AssignAttackers(command); break;
             case "assignDefense": AssignDefense(command); break;
             case "selectBattle": SelectBattle(command); break;
             case "equip": Equip(command); break;
@@ -938,6 +952,16 @@ public sealed partial class MatchEngine
         else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
     }
 
+    // The deferred action, once its window has closed: negated as a whole (a reaction negated it: Yoritomo Sakuma, issue #338; Jinn-Kuen, issue #335) it is taken and
+    // its costs paid but its effects are not applied (ActionNegation.cs), otherwise it resolves. A negation signal must never survive the one re-invocation it was set
+    // for, so the per-card ones are cleared here.
+    private void ResolveDeferredAction(GameCommand pending)
+    {
+        var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+        if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
+        _state.NegatedEffects.Clear();
+    }
+
     private void Pass()
     {
         Emit("passed", $"{Player(_state.PriorityPlayerId).Name} passed.", _state.PriorityPlayerId);
@@ -947,16 +971,18 @@ public sealed partial class MatchEngine
                 if(++_state.ConsecutivePasses==2) SetPhase(Phase.AttackDeclaration,_state.ActivePlayerId);
                 else _state.PriorityPlayerId=1-_state.PriorityPlayerId;
                 break;
-            // Declining to assign any Infantry is not a decision to skip the whole Attack Phase --
-            // Cavalry Maneuvers is a separate step that must still get its own opportunity, exactly
-            // as an empty Cavalry declaration below only declines further Cavalry, not the Battle
-            // Phase that follows it.
-            case Phase.AttackDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
+            // The Declaration Segment: passing IS declining to attack, and a declined attack ends the Attack Phase
+            // right here -- no battlefield exists, so there are no Maneuvers segments and no defender prompts.
+            case Phase.AttackDeclaration: DeclineAttackPhase(); break;
+            // Assigning no Infantry is not declining the attack: it was already declared, so Cavalry Maneuvers
+            // still gets its own opportunity and every battlefield is still fought (an attacker is "not
+            // compelled to assign any units").
+            case Phase.InfantryDeclaration:
+            case Phase.CavalryDeclaration: AssignAttackers(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.DefenseAssignment:
             case Phase.CavalryDefense:
                 AssignDefense(new("assignDefense",_state.PriorityPlayerId,_state.Version,Assignments:[]));
                 break;
-            case Phase.CavalryDeclaration: DeclareAttack(new("attack",_state.PriorityPlayerId,_state.Version,Assignments:[])); break;
             case Phase.Battle:
                 // Additional Action (issue #181): passing forfeits any of this player's own still-
                 // unused grants rather than letting them linger for a future, ordinary turn -- the
@@ -983,14 +1009,30 @@ public sealed partial class MatchEngine
         SetPhase(Phase.DynastyDiscard,command.PlayerId);
     }
 
-    // Infantry Maneuvers (AttackDeclaration/DefenseAssignment) always runs first; Cavalry Maneuvers
-    // (CavalryDeclaration/CavalryDefense) follows, adding to the same battlefields Infantry
-    // Maneuvers already opened -- only provinces where the attacker actually placed a unit,
-    // recomputed after each of the two attacker steps so a Cavalry-only or Infantry-only
-    // declaration is just as capable of putting a province up for battle as a mixed one.
-    private void DeclareAttack(GameCommand command)
+    // The Declaration Segment (rules lead: "an attack is either declared or not"): one explicit decision by the
+    // Attacker. Declaring creates a battlefield at EVERY one of the Defender's provinces, whether or not anyone is
+    // ever assigned to it (core rules: even a battlefield with no units on either side has its one battle);
+    // declining ends the Attack Phase at once (DeclineAttackPhase).
+    private void DeclareAttackPhase(GameCommand command)
     {
-        Require(_state.Phase is Phase.AttackDeclaration or Phase.CavalryDeclaration,"Declare an attack after the Action Phase.");
+        Require(_state.Phase==Phase.AttackDeclaration,"Declare an attack after the Action Phase.");
+        Require(!Player(command.PlayerId).MayNotAttackThisTurn,"You may not declare an attack this turn.");
+        _state.UnresolvedBattlefields=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).Order().ToList();
+        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared an attack: a battlefield exists at each of {Player(1-command.PlayerId).Name}'s provinces.",command.PlayerId);
+        SetPhase(Phase.InfantryDeclaration,command.PlayerId);
+    }
+    private void DeclineAttackPhase()
+    {
+        Emit("attackDeclined",$"{Player(_state.PriorityPlayerId).Name} declined to attack; the Attack Phase ends.",_state.PriorityPlayerId);
+        _state.UnresolvedBattlefields=[];
+        SetPhase(Phase.Dynasty,_state.ActivePlayerId);
+    }
+    // Infantry Maneuvers (InfantryDeclaration/DefenseAssignment) runs first, then Cavalry Maneuvers
+    // (CavalryDeclaration/CavalryDefense), both on the battlefields the declaration already created: assigning
+    // places units at them but never decides whether a battlefield exists.
+    private void AssignAttackers(GameCommand command)
+    {
+        Require(_state.Phase is Phase.InfantryDeclaration or Phase.CavalryDeclaration,"Assign attackers after declaring an attack.");
         // Utaku Chikako's own restriction (issue #186): a broad "may not declare an attack this turn"
         // -- blocks any non-empty attacker assignment outright, Infantry or Cavalry alike, regardless
         // of what would otherwise grant the assignment opportunity (a future "Ambush"-style card
@@ -1000,9 +1042,7 @@ public sealed partial class MatchEngine
         var cavalry=_state.Phase==Phase.CavalryDeclaration;
         var targets=Player(1-command.PlayerId).Provinces.Where(p=>!p.Destroyed).Select(p=>p.Index).ToHashSet();
         Assign(command,targets,cavalry,false);
-        _state.UnresolvedBattlefields=_state.Cards.Values.Where(c=>c.OwnerId==command.PlayerId && c.Zone==Zone.Battlefield && c.ProvinceIndex is int)
-            .Select(c=>c.ProvinceIndex!.Value).Distinct().Order().ToList();
-        Emit("attackDeclared",$"{Player(command.PlayerId).Name} declared {(cavalry?"a Cavalry":"an Infantry")} attack.",command.PlayerId);
+        Emit("attackersAssigned",$"{Player(command.PlayerId).Name} assigned {(command.Assignments?.Count??0)} {(cavalry?"Cavalry":"Infantry")} attacker(s).",command.PlayerId);
         // Brash (core rules keyword, issue #216): the Defender may draw a card, independently, once
         // per Brash card just assigned to attack -- deferred here, before the usual phase transition,
         // so the Defender resolves every offer first; FinishBrashDraws makes that same transition
@@ -1033,8 +1073,6 @@ public sealed partial class MatchEngine
         Require(_state.Phase is Phase.DefenseAssignment or Phase.CavalryDefense,"Defenders assign after the attacking army.");
         var cavalry=_state.Phase==Phase.CavalryDefense;
         Assign(command,_state.UnresolvedBattlefields.ToHashSet(),cavalry,true);
-        // Nothing to fight this turn (no Infantry or Cavalry ever attacked anywhere): skip the
-        // battlefield-selection/resolution phases outright rather than stall with zero choices.
         SetPhase(cavalry?(_state.UnresolvedBattlefields.Count>0?Phase.BattleSelection:Phase.Dynasty):Phase.CavalryDeclaration,_state.ActivePlayerId);
     }
     private void Assign(GameCommand command,HashSet<int> provinces,bool cavalry,bool isDefender)
@@ -1089,7 +1127,7 @@ public sealed partial class MatchEngine
         // resolution is determined" -- deliberately checked BEFORE Army() is ever read below, since
         // Encircled Terrain's own effect (sending every other Personality home) changes who actually
         // fights. See PendingBeforeBattleResolve's own doc comment for the full sequencing.
-        var sources=BeforeBattleResolveSourceIds(provinceIndex);
+        var sources=BeforeResolutionItemIds(provinceIndex);
         if(sources.Length>0)
         {
             _state.PendingBeforeBattleResolve=new PendingBeforeBattleResolve{ProvinceIndex=provinceIndex,Attacker=attacker,Defender=defender,RemainingSourceIds=sources.ToList()};
@@ -1148,7 +1186,10 @@ public sealed partial class MatchEngine
     }
     private void StartBeforeBattleEffect(PendingBeforeBattleResolve pending)
     {
-        var source=Card(pending.ActiveSourceId!);
+        var itemId=pending.ActiveSourceId!;
+        if(itemId.StartsWith(DelayedItemPrefix,StringComparison.Ordinal)) { StartDelayedItem(pending,itemId); return; }
+        if(itemId.StartsWith(ReactionItemPrefix,StringComparison.Ordinal)) { StartReactionItem(pending,itemId); return; }
+        var source=Card(itemId);
         var traitId=BeforeResolutionAbilityId(source)!;
         var province=pending.ProvinceIndex;
         // Each source reads the battlefield live, one at a time, so an earlier source's effect (a Personality sent
@@ -1330,9 +1371,10 @@ public sealed partial class MatchEngine
     // reach the same completion as the immediate (0 or 1 candidate) path.
     private void FinishBattleResolution(int attacker,int provinceIndex,CardInstance[] a,string? conquerorUnbowedId)
     {
+        var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
-            ReturnHome(card,card.Id!=conquerorUnbowedId);
+            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId));
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1356,6 +1398,12 @@ public sealed partial class MatchEngine
         _state.AshigaruBoost=new int[2];
         // First-opportunity state (issue #310) is battle-scoped too: a later battle starts from the default again.
         _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
+        // A delayed effect and a "will not bow" promise belong to their battle: both lapse with it, applied or not.
+        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear();
+        // "Remove those Followers from the game after the battle ends" (Kyuden Hida - exp): wherever they stand now (attached, or discarded with a destroyed host).
+        foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
+            if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
+        _state.CreatedUntilBattleEndsIds.Clear();
         // Additional Action grants/restrictions (issue #181) are battle-scoped too -- Two Hands'
         // "ceases during battle resolution" is explicit, and an unused Again!/Equip(Battle) grant
         // makes no sense carried into a battle it was never meant for.
@@ -1706,7 +1754,7 @@ public sealed partial class MatchEngine
         // effect, so it is Effect-keyed on the ATTACHED SPELL itself (the same shape
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
-        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"?2:0)
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -1966,8 +2014,10 @@ public sealed partial class MatchEngine
         _state.PendingChoice=null;
         if(_state.ForcedDiscardContinuation is { } announced)
         {
-            _state.ForcedDiscardContinuation=null;
-            AnnounceAbility(announced);
+            var resume=_state.ForcedDiscardResume; _state.ForcedDiscardContinuation=null; _state.ForcedDiscardResume=null;
+            if(resume=="action") ResolveDeferredActionInItsWindow(announced);
+            else if(resume=="attack") ResolveAttack();
+            else { ContinueSuspendedReaction(announced); AnnounceAbility(announced); }
             return;
         }
         ResumeAfterDeferredWindow(pending.ActingPlayerId!.Value);
@@ -2001,7 +2051,15 @@ public sealed partial class MatchEngine
     // treated as Personal Honor 0 (see CardPersonalHonor) until Rehonor restores them. The 180-degree
     // rotation the rules describe is purely visual, driven client-side off this same flag; no engine
     // state beyond it.
-    private void Dishonor(CardInstance card) => card.Dishonorable=true;
+    private void Dishonor(CardInstance card)
+    {
+        if(NegatesEffect(card,"all"))
+        {
+            Emit("dishonorNegated",$"{Definition(card).Name}'s dishonoring was negated before it resolved.",card.OwnerId,card.Id);
+            return;
+        }
+        card.Dishonorable=true;
+    }
     // A card already sitting in a discard pile (Zone.DynastyDiscard/FateDiscard) -- never destroyed
     // via DestroyUnits, so it carries no attachments/tokens to cascade -- becomes dead. "Honorably
     // dead" (Glossary) means dead and honorable; honorable:false leaves its current status as-is.
@@ -2539,6 +2597,11 @@ public sealed partial class MatchEngine
         // (minimum 0)" -- active only while resolving the one specific command this player's own
         // just-played Reaction targeted (see ResolveOrDeferUnimpeachableName), so every negative
         // Honor change of theirs during that single resolution is reduced, not just the first.
+        if(amount<0 && HonorLossNegatedWithEffects(playerId))
+        {
+            Emit("honorLossNegated",$"{Player(playerId).Name}'s Honor loss from {reason} was negated with the action's effects.",playerId,source?.Id);
+            return;
+        }
         if(amount<0 && playerId==_state.HonorLossReductionPlayerId)
         {
             var reduced=Math.Min(0,amount+3);
@@ -2609,7 +2672,7 @@ public sealed partial class MatchEngine
         // Wave Man (issue #279): "After an Attack Phase ends: Straighten this unit" -- a trait (no
         // Action:/Reaction: prefix), so mandatory and automatic, never an optional choice, same
         // convention as EntryHonorLoss/Destined above. The Attack Phase ends in exactly two places --
-        // AssignDefense (a player declined to attack outright: no battlefield was ever created) and
+        // DeclineAttackPhase (a player declined to attack outright: no battlefield was ever created) and
         // FinishBattleReturnHomeAndTransition (the last battlefield resolved) -- and BOTH, and only
         // those, ever call SetPhase(Phase.Dynasty, ...) (grep confirms it; CreateEconomyScenario's own
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
