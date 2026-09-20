@@ -2121,6 +2121,48 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>personality-wave-39 (issue #394).</summary>
+    public static PublishedSnapshot PersonalityWave39 { get; } = LoadPersonalityWave39();
+
+    private static PublishedSnapshot LoadPersonalityWave39()
+    {
+        var snapshot = Load("L5R.Published.PersonalityWave39.json", "personality-wave-39", requireDecks: false);
+        if(snapshot.Cards.Length != 5)
+            throw new InvalidOperationException("Unexpected personality-wave-39 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Personality)
+                throw new InvalidOperationException($"personality-wave-39 card is not a Personality: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>follower-wave-18 (issue #394).</summary>
+    public static PublishedSnapshot FollowerWave18 { get; } = LoadFollowerWave18();
+
+    private static PublishedSnapshot LoadFollowerWave18()
+    {
+        var snapshot = Load("L5R.Published.FollowerWave18.json", "follower-wave-18", requireDecks: false);
+        if(snapshot.Cards.Length != 1)
+            throw new InvalidOperationException("Unexpected follower-wave-18 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Follower)
+                throw new InvalidOperationException($"follower-wave-18 card is not a Follower: {card.Id}");
+        return snapshot;
+    }
+
+    /// <summary>item-wave-6 (issue #394).</summary>
+    public static PublishedSnapshot ItemWave6 { get; } = LoadItemWave6();
+
+    private static PublishedSnapshot LoadItemWave6()
+    {
+        var snapshot = Load("L5R.Published.ItemWave6.json", "item-wave-6", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected item-wave-6 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Item)
+                throw new InvalidOperationException($"item-wave-6 card is not a Item: {card.Id}");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

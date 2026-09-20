@@ -592,11 +592,12 @@ public sealed partial class MatchEngine
     // "priority flips, window stays open" tail. The one thing not offered is a reaction TO the created
     // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction = false)
+    // battlefield (issue #394, "at this battlefield"): the province whose battle the card is created at, on its controller's side; null is home.
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card)
     {
-        var card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=Zone.Home,FaceUp=true};
+        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true};
         _state.Cards.Add(card.Id,card);
-        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}.",ownerId,card.Id);
+        Emit("cardCreated",$"{Player(ownerId).Name} created {definition.Name}{(battlefield is null?"":" at the battlefield")}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
         if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);

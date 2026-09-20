@@ -1,0 +1,47 @@
+[
+  {
+    "card_id": "oracle-l5r-6867",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6867",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-6867-printing-1-image-1.webp",
+    "image_sha256": "38967e12696ea733f2db9c5da9b35544d2f65e59fe37ad8efad8298397d3442c"
+  },
+  {
+    "card_id": "oracle-l5r-3091",
+    "printing_set": [
+      "Forgotten Legacy"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=3091",
+    "image_path": "assets/reference/oracle/forgotten-legacy/webp/oracle-l5r-3091-printing-1-image-1.webp",
+    "image_sha256": "beaee980b0d64f36a124d735c150b53ffef58022637e56587ff984ee7eaa9fcb"
+  },
+  {
+    "card_id": "oracle-l5r-10463",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10463",
+    "image_path": "assets/reference/oracle/coils-of-madness/webp/oracle-l5r-10463-printing-1-image-1.webp",
+    "image_sha256": "b5a8ad4b5f6aa6c79db5ac713fd9cfb29982b22c8777af491570aaaea99edb56"
+  },
+  {
+    "card_id": "oracle-l5r-10001",
+    "printing_set": [
+      "Emperor Edition"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10001",
+    "image_path": "assets/reference/oracle/emperor-edition/images/oracle-l5r-10001-printing-1-image-1.jpg",
+    "image_sha256": "792ae5d53404fade9a32c0b11e2d802bdf045aa3eab6363bdc36fc1dd703544d"
+  },
+  {
+    "card_id": "oracle-l5r-10807",
+    "printing_set": [
+      "Coils of Madness"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10807",
+    "image_path": "assets/reference/oracle/coils-of-madness/images/oracle-l5r-10807-printing-1-image-1.jpg",
+    "image_sha256": "d1ce9a6b6711e93c44f7715dba5193355724750f8f49e91f51b241e7294c5049"
+  }
+]

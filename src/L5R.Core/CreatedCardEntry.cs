@@ -3,22 +3,35 @@ namespace L5R.Core;
 public sealed partial class MatchEngine
 {
     // Returns true when an entering-play window opened (the caller returns). A Reaction printed "After X enters play" creates inside the window it was played in.
-    private bool ExecuteCreate(AbilityDefinition ability, CreatedCardSpec spec, PlayerState player, CardInstance? target)
+    private bool ExecuteCreate(AbilityDefinition ability, CreatedCardSpec creates, GameCommand command, PlayerState player)
     {
+        var spec = CreatedCards.Chosen(creates, command.CreatedCard) ?? throw new RuleViolation("Choose which card to create.");
         var scan = CreatedCards.Resolve(spec);
         var insideEntryWindow = ability.Timing == "Reaction" && ability.Trigger == "own-enters-play";
-        if (scan.Type == CardType.Personality) return CreatePersonality(player.Id, scan, insideEntryWindow);
+        if (scan.Type == CardType.Personality)
+        {
+            var created = CreatePersonality(player.Id, scan, insideEntryWindow, spec.AtBattlefield ? _state.CurrentBattleProvince : null, out var personality);
+            if (spec.UntilBattleEnds) _state.CreatedUntilBattleEndsIds.Add(personality.Id);
+            return created;
+        }
         if (!CreatedCards.IsAttachment(scan.Type)) throw new InvalidOperationException($"{scan.Name} ({scan.Id}) is a {scan.Type}: creating one is not built.");
-        return CreateAttachment(player.Id, scan, target ?? throw new RuleViolation("Choose a Personality to attach it to."), insideEntryWindow);
+        return CreateAttachments(player.Id, scan, spec, CreateHosts(command), insideEntryWindow);
     }
 
+    // The Personalities a created attachment goes to: the ones the command names (CardIds), or its single target.
+    private CardInstance[] CreateHosts(GameCommand command) => ArmyPersonalityChoice(command).Select(Card).ToArray();
+
     // The created attachment must be one the chosen Personality could be equipped with; the card does not exist yet, so a stand-in with its definition is judged.
-    private void ValidateCreate(GameCommand command, CreatedCardSpec spec, PlayerState player)
+    private void ValidateCreate(GameCommand command, CreatedCardSpec creates, PlayerState player)
     {
+        var spec = CreatedCards.Chosen(creates, command.CreatedCard) ?? throw new RuleViolation(creates.Or is { Length: > 0 } ? "Choose which card to create." : "That is not the card this action creates.");
         var scan = CreatedCards.Resolve(spec);
+        if (spec.AtBattlefield) Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to create it at.");
         if (!CreatedCards.IsAttachment(scan.Type)) return;
-        var host = command.TargetId is null ? throw new RuleViolation("Choose a Personality to attach it to.") : Card(command.TargetId);
-        RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id);
+        var hosts = CreateHosts(command);
+        Require(hosts.Length > 0, "Choose a Personality to attach it to.");
+        foreach (var host in hosts)
+            RequireAttachable(new CardInstance { Id = "created-preview", DefinitionId = scan.Id, OwnerId = player.Id, Zone = Zone.Hand, FaceUp = true }, host, player.Id);
     }
 
     private CardInstance MintAttachedCard(CardInstance host, CardDefinition definition)
@@ -30,11 +43,15 @@ public sealed partial class MatchEngine
         return card;
     }
 
-    private bool CreateAttachment(int ownerId, CardDefinition definition, CardInstance host, bool duringEntryReaction)
+    // Every created attachment enters play; the entering-play Reaction window (an Equip's own) opens for the last, the others get the mandatory half only.
+    private bool CreateAttachments(int ownerId, CardDefinition definition, CreatedCardSpec spec, CardInstance[] hosts, bool duringEntryReaction)
     {
-        var card = MintAttachedCard(host, definition);
-        if (duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId, card); return false; }
-        return OpenEntryReactionWindow(ownerId, card, 1 - ownerId);
+        var placements = spec.PerHost ? hosts.SelectMany(h => Enumerable.Repeat(h, spec.Count)).ToArray() : Enumerable.Range(0, spec.Count).Select(i => hosts[i % hosts.Length]).ToArray();
+        var cards = placements.Select(host => MintAttachedCard(host, definition)).ToArray();
+        if (spec.UntilBattleEnds) foreach (var card in cards) _state.CreatedUntilBattleEndsIds.Add(card.Id);
+        foreach (var card in cards[..^1]) ApplyMandatoryEntryEffects(ownerId, card);
+        if (duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId, cards[^1]); return false; }
+        return OpenEntryReactionWindow(ownerId, cards[^1], 1 - ownerId);
     }
 
     // A created card has no pile to return to: whatever way it leaves play (a destroyed host, a return to hand, a shuffle), it is removed from the game by the end of the command.

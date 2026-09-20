@@ -822,7 +822,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CostOption = null,
     // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
     // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
-    SlotSelection[]? Selections = null);
+    SlotSelection[]? Selections = null,
+    // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
+    // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
+    string? CreatedCard = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
