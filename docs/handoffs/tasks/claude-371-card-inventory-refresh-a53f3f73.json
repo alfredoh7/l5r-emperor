@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Regenerated docs/CARD_INVENTORY.xlsx from origin/main 971e8ed2 (2146 cards, 442 wired, 1704 unwired) and removed a stale BLOCKERS entry in tools/content/build_card_inventory.py: oracle-l5r-4937 (Matsu Kasei - exp) was wired by #265 but still carried a blocked note, the same defect class as #225. Content-tooling only; no engine or client code touched.",
+  "validation": "python3 tools/content/build_card_inventory.py -> {cards: 2146, wired: 442}; python3 -m unittest discover tools/content (132/132); post-regeneration check that zero rows in the Cards sheet are Wired with a non-empty Blocker.",
+  "remaining": "None; ready for review.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/371",
+  "branch": "claude/371-card-inventory-refresh",
+  "updated": "2026-09-20T18:16:12.756777+00:00"
+}
