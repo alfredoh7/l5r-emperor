@@ -7,7 +7,7 @@ internal static class DecisionShowcaseTests
     public static void Run(TestRunner runner) => runner.Run("decision-showcase",[
         ("Yumaru: exactly one of three complete choices resolves and a stale answer is rejected",Yumaru),
         ("Fukui: disabled alternative retains public grouping metadata and transport preserves it",Fukui),
-        ("Every generic decision fixture opens naturally and all complete engine answers execute",Generic)
+        ("Every prepared generic decision offers complete engine answers that execute",Generic)
     ]);
     private static void Check(bool value,string message) {if(!value)throw new Exception(message);}
     private static void Yumaru()

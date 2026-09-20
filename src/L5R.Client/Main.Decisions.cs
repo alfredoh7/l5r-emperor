@@ -116,7 +116,8 @@ public partial class Main
         _decisionActions.AddChild(confirm);
         if(pending is null) _decisionActions.AddChild(SidebarSkin.Button("Back to target",()=>{_reviewingAlternativeCost=false;_decisionSelection=null;RenderInspector();}));
         else if(_decisionSelection is not null) _decisionActions.AddChild(SidebarSkin.Button("Clear selection",()=>{_decisionSelection=null;RenderInspector();Highlight();}));
-        _decisionActions.AddChild(Palette.Wrapped(DecisionCanSubmit?"Select one option, then confirm.":"Your choice is paused until the connection is ready.",14,Palette.PaperDim));
+        if(!DecisionReviewMode || !DecisionCanSubmit)
+            _decisionActions.AddChild(Palette.Wrapped(DecisionCanSubmit?"Select one option, then confirm.":"Your choice is paused until the connection is ready.",14,Palette.PaperDim));
         return true;
     }
 

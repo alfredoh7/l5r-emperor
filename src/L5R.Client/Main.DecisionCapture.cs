@@ -7,6 +7,7 @@ public partial class Main
 {
     private bool _decisionCaptureStarted;
     private string _decisionReviewCase="yumaru";
+    private bool DecisionReviewMode => _captureMode.StartsWith("published-decisions-review",StringComparison.Ordinal);
     private void ProcessDecisionCapture(double delta)
     {
         _captureClock+=delta;
@@ -25,21 +26,21 @@ public partial class Main
         if(kind.StartsWith("fukui",StringComparison.Ordinal) && (seat??engine.State.PriorityPlayerId)==0)
         {
             SelectCard(Self.Army.Single(c=>c.Definition?.Id=="oracle-l5r-4375"));
-            if(_captureMode.StartsWith("published-decisions-review",StringComparison.Ordinal))
+            if(DecisionReviewMode)
                 Choose(Actions.First(a=>a.Enabled&&a.AlternativeCost?.AbilityId=="fukui-bow"));
         }
         Render();await EventFrames(8);
     }
     private void AddDecisionReviewNavigation()
     {
-        if(!_captureMode.StartsWith("published-decisions-review",StringComparison.Ordinal))return;
+        if(!DecisionReviewMode)return;
         var row=new HBoxContainer();row.AddThemeConstantOverride("separation",6);
         var restart=SidebarSkin.Button("Restart demo",()=>_ = PrepareDecisionReview(_decisionReviewCase));
         var next=SidebarSkin.Button("Next demo",()=>_ = PrepareDecisionReview(_decisionReviewCase switch {"yumaru"=>"fukui","fukui"=>"fukui-bowed",_=>"yumaru"}));
         restart.SizeFlagsHorizontal=next.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;
         restart.CustomMinimumSize=next.CustomMinimumSize=new(0,44);
+        row.TooltipText="Review demo · "+(_decisionReviewCase=="yumaru"?"Yumaru: choose who moves home":_decisionReviewCase=="fukui"?"Fukui: bow or destroy the Ancestor":"Fukui: a bowed Ancestor cannot pay the bow cost");
         row.AddChild(restart);row.AddChild(next);_decisionActions.AddChild(row);
-        _decisionActions.AddChild(Palette.Wrapped("Review demo · "+(_decisionReviewCase=="yumaru"?"Yumaru: choose who moves home":_decisionReviewCase=="fukui"?"Fukui: bow or destroy the Ancestor":"Fukui: a bowed Ancestor cannot pay the bow cost"),13,Palette.PaperDim));
     }
     private async Task WaitDecisionPresentation()
     {
@@ -71,8 +72,36 @@ public partial class Main
             var kind=_captureMode.Contains("fukui-bowed")?"fukui-bowed":_captureMode.Contains("fukui")?"fukui":"yumaru";
             var waiting=_captureMode.Contains("waiting");
             await PrepareDecisionReview(kind,waiting?1:0);
-            if(_captureMode.Contains("review"))
-            {GD.Print("DECISION_REVIEW_READY: use Next demo for Yumaru, Fukui and bowed-Ancestor cases.");return;}
+            if(DecisionReviewMode)
+            {
+                if(_captureMode.EndsWith("-check",StringComparison.Ordinal))
+                {
+                    foreach(var demo in new[]{"yumaru","fukui","fukui-bowed"})
+                    {
+                        DecisionRequire(_decisionReviewCase==demo,"Next demo opened the wrong case");
+                        if(demo!="yumaru"){await SupportClick(DecisionButton("Review cost choices"));await EventFrames(8);}
+                        var labels=demo=="yumaru"?new[]{"Move Yumaru home","Move the targeted Personality home","Move both home"}:new[]{"Bow the Ancestor","Destroy the Ancestor"};
+                        var scroll=(ScrollContainer)_inspector.GetParent();
+                        foreach(var label in labels)
+                            DecisionRequire(scroll.GetGlobalRect().Encloses(DecisionButton(label).GetGlobalRect()),"Review choice clipped: "+label);
+                        DecisionRequire(DecisionButton("Confirm choice").Disabled,"Review demo selected an answer implicitly");
+                        await SupportCapture("-"+demo);
+                        if(demo=="fukui-bowed")
+                        {
+                            await SupportClick(DecisionButton("Destroy the Ancestor"));
+                            await SupportClick(DecisionButton("Back to target"));await EventFrames(8);
+                            await SupportClick(DecisionButton("Review cost choices"));await EventFrames(8);
+                            DecisionRequire(DecisionButton("Confirm choice").Disabled,"Back retained the draft answer");
+                        }
+                        await SupportClick(DecisionButton("Restart demo"));await EventFrames(30);
+                        DecisionRequire(_decisionReviewCase==demo,"Restart changed the demo");
+                        await SupportClick(DecisionButton("Next demo"));await EventFrames(30);
+                    }
+                    DecisionRequire(_decisionReviewCase=="yumaru","Demo cycle did not return to Yumaru");
+                    GD.Print("DECISION_CHOOSER_PASS: "+_captureMode);GetTree().Quit();return;
+                }
+                GD.Print("DECISION_REVIEW_READY: use Next demo for Yumaru, Fukui and bowed-Ancestor cases.");return;
+            }
             var version=View.Version;
             if(waiting)
             {
@@ -104,12 +133,14 @@ public partial class Main
                 await SupportClick(DecisionButton("Review cost choices"));await EventFrames(5);
                 DecisionRequire(DecisionButton("Confirm choice").Disabled,"Alternative cost has implicit default");
                 DecisionRequire(DecisionButton("Bow the Ancestor").Disabled==(kind=="fukui-bowed"),"Incorrect disabled bow option");
-                var selected=Actions.Single(a=>a.AlternativeCost?.Id=="destroy");
-                await SupportCapture("");await SupportClick(DecisionButton("Destroy the Ancestor"));
+                var payBow=_captureMode.Contains("pay-bow");
+                var selected=Actions.Single(a=>a.AlternativeCost?.Id==(payBow?"bow":"destroy"));
+                await SupportCapture("");await SupportClick(DecisionButton(payBow?"Bow the Ancestor":"Destroy the Ancestor"));
                 DecisionRequire(View.Version==version,"Selecting cost mutated state");
                 await SupportCapture("-selected");await SupportClick(DecisionButton("Confirm choice"));await WaitDecisionPresentation();
                 DecisionRequire(View.Version==version+1,"Cost did not execute once");
-                DecisionRequire(FindCard(selected.AlternativeCost!.PerformerId!)?.Zone==Zone.RemovedFromGame,"Created Ancestor not removed after destruction");
+                var performer=FindCard(selected.AlternativeCost!.PerformerId!);
+                DecisionRequire(payBow?performer is {Bowed:true,Zone:Zone.Battlefield}:performer?.Zone==Zone.RemovedFromGame,"Selected Ancestor cost did not resolve");
                 DecisionRequire(FindCard(selected.Command!.TargetId!)?.Bowed==true,"Target not bowed");
             }
             await SupportCapture("-result");

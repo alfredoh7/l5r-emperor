@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement #339 automatic choice sidebar and alternative-cost flow with Mac review launcher, isolated from main. Add disabled-cost presentation metadata and real-engine review fixtures. Refresh verified catalogue art pack so launchers start offline.",
-  "validation": "Client compiles with zero warnings/errors. Full deterministic suite passed before final layout refinement; all three expanded showcase tests pass. Native Yumaru all three choices, Fukui ready and bowed Ancestor, opponent waiting, all five other generic choice types, and reduced-motion pass. Catalogue pack generated from verified originals and installed offline. Actual Mac launcher opens prepared game; Next demo works. Final compact layout rerun in progress.",
-  "remaining": "Finish final compact screenshots and verify updated launcher navigation; publish private art dependency and update PR evidence. No main merge authorized. Remaining seven approved UI tasks are pending. Shared metadata review and human rules acceptance remain distinct from tests; Windows graphical testing not performed.",
+  "summary": "Complete #339 review candidate: automatic choice sidebar, alternative-cost flow, prepared Mac demo launcher, verified scan dependency. Isolated preview PR #392; no merge into main.",
+  "validation": "Full deterministic check passed before final presentation refinement; 3/3 expanded showcase regressions passed. Final client build has zero warnings/errors and Godot import passed. Native Mac checks cover all Yumaru outcomes, both Fukui payments, bowed-option reason, opponent waiting, five other generic decisions, reduced motion, keyboard confirmation and compact 1280x800 review navigation. Actual Mac app opens the prepared demo. Private art dependency upload and offline installation verified.",
+  "remaining": "Alfredo UI acceptance and Mendon shared-contract review pending. Normal main-target CI has not run for preview-base PR; routing skipped. Multiplayer reconnect and native Windows graphical checks not performed. Seven other approved UI tasks remain pending. No main merge is authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/339",
   "branch": "codex/339-decision-chooser",
-  "updated": "2026-09-20T22:19:58.207228+00:00"
+  "updated": "2026-09-20T22:32:12.688070+00:00"
 }

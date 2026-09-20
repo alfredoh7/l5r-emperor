@@ -1,28 +1,53 @@
-# Decision chooser (#339) — implementation checkpoint
+# Decision chooser (#339) — ready for individual review
 
-This is the first task of Alfredo's eight approved UI previews. **No merge into main is authorized.** The remaining seven interfaces have not been implemented in this branch.
+This is **1 of 8** approved UI previews. **No merge into main is authorized.** PR [#392](https://github.com/alfredoh7/l5r-emperor/pull/392) remains a draft against the isolated `codex/ui-eight-preview-base`; the other seven tasks remain pending. Test success and human acceptance do not authorize a merge.
 
-## What is built
+## Open the prepared demo
 
-- A's automatic sidebar with B's full source-card preview, using the approved lacquer assets and existing fonts.
-- Engine-listed answers for effectChoice, preservingHonor, rinShame, conqueror, declineStraighten and forcedDiscard, independent of card selection. The existing Times of Strife presentation retains its dedicated flow.
-- Explicit selection before confirmation, keyboard-focusable controls, source highlight/inspection, disabled reasons and opponent waiting state. Pending answers submit the engine's complete command unchanged.
-- Alternative-cost variants group by source, ability and performer. Target selection precedes “How do you pay?”. The selected engine command supplies the cost choice; Gold uses the shared quoted payment panel when present.
-- Additive `AlternativeCostView` metadata preserves grouping and labels for disabled options, whose existing Command is null. No illegal command is fabricated. This public contract addition needs shared review.
-- Real engine fixtures for Yumaru and both ready/bowed Ancestor Fukui cases. The created Lion Ancestor is removed from the game when destroyed, as the current engine requires.
-- `Review Decision Chooser.command` and local `artifacts/L5R Decision Chooser - Review.app`. Restart demo and Next demo cycle the three cases without editing decks.
+On Alfredo's Mac: [L5R Decision Chooser — Review.app](../../artifacts/L5R%20Decision%20Chooser%20-%20Review.app).
 
-## Evidence at this checkpoint
+The local app is generated, not checked into Git. On another Mac checkout, run:
 
-The preview baseline integrates main `20708c37` and approved UI lineage `7360ff1c`, on `codex/ui-eight-preview-base` (`59437b01`). The root checkout and main are unchanged.
+```sh
+python3 tools/create-review-launcher.py 'Review Decision Chooser.command' 'L5R Decision Chooser - Review'
+```
 
-- Client compile: zero warnings/errors. Baseline Godot headless import passed.
-- All baseline Core suites passed (see local `artifacts/baseline-check.log`), then corrected AI fixture: 34/34 AI, 8/8 server and 8/8 transport checks passed (`baseline-services.log`).
-- Native baseline 1920×1080 Regions/Celestials: inspection, payment, activation, replacement, province destruction, empty support zones and Fallow Lands reaction passed (`baseline-native.log`).
-- New focused checks: 16/16 alternative-cost, 10/10 effect-choice and 2/2 showcase tests passed (`decision-core.log`).
-- Native Yumaru: automatic prompt without selecting source, no default choice, keyboard selection, explicit confirmation and public outcome passed. Screenshot: local `artifacts/decision-yumaru-selected.png`.
-- The first Fukui native check reached actual destruction but checked the held animation snapshot too early. The check now waits for the existing presentation to finish; rerun pending. This was not an engine rejection.
+Or open the checked-in `Review Decision Chooser.command`. This builds this review checkout, verifies the artwork dependency, then opens the prepared Yumaru choice. It never fetches another branch or merges main. The artwork is installed locally for offline launches; the private dependency is [catalogue-art-ui-eight-20260921](https://github.com/alfredoh7/l5r-emperor/releases/tag/catalogue-art-ui-eight-20260921).
 
-## Remaining before marking #339 ready
+## Short review checklist
 
-Native Fukui rerun, bowed-option and compact layout review, opponent waiting, both other Yumaru choices, actual launcher and review navigation verification, generic non-Yumaru decision coverage, stale/reconnect/keyboard edge cases, final full checks and screenshot review. Initial native image is promising but is not yet a claim of final fidelity or polish. Main remains untouched; Windows graphical testing and human rules acceptance are not claimed.
+1. **Yumaru:** the sidebar should immediately show all three movement choices, with none selected. Select an option; the board must wait until **Confirm choice**. Use **Restart demo** to try the other outcomes. Keyboard focus and Enter also select an option before confirmation.
+2. **Source inspection:** **Inspect source** opens the complete card; closing it must leave the decision pending. The source is highlighted on the table.
+3. **Next demo → Fukui:** review the performing Ancestor and target, then choose **Review cost choices**. Either bow or destroy the Ancestor; select and confirm. Restart to try the other cost. **Back to target** clears the draft cost.
+4. **Next demo → bowed Ancestor:** bowing should be disabled with its explanation; destruction remains available. The created Ancestor is removed from the game when destroyed, as required by the current engine.
+5. **Next demo** returns to Yumaru. Review controls are confined to this demo mode.
+
+## Implementation and approved visual direction
+
+- A's automatic sidebar with B's full source-card preview and full-size inspection, using the existing approved lacquer assets, Caudex and WeatheredQuill. Reference concepts are the parent checkout's `artifacts/ui-eight-design-review-2026-09-20/images/01-decisions-a.png` and `01-decisions-b.png`.
+- The native captures below were inspected against those references. The compact source row, verified period scans and live game layout replace illustrative generated card art; no claim of exact full-screen pixel equivalence is made.
+- Engine-listed answers for effectChoice, preservingHonor, rinShame, conqueror, declineStraighten and forcedDiscard appear independently of card selection. Times of Strife retains its dedicated presentation.
+- Explicit selection before confirmation, disabled reasons, keyboard controls, source inspection and opponent waiting. Pending answers submit the engine's complete command unchanged.
+- Alternative costs group by source, ability and performer. Target selection precedes “How do you pay?”. Gold, when quoted, continues through the existing payment panel.
+- Additive `AlternativeCostView` metadata retains grouping and labels for disabled options whose Command is null. The UI does not invent commands or determine legality. Mendon's review is requested for this shared contract and the prepared fixtures.
+- Yumaru and Fukui use real published abilities. Other generic fixtures exercise engine choices; the Conqueror grant, choose-straighten test definition and prepared forced-discard queue are scenario setup, not proof of a complete published-card trigger chain.
+
+## Verified evidence
+
+- `bash tools/check.sh --skip-client`: all requested deterministic checks passed (`artifacts/decision-full-check.log`), including 34/34 AI, 8/8 server and 8/8 transport. This run preceded the final presentation-only compact footer refinement and expanded generic fixtures.
+- Expanded focused showcase checks: 3/3 passed (`artifacts/decision-fixtures.log`), covering all three Yumaru consequences, stale-command rejection, opponent privacy, disabled-cost metadata serialization and all five additional generic decision types. Earlier focused suites: 16/16 alternative-cost and 10/10 effect-choice passed.
+- Final client build: zero warnings/errors; Godot headless import passed.
+- Native Mac: all three Yumaru outcomes, Fukui destruction and bow payments, bowed-option reason, opponent waiting, all five other generic types, explicit confirmation and reduced motion passed. Resolutions exercised: 1920×1080 and 1280×800.
+- Final compact demo check: all option buttons fully inside the visible scroll area; restart, next-demo cycle and clearing the draft via Back all passed (`artifacts/checks/decisions/review-check.log`). Both final source-row compact cases and the bow-payment follow-up passed.
+- Actual `.app` launch verified through the Mac UI: it builds and opens the prepared Yumaru decision. Full source inspection and demo navigation were also checked in the native window.
+- Updated artwork dependency: 2,895 verified scans, private prerelease asset uploaded; offline installation verified. Bulk artwork stays out of Git.
+
+![Yumaru review at 1280×800](../screenshots/decision-chooser/yumaru-review.png)
+
+![Fukui with a bowed Ancestor at 1280×800](../screenshots/decision-chooser/fukui-bowed-review.png)
+
+## Boundaries and remaining review
+
+The preview baseline integrates main `20708c37` with the approved UI lineage, on `codex/ui-eight-preview-base` (`59437b01`). Its inherited stabilization rules candidates remain unapproved; see the eight-task review plan. Main and the root checkout were not modified.
+
+The PR uses a preview base; the current GitHub routing check is skipped, and normal main-target CI has not run. Local results above are not a CI-pass claim. A multiplayer reconnect session, native Windows graphical play and expert rules acceptance have not been performed for this preview. Alfredo's individual UI acceptance and Mendon's shared-contract review remain outstanding. **No merge permission has been granted.**
