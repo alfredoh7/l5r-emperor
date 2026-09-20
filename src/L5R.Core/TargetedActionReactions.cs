@@ -30,7 +30,7 @@ public sealed partial class MatchEngine
         if (command.AbilityId is not { } id || !AbilityCatalog.All.TryGetValue(id, out var ability) || !IsAction(ability)) return null;
         var costOnly = TargetsThroughAttackPipeline(id);
         var target = !costOnly && command.TargetId is { } t && _state.Cards.ContainsKey(t) ? t : null;
-        return target is not null || CostSubjectOf(command) is not null ? new(command, target, false) : null;
+        return target is not null || BowOrDestroyCostSubjects(command).Any() ? new(command, target, false) : null;
     }
 
     // An Attack that names no card (no target, or a province) targets no card, so nothing card-targeted reacts to it.
@@ -146,39 +146,19 @@ public sealed partial class MatchEngine
 
     // ---- a cost paid by a Follower a negation protects (Hida Mochitoko, decision note 2) ------------------------------------------------------
 
-    // The card an action pays a bow or destroy cost with (its chosen cost option's subject) and the verb it is paid with, if it names one.
-    private (CardInstance Subject, string Verb)? CostOf(GameCommand command)
-    {
-        if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.CostOptions is null) return null;
-        try
-        {
-            var option = ChosenCostOption(ability, command);
-            var subject = CostSubjectCard(option, ability, command, command.CardId is not null && _state.Cards.TryGetValue(command.CardId, out var s) ? s : null);
-            return subject is not null && InPlay(subject) ? (subject, option.Verb) : null;
-        }
-        catch (RuleViolation) { return null; }
-    }
+    // The cards an action pays a bow or destroy cost with (its chosen cost option and every declared Costs entry, AbilityCosts.cs). The rule that a negation of that
+    // bowing or destruction blocks the payment is CostPaymentBlockedByNegation (AbilityCosts.cs), the one predicate.
 
-    private CardInstance? CostSubjectOf(GameCommand command) => CostOf(command)?.Subject;
-
-    /// <summary>Is this action's cost payment blocked by a negation? True when the card it would bow or destroy as its cost has had that negated. This is the ONE
-    /// place the rule is asked: the action then does not resolve and pays nothing (AbortActionForBlockedCost), so a cost cannot be dodged while the effects are
-    /// kept. A cost-payment function that pays atomically calls this first and passes its verdict on.</summary>
-    private bool CostPaymentBlockedByNegation(GameCommand command) =>
-        _state.NegatedEffects.Count > 0 && CostOf(command) is { } cost
-        && _state.NegatedEffects.Any(n => n.CardId == cost.Subject.Id && (n.Kind == "all" || n.Kind == cost.Verb)); // a bow is blocked by a negated bow, a destruction by a negated destruction
-
-    // The action is negated: taken (its use is spent, priority passes) but nothing is paid and nothing happens -- no Gold, no Honor-loss cost, no discard, no effect.
-    private void AbortActionForBlockedCost(GameCommand command)
+    // The action is negated because paying one of its costs was blocked: taken (its use is spent, a Strategy played from a hand is discarded, priority passes) but
+    // nothing is paid and nothing happens -- no Gold, no Honor-loss cost, no discard, no effect (ActionNegation.cs, CompleteNegatedAction).
+    private void AbortActionForBlockedCost(GameCommand command, bool consumedGrant = false)
     {
         var ability = AbilityCatalog.All[command.AbilityId!];
         var player = Player(command.PlayerId);
         var source = command.CardId is null ? null : Card(command.CardId);
-        SpendAbilityUse(source?.AbilityUses ?? player.AbilityUses, ability, ability.UsageKey ?? command.AbilityId!);
-        Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: {Definition(CostSubjectOf(command)!).Name}'s bowing or destruction as its cost was negated, so nothing is paid and nothing resolves.", player.Id, source?.Id);
-        if (ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
-        if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
-        NextAction(player.Id);
+        var playedFromDiscard = PlayedFromDiscard(ability, source);
+        Emit("actionNegated", $"{player.Name}'s {ability.Label} is negated: paying one of its costs (bowing or destroying a card as its cost) was negated, so nothing is paid and nothing resolves.", player.Id, source?.Id);
+        CompleteNegatedAction(command, ability, player, source, playedFromDiscard, consumedGrant);
     }
 
     private IEnumerable<(CardInstance Card, string AbilityId)> TargetedActionReactionCandidates() =>
@@ -251,7 +231,9 @@ public sealed partial class MatchEngine
         var ids = new List<CardInstance>();
         if (subject.TargetId is not null && _state.Cards.TryGetValue(subject.TargetId, out var target) && Covered(target) && ActionMayBowOrDestroy(subject.Command.AbilityId!, subject.IsAttack))
             ids.Add(target);
-        if (!subject.IsAttack && CostSubjectOf(subject.Command) is { } paying && Covered(paying) && ids.All(c => c.Id != paying.Id)) ids.Add(paying);
+        if (!subject.IsAttack)
+            foreach (var paying in BowOrDestroyCostSubjects(subject.Command))
+                if (Covered(paying) && ids.All(c => c.Id != paying.Id)) ids.Add(paying);
         return ids;
     }
 

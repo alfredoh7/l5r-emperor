@@ -297,15 +297,15 @@ public sealed partial class MatchEngine
                 // specific opportunity outright (forfeiting it -- see ConsumeAdditionalActionGrant,
                 // already removed the grant regardless of what happens next).
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the pending additional action first.");
-                var holder=_state.PendingChoice.PlayerId;
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingAdditionalAction is not null)
                 {
                     var pending=_state.PendingAdditionalAction; _state.PendingAdditionalAction=null;
-                    ExecuteAbilityEffects(pending,consumedGrant:true);
+                    // Negated (Effortless Counterattack): it is taken and pays its costs, only its effects are lost, and the burst it was part of goes on --
+                    // the next additional action is the holder's to take (ResolveNegatedAction, consumedGrant).
+                    var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
+                    if(negated) ResolveNegatedAction(pending,consumedGrant:true); else ExecuteAbilityEffects(pending,consumedGrant:true);
                 }
-                // The additional action was negated: only it is lost. The burst it was part of goes on, so the next additional action is the holder's to take.
-                else if (_state.PendingChoice is null && _state.AdditionalActions.Any(g=>g.PlayerId==holder)) { _state.PriorityPlayerId=holder; _state.ConsecutivePasses=0; }
                 return;
             }
             if (_state.PendingChoice.Type=="beforeActionReaction")
@@ -773,6 +773,8 @@ public sealed partial class MatchEngine
         Require(_state.PendingSearch is null && _state.PendingLook is null,"Finish the deck search or look before ordering Seppuku.");
         // The same for a copy in progress (its receiver could be the one destroyed) and an Either/Or choice (issue #338).
         Require(_state.PendingCopy is null && _state.PendingEitherOr is null,"Finish the pending choice before ordering Seppuku.");
+        // Unfortunate Hesitation (issue #351, Mendon): Order Seppuku is an Open action, so a player who owes a pass may not take it either.
+        Require(!OwesForcedPass(command.PlayerId),ForcedPassReason);
         var card=Card(command.CardId);
         Require(card.OwnerId==command.PlayerId,"You may only order Seppuku for your own Personality.");
         Require(InPlay(card) && Definition(card).Type==CardType.Personality,"Choose your Personality in play.");
