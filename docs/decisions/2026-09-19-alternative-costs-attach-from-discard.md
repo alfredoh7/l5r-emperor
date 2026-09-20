@@ -196,29 +196,25 @@ action does not resolve, and costs of the action that were not yet paid are not 
 blocked cost negates the entire action; an Honor-loss cost is then ignored; a negated action whose costs were all paid still keeps those costs) and
 PR #344's whole-action negation (`ActionNegation.cs`). Built on what is on main, with a named seam for the atomic cost payment of #344's follow-up:
 
-- **The seam is `CostOptionDestructionNegated(ability, command, source)`** (`AlternativeCosts.cs`): "is destroying the cost option's card blocked by a
-  negation?", the reason or null, a **pure read** (it never consumes a negation and never counts a destruction). Today only a destroy cost option can be blocked (a
-  bow is paid by the card's own controller, never "an enemy's effect"); it asks the two negators `DestroyUnits` itself consults, without their side
-  effects: a negation a reaction set for that card (`NegatedEffects` "destroy" or "all") and Fields of Mercy's allowance being used up
-  (`FieldsOfMercyWouldNegatePersonalityDestruction`, the read-only half of the existing check). F's atomic payment should extend or replace this
-  method's body; the callers do not change.
-- **It coexists with R's `CostPaymentBlockedByNegation(command)`** (`TargetedActionReactions.cs`, Hida Mochitoko, #341), which is the per-VERB check for
-  a negated bow or destruction (a `NegatedEffects` entry of the cost's verb or "all") and aborts the action through `AbortActionForBlockedCost`. This one is
-  narrower and asks only what R's cannot: Fields of Mercy's destruction allowance being used up, plus the same destroy entry, and it resolves a deferred action
-  through `ResolveNegatedAction`. Both read the cost through the same `ChosenCostOption`/`CostSubjectCard`, and this one runs first, so a destroy cost is
-  never judged twice differently. The name is distinct so neither shadows the other; when F's atomic cost payment (#356) lands, this body and R's fold
-  into its single `CostPaymentBlockedByNegation(cost, subject)` and the callers here do not change.
-- **Asked BEFORE anything of the action is paid**: `ExecuteAbilityEffects` asks it first, and a blocked cost resolves the action through
-  `ResolveNegatedAction(command, costBlocked)`: the action is still TAKEN (its use is spent, a hand-played card leaves the hand, grants are
-  forfeited, priority passes, it is logged "(negated)" and `costBlocked`) but none of its costs are paid (no Gold, no Favor, no bow or destroy) and none of
-  its effects happen. `ResolveNegatedAction` also asks it, so a **reaction-negated action** (Sakuma's) pays what it can -- the Gold **and the non-Gold cost
-  option** (now generic, `PayCostOption`) -- unless that cost is itself blocked, when nothing is paid.
+- **There is ONE predicate: `CostPaymentBlockedByNegation(command)`** (`AbilityCosts.cs`, agent F's atomic cost payment, #356), which folds in agent R's
+  Hida Mochitoko rule (#341). It asks, before anything is paid, every cost the action would pay -- the chosen alternative cost (`CostOptions`) and each declared
+  `Costs` entry -- and is true when the card a cost would bow or destroy (sacrifice included) is in play and has that negated. It is verb-specific: a negated bow
+  (or "all") blocks a bow cost, a negated destruction (or "all") blocks a destroy or sacrifice, a negated destruction alone never blocks a bow, and verbs no
+  negation stops (discard, remove, token, deck, Honor loss) are never blocked. This document's destroy-as-cost cases (Kitsu Fukui's chosen alternative cost and the
+  four older `CostOptions` abilities) are the "chosen alternative cost" half of it, through the same `ChosenCostOption` / `CostSubjectCard`. My own separate
+  seam, `CostOptionDestructionNegated`, is gone; what it added on top of the shared check is one clause in the predicate: **Fields of Mercy's allowance being
+  used up blocks the destruction of a Personality paid as a cost** (`FieldsOfMercyWouldNegatePersonalityDestruction`, the read-only half of the existing check:
+  it never counts a destruction). A future "this cost is blocked" rule is added there and nowhere else.
+- **Asked once, BEFORE anything of the action is paid**, by `ExecuteAbilityEffects` (an action that is not negated) and by `ResolveNegatedAction` (one that
+  is): a blocked cost resolves the action through `AbortActionForBlockedCost` -- still TAKEN (its use is spent, a hand-played card leaves the hand, grants are
+  forfeited, priority passes, logged `actionNegated`) but none of its costs are paid (no Gold, no Favor, no bow or destroy) and none of its effects happen.
+  Otherwise a **reaction-negated action** (Sakuma's) pays what it can -- the Gold **and the non-Gold cost option** (`PayCostOption`) and the declared costs.
 - **Fields of Mercy's first destruction still goes through and is counted; the second is what it negates** (its existing rule); a blocked destroy
   cost leaves the Ancestor **and its attachments** alone (a cost that cannot be paid pays nothing: the attachments-still-destroyed clause of Fields of
   Mercy is about an effect, not a cost -- the alternative reading, destroying the unit's attachments anyway, would need the cost to be half-paid).
 - **The order of costs is the engine's, not a printed one** (Gold, then the cost option). No published card has both a Gold cost and a destroy option, so the
   order is only exercised by a training fixture; when one exists the printed order should decide.
-- Not changed: an unpaid **bow** option is never blocked; the four cost-choice abilities that predate the primitive are unaffected.
+- **Changed by the fold**: a bow paid as a cost option is now blocked by a negated bow of the subject (Mochitoko's "negate its bowing"), as F's predicate has it; before, only a destroy option could be blocked. The four cost-choice abilities that predate the primitive keep working and are covered the same way. A blocked cost is logged `actionNegated` ("paying one of its costs ... was negated"), no longer the separate `costBlocked` + "(negated)" pair.
 
 **H3. Fukui: closed by PR #350** (the Honor gain is independent of the performing Ancestor; the dishonorable death penalty is a separate Honor loss and
 both occur). No change here.
@@ -279,23 +275,26 @@ may be used during a player's action segment (as Open actions may be used during
 
 | Rule broken | File | Named tests that fail |
 |---|---|---|
-| a blocked cost is checked before the action is paid | `CardAbilities.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy` |
-| a blocked cost still charges the Gold | `ActionNegation.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy`, `NegatedActionKeepsPayableCosts` |
-| the predicate reads Fields of Mercy | `CardAbilities.cs` | `BlockedCostPaysNothingAfterIt`, `CostDestroyNegatedByFieldsOfMercy`, `NegatedActionKeepsPayableCosts` |
-| a reaction-negated action keeps the cost option it can pay | `ActionNegation.cs` | `NegatedActionKeepsPayableCosts` |
-| the predicate reads a negation set for the card | `AlternativeCosts.cs` | `CostDestroyNegatedByFieldsOfMercy` |
-| taking control changes OwnerId | `AttachAction.cs` | `ControlFollowsJunNi`, `EnemyFollowerAbilitiesBelongToTheNewController`, `TakenFollowerReturnsToItsOwner` |
+| the predicate reads Fields of Mercy | `AbilityCosts.cs` | `CostDestroyNegatedByFieldsOfMercy`, `BlockedCostPaysNothingAfterIt`, `NegatedActionKeepsPayableCosts` |
+| the predicate reads a destroy negation set for the card | `AbilityCosts.cs` | `CostDestroyNegatedByFieldsOfMercy`, `CostBlockIsPerVerb` |
+| the predicate asks the chosen cost option | `AbilityCosts.cs` | `CostDestroyNegatedByFieldsOfMercy`, `BlockedCostPaysNothingAfterIt`, `NegatedActionKeepsPayableCosts`, `CostOptionIsPaidAndAtomic`, `MochitokoBlocksAFollowerCost`, `CostBlockIsPerVerb` |
+| Fields of Mercy blocks only a destruction, never a bow | `AbilityCosts.cs` | `CostDestroyNegatedByFieldsOfMercy` |
+| the Fields of Mercy read is pure (never counts a destruction) | `AbilityCosts.cs` | `CostDestroyNegatedByFieldsOfMercy` |
+| a blocked cost is checked before the action is paid | `CardAbilities.cs` | `CostDestroyNegatedByFieldsOfMercy`, `BlockedCostPaysNothingAfterIt`, `AtomicCostPayment`, `CostOptionIsPaidAndAtomic`, `BlockingPredicateSeesEveryCost`, `MochitokoProtectsADeclaredCost`, `CostBlockIsPerVerb`, `MochitokoBlocksAFollowerCost`, `CostBlockIsPerVerb` |
+| a reaction-negated action is checked for a blocked cost | `ActionNegation.cs` | `NegatedActionKeepsPayableCosts`, `AtomicCostPayment`, `CostBlockIsPerVerb` |
+| a reaction-negated action keeps the cost option it can pay | `ActionNegation.cs` | `NegatedActionKeepsPayableCosts`, `CostOptionIsPaidAndAtomic` |
+| taking control changes OwnerId | `AttachAction.cs` | `ControlFollowsJunNi`, `TakenFollowerReturnsToItsOwner`, `EnemyFollowerAbilitiesBelongToTheNewController`, `TakenFollowerIsProtectedByItsControllersReactions` |
 | a card leaving play returns to its owner | `AttachAction.cs` | `TakenFollowerReturnsToItsOwner` |
 | a card going to a hand goes to its owner's | `CardAbilities.cs` | `TakenFollowerReturnsToItsOwner` |
-| the Open timing works in any player's segment | `TimingGrants.cs` | `BattleEquip`, `OpenEquipInAnySegment` |
+| the Open timing works in any player's segment | `TimingGrants.cs` | `OpenEquipInAnySegment`, `BattleEquip` |
 | the Battle timing needs the granting card unbowed | `TimingGrants.cs` | `BattleEquip` |
 | the Battle wielder is at the current battlefield | `MatchEngine.cs` | `BattleEquip` |
 | Equip (Limited) is not replaced by the grant | `TimingGrants.cs` | `KatagiDiscountOnlyFromHand`, `EquipLimitedIsUnchanged` |
 | a Battle equip uses an Additional Action grant | `MatchEngine.cs` | `BattleEquipIsABattleAction` |
 | a Battle equip is barred by the first-action limit | `MatchEngine.cs` | `BattleEquipIsABattleAction` |
-| Foothills' ability is Battle/Open | `CardAbilities.cs` | `AttachAsOpenInAnySegment`, `KeepBowsOnlyWhenItPays`, `OwnWeaponControl`, `PublishedShape` |
+| Foothills' ability is Battle/Open | `CardAbilities.cs` | `PublishedShape`, `AttachAsOpenInAnySegment`, `KeepBowsOnlyWhenItPays`, `OwnWeaponControl` |
 | a Battle equip stands at its wielder's battlefield | `MatchEngine.cs` | `BattleEquip` |
-| only Weapons are granted the timing | `TimingGrants.cs` | `BattleEquip`, `OpenEquipInAnySegment` |
+| only Weapons are granted the timing | `TimingGrants.cs` | `OpenEquipInAnySegment`, `BattleEquip` |
 
 **Cards the player-level timing grant unblocks.** One table row (and an action class) each: **Glory of the Shogun `oracle-l5r-2824`** ("Equipping is a Battle/Open
 action (for all players), and after the first time each turn each player Equips a card with a printed Gold Cost of 5 or more, that player may draw a card")
