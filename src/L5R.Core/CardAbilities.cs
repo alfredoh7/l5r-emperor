@@ -625,9 +625,9 @@ public static class AbilityCatalog
         // discard this Ring from your hand to use its ability without cost"). Recruitment for the
         // four Reaction-shaped Rings below is granted as an Additional Battle Action (GrantRingRecruit)
         // rather than a forced mid-resolution interrupt -- the user's own simplification.
-        ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none"),
+        ["ring-of-air-recruit"] = new("Battle", "Play after you resolve two or more Favor actions in one turn", "none", Absent: true),
         ["ring-of-air-straighten"] = new("BattleOrOpen", "Air Repeatable Battle/Open, bow: Straighten your target Personality or attachment", "personality-or-attachment", UsesPerTurn: AbilityUseLimit.Unlimited, Costs: ActionCost.BowSourceUnlessInHand),
-        ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none"),
+        ["ring-of-water-recruit"] = new("Battle", "Play after a battle resolves in which you played a Terrain, destroyed a Terrain, and destroyed any cards or provinces during resolution", "none", Absent: true),
         // Simplified from the printed "Absent Repeatable Battle" (issue #194): only the "move home" half
         // of the dual move effect is wired -- the "or move him to the current battlefield if he would be
         // opposed" half is deferred. See docs/ROADMAP.md. Its "Absent" (no-presence-required) half was
@@ -640,7 +640,7 @@ public static class AbilityCatalog
         // entire hand (except the Void ring itself).
         ["ring-of-void-recruit"] = new("Limited", "Play if you have two or fewer Rings in play. Discard your hand", "none"),
         ["ring-of-void-draw"] = new("Limited", "Void Limited, bow: Draw a card. If you now have more cards in your hand than any other player, discard a card", "none", Costs: ActionCost.BowSourceUnlessInHand),
-        ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-air-recruit"] = new("Battle", "After you win a battle in which there was ever a unit on the opposing side, you may put this Ring into play and lose 2 Honor", "none", Absent: true),
         // False Ring of Earth (oracle-l5r-10532, issue #295): Dueling (issue #204) and the own-won-duel
         // Reaction trigger (issue #209) cover "after a duel resolves" generally, but this Ring's own
         // condition is a per-PLAYER reaction to any duel their side wins (not a reaction carried by the
@@ -648,7 +648,7 @@ public static class AbilityCatalog
         // Action scoped to this Ring in hand" shape (GrantRingRecruit) instead, called from ResolveDuel
         // once a winner is known (see Dueling.cs), the same simplification every other Ring recruit
         // condition already uses in place of a forced mid-resolution interrupt.
-        ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none"),
+        ["false-ring-of-earth-recruit"] = new("Battle", "After you win a duel against a Personality who shared no keywords with your Personality in the duel, you may put this Ring into play and lose 2 Honor", "none", Absent: true),
         // "Absent Battle" (issue #331: the Absent flag replaces the earlier simplification to plain Battle).
         // Bowing the Ring is a COST of the action (Mendon's ruling, issue #353): it must be in play and unbowed (the shared "abilities on bowed cards
         // cannot be used" Require), and it is a DECLARED cost (Costs: ActionCost.BowSource, AbilityCosts.cs), so a negated action still pays it and a
@@ -675,7 +675,7 @@ public static class AbilityCatalog
         // branch -- "none of your Personalities were destroyed" holds by construction on the winning
         // side of an outright win (only DestroyUnits(the LOSING army) runs in those two branches; a
         // tie is the only resolution that ever destroys the winning side's own units too).
-        ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none"),
+        ["ring-of-earth-recruit"] = new("Battle", "After the resolution of a battle you won, if there were ever any enemy units at that battlefield and none of your Personalities were destroyed during the battle, you may put this Ring into play from your hand", "none", Absent: true),
         // "Even if you control no units at the current battlefield" waives the ordinary Battle-timing
         // presence check -- exactly rule 9's own gloss of Absent ("the action may be taken even without
         // controlling any unit at the current battlefield"), so it carries the Absent flag (issue #331; it
@@ -693,7 +693,7 @@ public static class AbilityCatalog
         // provinces or enemy cards in this resolution" fact Ring of Water's own CheckRingOfWaterRecruit
         // already computes at each ResolveBattle call site -- no "win" requirement, same as Ring of
         // Water, unlike Ring of Earth/False Ring of Air above.
-        ["ring-of-fire-recruit"] = new("Battle", "After the resolution of a battle in which you destroyed one or more provinces or enemy cards, you may put this Ring into play from your hand", "none"),
+        ["ring-of-fire-recruit"] = new("Battle", "After the resolution of a battle in which you destroyed one or more provinces or enemy cards, you may put this Ring into play from your hand", "none", Absent: true),
         // "Destroy your performing Personality" needs no new Performer category -- "own-personality"
         // (no AtBattle/unbowed qualifier, same reasoning as Steel on Steel's own performer) already
         // matches the printed text exactly. "enemy-personality-chi-lte-performer" (Chokehold's own
@@ -2431,10 +2431,10 @@ public sealed partial class MatchEngine
     // ceding priority to their opponent first -- Again!'s shape (ScopeCardIds null: any of the
     // player's own cards) or Two Hands' shape (a specific set: "from cards in his unit"). Two Hands'
     // own restriction blocks future GRANTS, not the use of ones already sitting here.
-    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false)
+    private void GrantAdditionalAction(int playerId, string[]? scopeCardIds, bool fromDiscard = false, int? battle = null)
     {
         if (_state.NoNewAdditionalActionsThisBattle) return;
-        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard));
+        _state.AdditionalActions.Add(new(playerId, scopeCardIds, fromDiscard, battle));
         Emit("additionalActionGranted", $"{Player(playerId).Name} may take an additional Battle action.", playerId);
     }
     // Ring recruitment (issue #194): rather than a forced mid-resolution interrupt, a satisfied
@@ -2447,9 +2447,37 @@ public sealed partial class MatchEngine
         if (!condition) return;
         var ring = player.Hand.Select(Card).FirstOrDefault(c => (Definition(c).Abilities ?? []).Contains(recruitAbilityId));
         if (ring is null) return;
-        if (!_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { } ids && ids.Contains(ring.Id)))
-            GrantAdditionalAction(player.Id, [ring.Id]);
+        var battle = RecruitGrantBattle();
+        if (!_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.Battle == battle && g.ScopeCardIds is { } ids && ids.Contains(ring.Id)))
+            GrantAdditionalAction(player.Id, [ring.Id], battle: battle);
     }
+    // The abilities that put a Ring into play on a GRANT ("After ...: you may put this Ring into play", issue #194): their Rings' recruit rights. (False Ring of
+    // Water's and Ring of the Void's recruits are standing checks with no grant.)
+    private static readonly HashSet<string> RingRecruitGrantIds = new(StringComparer.Ordinal)
+    {
+        "ring-of-air-recruit", "ring-of-water-recruit", "ring-of-earth-recruit", "ring-of-fire-recruit", "false-ring-of-air-recruit", "false-ring-of-earth-recruit"
+    };
+    // The battle a recruit grant made NOW belongs to (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle"): the battle in
+    // progress -- its Battle phase, through its resolution and aftermath -- or, made anywhere else (the Action phase's Favor actions), the next battle to be fought.
+    private int RecruitGrantBattle() => _state.Phase == Phase.Battle ? _state.BattleNumber : _state.BattleNumber + 1;
+    // A recruit grant (the only grants that carry a battle) is a standing permission for its battle, not a burst: another action, or a pass, by its holder does not
+    // forfeit it, and holding one does not keep the holder's priority (issue #379: it stays available across the actions of its own battle, and lapses with the battle).
+    private static bool Forfeitable(AdditionalActionGrant g) => g.Battle is null;
+    private bool GrantUsableNow(AdditionalActionGrant g) => g.Battle is null || g.Battle == _state.BattleNumber;
+    // A player still holding a recruit grant of the battle just resolved, for a Ring that is still in their hand.
+    private bool HoldsBattleRecruit(int playerId) => _state.AdditionalActions.Any(g => g.PlayerId == playerId && g.Battle == _state.BattleNumber
+        && g.ScopeCardIds is { Length: 1 } ids && Card(ids[0]).Zone == Zone.Hand);
+    // The window after a battle resolved, in which its recruit grants may be used before they lapse with it. Opens only when someone holds one.
+    private bool OpenBattleRecruitWindow(int attacker)
+    {
+        if (_state.WinnerId is not null) return false;
+        if (!HoldsBattleRecruit(0) && !HoldsBattleRecruit(1)) { ExpireBattleRecruitGrants(); return false; }
+        var first = FirstReactionOpportunity(HoldsBattleRecruit);
+        OpenAlternatingReactionWindow(new("battleRecruit", first, null, "After this battle resolved: you may put a Ring into play, or pass.", attacker), first, "After-battle recruit window opened.");
+        return true;
+    }
+    // A recruit grant is over when its battle is: this battle's and any older one's go; a grant for the NEXT battle (made between battles) waits.
+    private void ExpireBattleRecruitGrants() => _state.AdditionalActions.RemoveAll(g => g.Battle is int b && b <= _state.BattleNumber);
     // Ring of Water's own recruitment condition (issue #194): "played a Terrain, destroyed a
     // Terrain, and destroyed any cards or provinces during resolution" -- the first two are this
     // player's own battle-scoped flags; `destroyedSomething` is this specific resolution's own fact,
@@ -2463,8 +2491,8 @@ public sealed partial class MatchEngine
     {
         // A grant for playing this very card from a discard pile (Daigotsu Bofana - exp) goes first: it is the permission the play
         // was validated against, and an unscoped grant must not be spent in its place.
-        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
-            .OrderByDescending(g => g.FromDiscard).FirstOrDefault();
+        var grant = _state.AdditionalActions.Where(g => g.PlayerId == playerId && GrantUsableNow(g) && (g.ScopeCardIds is null || cardId is not null && g.ScopeCardIds.Contains(cardId)))
+            .OrderByDescending(g => g.FromDiscard).ThenByDescending(g => g.ScopeCardIds is not null).FirstOrDefault();
         if (grant is null) return false;
         _state.AdditionalActions.Remove(grant);
         return true;
@@ -2569,8 +2597,8 @@ public sealed partial class MatchEngine
         // keywords are the ability's source card's (Command.CardId), not the performer's (SourceId).
         FireAfterOwnActionTraits(AbilityCatalog.All[attack.AbilityId], attack.PlayerId, attack.Command?.CardId is { } sourceCardId ? Card(sourceCardId) : null);
         // Same "an unrelated action forfeits dangling grants" rule as ExecuteAbilityEffects' own tail.
-        if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId);
-        NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId));
+        if (!attack.Additional) _state.AdditionalActions.RemoveAll(g => g.PlayerId == attack.PlayerId && Forfeitable(g));
+        NextAction(attack.PlayerId, attack.Additional && _state.AdditionalActions.Any(g => g.PlayerId == attack.PlayerId && Forfeitable(g)));
     }
     private bool IsAttacking(CardInstance card) => card.Zone == Zone.Battlefield && card.OwnerId == _state.ActivePlayerId;
     // "Defending": at the current battlefield and owned by the non-active player -- unlike IsAttacking
@@ -2912,8 +2940,8 @@ public sealed partial class MatchEngine
         // re-checked here. This also naturally makes the grant, not a separate flag, the single
         // source of truth for "was this satisfied."
         if (id is "ring-of-air-recruit" or "ring-of-water-recruit" or "false-ring-of-air-recruit" or "ring-of-earth-recruit" or "ring-of-fire-recruit" or "false-ring-of-earth-recruit")
-            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
-                "This Ring's recruitment condition has not been granted yet.");
+            Require(_state.AdditionalActions.Any(g => g.PlayerId == player.Id && GrantUsableNow(g) && g.ScopeCardIds is { Length: 1 } grantIds && grantIds[0] == source!.Id),
+                "This Ring's recruitment condition has not been granted at this battle.");
         // Ring of the Void's own entry condition (issue #194): a Limited ability (not a granted
         // Additional Action), gated only by how many Rings this player already controls.
         if (id == "ring-of-void-recruit")
@@ -4027,7 +4055,7 @@ public sealed partial class MatchEngine
         // Snapshotted by reference (not just a count): a switch case that itself grants fresh actions
         // (Again!/Two Hands/equip-battle) must never accidentally spare an unrelated PRE-EXISTING
         // grant from forfeiture below just because the total count happens to end up higher.
-        var preExistingGrants = _state.AdditionalActions.Where(g => g.PlayerId == player.Id).ToList();
+        var preExistingGrants = _state.AdditionalActions.Where(g => g.PlayerId == player.Id && Forfeitable(g)).ToList();
         // Dueling (issue #204): a challenge-issuing ability resolves generically, not through the
         // per-id switch below -- "playing" the card (paying its cost, discarding a hand-played
         // Strategy immediately) is the only part that happens right away; the printed EFFECT (the
@@ -5391,7 +5419,7 @@ public sealed partial class MatchEngine
                 SpendHandPlayedCard(player, source);
                 if (!consumedGrant) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
                 if (OpenEitherOr(EitherOrSpecs.UnfortunateHesitation, source!, player.Id, target!.OwnerId, target, "action", bowedBeforeAction,
-                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id))) return;
+                        stayWithActor: _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g)))) return;
                 break;
             }
             // Training fixture for the Either/Or primitive's three-option shape.
@@ -5594,7 +5622,7 @@ public sealed partial class MatchEngine
         if (!consumedGrant && ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(preExistingGrants.Contains);
         // A burst the acting player still holds keeps its priority through every window this action opens (a Reaction, being played inside a window
         // that alternates on its own, never does: the window's own alternation goes on, and the burst waits behind it).
-        var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id);
+        var burstContinues = ForfeitsAdditionalActions(ability) && _state.AdditionalActions.Any(g => g.PlayerId == player.Id && Forfeitable(g));
         var closesTo = burstContinues ? player.Id : 1 - player.Id;
         // Togashi Hizumi / Tamori Ruya (issue #216): a chance to react to this action having just bowed a
         // Personality, before handing priority back the ordinary way. A Reaction is an action too, so its own
@@ -6158,8 +6186,11 @@ public sealed partial class MatchEngine
         var inEngageWindow = _state.PendingChoice?.Type == "engageReaction" && _state.PendingEngage is not null;
         // Likewise for the before-resolution set's Reaction window: only the one card it is asking about, only its "Before a battle resolves" Reactions.
         var beforeResolutionCard = _state.PendingChoice is { Type: "beforeBattleReaction" } beforeResolution ? beforeResolution.CardId : null;
+        // After a battle resolved (issue #379): only the recruits of this battle's grants are on offer.
+        var inRecruitWindow = _state.PendingChoice?.Type == "battleRecruit";
         foreach (var (source, id) in sources)
         {
+            if (inRecruitWindow && !RingRecruitGrantIds.Contains(id)) continue;
             var ability = AbilityCatalog.All[id];
             var isEngageReaction = ability.Timing == "Reaction" && ability.Trigger is "after-engaging" or "after-engaging-at-own-battlefield";
             if (inEngageWindow != isEngageReaction) continue;
@@ -6235,7 +6266,7 @@ public sealed partial class MatchEngine
                     continue;
                 }
                 // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
-                string?[] candidates = ability.Target switch { "none" or "provinces" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
+                string?[] candidates = ability.Target switch { "none" or "provinces" or "any-province" or "enemy-province" => new string?[] {null}, "own-army-personalities" => armyIds.Cast<string?>().ToArray(), "hand" => player.Hand.ToArray(),
                     "spell-or-reserve-in-hand" => player.Hand.Where(h => Definition(Card(h)).Type == CardType.Spell || Keyword(Card(h), "Reserve")).Cast<string?>().ToArray(),
                     // Low Market: broader than Equip (Battle)'s own hand filter (any Item/Follower/
                     // Spell, matching the ordinary Equip() command's own type filter).
@@ -6268,9 +6299,14 @@ public sealed partial class MatchEngine
                 // keeps only the ones with enemy units. Every other ability has exactly one (null).
                 // A move whose destination is a rule of the ability that the player chooses between (issue #336) offers one candidate
                 // per battlefield the rule lists; a move with nothing to choose (and no legal battlefield) offers the single null one.
-                int?[] destinations = id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
+                // A province target (Ring of Earth's "a province", a Reconnaissance grant's "an enemy province", issue #379) is a command parameter, not a card: one
+                // candidate per province, and for "any province" one option per owner (whose province) -- the choices QueryActions could not enumerate before.
+                int?[] destinations = ability.Target is "any-province" or "enemy-province" ? Enumerable.Range(0, Player(playerId).Provinces.Count).Select(i => (int?)i).ToArray()
+                    : id == "hawado-move-battlefield" ? _state.UnresolvedBattlefields.Select(p => (int?)p).ToArray()
                     : ability.Move is { ChoosesBattlefield: true } chosenMove && MoveDestinations(chosenMove) is { Length: > 0 } listed ? listed.Select(p => (int?)p).ToArray()
                     : ability.Target == "attack" && ability.AttackTargetsProvince && _state.CurrentBattleProvince is int battleProvince ? [null, battleProvince] : [null];
+                foreach (var provinceOwner in ability.Target == "any-province" ? new int?[] { 0, 1 } : new int?[] { null })
+                {
                 var legal = new List<GameCommand>(); string? error = null;
                 var quotes = new List<(GameCommand Command, GoldQuote? Quote)>();
                 foreach (var (target, destination) in candidates.SelectMany(t => destinations.Select(d => (t, d))))
@@ -6281,7 +6317,7 @@ public sealed partial class MatchEngine
                     // a parallel per-ability chain. A free ability gets the empty source list, and a cost the
                     // player cannot pay gets none, so ValidateAbility below reports the shortfall exactly as
                     // it always has.
-                    var command = prototype with { TargetId = target, Province = destination };
+                    var command = prototype with { TargetId = target, Province = destination, TargetPlayerId = provinceOwner };
                     var quote = QuoteAbilityGold(command);
                     command = command with { SourceIds = quote is null ? [] : quote.Payments.FirstOrDefault()?.SourceIds };
                     try { ValidateAbility(command); legal.Add(command); quotes.Add((command, quote)); }
@@ -6292,17 +6328,20 @@ public sealed partial class MatchEngine
                 // the client swaps between them without a round trip.
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                var label = AbilityOptionLabel(id, ability, performer, source, costOption);
+                var label = AbilityOptionLabel(id, ability, performer, source, costOption)
+                    + (provinceOwner is int owner ? (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
                     // The battlefields a move's destination rule lists (issue #336) or, for an Attack, the province it may name instead of a card (issue #335): the
                     // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
                     // same field never means both; ActionOption.Type/Slots/NoTarget say which.
-                    Provinces: ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                    Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                        : ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                         : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
                     Gold: firstQuote, TargetGold: targetQuotes,
                     // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
                     NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null));
+                }
             }
         }
     }

@@ -414,7 +414,10 @@ public sealed record FirstActionRestriction(int PlayerId, string? PerformerId, b
 /// single scoped card FROM A DISCARD PILE (Daigotsu Bofana - exp: "take an additional action to play it ... After it
 /// resolves, remove the card from the game"); it makes that card's Battle actions available, and consumed, like any
 /// grant.</summary>
-public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false);
+///  <param name="Battle">The battle the grant belongs to (MatchState.BattleNumber), or null for one that needs no battle. A Ring's recruit grant
+/// (Mendon's ruling, issue #379: "A recruit grant at one battle is limited to that battle") is usable only at its own battle and lapses when that
+/// battle is over: made during a battle it belongs to that battle, made between battles (the Action phase) it belongs to the NEXT one.</param>
+public sealed record AdditionalActionGrant(int PlayerId, string[]? ScopeCardIds, bool FromDiscard = false, int? Battle = null);
 
 /// <summary>A discard a player owes: they choose the card from their hand (Times of Strife, Daigotsu Bofana - exp's entry).
 /// Reason names the card or rule in the prompt and the event.</summary>
@@ -610,6 +613,9 @@ public sealed class MatchState
     // it does not touch grants already sitting in AdditionalActions. All battle-scoped: cleared at
     // FinishBattleResolution, never carried into a later battle or turn.
     public List<AdditionalActionGrant> AdditionalActions { get; set; } = [];
+    // Which battle of the game is being fought (issue #379): incremented when a battle is selected, so it names the battle in progress from its Engage
+    // window through its aftermath, and stays that battle's number until the next one is selected. What a battle-scoped grant is compared against.
+    public int BattleNumber { get; set; }
     public GameCommand? PendingAdditionalAction { get; set; }
     public bool NoNewAdditionalActionsThisBattle { get; set; }
     // Attack-vs-Followers exceptions granted by another card (AttackFollowerException shape (e), Yoritomo
