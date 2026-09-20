@@ -1,0 +1,39 @@
+{
+  "Profile": "personality-wave-38",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-200",
+      "Name": "Akodo Dairuko",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 5,
+      "PersonalHonor": 5,
+      "HonorRequirement": 10,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: Even if Dairuko is bowed, before the resolution of a battle at her battlefield: Dairuko rallies her troops. That battle's resolution will not bow cards in your army.\nBattle: Melee 8 Attack.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-200.jpg",
+      "Keywords": [
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Lion Clan",
+        "Paragon",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dairuko-rally",
+        "dairuko-melee"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

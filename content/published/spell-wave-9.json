@@ -1,0 +1,32 @@
+{
+  "Profile": "spell-wave-9",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-9890",
+      "Name": "The Wave Persists",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 2,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "While this Shugenja is Water, he has +2F.\nReaction: After engaging, if this Shugenja is not at the current battlefield, target your Personality there: Before this battle resolves, move the target home, and if he moved, move this Shugenja to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-9890.jpg",
+      "Keywords": [
+        "Water"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "wave-persists-move"
+      ],
+      "Effect": "wave-persists-force"
+    }
+  ],
+  "Decks": []
+}

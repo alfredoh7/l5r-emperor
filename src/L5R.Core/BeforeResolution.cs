@@ -5,7 +5,8 @@ namespace L5R.Core;
 // reaction round: every source below joins ONE set that the active player orders (PendingBeforeBattleResolve, MatchEngine.ResolveBattle), and
 // each is read live when its turn comes, so an earlier effect is already reflected in the next.
 //   - a card's trait (item id = the card id; mandatory or "you may", decided by its owner) -- MatchEngine.BeforeBattleResolveSourceIds
-//   - a DELAYED effect a Battle action registered ("Before this battle resolves, bow him") -- item id "delayed:N"
+//   - a DELAYED effect an action registered ("Before this battle resolves, bow him"; also give -3C, straighten, destroy, or move him home and then a
+//     second card to the battlefield) -- item id "delayed:N"
 //   - a printed "Reaction: Before a battle resolves" (Steady Resolve, Akodo Dairuko) -- item id "reaction:CARD"; optional, its owner uses or declines it
 // A delayed effect belongs to its battle: it lapses with it, applied or not.
 public sealed partial class MatchEngine
@@ -14,11 +15,12 @@ public sealed partial class MatchEngine
 
     private static bool IsBeforeResolutionReaction(AbilityDefinition ability) => ability.Timing == "Reaction" && ability.Trigger == "before-battle-resolves";
 
-    // The primitive a Battle action calls to say "before this battle resolves, do X to him". Kind: "bow", "straighten", "destroy" or "modifier"
-    // (stat, amount).
-    private void RegisterDelayedBattleEffect(int playerId, CardInstance? source, string kind, CardInstance target, string? stat = null, int amount = 0)
+    // The primitive an action calls to say "before this battle resolves, do X to him". Kind: "bow", "straighten", "destroy", "modifier" (stat, amount) or
+    // "moveHome". A moveHome may carry one dependent second move -- "and if he moved, move this Shugenja to the current battlefield" (The Wave Persists):
+    // thenMoveToBattleId names the card that follows to the battlefield once the target has actually gone home.
+    private void RegisterDelayedBattleEffect(int playerId, CardInstance? source, string kind, CardInstance target, string? stat = null, int amount = 0, string? thenMoveToBattleId = null)
     {
-        var effect = new DelayedBattleEffect(_state.NextDelayedEffectId++, kind, playerId, source?.Id, target.Id, stat, amount);
+        var effect = new DelayedBattleEffect(_state.NextDelayedEffectId++, kind, playerId, source?.Id, target.Id, stat, amount, thenMoveToBattleId);
         _state.DelayedBattleEffects.Add(effect);
         Emit("delayedEffectRegistered", $"Before this battle resolves: {DescribeDelayedEffect(effect)}.", playerId, source?.Id);
     }
@@ -31,6 +33,7 @@ public sealed partial class MatchEngine
             "bow" => $"bow {target}",
             "straighten" => $"straighten {target}",
             "destroy" => $"destroy {target}",
+            "moveHome" => $"move {target} home" + (effect.ThenMoveId is { } follower && _state.Cards.ContainsKey(follower) ? $", and if he moved, move {Definition(Card(follower)).Name} to the battlefield" : ""),
             _ => $"give {target} {(effect.Amount >= 0 ? "+" : "")}{effect.Amount} {effect.Stat}",
         };
     }
@@ -93,9 +96,24 @@ public sealed partial class MatchEngine
                 case "bow": if (!StalwartNegatesBow(target, effect.PlayerId)) target.Bowed = true; break;
                 case "straighten": Straighten(target); break;
                 case "destroy": DestroyUnits([target], false, effect.PlayerId); break;
+                case "moveHome": ResolveDelayedMoveHome(effect, target); break;
                 default: ApplyModifier(target, effect.SourceId ?? "delayed-effect", "delayed-effect", effect.Stat!, effect.Amount); break;
             }
         FinishBeforeBattleEffect(pending);
+    }
+
+    // "Move him home, and if he moved, move this Shugenja to the current battlefield": read when its turn comes, like every member of the set. He moved only
+    // if he was at a battlefield and the move was not negated; then the dependent card, if it is still in play, follows to this battle's battlefield.
+    private void ResolveDelayedMoveHome(DelayedBattleEffect effect, CardInstance target)
+    {
+        var wasAtABattlefield = target.Zone == Zone.Battlefield;
+        if (wasAtABattlefield) MoveHome(target, false);
+        var moved = wasAtABattlefield && target.Zone != Zone.Battlefield;
+        if (!moved || effect.ThenMoveId is not { } followerId || !_state.Cards.TryGetValue(followerId, out var follower) || !InPlay(follower) || _state.CurrentBattleProvince is not int province) return;
+        MoveToBattlefield(follower, province);
+        // A move the set applies is not "after the resolution of an action": no after-action window is owed for it.
+        _state.PendingMoveReactionCardId = null;
+        Emit("unitMovedToBattlefield", $"{Definition(follower).Name}'s unit moved to the battlefield at province {province + 1}.", follower.OwnerId, follower.Id);
     }
 
     // A Reaction's turn in the set: its owner is asked to use it or pass. Nothing is asked when it can no longer be used (an earlier effect
