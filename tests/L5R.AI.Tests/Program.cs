@@ -197,6 +197,16 @@ return runner.Finish();
 void Run(string name,Action run) => tests.Add((name,run));
 
 static void Check(bool condition,string message) { if(!condition) throw new Exception(message); }
+// Order Seppuku (issue #368): available exactly at a player's own turn to act in the Action phase with nothing pending -- and, guarding the other
+// direction, no leftover pending state may quietly block it at an ordinary opportunity. Run at every decision of the whole matches below.
+static void CheckSeppukuTiming(MatchEngine game,int player)
+{
+    var state=game.State; var offered=game.QueryActions(player).Any(a=>a.Type=="orderSeppuku" && a.Enabled);
+    var ordinary=state.Phase==Phase.Action && state.PriorityPlayerId==player && state.PendingChoice is null && state.PendingDuel is null;
+    if(ordinary) Check(game.SeppukuTimingReason(player) is null,$"A stale pending state blocks Seppuku at an ordinary Action-phase opportunity (turn {state.TurnNumber}, player {player})");
+    else Check(!offered,$"Seppuku is offered outside an ordinary Action-phase opportunity ({state.Phase}, pending {state.PendingChoice?.Type}, priority {state.PriorityPlayerId}, player {player})");
+    if(game.SeppukuTimingReason(player) is not null) Check(!offered,"Seppuku is offered although the timing predicate refuses it");
+}
 // Starts the search with an explicit command, then lets the training AI answer every decision from ONLY its own view and its
 // offered actions (forceDeck narrows the deck choice, standing in for a player who prefers that deck).
 static void ResolveSearch(MatchEngine game,string ability,string? forceDeck)
@@ -225,7 +235,7 @@ static void PlaySearchMatch(ulong seed)
     var game=MatchEngine.CreateDeckSearchShowcase(seed); var commands=0;
     while(game.GetView(0).WinnerId is null && commands<700)
     {
-        var player=game.GetView(0).PriorityPlayerId;
+        var player=game.GetView(0).PriorityPlayerId; CheckSeppukuTiming(game,player); CheckSeppukuTiming(game,1-player);
         var decision=TrainingOpponent.Choose(game.GetView(player),game.QueryActions(player));
         Check(decision.Command is not null,$"No decision at {game.GetView(player).Phase}, step {commands}");
         var result=game.Execute(decision.Command!);
@@ -242,7 +252,7 @@ static void Play(ulong seed,bool published=false)
     var game=published?MatchEngine.CreatePublishedMatch(seed):MatchEngine.CreateStarterMatch(seed); var commands=0;
     while(game.GetView(0).WinnerId is null && commands<1600)
     {
-        var player=game.GetView(0).PriorityPlayerId;
+        var player=game.GetView(0).PriorityPlayerId; CheckSeppukuTiming(game,player); CheckSeppukuTiming(game,1-player);
         var view=game.GetView(player); var actions=game.QueryActions(player);
         // Also exercise assignment reconstruction from legal target/province metadata.
         if(commands%3==0) actions=actions.Select(a=>a.Type is "attack" or "assignDefense"?a with {Command=null}:a).ToArray();
