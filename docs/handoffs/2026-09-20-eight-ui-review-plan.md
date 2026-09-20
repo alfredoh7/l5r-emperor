@@ -7,7 +7,7 @@ Alfredo approved these concept combinations. Implementation completion means a t
 | Order | Issue | Approved direction | Current evidence |
 |---|---|---|---|
 | 1 | #339 | A sidebar + B clearer source preview; reusable choice and alternative-cost flow | Ready for individual review; [PR #392](https://github.com/alfredoh7/l5r-emperor/pull/392), native Mac checks and dedicated launcher; no merge |
-| 2 | #315 | B shown-card history sidebar | Pending |
+| 2 | #315 | B shown-card history sidebar | Ready for individual review; [PR #393](https://github.com/alfredoh7/l5r-emperor/pull/393), native Mac and live reconnect checks, dedicated launcher; no merge |
 | 3 | #347 | A restriction seal | Pending |
 | 4 | #314 | B full-card gallery inside A search panel | Pending |
 | 5 | #343 | A sidebar + B explicit consequences | Pending |

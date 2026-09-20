@@ -99,6 +99,7 @@ public partial class Main : Node
         ProcessBattlePresentation(delta);
         if (_session.Snapshot is not null) SyncBloodCourts();
         ProcessTableCamera(delta);
+        ProcessShownCards(delta);
         if (_session.Snapshot is not null && _matSections.ReducedMotion != _reducedMotion) SyncMatSections();
         ExpireBattleResolution();
         foreach (var tracker in _sidebarHeader.GetChildren().OfType<BattleTracker>()) tracker.ReducedMotion = _reducedMotion;
@@ -117,6 +118,7 @@ public partial class Main : Node
             _session.StepPracticeReaction();
         }
         if (_capturePath is not null && _captureMode.StartsWith("published-decisions",StringComparison.Ordinal)) { ProcessDecisionCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
@@ -303,6 +305,7 @@ public partial class Main : Node
         _hand.Position = new Vector2(250, 1060 - HandCardSide); _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
+        FitShownCards();
         FitEventDecisions();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
@@ -365,6 +368,7 @@ public partial class Main : Node
         _unitDetail = Place(_root, new Control { MouseFilter = Control.MouseFilterEnum.Ignore, ZIndex = 50 }, 0, 0, 1920, 1080);
         BuildEventDecisions();
         BuildCameraControls();
+        BuildShownCards();
         BuildBattleFeedback();
         BuildFullscreenGate();
         GetViewport().SizeChanged += FitPresentation; FitPresentation();
@@ -388,6 +392,8 @@ public partial class Main : Node
             GetViewport().SetInputAsHandled();
         }
         else if (MenuVisible || PracticeVisible) return;
+        else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
+        else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -402,6 +408,7 @@ public partial class Main : Node
         if (MenuVisible || PracticeVisible) return;
         if (_session.Snapshot is null)
         {
+            ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
             _matSections.Sync([], true, "disconnected");
@@ -427,6 +434,7 @@ public partial class Main : Node
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
         RenderBattleFeedback();
+        ObserveShownCards();
     }
 
     private void RenderTimeline()
@@ -465,6 +473,7 @@ public partial class Main : Node
 
     private void SelectCard(CardView card)
     {
+        if(_shownOpen)ToggleShownCards(false);
         if (_session.Busy || PresentationBusy) return;
         if (SelectEventCard(card)) return;
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
@@ -534,6 +543,7 @@ public partial class Main : Node
 
     private void Choose(ActionOption option)
     {
+        if(_shownOpen)ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
         if (option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
             option = option with { Command = command with { TargetId = target } };

@@ -18,6 +18,7 @@ try
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
+        ("shown-card history arrives on both seats and survives live reconnect without exposing other deck cards", ShownHistoryReconnect),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
@@ -92,6 +93,7 @@ static async Task Reconnect(string url)
     await host.CreateOrJoin(url, null);
     await WaitFor(() => host.Snapshot is not null && !host.Busy);
     var saved = host.Seat!;
+    var matchKey = host.MatchKey;
     await guest.CreateOrJoin(url, saved.RoomCode);
     await WaitFor(() => guest.Snapshot is not null && !guest.Busy);
     var actor = host.Snapshot!.View.PriorityPlayerId == 0 ? host : guest;
@@ -102,6 +104,7 @@ static async Task Reconnect(string url)
     await host.Resume(url, saved);
     await WaitFor(() => host.Snapshot?.View.Version == 1 && !host.Busy);
     Check(host.Seat == saved && host.Snapshot!.View.ViewerId == saved.PlayerId, "Resume retains identity and authoritative state.");
+    Check(host.MatchKey == matchKey, "Reconnect keeps the inspection identity.");
 
     // A canceled older Connect/Receive must never disconnect or overwrite the latest session.
     var old = host.Resume(url, saved);
@@ -112,6 +115,50 @@ static async Task Reconnect(string url)
     await host.Submit(new GameCommand("concede", saved.PlayerId, 1));
     await WaitFor(() => host.Snapshot?.View.Version == 2 && !host.Busy);
     Check(host.Snapshot!.View.WinnerId == 1, "The latest connection remains usable after overlapping reconnects.");
+}
+
+static async Task ShownHistoryReconnect()
+{
+    var directory=Path.Combine(Path.GetTempPath(),"l5r-shown-history-"+Guid.NewGuid().ToString("N"));
+    const string room="SHWNTEST";
+    var tokens=new[]{Guid.NewGuid().ToString("N"),Guid.NewGuid().ToString("N")};
+    static string Hash(string value)=>Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(value)));
+    var engine=MatchEngine.CreateDeckSearchShowcase(315);
+    var source=engine.State.Cards.Values.Single(c=>c.OwnerId==0&&c.DefinitionId=="oracle-l5r-10292").Id;
+    foreach(var command in new[]{new GameCommand("useAbility",0,0,source,AbilityId:"shizuka-search"),new GameCommand("chooseSearchDeck",0,1,Choice:"Fate")})
+        Check(engine.Execute(command).Accepted,"Prepare private search");
+    await new RoomStore(directory).SaveAsync(new PersistedRoom(1,room,DateTimeOffset.UtcNow,
+        tokens.Select((token,seat)=>new SeatCredential(seat,Hash(token))).ToArray(),engine.ExportReplay(),[]));
+    var server=await ServerApplication.BuildAsync(["--urls","http://127.0.0.1:0","--L5R:StoragePath",directory,"--Logging:LogLevel:Default","Critical"]);
+    try
+    {
+        await server.StartAsync();var address=server.Urls.Single();
+        using var first=new MatchSession();using var other=new MatchSession();
+        var seats=tokens.Select((token,seat)=>new RoomSeat(room,seat,token,1,Protocol.ContentVersion)).ToArray();
+        await first.Resume(address,seats[0]);await other.Resume(address,seats[1]);
+        await WaitFor(()=>first.Snapshot?.PlayersConnected?.All(x=>x)==true&&other.Snapshot?.PlayersConnected?.All(x=>x)==true);
+        Check(other.Snapshot!.View.PendingSearch is null&&(other.Snapshot.View.ShownCards?.Length??0)==0,"No private search contents reach the opponent before the reveal");
+        await first.Submit(first.Snapshot!.Actions.Single(a=>a.Type=="selectSearchCard"&&a.Command?.Choice=="training-terrain").Command!);
+        await WaitFor(()=>first.Snapshot?.View.ShownCards?.Length==1&&other.Snapshot?.View.ShownCards?.Length==1);
+        var before=JsonSerializer.Serialize(other.Snapshot!.View.ShownCards);
+        Check(before==JsonSerializer.Serialize(first.Snapshot!.View.ShownCards),"Both sessions receive exactly the same public show");
+        var key=other.MatchKey;other.Disconnect();await other.Resume(address,seats[1]);
+        await WaitFor(()=>other.Connected&&!other.Busy&&other.Snapshot?.View.ShownCards?.Length==1);
+        Check(other.MatchKey==key&&JsonSerializer.Serialize(other.Snapshot!.View.ShownCards)==before,"Reconnect restores the history with stable inspection identity");
+        var visible=other.Snapshot!.View;
+        Check(visible.Players[0].Hand.Length==0&&visible.PendingSearch is null,"Reconnect cannot expose the searcher's hidden hand or viewer");
+        Check(!before.Contains("training-costed-region"),"An unshown deck card is absent from history");
+        using var fresh=new MatchSession();await fresh.Resume(address,seats[1]);
+        await WaitFor(()=>fresh.Snapshot?.View.ShownCards?.Length==1);
+        Check(JsonSerializer.Serialize(fresh.Snapshot!.View.ShownCards)==before,"A fresh client reconstructs history entirely from the server");
+        var oldKey=fresh.MatchKey;fresh.StartPractice(false,true);
+        Check(fresh.MatchKey!=oldKey&&(fresh.Snapshot!.View.ShownCards?.Length??0)==0,"A new match cannot inherit the old inspection history");
+    }
+    finally
+    {
+        await server.StopAsync();await server.DisposeAsync();
+        if(Directory.Exists(directory))Directory.Delete(directory,true);
+    }
 }
 
 // The outgoing mapping is an explicit field list, so a new GameCommand field is silently dropped online unless it is

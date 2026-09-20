@@ -124,7 +124,7 @@ public partial class Main
     private void AddDecisionSource(CardView source,string? prompt)
     {
         var row=new HBoxContainer();row.AddThemeConstantOverride("separation",14);_inspector.AddChild(row);
-        row.AddChild(CardPreview.Face(source,240,168));
+        row.AddChild(CardPreview.Face(source,200,140));
         var details=new VBoxContainer {SizeFlagsHorizontal=Control.SizeFlags.ExpandFill};details.AddThemeConstantOverride("separation",12);row.AddChild(details);
         var name=Palette.Wrapped(source.Definition!.Name,22);name.AddThemeFontOverride("font",SidebarSkin.Bold);details.AddChild(name);
         if(prompt is not null)
