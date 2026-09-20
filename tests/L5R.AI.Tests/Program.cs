@@ -35,6 +35,24 @@ Run("resolves purchase and Proclaim with alternating reaction priority",()=>
     }
     Check(game.GetView(0).PendingChoice is null,"Reaction window stuck");
 });
+Run("declines to attack at the Declaration Segment when it has nothing to attack with, and never stalls there (issue #354)",()=>
+{
+    var game=MatchEngine.CreateStarterMatch();
+    for(var i=0;i<12 && game.GetView(0).Phase!=Phase.AttackDeclaration;i++)
+    {
+        var mover=game.GetView(0).PriorityPlayerId;
+        var step=TrainingOpponent.Choose(game.GetView(mover),game.QueryActions(mover));
+        Check(step.Command is not null && game.Execute(step.Command).Accepted,"the AI could not reach the Declaration Segment");
+    }
+    var view=game.GetView(0); var actions=game.QueryActions(view.PriorityPlayerId);
+    if(view.Phase==Phase.AttackDeclaration)
+    {
+        Check(actions.Any(a=>a.Type=="declareAttack") && actions.Any(a=>a.Type=="pass"),"the decision is one explicit choice");
+        var decision=TrainingOpponent.Choose(game.GetView(view.PriorityPlayerId),actions);
+        Check(decision.Command?.Type=="pass","With no army the AI declines to attack");
+        Check(game.Execute(decision.Command!).Accepted && game.GetView(0).Phase==Phase.Dynasty,"and declining ends the Attack Phase");
+    }
+});
 Run("passes, never deadlocks, in a multi-reaction before-action window (issue #318)",()=>
 {
     // The legal-action listing now offers the player holding priority every reaction of their own that applies to the
@@ -51,6 +69,29 @@ Run("passes, never deadlocks, in a multi-reaction before-action window (issue #3
     };
     var decision=TrainingOpponent.Choose(view,actions);
     Check(decision.Command?.Type=="declineReaction","The practice opponent took a reaction over passing");
+});
+Run("passes, never stalls or spends Gold, in a window holding a redirect or a negation (Ezuno, Blade of Champions, Yurishi, Jinn-Kuen, Mochitoko; issue #335)",()=>
+{
+    // The targeted-by-action reactions are offered as targetless useAbility options (Ezuno, Yurishi, Jinn-Kuen with its Gold quote, Mochitoko) or one
+    // option per candidate card (Blade of Champions). The practice opponent scores an ability it has no rule for below passing, so it always passes
+    // -- and never pays Jinn-Kuen's 2 Gold or redirects an action on its own -- in both windows an action can be held in.
+    var game=MatchEngine.CreateStarterMatch();
+    foreach(var window in new[]{"beforeActionReaction","attackReaction"})
+    {
+        var view=game.GetView(0) with { PendingChoice=new(window,1,null,"An action is pending: react or pass.") };
+        var own=view.Players[0].Hand.First().Id;
+        var actions=new ActionOption[]
+        {
+            new("useAbility","Ezuno",true,null,new("useAbility",0,view.Version,CardId:"ezuno",AbilityId:"ezuno-redirect"),"ezuno"),
+            new("useAbility","Blade of Champions",true,null,new("useAbility",0,view.Version,CardId:"blade",TargetId:own,AbilityId:"blade-of-champions-redirect"),"blade"),
+            new("useAbility","Yurishi",true,null,new("useAbility",0,view.Version,CardId:"yurishi",AbilityId:"yurishi-disappear"),"yurishi"),
+            new("useAbility","Jinn-Kuen",true,null,new("useAbility",0,view.Version,CardId:"jinn",AbilityId:"jinn-kuen-negate",SourceIds:["stronghold"]),"jinn"),
+            new("useAbility","Mochitoko",true,null,new("useAbility",0,view.Version,CardId:"moch",AbilityId:"mochitoko-negate"),"moch"),
+            new("declineReaction","Pass reaction",true,null,new("declineReaction",0,view.Version))
+        };
+        var decision=TrainingOpponent.Choose(view,actions);
+        Check(decision.Command?.Type=="declineReaction",$"The practice opponent took a reaction over passing in the {window} window");
+    }
 });
 Run("answers a forced discard (Times of Strife, Daigotsu Bofana) with the least useful card in its hand instead of stalling (issue #333)",()=>
 {
@@ -211,6 +252,7 @@ static void Play(ulong seed,bool published=false)
         Check(result.Accepted,$"Illegal {decision.Command!.Type}: {result.Error}"); commands++;
     }
     Check(game.GetView(0).WinnerId is not null,$"Match exceeded 1600 decisions (turn {game.GetView(0).TurnNumber})");
+    Check(game.GetView(0).VictoryReason?.Contains("Military")!=true || game.GetView(0).Events.Any(e=>e.Type=="attackDeclared"),"A military victory needs a declared attack: the AI still declares (issue #354)");
     var replay=MatchEngine.Replay(game.ExportReplay());
     Check(JsonSerializer.Serialize(replay.GetView(0))==JsonSerializer.Serialize(game.GetView(0)),"Replay differs");
     Console.WriteLine($"  {commands} decisions; {game.GetView(0).VictoryReason}; turn {game.GetView(0).TurnNumber}");

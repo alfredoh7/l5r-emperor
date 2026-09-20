@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
     private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
-    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {

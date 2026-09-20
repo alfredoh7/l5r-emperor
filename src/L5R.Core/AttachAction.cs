@@ -47,6 +47,8 @@ public static class AttachPile
 {
     public const string Own = "own-discard";
     public const string Any = "any-discard";
+    /// <summary>Your own hand or your own discard pile (Harsh Taskmaster: "a Follower in your hand or discard pile").</summary>
+    public const string OwnHandOrDiscard = "own-hand-or-discard";
 }
 
 /// <summary>Who receives the attached card.</summary>
@@ -68,9 +70,16 @@ public sealed partial class MatchEngine
     private string? AttachTargetError(AttachSpec spec, int playerId, CardInstance card)
     {
         var def = Definition(card);
-        if (card.Zone != Zone.FateDiscard) return "Choose a card in a discard pile.";
-        if (spec.Pile == AttachPile.Own && card.OwnerId != playerId) return "Choose a card in your own discard pile.";
-        if (spec.Types is { } types && !types.Contains(def.Type)) return $"Choose {string.Join(" or ", types.Select(t => "a " + t))} in a discard pile.";
+        if (spec.Pile == AttachPile.OwnHandOrDiscard)
+        {
+            if (card.OwnerId != playerId || card.Zone != Zone.FateDiscard && !(card.Zone == Zone.Hand && Player(playerId).Hand.Contains(card.Id))) return "Choose a card in your hand or your own discard pile.";
+        }
+        else
+        {
+            if (card.Zone != Zone.FateDiscard) return "Choose a card in a discard pile.";
+            if (spec.Pile == AttachPile.Own && card.OwnerId != playerId) return "Choose a card in your own discard pile.";
+        }
+        if (spec.Types is { } types && !types.Contains(def.Type)) return $"Choose {string.Join(" or ", types.Select(t => "a " + t))} in {(spec.Pile == AttachPile.OwnHandOrDiscard ? "your hand or a discard pile" : "a discard pile")}.";
         if (spec.Keywords is { } required && !required.All(k => Keyword(card, k))) return $"Choose a card with {string.Join(", ", required)}.";
         if (spec.ExcludedKeywords is { } excluded && excluded.Any(k => Keyword(card, k))) return $"Choose a card without {string.Join(" or ", excluded)}.";
         return null;

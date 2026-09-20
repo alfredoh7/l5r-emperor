@@ -19,7 +19,7 @@ namespace L5R.Core;
 //   - A cost can be NEGATED (Mendon's ruling, issue #352: a destruction paid as a cost CAN be negated -- Fields of Mercy and the like). When it is,
 //     the whole action is negated: it is still taken (its use is spent, a hand-played card leaves the hand) but none of it resolves, and the costs
 //     of the action that were not yet paid are not paid. This is the same reading as a blocked cost of Hida Mochitoko (#341) and the atomic cost
-//     payment of #344's follow-up, which asks the one question this file answers for a cost option: CostPaymentBlockedByNegation.
+//     payment of #344's follow-up, which asks the one question this file answers for a cost option: CostOptionDestructionNegated.
 
 /// <summary>The verbs a cost option may apply to its subject.</summary>
 public static class CostVerb
@@ -91,7 +91,7 @@ public sealed partial class MatchEngine
     // only cost that can be blocked is a destroy cost option (a bow cannot be negated: it is paid by the card's own controller, never "an enemy's
     // effect"); a future cost whose payment a negation can stop (an Honor-loss cost, a discard) adds its own clause here, or F's atomic cost payment
     // replaces this method's body -- the callers do not change. The check is a pure read: it never consumes a negation and never counts a destruction.
-    private string? CostPaymentBlockedByNegation(AbilityDefinition ability, GameCommand command, CardInstance? source)
+    private string? CostOptionDestructionNegated(AbilityDefinition ability, GameCommand command, CardInstance? source)
     {
         if (ability.CostOptions is null) return null;
         var option = ChosenCostOption(ability, command);

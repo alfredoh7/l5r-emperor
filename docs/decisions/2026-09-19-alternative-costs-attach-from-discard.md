@@ -196,12 +196,18 @@ action does not resolve, and costs of the action that were not yet paid are not 
 blocked cost negates the entire action; an Honor-loss cost is then ignored; a negated action whose costs were all paid still keeps those costs) and
 PR #344's whole-action negation (`ActionNegation.cs`). Built on what is on main, with a named seam for the atomic cost payment of #344's follow-up:
 
-- **The seam is `CostPaymentBlockedByNegation(ability, command, source)`** (`AlternativeCosts.cs`): "is paying this cost blocked by a negation?", the
-  reason or null, a **pure read** (it never consumes a negation and never counts a destruction). Today only a destroy cost option can be blocked (a
+- **The seam is `CostOptionDestructionNegated(ability, command, source)`** (`AlternativeCosts.cs`): "is destroying the cost option's card blocked by a
+  negation?", the reason or null, a **pure read** (it never consumes a negation and never counts a destruction). Today only a destroy cost option can be blocked (a
   bow is paid by the card's own controller, never "an enemy's effect"); it asks the two negators `DestroyUnits` itself consults, without their side
   effects: a negation a reaction set for that card (`NegatedEffects` "destroy" or "all") and Fields of Mercy's allowance being used up
   (`FieldsOfMercyWouldNegatePersonalityDestruction`, the read-only half of the existing check). F's atomic payment should extend or replace this
   method's body; the callers do not change.
+- **It coexists with R's `CostPaymentBlockedByNegation(command)`** (`TargetedActionReactions.cs`, Hida Mochitoko, #341), which is the per-VERB check for
+  a negated bow or destruction (a `NegatedEffects` entry of the cost's verb or "all") and aborts the action through `AbortActionForBlockedCost`. This one is
+  narrower and asks only what R's cannot: Fields of Mercy's destruction allowance being used up, plus the same destroy entry, and it resolves a deferred action
+  through `ResolveNegatedAction`. Both read the cost through the same `ChosenCostOption`/`CostSubjectCard`, and this one runs first, so a destroy cost is
+  never judged twice differently. The name is distinct so neither shadows the other; when F's atomic cost payment (#356) lands, this body and R's fold
+  into its single `CostPaymentBlockedByNegation(cost, subject)` and the callers here do not change.
 - **Asked BEFORE anything of the action is paid**: `ExecuteAbilityEffects` asks it first, and a blocked cost resolves the action through
   `ResolveNegatedAction(command, costBlocked)`: the action is still TAKEN (its use is spent, a hand-played card leaves the hand, grants are
   forfeited, priority passes, it is logged "(negated)" and `costBlocked`) but none of its costs are paid (no Gold, no Favor, no bow or destroy) and none of
@@ -260,6 +266,12 @@ may be used during a player's action segment (as Open actions may be used during
 - **Published like any Stronghold**: `stronghold-wave-5` (waves 1-3 exist and 4 is unclaimed; the offset puts this at 5), Province Strength 7, Gold Production 4,
   Starting Honor 5, Dragon. The pipeline needed nothing new.
 - **Which reading of "the Keep unbowed" for the grant** is Open question 9 (I applied it to the Battle timing only).
+- **Checked against main's battle-timing work (#359, #363)**: the equip is an ordinary command, not an ability, so `Absent` and `MovesToBattle` (which waive the
+  presence check for abilities that reinforce a battle) do not touch it, and it keeps its own rule that a Battle equip needs a unit AT the battlefield and a
+  wielder there. `ForcedPass` and `FirstActionRestriction` already bar an `equip` in a battle like any other Battle action, and it draws on an Additional
+  Action burst exactly as an ability does (uses an unscoped grant and keeps priority while more remain, else forfeits them), which the tests hold. Control
+  follows Jun-Ni for reactions too: a reaction that guards "his controller's Follower" (Mochitoko) is the taker's, never the owner's
+  (`TakenFollowerIsProtectedByItsControllersReactions`).
 
 **H6. Fading Shadows: confirmed as built** -- the performer is a Personality at a battlefield with the Ninja keyword. No change.
 

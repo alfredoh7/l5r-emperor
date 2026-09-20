@@ -1,0 +1,56 @@
+[
+  {
+    "card_id": "oracle-l5r-9930",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9930",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9930-printing-1-image-1.webp",
+    "image_sha256": "c9baab0b5bd01ae6b00e908727c3bde9bfbacf27b5540d24862f4f1c725bca16"
+  },
+  {
+    "card_id": "oracle-l5r-10733",
+    "printing_set": [
+      "Gates of Chaos"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10733",
+    "image_path": "assets/reference/oracle/gates-of-chaos/webp/oracle-l5r-10733-printing-1-image-1.webp",
+    "image_sha256": "cc9105575ef539e0fc4e89f758061fc3304e92a36c8fa0748d389e2d10661312"
+  },
+  {
+    "card_id": "oracle-l5r-9920",
+    "printing_set": [
+      "The Shadow's Embrace"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=9920",
+    "image_path": "assets/reference/oracle/the-shadow-s-embrace/webp/oracle-l5r-9920-printing-1-image-1.webp",
+    "image_sha256": "da9a82e4fa473964da2acf9001651322d42e792bd8cee2e1f64e2649719fa262"
+  },
+  {
+    "card_id": "oracle-l5r-6132",
+    "printing_set": [
+      "Promotional&ndash;Celestial"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6132",
+    "image_path": "assets/reference/oracle/promotional-celestial/webp/oracle-l5r-6132-printing-1-image-1.webp",
+    "image_sha256": "98700e93fbf737ff4f0a98b823d99db495d5bd37c2089d56a5aa20883aa1ef79"
+  },
+  {
+    "card_id": "oracle-l5r-6211",
+    "printing_set": [
+      "Before the Dawn"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=6211",
+    "image_path": "assets/reference/oracle/before-the-dawn/webp/oracle-l5r-6211-printing-1-image-1.webp",
+    "image_sha256": "5d1f79eb24c4d51beca25a5a0972f62c6af44d059ea5174632c714cc911f242e"
+  },
+  {
+    "card_id": "oracle-l5r-10151",
+    "printing_set": [
+      "Seeds of Decay"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10151",
+    "image_path": "assets/reference/oracle/seeds-of-decay/webp/oracle-l5r-10151-printing-1-image-1.webp",
+    "image_sha256": "fbf9269445ac3cfdf2031f2515dd015d8573c37672a9572fe5abcaceab1f9053"
+  }
+]

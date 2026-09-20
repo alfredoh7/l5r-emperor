@@ -17,6 +17,7 @@ internal static class AttachFromDiscardTests
             ("Control follows Jun-Ni (Mendon's ruling, issue #352): a Follower from the ENEMY discard pile is controlled by Jun-Ni's controller -- unit membership, view, log -- while its real owner is remembered; one from your own pile changes nothing", ControlFollowsJunNi),
             ("...and it returns to its OWNER's pile the moment it leaves play by any path: destroyed alone, destroyed with Jun-Ni, or returned to a hand -- and the Expendable draw and destruction penalties belong to the controller", TakenFollowerReturnsToItsOwner),
             ("...and its own abilities are the new controller's to use, and only theirs: offered to him and accepted from him, never offered to or accepted from its owner", EnemyFollowerAbilitiesBelongToTheNewController),
+            ("...and a reaction that guards \"his controller's Follower\" (Hida Mochitoko) follows the control: the taker's Mochitoko is offered against an action on the taken Follower, the owner's is not", TakenFollowerIsProtectedByItsControllersReactions),
             ("The cost is quoted and paid through the Gold path before the card leaves the pile: an underpaid command is refused with the card still in the pile and nothing bowed, and with no Gold left the action is listed disabled", CostIsPaidBeforeTheCardLeaves),
             ("Legality is Equip's legality: the Honor Requirement (a dishonorable Jun-Ni has no Personal Honor), \"Will only attach to\" restrictions, and Unique/Singular in-play copies each keep a discarded Follower out of the offered targets and refuse it if submitted", LegalityIsEquipLegality),
             ("A card returning from a discard pile is a NEW entry into play: stale modifiers, tokens, granted keywords, once-per-turn stamps and bowed state are gone", ReEntryIsFresh),
@@ -217,6 +218,42 @@ internal static class AttachFromDiscardTests
         }
     }
 
+    private static void TakenFollowerIsProtectedByItsControllersReactions()
+    {
+        // A reaction that guards "his controller's Follower" (Hida Mochitoko, #341) follows the control the attach moved: the taker's Mochitoko answers an action
+        // against the taken Follower, and the owner's Mochitoko, whose Follower it no longer is, does not.
+        foreach (var takerHasIt in new[] { true, false })
+        {
+            var r = ActionPhase();
+            var theirs = Put(r.S, "training-follower", 1, Zone.FateDiscard);
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var battle = Edit(e, st =>
+            {
+                st.Phase = Phase.Battle; st.ActivePlayerId = 1; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+                st.Cards[r.JunNi.Id].Zone = Zone.Battlefield; st.Cards[r.JunNi.Id].ProvinceIndex = 0; st.Cards[theirs.Id].ProvinceIndex = 0;
+                Put(st, "oracle-l5r-3152", takerHasIt ? 0 : 1, Zone.Battlefield, province: 0);
+                Put(st, "training-card-bower", 1, Zone.Battlefield, province: 0);
+            });
+            var bower = battle.State.Cards.Values.Single(c => c.DefinitionId == "training-card-bower");
+            Accept(battle, Offer(battle, 1, "training-bow-enemy-card-at-battle", bower.Id, theirs.Id));
+            var mochitoko = battle.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-3152");
+            if (takerHasIt)
+            {
+                Eq(battle.State.PendingChoice?.Type, "beforeActionReaction", "the taker's Mochitoko gets its window");
+                var offer = battle.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == "mochitoko-negate");
+                Accept(battle, offer.Command!);
+                while (battle.State.PendingChoice?.Type == "beforeActionReaction") Accept(battle, new GameCommand("declineReaction", battle.State.PriorityPlayerId, battle.Version));
+                Expect(!battle.State.Cards[theirs.Id].Bowed && battle.State.Cards[theirs.Id].OwnerId == 0, "the bow was negated and the Follower is still the taker's");
+            }
+            else
+            {
+                Expect(battle.State.PendingChoice is null && battle.State.Cards[theirs.Id].Bowed, "the owner's Mochitoko guards nothing of a Follower it no longer controls: the bow lands");
+                Expect(!battle.QueryActions(1).Any(a => a.Command?.AbilityId == "mochitoko-negate" && a.Enabled), "and it is not offered");
+            }
+        }
+    }
+
     private static void EnemyFollowerAbilitiesBelongToTheNewController()
     {
         var r = ActionPhase();
@@ -332,7 +369,7 @@ internal static class AttachFromDiscardTests
         var maneuvers = Edit(e, st => { st.Phase = Phase.CavalryDeclaration; st.PriorityPlayerId = 0; st.ActivePlayerId = 0; st.PendingChoice = null; foreach (var c in st.Cards.Values) c.Bowed = false; });
         var attack = maneuvers.QueryActions(0).First(a => a.Type == "attack");
         Expect(attack.TargetIds!.Contains(jun.Id) && !attack.TargetIds.Contains(other.Id), "Jun-Ni's unit assigns in Cavalry Maneuvers; the control unit does not");
-        var infantry = Edit(maneuvers, st => { st.Phase = Phase.AttackDeclaration; });
+        var infantry = Edit(maneuvers, st => { st.Phase = Phase.InfantryDeclaration; });
         var infantryAttack = infantry.QueryActions(0).First(a => a.Type == "attack");
         Expect(!infantryAttack.TargetIds!.Contains(jun.Id) && infantryAttack.TargetIds.Contains(other.Id), "and the reverse in Infantry Maneuvers");
         // Gone the moment it leaves her unit.

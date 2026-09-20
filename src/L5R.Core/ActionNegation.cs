@@ -30,7 +30,7 @@ public sealed partial class MatchEngine
     }
 
     // The deferred action, resolved negated: the taking of the action without its effects (see the file comment). costBlocked (issue #352) is the
-    // reason a cost of the action was itself blocked by a negation (CostPaymentBlockedByNegation): the whole action is then negated with none of its
+    // reason a cost of the action was itself blocked by a negation (CostOptionDestructionNegated): the whole action is then negated with none of its
     // costs paid -- "costs of the action that were not yet paid are not paid" -- because the blocked cost stops it before anything is charged. A
     // negated action whose costs can all be paid still keeps them, including the non-Gold cost option (PayCostOption).
     private void ResolveNegatedAction(GameCommand command, string? costBlocked = null)
@@ -40,7 +40,7 @@ public sealed partial class MatchEngine
         var source = command.CardId is null ? null : Card(command.CardId);
         (source?.AbilityUses ?? player.AbilityUses)[ability.UsageKey ?? id] = _state.TurnNumber;
         var playedFromDiscard = PlayedFromDiscard(ability, source);
-        costBlocked ??= CostPaymentBlockedByNegation(ability, command, source);
+        costBlocked ??= CostOptionDestructionNegated(ability, command, source);
         if (costBlocked is null)
         {
             // A cost the action's own execution pays is not paid; the ones the engine charges generically are, and the non-Gold cost option is one.
@@ -57,7 +57,7 @@ public sealed partial class MatchEngine
         Emit("abilityUsed", $"{player.Name}: {(source is null ? "Imperial Favor" : Definition(source).Name)} — {ability.Label} (negated).", player.Id, source?.Id);
         SpendHandPlayedCard(player, source);
         if (playedFromDiscard) RemoveFromGame(source!);
-        _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
+        if (ForfeitsAdditionalActions(ability)) _state.AdditionalActions.RemoveAll(g => g.PlayerId == player.Id);
         if (OpenOverconfidentDrawWindow(1 - player.Id)) return;
         NextAction(player.Id);
     }
