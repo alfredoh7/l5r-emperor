@@ -24,6 +24,7 @@ internal static class DisciplineRulingsTests
             ("Expensive Achievement: Battle only, presence required; +2 or -2 to the CURRENT battlefield's province (the Defender's, whoever acts), the two halves share one use; from the discard pile it costs its 2 Gold Discipline cost and is removed", ExpensiveAchievementEffect),
             ("Lost in Transit has two modes, each with its own presence rule: as an Open action in the Action phase no presence and no battlefield target; as a Battle action presence and a target at the battlefield -- in hand and from the discard pile", LostInTransitTwoModes),
             ("False Ring of Air: an Absent Battle action whose cost is bowing the Ring -- bowed before the effect, a bowed Ring cannot pay it, and it has no hand play (nothing to bow)", FalseRingBowIsACost),
+            ("Atomic costs (#356) with Discipline: a NEGATED Discipline play still pays the Discipline cost first and then the action's own cost and is removed from the game (no effect); from hand only the own cost; False Ring of Air's declared bow is paid when negated and, when blocked, aborts the whole action", NegatedPlaysPayAtomically),
         ];
         runner.Run("discipline-rulings", tests);
     }
@@ -450,5 +451,62 @@ internal static class DisciplineRulingsTests
         Reject(hand, Use(hand, handRing, Frair, t3.Id));
         Check(Offer(hand, handRing, Frair) is null or { Enabled: false }, "not offered as a usable action from hand");
         Eq(hand.State.Cards[handRing.Id].Zone, Zone.Hand);
+    }
+
+    // ---- atomic cost payment (#356) ---------------------------------------------------------------------------------
+    private static void NegatedPlaysPayAtomically()
+    {
+        // A whole-action negation (the test seam): every announced action is negated, its costs are still paid, only its effects are skipped.
+        foreach (var zone in new[] { Zone.FateDiscard, Zone.Hand })
+        {
+            var s = ActionTable();
+            var kp = Add(s, KnowledgeAndPower, 0, zone);
+            var victim = Add(s, "training-lion-samurai", 1, Zone.Home); AddToken(victim, "tok-a");
+            var e = MatchEngine.FromTestState(s);
+            var asked = 0; e.CostBlockHook = (_, _) => { asked++; return false; };
+            e.NegateEveryAction = true;
+            var option = Offer(e, kp, Kp)!;
+            Check(option.Enabled, option.Reason ?? "");
+            Accept(e, option.Command!);
+            var paid = Payments(e);
+            if (zone == Zone.FateDiscard)
+            {
+                Eq(paid.Length, 2, "a negated Discipline play pays BOTH parts");
+                Check(paid[0].Contains("Discipline cost, paid first") && paid[1].Contains("the action's own cost"), "Discipline first: " + string.Join(" | ", paid));
+                Eq(e.State.Cards[kp.Id].Zone, Zone.RemovedFromGame, "and the card is removed from the game as before");
+            }
+            else
+            {
+                Eq(paid.Length, 1, "from hand only the action's own cost");
+                Check(!paid[0].Contains("Discipline"), paid[0]);
+                Eq(e.State.Cards[kp.Id].Zone, Zone.FateDiscard);
+            }
+            Check(e.State.Cards[victim.Id].Tokens.Count == 1 && e.State.Cards[victim.Id].Tokens[0].Id == "tok-a", "no effect: the token is untouched");
+            Eq(asked, 0, "the action declares no bow or destroy cost, so there is nothing a negation could block");
+        }
+        // False Ring of Air's bow is a DECLARED cost: paid when the action is negated (its effect is not)...
+        MatchEngine Ring(out CardInstance ring, out CardInstance enemy)
+        {
+            var s = BattleTable();
+            ring = Add(s, FalseRingOfAir, 0, Zone.Home);
+            enemy = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            return MatchEngine.FromTestState(s);
+        }
+        var negated = Ring(out var ringA, out var enemyA);
+        negated.NegateEveryAction = true;
+        Accept(negated, Use(negated, ringA, Frair, enemyA.Id));
+        Check(negated.State.Cards[ringA.Id].Bowed, "a negated action still pays its cost: the Ring is bowed");
+        Eq(negated.GetView(1).Players[1].Army.Single(c => c.Id == enemyA.Id).Force, 4, "but the -3F never happened");
+        // ...and when paying it is blocked, the ENTIRE action is negated and nothing is paid.
+        var blocked = Ring(out var ringB, out var enemyB);
+        blocked.CostBlockHook = (cost, subject) => cost.Verb == CostVerb.Bow && subject?.Id == ringB.Id;
+        Accept(blocked, Use(blocked, ringB, Frair, enemyB.Id));
+        Check(!blocked.State.Cards[ringB.Id].Bowed, "a blocked bow: nothing is paid, the Ring stays unbowed");
+        Eq(blocked.GetView(1).Players[1].Army.Single(c => c.Id == enemyB.Id).Force, 4, "and nothing resolves");
+        Check(blocked.State.Cards[ringB.Id].AbilityUses.ContainsKey(Frair), "the action was still taken: its use is spent");
+        // The ordinary (not negated) flow pays it once, before the effect.
+        var plain = Ring(out var ringC, out var enemyC);
+        Accept(plain, Use(plain, ringC, Frair, enemyC.Id));
+        Check(plain.State.Cards[ringC.Id].Bowed); Eq(plain.GetView(1).Players[1].Army.Single(c => c.Id == enemyC.Id).Force, 1);
     }
 }

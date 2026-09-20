@@ -98,6 +98,25 @@ blocked on the Honor-loss primitive).
   `strategy-wave-23` is pinned by its own manifest `tests/L5R.Core.Tests/PublishedWaves/strategy-wave-23.txt` (no collision: main has
   strategy waves 17, 18, 22 and 27). Suites are found by reflection, so `DisciplineRulingsTests` needs no registration.
 
+## Reconciled with atomic costs (#356), alternative costs (#357) and out-of-play windows (#367)
+
+- **Declared costs (#356).** The non-Gold costs of an action are a declarative `Costs` list paid at one point (before the effects, and also for a
+  NEGATED action), and a cost blocked by a negation aborts the whole action. This work has exactly one non-Gold cost, and it is declared:
+  **False Ring of Air** is `Costs: ActionCost.BowSource` (main had `BowSourceUnlessInHand`, which kept the free hand play; the ruling wants a real
+  bow, so the "unless in hand" is gone and `ValidateAbility` still requires the Ring in play). The three new abilities and the Discipline payment
+  have no other non-Gold cost (Knowledge and Power and Two Steady Breaths' own cost is Gold; Expensive Achievement has none), so nothing is left in
+  an effect case that a negation would skip. The effect case no longer bows the Ring.
+- **Order under atomic payment.** `PayForAbility` (all Gold: the Discipline cost first, then the action's own Gold cost, as the two payments of the
+  combined quote) runs before `PayCostOption` and the declared `Costs`, both in a normal resolution and in `ResolveNegatedAction`, so "Discipline
+  first" holds. A **negated Discipline play** pays the Discipline cost and then the own cost and is still removed from the game
+  (`CompleteNegatedAction`); a play aborted because a bow/destroy cost was blocked pays nothing but is still spent and, from a discard pile,
+  removed (`AbortActionForBlockedCost`). Pinned in `NegatedPlaysPayAtomically` (Knowledge and Power from the discard pile and from hand under a
+  whole-action negation; False Ring of Air negated, blocked and plain).
+- **#357, #367.** No overlap: this adds no alternative cost and no Reaction. The discard-pile Discipline plays (Return to Action, Banzai!, Lost in
+  Transit and the three new cards) are non-Reaction abilities, so the out-of-play Reaction-window rule does not touch them; they are still offered
+  and validated exactly as before (the whole `discipline-absent`/`discipline-rulings` and `out-of-play-reaction-window` suites pass on the merged code).
+  Main's `training-discipline-counter-negate` (a Discipline Reaction fixture) joined the pinned Discipline-flag inventory.
+
 ## Validation and merge notes
 
 - `tools/check.sh --skip-client` and the client compile, see the PR; new tests in `tests/L5R.Core.Tests/DisciplineRulingsTests.cs`

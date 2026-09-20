@@ -14,7 +14,10 @@ internal static class AttachFromDiscardTests
             ("Published shape: Moto Jun-Ni is the printed card (Force 4, Chi 2, Honor Requirement 2, Cost 8, Personal Honor 2, Unicorn Cavalry Commander Demon Slayer Samurai), whole -- her Effect is the live Cavalry grant and her one ability a Limited attach from any discard pile paying all costs", PublishedShape),
             ("Offered targets are exactly the Followers in EITHER player's discard pile (not Items, hand cards, cards in play or removed from the game), each with its own derived Gold quote at the printed cost and a suggested payment", OffersEveryFollowerInEitherDiscardPile),
             ("Own Follower: the Gold is paid FIRST (the payment is logged before the card is attached), the Follower leaves the pile and attaches to Jun-Ni face up, priority passes, and the Limited use is spent", AttachOwnFollowerPaysThenAttaches),
-            ("An opponent's Follower may be attached too: it stays THEIR card (owner unchanged, so it returns to their pile when destroyed) and the discard piles are public, so both players see it move", AttachOpponentsFollower),
+            ("Control follows Jun-Ni (Mendon's ruling, issue #352): a Follower from the ENEMY discard pile is controlled by Jun-Ni's controller -- unit membership, view, log -- while its real owner is remembered; one from your own pile changes nothing", ControlFollowsJunNi),
+            ("...and it returns to its OWNER's pile the moment it leaves play by any path: destroyed alone, destroyed with Jun-Ni, or returned to a hand -- and the Expendable draw and destruction penalties belong to the controller", TakenFollowerReturnsToItsOwner),
+            ("...and its own abilities are the new controller's to use, and only theirs: offered to him and accepted from him, never offered to or accepted from its owner", EnemyFollowerAbilitiesBelongToTheNewController),
+            ("...and a reaction that guards \"his controller's Follower\" (Hida Mochitoko) follows the control: the taker's Mochitoko is offered against an action on the taken Follower, the owner's is not", TakenFollowerIsProtectedByItsControllersReactions),
             ("The cost is quoted and paid through the Gold path before the card leaves the pile: an underpaid command is refused with the card still in the pile and nothing bowed, and with no Gold left the action is listed disabled", CostIsPaidBeforeTheCardLeaves),
             ("Legality is Equip's legality: the Honor Requirement (a dishonorable Jun-Ni has no Personal Honor), \"Will only attach to\" restrictions, and Unique/Singular in-play copies each keep a discarded Follower out of the offered targets and refuse it if submitted", LegalityIsEquipLegality),
             ("A card returning from a discard pile is a NEW entry into play: stale modifiers, tokens, granted keywords, once-per-turn stamps and bowed state are gone", ReEntryIsFresh),
@@ -101,7 +104,7 @@ internal static class AttachFromDiscardTests
         Expect(Offers(e, 0, JunNiAbility).All(o => !o.Enabled), "Limited: once per turn");
     }
 
-    private static void AttachOpponentsFollower()
+    private static void ControlFollowsJunNi()
     {
         var r = ActionPhase();
         var theirs = Put(r.S, "training-follower", 1, Zone.FateDiscard);
@@ -109,11 +112,169 @@ internal static class AttachFromDiscardTests
         Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
         var moved = e.State.Cards[theirs.Id];
         Expect(moved.Zone == Zone.Attached && moved.AttachedTo == r.JunNi.Id, "attached to MY Personality");
-        Eq(moved.OwnerId, 1, "still the opponent's card: it goes back to their discard pile when it leaves play");
+        Eq(moved.OwnerId, 0, "controlled by Jun-Ni's controller");
+        Eq(moved.OriginalOwnerId, (int?)1, "its real owner is remembered");
         Expect(e.GetView(1).Players[1].Discard.All(c => c.Id != theirs.Id), "their pile no longer holds it (the pile is public)");
-        Expect(e.GetView(1).Players[0].Home.Any(c => c.Id == theirs.Id && c.AttachedTo == r.JunNi.Id), "and both players see it in Jun-Ni's unit");
-        Expect(e.GetView(0).Players[0].Home.Any(c => c.Id == theirs.Id && c.AttachedTo == r.JunNi.Id));
-        Expect(e.GetView(1).Players[1].Home.All(c => c.Id != theirs.Id), "it is listed with the unit's controller, not with its owner, so a client can group the unit");
+        foreach (var viewer in new[] { 0, 1 })
+        {
+            Expect(e.GetView(viewer).Players[0].Home.Any(c => c.Id == theirs.Id && c.AttachedTo == r.JunNi.Id && c.OwnerId == 0), $"player {viewer} sees it in Jun-Ni's unit under her controller");
+            Expect(e.GetView(viewer).Players[1].Home.All(c => c.Id != theirs.Id), $"player {viewer}: and not among the owner's cards");
+        }
+        Expect(e.State.Events.Any(x => x.Type == "controlTaken" && x.CardId == theirs.Id && x.PlayerId == 0), "the change of control is in the public log");
+        // Control counts everywhere the engine asks "do you control it": a second copy of a Singular card cannot follow it in.
+        // From your OWN pile nothing changes hands.
+        var own = ActionPhase();
+        var mine = Put(own.S, "training-follower", 0, Zone.FateDiscard);
+        var oe = Engine(own.S);
+        Accept(oe, Offer(oe, 0, JunNiAbility, own.JunNi.Id, mine.Id));
+        Expect(oe.State.Cards[mine.Id].OwnerId == 0 && oe.State.Cards[mine.Id].OriginalOwnerId is null, "your own pile: no change of control, nothing to remember");
+        Expect(!oe.State.Events.Any(x => x.Type == "controlTaken"), "and no log entry");
+        // A Unique Follower taken from the enemy pile counts as one you control afterwards.
+        var unique = ActionPhase();
+        var takenUnique = Put(unique.S, "training-unique-follower", 1, Zone.FateDiscard);
+        var ue = Engine(unique.S);
+        Accept(ue, Offer(ue, 0, JunNiAbility, unique.JunNi.Id, takenUnique.Id));
+        var second = Edit(ue, st => { Put(st, "training-unique-follower", 0, Zone.FateDiscard); st.PriorityPlayerId = 0; st.AbilityUses(unique.JunNi.Id).Clear(); });
+        Expect(Offers(second, 0, JunNiAbility).All(o => !o.Enabled), "I now control a Unique copy: a second one is not offered");
+    }
+
+    private static void TakenFollowerReturnsToItsOwner()
+    {
+        // (a) Destroyed ALONE by an enemy Personality in battle (Tetsuo: "Target an attachment: destroy it"): back to the OWNER's pile.
+        {
+            var r = ActionPhase();
+            var theirs = Put(r.S, "training-follower", 1, Zone.FateDiscard);
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var battle = Edit(e, st =>
+            {
+                st.Phase = Phase.Battle; st.ActivePlayerId = 0; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+                foreach (var id in new[] { r.JunNi.Id, theirs.Id }) { st.Cards[id].ProvinceIndex = 0; }
+                st.Cards[r.JunNi.Id].Zone = Zone.Battlefield;
+                Put(st, "oracle-l5r-7943", 1, Zone.Battlefield, province: 0);
+            });
+            var tetsuo = battle.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-7943");
+            Accept(battle, Offer(battle, 1, "tetsuo-destroy-attachment", tetsuo.Id, theirs.Id));
+            var after = battle.State.Cards[theirs.Id];
+            Expect(after.Zone == Zone.FateDiscard && after.OwnerId == 1 && after.OriginalOwnerId is null, "destroyed: in its OWNER's discard pile, no longer anyone's to control");
+            Expect(battle.GetView(1).Players[1].Discard.Any(c => c.Id == theirs.Id) && battle.GetView(0).Players[0].Discard.All(c => c.Id != theirs.Id), "player 1's pile holds it, player 0's does not");
+        }
+        // (b) Destroyed WITH Jun-Ni (Seppuku, an Open action of a dishonorable Samurai): her unit's cards each go to their own owner's pile.
+        {
+            var r = ActionPhase(); r.JunNi.Dishonorable = true;
+            var theirs = Put(r.S, "training-cavalry-follower", 1, Zone.FateDiscard);     // no Honor Requirement: a dishonorable Jun-Ni can take it
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var mine = Edit(e, st => { Put(st, "training-item", 0, Zone.Attached, parent: r.JunNi.Id); st.PriorityPlayerId = 0; });
+            var ownItem = mine.State.Cards.Values.Single(c => c.AttachedTo == r.JunNi.Id && c.DefinitionId == "training-item");
+            var seppuku = mine.QueryActions(0).Single(a => a.Type == "orderSeppuku" && a.CardId == r.JunNi.Id);
+            var handBefore = mine.State.Players[0].Hand.Count;
+            Accept(mine, seppuku.Command!);
+            var s = mine.State;
+            Eq(s.Cards[r.JunNi.Id].Zone, Zone.Dead);
+            Expect(s.Cards[theirs.Id].Zone == Zone.FateDiscard && s.Cards[theirs.Id].OwnerId == 1, "the taken Follower is in its owner's pile");
+            Expect(s.Cards[ownItem.Id].OwnerId == 0 && s.Cards[ownItem.Id].Zone == Zone.FateDiscard, "and Jun-Ni's own attachment is in hers");
+            Expect(mine.GetView(0).Players[0].Discard.All(c => c.Id != theirs.Id) && mine.GetView(0).Players[1].Discard.Any(c => c.Id == theirs.Id) && mine.GetView(1).Players[1].Discard.Any(c => c.Id == theirs.Id), "both views: the owner's pile holds it, the controller's does not");
+            Eq(s.Players[0].Hand.Count, handBefore, "nothing went to the wrong hand");
+        }
+        // (c) Expendable is a draw for whoever CONTROLLED it when it was destroyed; the card still returns to its owner.
+        {
+            var r = ActionPhase();
+            var theirs = Put(r.S, "training-expendable-follower", 1, Zone.FateDiscard);
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var battle = Edit(e, st =>
+            {
+                st.Phase = Phase.Battle; st.ActivePlayerId = 0; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+                st.Cards[r.JunNi.Id].Zone = Zone.Battlefield; st.Cards[r.JunNi.Id].ProvinceIndex = 0; st.Cards[theirs.Id].ProvinceIndex = 0;
+                Put(st, "oracle-l5r-7943", 1, Zone.Battlefield, province: 0);
+            });
+            var tetsuo = battle.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-7943");
+            var deck0 = battle.State.Players[0].FateDeck.Count; var deck1 = battle.State.Players[1].FateDeck.Count;
+            Accept(battle, Offer(battle, 1, "tetsuo-destroy-attachment", tetsuo.Id, theirs.Id));
+            Eq(battle.State.Players[0].FateDeck.Count, deck0 - 1, "its controller drew for it");
+            Eq(battle.State.Players[1].FateDeck.Count, deck1, "its owner did not");
+            Eq(battle.State.Cards[theirs.Id].OwnerId, 1, "and it is in its owner's pile");
+        }
+        // (d) Put into a hand (Asako Rikate: "put any attachments in that unit into his hand"): a card goes to its OWNER's hand.
+        {
+            var r = ActionPhase();
+            var theirs = Put(r.S, "training-follower", 1, Zone.FateDiscard);
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var battle = Edit(e, st =>
+            {
+                st.Phase = Phase.Battle; st.ActivePlayerId = 1; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+                st.Cards[r.JunNi.Id].Zone = Zone.Battlefield; st.Cards[r.JunNi.Id].ProvinceIndex = 0; st.Cards[theirs.Id].ProvinceIndex = 0;
+                Put(st, "oracle-l5r-576", 1, Zone.Battlefield, province: 0);
+                Put(st, "training-lion-samurai", 1, Zone.Battlefield, province: 0);
+            });
+            var rikate = battle.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-576");
+            Accept(battle, Offer(battle, 1, "rikate-detach-chi", rikate.Id, r.JunNi.Id));
+            Eq(battle.State.PendingChoice?.Type, "rikateDetach"); Eq(battle.State.PendingChoice?.PlayerId, 0, "Jun-Ni's controller answers");
+            Accept(battle, battle.QueryActions(0).First(a => a.Type == "chooseRikateDetach" && a.Command!.CardIds is { Length: 1 } ids && ids[0] == theirs.Id && a.Label.Contains("Put")).Command!);
+            var moved = battle.State.Cards[theirs.Id];
+            Expect(moved.Zone == Zone.Hand && moved.OwnerId == 1 && battle.State.Players[1].Hand.Contains(theirs.Id) && !battle.State.Players[0].Hand.Contains(theirs.Id), "returned to its OWNER's hand, never the controller's");
+        }
+    }
+
+    private static void TakenFollowerIsProtectedByItsControllersReactions()
+    {
+        // A reaction that guards "his controller's Follower" (Hida Mochitoko, #341) follows the control the attach moved: the taker's Mochitoko answers an action
+        // against the taken Follower, and the owner's Mochitoko, whose Follower it no longer is, does not.
+        foreach (var takerHasIt in new[] { true, false })
+        {
+            var r = ActionPhase();
+            var theirs = Put(r.S, "training-follower", 1, Zone.FateDiscard);
+            var e = Engine(r.S);
+            Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+            var battle = Edit(e, st =>
+            {
+                st.Phase = Phase.Battle; st.ActivePlayerId = 1; st.PriorityPlayerId = 1; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+                st.Cards[r.JunNi.Id].Zone = Zone.Battlefield; st.Cards[r.JunNi.Id].ProvinceIndex = 0; st.Cards[theirs.Id].ProvinceIndex = 0;
+                Put(st, "oracle-l5r-3152", takerHasIt ? 0 : 1, Zone.Battlefield, province: 0);
+                Put(st, "training-card-bower", 1, Zone.Battlefield, province: 0);
+            });
+            var bower = battle.State.Cards.Values.Single(c => c.DefinitionId == "training-card-bower");
+            Accept(battle, Offer(battle, 1, "training-bow-enemy-card-at-battle", bower.Id, theirs.Id));
+            var mochitoko = battle.State.Cards.Values.Single(c => c.DefinitionId == "oracle-l5r-3152");
+            if (takerHasIt)
+            {
+                Eq(battle.State.PendingChoice?.Type, "beforeActionReaction", "the taker's Mochitoko gets its window");
+                var offer = battle.QueryActions(0).Single(a => a.Type == "useAbility" && a.Enabled && a.Command?.AbilityId == "mochitoko-negate");
+                Accept(battle, offer.Command!);
+                while (battle.State.PendingChoice?.Type == "beforeActionReaction") Accept(battle, new GameCommand("declineReaction", battle.State.PriorityPlayerId, battle.Version));
+                Expect(!battle.State.Cards[theirs.Id].Bowed && battle.State.Cards[theirs.Id].OwnerId == 0, "the bow was negated and the Follower is still the taker's");
+            }
+            else
+            {
+                Expect(battle.State.PendingChoice is null && battle.State.Cards[theirs.Id].Bowed, "the owner's Mochitoko guards nothing of a Follower it no longer controls: the bow lands");
+                Expect(!battle.QueryActions(1).Any(a => a.Command?.AbilityId == "mochitoko-negate" && a.Enabled), "and it is not offered");
+            }
+        }
+    }
+
+    private static void EnemyFollowerAbilitiesBelongToTheNewController()
+    {
+        var r = ActionPhase();
+        var theirs = Put(r.S, "training-bow-follower", 1, Zone.FateDiscard);     // Battle: bow a target enemy Personality
+        var enemy = Put(r.S, "training-lion-courtier", 1, Zone.Home);
+        var e = Engine(r.S);
+        Accept(e, Offer(e, 0, JunNiAbility, r.JunNi.Id, theirs.Id));
+        var battle = Edit(e, st =>
+        {
+            st.Phase = Phase.Battle; st.ActivePlayerId = 0; st.PriorityPlayerId = 0; st.CurrentBattleProvince = 0; st.UnresolvedBattlefields = [0];
+            st.Cards[r.JunNi.Id].Zone = Zone.Battlefield; st.Cards[r.JunNi.Id].ProvinceIndex = 0; st.Cards[theirs.Id].ProvinceIndex = 0;
+            st.Cards[enemy.Id].Zone = Zone.Battlefield; st.Cards[enemy.Id].ProvinceIndex = 0;
+        });
+        Expect(Offers(battle, 0, "training-bow-at-battle").Any(o => o.Enabled && o.CardId == theirs.Id), "the controller is offered the Follower's own Battle action");
+        var command = Offer(battle, 0, "training-bow-at-battle", theirs.Id, enemy.Id);
+        // The owner is neither offered it nor allowed it, whoever holds priority.
+        var asOwner = Edit(battle, st => st.PriorityPlayerId = 1);
+        Expect(!asOwner.QueryActions(1).Any(a => a.Type == "useAbility" && a.CardId == theirs.Id), "its owner is offered nothing of it");
+        Reject(asOwner, command with { PlayerId = 1, ExpectedVersion = asOwner.Version });
+        Accept(battle, command);
+        Expect(battle.State.Cards[enemy.Id].Bowed, "and it works for the controller");
     }
 
     private static void CostIsPaidBeforeTheCardLeaves()

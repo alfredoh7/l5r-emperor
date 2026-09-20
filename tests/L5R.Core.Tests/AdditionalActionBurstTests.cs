@@ -203,7 +203,7 @@ internal static class AdditionalActionBurstTests
         var next = Offered(e, 0, "training-bow-at-battle", r.Follow);
         Check(next is not null, "the next additional action is offered");
         Accept(e, next!.Command! with { TargetId = r.Second.Id });
-        while (e.State.PendingChoice is not null) Decline(e); // the discarded Counterattack still counts as available to the window (a separate, older quirk)
+        Check(e.State.PendingChoice is null, "the played Counterattack sits in the discard pile and cannot be played from there: the next additional action opens no window");
         Check(e.State.Cards[r.Second.Id].Bowed, "the additional action resolved"); Eq(Grants(e), 0);
     }
 
