@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Created-card follow-up 1 (issue 394): Mendon's confirmed pairings and the creation rules they need. CreatedCardSpec gains Count, PerHost, AtBattlefield, UntilBattleEnds and Or (a choice of scans, offered as one action per scan through the new GameCommand.CreatedCard, also on the wire); AbilityDefinition.NotCopyable. Wired: Kyuden Hida - exp through the resolver with the published Kyuden Hida Survivor (the synthetic scenario-only Scout is deleted), Shinjo Dak-ho with Dak-ho's Men, Hida Fubatsu with Kaiu Armor / Yasunori's Gift, Matsu Nimuro with The False Nimuro (personality-wave-39, follower-wave-18, item-wave-6). Shared lane: rules engine plus one wire/client field mapping and shipped card art.",
+  "validation": "bash tools/check.sh --skip-client: Python 132 + 43, L5R.Core.Tests all pass (new suite created-pairings 12/12), L5R.AI.Tests, L5R.Server.Tests 8/8, L5R.Client.Transport.Tests 7/7. 11 mutations each fail a named created-pairings or kyuden-hida-exp test. No scan downloaded (all in the local cache, sha256 match committed receipts). Godot client not built locally (no Godot here); MatchSession.cs gained one wire property.",
+  "remaining": "Separate PRs: created copies, per-instance values (alignment, title and Gold Cost, computed stats), Holdings and Terrain, the scan requests, and the decision-note update. Not wired here: Kyuden Hida Scout and Unicorn Scout stay unpublished (the ruling names the other scan).",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/394",
+  "branch": "claude/394-created-pairings-battlefield-counts",
+  "updated": "2026-09-20T23:51:15.405555+00:00"
+}

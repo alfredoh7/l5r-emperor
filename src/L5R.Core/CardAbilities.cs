@@ -120,7 +120,9 @@ public sealed record AbilityDefinition(string Timing, string Label, string Targe
     // "Create a [card]" (issue #387): the card the printed text says this action creates, as data; the engine instantiates the Proxy scan that fits (CreatedCards.cs).
     CreatedCardSpec? Creates = null,
     // Once per game, per source card (Border Keep's refresh, Bo of Water).
-    bool OncePerGame = false);
+    bool OncePerGame = false,
+    // "[Card]'s printed ability will not be copied" (Matsu Nimuro): no copy effect (CardCopy.cs) may take this ability.
+    bool NotCopyable = false);
 
 public static class AbilityCatalog
 {
@@ -144,6 +146,9 @@ public static class AbilityCatalog
         // "if used when it is not their turn" clause -- honor gain unaffected either way -- describes
         // a case this engine's Limited timing already makes structurally unreachable.
         ["utaku-chikako-decline"] = new("Limited", "Gain 2 Honor. You may not declare an attack this turn.", "none"),
+        // Spirit of the Monk: the Strategy grants this predefined ability to its performer permanently.
+        ["spirit-of-the-monk"] = new("Limited", "If the performer is a Monk, permanently give him a Battle ability to bow an enemy Personality without Armor; otherwise, permanently give him Monk", "none", Performer: "own-unbowed-personality"),
+        ["spirit-monk-bow"] = new("Battle", "Target an enemy Personality without Armor: Bow him.", "enemy-personality-without-armor"),
         ["kouki-force"] = new("Battle", "Bow Kouki · enemy −3 Force", "enemy-personality", Costs: ActionCost.BowSource),
         ["prepared-death"] = new("Limited", "Perform · +2 Force", "own-personality"),
         ["paid-bow"] = new("Open", "Pay 4 Gold · bow a Personality", "personality"),
@@ -437,7 +442,9 @@ public static class AbilityCatalog
         // of one to three of your Personalities in your current army. Remove those Followers from the game after the battle ends." The chosen Personalities travel on
         // CardIds (one to three, all in the acting player's army), like the province choice of Border Keep.
         ["kyuden-hida-exp-scouts"] = new("Reaction", "Recon Reaction: after engaging: you have Reconnaissance at the current battlefield. Create and attach a 0F Scout Follower to each of one to three of your Personalities in your current army; remove those Followers from the game after the battle ends",
-            "own-army-personalities", Trigger: "after-engaging", ActionKeywords: ["Recon"]),
+            "own-army-personalities", Trigger: "after-engaging", ActionKeywords: ["Recon"],
+            // Two scans are 0F Scout Followers (Kyuden Hida Scout, Kyuden Hida Survivor); Mendon's ruling (issue #394): his is the Survivor.
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", PerHost: true, UntilBattleEnds: true)),
         // The delayed effects (issue #364): each registers a member of the one before-resolution set (BeforeResolution.cs). Holding Cells (oracle-l5r-10733,
         // "Kolat Battle, 4 Gold: Target a Personality. Before this battle resolves, bow him. Lose 1 Honor."): the 4 Gold is the ability's own cost and "Kolat" its
         // action keyword (the card itself has no keywords); the Honor loss is the action's own, at once.
@@ -1604,6 +1611,24 @@ public static class AbilityCatalog
         ["bo-of-water-create"] = new("Limited", "Once per game: Create a +2F/+0C Water · Weapon Item with the ability \"Battle: Target an enemy card without attachments: Bow it\" and attach it to one of your Personalities", "own-personality", OncePerGame: true,
             Creates: new(CardType.Item, Force: 2, Chi: 0, Keywords: ["Water", "Weapon"], AbilityText: "Battle: Target an enemy card without attachments: Bow it")),
         ["water-bo-bow"] = new("Battle", "Target an enemy card without attachments: Bow it", "enemy-card", RequireNoAttachments: true),
+        // Synthetic fixtures for the count/deal rules of a created attachment (issue #394): three Scouts dealt among the chosen Personalities, and two to EACH chosen one.
+        ["training-create-scouts"] = new("Battle", "Training: create three 0F Scout Followers, dealt among the chosen Personalities of your army", "own-army-personalities",
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 3)),
+        ["training-create-scouts-each"] = new("Battle", "Training: create two 0F Scout Followers for each chosen Personality of your army", "own-army-personalities",
+            Creates: new(CardType.Follower, Force: 0, Keywords: ["Scout"], ProxyId: "oracle-l5r-9714", Count: 2, PerHost: true, UntilBattleEnds: true)),
+        // Created-card follow-up (issue #394, Mendon's answers). Shinjo Dak-ho (oracle-l5r-6867): "Battle: Create a 2F/2C/2PH Unicorn Clan * Samurai * Cavalry * Scout
+        // Personality at this battlefield. Remove him from the game after this battle ends." Two scans print that card (Dak-ho's Men, Unicorn Scout); his is Dak-ho's Men.
+        ["dak-ho-create"] = new("Battle", "Create a 2F/2C/2PH Unicorn Clan · Samurai · Cavalry · Scout Personality at this battlefield; remove him from the game after this battle ends", "none",
+            Creates: new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 2, Keywords: ["Unicorn Clan", "Samurai", "Cavalry", "Scout"], ProxyId: "oracle-l5r-10001", AtBattlefield: true, UntilBattleEnds: true)),
+        // Hida Fubatsu (oracle-l5r-3091): "Limited: Target your Personality: Create a +1F Armor or Weapon Item and attach it to him." The player chooses the Item: Kaiu Armor or
+        // Yasunori's Gift (+1F/+0C; the Chi is not printed, so it is +0). "Battle: Target an enemy card without attachments: Bow it. If it is an attachment, remove it from the game."
+        ["fubatsu-create"] = new("Limited", "Target your Personality: Create a +1F Armor or Weapon Item and attach it to him", "own-personality",
+            Creates: new(CardType.Item, Force: 1, Chi: 0, Keywords: ["Armor"], Or: [new(CardType.Item, Force: 1, Chi: 0, Keywords: ["Weapon"])])),
+        ["fubatsu-bow"] = new("Battle", "Target an enemy card without attachments: Bow it. If it is an attachment, remove it from the game", "enemy-card", RequireNoAttachments: true),
+        // Matsu Nimuro (oracle-l5r-10463): "Nimuro's printed ability will not be copied. Limited: Once per game, create a Personality titled The False Nimuro with Nimuro's printed
+        // Force, Chi, Personal Honor, and keywords." The False Nimuro (oracle-l5r-10807) prints exactly Nimuro's stats and keywords and no text.
+        ["nimuro-create"] = new("Limited", "Once per game: create a Personality titled The False Nimuro with Nimuro's printed Force, Chi, Personal Honor and keywords", "none", OncePerGame: true, NotCopyable: true,
+            Creates: new(CardType.Personality, Force: 5, Chi: 5, PersonalHonor: 4, Keywords: ["Lion Clan", "Clan Champion", "Samurai", "Duelist", "Experienced 2", "Loyal", "Tactician", "Unique"])),
         // Gates of Chikushudo (oracle-l5r-10707, issue #398): "Open: Target your created Spirit Personality. Create a Personality that permanently copies the target's printed keywords, traits,
         // abilities, and stats. Destroy this Spell." Mendon's ruling: the created Personality is a real copy of the target (its definition is the target's own, marked as a created copy).
         ["gates-of-chikushudo-copy"] = new("Open", "Target your created Spirit Personality: Create a Personality that permanently copies the target's printed keywords, traits, abilities and stats. Destroy this Spell", "own-created-personality",
@@ -1995,7 +2020,7 @@ public sealed partial class MatchEngine
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
         or "soshi-conditional-bow" or "kinaro-exp-bow" or "nubane-bow" or "xijkt-bow" or "kouzei-bow" or "mitoshi-bow" or "jinai-bow"
-        or "muzu-bow" or "hiroto-bow" or "water-bo-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
+        or "muzu-bow" or "hiroto-bow" or "water-bo-bow" or "fubatsu-bow" or "noboru-shattered-star-weaken" or "korimi-exp-bow" or "jakuei-bow" or "jakuei-bow-favor" or "ruya-bow"
         // Strategy wave 13 (issue #287): Strength of the Bear and Unexpected both bow their own
         // target unconditionally; The Strength of the Spider bows its target conditionally (only
         // when not already destroyed by its own alternate branch) -- still counts as "bows the
@@ -3655,6 +3680,7 @@ public sealed partial class MatchEngine
                         "own-wielder-or-personality-with-wielder-keyword" => own && personality &&
                             (target.Id == Card(source!.AttachedTo!).Id || HasKeywords(Card(source.AttachedTo!), ability.RequiredKeywords)),
                         "enemy-personality" => personality && !own,
+                        "enemy-personality-without-armor" => personality && !own && !Attachments(target.Id).Any(a => Keyword(a, "Armor")),
                         "own-bowed" => personality && own && target.Bowed,
                         "own-opposed" => personality && own && Army(1-player.Id, _state.CurrentBattleProvince!.Value).Any(),
                         "enemy-force" => !own && type is CardType.Personality or CardType.Follower,
@@ -3840,6 +3866,7 @@ public sealed partial class MatchEngine
         if (ability.Attach is { } attachSpec) ValidateAttach(command, attachSpec, player, source);
         // A created attachment must be one the chosen Personality could be equipped with.
         if (ability.Creates is { } createdSpec) ValidateCreate(command, createdSpec, player);
+        else Require(command.CreatedCard is null, "This action creates no card.");
         // Shinden Shorai (oracle-l5r-6857, issue #301): "If it is not your first or second turn" -- the
         // player's OWN turn count (PlayerState.TurnsTaken counts only that player's turns, the same
         // counter border-first's own "your first turn" reads; the global MatchState.TurnNumber advances
@@ -4616,7 +4643,7 @@ public sealed partial class MatchEngine
                 foreach (var weapon in Attachments(kensai.Id).Where(a => Keyword(a, "Weapon")))
                 {
                     Straighten(weapon);
-                    foreach (var weaponAbilityId in Definition(weapon).Abilities ?? [])
+                    foreach (var weaponAbilityId in AbilityIdsOf(weapon))
                         if (AbilityCatalog.All.TryGetValue(weaponAbilityId, out var weaponAbility) && weaponAbility.Timing == "Battle")
                             weapon.AbilityUses.Remove(weaponAbility.UsageKey ?? weaponAbilityId);
                 }
@@ -4652,6 +4679,16 @@ public sealed partial class MatchEngine
             case "training-grant-bow": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; GrantAdditionalAction(player.Id, null); break;
             case "training-bow-at-battle": case "training-bow-enemy-card-at-battle": case "training-bow-enemy-card-open": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "training-straighten-at-battle": Straighten(target!); break;
+            case "spirit-of-the-monk":
+                var monk = Card(command.PerformerId!);
+                if (Keyword(monk, "Monk"))
+                {
+                    GrantAbility(monk, "spirit-monk-bow", source!.Id, GrantDuration.Permanent);
+                    Emit("abilityGranted", $"{Definition(monk).Name} permanently gains Battle: {AbilityCatalog.All["spirit-monk-bow"].Label}", player.Id, monk.Id);
+                }
+                else GrantKeyword(monk, "Monk", source!.Id, GrantDuration.Permanent);
+                break;
+            case "spirit-monk-bow":
             case "training-bow-any": if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true; break;
             case "effortless-counterattack-move": MoveHome(target!, false); break;
             case "training-honor-strike": GainHonor(target!.OwnerId, -2, "Training strike", source); break;
@@ -5394,9 +5431,22 @@ public sealed partial class MatchEngine
             // Gates of Chikushudo: the copy is created first, then this Spell is destroyed (printed order); a window the copy's entry opens ends the action after the Spell is gone.
             case "gates-of-chikushudo-copy":
             {
-                var opened = ExecuteCreate(ability, ability.Creates!, player, target);
+                var opened = ExecuteCreate(ability, ability.Creates!, command, player);
                 DestroyAttachment(source!);
                 if (opened) return;
+                break;
+            }
+            // "Bow it. If it is an attachment, remove it from the game": the removal is a separate clause, so a Stalwart attachment whose bow was negated is still removed.
+            // A removed Item may take Chi with it; a Personality left with none is destroyed, as when an attachment is destroyed (DestroyAttachment).
+            case "fubatsu-bow":
+            {
+                if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
+                if (target!.Zone == Zone.Attached)
+                {
+                    var wielder = Card(target.AttachedTo!);
+                    RemoveFromGame(target);
+                    if (Definition(wielder).Type == CardType.Personality && PersonalityChi(wielder) <= 0) DestroyUnits([wielder], true);
+                }
                 break;
             }
             case "kasuru-draw":
@@ -5584,7 +5634,7 @@ public sealed partial class MatchEngine
             case "kyuden-hida-exp-scouts":
             {
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
-                foreach (var hostId in ArmyPersonalityChoice(command)) CreateAttachedFollower(Card(hostId), "created-scout-follower");
+                if (ExecuteCreate(ability, ability.Creates!, command, player)) return;
                 break;
             }
             case "wave-persists-move":
@@ -5635,7 +5685,7 @@ public sealed partial class MatchEngine
                 // Any ability with a Creates spec (Kitsu Akai, Kitsune Ohsuki/Tokoru, Bo of Water) creates the scan that fits it (CreatedCardEntry.cs).
                 if (ability.Creates is { } createdSpec)
                 {
-                    if (ExecuteCreate(ability, createdSpec, player, target)) return;
+                    if (ExecuteCreate(ability, createdSpec, command, player)) return;
                     break;
                 }
                 throw new RuleViolation("Ability effect is not implemented.");
@@ -6022,14 +6072,6 @@ public sealed partial class MatchEngine
     }
     // The Personalities an own-army-personalities action names: several on CardIds, or the one a plain click named as TargetId.
     private static string[] ArmyPersonalityChoice(GameCommand command) => command.CardIds is { Length: > 0 } ids ? ids : command.TargetId is null ? [] : [command.TargetId];
-    // A Follower an action creates and attaches to a Personality in play, removed from the game when the battle ends (Kyuden Hida - exp). It is a new card, owned by the
-    // Personality's controller; nothing entered play from a zone, so there is no entry window to open (the created Scout has no "after entering play" text).
-    private CardInstance CreateAttachedFollower(CardInstance host, string definitionId)
-    {
-        var card = MintAttachedCard(host, CardCatalog.Get(definitionId));
-        _state.CreatedUntilBattleEndsIds.Add(card.Id);
-        return card;
-    }
     private void MoveHome(CardInstance card, bool bow)
     {
         // Tamori Tamoko (issue #207 follow-up): "before an action resolves, negate ... his movement
@@ -6056,7 +6098,7 @@ public sealed partial class MatchEngine
     // only the actual removal, run once the ability it triggered has fully resolved.
     private void RemoveFromGame(CardInstance card)
     {
-        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         card.Zone = Zone.RemovedFromGame; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true; card.Tokens.Clear();
         // Fukuzo's copies (issue #338, Mendon): they end only when he is reshuffled into the Dynasty deck (ToOwnerDeck) or removed from the game (here).
         // Copy-duration grants only: a permanent change of a removed card is still what a later copy from it reads (Fukuzo's own cost removes the donor
@@ -6082,7 +6124,7 @@ public sealed partial class MatchEngine
         var wasAttachedTo = card.Zone == Zone.Attached && card.AttachedTo is string hostId ? Card(hostId) : null;
         if (wasAttachedTo is not null)
         {
-            wasAttachedTo.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+            RemoveAttachmentGrants(wasAttachedTo, card.Id);
             card.AttachedTo = null; card.Bowed = false;
             card.Tokens.Clear(); card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear();
         }
@@ -6101,7 +6143,7 @@ public sealed partial class MatchEngine
     private void ToOwnerDeck(CardInstance card, string position)
     {
         RestoreOwner(card); // ...and to its OWNER's deck (issue #352)
-        if (card.AttachedTo is string parentId) Card(parentId).GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        if (card.AttachedTo is string parentId) RemoveAttachmentGrants(Card(parentId), card.Id);
         var owner = Player(card.OwnerId);
         var dynasty = Definition(card).Type == CardType.Personality;
         card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = false; card.Bowed = false;
@@ -6183,7 +6225,7 @@ public sealed partial class MatchEngine
         }
         var parent = Card(card.AttachedTo);
         card.Zone = Zone.FateDiscard; card.AttachedTo = null; card.ProvinceIndex = null; card.FaceUp = true;
-        parent.GrantedKeywords.RemoveAll(g => g.Source == card.Id && g.Duration == "Attachment");
+        RemoveAttachmentGrants(parent, card.Id);
         card.Tokens.Clear();
         DestroyedDuringBattleBonus(card);
         ExpendableDraw(card);
@@ -6317,6 +6359,7 @@ public sealed partial class MatchEngine
                 "own-naval-personality-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Naval")).Select(c => (string?)c.Id).ToArray(),
                 "own-personality-with-keyword-opposed-at-battle" => _state.CurrentBattleProvince is not int opposedProvince || !Army(1 - playerId, opposedProvince).Any() ? []
                     : _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && HasKeywords(c, ability.RequiredKeywords)).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality" => _state.Cards.Values.Where(c => c.OwnerId == playerId && InPlay(c) && Definition(c).Type == CardType.Personality && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-tactician-at-battle" => _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && AtBattle(c) && Keyword(c, "Tactician")).Select(c => (string?)c.Id).ToArray(),
                 // Kitsu Fukui / Fading Shadows (issue #337): the generic "performing [Keyword] Personality", bowed or not. It was missing from
                 // this listing, so an ability that used it (Again!'s shape) could only be played by a hand-built command.
@@ -6337,17 +6380,20 @@ public sealed partial class MatchEngine
             // its own validation, so an option that cannot be paid is listed disabled with the reason); an ability with a single way, or none,
             // is listed exactly as before with the choice left off the command.
             CostOption?[] costOptions = ability.CostOptions is { Length: > 1 } manyOptions ? manyOptions.Select(o => (CostOption?)o).ToArray() : [null];
+            // A created card the player chooses (issue #394, "an Armor or Weapon Item"): one offered action per card, each carrying its scan's id.
+            CardDefinition?[] createChoices = ability.Creates is { Or.Length: > 0 } multiple ? multiple.Alternatives.Select(a => (CardDefinition?)CreatedCards.Resolve(a)).ToArray() : [null];
             foreach (var performer in performers)
             foreach (var costOption in costOptions)
+            foreach (var createChoice in createChoices)
             {
                 var provinces = player.Provinces.Where(p => !p.Destroyed && p.CardId is not null).Select(p => p.CardId!).ToArray();
                 var armyIds = _state.CurrentBattleProvince is int currentProvince ? Army(playerId, currentProvince).Select(a => a.Id).OrderBy(x => x, StringComparer.Ordinal).ToArray() : [];
                 var prototype = new GameCommand("useAbility", playerId, _state.Version, source?.Id, null,
-                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id);
+                    CardIds: ability.Target == "provinces" ? provinces : null, AbilityId: id, PerformerId: performer, CostOption: costOption?.Id, CreatedCard: createChoice?.Id);
                 // Multi-target actions (issue #336): one option carrying every slot's legal candidates, and the default selection as its command.
                 if (ability.Slots is not null)
                 {
-                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption), source?.Id);
+                    yield return SlotAbilityOption(prototype, ability, AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}"), source?.Id);
                     continue;
                 }
                 // Kyuden Hida - exp: each Personality of the army is a candidate on its own (a click names one); several are named together on CardIds.
@@ -6414,7 +6460,7 @@ public sealed partial class MatchEngine
                 // the client swaps between them without a round trip.
                 var targetQuotes = firstQuote?.Kind == GoldCostKind.Derived
                     ? quotes.Where(q => q.Command.TargetId is not null && q.Quote is not null).GroupBy(q => q.Command.TargetId!).ToDictionary(g => g.Key, g => g.First().Quote!) : null;
-                var label = AbilityOptionLabel(id, ability, performer, source, costOption)
+                var label = AbilityOptionLabel(id, ability, performer, source, costOption) + (createChoice is null ? "" : $" · {createChoice.Name}")
                     + (provinceOwner is int owner ? (owner == playerId ? " · your Province" : " · an enemy Province") : "");
                 yield return new("useAbility", label, legal.Count > 0, legal.Count > 0 ? null : error ?? "No legal target or performer.",
                     legal.FirstOrDefault(), source?.Id, ability.Target == "provinces" ? provinces : legal.Where(c => c.TargetId is not null).Select(c => c.TargetId!).Distinct().ToArray(),
@@ -6437,5 +6483,6 @@ public sealed partial class MatchEngine
         // play of one granted by Daigotsu Bofana - exp (issue #333).
         + (PlayedFromDiscard(ability, source) ? (ability.Discipline ? " · Discipline (removed from the game)" : " · from your discard pile (removed from the game)") : "")
         // A copied ability says whose it was (issue #338), so the player can tell it from the card's own printed ones.
-        + (source is not null && !(Definition(source).Abilities ?? []).Contains(id) && source.GrantedAbilities.FirstOrDefault(g => g.AbilityId == id) is { CopiedFromName: { } copiedFrom } ? $" · copied from {copiedFrom}" : "");
+        + (source is not null && !(Definition(source).Abilities ?? []).Contains(id) && source.GrantedAbilities.FirstOrDefault(g => g.AbilityId == id && GrantHolds(g.Duration, source)) is { } grant
+            ? $" · {(grant.CopiedFrom is null ? "granted" : "copied")} from {GrantSourceName(grant)}" : "");
 }

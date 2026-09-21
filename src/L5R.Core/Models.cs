@@ -163,7 +163,9 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// <summary>An ability a card has because another card's effect gave it (as opposed to one printed on it), the ability twin of
 /// GrantedKeyword. Duration is "Permanent" (only when the granting text says so; it survives the card dying and returning),
 /// "Turn" (cleared at turn end) or "Copy" (a copied ability, kept until the copying ability is used again -- Source is that
-/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). See CardCopy.cs.</summary>
+/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). "Battle" ends with the battle;
+/// "Attachment" ends when the granting attachment leaves its host. Source is the granting card instance, or the copying
+/// ability id for a copy. See AbilityGrants.cs and CardCopy.cs.</summary>
 public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
@@ -826,7 +828,10 @@ public sealed record GameCommand(string Type, int PlayerId, long ExpectedVersion
     string? CostOption = null,
     // Multi-target actions (issue #336): one entry per target slot of an ability that declares AbilityDefinition.Slots --
     // the cards (or the player) chosen for that slot. Null for every ability with a single Target.
-    SlotSelection[]? Selections = null);
+    SlotSelection[]? Selections = null,
+    // "Create a card" with a choice of cards (issue #394, "an Armor or Weapon Item"): the id of the scan the acting player chose among the ability's
+    // CreatedCardSpec.Or alternatives; null for an ability that creates a single card.
+    string? CreatedCard = null);
 public sealed record CommandResult(bool Accepted, string? Error, long Version, GameEvent[] Events);
 public sealed record PaymentOption(string[] SourceIds, int Produced, int Cost, int Excess);
 // Basis (issue #303): the human-readable derivation of Cost, e.g. "Training samurai cost 5 - 2 (Clan
@@ -874,7 +879,8 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
     bool CreatedCopy = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
-public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName);
+public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
+    string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
 public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);

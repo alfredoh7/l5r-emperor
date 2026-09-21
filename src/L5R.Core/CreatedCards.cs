@@ -4,10 +4,16 @@ using System.Text;
 namespace L5R.Core;
 
 /// <summary>What an ability's printed text says the card it creates is; an omitted stat is not compared. Item Force/Chi are the printed "+2F/+0C" bonuses, stored unsigned.
-/// Keywords is the exact set (order irrelevant); AbilityText is compared with the scan's text ignoring case and punctuation; ProxyId names the scan when the rest fits several.</summary>
+/// Keywords is the exact set (order irrelevant); AbilityText is compared with the scan's text ignoring case and punctuation; ProxyId names the scan when the rest fits several.
+/// Count is how many cards the ability creates; an attachment goes to a chosen host (the command's CardIds, or its TargetId): with PerHost, Count of them to EACH chosen host
+/// ("one to each of one to three Personalities"), otherwise Count in all, dealt to the chosen hosts in turn ("two Followers, attached to one or two Personalities").
+/// AtBattlefield creates a Personality at the current battlefield instead of at home. UntilBattleEnds removes the created cards from the game when the battle ends.
+/// Or lists the other cards the player may choose instead ("an Armor or Weapon Item"): each is a spec of its own, and the command names the scan chosen (GameCommand.CreatedCard).</summary>
 public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi = null, int? PersonalHonor = null, string[]? Keywords = null,
-    string? AbilityText = null, string? ProxyId = null, bool CopyOfTarget = false)
+    string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null, bool CopyOfTarget = false)
 {
+    public IEnumerable<CreatedCardSpec> Alternatives => Or is { Length: > 0 } others ? others.Prepend(this with { Or = null }) : [this];
+
     public string Describe()
     {
         var text = new StringBuilder(Type.ToString());
@@ -17,6 +23,10 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (AbilityText is not null) text.Append(" with \"").Append(AbilityText).Append('"');
         if (ProxyId is not null) text.Append(" (scan ").Append(ProxyId).Append(')');
         if (CopyOfTarget) text.Append(" copying the target");
+        if (Count != 1) text.Append(PerHost ? $" x{Count} per host" : $" x{Count}");
+        if (AtBattlefield) text.Append(" at the battlefield");
+        if (UntilBattleEnds) text.Append(" until the battle ends");
+        if (Or is { Length: > 0 } others) text.Append(" or ").Append(string.Join(" or ", others.Select(o => o.Describe())));
         return text.ToString();
     }
 }
@@ -71,6 +81,17 @@ public static class CreatedCards
         return string.Join(' ', words.ToString().Split(' ', StringSplitOptions.RemoveEmptyEntries));
     }
 
+    // A Personality carries one Armor and one Weapon (two with Kensai): several created at once could not all attach, and are not built.
+    private static bool IsSingleOfKind(CardDefinition scan) => scan.Type == CardType.Item && (scan.Keywords ?? []).Any(k => k is "Armor" or "Weapon");
+
+    /// <summary>The alternative the command chose: the only one when there is only one, else the one whose scan id the command names (null when it names none of them).</summary>
+    public static CreatedCardSpec? Chosen(CreatedCardSpec spec, string? chosenScanId)
+    {
+        var options = spec.Alternatives.ToArray();
+        if (options.Length == 1) return chosenScanId is null || Resolve(options[0]).Id == chosenScanId ? options[0] : null;
+        return chosenScanId is null ? null : options.FirstOrDefault(o => Resolve(o).Id == chosenScanId);
+    }
+
     public static IEnumerable<(string AbilityId, CreatedCardSpec Spec)> Creators =>
         AbilityCatalog.All.Where(p => p.Value.Creates is not null).Select(p => (p.Key, p.Value.Creates!));
 
@@ -91,10 +112,13 @@ public static class CreatedCards
                     problems.Add($"{abilityId}: {spec.Describe()} names stats or a scan, but a copy is exactly the card it copies");
                 continue;
             }
+            foreach (var alternative in spec.Alternatives)
             try
             {
-                var scan = Resolve(spec, all);
+                var scan = Resolve(alternative, all);
                 if (!Creatable(scan.Type)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
+                if (alternative.Count < 1 || alternative.AtBattlefield && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} names a count or a place that {scan.Name} cannot have");
+                if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
             }
             catch (CreatedCardResolutionException e) { problems.Add($"{abilityId}: {e.Message}"); }
         }

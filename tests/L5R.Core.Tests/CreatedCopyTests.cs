@@ -19,6 +19,7 @@ internal static class CreatedCopyTests
             ("Any card can create a copy of any Personality (a fixture): the copy is the target's own definition, belongs to the acting player, is not itself a CreatedOnly scan yet is marked, and a copy of a copy is a copy", AnyPersonalityCanBeCopied),
             ("A created copy has no physical card: destroyed it is removed from the game (never dead, never discarded) while an identical ordinary card dies normally; the opponent's Honor and the ordinary death rules still apply", CopiesLeaveTheGame),
             ("A created copy found in a hand, a deck or a discard pile by any path is removed from the game at the end of the command, ordinary cards in the same places are left alone", StrayCopiesAreRemoved),
+            ("A copy is a new card, not a clone of the target's state: the target's permanent ability grants (#388), granted and removed keywords, protections, tokens and modifiers stay on the target and none reaches the copy, whose view carries no grant", CopyInheritsNoGrants),
             ("Copy specs are checked as data: a copy names no stats and no scan, only a Personality can be copied, and it needs no scan to resolve", CopySpecRules),
         ];
         runner.Run("created-copies", tests);
@@ -193,6 +194,31 @@ internal static class CreatedCopyTests
         Check(!e.State.Players.Any(p => p.Hand.Concat(p.FateDeck).Concat(p.DynastyDeck).Any(id => strays.Any(x => x.Id == id))), "in no hand or deck");
         Eq(e.State.Players[0].Hand.Count, handSize); Eq(e.State.Players[0].FateDeck.Count, fate);
         Eq(e.State.Cards[control.Id].Zone, Zone.Dead, "an ordinary dead card is left alone");
+    }
+
+    private static void CopyInheritsNoGrants()
+    {
+        var (s, _, spell, ancestor) = Table0();
+        ancestor.GrantedAbilities = [new("water-bo-bow", "test-fixture", GrantDuration.Permanent)];
+        ancestor.GrantedKeywords = [new("Ninja", "test-fixture", "Permanent")];
+        ancestor.RemovedKeywords = ["Samurai"];
+        ancestor.Protections = [new("test-fixture", "Permanent")];
+        ancestor.Tokens = [new("token-1", "Training", "test-fixture", "Force", 1)];
+        ancestor.Modifiers = [new("test-fixture", "test-fixture", "Force", 2)];
+        var e = Engine(s);
+        Accept(e, Offer(e, 0, Copy, spell.Id, ancestor.Id));
+        var copy = Copies(e).Single();
+        Check(copy.GrantedAbilities.Count == 0 && copy.GrantedKeywords.Count == 0 && copy.RemovedKeywords.Count == 0 && copy.Protections.Count == 0 && copy.Tokens.Count == 0 && copy.Modifiers.Count == 0 && copy.AbilityUses.Count == 0,
+            "a copy starts with the target's printed definition and nothing else");
+        var original = e.State.Cards[ancestor.Id];
+        Check(original.GrantedAbilities.Count == 1 && original.GrantedKeywords.Count == 1 && original.RemovedKeywords.Count == 1 && original.Protections.Count == 1 && original.Tokens.Count == 1, "the target keeps all of it");
+        foreach (var viewer in new[] { 0, 1 })
+        {
+            var mine = ViewOf(e, viewer, copy.Id); var theirs = ViewOf(e, viewer, ancestor.Id);
+            Check(mine.GrantedAbilities is null && mine.Force == 2 && mine.Definition!.Keywords!.Contains("Samurai") && !e.HasKeyword(copy.Id, "Ninja"), $"viewer {viewer}: the copy shows no grant, no bonus, its printed keywords");
+            Check(theirs.GrantedAbilities is { Length: 1 } && theirs.Force > mine.Force, $"viewer {viewer}: the target shows its grant and its bonuses");
+        }
+        Check(Offers(e, 0, "water-bo-bow").All(o => o.CardId != copy.Id), "the granted action is not offered from the copy");
     }
 
     private static void CopySpecRules()
