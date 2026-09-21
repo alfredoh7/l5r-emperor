@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Propagate Alfredo-approved 1-4 deck navigation into the combined eight-preview checkout; retain both Movement and AlternativeCost metadata. Previews 5-8 remain awaiting Alfredo.",
-  "validation": "Combined client build and native deck-search 1280x800 reduced pass; source change also passed 1920x1080 normal in #396. Combined client transport 12/12 pass, preserving movement/Attack and bow/destroy regressions. Full source check.sh --skip-client passed in #396; generated Mac launchers refreshed.",
-  "remaining": "Mendon review and approved 1-4 Windows delivery pending. No merge until his approval and dependency review; previews 5-8 still unapproved by Alfredo. Native Windows graphical and external multiplayer playtests pending.",
+  "summary": "Integrate current main 68b24c86 into the eight-preview branch; preserve engine grant source/usage and CreatedCopy metadata in the existing card-change panel. Approved red brush presentation is being finished separately.",
+  "validation": "check.sh --skip-client passed all requested checks, including 9/9 ability grants, 9/9 created copies, 12/12 created values, 12/12 transport. Native AbilityGrantProbe passed both seats, source/duration/uses and unchanged second copy. Client build zero warnings/errors.",
+  "remaining": "Finish approved brush assets, publish refreshed private artwork dependency and review evidence. Ranged/melee concepts await Alfredo selection. No merge to main authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T07:13:39.767371+00:00"
+  "updated": "2026-09-21T09:58:40.020807+00:00"
 }

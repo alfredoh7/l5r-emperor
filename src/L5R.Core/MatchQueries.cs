@@ -14,10 +14,11 @@ public sealed partial class MatchEngine
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
-                card.GrantedAbilities.Count==0?null:card.GrantedAbilities.Select(g=>new GrantedAbilityView(g.AbilityId,AbilityCatalog.All[g.AbilityId].Label,AbilityCatalog.All[g.AbilityId].Timing,g.Source,g.Duration,g.CopiedFrom,g.CopiedFromName)).ToArray(),
+                GrantedAbilityViews(card),
                 GoldSourceProduction(card),ActionLocked(card),
                 card.Protections.Select(p=>new GrantedEffectView("Action protection",
-                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray());
+                    "Effects of actions this card performs will not be negated.",p.Source,p.Duration)).ToArray(),
+                CreatedCopy:card.CreatedCopy);
         }
         var players=_state.Players.Select(player=>
         {
@@ -94,7 +95,7 @@ public sealed partial class MatchEngine
                 if(why is null && (validate || chosenPlayer is not null)) why=AbilityRejection(command);
                 // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
                 why??=ActionLockRejection(command);
-                var text=label??AbilityCatalog.All[abilityId].Label;
+                var text=label??AbilityOptionLabel(abilityId,AbilityCatalog.All[abilityId],null,card);
                 if(chosenPlayer is int who) text+=who==playerId ? " · you" : " · your opponent";
                 Add("useAbility",text,command,why,card.Id,gold:gold);
             }
@@ -175,7 +176,8 @@ public sealed partial class MatchEngine
                 .SelectMany(c=>AbilityIdsOf(c).Select(a=>(Card:c,Id:a)))
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
-                var used=card.AbilityUses.ContainsKey(reactionId);
+                var reaction=AbilityCatalog.All[reactionId];
+                var used=AbilityUseSpent(card.AbilityUses,reaction,reaction.UsageKey??reactionId);
                 // Akodo Kakihara (issue #305): an in-play Attack reactor may carry a printed condition of its own
                 // (only when HE is the target), so a listed reaction is only enabled while ValidateAbility
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.

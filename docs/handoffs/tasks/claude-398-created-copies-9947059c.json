@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Created copies (issue 398, Mendon's ruling): CreatedCardSpec.CopyOfTarget creates an instance whose definition is the target card's own (a real copy that behaves exactly as the card it copies) marked by the per-instance CardInstance.CreatedCopy, carried to both views as CardView.CreatedCopy; one IsCreatedCard rule (CreatedOnly scan or created copy) for removal from the game. Gates of Chikushudo (spell-wave-11) wired end to end: copy of your created Spirit Personality, then the Spell is destroyed. The Egg of P'an Ku, Amazing Feat and Two-Fold Virtue stay unwired (recorded in BLOCKERS). Shared lane: rules engine plus the CardView field the client will use to mark a copy (a separate issue asks Alfredo for the frame).",
+  "validation": "bash tools/check.sh --skip-client: Python 132 + 43, L5R.Core.Tests all pass (new suite created-copies 8/8), AI, Server 8/8, Client transport 7/7. 8 mutations each fail a named created-copies test. No scan downloaded (Gates' scan is in the local cache, sha256 matches the committed receipt). Godot client not built locally; no client file changed.",
+  "remaining": "The visual marker for a created copy is Alfredo's (separate issue). Per-instance values, Holdings/Terrain, scan requests and the decision-note update are separate PRs. Egg/Amazing Feat/Two-Fold Virtue need more than a copy.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/398",
+  "branch": "claude/398-created-copies",
+  "updated": "2026-09-21T00:19:16.019669+00:00"
+}

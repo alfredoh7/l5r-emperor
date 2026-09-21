@@ -11,7 +11,7 @@ public static class CardChanges
     public static bool IsPermanent(string duration) => duration.Equals("Permanent", StringComparison.OrdinalIgnoreCase);
     public static Entry[] Entries(CardView card) => card.Definition is null ? [] :
         (card.GrantedKeywords ?? []).Select(g=>new Entry("Keyword",g.Keyword,"",g.CopiedFrom??g.Source,g.Duration,g.CopiedFrom is not null,g.CopiedFromName))
-        .Concat((card.GrantedAbilities??[]).Select(g=>new Entry("Ability",g.Timing,g.Label,g.CopiedFrom??g.Source,g.Duration,g.CopiedFrom is not null,g.CopiedFromName)))
+        .Concat((card.GrantedAbilities??[]).Select(g=>new Entry("Ability",g.Timing,(g.CopiedFrom is null?"Granted ability\n":"")+g.Label+GrantedAbilityText.Usage(g),g.CopiedFrom??g.Source,g.Duration,g.CopiedFrom is not null,g.CopiedFromName??g.SourceName)))
         .Concat((card.GrantedEffects ?? []).Select(g=>new Entry(g.Kind,g.Name,g.Text,g.Source,g.Duration)))
         // AppliedModifier currently has turn duration in the engine. Never infer a permanent
         // bonus from the difference between printed and current Force (tokens/attachments also alter it).

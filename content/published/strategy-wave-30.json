@@ -1,0 +1,30 @@
+{
+  "Profile": "strategy-wave-30",
+  "Rules": "Emperor Edition; curated ability IDs, verified Second City printing.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7424",
+      "Name": "Spirit of the Monk",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Monk, permanently give him the ability, \"Battle: Target an enemy Personality without Armor: Bow him.\" Otherwise, permanently give him Monk.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7424.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-monk"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

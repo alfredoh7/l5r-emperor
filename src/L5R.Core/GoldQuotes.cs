@@ -254,7 +254,7 @@ public sealed partial class MatchEngine
         Require(command.GoldAmount is null || cost?.Rule.Basis == GoldCostBasis.Variable, "This action has no player-chosen Gold amount.");
         if (cost is not null) Require(cost.Error is null, cost.Error ?? "");
         if (cost is { LeadAmount: > 0 }) ValidateSplitPayment(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
-        else ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds);
+        else ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds, CostPaidCards(command));
     }
 
     // ---- two-part payment: the Discipline cost first, then the action's own cost (issue #353) --------------------------------------------------
@@ -326,7 +326,7 @@ public sealed partial class MatchEngine
         Require(cost.Error is null, cost.Error ?? "");
         if (!cost.Rule.Explicit && cost.Amount <= 0) return;
         if (cost.LeadAmount > 0) PaySplit(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
-        else Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds);
+        else Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds, exclude: CostPaidCards(command));
     }
 
     /// <summary>The quote the client renders for an ability command (full or partial: a target-derived cost
@@ -336,15 +336,15 @@ public sealed partial class MatchEngine
     {
         if (command.PlayerId is < 0 or > 1) return null;
         var cost = AbilityGoldCost(command);
-        return cost is null ? null : BuildQuote(command.PlayerId, cost);
+        return cost is null ? null : BuildQuote(command.PlayerId, cost, CostPaidCards(command));
     }
 
-    private GoldQuote BuildQuote(int playerId, AbilityCost cost)
+    private GoldQuote BuildQuote(int playerId, AbilityCost cost, IReadOnlySet<string>? exclude)
     {
         var error = cost.Error ?? (cost.NeedsTarget ? cost.Basis : null);
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
-                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount) : PaymentOptions(playerId, cost.Amount));
+                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount) : PaymentOptionsExcluding(playerId, cost.Amount, exclude));
         return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error);
     }
 

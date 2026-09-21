@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Created Holdings (at home, unbowed or bowed) and Terrains (at the current battlefield, refused with a reason when there is none or one is already there) per Mendon's answer 14; publishes the Charter and Questionable Resources Holding scans. No real creator is wired (each needs another mechanic, listed in the PR). Shared change: rules engine and published card data; the client is untouched.",
+  "validation": "bash tools/check.sh --skip-client passed (Core all pass incl. new suite created-holdings-terrain 6/6, Python, AI, Server, client transport 7/7); 16 named mutation checks each fail a test; nothing downloaded",
+  "remaining": "None for this topic; stacked on #405 and #397 (merge in that order). Scan-request PR and decision-doc update are separate.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/406",
+  "branch": "claude/406-created-holdings-terrains",
+  "updated": "2026-09-21T01:36:25.791059+00:00"
+}
