@@ -30,6 +30,7 @@ public static class GrantDuration
 {
     public const string Permanent = "Permanent";
     public const string Turn = "Turn";
+    public const string Battle = "Battle";
     public const string Attachment = "Attachment";
     public const string Copy = "Copy";
 }
@@ -81,7 +82,7 @@ public sealed partial class MatchEngine
     // The ability ids a card has now: printed, plus granted (a permanent grant, a copy). The ONE place a granted ability is joined
     // to the printed ones; every scan of "the abilities this card has" goes through it.
     private static IEnumerable<string> AbilityIdsOf(CardInstance card) =>
-        (Definition(card).Abilities ?? []).Concat(card.GrantedAbilities.Select(g => g.AbilityId)).Distinct(StringComparer.Ordinal);
+        (Definition(card).Abilities ?? []).Concat(card.GrantedAbilities.Where(g => GrantHolds(g.Duration, card)).Select(g => g.AbilityId)).Distinct(StringComparer.Ordinal);
 
     // A grant that is still "on" a card that is not in play: a permanent one, or a copy (which lasts until the copying ability is
     // used again, wherever the receiver is). A turn or attachment grant belongs to a card in play -- it does not follow a Personality
@@ -183,7 +184,7 @@ public sealed partial class MatchEngine
             Emit("keywordCopied", $"{Definition(receiver).Name} copies the keyword {value} from {copy.SourceName}.", receiver.OwnerId, receiver.Id);
             return;
         }
-        if (!AbilityIdsOf(receiver).Contains(value, StringComparer.Ordinal)) receiver.GrantedAbilities.Add(new(value, copy.CopierAbilityId, copy.Duration, copy.SourceDefinitionId, copy.SourceName));
+        if (!AbilityIdsOf(receiver).Contains(value, StringComparer.Ordinal)) GrantAbility(receiver, value, copy.CopierAbilityId, copy.Duration, copy.SourceDefinitionId, copy.SourceName);
         Emit("abilityCopied", $"{Definition(receiver).Name} copies an ability from {copy.SourceName}: {AbilityCatalog.All[value].Label}.", receiver.OwnerId, receiver.Id);
     }
 

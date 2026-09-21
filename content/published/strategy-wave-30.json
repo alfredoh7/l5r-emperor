@@ -1,10 +1,10 @@
 {
   "Profile": "strategy-wave-30",
-  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Rules": "Emperor Edition; curated ability IDs, verified Second City printing.",
   "Cards": [
     {
-      "Id": "oracle-l5r-5506",
-      "Name": "Nakanu Technique",
+      "Id": "oracle-l5r-7424",
+      "Name": "Spirit of the Monk",
       "Type": "Strategy",
       "Clan": "Unaligned",
       "GoldCost": 0,
@@ -15,13 +15,13 @@
       "HonorRequirement": null,
       "ProvinceStrength": 0,
       "StartingHonor": 0,
-      "Text": "Reaction: After engaging, choose your performing unbowed opposed Personality at the current battlefield: Create two 1F Shadowlands • Undead Followers and attach them to him. Lose 1 Honor.",
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Monk, permanently give him the ability, \"Battle: Target an enemy Personality without Armor: Bow him.\" Otherwise, permanently give him Monk.",
       "ScenarioOnly": false,
-      "ArtworkKey": "res://Content/Published/oracle-l5r-5506.jpg",
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7424.jpg",
       "Keywords": [],
-      "Focus": 3,
+      "Focus": 4,
       "Abilities": [
-        "nakanu-technique-create"
+        "spirit-of-the-monk"
       ],
       "Effect": "none"
     }

@@ -2205,17 +2205,17 @@ public static class PublishedContent
         return snapshot;
     }
 
-    /// <summary>strategy-wave-30 (issue #402).</summary>
-    public static PublishedSnapshot StrategyWave30 { get; } = LoadStrategyWave30();
+    /// <summary>strategy-wave-31 (issue #402).</summary>
+    public static PublishedSnapshot StrategyWave31 { get; } = LoadStrategyWave31();
 
-    private static PublishedSnapshot LoadStrategyWave30()
+    private static PublishedSnapshot LoadStrategyWave31()
     {
-        var snapshot = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
+        var snapshot = Load("L5R.Published.StrategyWave31.json", "strategy-wave-31", requireDecks: false);
         if(snapshot.Cards.Length != 1)
-            throw new InvalidOperationException("Unexpected strategy-wave-30 card count.");
+            throw new InvalidOperationException("Unexpected strategy-wave-31 card count.");
         foreach(var card in snapshot.Cards)
             if(card.Type != CardType.Strategy)
-                throw new InvalidOperationException($"strategy-wave-30 card is not a Strategy: {card.Id}");
+                throw new InvalidOperationException($"strategy-wave-31 card is not a Strategy: {card.Id}");
         return snapshot;
     }
 
@@ -2255,4 +2255,6 @@ public static class PublishedContent
                 throw new InvalidOperationException("A published deck lists a card that may not be included in decks.");
         return snapshot;
     }
+    /// <summary>Spirit of the Monk: first permanent, predefined ability grant (#386).</summary>
+    public static PublishedSnapshot StrategyWave30 { get; } = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
 }
