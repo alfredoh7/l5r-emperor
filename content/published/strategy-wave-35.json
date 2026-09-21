@@ -223,6 +223,105 @@
         "barred-passage-bow"
       ],
       "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-24",
+      "Name": "A Fugitive Apprehended",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target your performing unbowed Personality. Bow a target enemy card without attachments and with lower Gold Cost. If your Personality is a Magistrate, you may target an enemy card and reduce its Gold Cost to 0.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-24.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "fugitive-apprehended"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-2024",
+      "Name": "Dislodge the Foe",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Target one or more of your performing Tacticians at the same, non-current battlefield to target a Personality opposing them. He is lured into a trap. Move the targets to the current battlefield.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-2024.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "dislodge-the-foe"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4481",
+      "Name": "Know No Fear",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your performing Samurai: Negate his bowing and movement from the action's effects.\nReaction: After a Fear action targets your performing Samurai: Negate its effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4481.jpg",
+      "Keywords": [
+        "Courage",
+        "Bushido Virtue"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "know-no-fear-negate-move",
+        "know-no-fear-negate-fear"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-8500",
+      "Name": "To First Blood",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.\nReaction: After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-8500.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 3,
+      "Abilities": [
+        "to-first-blood-focus",
+        "to-first-blood-negate"
+      ],
+      "Effect": "none"
     }
   ],
   "Decks": []

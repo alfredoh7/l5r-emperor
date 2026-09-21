@@ -22,7 +22,7 @@ public sealed partial class MatchEngine
     {
         if (command.AbilityId is not null && AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) && ability.Slots is not null)
         {
-            var ids = ability.Slots.Where(s => !s.IsPlayer && !s.AtResolution)
+            var ids = ability.Slots.Where(s => !s.IsPlayer && !s.AtResolution && !s.Performing)
                 .SelectMany(s => command.Selections?.FirstOrDefault(x => x.Slot == s.Id)?.CardIds ?? []).Distinct().ToArray();
             return ids.Length == 0 ? [null] : ids.Cast<string?>().ToArray();
         }
@@ -38,6 +38,7 @@ public sealed partial class MatchEngine
         if (command.AbilityId is null || !AbilityCatalog.All.TryGetValue(command.AbilityId, out var ability) || ability.Move is not { } move) yield break;
         if (move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget && command.CardId is not null) yield return command.CardId;
         if (move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget && command.PerformerId is not null) yield return command.PerformerId;
+        if (move.Movers == MoveSpec.PerformingSlot) foreach (var mover in PerformingSlotCards(command, ability)) yield return mover.Id;
         if (move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget)
             foreach (var id in ReactionWindowTargets(command).OfType<string>()) yield return id;
     }

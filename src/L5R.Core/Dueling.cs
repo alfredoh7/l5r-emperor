@@ -36,6 +36,7 @@ public sealed partial class MatchEngine
             AbilityId = abilityId, ChallengerPlayerId = challengerPlayerId, ChallengedPlayerId = challenged.OwnerId,
             ChallengerId = challengerId, ChallengedId = challengedId, Stat = stat, Refusable = refusable,
             Stage = refusable ? "AwaitingAccept" : "Reaction",
+            NegatedEffects = _state.NegatedEffects.ToList(),
         };
         Emit("duelChallenged", $"{Definition(challenger).Name} challenges {Definition(challenged).Name} to a duel.", challengerPlayerId, challengerId);
         if (refusable) { _state.PriorityPlayerId = challenged.OwnerId; _state.ConsecutivePasses = 0; }
@@ -283,7 +284,13 @@ public sealed partial class MatchEngine
         // Focus-Effect-driven outcome layers on top, in the active player's own chosen order -- e.g.
         // a Focus Effect that dishonors the loser, resolved before the duel's own "destroy the
         // loser," makes that death a dishonorable one instead of an honorable one.
+        // The action's own negations still stand, and To First Blood's Focus Effect negates the destruction of every loser ("negate any destruction for losing this duel").
+        _state.NegatedEffects = duel.NegatedEffects.ToList();
+        foreach (var focusedId in duel.OrderedFocusEffects)
+            if ((Definition(Card(focusedId)).Abilities ?? []).Contains("to-first-blood-focus"))
+                foreach (var loserId in loserIds) _state.NegatedEffects.Add(new("destroy", loserId));
         ApplyDuelOutcome(duel.AbilityId, winnerId, loserIds, duel.ChallengerPlayerId);
+        _state.NegatedEffects = [];
         // False Ring of Earth (oracle-l5r-10532, issue #295): "After you win a duel against a
         // Personality who shared no keywords with your Personality in the duel" -- Ring
         // recruitment's own existing shape (GrantRingRecruit, issue #194), reusing winnerId/loserIds
@@ -413,6 +420,10 @@ public sealed partial class MatchEngine
         {
             case "courtesy-of-the-crane-focus":
                 if (ownerId == winnerPlayerId) foreach (var province in Player(ownerId).Provinces) province.Strength += 2;
+                break;
+            // To First Blood: "its winner's controller gains 2 Honor" (the destruction it negates was applied before the Focus Effects, in ResolveDuel).
+            case "to-first-blood-focus":
+                if (winnerPlayerId is int firstBloodWinner) GainHonor(firstBloodWinner, 2, "To First Blood");
                 break;
             // Discovering a Conspiracy: "if your Personality won it, gain 2 Honor".
             case "discovering-conspiracy-focus":

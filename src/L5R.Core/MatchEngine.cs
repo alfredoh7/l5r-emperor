@@ -2288,8 +2288,10 @@ public sealed partial class MatchEngine
     // play (Mirumoto Michi/Togashi Rikyou's own shape: "move him to the current battlefield") moves
     // to reinforce the current battle rather than leaving it, unlike Reserve's own dynasty-recruit
     // path (which brings a fresh card straight from its province, never a card already in play).
-    private void MoveToBattlefield(CardInstance card,int province)
+    // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
+    private bool MoveToBattlefield(CardInstance card,int province)
     {
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && KitsuneNegatesMovement(card,province)) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -2302,6 +2304,7 @@ public sealed partial class MatchEngine
         card.Zone=Zone.Battlefield; card.ProvinceIndex=province;
         foreach(var attachment in Attachments(card.Id)) attachment.ProvinceIndex=province;
         if(arrivedFromElsewhere) _state.PendingMoveReactionCardId=card.Id;
+        return true;
     }
 
     // Asahina Tsugio / Asako Kijo (issue #223): "other players' maximum hand sizes are increased by

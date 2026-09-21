@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City pass (#264), follow-up to #413: the five cards Mendon's rulings unblocked are wired (Know No Fear, To First Blood, A Fugitive Apprehended, Dislodge the Foe, Kyuden Kitsune) in two waves (strategy-wave-35 grows to 13 cards; stronghold-wave-10), with the engine primitives they needed (hand-played targeted-by-action Reactions, duel-carried negations, performing target slots, Kitsune movement negation). Rules lane; the client-lane files are only the five shipped art scans and their generated .import files. BLOCKERS: 22 Second City cards still unwired, each with a specific note.",
+  "validation": "Local: bash tools/check.sh exits 0 -- Python suites, Core suites (every named suite, including second-city-spirits 10, second-city-pass 12, second-city-battle 19, second-city-rulings 8), AI 28, server 8, transport 7; client builds and the Godot import passes. 13 mutation checks of the new rules: 12 fail a named test; one (dropping the performing-slot skip in PrimarySlotCardId, which only changes which performer is recorded as the command's primary target for Dislodge) is not observable through any current reader and is left.",
+  "remaining": "The readings for Mendon are 18-22 in docs/decisions/2026-09-21-second-city-pass.md (A Fugitive Apprehended's Magistrate clause, Dislodge the Foe's performers, Know No Fear's targeted Samurai, To First Blood's Focus Effect, Kyuden Kitsune's once-per-battle negation); earlier readings 1-17 still await confirmation. 22 Second City cards remain unwired with specific blockers.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/264",
+  "branch": "claude/264-second-city-rulings",
+  "updated": "2026-09-21T11:44:44.104754+00:00"
+}

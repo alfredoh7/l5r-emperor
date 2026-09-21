@@ -5,7 +5,9 @@ namespace L5R.Core;
 /// Target accepts, or "player" for a chosen player -- its own Min..Max count ("one to three attachments" is Min 1, Max 3;
 /// "up to three" is Min 0), and an optional TargetMustBe status. Slots are independent: each candidate is checked on its
 /// own, exactly as it would be as the ability's only target, and the selection as a whole must satisfy every slot's count.
-/// Label is the words a viewer shows for the slot.
+/// Label is the words a viewer shows for the slot. Performing: the cards of this slot PERFORM the action ("one or more of your performing Tacticians", Dislodge the
+/// Foe -- Mendon: N Tacticians may be designated as performers) and are not its targets: no targeted-by-action reaction is offered for them, they are not the
+/// primary target, and a lock on one of them bars the action.
 ///
 /// Two timings (Mendon's ruling, issue #336: conditional sentences are independent, and a conditional follow-up is prompted only when its
 /// condition holds). An UP-FRONT slot (Resolution null) is chosen with the command, before anything happens: Yoshitada's enemy Personality, the
@@ -14,7 +16,7 @@ namespace L5R.Core;
 /// if he is dishonorable; Fear Me!'s only if he moved. The decision reuses the pending effect choice (EffectChoice.cs): the acting player is
 /// offered each of Resolution.Options as one action, and the action then finishes exactly as any action does.</summary>
 public sealed record TargetSlot(string Id, string Category, string Label, int Min = 1, int Max = 1, TargetStatus? MustBe = null,
-    ConditionalChoice? Resolution = null)
+    ConditionalChoice? Resolution = null, bool Performing = false)
 {
     public bool IsPlayer => Category == TargetSlotKinds.Player;
     public bool AtResolution => Resolution is not null;
@@ -51,7 +53,7 @@ public sealed partial class MatchEngine
     private static string? PrimarySlotCardId(AbilityDefinition ability, SlotSelection[]? selections)
     {
         foreach (var slot in ability.Slots ?? [])
-            if (!slot.IsPlayer && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
+            if (!slot.IsPlayer && !slot.Performing && selections?.FirstOrDefault(s => s.Slot == slot.Id)?.CardIds is { Length: > 0 } ids) return ids[0];
         return null;
     }
 
@@ -100,6 +102,21 @@ public sealed partial class MatchEngine
             Require(ids.Distinct().Count() == ids.Length, $"{slot.Label}: choose different cards.");
             foreach (var id in ids) ValidateSlotCard(command, ability, slot, id);
         }
+        // Dislodge the Foe: every performing Tactician stands at the SAME battlefield, and the one Personality they oppose stands there too.
+        if (ability is { Move.Movers: MoveSpec.PerformingSlot }) ValidatePerformersTogether(command, ability);
+    }
+
+    // The cards of the ability's performing slot(s), in the order chosen.
+    private IEnumerable<CardInstance> PerformingSlotCards(GameCommand command, AbilityDefinition ability) =>
+        (ability.Slots ?? []).Where(s => s.Performing).SelectMany(s => SlotCards(command, s.Id));
+
+    private void ValidatePerformersTogether(GameCommand command, AbilityDefinition ability)
+    {
+        var performers = PerformingSlotCards(command, ability).ToArray();
+        if (performers.Length == 0) return;
+        Require(performers.All(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == performers[0].ProvinceIndex), "The performing Personalities must all stand at the same battlefield.");
+        foreach (var target in (ability.Slots ?? []).Where(s => !s.Performing && !s.IsPlayer && !s.AtResolution).SelectMany(s => SlotCards(command, s.Id)))
+            Require(target.Zone == Zone.Battlefield && target.ProvinceIndex == performers[0].ProvinceIndex, "The opposing Personality must stand where the performing Personalities do.");
     }
 
     // One candidate of one slot, judged exactly as the ability's single Target of that category would be: the same
@@ -108,7 +125,8 @@ public sealed partial class MatchEngine
     private void ValidateSlotCard(GameCommand command, AbilityDefinition ability, TargetSlot slot, string cardId)
     {
         Require(_state.Cards.ContainsKey(cardId), "Unknown card.");
-        ValidateAbility(command with { TargetId = cardId, Selections = null },
+        // The selections stay on the command: a category that compares a candidate with the cards another slot holds (Dislodge the Foe's opposing Personality) reads them.
+        ValidateAbility(command with { TargetId = cardId },
             ability with { Target = slot.Category, Slots = null, TargetMustBe = slot.MustBe, RequireNoAttachments = false });
     }
 
@@ -135,9 +153,10 @@ public sealed partial class MatchEngine
                 continue;
             }
             var legal = new List<string>();
+            var probe = prototype with { Selections = chosen.ToArray() };
             foreach (var candidate in SlotCandidateCards(prototype.PlayerId))
             {
-                try { ValidateSlotCard(prototype, ability, slot, candidate.Id); legal.Add(candidate.Id); }
+                try { ValidateSlotCard(probe, ability, slot, candidate.Id); legal.Add(candidate.Id); }
                 catch (RuleViolation e) { refusals[e.Message] = refusals.GetValueOrDefault(e.Message) + 1; }
             }
             options.Add(new(slot.Id, slot.Label, TargetSlotKinds.Card, slot.Min, slot.Max, legal.ToArray(), []));
