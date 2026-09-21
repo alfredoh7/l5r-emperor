@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City primitives 5/6: the other player decides (Know Their Minds, Scandalous Rumors, Dragon's Breath Castle), a duel Focus Effect that pauses for a choice (Disreputable Deal), and sequenced targets and effects (Engulfing Flames); five cards wired, 28 numbered readings for Mendon in docs/decisions/2026-09-21-second-city-primitives.md",
+  "validation": "bash tools/check.sh: exit 0, all suites pass incl. decider-choice 6, focus-effect-choice 6, sequenced-target 5; 39 mutations of the new code run, all killed except two equivalent ones (a redundant wrong-player check and a redundant negation restore); art scans viewed against the cards",
+  "remaining": "Mastering the Elements, Skipping the Puddle, Superior Reach, Scavenging Party (stage 6, #420) and Blessings of the Shi-Tien Yen-Wang stay unwired; readings 1-28 await Mendon's confirmation",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/419",
+  "branch": "claude/419-other-player-decides",
+  "updated": "2026-09-21T16:13:41.135216+00:00"
+}

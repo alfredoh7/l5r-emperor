@@ -2345,4 +2345,10 @@ public static class PublishedContent
     public static PublishedSnapshot RegionWave4 { get; } = Load("L5R.Published.RegionWave4.json", "region-wave-4", requireDecks: false);
     /// <summary>Strategy wave 39 (issue #418): Ancient Feud, Hasty Fortifications, Shiotome Plains.</summary>
     public static PublishedSnapshot StrategyWave39 { get; } = Load("L5R.Published.StrategyWave39.json", "strategy-wave-39", requireDecks: false);
+    /// <summary>Strategy wave 40 (issue #419): Know Their Minds, Scandalous Rumors.</summary>
+    public static PublishedSnapshot StrategyWave40 { get; } = Load("L5R.Published.StrategyWave40.json", "strategy-wave-40", requireDecks: false);
+    /// <summary>Stronghold wave 11 (issue #419): Dragon's Breath Castle.</summary>
+    public static PublishedSnapshot StrongholdWave11 { get; } = Load("L5R.Published.StrongholdWave11.json", "stronghold-wave-11", requireDecks: false);
+    /// <summary>Strategy wave 41 (issue #419): Disreputable Deal.</summary>
+    public static PublishedSnapshot StrategyWave41 { get; } = Load("L5R.Published.StrategyWave41.json", "strategy-wave-41", requireDecks: false);
 }
