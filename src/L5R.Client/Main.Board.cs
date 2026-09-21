@@ -315,13 +315,13 @@ public partial class Main
         if(AttackTargetActive&&_attackChoice==AttackChoice.Province&&_chosen!.Command!.Province is {} attackProvince
             &&_provinceButtons.TryGetValue((1-View.ActivePlayerId,attackProvince),out var provinceTarget)
             &&_tiles.FirstOrDefault(t=>t.Card.Id==(_chosen.Command.PerformerId??_chosen.CardId)) is {} attackSource&&TileVisible(attackSource))
-            yield return new(ScreenCenter(attackSource),ScreenCenter(provinceTarget),Palette.Gold,false,clip);
+            yield return new(ScreenCenter(attackSource),ScreenCenter(provinceTarget),Palette.Gold,false,clip,Attack:true);
         if (!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));
             var to = _tiles.FirstOrDefault(t => t.Card.Id == targetId);
             if (from is not null && to is not null && from != to && TileVisible(from) && TileVisible(to))
-                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip);
+                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip,Attack:AttackTargetActive);
         }
     }
 

@@ -1,6 +1,22 @@
 # Attack target choices (#355) — ready for individual review
 
-Eighth approved UI preview: A’s explicit choices plus B’s full-card previews. [Draft PR #410](https://github.com/alfredoh7/l5r-emperor/pull/410) is stacked on #404. **No merge is authorized.** Completion delivers a review candidate, not human acceptance or merge permission.
+Eighth individual UI preview: A’s explicit choices plus B’s full-card previews. [Draft PR #410](https://github.com/alfredoh7/l5r-emperor/pull/410) is stacked on #404. **No merge is authorized.** Completion delivers a review candidate, not human acceptance or merge permission.
+
+## Current update — approved brush pointer
+
+Alfredo approved the straight broken-red-brush arrow. This checkout now uses an imagegen-derived transparent dash/head atlas for card and province Attack intentions. The actual painted pixels are repeated along a beeline, with a proportionally scaled head and no animation. Source/provenance and new native captures are in the [comparison](../../assets/ui/attack-targets/comparison.html).
+
+Ranged/melee differentiation remains concept-only. Alfredo requested further weapon-based concepts without a plaque below the court. The local `artifacts/attack-type-concepts-2026-09-21/round-2/` gallery outside this worktree contains D–G: compact weapon tips, inline symbols, source-edge tabs and the existing court medallion. Full #8 acceptance and type selection remain pending.
+
+Current-revision verification:
+
+- Client compilation and import passed; zero warnings/errors. Native Attack checks passed at 1920×1080 normal and 1280×800 reduced, including table/keyboard/sidebar input, reaction, province and No target cases. The reduced run initially failed twice because the window lacked focus; after raising the native window it passed with the existing focus guard unchanged. Failure logs remain under ignored `artifacts/checks/attack-targets/`.
+- The generated Mac review app opened the prepared scenario after refreshing artwork. Desktop clicks checked card selection, table retargeting, No target clearing, and closer table zoom. The actual window was closed after verification.
+- `bash tools/check.sh --skip-client` passed all requested suites, including 9/9 ability grants, 9/9 created copies, 12/12 created values, 30/30 targeted reactions, 34/34 AI, 8/8 server and 12/12 client transport.
+- Latest main `68b24c86` is integrated. The existing approved CardChangePanel retains main’s authoritative granted-ability source/remaining-use data and CreatedCopy metadata; protection summaries remain intact. Native AbilityGrantProbe passed both seats and confirmed source, duration, uses, read-only inspection and an unchanged second copy. This resolves the earlier Copy/#388 duplicate-panel integration note.
+- Main introduced 18 additional scans absent from the older preview pack. The publisher rebuilt and locally verified the complete 2,915-image private dependency `catalogue-art-pr410-20260921-r1` (SHA-256 `dbff8fbc8c9979256777991ad7c49a60110357f18e017d5be7df849c8ab9b761`). The launcher retains coverage/integrity checks.
+
+Earlier evidence below describes the original preview revision. Native Windows graphical play and external multiplayer acceptance remain open; CI must be read for this PR’s final revision.
 
 ## Open the prepared demo
 
@@ -57,7 +73,7 @@ The existing version/disconnection guards discard stale drafts; a seat change al
 
 ## Coordination and remaining acceptance
 
-Main was refreshed at `0d694f02`, with no missing main commits. The branch inherits the unmerged review stack through #404 and separately unapproved stabilization candidates documented in the batch plan. #388/#397/#399/#405/#407 affect neighboring shared state/action data; #409 is scan-request documentation only. Their independent changes are preserved. The existing Copy/#388 duplicate-panel integration note remains applicable.
+The branch inherits the unmerged review stack through #404 and separately unapproved stabilization candidates documented in the batch plan. The current brush update integrates main through `68b24c86`, including #388/#397/#399/#405/#407 and #409. Their independent changes and authoritative fields are preserved; the Copy/#388 panel integration is verified above.
 
 `collab.py context` refreshed refs but could not complete live GitHub context; direct Git/GitHub CLI reads supplied the open-task and PR facts. The project-board token is unavailable. PR #404’s final context, Mac and Windows CI passed on `7e7d6999`; this PR’s checks must be read on its own final revision.
 

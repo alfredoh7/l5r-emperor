@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Integrate current main 68b24c86 into the eight-preview branch; preserve engine grant source/usage and CreatedCopy metadata in the existing card-change panel. Approved red brush presentation is being finished separately.",
-  "validation": "check.sh --skip-client passed all requested checks, including 9/9 ability grants, 9/9 created copies, 12/12 created values, 12/12 transport. Native AbilityGrantProbe passed both seats, source/duration/uses and unchanged second copy. Client build zero warnings/errors.",
-  "remaining": "Finish approved brush assets, publish refreshed private artwork dependency and review evidence. Ranged/melee concepts await Alfredo selection. No merge to main authorized.",
+  "summary": "Implement Alfredo-approved straight red brush Attack intentions using actual imagegen raster paint; keep new ranged/melee concepts unimplemented pending selection. Integrate main 68b24c86 while preserving grant source/uses, protections and CreatedCopy metadata. Refresh required artwork dependency for 18 main-added scans.",
+  "validation": "Client build zero warnings/errors and import pass; native Attack 1920x1080 normal and 1280x800 reduced pass. Reduced initially failed focus guard twice, then passed after window raise without changing the guard. Actual .app launch, target selection/retargeting/No target and closer zoom verified by desktop clicks. Full check.sh --skip-client passed; transport 12/12, server 8/8, AI 34/34. Native AbilityGrantProbe both-seat/source/duration/uses/read-only checks passed. Complete 2915-image art pack built and integrity-verified locally; source/native comparison and prompts retained.",
+  "remaining": "Ranged/melee D-G concepts and full #8 review await Alfredo; Mendon shared review, final CI, native Windows graphical and external multiplayer acceptance remain open. No main merge authorized. Previews 1-4 were already sent to Mendon separately.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T09:58:40.020807+00:00"
+  "updated": "2026-09-21T10:00:46.645613+00:00"
 }

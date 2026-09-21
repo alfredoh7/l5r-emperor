@@ -30,3 +30,7 @@ To recreate any launcher on a Mac checkout, use `python3 tools/create-review-lau
 ## Update for the first four approvals
 
 The #4 direct deck-button change is included in this combined checkout, so the existing local launcher opens the updated flow after restarting it. Later preview UI (5–8) remains available here for Alfredo's separate review. The Windows package sent to Mendon uses PR #396's independent 1–4 build and excludes those later UI implementations. This combined branch keeps both Movement and AlternativeCost wire fields and their regression checks.
+
+## Attack pointer update
+
+Alfredo approved #8’s straight broken-red-brush pointer, now included in its prepared launcher. This does not approve the whole preview or its merge. Ranged/melee differentiation is still being explored, most recently without a separate plaque beneath the court; no type symbols have been implemented. The combined checkout now includes main through `68b24c86`, preserves permanent-grant source/usage and CreatedCopy fields, and uses the complete `catalogue-art-pr410-20260921-r1` artwork dependency. The independent Windows package previously sent for previews 1–4 is unchanged.
