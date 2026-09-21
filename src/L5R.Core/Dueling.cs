@@ -446,6 +446,10 @@ public sealed partial class MatchEngine
             case "to-first-blood-focus":
                 if (winnerPlayerId is int firstBloodWinner) GainHonor(firstBloodWinner, 2, "To First Blood");
                 break;
+            // Scavenging Party: "After this duel ends, give its winner -3F" (a tie has no winner).
+            case "scavenging-party-focus":
+                if (_state.PendingDuel?.WinnerId is string scavengedWinnerId && InPlay(Card(scavengedWinnerId))) ApplyModifier(Card(scavengedWinnerId), scavengedWinnerId, abilityId, "Force", -3);
+                break;
             // Discovering a Conspiracy: "if your Personality won it, gain 2 Honor".
             case "discovering-conspiracy-focus":
                 if (ownerId == winnerPlayerId) GainHonor(ownerId, 2, "Discovering a Conspiracy");

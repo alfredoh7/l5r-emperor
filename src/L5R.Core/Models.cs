@@ -261,6 +261,8 @@ public sealed class CardInstance
     public List<MovementLock> MovementLocks { get; set; } = [];
     // Hibernation: "after the next time this game another player's Battle action targets it, negate the action's effects" -- set when it hibernates, spent by that action.
     public bool TargetShield { get; set; }
+    // Superior Reach (issue #420, TargetBars.cs): actions the named cards perform may not target this card, for the turn and while the condition holds.
+    public List<TargetBar> TargetBars { get; set; } = [];
     // Never Safe (issue #417): the number of the battle in which this card was played, so that "after this battle ends, if this card is in your discard pile" is offered for that battle only.
     public int ReturnAfterBattle { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --

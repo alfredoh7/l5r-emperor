@@ -2351,4 +2351,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrongholdWave11 { get; } = Load("L5R.Published.StrongholdWave11.json", "stronghold-wave-11", requireDecks: false);
     /// <summary>Strategy wave 41 (issue #419): Disreputable Deal.</summary>
     public static PublishedSnapshot StrategyWave41 { get; } = Load("L5R.Published.StrategyWave41.json", "strategy-wave-41", requireDecks: false);
+    /// <summary>Spell wave 15 (issue #420): Mastering the Elements, a permanent copy of another Spell.</summary>
+    public static PublishedSnapshot SpellWave15 { get; } = Load("L5R.Published.SpellWave15.json", "spell-wave-15", requireDecks: false);
+    /// <summary>Strategy wave 42 (issue #420): Skipping the Puddle (a Kata), Superior Reach and Scavenging Party.</summary>
+    public static PublishedSnapshot StrategyWave42 { get; } = Load("L5R.Published.StrategyWave42.json", "strategy-wave-42", requireDecks: false);
 }

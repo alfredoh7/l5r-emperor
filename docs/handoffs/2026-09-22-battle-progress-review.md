@@ -7,3 +7,5 @@ Render public `MatchView.BattleStep`, its ordered effects/claims, and offered co
 Implementation, native input/visual verification, launchable review and human acceptance are pending.
 
 Implementation checkpoint: five-step strip and expanded sequence, public first-action reasons/limits, pass count, ordered before-resolution effects and generic timing choices. Both Cavalry help cases fixed; current-attack history excludes setup messages. Native 1920x1080 review-check and 1280x800 reduced runs passed before final seat-camera and Naval-label follow-up. Those follow-ups and integration with current main require another native run. Full checks, prepared launcher verification, current art package and review delivery remain pending.
+
+Integrated main `97d8e407` (#426). One adjacent conflict in ActionOption.Provinces: preserved the inherited Hawado destination exposure AND main’s new ChoosesOwnProvince exposure for Scavenging Party. No new rule interpretation; full baseline and movement regression will validate the combined branches.

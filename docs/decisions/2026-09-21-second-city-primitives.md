@@ -205,3 +205,50 @@ Dragon's Breath Castle's trait and Reaction are built; nothing else in the block
 ## Verification (stage 5)
 
 Suites `decider-choice` (6), `focus-effect-choice` (6) and `sequenced-target` (5); the pinned player-target inventory was updated for Know Their Minds.
+
+## Stage 6 (#420): copying a card's rules, Kata, may-not-be-targeted, dead Personalities as discarded
+
+Wired: **Mastering the Elements** (spell-wave-15), **Skipping the Puddle**, **Superior Reach**, **Scavenging Party** (strategy-wave-42). The code is in `PermanentCopy.cs`, `KataCards.cs`, `TargetBars.cs` and `ScavengingParty.cs`.
+
+### A permanent copy of a Spell's rules (PermanentCopy.cs)
+
+"This card permanently copies the Spell's keywords, traits, and its base abilities that do not themselves copy abilities." `CardCopy.cs` copies one keyword or one ability for a while (Fukuzo); this takes everything but the title, for good. The copy is written into the copier's own printed values (`CardInstance.Printed`, the per-instance override every `Definition(card)` reads), so it is permanent for the game, survives the card leaving and re-entering play, and nothing that clears a card's grants or modifiers when it leaves play can undo it.
+
+- **Keywords** are added to the card's own (the Spell's current keywords: printed, and any permanent grant).
+- **Traits**: the Spell's trait is its `Effect` string, which is what drives its static bonus (Scouring Flood's +2F is keyed on the attached Spell's Effect). The Mastering card is a Spell, so once it has the trait its wielder has the bonus, as the ruling's example says.
+- **Base abilities** are the abilities the Spell prints. An ability that copies abilities (`CopiesAbilities`, including Mastering the Elements' own) and one that triggers on its own card entering play (which has already happened for the copier) are not taken; nothing is added twice.
+- **The Gold** is the Spell's printed Gold Cost, not its current cost (`GoldCostRule.TargetPrinted`): a Spell with a +3 Gold penalty still costs its printed 2.
+- **Once per game** means once per stay in play, per Mendon's ruling: the entry window clears the stamp each time the card enters play, so the Reaction comes back when the card re-enters play, and a later copy adds abilities and keywords to what an earlier one gave. The Reaction is offered inside the entry window, so passing it forfeits it for that entry.
+- **Scouring Flood example** (a test): Mastering enters play through Equip (Battle), pays 2 Gold, targets its controller's Scouring Flood, and gains the Water keyword, the +2F trait, and the Battle action that moves a defending Personality home.
+- The entry window now lists an entering card's Reaction that targets a card in play (it listed only Reactions with no target or a player before): one option carrying every legal target and each target's own Gold quote.
+
+### Kata (KataCards.cs)
+
+A Kata is a keyword on a Strategy that is put into play instead of played and discarded: it sits in Zone.Home (at the right of home, like a Ring), stays until it is discarded or destroyed, and while it is there its controller has the action printed on it. Putting one into play discards all the player's other Kata (never the other player's). **Skipping the Puddle**: the Water Battle action (a Battle action with the keyword Water, once per turn like any action) moves a Water Shugenja to the current battlefield if the enemy has units there and grants an additional Battle action which he must perform.
+
+### May not be targeted by (TargetBars.cs)
+
+`TargetBar(ActorCardId, UntilTurn, WhileAttachmentKeyword)` on the protected card: no action the named card performs may target it, until the end of the turn, and while the protected card has an attachment with the keyword (Superior Reach: "while your Kensai has a Weapon"). The condition is live: a Weapon lost mid-turn ends the bar, and a Weapon attached again brings it back. It is checked where every action is validated, so a barred action is neither offered nor accepted and costs nothing. An action is performed by the performer the ability names, else the card it is on; an Item's or Spell's action is performed by its wielder.
+
+### Dead Personalities are discarded too (ScavengingParty.cs)
+
+**Scavenging Party**: "Target your discarded Personality: Discard a card from one of your provinces and refill it face-up with the Personality." Per Mendon, a dead Personality is also a discarded one (the same pile). The target is any of the player's Personalities in the Dynasty discard pile, dead or merely discarded; the province is chosen in the command (one of his provinces that holds a card); the card there goes to the Dynasty discard pile, and the Personality comes back as a fresh card with every permanent change cleared. The Focus Effect gives the duel's winner -3F (a tie has no winner); the Open half gives each of the player's provinces that stands +2 strength.
+
+### Cards not built
+
+**Blessings of the Shi-Tien Yen-Wang** (1040) is the one Second City card of the pass left unwired. It needs a move of a dead Personality to the top of its owner's deck (now that dead Personalities count as discarded, only that move is missing), a shield that outlives an action ("negate the next card effect that bows, destroys, or moves him", whose duration the text does not give), and the count of dead Personalities in all discard piles. The shield's duration is the reading Mendon needs to give.
+
+### Readings for Mendon (continued)
+
+29. **Mastering the Elements' target** is one of its controller's own Spells in play (attached to any of his Personalities), never itself, an enemy's or one in his hand.
+30. **A trait slot**: a card has one trait, so a later copy's trait replaces an earlier one's, and a Spell without a trait leaves the card's trait alone. Keeping several traits at once would need a multi-trait model.
+31. **"Base abilities"** are the abilities the Spell prints, not ones it was granted or copied; an entry ability is not copied.
+32. **The copy is permanent for the game**: it stays across leaving play and re-entry (the Reaction re-triggers on each entry and adds to it).
+33. **Skipping the Puddle's condition** ("if any enemy units are at the current battlefield") is a condition of taking the action: it is not offered otherwise. The performing Water Shugenja may be bowed (the text does not say unbowed) and may be anywhere, since he is moving. The additional Battle action is granted even if the movement was refused by a lock.
+34. **A Kata put into play from the hand** is Zone.Home at the right of home; the other player's Kata are not discarded, and a Kata's action is its controller's.
+35. **Superior Reach lasts until the end of the turn** and holds only while the Kensai has a Weapon; "actions the Personality performs" are the ones he performs himself (his own abilities, the Strategies he performs, and those of his Items and Spells). An action performed by another Personality may still target the Kensai.
+36. **Scavenging Party**: a dead Personality is also discarded, for this card (a general reading of "discarded" for other cards, such as Shunsuke's "make dead", is not made: a dead Personality cannot become dead again). The province must hold a card, which goes to the Dynasty discard pile.
+
+## Verification (stage 6)
+
+Suite `copy-kata-targeting` (9); the move-to-battle inventory test now lists Skipping the Puddle's action.
