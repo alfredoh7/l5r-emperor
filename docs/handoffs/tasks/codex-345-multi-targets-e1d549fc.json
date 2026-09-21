@@ -1,9 +1,9 @@
 {
-  "lane": "ui",
-  "summary": "Implement approved board targeting and expandable slot groups (#345); final integration checks still in progress.",
-  "validation": "Client compilation and first 1920x1080 native engine-backed pass succeeded; reduced native run and current-main integration pending.",
-  "remaining": "Finish native visual/input checks, current-main integration, launchable review and CI. Human acceptance and Mendon review pending; no main merge authorized.",
+  "lane": "shared",
+  "summary": "Approved A+C multiple-target presentation with ordered board links and expandable groups. New authored behavior is client-side; inherited preview rules and merged main c8e13901 make the cumulative stack shared and require Mendon review. No main merge authorized.",
+  "validation": "Client builds; native normal/reduced multi-target, conditional engine effects/privacy/reactions; existing cost/generic chooser and Attack regressions; full deterministic checks; actual review app/manual selection/navigation; private complete artwork receipt verified.",
+  "remaining": "Final-head CI, Alfredo hands-on acceptance, Mendon rules review and native Windows review. Goal continues with #311/#400 and combined review delivery; no main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/345",
   "branch": "codex/345-multi-targets",
-  "updated": "2026-09-21T21:53:25.742037+00:00"
+  "updated": "2026-09-21T22:02:29.445873+00:00"
 }

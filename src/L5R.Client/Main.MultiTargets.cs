@@ -177,7 +177,7 @@ public partial class Main
         else
         {
             var (required, ready) = RenderGoldPanel(action);
-            _paymentConfirm = SidebarSkin.Button((total == 0 ? "Confirm without targets" : $"Confirm {total} target{(total == 1 ? "" : "s")}") + (required > 0 ? $" · {required} Gold" : ""), () =>
+            _paymentConfirm = SidebarSkin.Button((total == 0 ? MultiReady ? "Confirm without targets" : "Choose required targets" : $"Confirm {total} target{(total == 1 ? "" : "s")}") + (required > 0 ? $" · {required} Gold" : ""), () =>
             {
                 if (!DecisionCanSubmit || !MultiTargetActive || key != _multiDraftKey || !MultiReady || !ready) return;
                 Submit(MultiCommand() with { SourceIds = required > 0 ? _sources.ToArray() : [] });

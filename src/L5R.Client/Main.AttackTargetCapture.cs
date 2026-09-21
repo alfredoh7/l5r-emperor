@@ -155,7 +155,15 @@ public partial class Main
             await EventFrames(20);CheckAttackTab("Ranged",_attackSource);await SupportCapture("-tab-close");
             _cameraZoom=savedZoom;_cameraCenter=savedCenter;ApplyTableCamera();await EventFrames(12);
             if(renderOnly){ChooseAttackTarget(AttackChoice.Card,_attackReactiveCard);await EventFrames(12);}
-            else await SupportClick(_tiles.Single(t=>t.Card.Id==_attackReactiveCard));
+            else
+            {
+                // macOS may leave a newly launched native probe in the background. Respect the real
+                // game's focus guard and wait for activation before testing projected table input.
+                if (!GetWindow().HasFocus()) GD.Print("ATTACK_TARGET_FOCUS_REQUIRED: activate the game window to continue table input checks.");
+                for (var i = 0; i < 18000 && !GetWindow().HasFocus(); i++) await EventFrames(1);
+                SupportRequire(GetWindow().HasFocus(), "Native Attack probe did not receive OS focus");
+                await SupportClick(_tiles.Single(t=>t.Card.Id==_attackReactiveCard));
+            }
             SupportRequire(_chosen.Command.TargetId==_attackReactiveCard,"Table retargeting did not follow the clicked legal card");
             CheckAttackTab("Ranged",_attackSource);
             await SupportClick(AttackNoTargetButton());SupportRequire(_chosen.Command.TargetId is null&&_chosen.Command.Province is null&&!IntentArrows().Any(),"No target retained the previous target/arrow");
