@@ -121,6 +121,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-multi-targets", StringComparison.Ordinal)) { ProcessMultiCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-top-cards", StringComparison.Ordinal)) { ProcessLookCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-opponent-payment",StringComparison.Ordinal)) { ProcessOpponentPaymentCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
@@ -317,6 +318,7 @@ public partial class Main : Node
         FitSearchPanel();
         FitLookPanel();
         FitLookReviewControls();
+        FitMultiReviewControls();
         FitEitherReviewControls();
         FitOpponentPaymentReviewControls();
         FitCopyPanel();
@@ -431,6 +433,7 @@ public partial class Main : Node
             if(_chosen?.Type is "chooseEitherOr" or "chooseOpponentPayment"){_chosen=null;_sources.Clear();}
             ClearSearchPanel();
             ClearLookPanel();
+            ClearMultiTargets();
             ClearCopyPanel(true);_copyNoticeMatch=null;_copyNotice=null;
             ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
@@ -451,6 +454,7 @@ public partial class Main : Node
         }
         if (_chosen?.Command?.ExpectedVersion != View.Version) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         if(_chosen?.Movement is not null&&_chosen.Command?.PlayerId!=View.ViewerId){_chosen=null;_sources.Clear();}
+        if(HasMultiTargets(_chosen) && (_chosen!.Command!.PlayerId != View.ViewerId || _multiMatch != _session.MatchKey)) { _chosen = null; _sources.Clear(); ClearMultiTargets(); }
         if(HasAttackTargets(_chosen)&&_chosen!.Command!.PlayerId!=View.ViewerId){_chosen=null;_sources.Clear();}
         if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         if (_selected is not null) _selected = FindCard(_selected.Id);
@@ -459,7 +463,7 @@ public partial class Main : Node
         if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
         ObserveCopyResults();
-        RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
+        RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle(); FrameReactionTarget();
         RenderBattleFeedback();
         ObserveShownCards();
     }
@@ -503,6 +507,7 @@ public partial class Main : Node
         if(_shownOpen)ToggleShownCards(false);
         if (_session.Busy || PresentationBusy) return;
         if (SelectEventCard(card)) return;
+        if (SelectMultiCard(card)) return;
         if(AttackTargetActive&&card.Zone is Zone.Province or Zone.Region&&card.ProvinceIndex is {} attackProvince)
         {if(AttackProvinceTarget(card.OwnerId,attackProvince))ChooseAttackTarget(AttackChoice.Province,province:attackProvince);return;}
         if(MovementActive&&card.Zone is Zone.Province or Zone.Region&&card.ProvinceIndex is {} destination)
@@ -554,9 +559,11 @@ public partial class Main : Node
             tile.Highlighted = tile.Card.Id == (_assignmentUnit ?? _selected?.Id) || rootId is not null && tile.Card.AttachedTo == rootId;
             tile.Highlighted |= GenericDecisionActive && tile.Card.Id==View.PendingChoice?.CardId;
             tile.LegalTarget |= GenericDecisionActive && tile.Card.Id==View.PendingChoice?.CardId;
+            tile.LegalTarget |= View.PendingChoice?.Type == "beforeActionReaction" && tile.Card.Id == View.PendingChoice.CardId;
             tile.DecisionSelected |= GenericDecisionActive && tile.Card.Id==_decisionSelection?.Command?.TargetId;
             tile.LegalTarget |= _chosen?.TargetIds?.Contains(tile.Card.Id) == true || supportTargets.Contains(tile.Card.Id);
-            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id);
+            tile.LegalTarget |= MultiTargetActive && MultiUpFront.Any(s => s.Slot == _multiActiveSlot && s.CardIds.Contains(tile.Card.Id));
+            tile.ChosenTarget = _chosen?.Command?.TargetId == tile.Card.Id || _assignments.ContainsKey(tile.Card.Id) || MultiTargetActive && MultiSelectedIds.Contains(tile.Card.Id);
             tile.SelectedSource = _sources.Contains(tile.Card.Id); tile.QueueRedraw();
         }
         foreach (var (key, button) in _provinceButtons)
@@ -588,10 +595,12 @@ public partial class Main : Node
         if(HasAttackTargets(option))option=option with {Command=option.Command! with {TargetId=null,Province=null}};
         _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
+        if (HasMultiTargets(option)) BeginMultiTargets(); else ClearMultiTargets();
         if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();
         RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
         if(MovementActive)FocusMovement();
         if(AttackTargetActive)FocusAttackTargets();
+        if(MultiTargetActive)FocusMultiTargets();
     }
 
     private async void Submit(GameCommand command)

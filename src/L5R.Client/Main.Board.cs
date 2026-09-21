@@ -317,7 +317,14 @@ public partial class Main
             &&_provinceButtons.TryGetValue((1-View.ActivePlayerId,attackProvince),out var provinceTarget)
             &&_tiles.FirstOrDefault(t=>t.Card.Id==(_chosen.Command.PerformerId??_chosen.CardId)) is {} attackSource&&TileVisible(attackSource))
             yield return new(ScreenCenter(attackSource),ScreenCenter(provinceTarget),Palette.Gold,false,clip,Attack:true);
-        if (!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
+        if (MultiTargetActive && _tiles.FirstOrDefault(t => t.Card.Id == (_chosen!.Command!.PerformerId ?? _chosen.CardId)) is {} multiSource && TileVisible(multiSource))
+        {
+            foreach (var group in MultiSelectedIds.Select((id, index) => (Id: id, Index: index + 1)).GroupBy(x => x.Id))
+                if (_tiles.FirstOrDefault(t => t.Card.Id == group.Key) is {} target && TileVisible(target) && target != multiSource)
+                    yield return new(ScreenCenter(multiSource), MultiTargetPoint(target), Palette.Gold, false,
+                        multiSource.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip, Label: string.Join(",", group.Select(x => x.Index)));
+        }
+        if (!MultiTargetActive&&!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));
             var to = _tiles.FirstOrDefault(t => t.Card.Id == targetId);

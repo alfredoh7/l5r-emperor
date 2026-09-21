@@ -1,9 +1,9 @@
 {
-  "lane": "shared",
-  "summary": "Begin approved board and expandable-group multi-target chooser (#345)",
-  "validation": "Reviewed live issue and engine slot contract; implementation/native checks pending.",
-  "remaining": "Build private target draft, board/sidebar selection and prepared cases; verify and publish for human review. No merge authorized.",
+  "lane": "ui",
+  "summary": "Implement approved board targeting and expandable slot groups (#345); final integration checks still in progress.",
+  "validation": "Client compilation and first 1920x1080 native engine-backed pass succeeded; reduced native run and current-main integration pending.",
+  "remaining": "Finish native visual/input checks, current-main integration, launchable review and CI. Human acceptance and Mendon review pending; no main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/345",
   "branch": "codex/345-multi-targets",
-  "updated": "2026-09-21T21:32:15.493690+00:00"
+  "updated": "2026-09-21T21:53:25.742037+00:00"
 }

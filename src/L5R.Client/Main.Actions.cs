@@ -22,6 +22,7 @@ public partial class Main
         if (RenderOpponentPayment()) return;
         if (RenderEitherOr()) return;
         if (RenderCopyTray()) return;
+        if (RenderMultiTargets()) return;
         if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
         if (RenderMovement()) return;
         if (RenderAttackTargets()) return;
@@ -109,6 +110,7 @@ public partial class Main
         if (_selectedHomeReminder is not null && View.PendingChoice is null) { AddHomeReminderActions(); return; }
         if(View.PendingChoice?.Type is "bowReaction" or "beforeActionReaction")
         {
+            RenderReactionTarget();
             foreach(var reaction in Actions.Where(a=>a.Type=="useAbility")) AddAction(_inspector,reaction);
             return;
         }

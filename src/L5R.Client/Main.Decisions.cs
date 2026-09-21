@@ -91,7 +91,7 @@ public partial class Main
         foreach(var option in options)
         {
             // A cost option is usable only for the draft's engine-listed target. Never fabricate a disabled command.
-            var matchesTarget=pending is not null || _chosen?.Command?.TargetId is not { } target || option.TargetIds?.Contains(target)==true;
+            var matchesTarget=pending is not null || (HasMultiTargets(_chosen) ? MultiSelectionsAllowed(option) : _chosen?.Command?.TargetId is not { } target || option.TargetIds?.Contains(target)==true);
             var enabled=option.Enabled && option.Command is not null && matchesTarget;
             Button? button=null;
             button=SidebarSkin.Button(option.AlternativeCost?.Label??option.Label,()=>
@@ -153,6 +153,13 @@ public partial class Main
         }
         else if(_reviewingAlternativeCost && _chosen?.Command is { } draft)
         {
+            if (HasMultiTargets(_chosen))
+            {
+                if (!MultiSelectionsAllowed(selected)) return;
+                _chosen = selected with { Command = command with { TargetId = draft.TargetId, Selections = draft.Selections } };
+                _reviewingAlternativeCost = false; _decisionSelection = null; _alternativeCostConfirmed = true;
+                ResuggestSources(); RenderInspector(); Highlight(); return;
+            }
             if(draft.TargetId is { } target && selected.TargetIds?.Contains(target)!=true) return;
             var reviewed=selected with {Command=command with {TargetId=draft.TargetId}};
             // Gold still goes through the existing engine-quoted panel when the ability has both kinds of cost.

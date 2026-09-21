@@ -164,6 +164,7 @@ public partial class Main
             attackReview.IsVisibleInTree() && attackReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_root.GetNodeOrNull<Control>("OpponentPaymentReviewControls") is { } paymentReview &&
             paymentReview.IsVisibleInTree() && paymentReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
+        if (_root.GetNodeOrNull<Control>("MultiReviewControls") is {} multiReview && multiReview.IsVisibleInTree() && multiReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if (_root.GetNodeOrNull<Control>("LookReviewControls") is { } lookReview && lookReview.IsVisibleInTree() && lookReview.GetGlobalRect().HasPoint(viewportPoint)) return false;
         if(_eventHandBar is {Visible:true} && _eventHandBar.GetGlobalRect().HasPoint(viewportPoint))return false;
         if(_shownPreview is { } preview && IsInstanceValid(preview) && preview.GetGlobalRect().HasPoint(viewportPoint))return false;
