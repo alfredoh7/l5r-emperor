@@ -81,8 +81,9 @@ internal static class PlayerTargetTests
     private static void Inventory()
     {
         var singles = AbilityCatalog.All.Where(p => p.Value.Target == "player").OrderBy(p => p.Key, StringComparer.Ordinal).ToArray();
-        Eq(string.Join(",", singles.Select(p => p.Key)), "horume-gain,horume-lose,mugoshi-slander,training-choose-player-gain,training-choose-player-lose");
-        Check(singles.All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play"), "all entering-play Reactions: none is reached by AbilityActions' candidate switch");
+        Eq(string.Join(",", singles.Select(p => p.Key)), "horume-gain,horume-lose,know-their-minds-choose,mugoshi-slander,training-choose-player-gain,training-choose-player-lose");
+        // Every one is an entering-play Reaction (listed by the entry-reaction window) except Know Their Minds (issue #419), the one Open action that chooses a player: AbilityActions lists it once per player.
+        Check(singles.Where(p => p.Key != "know-their-minds-choose").All(p => p.Value.Timing == "Reaction" && p.Value.Trigger == "own-enters-play") && singles.Single(p => p.Key == "know-their-minds-choose").Value.Timing == "Open", "the entering-play Reactions, and Know Their Minds' Open action");
         var slotted = AbilityCatalog.All.Where(p => p.Value.Slots?.Any(s => s.IsPlayer) == true).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal).ToArray();
         Eq(string.Join(",", slotted), "fear-me-move,training-slots-mixed,yoshitada-bow");
         // No card prints two player-target reactions of different kinds: Horume and the fixture print exactly a gain and a lose.

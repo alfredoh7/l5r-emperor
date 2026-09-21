@@ -298,11 +298,32 @@ public sealed partial class MatchEngine
         // satisfies "you win," so both are excluded.
         if (winnerId is not null && loserIds.Count == 1)
             GrantRingRecruit(Player(Card(winnerId).OwnerId), SharesNoKeywords(Card(winnerId), Card(loserIds[0])), "false-ring-of-earth-recruit");
-        foreach (var focusedId in duel.OrderedFocusEffects)
+        duel.WinnerId = winnerId; duel.LoserIds = loserIds;
+        ContinueDuelFocusEffects(0);
+    }
+
+    // The duel's Focus Effects, in the order chosen, from the one at `from`: each applies, and one that needs a decision (Disreputable Deal's search) pauses the resolution here until
+    // it is answered (FocusEffectChoice.cs), which then carries on from the next.
+    private void ContinueDuelFocusEffects(int from)
+    {
+        var duel = _state.PendingDuel!;
+        var winnerPlayerId = duel.WinnerId is null ? (int?)null : Card(duel.WinnerId).OwnerId;
+        var loserPlayerIds = duel.LoserIds.Select(id => Card(id).OwnerId).ToList();
+        for (var i = from; i < duel.OrderedFocusEffects.Count; i++)
         {
+            var focusedId = duel.OrderedFocusEffects[i];
             var focusEffectAbility = (Definition(Card(focusedId)).Abilities ?? []).First(a => AbilityCatalog.All.TryGetValue(a, out var def) && def.Timing == "FocusEffect");
+            if (FocusEffectNeedsChoice(focusEffectAbility) && BeginFocusEffectChoice(i, focusedId, focusEffectAbility)) return;
             ApplyDuelFocusEffect(focusEffectAbility, Card(focusedId).OwnerId, winnerPlayerId, loserPlayerIds);
         }
+        FinishDuelResolution();
+    }
+
+    // Everything after the Focus Effects: the focused cards are spent and the duel's action completes.
+    private void FinishDuelResolution()
+    {
+        var duel = _state.PendingDuel!;
+        var winnerId = duel.WinnerId; var winnerPlayerId = winnerId is null ? (int?)null : Card(winnerId).OwnerId;
         // Every focused card is spent, win or lose (a card destroyed as part of the outcome above is
         // simply skipped here -- Card() would still resolve it, but it is no longer in Zone.Focused).
         // Mirumoto Hikaro's own "remove that card from the game after the duel ends" -- a
