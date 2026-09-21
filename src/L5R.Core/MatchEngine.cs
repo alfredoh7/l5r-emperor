@@ -729,6 +729,7 @@ public sealed partial class MatchEngine
         higher.Bowed = lower.Bowed || Definition(higher).Effect == "enters-bowed";
         higher.Dishonorable = lower.Dishonorable || Definition(higher).Effect == "enters-dishonored";
         higher.StraightenBlockedTurn = Math.Max(higher.StraightenBlockedTurn, lower.StraightenBlockedTurn);
+        higher.StraightenLockedTurn = Math.Max(higher.StraightenLockedTurn, lower.StraightenLockedTurn);
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
 
         higher.Modifiers.AddRange(lower.Modifiers);
@@ -1561,7 +1562,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");

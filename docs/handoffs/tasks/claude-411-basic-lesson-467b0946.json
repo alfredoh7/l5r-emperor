@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Basic Lesson end to end (Mendon's ruling): a whole-turn 'may not be straightened' restriction on the player's Stronghold (CardInstance.StraightenLockedTurn; Straighten() refuses, straighten-only actions like Jinn-Kuen's are not offered against it, the Straighten phase is untouched), the bowed Questionable Resources Limited action and the Open action creating Hired Samurai with Force from the destroyed Holding's base Gold Cost; re-check of the other waiting created-card cards (none whole and unambiguous, what is missing recorded); decision doc records Mendon's rulings. Shared change: rules engine and published card data; the client is untouched.",
+  "validation": "bash tools/check.sh --skip-client passed (Core all pass incl. new suite basic-lesson 7/7, Python, AI, Server, client transport); 13 named mutation checks each fail a test; nothing downloaded",
+  "remaining": "None for Basic Lesson. Rulings needed from Mendon for The Egg of P'an Ku, Amazing Feat, Two-Fold Virtue and Imperial Charter; The Golden Plains needs published Terrains playable from a hand; Treasure Hunter and Returning Home need an after-battle Reaction trigger.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/411",
+  "branch": "claude/411-basic-lesson",
+  "updated": "2026-09-21T09:53:06.952570+00:00"
+}
