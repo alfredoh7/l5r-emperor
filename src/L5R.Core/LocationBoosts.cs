@@ -13,4 +13,6 @@ public sealed partial class MatchEngine
     }
 
     internal int MaxHandSizeForTest(int playerId) => MaxHandSize(playerId);
+    internal int PersonalityChiForTest(string cardId) => PersonalityChi(Card(cardId));
+    internal int AttackStrengthForTest(string abilityId, string sourceId) => AttackStrength(abilityId, Player(Card(sourceId).OwnerId), null, sourceId);
 }

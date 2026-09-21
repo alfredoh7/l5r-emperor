@@ -3438,6 +3438,8 @@ public sealed partial class MatchEngine
         if (id == "torazu-fire-attack") Require(HasToken(source!, "Fire"), "Torazu needs a Fire token of his own to attack.");
         if (id == "moto-ming-gwok-attack") Require(DeadCount(0) > 0 || DeadCount(1) > 0, "Moto Ming-Gwok needs a dead Personality in some player's discard pile to attack.");
         if (id == "archery-range-reaction") Require(_state.PendingAttack!.Kind == "Ranged", "Archery Range only boosts a Ranged Attack.");
+        if (id == "saibankan-dishonor" && command.Selections is { } saibankanSelections)
+            Require(saibankanSelections.SelectMany(x => x.CardIds ?? []).Select(x => Card(x).OwnerId).Distinct().Count() <= 1, "The Personalities must be controlled by the same player.");
         if (id is "stockpiled-attach" or "spirit-magistrate-bow")
             Require(id == "spirit-magistrate-bow" ? _state.ActivePlayerId != player.Id : !Keyword(Card(command.PerformerId!), "Commander"), id == "spirit-magistrate-bow" ? "Only usable when it is not your own turn." : "A Commander pays 4 less: use the discounted attach.");
         if (id is "hailung-attach" or "hailung-attach-discount")
