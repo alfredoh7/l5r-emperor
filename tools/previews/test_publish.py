@@ -1,9 +1,30 @@
 import unittest
+import tempfile
+from pathlib import Path
 from unittest.mock import patch
-from publish import deliver, verify_asset
+from publish import deliver, verify_asset, stage
+from package import REPO, digest
 
 
 class PublishTests(unittest.TestCase):
+    def test_delayed_draft_listing_resumes_one_release_without_notification(self):
+        with tempfile.TemporaryDirectory() as temp:
+            archive = Path(temp) / "review.zip"
+            archive.write_bytes(b"validated fixture package")
+            spec = {"source_commit": "a" * 40, "source_pr": 410, "title": "Review"}
+            receipt = {"repository": REPO, "source_commit": spec["source_commit"],
+                       "asset": archive.name, "bytes": archive.stat().st_size,
+                       "sha256": digest(archive), "tag": "preview-fixture"}
+            draft = {"draft": True, "assets": []}
+            uploaded = {"draft": True, "assets": [{"name": archive.name,
+                "size": receipt["bytes"], "digest": "sha256:" + receipt["sha256"]}]}
+            with patch("publish.api", return_value={"private": True}), patch("publish.gh") as gh, \
+                 patch("publish.release_for", side_effect=[None, None, draft, uploaded]), patch("publish.time.sleep"):
+                stage(spec, receipt, archive)
+                self.assertEqual(sum(c.args[:2] == ("release", "create") for c in gh.call_args_list), 1)
+                self.assertEqual(sum(c.args[:2] == ("release", "upload") for c in gh.call_args_list), 1)
+                self.assertFalse(any("POST" in c.args for c in gh.call_args_list))
+
     def test_corrupt_or_incomplete_upload_is_rejected(self):
         receipt = {"asset": "review.zip", "bytes": 12, "sha256": "a" * 64}
         for assets in [[], [{"name": "review.zip", "size": 11, "digest": "sha256:" + "a" * 64}],

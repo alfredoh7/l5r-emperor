@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Deliver Alfredo-approved UI demos 1-4 as an isolated Windows package with named prepared launchers and explicit Mendon approval/feedback instructions; 5-8 excluded and unapproved.",
-  "validation": "8/8 packaging/publication Python tests passed. Exact source db649158 exported with complete Windows runtime/artwork and no development source files. Actual ZIP launchers, source pin and approval/feedback wording inspected. Source native Mac 1920x1080 and 1280x800 deck checks and full non-client suite passed; 10/10 transport. Uploaded asset validation/Windows CI and targeted notification follow using pinned receipt.",
-  "remaining": "Windows review package job must pass on exact receipt commit before publish.py deliver notifies Mendon. No main merge: Mendon approval and dependency review required; 5-8 await Alfredo. Windows graphical and external multiplayer acceptance pending.",
+  "summary": "Package Alfredo-approved demos 5-8 as four named self-contained Windows launchers pinned to PR410 552b54a4; stage verified private release and prepare Mendon approval/feedback notification. Tolerate delayed GitHub draft listings without duplicate creation.",
+  "validation": "Source native/engine/transport checks and four actual Mac launches pass; Windows export resources/runtime/source exclusion validated. Inspected every launcher and embedded README/spec plus new tab asset inside actual ZIP; package SHA-256 and size verified locally and on GitHub. Packaging/publication regressions 9/9 pass including delayed-listing resume. Main 828f1bb7 integrated; unrelated untracked comments file preserved.",
+  "remaining": "Exact uploaded package must pass Windows review package CI on this delivery commit before publish.py deliver posts Mendon notification. Human Windows graphical/rules review and main merge remain pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T07:15:05.368214+00:00"
+  "updated": "2026-09-21T11:31:30.431421+00:00"
 }

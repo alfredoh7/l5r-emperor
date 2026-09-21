@@ -1,0 +1,17 @@
+# Alfredo-approved demos 5–8 — Windows review delivery
+
+Alfredo approved Either/Or (#343 / PR #401), Copy (#342 / PR #403), Movement (#346 / PR #404), and Attack targets/type tabs (#355 / PR #410). He explicitly requested Windows demos and a notification for Mendon, with UI/QoL feedback recorded for Alfredo to address. Merging is contingent on Mendon approving and required checks; no main merge is part of this task.
+
+## Exact game candidate
+
+PR #410 at `552b54a4596f5ed9a14c58e78bc6ac07a27802ac`. The package specification is `previews/approved-ui-5-8.json`, and the uploaded package receipt is `previews/published/approved-ui-5-8.json`. The package contains `Start Review.cmd`, four named Demo 5–8 launchers, `Open Full Game.cmd`, feedback instructions, executable, managed runtime and all required artwork. Extract All, then double-click the desired demo. No source checkout, Godot or SDK is required. Settings/decks are isolated from the normal game. Open one demo at a time.
+
+[Private release](https://github.com/alfredoh7/l5r-emperor/releases/tag/preview-pr410-552b54a459-r1-windows) · [Batch review / notification](https://github.com/alfredoh7/l5r-emperor/pull/410). Before delivery the release is marked Validation pending. `publish.py deliver` requires the exact committed receipt to pass the Windows review package job, verifies the GitHub upload's SHA-256/size, then sends one deduplicated @mdornbrook notification with download, launch instructions, per-demo checklists, approval/merge gate and a Claude prompt. The notification URL is recorded on the PR after that gate passes.
+
+## Validation and remaining limits
+
+Source evidence at the pinned revision: client compilation/import pass; full deterministic checks pass, including targeted reactions 31/31, AI 34/34, server 8/8 and transport 12/12. Native Attack normal/reduced/review navigation and demos 5–7 reduced-review checks pass. All four actual Mac review apps opened prepared scenarios. Actual source/native F comparison was inspected and production art/prompt retained. Main through `828f1bb7` and the complete verified 2,917-scan dependency are included.
+
+Packaging/publication Python regressions: 9/9 pass. The first stage attempt encountered GitHub’s delayed draft listing after successful creation; the publisher now performs bounded reads of the same tag, with a regression proving one creation/upload and no notification. The existing draft was resumed, uploaded and hash/size verified; no duplicate release was created. Export validation checks runtime, managed libraries, resources and exclusion of development files. The package README and named scenario launchers are inspected before staging. The Windows workflow downloads the actual uploaded archive, verifies its size/hash, starts the exported .NET executable headlessly, checks isolated data, and executes every `.cmd` through real Windows command handling against an argument-capture executable. This proves runtime/launcher routing, not Windows graphical play or expert rules acceptance.
+
+Mendon review, native Windows graphical play and external multiplayer remain open human gates. The optional attack presentation metadata needs shared review. Alfredo UI approval does not accept inherited stabilization/rules candidates. Previous demos 1–4 retain their separate versioned package. Root/main and repository visibility remain unchanged. GitHub mention/review requests are observable; email delivery/read status cannot be verified.

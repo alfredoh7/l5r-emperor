@@ -6,6 +6,7 @@ import os
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 from package import ROOT, REPO, digest, read_spec
 
@@ -42,6 +43,18 @@ def verify_asset(receipt, release):
     if asset["size"] != receipt["bytes"] or asset.get("digest") != "sha256:" + receipt["sha256"]:
         raise ValueError("GitHub upload size/digest differs from the local package")
     return asset
+
+
+def wait_for_release(receipt):
+    # GitHub may acknowledge draft creation before its paginated releases list
+    # contains it. Re-read that same tag; never create a second release on retry.
+    for delay in (0, 1, 2, 4, 8):
+        if delay:
+            time.sleep(delay)
+        release = release_for(receipt)
+        if release is not None:
+            return release
+    raise ValueError("GitHub created the draft but has not listed it yet; rerun stage to resume the same tag")
 
 
 def notification(spec, receipt, asset):
@@ -108,12 +121,12 @@ def stage(spec, receipt, archive):
             gh("release", "create", receipt["tag"], "--repo", REPO, "--target", receipt["source_commit"],
                "--draft", "--prerelease", "--latest=false", "--title", "Review: " + spec["title"] + " (Windows)",
                "--notes-file", str(file))
-        existing = release_for(receipt)
+        existing = wait_for_release(receipt)
     if not any(a["name"] == receipt["asset"] for a in existing["assets"]):
         if not existing["draft"]:
             raise ValueError("Never append or replace a published preview; increment its revision")
         gh("release", "upload", receipt["tag"], str(archive), "--repo", REPO)
-    release = release_for(receipt)
+    release = wait_for_release(receipt)
     verify_asset(receipt, release)
     if release["draft"]:
         # Read-only CI tokens cannot see draft releases. Keep CI read-only and
