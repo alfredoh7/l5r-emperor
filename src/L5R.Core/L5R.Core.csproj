@@ -136,5 +136,17 @@
     <EmbeddedResource Include="../../content/published/strategy-wave-32.json" LogicalName="L5R.Published.StrategyWave32.json" />
     <EmbeddedResource Include="../../content/published/personality-wave-41.json" LogicalName="L5R.Published.PersonalityWave41.json" />
     <EmbeddedResource Include="../../content/published/stronghold-wave-10.json" LogicalName="L5R.Published.StrongholdWave10.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-36.json" LogicalName="L5R.Published.StrategyWave36.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-14.json" LogicalName="L5R.Published.SpellWave14.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-37.json" LogicalName="L5R.Published.StrategyWave37.json" />
+    <EmbeddedResource Include="../../content/published/holding-wave-5.json" LogicalName="L5R.Published.HoldingWave5.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-38.json" LogicalName="L5R.Published.StrategyWave38.json" />
+    <EmbeddedResource Include="../../content/published/region-wave-4.json" LogicalName="L5R.Published.RegionWave4.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-39.json" LogicalName="L5R.Published.StrategyWave39.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-40.json" LogicalName="L5R.Published.StrategyWave40.json" />
+    <EmbeddedResource Include="../../content/published/stronghold-wave-11.json" LogicalName="L5R.Published.StrongholdWave11.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-41.json" LogicalName="L5R.Published.StrategyWave41.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-15.json" LogicalName="L5R.Published.SpellWave15.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-42.json" LogicalName="L5R.Published.StrategyWave42.json" />
   </ItemGroup>
 </Project>

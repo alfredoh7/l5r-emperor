@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Second City primitives 4/6 (#418): a province's current strength against a maximum (raises kept, the limit enforced on every read and lifted with its source; Times of Strife folded in as one limit; the view shows it), and Terrains as ordinary cards with passive traits: Ancient Feud (maximum = base strength at its battlefield, replaces the Terrain there), Hasty Fortifications (+1 strength on being played and after each of its controller's Battle actions, counted while it is in play), Shiotome Plains (+1F Cavalry / -1F others, card-level). Rules lane; client-lane files are only the three shipped art scans and their .import files. Stacked on #417 (PR 423).",
+  "validation": "Local: every test suite passes (Core incl. terrain-statics 6, AI 28, server 8, transport 7; client builds); the local Godot import step exits 1 with the known f.is_null errors on unrelated existing assets, CI is authoritative. 18 mutation checks (limit source, battlefield ownership, cap on read, bonus lifetime, Cavalry sign and floor, Follower host, Battle-action gate and owner, played-Terrain bonus, cleanup, replace rule, hook, Force insertions, view): one survived (the Battle-timing gate), a Reaction test was added, and every one now fails a named test.",
+  "remaining": "Readings 19-22 for Mendon in docs/decisions/2026-09-21-second-city-primitives.md (a lowering acts on the current strength; what counts as your Battle action; Infantry = no Cavalry keyword, by each card's own keywords; a Terrain's trait cannot be negated yet). A minimum strength is the mirror image in the same read and is not built. Stages 5-6 (#419, #420) follow.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/418",
+  "branch": "claude/418-province-strength",
+  "updated": "2026-09-21T15:28:09.901002+00:00"
+}

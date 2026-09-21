@@ -2331,4 +2331,28 @@ public static class PublishedContent
     public static PublishedSnapshot SpellWave13 { get; } = Load("L5R.Published.SpellWave13.json", "spell-wave-13", requireDecks: false);
     /// <summary>Second City pass (#264): Kyuden Kitsune.</summary>
     public static PublishedSnapshot StrongholdWave10 { get; } = Load("L5R.Published.StrongholdWave10.json", "stronghold-wave-10", requireDecks: false);
+    /// <summary>Strategy wave 36 (issue #415): Hibernation and Visitation.</summary>
+    public static PublishedSnapshot StrategyWave36 { get; } = Load("L5R.Published.StrategyWave36.json", "strategy-wave-36", requireDecks: false);
+    /// <summary>Spell wave 14 (issue #415): Strength of the Tsunami.</summary>
+    public static PublishedSnapshot SpellWave14 { get; } = Load("L5R.Published.SpellWave14.json", "spell-wave-14", requireDecks: false);
+    /// <summary>Strategy wave 37 (issue #416): A Quiet Transaction.</summary>
+    public static PublishedSnapshot StrategyWave37 { get; } = Load("L5R.Published.StrategyWave37.json", "strategy-wave-37", requireDecks: false);
+    /// <summary>Holding wave 5 (issue #416): Red Crane Dojo and Bushi Dojo.</summary>
+    public static PublishedSnapshot HoldingWave5 { get; } = Load("L5R.Published.HoldingWave5.json", "holding-wave-5", requireDecks: false);
+    /// <summary>Strategy wave 38 (issue #417): Never Safe, Redoubled Attack, Tales of Dishonor.</summary>
+    public static PublishedSnapshot StrategyWave38 { get; } = Load("L5R.Published.StrategyWave38.json", "strategy-wave-38", requireDecks: false);
+    /// <summary>Region wave 4 (issue #417): Quagmire.</summary>
+    public static PublishedSnapshot RegionWave4 { get; } = Load("L5R.Published.RegionWave4.json", "region-wave-4", requireDecks: false);
+    /// <summary>Strategy wave 39 (issue #418): Ancient Feud, Hasty Fortifications, Shiotome Plains.</summary>
+    public static PublishedSnapshot StrategyWave39 { get; } = Load("L5R.Published.StrategyWave39.json", "strategy-wave-39", requireDecks: false);
+    /// <summary>Strategy wave 40 (issue #419): Know Their Minds, Scandalous Rumors.</summary>
+    public static PublishedSnapshot StrategyWave40 { get; } = Load("L5R.Published.StrategyWave40.json", "strategy-wave-40", requireDecks: false);
+    /// <summary>Stronghold wave 11 (issue #419): Dragon's Breath Castle.</summary>
+    public static PublishedSnapshot StrongholdWave11 { get; } = Load("L5R.Published.StrongholdWave11.json", "stronghold-wave-11", requireDecks: false);
+    /// <summary>Strategy wave 41 (issue #419): Disreputable Deal.</summary>
+    public static PublishedSnapshot StrategyWave41 { get; } = Load("L5R.Published.StrategyWave41.json", "strategy-wave-41", requireDecks: false);
+    /// <summary>Spell wave 15 (issue #420): Mastering the Elements, a permanent copy of another Spell.</summary>
+    public static PublishedSnapshot SpellWave15 { get; } = Load("L5R.Published.SpellWave15.json", "spell-wave-15", requireDecks: false);
+    /// <summary>Strategy wave 42 (issue #420): Skipping the Puddle (a Kata), Superior Reach and Scavenging Party.</summary>
+    public static PublishedSnapshot StrategyWave42 { get; } = Load("L5R.Published.StrategyWave42.json", "strategy-wave-42", requireDecks: false);
 }

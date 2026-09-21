@@ -49,6 +49,28 @@ public static class GoldCostBasis
     /// wielder: the printed cost less every discount that applies to this attachment, this wielder and this player (EquipGoldCost), then Modifier
     /// and Floor. "Paying all costs" is Modifier 0; "paying 1 less Gold" is Modifier -1 (Moto Jun-Ni, Foothills Keep, Fading Shadows).</summary>
     public const string AttachCost = "attach-cost";
+    /// <summary>"Pay Gold equal to [base | current] [stat] of [target | performer | source] +/- [z]" (issue #416): any printed number of a card, converted into Gold and paid through the
+    /// ordinary Gold pathway. Which card, which stat and whether the printed (base) or the current value is read are on the rule (GoldCostRule.StatOf, Stat, StatBase).</summary>
+    public const string Stat = "stat";
+}
+
+/// <summary>Whose stat a <see cref="GoldCostBasis.Stat"/> rule reads.</summary>
+public static class CostStatSubject
+{
+    public const string Target = "target";
+    public const string Performer = "performer";
+    public const string Source = "source";
+}
+
+/// <summary>The printed numbers a Gold cost can be made of. "Strength" on a Stronghold is its Province Strength; a unit's is its Force.</summary>
+public static class CostStat
+{
+    public const string Force = "Force";
+    public const string Chi = "Chi";
+    public const string GoldCost = "GoldCost";
+    public const string PersonalHonor = "PersonalHonor";
+    public const string Focus = "Focus";
+    public const string ProvinceStrength = "ProvinceStrength";
 }
 
 /// <summary>Data describing how one ability is priced. Interpreted only by MatchEngine.AbilityGoldCost.
@@ -61,7 +83,8 @@ public static class GoldCostBasis
 /// (a Strategy source paying its own printed cost): those charge nothing, and emit no payment event, when
 /// that cost is 0.</param>
 public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0, int? Floor = null,
-    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false, bool MinusPerformerCost = false)
+    int? MaxAmount = null, string? HonorWaiverClan = null, bool Explicit = true, bool AtResolution = false, bool MinusPerformerCost = false,
+    string? StatOf = null, string? Stat = null, bool StatBase = false)
 {
     public static GoldCostRule Fixed(int amount) => new(GoldCostBasis.Fixed, amount);
     public static GoldCostRule SourcePrinted() => new(GoldCostBasis.SourcePrinted);
@@ -73,11 +96,15 @@ public sealed record GoldCostRule(string Basis, int Amount = 0, int Modifier = 0
     public static GoldCostRule TargetCurrent(int modifier = 0, int? floor = null) => new(GoldCostBasis.TargetCurrent, Modifier: modifier, Floor: floor);
     public static GoldCostRule Variable(int min = 0, int? max = null, bool atResolution = false) => new(GoldCostBasis.Variable, Amount: min, MaxAmount: max, AtResolution: atResolution);
     public static GoldCostRule AttachCost(int modifier = 0, int? floor = null) => new(GoldCostBasis.AttachCost, Modifier: modifier, Floor: floor);
+    /// <summary>Gold equal to a printed number of a card, plus or minus a modifier (A Quiet Transaction: the target's BASE Personal Honor plus one). <paramref name="of"/> is a
+    /// CostStatSubject, <paramref name="stat"/> a CostStat; <paramref name="basePrinted"/> reads the printed value, otherwise the current one (every modifier and token).</summary>
+    public static GoldCostRule StatValue(string of, string stat, bool basePrinted, int modifier = 0, int? floor = null) =>
+        new(GoldCostBasis.Stat, Modifier: modifier, Floor: floor, StatOf: of, Stat: stat, StatBase: basePrinted);
 
     public string Kind => Basis switch
     {
         GoldCostBasis.Variable => GoldCostKind.Variable,
-        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetCurrent or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost => GoldCostKind.Derived,
+        GoldCostBasis.TargetPrinted or GoldCostBasis.TargetCurrent or GoldCostBasis.TargetUnitTotal or GoldCostBasis.TargetRecruit or GoldCostBasis.AttachCost or GoldCostBasis.Stat => GoldCostKind.Derived,
         _ => GoldCostKind.Fixed
     };
 }
@@ -145,6 +172,28 @@ public sealed partial class MatchEngine
         return total;
     }
 
+    private static string StatLabel(string stat) => stat switch
+    {
+        CostStat.GoldCost => "Gold Cost", CostStat.PersonalHonor => "Personal Honor", CostStat.ProvinceStrength => "Province Strength", _ => stat
+    };
+
+    /// <summary>A printed number of a card (issue #416): the printed value, or the current one with every modifier and token, of Force, Chi, Gold Cost, Personal Honor, Focus Value
+    /// or (on a Stronghold) Province Strength. A stat a card does not have reads 0.</summary>
+    internal int CostStatValue(CardInstance card, string stat, bool basePrinted)
+    {
+        var def = Definition(card);
+        return stat switch
+        {
+            CostStat.GoldCost => basePrinted ? def.GoldCost : CardGoldCost(card),
+            CostStat.Force => basePrinted ? def.Force : def.Type == CardType.Personality ? PersonalityForce(card) : def.Type == CardType.Follower ? FollowerForce(card) : Math.Max(0, def.Force + StatModifier(card, "Force")),
+            CostStat.Chi => basePrinted ? def.Chi : def.Type == CardType.Personality ? PersonalityChi(card) : Math.Max(0, def.Chi + StatModifier(card, "Chi")),
+            CostStat.PersonalHonor => basePrinted ? def.PersonalHonor : CardPersonalHonor(card),
+            CostStat.Focus => basePrinted ? def.Focus : Math.Max(0, def.Focus + StatModifier(card, "Focus")),
+            CostStat.ProvinceStrength => basePrinted ? def.ProvinceStrength : def.ProvinceStrength + StatModifier(card, "ProvinceStrength"),
+            _ => throw new InvalidOperationException($"Unknown cost stat '{stat}'.")
+        };
+    }
+
     private static string Modified(int modifier, int? floor) =>
         (modifier < 0 ? $" − {-modifier}" : modifier > 0 ? $" + {modifier}" : "") + (floor is int f ? $" (min {f})" : "");
 
@@ -198,6 +247,20 @@ public sealed partial class MatchEngine
                 var basis = rule.MaxAmount is int max ? $"You choose the amount ({rule.Amount} to {max} Gold)"
                     : rule.Amount > 0 ? $"You choose the amount (at least {rule.Amount} Gold)" : "You choose the amount (zero or more Gold)";
                 return new(rule, chosen, basis, error, false, source ?? target, rule.Amount, rule.MaxAmount);
+            }
+            case GoldCostBasis.Stat:
+            {
+                var statCard = rule.StatOf switch
+                {
+                    CostStatSubject.Target => target,
+                    CostStatSubject.Performer => command.PerformerId is not null && _state.Cards.TryGetValue(command.PerformerId, out var performing) ? performing : null,
+                    _ => source
+                };
+                if (statCard is null)
+                    return new(rule, 0, rule.StatOf == CostStatSubject.Performer ? "Choose a performing card to see this cost." : "Choose a target to see this cost.", null, true, null);
+                var value = CostStatValue(statCard, rule.Stat!, rule.StatBase);
+                return new(rule, Clamp(value + rule.Modifier, rule.Floor),
+                    $"{Definition(statCard).Name} {(rule.StatBase ? "base" : "current")} {StatLabel(rule.Stat!)} {value}{Modified(rule.Modifier, rule.Floor)}", null, false, statCard);
             }
             case GoldCostBasis.AttachCost:
             {
@@ -260,8 +323,9 @@ public sealed partial class MatchEngine
         var cost = AbilityGoldCost(command);
         Require(command.GoldAmount is null || cost?.Rule.Basis == GoldCostBasis.Variable, "This action has no player-chosen Gold amount.");
         if (cost is not null) Require(cost.Error is null, cost.Error ?? "");
-        if (cost is { LeadAmount: > 0 }) ValidateSplitPayment(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
-        else ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds, CostPaidCards(command));
+        var paying = PaymentSubjectFor(command, cost?.Subject);
+        if (cost is { LeadAmount: > 0 }) ValidateSplitPayment(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds, paying);
+        else ValidatePayment(playerId, cost?.Amount ?? 0, command.SourceIds, CostPaidCards(command), paying);
     }
 
     // ---- two-part payment: the Discipline cost first, then the action's own cost (issue #353) --------------------------------------------------
@@ -271,12 +335,12 @@ public sealed partial class MatchEngine
     // (any order is accepted); when several splits work the one with the least excess on the Discipline part is used, deterministically.
     private const int MaxSplitPaymentSources = 16;
 
-    private bool TrySplitPayment(int playerId, int lead, int rest, string[] ids, out string[] leadIds, out string[] restIds)
+    private bool TrySplitPayment(int playerId, int lead, int rest, string[] ids, out string[] leadIds, out string[] restIds, PaymentSubject? paying = null)
     {
         leadIds = []; restIds = [];
         if (ids.Length > MaxSplitPaymentSources) return false;
         var sorted = ids.OrderBy(id => id, StringComparer.Ordinal).ToArray();
-        var produced = sorted.Select(id => GoldProduced(id, playerId)).ToArray();
+        var produced = sorted.Select(id => GoldProduced(id, playerId, paying)).ToArray();
         var total = produced.Sum();
         (int Excess, int Count, int Mask)? best = null;
         for (var mask = 0; mask < 1 << sorted.Length; mask++)
@@ -294,31 +358,31 @@ public sealed partial class MatchEngine
         return true;
     }
 
-    private void ValidateSplitPayment(int playerId, int lead, int rest, string[]? sourceIds)
+    private void ValidateSplitPayment(int playerId, int lead, int rest, string[]? sourceIds, PaymentSubject? paying = null)
     {
         var ids = sourceIds ?? [];
         Require(ids.Distinct(StringComparer.Ordinal).Count() == ids.Length, "A Gold source cannot be used twice in one payment.");
-        var producers = Producers(playerId).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
+        var producers = Producers(playerId, paying).Select(c => c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains), "Every Gold source must be yours, in play, unbowed and able to produce Gold.");
-        Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds) && (rest > 0 || restIds.Length == 0),
+        Require(TrySplitPayment(playerId, lead, rest, ids, out _, out var restIds, paying) && (rest > 0 || restIds.Length == 0),
             $"This play needs its Discipline cost ({lead} Gold) paid first and then {rest} Gold for the action itself, each from its own sources (Gold does not carry over); the selected sources cannot do that.");
     }
 
-    private void PaySplit(int playerId, CardInstance target, int lead, int rest, string[]? sourceIds)
+    private void PaySplit(int playerId, CardInstance target, int lead, int rest, string[]? sourceIds, PaymentSubject? paying = null)
     {
-        ValidateSplitPayment(playerId, lead, rest, sourceIds);
-        TrySplitPayment(playerId, lead, rest, sourceIds ?? [], out var leadIds, out var restIds);
-        Pay(playerId, target, lead, leadIds, "Discipline cost, paid first");
-        if (rest > 0) Pay(playerId, target, rest, restIds, "the action's own cost");
+        ValidateSplitPayment(playerId, lead, rest, sourceIds, paying);
+        TrySplitPayment(playerId, lead, rest, sourceIds ?? [], out var leadIds, out var restIds, paying);
+        Pay(playerId, target, lead, leadIds, "Discipline cost, paid first", paying: paying);
+        if (rest > 0) Pay(playerId, target, rest, restIds, "the action's own cost", paying: paying);
     }
 
     /// <summary>Suggested sources for a two-part payment: every alternative for the Discipline cost, each completed from the sources it leaves for the
     /// action's own cost. Empty when either part cannot be paid (so the play is offered only when both are).</summary>
-    private PaymentOption[] SplitPaymentOptions(int playerId, int lead, int rest)
+    private PaymentOption[] SplitPaymentOptions(int playerId, int lead, int rest, PaymentSubject? paying = null)
     {
         var options = new List<PaymentOption>();
-        foreach (var first in PaymentOptions(playerId, lead).Take(8))
-            foreach (var second in PaymentOptionsExcluding(playerId, rest, first.SourceIds.ToHashSet(StringComparer.Ordinal)).Take(4))
+        foreach (var first in PaymentOptions(playerId, lead, paying).Take(8))
+            foreach (var second in PaymentOptionsExcluding(playerId, rest, first.SourceIds.ToHashSet(StringComparer.Ordinal), paying).Take(4))
                 options.Add(new([.. first.SourceIds, .. second.SourceIds], first.Produced + second.Produced, lead + rest, first.Excess + second.Excess));
         return options.OrderBy(p => p.SourceIds.Count(id => Definition(Card(id)).GoldProduction == 0)).ThenBy(p => p.Excess).ThenBy(p => p.SourceIds.Length)
             .ThenBy(p => string.Join(",", p.SourceIds), StringComparer.Ordinal).Take(24).ToArray();
@@ -332,8 +396,9 @@ public sealed partial class MatchEngine
         if (AbilityGoldCost(command) is not { } cost || cost.Rule.AtResolution != atResolution) return;
         Require(cost.Error is null, cost.Error ?? "");
         if (!cost.Rule.Explicit && cost.Amount <= 0) return;
-        if (cost.LeadAmount > 0) PaySplit(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds);
-        else Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds, exclude: CostPaidCards(command));
+        var paying = PaymentSubjectFor(command, cost.Subject);
+        if (cost.LeadAmount > 0) PaySplit(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.LeadAmount, cost.Amount - cost.LeadAmount, command.SourceIds, paying);
+        else Pay(player.Id, cost.Subject ?? Card(player.StrongholdId), cost.Amount, command.SourceIds, exclude: CostPaidCards(command), paying: paying);
     }
 
     /// <summary>The quote the client renders for an ability command (full or partial: a target-derived cost
@@ -343,28 +408,28 @@ public sealed partial class MatchEngine
     {
         if (command.PlayerId is < 0 or > 1) return null;
         var cost = AbilityGoldCost(command);
-        return cost is null ? null : BuildQuote(command.PlayerId, cost, CostPaidCards(command));
+        return cost is null ? null : BuildQuote(command.PlayerId, cost, CostPaidCards(command), PaymentSubjectFor(command, cost.Subject));
     }
 
-    private GoldQuote BuildQuote(int playerId, AbilityCost cost, IReadOnlySet<string>? exclude)
+    private GoldQuote BuildQuote(int playerId, AbilityCost cost, IReadOnlySet<string>? exclude, PaymentSubject? paying = null)
     {
         var error = cost.Error ?? (cost.NeedsTarget ? cost.Basis : null);
         if (cost.Rule.Basis != GoldCostBasis.Variable)
             return new(cost.Amount, cost.Rule.Kind, cost.Basis, error,
-                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount) : PaymentOptionsExcluding(playerId, cost.Amount, exclude));
-        return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error);
+                error is not null ? [] : cost.LeadAmount > 0 ? SplitPaymentOptions(playerId, cost.LeadAmount, cost.Amount - cost.LeadAmount, paying) : PaymentOptionsExcluding(playerId, cost.Amount, exclude, paying));
+        return VariableGoldQuote(playerId, cost.Min ?? 0, cost.Max, cost.Amount, cost.Basis, error, paying);
     }
 
     /// <summary>A "pay zero or more Gold" quote for whoever pays it: every amount from min up to what the player can produce (capped at cap),
     /// each with the engine's suggested sources, so the acting player's own variable cost and the opposing player's payment share one shape.</summary>
-    private GoldQuote VariableGoldQuote(int playerId, int min, int? cap, int chosen, string basis, string? error = null)
+    private GoldQuote VariableGoldQuote(int playerId, int min, int? cap, int chosen, string basis, string? error = null, PaymentSubject? paying = null)
     {
-        var production = Producers(playerId).Sum(c => GoldProduced(c.Id, playerId));
+        var production = Producers(playerId, paying).Sum(c => GoldProduced(c.Id, playerId, paying));
         var max = Math.Max(min, Math.Min(cap ?? int.MaxValue, production));
         var byAmount = new Dictionary<int, PaymentOption[]>();
         for (var amount = min; amount <= max && error is null; amount++)
         {
-            var options = PaymentOptions(playerId, amount).Take(VariablePaymentOptionsPerAmount).ToArray();
+            var options = PaymentOptions(playerId, amount, paying).Take(VariablePaymentOptionsPerAmount).ToArray();
             if (options.Length > 0) byAmount[amount] = options;
         }
         var payments = error is null && byAmount.TryGetValue(chosen, out var suggested) ? suggested : [];
@@ -414,7 +479,7 @@ public sealed partial class MatchEngine
     private GoldQuote QuoteEquipGold(int playerId, CardInstance card, CardInstance target)
     {
         var (cost, basis, kind) = EquipGoldCost(playerId, card, target);
-        return new(cost, kind, basis, null, PaymentOptions(playerId, cost));
+        return new(cost, kind, basis, null, PaymentOptions(playerId, cost, new PaymentSubject(card, PaymentKind.Equip)));
     }
 
     /// <summary>A Region attached by a deck search (issue #312, Ikoma Shizuka: "attach it to one of your provinces, paying
@@ -430,6 +495,6 @@ public sealed partial class MatchEngine
     private GoldQuote? QuoteStrategyGold(int playerId, CardInstance card)
     {
         var def = Definition(card);
-        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost)) : null;
+        return def.GoldCost > 0 ? new(def.GoldCost, GoldCostKind.Fixed, $"{def.Name} cost {def.GoldCost}", null, PaymentOptions(playerId, def.GoldCost, new PaymentSubject(card, PaymentKind.Play))) : null;
     }
 }

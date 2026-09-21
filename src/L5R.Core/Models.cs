@@ -185,6 +185,21 @@ public sealed record Protection(string Source, string Duration);
 /// the GrantedKeyword/Protection convention: "Turn" (the default -- until the end of the turn) is swept by FinishTurn.</summary>
 public sealed record ActionLock(string Source, string Duration);
 
+/// <summary>The moments of a turn a straighten hold can wait for. Each happens during the active player's turn; a hold names whose turn counts.</summary>
+public enum StraightenPoint { TurnBegins, StraightenPhaseEnds, EventsRevealEnds, ActionPhaseEnds, TurnEnds }
+
+/// <summary>"May not straighten until X" (issue #415). <see cref="Owner"/> is the player whose turn counts (null: whoever's turn it is when the point comes, "this turn" and "the
+/// next Straighten Phase"); <see cref="Until"/> is the point; <see cref="Skip"/> is how many of those points must pass with the hold still standing before it is released (0: the
+/// next one releases it). <see cref="WhileInPlay"/> ties the hold to a card ("while this card remains in play"): it ends when that card leaves play.</summary>
+public sealed class StraightenHold
+{
+    public string Source { get; set; } = "";
+    public int? Owner { get; set; }
+    public StraightenPoint Until { get; set; }
+    public int Skip { get; set; }
+    public string? WhileInPlay { get; set; }
+}
+
 /// <summary>A physical marker on a card, not a card itself (core rules Glossary — Token). Type
 /// identifies the kind of token (e.g. "Fire", "Madness") for other effects to count/reference; it
 /// does not grant its host a keyword. Stat/Amount, when set, is a persistent bonus/penalty carried
@@ -233,6 +248,19 @@ public sealed class CardInstance
     // unlike the one-shot StraightenBlockedTurn above, which negates the next attempt only. Not swept: it simply stops holding when the turn number moves on, which is after the
     // End phase, so the next Straighten phase (which is not an effect) is untouched.
     public int StraightenLockedTurn { get; set; } = -1;
+    // Timed straighten holds (issue #415, StraightenHolds.cs): "negate its straightening until [a point in a player's turn]" -- Hibernation, Visitation, Bamboo Harvesters' "will not
+    // straighten before your second turn". While any hold stands the card is not straightened by the Straighten phase or by any effect; PrintedHoldsSeeded records that the holds a
+    // printed trait implies were created for this stay in play.
+    public List<StraightenHold> StraightenHolds { get; set; } = [];
+    public bool PrintedHoldsSeeded { get; set; }
+    // Movement locks (issue #415, MovementLocks.cs): kinds of movement refused until the end of a given turn.
+    public List<MovementLock> MovementLocks { get; set; } = [];
+    // Hibernation: "after the next time this game another player's Battle action targets it, negate the action's effects" -- set when it hibernates, spent by that action.
+    public bool TargetShield { get; set; }
+    // Superior Reach (issue #420, TargetBars.cs): actions the named cards perform may not target this card, for the turn and while the condition holds.
+    public List<TargetBar> TargetBars { get; set; } = [];
+    // Never Safe (issue #417): the number of the battle in which this card was played, so that "after this battle ends, if this card is in your discard pile" is offered for that battle only.
+    public int ReturnAfterBattle { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
@@ -273,6 +301,8 @@ public sealed class ProvinceState
     // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
     // face-down/face-up Dynasty card, but for the Zone.Region card instead.
     public string? RegionId { get; set; }
+    // Strength bonuses from cards that stay in play (Hasty Fortifications, issue #418): counted while their source is.
+    public List<ProvinceBonus> SourceBonuses { get; set; } = [];
 }
 
 public sealed class PlayerState
@@ -514,6 +544,9 @@ public sealed class PendingDuel
     // Timing=="FocusEffect" ability, set once (by ResolveDuelFocusEffectsInOrder) just before
     // ResolveDuel actually applies them.
     public List<string> OrderedFocusEffects { get; set; } = [];
+    // The duel's result, kept while its Focus Effects resolve one by one (a Focus Effect may pause for a decision, FocusEffectChoice.cs).
+    public string? WinnerId { get; set; }
+    public List<string> LoserIds { get; set; } = [];
     // Mirumoto Hikaro's own second trait: "once per duel, you may focus from your discard pile
     // instead" -- per player (either side could independently control their own Hikaro), and which
     // already-focused card ids came from a discard pile this way (ResolveDuel removes those from
@@ -576,6 +609,10 @@ public sealed class MatchState
     // "That battle's resolution will not bow cards in your army" (Akodo Dairuko): the players whose army the resolution does not bow;
     // cleared when the battle ends.
     public List<int> ResolutionWillNotBowPlayerIds { get; set; } = [];
+    // Cards whose unit will not bow from this battle's resolution (Redoubled Attack, issue #417); lapses with the battle like the player-wide list above.
+    public List<string> ResolutionWillNotBowCardIds { get; set; } = [];
+    // What the battle's resolution did, held while the after-resolution window is open (AfterResolution.cs).
+    public PendingAfterResolution? PendingAfterResolution { get; set; }
     // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
     // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
     // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),
@@ -754,6 +791,8 @@ public sealed class MatchState
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
     public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Keywords and Clan alignments taken off cards until an action or the turn ends (Red Crane Dojo, TemporaryRemovals.cs).
+    public List<TemporaryRemoval> TemporaryRemovals { get; set; } = [];
     // Kyuden Kitsune: the battles ("turn:province") whose one negated movement has been used.
     public List<string> KitsuneNegatedBattles { get; set; } = [];
     // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy
@@ -811,6 +850,12 @@ public sealed class MatchState
     public PendingEitherOr? PendingEitherOr { get; set; }
     // The opposing player's variable payment (issue #373, Virtuous Charity): non-null exactly while an "opponentPayment" PendingChoice is open. See OpponentPayment.cs.
     public PendingOpponentPayment? PendingOpponentPayment { get; set; }
+    // The decision another player makes inside an action (issue #419, DeciderChoice.cs): non-null exactly while a "deciderChoice" PendingChoice is open.
+    public PendingDeciderChoice? PendingDeciderChoice { get; set; }
+    // A Focus Effect paused for a decision (issue #419, FocusEffectChoice.cs): non-null exactly while a "focusEffectChoice" PendingChoice is open.
+    public PendingFocusChoice? PendingFocusChoice { get; set; }
+    // The second target of a sequenced action (issue #419, SequencedTarget.cs): non-null exactly while a "sequencedTarget" PendingChoice is open.
+    public PendingSequencedTarget? PendingSequencedTarget { get; set; }
     // Whole-action negation (issue #338, Yoritomo Sakuma): set on the deferred command's window while a reaction has negated the
     // action's effects; the window's close then resolves it with everything but its costs skipped (ActionNegation.cs).
     public bool DeferredActionNegated { get; set; }
@@ -901,7 +946,9 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
+/// <param name="Strength">What anything reads the province's strength as now: the current strength, or the maximum while a limit holds it down.</param>
+/// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so

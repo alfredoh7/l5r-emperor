@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,skipping-the-puddle-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -171,6 +171,8 @@ internal static class BattleAbsentMovesTests
         CardInstance card;
         if (definition.Type == CardType.Personality) card = Add(s, definition.Id, actor, Zone.Home, bowed: ability is "hawado-move-battlefield" or "houken-exp-straighten");
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);
+        // A Kata's action is taken from play, where it sits at the right of home.
+        else if (ability == "skipping-the-puddle-move") card = Add(s, definition.Id, actor, Zone.Home);
         else card = Add(s, definition.Id, actor, Zone.Hand);
         Add(s, "training-lion-samurai", actor, Zone.DynastyDiscard);
         // Dislodge the Foe (issue #264): the performing Tacticians stand at ANOTHER battlefield, with the Personality who opposes them there.

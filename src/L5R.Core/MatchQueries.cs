@@ -12,7 +12,7 @@ public sealed partial class MatchEngine
                 return new($"hidden-p{card.OwnerId}-province{card.ProvinceIndex}",null,card.OwnerId,card.Zone,false,false,card.ProvinceIndex,null,0);
             var def=Definition(card);
             var force=def.Type switch { CardType.Personality=>PersonalityForce(card), CardType.Follower=>FollowerForce(card), _=>Math.Max(0,def.Force+StatModifier(card,"Force")) };
-            return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber || card.StraightenLockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
+            return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber || StraightenRefusedInView(card),card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
                 GrantedAbilityViews(card),
                 GoldSourceProduction(card),ActionLocked(card),card.CreatedCopy);
@@ -30,7 +30,7 @@ public sealed partial class MatchEngine
                 units.Where(c=>c.Zone==Zone.Battlefield || c.Zone==Zone.Attached && Card(c.AttachedTo).Zone==Zone.Battlefield).Select(c=>ViewCard(c)).ToArray(),
                 player.Provinces.Select(p=>new ProvinceView(p.Index,EffectiveProvinceStrength(p),p.Destroyed,
                     p.CardId is null?null:ViewCard(Card(p.CardId),Card(p.CardId).FaceUp),
-                    p.RegionId is null?null:ViewCard(Card(p.RegionId)))).ToArray(),
+                    p.RegionId is null?null:ViewCard(Card(p.RegionId)),ProvinceStrengthMax(p))).ToArray(),
                 player.Id==playerId?player.Hand.Select(id=>ViewCard(Card(id))).ToArray():[],player.Hand.Count,
                 player.DynastyDeck.Count,player.FateDeck.Count,
                 owned.Where(c=>c.Zone is Zone.DynastyDiscard or Zone.FateDiscard or Zone.Dead).Select(c=>ViewCard(c)).ToArray(),
@@ -96,6 +96,27 @@ public sealed partial class MatchEngine
                 Add("useAbility",text,command,why,card.Id,gold:gold);
             }
         }
+        // An entering-play Reaction that targets a card in play (Mastering the Elements, issue #420: "target your Spell"): one option carrying every legal target, each with its own Gold quote when the
+        // cost comes from the target, the way an ordinary ability is listed; disabled, with the first reason, when no target is legal.
+        void AddTargetedEntryReaction(CardInstance card,string abilityId,string? reason)
+        {
+            var ability=AbilityCatalog.All[abilityId];
+            var legal=new List<(GameCommand Command,GoldQuote? Gold)>(); string? firstError=null;
+            foreach(var candidate in _state.Cards.Values.Where(InPlay).Select(c=>c.Id).OrderBy(x=>x,StringComparer.Ordinal))
+            {
+                var command=new GameCommand("useAbility",playerId,_state.Version,CardId:card.Id,TargetId:candidate,AbilityId:abilityId);
+                var gold=QuoteAbilityGold(command);
+                if(gold is not null) command=command with {SourceIds=gold.Payments.FirstOrDefault()?.SourceIds};
+                var why=gold is null ? null : gold.Error ?? (gold.Payments.Length==0 ? "Insufficient unbowed Gold production." : null);
+                why??=AbilityRejection(command);
+                why??=ActionLockRejection(command);
+                if(why is null) legal.Add((command,gold)); else firstError??=why;
+            }
+            var first=legal.FirstOrDefault();
+            var targetGold=first.Gold?.Kind==GoldCostKind.Derived ? legal.Where(l=>l.Gold is not null).ToDictionary(l=>l.Command.TargetId!,l=>l.Gold!) : null;
+            Add("useAbility",AbilityOptionLabel(abilityId,ability,null,card),legal.Count>0 ? first.Command : null,reason??(legal.Count>0 ? null : firstError??"No legal target."),card.Id,
+                legal.Select(l=>l.Command.TargetId!).ToArray(),gold:first.Gold,targetGold:targetGold);
+        }
         // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
         void AddTargetedActionReactions()
         {
@@ -134,7 +155,8 @@ public sealed partial class MatchEngine
                 foreach(var reactionId in (Definition(enteringCard).Abilities??[]).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger=="own-enters-play"))
                 {
                     var used=enteringCard.AbilityUses.ContainsKey(AbilityCatalog.All[reactionId].UsageKey??reactionId);
-                    AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
+                    if(AbilityCatalog.All[reactionId].Target is "none" or "player") AddReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
+                    else AddTargetedEntryReaction(enteringCard,reactionId,used?"This reaction has already been used.":null);
                 }
                 // Singh Remnants' shape: a DIFFERENT card (hand or discard pile) watching this entry,
                 // only relevant once a Personality is what entered.
@@ -227,6 +249,30 @@ public sealed partial class MatchEngine
             result.AddRange(AbilityActions(playerId));
             Add("declineReaction","Pass reaction",Command("declineReaction"));
         }
+        else if(_state.PendingChoice is { Type:"bowReaction" } bowPending)
+        {
+            // After an action bowed a Personality (issue #216 Hizumi and Ruya, issue #417 Quagmire): the one watching card's own Reaction, one option per Personality it may target
+            // when its target is one of those the action bowed, else the plain option; then the pass.
+            if(bowPending.PlayerId==playerId && bowPending.CardId is not null)
+            {
+                var watcher=Card(bowPending.CardId);
+                foreach(var reactionId in AbilityIdsOf(watcher).Where(a=>AbilityCatalog.All.TryGetValue(a,out var def) && def.Timing=="Reaction" && def.Trigger is "bowed-personality-at-own-battlefield" or "bowed-personality-near-region" or "own-action-bowed-personality"))
+                {
+                    var used=AbilityUseSpent(watcher.AbilityUses,AbilityCatalog.All[reactionId],AbilityCatalog.All[reactionId].UsageKey??reactionId);
+                    if(AbilityCatalog.All[reactionId].Target=="bow-reaction-candidate")
+                        foreach(var candidateId in _state.BowReactionCandidateIds)
+                            AddReaction(watcher,reactionId,used?"This reaction has already been used.":null,targetId:candidateId,label:$"{AbilityCatalog.All[reactionId].Label} · {Definition(Card(candidateId)).Name} ({candidateId})",validate:true);
+                    else AddReaction(watcher,reactionId,used?"This reaction has already been used.":null);
+                }
+            }
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
+        else if(_state.PendingChoice is { Type:"afterResolutionReaction" })
+        {
+            // After a battle's resolution (issue #417): this player's Reactions that name it, from a hand, a discard pile or play, then the pass.
+            result.AddRange(AbilityActions(playerId));
+            Add("declineReaction","Pass reaction",Command("declineReaction"));
+        }
         else if(_state.PendingChoice is { Type:"battleRecruit" })
         {
             // After a battle resolved (issue #379): the recruit grants of this battle this player still holds, then the pass.
@@ -314,6 +360,18 @@ public sealed partial class MatchEngine
             // The opposing player's Either/Or choice (issue #338): one option per option the engine offers, the unavailable ones
             // listed disabled with the reason.
             result.AddRange(EitherOrActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"deciderChoice" })
+        {
+            result.AddRange(DeciderChoiceActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"focusEffectChoice" })
+        {
+            result.AddRange(FocusChoiceActions(playerId));
+        }
+        else if(_state.PendingChoice is { Type:"sequencedTarget" })
+        {
+            result.AddRange(SequencedTargetActions(playerId));
         }
         else if(_state.PendingChoice is { Type:"opponentPayment" })
         {

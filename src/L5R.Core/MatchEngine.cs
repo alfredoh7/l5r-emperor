@@ -221,6 +221,12 @@ public sealed partial class MatchEngine
             if (_state.PendingChoice.Type=="eitherOr") { ResolveEitherOrCommand(command); return; }
             // The opposing player's variable payment (issue #373, Virtuous Charity): answered by the paying player, who holds priority (OpponentPayment.cs).
             if (_state.PendingChoice.Type=="opponentPayment") { ResolveOpponentPaymentCommand(command); return; }
+            // Another player's choice inside an action (issue #419, DeciderChoice.cs): answered by the deciding player, who holds priority.
+            if (_state.PendingChoice.Type=="deciderChoice") { ResolveDeciderChoiceCommand(command); return; }
+            // A Focus Effect paused for its player's decision (issue #419, FocusEffectChoice.cs).
+            if (_state.PendingChoice.Type=="focusEffectChoice") { ResolveFocusEffectChoiceCommand(command); return; }
+            // The second target of a sequenced action (issue #419, SequencedTarget.cs).
+            if (_state.PendingChoice.Type=="sequencedTarget") { ResolveSequencedTargetCommand(command); return; }
             if (_state.PendingChoice.Type=="shinden") { ResolveShinden(command); return; }
             // Preserving Honor (issue #295): the target's own controller chooses bow-or-move.
             if (_state.PendingChoice.Type=="preservingHonor") { ResolvePreservingHonor(command); return; }
@@ -383,6 +389,13 @@ public sealed partial class MatchEngine
                 Require(command.Type is "useAbility" or "declineReaction" or "pass","Resolve the duel reaction window first.");
                 if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 if (_state.PendingChoice is null && _state.PendingDuel is { Stage:"Reaction" }) BeginFocusing();
+                return;
+            }
+            if (_state.PendingChoice.Type=="afterResolutionReaction")
+            {
+                // After a battle's resolution (issue #417): either player may play a Reaction that names it, or pass; two consecutive passes close the window (PassReaction).
+                Require(command.Type is "useAbility" or "declineReaction" or "pass","Play a Reaction to the battle's resolution or pass.");
+                if (command.Type=="useAbility") UseAbility(command); else PassReaction();
                 return;
             }
             if (_state.PendingChoice.Type=="battleRecruit")
@@ -553,7 +566,7 @@ public sealed partial class MatchEngine
         var card=Card(command.CardId);
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance);
         Require(quote.Error is null,quote.Error??"");
-        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Home; card.ProvinceIndex=null; card.FaceUp=true;
@@ -732,6 +745,12 @@ public sealed partial class MatchEngine
         higher.Dishonorable = lower.Dishonorable || Definition(higher).Effect == "enters-dishonored";
         higher.StraightenBlockedTurn = Math.Max(higher.StraightenBlockedTurn, lower.StraightenBlockedTurn);
         higher.StraightenLockedTurn = Math.Max(higher.StraightenLockedTurn, lower.StraightenLockedTurn);
+        higher.StraightenHolds.AddRange(lower.StraightenHolds);
+        higher.PrintedHoldsSeeded = lower.PrintedHoldsSeeded;
+        higher.MovementLocks.AddRange(lower.MovementLocks);
+        higher.TargetShield = lower.TargetShield;
+        higher.TargetBars.AddRange(lower.TargetBars);
+        foreach (var other in _state.Cards.Values) for (var i = 0; i < other.TargetBars.Count; i++) if (other.TargetBars[i].ActorCardId == lower.Id) other.TargetBars[i] = other.TargetBars[i] with { ActorCardId = higher.Id };
         higher.AssignedToAttackTurn = Math.Max(higher.AssignedToAttackTurn, lower.AssignedToAttackTurn);
 
         higher.Modifiers.AddRange(lower.Modifiers);
@@ -782,6 +801,11 @@ public sealed partial class MatchEngine
         card.Bowed = false;
         card.Dishonorable = false;
         card.StraightenBlockedTurn = -1;
+        card.StraightenHolds.Clear();
+        card.PrintedHoldsSeeded = false;
+        card.MovementLocks.Clear();
+        card.TargetShield = false;
+        card.TargetBars.Clear();
         card.ForcePenaltiesNegatedTurn = -1;
         card.AssignedToAttackTurn = -1;
     }
@@ -809,7 +833,7 @@ public sealed partial class MatchEngine
         Require(Army(1-command.PlayerId,provinceIndex).Any(),"The enemy must have presence at this battlefield.");
         var quote=QuotePurchase(command.PlayerId,card.Id,command.ClanDiscount,command.ClanAllegiance,viaReserve:true);
         Require(quote.Error is null,quote.Error??"");
-        Pay(command.PlayerId,card,quote.Cost,command.SourceIds);
+        Pay(command.PlayerId,card,quote.Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Recruit));
         var province=Player(command.PlayerId).Provinces.Single(p=>p.CardId==card.Id);
         province.CardId=null;
         card.Zone=Zone.Battlefield; card.FaceUp=true;
@@ -911,7 +935,7 @@ public sealed partial class MatchEngine
             +(clanAllegiance?" + 2 (Clan allegiance)":"")+(clanDiscount?" − 2 (Clan discount)":"")+(rawCost<0?" (min 0)":"");
         if ((Keyword(card,"Unique") || Keyword(card,"Singular")) && ControlsCopyOf(playerId,def.Name)) error=$"You already control this {(Keyword(card,"Unique") ? "Unique" : "Singular")} card.";
         var eligible=error is null && inClan && !clanDiscount && !fromDeadPile && playerId==_state.ActivePlayerId && player.ProclaimUsedTurn!=_state.TurnNumber;
-        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost) : [],basis);
+        return new(cardId,cost,clanDiscount,clanAllegiance,eligible,error,error is null ? PaymentOptions(playerId,cost,new PaymentSubject(card,PaymentKind.Recruit)) : [],basis);
     }
 
     // True when the card's own printed waiver names the recruiting player's own Clan (see
@@ -919,26 +943,28 @@ public sealed partial class MatchEngine
     private static bool HonorRequirementWaived(CardDefinition def,PlayerState player) =>
         def.HonorRequirementWaiverClan is string clan && string.Equals(clan,player.Clan,StringComparison.Ordinal);
 
-    public int GoldProduced(string cardId,int playerId)
+    // paying: what the payment is for (ConditionalProduction.cs) -- a Holding that produces more for a kind of card or action says so only when it is asked for that one.
+    public int GoldProduced(string cardId,int playerId,PaymentSubject? paying=null)
     {
         var card=Card(cardId); var def=Definition(card);
+        if(ConditionalProductionOf(card) is { } conditional && ProductionConditionMet(conditional,paying)) return conditional.Amount;
         // A card with no printed production that can bow to produce Gold for a payment (Yoritomo Sakuma, issue #338) produces that much.
         if(def.GoldProduction==0 && AlternateGoldSource(card) is { } alternate) return alternate.Amount;
         return def.GoldProduction+(def.Effect=="crane-gold" && Player(playerId).Clan=="Crane" || def.Effect=="dragon-gold" && Player(playerId).Clan=="Dragon"?1:0);
     }
 
-    public PaymentOption[] PaymentOptions(int playerId,int cost)=>PaymentOptionsExcluding(playerId,cost,null);
+    public PaymentOption[] PaymentOptions(int playerId,int cost,PaymentSubject? paying=null)=>PaymentOptionsExcluding(playerId,cost,null,paying);
     // The same suggestion search over the producers NOT in `exclude` -- the second half of a two-part payment (a Discipline play from a
     // discard pile pays the Discipline cost first, then the action's own cost from other sources; see SplitPaymentOptions).
-    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude)
+    private PaymentOption[] PaymentOptionsExcluding(int playerId,int cost,IReadOnlySet<string>? exclude,PaymentSubject? paying=null)
     {
-        var sources=Producers(playerId).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
+        var sources=Producers(playerId,paying).Where(c=>exclude is null || !exclude.Contains(c.Id)).OrderBy(c=>c.Id,StringComparer.Ordinal).ToArray();
         if(cost==0) return [new([],0,0,0)];
         // Dynamic programming keeps useful alternatives without exponential work for large economies.
         var byTotal=new Dictionary<int,List<string[]>> { [0]=[[]] };
         foreach(var source in sources)
         {
-            var production=GoldProduced(source.Id,playerId);
+            var production=GoldProduced(source.Id,playerId,paying);
             foreach(var pair in byTotal.OrderByDescending(p=>p.Key).ToArray())
             {
                 if(pair.Key>=cost) continue;
@@ -954,24 +980,25 @@ public sealed partial class MatchEngine
             .OrderBy(p=>p.SourceIds.Count(id=>Definition(Card(id)).GoldProduction==0)).ThenBy(p=>p.Excess).ThenBy(p=>p.SourceIds.Length).ThenBy(p=>string.Join(",",p.SourceIds),StringComparer.Ordinal).Take(24).ToArray();
     }
 
-    private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
+    private IEnumerable<CardInstance> Producers(int playerId,PaymentSubject? paying=null) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield
+        && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null || ConditionalProductionOf(c) is { } conditional && ProductionConditionMet(conditional,paying)));
     // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
-    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null)
+    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
         var ids=sourceIds??[];
         Require(exclude is null || !ids.Any(exclude.Contains),"A card bowed or destroyed as part of the action's cost cannot also be bowed for its Gold.");
         Require(ids.Distinct(StringComparer.Ordinal).Count()==ids.Length,"A Gold source cannot be used twice in one payment.");
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
-        var producers=Producers(playerId).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
+        var producers=Producers(playerId,paying).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
         Require(ids.All(producers.Contains),"Every Gold source must be yours, in play, unbowed and able to produce Gold.");
-        var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null,PaymentSubject? paying=null)
     {
-        ValidatePayment(playerId,cost,sourceIds,exclude);
+        ValidatePayment(playerId,cost,sourceIds,exclude,paying);
         var ids=sourceIds??[];
-        var produced=ids.Sum(id=>GoldProduced(id,playerId));
+        var produced=ids.Sum(id=>GoldProduced(id,playerId,paying));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
         // in the log so the opponent sees why it bowed.
         foreach(var id in ids)
@@ -1010,6 +1037,8 @@ public sealed partial class MatchEngine
             Emit("reactionClosed","Both players passed; the reaction window closed.");
             // The after-battle recruit window (issue #379): whatever was not used lapses with the battle, which then finishes.
             if(pending.Type=="battleRecruit") { ExpireBattleRecruitGrants(); CompleteBattleTransition(pending.ActingPlayerId!.Value); return; }
+            // The after-resolution window (issue #417, AfterResolution.cs): the resolution goes on with the winners' return home.
+            if(pending.Type=="afterResolutionReaction") { FinishAfterResolutionWindow(); return; }
             // Defaults to ActivePlayerId (Dynasty-phase purchasing and mid-Battle attacks never cede
             // priority away from the active player on their own); an entry-reaction window opened by
             // an Action-phase card (Equip, a played Terrain) instead sets ActingPlayerId to the
@@ -1035,6 +1064,7 @@ public sealed partial class MatchEngine
         var negated=_state.DeferredActionNegated; _state.DeferredActionNegated=false;
         if(negated) ResolveNegatedAction(pending); else ExecuteAbilityEffects(pending);
         _state.NegatedEffects.Clear();
+        RestoreTemporaryRemovals(TemporaryRemovals.Action);
     }
 
     private void Pass()
@@ -1163,6 +1193,7 @@ public sealed partial class MatchEngine
             var cavalryEligible=IsCavalryUnit(card) || isDefender && Definition(card).Effect=="cavalry-if-defender";
             Require(cavalry?cavalryEligible:!IsCavalryUnit(card),cavalry?"Only a Cavalry unit may assign during Cavalry Maneuvers.":"An Infantry unit must assign during Infantry Maneuvers.");
             Require(provinces.Contains(assignment.Value),"Choose an existing enemy province battlefield.");
+            Require(!MovementLocked(card,MovementKinds.Assign),$"{Definition(card).Name} may not be assigned to a battlefield this turn.");
             card.Zone=Zone.Battlefield; card.ProvinceIndex=assignment.Value;
             foreach(var attached in Attachments(card.Id)) attached.ProvinceIndex=assignment.Value;
             // Tamori Tamoko's own Open action (issue #207 follow-up): "gain 1 Honor if he was NOT
@@ -1364,13 +1395,17 @@ public sealed partial class MatchEngine
         // regardless of the outcome -- the only trigger that clears it.
         Player(defender).Provinces.Single(p=>p.Index==provinceIndex).Reconnaissance=new bool[2];
         var attackerWon=af>df;
+        // What the resolution did, for the Reactions that name it (AfterResolution.cs).
+        var destroyedByPlayer=new int[2]; var provinceDestroyedNow=false; var losers=new List<int>();
         if(attackerWon)
         {
             var destroyedDefenders=DestroyUnits(d);
+            destroyedByPlayer[attacker]=destroyedDefenders; losers.Add(defender);
             if(!RehonorWinners(a)) { GainHonor(attacker,destroyedDefenders*2,"Battle victory"); CheckEarthFlowsBonus(attacker,a); }
             var province=Player(defender).Provinces.Single(p=>p.Index==provinceIndex);
             var destroyedProvince=af>df+EffectiveProvinceStrength(province);
             if(destroyedProvince) DestroyProvince(defender,province);
+            provinceDestroyedNow=destroyedProvince;
             // Vital Pathways (issue #272): "After this battlefield's province is destroyed, if you
             // are the Attacker" -- checked here, at the actual moment of destruction, since
             // DestroyProvince only ever runs in this same attacker-won branch and a later hook would
@@ -1391,6 +1426,7 @@ public sealed partial class MatchEngine
         else if(df>af)
         {
             var destroyedAttackers=DestroyUnits(a);
+            destroyedByPlayer[defender]=destroyedAttackers; losers.Add(attacker);
             if(!RehonorWinners(d)) { GainHonor(defender,destroyedAttackers*2,"Battle victory"); CheckEarthFlowsBonus(defender,d); }
             GrantRingRecruit(Player(defender),a.Length>0,"false-ring-of-air-recruit");
             GrantRingRecruit(Player(defender),a.Length>0,"ring-of-earth-recruit");
@@ -1405,6 +1441,8 @@ public sealed partial class MatchEngine
             var attackerHadDishonorable=RehonorWinners(a);
             var defenderHadDishonorable=RehonorWinners(d);
             var destroyedA=DestroyUnits(a); var destroyedD=DestroyUnits(d);
+            // A tie: both players are the battle's loser (Mendon, issue #417: Tales of Dishonor).
+            destroyedByPlayer[attacker]=destroyedD; destroyedByPlayer[defender]=destroyedA; losers.Add(attacker); losers.Add(defender);
             // The Earth Flows (issue #264) is deliberately NOT checked here: its own text requires
             // being "in the WINNING army," which a tie -- by definition -- never has.
             if(!attackerHadDishonorable) GainHonor(attacker,destroyedD,"Tied battle");
@@ -1417,6 +1455,13 @@ public sealed partial class MatchEngine
             GrantRingRecruit(Player(attacker),destroyedD>0,"ring-of-fire-recruit");
             GrantRingRecruit(Player(defender),destroyedA>0,"ring-of-fire-recruit");
         }
+        // After the losing units are destroyed, the province is destroyed and Honor is settled: the Reactions that name this moment (AfterResolution.cs), before the winners go home.
+        if(OpenAfterResolutionWindow(NewAfterResolutionFacts(provinceIndex,attacker,attackerWon,a,destroyedByPlayer,provinceDestroyedNow,losers))) return;
+        ContinueAfterResolution(provinceIndex,attacker,attackerWon,a);
+    }
+    // The rest of the resolution once its after-resolution Reactions are done: the Conqueror's choice, the return home, the close of the battlefield.
+    private void ContinueAfterResolution(int provinceIndex,int attacker,bool attackerWon,CardInstance[] a)
+    {
         // Conqueror (core rules Glossary): only relevant when the attacker won -- the attacking army
         // (a) is untouched in that branch (only defenders are destroyed), so candidates read off it
         // here are still accurate even if the choice must be deferred to the attacker.
@@ -1449,7 +1494,7 @@ public sealed partial class MatchEngine
         var willNotBow=_state.ResolutionWillNotBowPlayerIds.ToArray();
         foreach(var card in a.Where(c=>c.Zone==Zone.Battlefield))
         {
-            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId));
+            ReturnHome(card,card.Id!=conquerorUnbowedId && !willNotBow.Contains(card.OwnerId) && !ResolutionWillNotBow(card));
             if(card.Id==conquerorUnbowedId) Emit("conquerorStraightened",$"{Definition(card).Name} returned home unbowed (Conqueror).",card.OwnerId,card.Id);
         }
         // Terrain leaves the battlefield here, after its printed effects (already applied earlier in
@@ -1474,7 +1519,7 @@ public sealed partial class MatchEngine
         // First-opportunity state (issue #310) is battle-scoped too: a later battle starts from the default again.
         _state.PendingEngage=null; _state.FirstActionPlayerId=null; _state.FirstActionReason=null; _state.FirstActionRestriction=null;
         // A delayed effect and a "will not bow" promise belong to their battle: both lapse with it, applied or not.
-        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear();
+        _state.DelayedBattleEffects.Clear(); _state.ResolutionWillNotBowPlayerIds.Clear(); _state.ResolutionWillNotBowCardIds.Clear();
         // "Remove those Followers from the game after the battle ends" (Kyuden Hida - exp): wherever they stand now (attached, or discarded with a destroyed host).
         foreach(var createdId in _state.CreatedUntilBattleEndsIds.ToArray())
             if(_state.Cards.TryGetValue(createdId,out var created) && created.Zone!=Zone.RemovedFromGame) RemoveFromGame(created);
@@ -1566,7 +1611,7 @@ public sealed partial class MatchEngine
             // no meaning once this card is sitting face-up in a province again, ready to be purchased.
             card.Modifiers.Clear(); card.ActionLocks.Clear(); card.GrantedKeywords.Clear(); card.GrantedAbilities.Clear(); card.RemovedKeywords.Clear(); card.RemovedClanAffiliations.Clear();
             card.AbilityUses.Clear(); card.Tokens.Clear(); card.Bowed=false; card.Dishonorable=false;
-            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
+            card.StraightenBlockedTurn=-1; card.StraightenLockedTurn=-1; card.StraightenHolds.Clear(); card.PrintedHoldsSeeded=false; card.ForcePenaltiesNegatedTurn=-1; card.AssignedToAttackTurn=-1;
             var owner=Player(card.OwnerId);
             if(!owner.Provinces.Any(p=>!p.Destroyed)) continue; // no province left to place him in -- an extremely rare edge case; he simply stays home
             _state.PendingChoice=new("yourClanNeedsYouProvince",card.OwnerId,id,$"{Definition(card).Name}: choose a province to place him into, face-up (discarding any card already there).");
@@ -1687,7 +1732,7 @@ public sealed partial class MatchEngine
         // The cost (Katagi's, Satoshi's Dual Warfans', Legion of the Bat's and Champion of Thunder's
         // discounts included) is EquipGoldCost in GoldQuotes.cs -- the same function that prices this
         // equip for QueryActions' quote, so the quote and the charge cannot drift (issue #303).
-        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds);
+        Pay(command.PlayerId,card,EquipGoldCost(command.PlayerId,card,target).Cost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Equip));
         Player(command.PlayerId).Hand.Remove(card.Id);
         card.Zone=Zone.Attached; card.AttachedTo=target.Id; card.FaceUp=true;
         if(inBattle) card.ProvinceIndex=target.ProvinceIndex; // the Weapon stands where its wielder does, so it is at the battlefield with him
@@ -1714,7 +1759,7 @@ public sealed partial class MatchEngine
         // A Strategy pays its own printed Gold cost (issue #303: the same QuoteStrategyGold that
         // QueryActions ships to the client; free ones -- every training fixture -- charge nothing and,
         // as before, accept no sources).
-        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds);
+        if(def.GoldCost>0) Pay(command.PlayerId,card,def.GoldCost,command.SourceIds,paying:new PaymentSubject(card,PaymentKind.Play));
         // Terrain (core rules Glossary): the printed effects only apply at the battlefield where it was
         // played -- itself just stays there as a card, not a target for a Personality-shaped effect --
         // and the default limit is at most one Terrain per battlefield until the old one is destroyed.
@@ -1728,7 +1773,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand","This battlefield already has a Terrain in play.");
+                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud","This battlefield already has a Terrain in play.");
                 DiscardTerrain(existingTerrain);
             }
             Player(command.PlayerId).Hand.Remove(card.Id);
@@ -1739,6 +1784,8 @@ public sealed partial class MatchEngine
             // play. A fresh watch per entry (DiscardTerrain removes this one's entry when it leaves).
             if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
+            if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
             if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
             NextAction(command.PlayerId);
             return;
@@ -1832,7 +1879,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -1855,6 +1902,8 @@ public sealed partial class MatchEngine
         // ItemForceToWielder already uses for an Item's own conditional bonus), always applying --
         // bowed or not, every phase -- since no published Spell needs a conditional version yet.
         +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell).Sum(c=>Definition(c).Effect=="scouring-flood-force"||Definition(c).Effect=="wave-persists-force"&&Keyword(card,"Water")?2:0)
+        // Strength of the Tsunami: "This Shugenja has +6F" -- only the Shugenja it is attached to gets it.
+        +Attachments(card.Id).Where(c=>Definition(c).Type==CardType.Spell && Definition(c).Effect=="tsunami-force" && Keyword(card,"Shugenja")).Sum(_=>6)
         +(Definition(card).Effect=="force-with-spell"&&Attachments(card.Id).Any(c=>Definition(c).Type==CardType.Spell)?1:0)
         +(Definition(card).Effect=="force-if-enemy-dishonorable"&&_state.Cards.Values.Any(c=>c.OwnerId!=card.OwnerId&&Definition(c).Type==CardType.Personality&&InPlay(c)&&c.Dishonorable)?2:0)
         // "The highest number of dead Personalities in any one discard pile" -- the greatest per-player
@@ -1911,7 +1960,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Disciples of Ganesh: "+2F while defending" -- shares FollowerForce's existing case, plus a
@@ -2291,7 +2340,7 @@ public sealed partial class MatchEngine
     // Returns whether the card moved: false only when Kyuden Kitsune negated the movement (the card stays where it was; callers ignore the result unless it matters).
     private bool MoveToBattlefield(CardInstance card,int province)
     {
-        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && KitsuneNegatesMovement(card,province)) return false;
+        if((card.Zone!=Zone.Battlefield || card.ProvinceIndex!=province) && (MovementLockNegates(card,MovementKinds.ToBattlefield) || KitsuneNegatesMovement(card,province))) return false;
         // Legion of the Bat (issue #279): "after the resolution of an action that moved a target
         // enemy Infantry Personality to this card's battlefield" -- every printed "move to the
         // current battlefield" ability (Mirumoto Michi/Togashi Rikyou/Intervening Spirit/Takasho/
@@ -2353,6 +2402,8 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
+        RestoreTemporaryRemovals(TemporaryRemovals.Turn);
+        AdvanceStraightenHolds(StraightenPoint.TurnEnds);
         foreach(var card in _state.Cards.Values) { card.Modifiers.RemoveAll(m=>!m.Permanent); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
@@ -2390,6 +2441,7 @@ public sealed partial class MatchEngine
             expired.Zone=Zone.DynastyDiscard;
             Emit("eventExpired",$"{Definition(expired).Name}'s effect ended.",expired.OwnerId,expired.Id);
         }
+        AdvanceStraightenHolds(StraightenPoint.TurnBegins);
         StraightenPhase(player);
     }
     private static readonly string[] RingElements=["Fire","Water","Air","Earth","Void"];
@@ -2425,6 +2477,7 @@ public sealed partial class MatchEngine
             else Straighten(card);
         }
         Emit("straightened",$"{player.Name}'s turn: eligible cards straightened.",player.Id);
+        AdvanceStraightenHolds(StraightenPoint.StraightenPhaseEnds);
         // Cultist Infiltrator (oracle-l5r-1595): "After each Straighten Phase: Give this Personality
         // a -1C token" -- fires once per turn's single Straighten Phase, for every Cultist
         // Infiltrator in play regardless of whose turn it is (no "your own turn" qualifier printed)
@@ -2464,6 +2517,7 @@ public sealed partial class MatchEngine
                 else if(Definition(card).Type==CardType.Celestial) ResolveCelestial(player,province,card);
             }
         }
+        AdvanceStraightenHolds(StraightenPoint.EventsRevealEnds);
         // Suspicions-shaped ongoing Event effects: re-checked every Events Phase (see ResolveOngoingEvents),
         // not just the phase that reveals them, so a card already sitting in Zone.EventInPlay from a
         // previous turn triggers here too.
@@ -2634,13 +2688,11 @@ public sealed partial class MatchEngine
     };
     private int EffectiveProvinceStrength(ProvinceState province)
     {
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0);
-        // Times of Strife (issue #259): "all Provinces have a maximum strength equal to their base
-        // strength" -- global (either player's, printed with no "your" of its own), and a CEILING
-        // only: a province already at or below PrintedStrength (Ring of Earth's own lower, say) is
-        // untouched, matching the card's own clarification that this never raises anything, only caps.
-        if(ControlsEventEffect(0,"times-of-strife") || ControlsEventEffect(1,"times-of-strife")) strength=Math.Min(strength,province.PrintedStrength);
-        return strength;
+        // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province);
+        // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
+        // below it is untouched, and one above it reads as the maximum until the limit ends.
+        return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
     }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state
@@ -2789,6 +2841,8 @@ public sealed partial class MatchEngine
         // those, ever call SetPhase(Phase.Dynasty, ...) (grep confirms it; CreateEconomyScenario's own
         // direct `state.Phase=Phase.Dynasty` field assignment bypasses SetPhase entirely, so it never
         // reaches here). One check here therefore covers both paths without needing two separate hooks.
+        if(_state.Phase==Phase.Action && phase!=Phase.Action) AdvanceStraightenHolds(StraightenPoint.ActionPhaseEnds);
+        if(phase==Phase.Dynasty) DragonsBreathHonor();
         if(phase==Phase.Dynasty)
             foreach(var waveMan in _state.Cards.Values.Where(c=>InPlay(c) && Definition(c).Effect=="wave-man-attack-phase-straighten"))
                 StraightenBowedUnit(waveMan);
