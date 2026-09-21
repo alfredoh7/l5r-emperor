@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Start approved Movement destination preview #346 with assignment arrows; include missing engine destination/mover projection.",
+  "validation": "Read issue, accepted movement rules and current engine/client implementation. No implementation checks yet.",
+  "remaining": "Implementation, regression/native validation, prepared launcher and review. No merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/346",
+  "branch": "codex/346-movement-picker",
+  "updated": "2026-09-21T01:13:40.870280+00:00"
+}

@@ -1,0 +1,9 @@
+# Movement destination picker (#346) — implementation in progress
+
+Seventh approved preview: A’s destination sidebar, reusing the existing battle assignment arrows, courts and proposed unit placement. Branch `codex/346-movement-picker` starts on current main `0d694f02` and inherits the unmerged review stack through #403. **No merge is authorized.**
+
+Scope: legal battlefield choices from the engine, table and inspector selection, proposed arrows/stack footprints for every mover, target selection, explicit Confirm/Cancel and reduced motion. Actual arrivals must follow public engine state/events because each movement may be negated separately. Deliver an individual prepared Mac launcher, checklist, screenshots and native tests.
+
+Contract gap discovered in current code: Hawado enumerates candidate `Command.Province` values but the resulting action does not populate `Provinces`, contrary to the issue description. The action also does not identify which units move. Add optional engine-projected movement preview metadata (defending owner, fixed mover IDs, whether the selected target moves), and include Hawado’s already-validated destinations. This exposes existing behavior without changing movement legality/effects. The UI must not recognize card IDs to infer rules. Shared engine/client contract needs Mendon’s review, with focused regression and transport checks plus the full deterministic suite.
+
+Existing #388/#397/#399 touch Models/CardAbilities for other mechanics; preserve their independent work and refresh overlaps before publication. Status: ownership/scope recorded; implementation and verification pending. Copy’s final desktop launcher check remains pending after the Mac locked; its native checks passed. No Windows graphical or external multiplayer acceptance is claimed.
