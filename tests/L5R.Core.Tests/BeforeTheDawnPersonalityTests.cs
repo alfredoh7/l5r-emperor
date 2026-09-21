@@ -168,15 +168,12 @@ internal static class BeforeTheDawnPersonalityTests
             Check(ne.State.Cards[follower.Id].Bowed && ne.State.Cards[enemy2.Id].Zone == Zone.Home, "the Follower bowed and the enemy went home");
             Eq(ne.State.Cards[enemy2.Id].MovementLocks.Count > 0, expectLock, $"Reconnaissance {recon}, Unicorn {unicorn}: his further movement is negated");
         }
-        // Nijugun's further-movement lock is for a Personality he MOVED: one already home is not locked.
+        // Nijugun moves a Personality at the battlefield: one already home is not a target.
         var nh = Battle(); var nij = Bf(nh, Nijugun, 0); var nhFollower = Add(nh, "training-follower", 0, Zone.Attached, province: 0, parent: nij.Id); var nhHome = Add(nh, "training-lion-samurai", 1, Zone.Home); Bf(nh, "training-lion-veteran", 1);
         nh.Players[1].Provinces[0].Reconnaissance[0] = true;
         var nhe = MatchEngine.FromTestState(nh);
-        if ((Options(nhe, 0, "nijugun-move", nij.Id).FirstOrDefault(o => o.Enabled)?.TargetIds ?? []).Contains(nhHome.Id))
-        {
-            Accept(nhe, Offer(nhe, 0, "nijugun-move", nij.Id, nhHome.Id, nhFollower.Id));
-            Check(nhe.State.Cards[nhHome.Id].MovementLocks.Count == 0, "he was already home: nothing was moved, so nothing is locked");
-        }
+        Check(!(Options(nhe, 0, "nijugun-move", nij.Id).FirstOrDefault(o => o.Enabled)?.TargetIds ?? []).Contains(nhHome.Id), "a Personality already at home is not a target");
+        Check(nhFollower.Id.Length > 0);
         // Omigawa: lower Force or no Weapon; bow him if he moved and she has a Weapon.
         foreach (var armed in new[] { false, true })
         {
@@ -396,12 +393,13 @@ internal static class BeforeTheDawnPersonalityTests
             var victim = Add(s, "training-lion-samurai", 1, Zone.Home); victim.Modifiers.Add(new("test-source", "test", "PersonalHonor", -CardCatalog.Get("training-lion-samurai").PersonalHonor));
             var proud = Add(s, "training-lion-veteran", 1, Zone.Home); proud.Modifiers.Add(new("test-source", "test", "PersonalHonor", 10));
             var own = Add(s, "training-crane-samurai", 0, Zone.Home);
+            var edge = Add(s, "training-lion-veteran", 1, Zone.Home); edge.Modifiers.Add(new("test-source", "test", "PersonalHonor", CardCatalog.Get(Izuna).Chi - CardCatalog.Get("training-lion-veteran").PersonalHonor));
             var e = MatchEngine.FromTestState(s);
             Accept(e, new GameCommand("purchase", 0, e.Version, CardId: cardId, SourceIds: e.PaymentOptions(0, CardCatalog.Get(Izuna).GoldCost).First().SourceIds));
             Eq(e.State.PendingChoice?.Type, "entryReaction", "her entry window is open");
             var offered = e.QueryActions(0).Where(x => x.Type == "useAbility" && x.Command?.AbilityId is "izuna-kolat" or "izuna-ninja" or "izuna-shadowlands").ToArray();
             Eq(offered.Length, 3, "one option per keyword she may give");
-            Check(offered.All(o => o.Enabled && o.TargetIds!.Contains(victim.Id) && !o.TargetIds.Contains(proud.Id) && !o.TargetIds.Contains(own.Id)), "another player's Personality with Personal Honor at most her Chi");
+            Check(offered.All(o => o.Enabled && o.TargetIds!.Contains(victim.Id) && o.TargetIds.Contains(edge.Id) && !o.TargetIds.Contains(proud.Id) && !o.TargetIds.Contains(own.Id)), "another player's Personality with Personal Honor at most her Chi (equal is allowed)");
             Accept(e, Offer(e, 0, ability, cardId, victim.Id));
             Check(e.State.Cards[victim.Id].Dishonorable && e.HasKeyword(victim.Id, keyword), $"dishonored and permanently {keyword}");
             Check(e.State.Cards[victim.Id].GrantedKeywords.Any(g => g.Keyword == keyword && g.Duration == GrantDuration.Permanent), "permanently");
@@ -536,13 +534,10 @@ internal static class BeforeTheDawnPersonalityTests
         Eq(she.GetView(0).Players[0].Provinces[0].Strength, shPlain.GetView(0).Players[0].Provinces[0].Strength, "and his own are not raised by his own dishonorable Personality");
         // Kota's reaction is for a Personality at HIS battlefield; Taishuu's answers Political actions only.
         var kt = Table(Phase.Battle, 1); kt.PriorityPlayerId = 1;
-        var kota = Bf(kt, Kota, 0); var elsewhere = Add(kt, "training-crane-samurai", 0, Zone.Battlefield, province: 1); var masafuni = Bf(kt, Masafuni, 1);
+        var kota = Add(kt, Kota, 0, Zone.Battlefield, province: 1); var here = Bf(kt, "training-crane-samurai", 0); var masafuni = Bf(kt, Masafuni, 1);
         var kte = MatchEngine.FromTestState(kt);
-        if ((Options(kte, 1, "masafuni-move", masafuni.Id).FirstOrDefault(o => o.Enabled)?.TargetIds ?? []).Contains(elsewhere.Id))
-        {
-            Accept(kte, Offer(kte, 1, "masafuni-move", masafuni.Id, elsewhere.Id));
-            Check(kte.State.PendingChoice is not { Type: "beforeActionReaction" } || !kte.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId == "kota-negate-move"), "Kota does not answer for a Personality at another battlefield");
-        }
+        Accept(kte, Offer(kte, 1, "masafuni-move", masafuni.Id, here.Id));
+        Check(!kte.QueryActions(0).Any(x => x.Enabled && x.Command?.AbilityId == "kota-negate-move"), "Kota answers for a Personality at his battlefield only");
         Check(kota.Id.Length > 0);
         var tt = Table(Phase.Battle, 1); tt.PriorityPlayerId = 1;
         var taishuu = Bf(tt, Taishuu, 0); var mine = Bf(tt, "training-crane-samurai", 0); var tsuji = Bf(tt, Tsuji, 1);

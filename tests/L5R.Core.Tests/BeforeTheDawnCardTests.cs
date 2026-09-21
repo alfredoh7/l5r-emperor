@@ -238,6 +238,11 @@ internal static class BeforeTheDawnCardTests
         var e2 = EconomyBattle(s => { k2 = Kw(Bf(s, "training-crane-samurai", 0, bowed: true), "Kensai"); c2 = Add(s, ReadiedSteel, 0, Zone.Hand); bare = Add(s, "training-follower", 0, Zone.Attached, province: 0, parent: k2.Id, bowed: true); Bf(s, "training-lion-samurai", 1); });
         Accept(e2, Enabled(e2, 0, "readied-steel-straighten", c2.Id, k2.Id).Command!);
         Check(e2.State.Cards[k2.Id].Bowed && e2.State.Cards[bare.Id].Bowed, "without a Weapon nothing is straightened");
+        // A Weapon with an entering-play Reaction opens its window, and the action waits for it.
+        CardInstance k3 = null!, c3 = null!, reactive = null!;
+        var e3 = EconomyBattle(s => { k3 = Kw(Bf(s, "training-crane-samurai", 0), "Kensai"); c3 = Add(s, ReadiedSteel, 0, Zone.Hand); reactive = Kw(Add(s, "training-item-entry-reaction", 0, Zone.FateDiscard), "Weapon"); Bf(s, "training-lion-samurai", 1); });
+        Accept(e3, Offer(e3, 0, "readied-steel-attach", c3.Id, reactive.Id, k3.Id));
+        Eq(e3.State.PendingChoice?.Type, "entryReaction", "the attached Weapon's entering-play window is open");
         // Stockpiled Resources: after engaging, attach an attachment from your hand to your performing Personality, 4 less if he is a Commander.
         foreach (var commander in new[] { false, true })
         {
