@@ -2339,4 +2339,8 @@ public static class PublishedContent
     public static PublishedSnapshot StrategyWave37 { get; } = Load("L5R.Published.StrategyWave37.json", "strategy-wave-37", requireDecks: false);
     /// <summary>Holding wave 5 (issue #416): Red Crane Dojo and Bushi Dojo.</summary>
     public static PublishedSnapshot HoldingWave5 { get; } = Load("L5R.Published.HoldingWave5.json", "holding-wave-5", requireDecks: false);
+    /// <summary>Strategy wave 38 (issue #417): Never Safe, Redoubled Attack, Tales of Dishonor.</summary>
+    public static PublishedSnapshot StrategyWave38 { get; } = Load("L5R.Published.StrategyWave38.json", "strategy-wave-38", requireDecks: false);
+    /// <summary>Region wave 4 (issue #417): Quagmire.</summary>
+    public static PublishedSnapshot RegionWave4 { get; } = Load("L5R.Published.RegionWave4.json", "region-wave-4", requireDecks: false);
 }

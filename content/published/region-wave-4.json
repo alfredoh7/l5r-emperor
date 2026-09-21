@@ -1,0 +1,32 @@
+{
+  "Profile": "region-wave-4",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6123",
+      "Name": "Quagmire",
+      "Type": "Region",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After the resolution of an action that bowed a Personality at a battlefield at this province or an adjacent province, target him and bow this card: Negate his next straightening (this turn).",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6123.jpg",
+      "Keywords": [
+        "Swamp"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "quagmire-negate-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

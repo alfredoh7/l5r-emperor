@@ -1,0 +1,80 @@
+{
+  "Profile": "strategy-wave-38",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-5535",
+      "Name": "Never Safe",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Choose your performing Ninja and target an enemy Personality or Follower: Give it -4F. After this battle ends, if this card is in your discard pile, you may put it into your hand.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-5535.jpg",
+      "Keywords": [
+        "Ninja"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "never-safe-penalty",
+        "never-safe-return"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-6222",
+      "Name": "Redoubled Attack",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After a battle's resolution ends, choose one or two performing Personalities at the current battlefield: Straighten their units. They will not bow from the battle's resolution.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6222.jpg",
+      "Keywords": [],
+      "Focus": 3,
+      "Abilities": [
+        "redoubled-attack-straighten"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7753",
+      "Name": "Tales of Dishonor",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Political Reaction: After the resolution of a battle at a province, if you destroyed any enemy units or a province in that resolution: The battle's loser loses 4 Honor.\nBattle: Choose your performing Magistrate: Straighten him.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7753.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "tales-of-dishonor-lose-honor",
+        "tales-of-dishonor-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

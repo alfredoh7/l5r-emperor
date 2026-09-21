@@ -7,6 +7,8 @@ namespace L5R.Core;
 public static class ReactionTriggers
 {
     public const string TargetedByAction = "targeted-by-action";
+    /// <summary>"After a battle's resolution ends" (issue #417, AfterResolution.cs): played from a hand, a discard pile or play in the after-resolution window.</summary>
+    public const string AfterBattleResolution = "after-battle-resolution";
 }
 
 public sealed partial class MatchEngine

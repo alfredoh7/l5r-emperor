@@ -33,6 +33,7 @@ public sealed partial class MatchEngine
         (nameof(MatchState.PendingLook), s => s.PendingLook is not null),
         (nameof(MatchState.PendingEffectChoice), s => s.PendingEffectChoice is not null),
         (nameof(MatchState.PendingBeforeBattleResolve), s => s.PendingBeforeBattleResolve is not null),
+        (nameof(MatchState.PendingAfterResolution), s => s.PendingAfterResolution is not null),
         (nameof(MatchState.PendingEngage), s => s.PendingEngage is not null),
         (nameof(MatchState.PendingAdditionalAction), s => s.PendingAdditionalAction is not null),
         (nameof(MatchState.PendingNegatableAbility), s => s.PendingNegatableAbility is not null),

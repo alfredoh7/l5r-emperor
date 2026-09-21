@@ -257,6 +257,8 @@ public sealed class CardInstance
     public List<MovementLock> MovementLocks { get; set; } = [];
     // Hibernation: "after the next time this game another player's Battle action targets it, negate the action's effects" -- set when it hibernates, spent by that action.
     public bool TargetShield { get; set; }
+    // Never Safe (issue #417): the number of the battle in which this card was played, so that "after this battle ends, if this card is in your discard pile" is offered for that battle only.
+    public int ReturnAfterBattle { get; set; } = -1;
     // Tamori Tamoko's own Open action (issue #207 follow-up): "assigned to attack ... this turn" --
     // set once, in Assign(), the turn this card is assigned during Infantry/Cavalry Maneuvers.
     public int AssignedToAttackTurn { get; set; } = -1;
@@ -600,6 +602,10 @@ public sealed class MatchState
     // "That battle's resolution will not bow cards in your army" (Akodo Dairuko): the players whose army the resolution does not bow;
     // cleared when the battle ends.
     public List<int> ResolutionWillNotBowPlayerIds { get; set; } = [];
+    // Cards whose unit will not bow from this battle's resolution (Redoubled Attack, issue #417); lapses with the battle like the player-wide list above.
+    public List<string> ResolutionWillNotBowCardIds { get; set; } = [];
+    // What the battle's resolution did, held while the after-resolution window is open (AfterResolution.cs).
+    public PendingAfterResolution? PendingAfterResolution { get; set; }
     // Battle Phase timing (issue #310). PendingEngage is non-null exactly while the Engage window is open
     // (PendingChoice "engageReaction"). FirstActionPlayerId/FirstActionReason record WHO holds the first
     // opportunity in the current battle and WHY ("Default", "Naval", "EngageGrant" or "DefenderOverride"),
