@@ -13,7 +13,7 @@ namespace L5R.Core;
 /// ControllerClan gives the created Personality its creator's Stronghold Clan and Clan keyword, fixed when it is created ("with your Clan alignment"). Values set printed values of
 /// the one created card from another card ("the performer's title and base Gold Cost", "Force equal to the target's Personal Honor"); the scan is still what the card is.</summary>
 public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi = null, int? PersonalHonor = null, string[]? Keywords = null,
-    string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null)
+    string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null, bool CopyOfTarget = false)
 {
     public bool HostIsPerformer { get; init; }
     public bool ControllerClan { get; init; }
@@ -31,6 +31,7 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (Keywords is not null) text.Append(" [").Append(string.Join(", ", Keywords)).Append(']');
         if (AbilityText is not null) text.Append(" with \"").Append(AbilityText).Append('"');
         if (ProxyId is not null) text.Append(" (scan ").Append(ProxyId).Append(')');
+        if (CopyOfTarget) text.Append(" copying the target");
         if (Count != 1) text.Append(PerHost ? $" x{Count} per host" : $" x{Count}");
         if (AtBattlefield) text.Append(" at the battlefield");
         if (UntilBattleEnds) text.Append(" until the battle ends");
@@ -74,7 +75,7 @@ public static class CreatedCards
 
     public static bool IsAttachment(CardType type) => type is CardType.Item or CardType.Follower or CardType.Spell;
 
-    public static CardDefinition Resolve(CreatedCardSpec spec) => Resolved.TryGetValue(spec, out var known) ? known : Resolved[spec] = Resolve(spec, Scans);
+    public static CardDefinition Resolve(CreatedCardSpec spec) => spec.CopyOfTarget ? throw new InvalidOperationException("A created copy has no scan: it copies its target.") : Resolved.TryGetValue(spec, out var known) ? known : Resolved[spec] = Resolve(spec, Scans);
 
     internal static CardDefinition Resolve(CreatedCardSpec spec, IEnumerable<CardDefinition> scans)
     {
@@ -136,6 +137,14 @@ public static class CreatedCards
         var all = scans.ToArray();
         foreach (var (abilityId, spec) in creators)
         {
+            // A copy of the ability's target has no scan to find: what it copies is chosen with the action. Only a Personality is copied so far.
+            if (spec.CopyOfTarget)
+            {
+                if (spec.Type != CardType.Personality) problems.Add($"{abilityId}: a created copy of a {spec.Type} is not built");
+                else if (spec.Force is not null || spec.Chi is not null || spec.PersonalHonor is not null || spec.Keywords is not null || spec.AbilityText is not null || spec.ProxyId is not null)
+                    problems.Add($"{abilityId}: {spec.Describe()} names stats or a scan, but a copy is exactly the card it copies");
+                continue;
+            }
             foreach (var alternative in spec.Alternatives)
             try
             {

@@ -1657,6 +1657,12 @@ public static class AbilityCatalog
             Creates: new(CardType.Personality, ProxyId: "oracle-l5r-10202") { Values = [new(CreatedStat.Name, CreatedSubject.Performer), new(CreatedStat.GoldCost, CreatedSubject.Source, Plus: 1)] }),
         ["training-create-from-wielder"] = new("Open", "Training: create a Personality with the title and Force of the Personality this card is attached to", "none",
             Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785") { Values = [new(CreatedStat.Name, CreatedSubject.Wielder), new(CreatedStat.Force, CreatedSubject.Wielder)] }),
+        // Gates of Chikushudo (oracle-l5r-10707, issue #398): "Open: Target your created Spirit Personality. Create a Personality that permanently copies the target's printed keywords, traits,
+        // abilities, and stats. Destroy this Spell." Mendon's ruling: the created Personality is a real copy of the target (its definition is the target's own, marked as a created copy).
+        ["gates-of-chikushudo-copy"] = new("Open", "Target your created Spirit Personality: Create a Personality that permanently copies the target's printed keywords, traits, abilities and stats. Destroy this Spell", "own-created-personality",
+            RequiredKeywords: ["Spirit"], Creates: new(CardType.Personality, CopyOfTarget: true)),
+        // Synthetic fixture: any Personality in play is copied (a copy of a card that is NOT itself a created card, so only the instance marker says the copy is created).
+        ["training-copy-personality"] = new("Open", "Training: create a copy of a target Personality", "personality", Creates: new(CardType.Personality, CopyOfTarget: true)),
 
         // Personality wave 22 / region-wave-3 (issue #301, Batch F of the "Not blocked; deferred for
         // scope" BLOCKERS audit -- the final batch).
@@ -3665,6 +3671,8 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // Gates of Chikushudo (issue #398): "your created Spirit Personality" -- a created card (a CreatedOnly scan or a created copy) in play, with the required keywords.
+                        "own-created-personality" => personality && own && IsCreatedCard(target) && (ability.RequiredKeywords is null || HasKeywords(target, ability.RequiredKeywords)),
                         // The Tale of the Disgraced (issue #369): "your target unbowed Personality".
                         "own-unbowed-personality" => personality && own && !target.Bowed,
                         // The Wave Persists (issue #364): "target your Personality there" -- a Reaction has no Battle-timing location Require of its own.
@@ -5451,6 +5459,14 @@ public sealed partial class MatchEngine
                 if (target!.Zone == Zone.Attached) DestroyAttachment(target);
                 else if (!StalwartNegatesBow(target, player.Id)) target.Bowed = true;
                 break;
+            // Gates of Chikushudo: the copy is created first, then this Spell is destroyed (printed order); a window the copy's entry opens ends the action after the Spell is gone.
+            case "gates-of-chikushudo-copy":
+            {
+                var opened = ExecuteCreate(ability, ability.Creates!, command, player);
+                DestroyAttachment(source!);
+                if (opened) return;
+                break;
+            }
             // "Bow it. If it is an attachment, remove it from the game": the removal is a separate clause, so a Stalwart attachment whose bow was negated is still removed.
             // A removed Item may take Chi with it; a Personality left with none is destroyed, as when an attachment is destroyed (DestroyAttachment).
             case "fubatsu-bow":

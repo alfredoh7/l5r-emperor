@@ -15,7 +15,7 @@ public sealed partial class MatchEngine
             return new(card.Id,Copy(def),card.OwnerId,card.Zone,card.FaceUp,card.Bowed,card.ProvinceIndex,card.AttachedTo,force,def.Type==CardType.Personality?PersonalityChi(card):def.Chi,card.StraightenBlockedTurn==_state.TurnNumber,card.Modifiers.ToArray(),card.GrantedKeywords.ToArray(),card.Dishonorable,
                 def.Type==CardType.Personality && card.Zone is Zone.Home or Zone.Battlefield ? BattleForce(card) : null,card.Tokens.ToArray(),
                 GrantedAbilityViews(card),
-                GoldSourceProduction(card),ActionLocked(card));
+                GoldSourceProduction(card),ActionLocked(card),card.CreatedCopy);
         }
         var players=_state.Players.Select(player=>
         {

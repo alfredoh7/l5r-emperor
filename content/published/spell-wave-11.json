@@ -1,0 +1,30 @@
+{
+  "Profile": "spell-wave-11",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-10707",
+      "Name": "Gates of Chikushudo",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Open: Target your created Spirit Personality. Create a Personality that permanently copies the target's printed keywords, traits, abilities, and stats. Destroy this Spell.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10707.jpg",
+      "Keywords": [],
+      "Focus": 1,
+      "Abilities": [
+        "gates-of-chikushudo-copy"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}
