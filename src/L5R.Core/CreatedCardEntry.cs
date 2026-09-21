@@ -26,6 +26,8 @@ public sealed partial class MatchEngine
             }
             return opened;
         }
+        if (scan.Type == CardType.Holding) return CreateInPlay(player.Id, scan, Zone.Home, null, spec.EntersBowed, " at home", insideEntryWindow, beforeWindow);
+        if (CreatedCards.IsTerrain(scan)) return CreateInPlay(player.Id, scan, Zone.Battlefield, _state.CurrentBattleProvince ?? throw new RuleViolation(NoBattlefieldForTerrain), false, " at the battlefield", insideEntryWindow, beforeWindow);
         if (!CreatedCards.IsAttachment(scan.Type)) throw new InvalidOperationException($"{scan.Name} ({scan.Id}) is a {scan.Type}: creating one is not built.");
         return CreateAttachments(player.Id, scan, printed, spec, CreateHosts(command, spec), insideEntryWindow, beforeWindow);
     }
@@ -45,6 +47,11 @@ public sealed partial class MatchEngine
         }
         var scan = CreatedCards.Resolve(spec);
         if (spec.AtBattlefield) Require(_state.CurrentBattleProvince is not null, "There is no current battlefield to create it at.");
+        if (CreatedCards.IsTerrain(scan))
+        {
+            Require(_state.CurrentBattleProvince is not null, NoBattlefieldForTerrain);
+            Require(!_state.Cards.Values.Any(c => c.Zone == Zone.Battlefield && c.ProvinceIndex == _state.CurrentBattleProvince && Keyword(c, "Terrain")), "This battlefield already has a Terrain in play.");
+        }
         if (!CreatedCards.IsAttachment(scan.Type)) return;
         var hosts = CreateHosts(command, spec);
         Require(hosts.Length > 0, spec.HostIsPerformer ? "Choose the performing Personality." : "Choose a Personality to attach it to.");
@@ -93,6 +100,19 @@ public sealed partial class MatchEngine
             };
         }
         return printed;
+    }
+
+    private const string NoBattlefieldForTerrain = "A Terrain is put into play at the current battlefield, and there is none.";
+
+    // A created Holding (at home) or Terrain (at the current battlefield): a card of its own that enters play like any other, with the entering-play window over it.
+    private bool CreateInPlay(int ownerId, CardDefinition scan, Zone zone, int? province, bool bowed, string where, bool duringEntryReaction, Action? beforeWindow)
+    {
+        var card = new CardInstance { Id = $"created-{++_state.CreatedCardSequence:D4}", DefinitionId = scan.Id, OwnerId = ownerId, Zone = zone, ProvinceIndex = province, FaceUp = true, Bowed = bowed };
+        _state.Cards.Add(card.Id, card);
+        Emit("cardCreated", $"{Player(ownerId).Name} created {scan.Name}{(bowed ? " (bowed)" : "")}{where}.", ownerId, card.Id);
+        beforeWindow?.Invoke();
+        if (duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId, card); return false; }
+        return OpenEntryReactionWindow(ownerId, card, 1 - ownerId);
     }
 
     private CardInstance MintAttachedCard(CardInstance host, CardDefinition definition, CardDefinition? printed)

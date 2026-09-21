@@ -98,7 +98,7 @@ internal static class CreatedCardTests
         foreach (var (id, spec) in CreatedCards.Creators.Where(c => !c.Spec.CopyOfTarget))
         {
             var scan = CreatedCards.Resolve(spec);
-            Check(scan.CreatedOnly && !scan.ScenarioOnly && CreatedCards.Creatable(scan.Type), $"{id}: the scan is a published created-only card of a creatable type");
+            Check(scan.CreatedOnly && (!scan.ScenarioOnly || id.StartsWith("training-", StringComparison.Ordinal)) && CreatedCards.Creatable(scan.Type), $"{id}: the scan is a published created-only card of a creatable type (a training fixture may use the synthetic Terrain)");
             Check(!AbilityCatalog.All[id].Target.Contains("proxy"), "no ability names a card in its target");
         }
         Eq(CreatedCards.Resolve(new(CardType.Personality, Force: 2, Chi: 2, PersonalHonor: 3, Keywords: ["Ancestor", "Lion Clan", "Samurai", "Spirit"])).Name, "Lion Ancestor");
@@ -146,20 +146,20 @@ internal static class CreatedCardTests
     {
         var weapon = Scan("s-weapon", CardType.Item, 2, 0, ["Weapon"]);
         var twin = Scan("s-twin", CardType.Item, 2, 0, ["Weapon"]);
-        var holding = new CardDefinition("s-charter", "Charter", CardType.Holding, GoldProduction: 2, Keywords: [], Text: "May not be included in decks.", ScenarioOnly: false, CreatedOnly: true);
+        var region = new CardDefinition("s-region", "Region scan", CardType.Region, Keywords: [], Text: "May not be included in decks.", ScenarioOnly: false, CreatedOnly: true);
         var recruitable = Scan("s-recruit", CardType.Follower, 1, 0, ["Ashigaru"], createdOnly: false);
         (string, CreatedCardSpec)[] creators = [
             ("fine-create", new(CardType.Item, Force: 2, Keywords: ["Weapon"], ProxyId: "s-weapon")),
             ("ghost-create", new(CardType.Item, Force: 9)),
             ("twin-create", new(CardType.Item, Force: 2, Keywords: ["Weapon"])),
-            ("charter-create", new(CardType.Holding)),
+            ("region-create", new(CardType.Region)),
             ("recruit-create", new(CardType.Follower, Force: 1)),
         ];
-        var problems = CreatedCards.Verify(creators, [weapon, twin, holding, recruitable]);
+        var problems = CreatedCards.Verify(creators, [weapon, twin, region, recruitable]);
         Eq(problems.Length, 4, string.Join("\n", problems));
         Check(problems.Any(p => p.StartsWith("ghost-create: ") && p.Contains("no created-only scan fits it")), "no scan: " + string.Join("\n", problems));
         Check(problems.Any(p => p.StartsWith("twin-create: ") && p.Contains("s-weapon") && p.Contains("s-twin")), "two scans: " + string.Join("\n", problems));
-        Check(problems.Any(p => p.StartsWith("charter-create: ") && p.Contains("Holding") && p.Contains("cannot create")), "a kind the engine cannot create yet: " + string.Join("\n", problems));
+        Check(problems.Any(p => p.StartsWith("region-create: ") && p.Contains("Region") && p.Contains("cannot create")), "a kind the engine cannot create yet: " + string.Join("\n", problems));
         Check(problems.Any(p => p.StartsWith("recruit-create: ")), "a card that is not created-only is never used: " + string.Join("\n", problems));
         Check(!problems.Any(p => p.StartsWith("fine-create")), "the creator that fits is not reported");
     }
@@ -379,7 +379,7 @@ internal static class CreatedCardTests
         var created = CreatedCards.Scans.Select(c => c.Id).ToHashSet();
         Check(created.IsSupersetOf([LionAncestor, Sparrow, Bear, WaterBo]) && created.Count >= 4);
         Check(!CardCatalog.PlayableFromDecks.Any(c => created.Contains(c.Id)), "never counted as playable from a deck");
-        Eq(CardCatalog.PlayableFromDecks.Count() + created.Count, CardCatalog.Cards.Values.Count(c => !c.ScenarioOnly), "every other published card is");
+        Eq(CardCatalog.PlayableFromDecks.Count() + CreatedCards.Scans.Count(c => !c.ScenarioOnly), CardCatalog.Cards.Values.Count(c => !c.ScenarioOnly), "every other published card is");
         Check(CardCatalog.PlayableFromDecks.Any(c => c.Id == KitsuAkai) && CardCatalog.PlayableFromDecks.Any(c => c.Id == BoOfWater), "the creators are ordinary cards");
         foreach (var deck in PublishedContent.Snapshot.Decks.Concat(PublishedContent.TestSnapshot.Decks))
             Check(!deck.Dynasty.Concat(deck.Fate).Any(created.Contains), "a published deck lists a created-only card");

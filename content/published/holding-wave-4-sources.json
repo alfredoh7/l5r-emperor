@@ -1,0 +1,20 @@
+[
+  {
+    "card_id": "oracle-l5r-10806",
+    "printing_set": [
+      "Torn Asunder"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10806",
+    "image_path": "assets/reference/oracle/torn-asunder/images/oracle-l5r-10806-printing-1-image-1.jpg",
+    "image_sha256": "4fdfcdaa3ebd1424c36fae9cd5f42f6b0ae0dffe9dffeec7ebc3b6a1afa2dda8"
+  },
+  {
+    "card_id": "oracle-l5r-10024",
+    "printing_set": [
+      "Second City"
+    ],
+    "source_url": "https://oracleofthevoid.com/#cardid=10024",
+    "image_path": "assets/reference/oracle/second-city/images/oracle-l5r-10024-printing-1-image-1.jpg",
+    "image_sha256": "f3bad00a6e6511767d770d427757c80f519172a16a28bbbd3910e355e3106380"
+  }
+]
