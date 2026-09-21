@@ -86,7 +86,7 @@ public sealed partial class MatchEngine
             if(reason is null && validate) reason=AbilityRejection(command);
             // "May not perform actions" (issue #336): a Reaction is an action, so a locked performer is listed disabled with the reason.
             reason??=ActionLockRejection(command);
-            Add("useAbility",label??AbilityCatalog.All[abilityId].Label,command,reason,card.Id,gold:gold);
+            Add("useAbility",label??AbilityOptionLabel(abilityId,AbilityCatalog.All[abilityId],null,card),command,reason,card.Id,gold:gold);
         }
         // Targeted-by-action reactions (issue #335): one option per legal new target for Blade of Champions, else one; unusable ones are listed disabled.
         void AddTargetedActionReactions()
@@ -144,7 +144,8 @@ public sealed partial class MatchEngine
                 .SelectMany(c=>AbilityIdsOf(c).Select(a=>(Card:c,Id:a)))
                 .Where(x=>AbilityCatalog.All.TryGetValue(x.Id,out var def) && def.Timing=="Reaction" && def.Trigger=="before-attack-resolves"))
             {
-                var used=card.AbilityUses.ContainsKey(reactionId);
+                var reaction=AbilityCatalog.All[reactionId];
+                var used=AbilityUseSpent(card.AbilityUses,reaction,reaction.UsageKey??reactionId);
                 // Akodo Kakihara (issue #305): an in-play Attack reactor may carry a printed condition of its own
                 // (only when HE is the target), so a listed reaction is only enabled while ValidateAbility
                 // actually accepts it -- otherwise every unrelated Attack would offer a button that then errors.

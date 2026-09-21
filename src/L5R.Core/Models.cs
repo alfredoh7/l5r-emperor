@@ -161,7 +161,9 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// <summary>An ability a card has because another card's effect gave it (as opposed to one printed on it), the ability twin of
 /// GrantedKeyword. Duration is "Permanent" (only when the granting text says so; it survives the card dying and returning),
 /// "Turn" (cleared at turn end) or "Copy" (a copied ability, kept until the copying ability is used again -- Source is that
-/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). See CardCopy.cs.</summary>
+/// copying ability's id; CopiedFrom/CopiedFromName say which card it was copied from). "Battle" ends with the battle;
+/// "Attachment" ends when the granting attachment leaves its host. Source is the granting card instance, or the copying
+/// ability id for a copy. See AbilityGrants.cs and CardCopy.cs.</summary>
 public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs

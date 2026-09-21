@@ -35,6 +35,8 @@ public sealed partial class MatchEngine
     /// pile holds real Personalities to copy from; in the Either/Or showcase player 0 holds Unfortunate Hesitation, Yoritomo Sakuma and Shosuro Rin
     /// and player 1 Yogo Adi and a Training Either/Or source. Both open in player 0's Action Phase.</summary>
     public static MatchEngine CreateCopyShowcase(ulong seed = 20260906) => Create(seed, CopyShowcaseScenario);
+    public static MatchEngine CreateAbilityGrantShowcase(ulong seed = 20260906) => Create(seed, AbilityGrantShowcaseScenario);
+    public const string AbilityGrantShowcaseScenario = "ability-grant-showcase";
     public static MatchEngine CreateEitherOrShowcase(ulong seed = 20260906) => Create(seed, EitherOrShowcaseScenario);
     public const string CopyShowcaseScenario = "copy-showcase";
     public const string EitherOrShowcaseScenario = "either-or-showcase";
@@ -66,7 +68,7 @@ public sealed partial class MatchEngine
     {
         if (scenario == PublishedContent.Scenario) return CreatePublished(seed, PublishedContent.Scenario, PublishedContent.Snapshot);
         if (scenario == PublishedContent.TestScenario) return CreatePublished(seed, PublishedContent.TestScenario, PublishedContent.TestSnapshot);
-        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
+        if (scenario is not ("starter" or "economy" or DeckSearchScenario or CopyShowcaseScenario or AbilityGrantShowcaseScenario or EitherOrShowcaseScenario or OpponentPaymentShowcaseScenario)) throw new ArgumentException("Unknown scenario.");
         var state = new MatchState { Players = [new() { Id=0, Name="Crane", Clan="Crane", Honor=8 }, new() { Id=1, Name="Lion", Clan="Lion", Honor=6 }] };
         var random = new StableRandom(seed);
         var nextId = 0;
@@ -128,6 +130,12 @@ public sealed partial class MatchEngine
                 for(var i=0;i<dynasty.Length;i++) state.Cards[player.DynastyDeck[i]].DefinitionId=dynasty[i];
                 for(var i=0;i<fate.Length;i++) state.Cards[player.FateDeck[i]].DefinitionId=fate[i];
             }
+        }
+        if (scenario == AbilityGrantShowcaseScenario)
+        {
+            // Two copies demonstrate that only the chosen Personality receives the permanent grant.
+            Add(0,"oracle-l5r-8550",Zone.Home,true); Add(0,"oracle-l5r-8550",Zone.Home,true);
+            var spirit = Add(0,"oracle-l5r-7424",Zone.Hand,true); state.Players[0].Hand.Add(spirit.Id);
         }
         if (scenario == CopyShowcaseScenario)
         {
@@ -1516,7 +1524,7 @@ public sealed partial class MatchEngine
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.FaceUp=true; attachment.Tokens.Clear();
-                card.GrantedKeywords.RemoveAll(g=>g.Source==attachment.Id && g.Duration=="Attachment");
+                RemoveAttachmentGrants(card, attachment.Id);
                 Emit("attachmentDiscarded",$"{Definition(attachment).Name} was discarded.",attachment.OwnerId,attachment.Id);
             }
             if(card.Zone==Zone.Battlefield) ReturnHome(card,false);
@@ -2155,6 +2163,7 @@ public sealed partial class MatchEngine
             }
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
+                RemoveAttachmentGrants(card, attachment.Id);
                 attachment.Zone=Zone.FateDiscard; attachment.AttachedTo=null; attachment.ProvinceIndex=null; attachment.Tokens.Clear(); count++;
                 DestroyedDuringBattleBonus(attachment);
                 ExpendableDraw(attachment);
