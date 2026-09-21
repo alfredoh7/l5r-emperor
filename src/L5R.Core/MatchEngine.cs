@@ -1764,7 +1764,7 @@ public sealed partial class MatchEngine
                 // able). Put this Terrain into play" -- unlike the ordinary "at most one Terrain per
                 // battlefield" default (Vital Pathways' own "if there is no Terrain in play" plays by
                 // that default unchanged), these two may replace an already-in-play Terrain outright.
-                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand","This battlefield already has a Terrain in play.");
+                Require(def.Effect is "encircled-before-battle" or "looting-return-to-hand" or "ancient-feud","This battlefield already has a Terrain in play.");
                 DiscardTerrain(existingTerrain);
             }
             Player(command.PlayerId).Hand.Remove(card.Id);
@@ -1775,6 +1775,8 @@ public sealed partial class MatchEngine
             // play. A fresh watch per entry (DiscardTerrain removes this one's entry when it leaves).
             if(def.Effect=="fields-of-mercy") _state.FieldsOfMercyWatches.Add(new(){CardId=card.Id});
             Emit("terrainPlayed",$"{Player(command.PlayerId).Name} played {def.Name} as Terrain at this battlefield.",command.PlayerId,card.Id);
+            // Hasty Fortifications: "(including this card's)" -- putting it into play is one of the Battle actions it counts.
+            if(def.Effect=="hasty-fortifications") AddHastyBonus(card);
             if(OpenEntryReactionWindow(command.PlayerId,card,1-command.PlayerId)) return;
             NextAction(command.PlayerId);
             return;
@@ -1868,7 +1870,7 @@ public sealed partial class MatchEngine
     // "force-with-spell" (Asako Ume), "force-if-enemy-dishonorable" (Bayushi Kahoku) and
     // "force-max-dead-pile" (Moto Shunsuke) are always-on passive bonuses, unlike the attacking-only
     // attacking-two/attacking-four Effects above.
-    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
+    private int PersonalityForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(IsAttacking(card)?(Definition(card).Effect=="attacking-two"?2:Definition(card).Effect=="attacking-four"?4:
         // Matsu Kaido (oracle-l5r-4934, issue #299): "Kaido has +1F while attacking" -- the plain +1
         // counterpart to attacking-two/attacking-four (Matsu Yoshito's own conditional variant below
         // starts from the same +1 base).
@@ -1949,7 +1951,7 @@ public sealed partial class MatchEngine
     // (e.g. "+2F while defending") -- distinct from an Item's, which always conveys to the wielder
     // instead (see PersonalityForce/ItemForceToWielder). Feeds both CardForce (targeting, always
     // visible regardless of bow state) and BattleForce (unit total, gated on unbowed-or-Elite).
-    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+(Definition(card).Effect switch
+    private int FollowerForce(CardInstance card) => Math.Max(0,Definition(card).Force+StatModifier(card,"Force")+TerrainForceAdjustment(card)+(Definition(card).Effect switch
     {
         "force-while-defending" => IsDefendingUnit(card) ? 2 : 0,
         // Disciples of Ganesh: "+2F while defending" -- shares FollowerForce's existing case, plus a
@@ -2677,13 +2679,11 @@ public sealed partial class MatchEngine
     };
     private int EffectiveProvinceStrength(ProvinceState province)
     {
-        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0);
-        // Times of Strife (issue #259): "all Provinces have a maximum strength equal to their base
-        // strength" -- global (either player's, printed with no "your" of its own), and a CEILING
-        // only: a province already at or below PrintedStrength (Ring of Earth's own lower, say) is
-        // untouched, matching the card's own clarification that this never raises anything, only caps.
-        if(ControlsEventEffect(0,"times-of-strife") || ControlsEventEffect(1,"times-of-strife")) strength=Math.Min(strength,province.PrintedStrength);
-        return strength;
+        // The CURRENT strength: raised and lowered by everything that has acted on the province, and by the Region and the Terrain bonuses still in play.
+        var strength=province.Strength + (province.RegionId is string id && RegionStrengthBonus.TryGetValue(Definition(Card(id)).Effect,out var bonus) ? bonus : 0) + ProvinceSourceBonuses(province);
+        // A limit (TerrainStatics.cs: Times of Strife, issue #259; Ancient Feud, issue #418) is a CEILING on what is read, never a lowering of the current strength: a province already at or
+        // below it is untouched, and one above it reads as the maximum until the limit ends.
+        return ProvinceStrengthMax(province) is int max ? Math.Min(strength,max) : strength;
     }
     // Suspicions (the first published ongoing Event -- core rules Glossary, "until the end of the
     // game"): re-checked every Events Phase rather than snapshotted once, the same living-state

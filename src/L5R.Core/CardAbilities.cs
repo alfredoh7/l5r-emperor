@@ -2932,6 +2932,7 @@ public sealed partial class MatchEngine
     };
     private void FireAfterOwnActionTraits(AbilityDefinition ability, int actingPlayerId, CardInstance? source)
     {
+        FireAfterOwnBattleActionTerrainTraits(ability, actingPlayerId);
         foreach (var card in _state.Cards.Values.Where(c => c.OwnerId == actingPlayerId && InPlay(c) && AfterOwnActionTraits.ContainsKey(Definition(c).Effect))
                      .OrderBy(c => c.Id, StringComparer.Ordinal).ToArray())
         {
@@ -6667,6 +6668,7 @@ public sealed partial class MatchEngine
         // until Fields of Mercy are played" -- so a LATER copy entering play must start fresh, not
         // resume where this one left off. A no-op for every other Terrain (RemoveAll matches nothing).
         _state.FieldsOfMercyWatches.RemoveAll(w => w.CardId == terrain.Id);
+        foreach (var province in _state.Players.SelectMany(p => p.Provinces)) province.SourceBonuses.RemoveAll(b => b.SourceId == terrain.Id);
         Emit("terrainDiscarded", $"{Definition(terrain).Name} was removed from play.", terrain.OwnerId, terrain.Id);
     }
     // Brawl (issue #304): a Region attached to a province leaves play for its owner's Dynasty discard,

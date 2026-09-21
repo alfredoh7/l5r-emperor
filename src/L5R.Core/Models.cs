@@ -299,6 +299,8 @@ public sealed class ProvinceState
     // second Region revealed here rather than replacing the first). Mirrors CardId's own role for the
     // face-down/face-up Dynasty card, but for the Zone.Region card instead.
     public string? RegionId { get; set; }
+    // Strength bonuses from cards that stay in play (Hasty Fortifications, issue #418): counted while their source is.
+    public List<ProvinceBonus> SourceBonuses { get; set; } = [];
 }
 
 public sealed class PlayerState
@@ -933,7 +935,9 @@ public sealed record GrantedAbilityView(string AbilityId, string Label, string T
     string? SourceName = null, int? UsesPerTurn = null, int? UsesRemaining = null);
 // Strength is the EFFECTIVE strength (printed + any attached Region's static bonus, e.g. Fallow
 // Lands) -- what a player actually needs to beat to destroy the province, not the raw mutable field.
-public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region);
+/// <param name="Strength">What anything reads the province's strength as now: the current strength, or the maximum while a limit holds it down.</param>
+/// <param name="MaxStrength">The limit in force (Times of Strife, Ancient Feud), or null. While it holds, the current strength may be higher and returns when the limit ends.</param>
+public sealed record ProvinceView(int Index, int Strength, bool Destroyed, CardView? Card, CardView? Region, int? MaxStrength = null);
 // DeadCount (issue #221): the authoritative count of this player's own Zone.Dead Personalities --
 // already present, individually, within Discard (each CardView's own Zone tells a dead card apart
 // from a merely-discarded one), but computed here as a single number the same way UnitForce is, so
