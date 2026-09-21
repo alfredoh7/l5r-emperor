@@ -57,6 +57,7 @@ public sealed partial class MatchEngine
         nameof(MatchState.PendingMoveReactionCardId),      // queued for the move-reaction window (PendingChoice)
         nameof(MatchState.PendingTamokoHonorChecks),       // delayed honor checks drained at end of turn; no one is deciding anything
         nameof(MatchState.PendingLadyMatsusRageWatches),   // reactive watches that last the turn; no one is deciding anything
+        nameof(MatchState.PendingDelayedDestructions),     // destructions put off until the turn ends; no one is deciding anything
     ];
 
     /// <summary>The names the guard test compares with every <c>Pending*</c> property of <see cref="MatchState"/>.</summary>

@@ -60,6 +60,11 @@ public static class LookCatalog
     /// <summary>Signs and Portents (oracle-l5r-7253, Event): "Look at the top four cards of any Fate deck. You may discard one of them. Put the rest back in any order." Either player's Fate deck.</summary>
     public static LookSpec SignsAndPortents { get; } = new("signs-and-portents", "Look at the top four cards of any Fate deck", [new("Fate"), new("Fate", Opponent: true)], 4, [new(LookDisposition.Discard, 0, 1)], Reorder: true);
 
+    /// <summary>Control Your Destiny (oracle-l5r-1489): "Look at the top three cards of your Fate or Dynasty deck. You may put one or two of these cards on the bottom of your deck. Put the remaining cards on the top of your deck in any order."</summary>
+    public static LookSpec ControlYourDestiny { get; } = new("control-your-destiny", "Look at the top three cards of your Fate or Dynasty deck", [new("Fate"), new("Dynasty")], 3, [new(LookDisposition.Bottom, 0, 2)], Reorder: true);
+    /// <summary>Jurojin's Blessing (oracle-l5r-4070, Celestial): "Look at the top card of your Fate deck. You may discard it."</summary>
+    public static LookSpec JurojinsBlessing { get; } = new("jurojins-blessing", "Look at the top card of your Fate deck", [new("Fate")], 1, [new(LookDisposition.Discard, 0, 1)]);
+
     // Training fixtures (never in a playable deck): every parameter the 25 cards need, ahead of any published card needing it.
     /// <summary>Own Dynasty deck, two cards, one may go to the bottom (Asako Kikugoro's shape).</summary>
     public static LookSpec TrainingDynasty { get; } = new("training-look-dynasty", "Look at the top two cards of your Dynasty deck", [new("Dynasty")], 2, [new(LookDisposition.Bottom, 0, 1)]);
@@ -76,7 +81,7 @@ public static class LookCatalog
     /// Exactly one card must be shown and taken.</summary>
     public static LookSpec TrainingShowAny { get; } = new("training-look-show", "Look at the top cards of your Fate deck", [new("Fate")], 3, [new(LookDisposition.Show, 1, 1)], Reorder: true);
 
-    public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents,
+    public static IReadOnlyDictionary<string, LookSpec> All { get; } = new[] { PublicRecords, IsawaTamaki, BanishAllDoubt, BayushiKahokuExp2, SignsAndPortents, ControlYourDestiny, JurojinsBlessing,
         TrainingDynasty, TrainingAny, TrainingTakeItem, TrainingFixedOrder, TrainingShowAny }.ToDictionary(s => s.Id, StringComparer.Ordinal);
 
     /// <summary>The look an Event carries in its Effect (an Event has no abilities of its own to hang a spec on).</summary>
