@@ -11,12 +11,14 @@ namespace L5R.Core;
 /// Or lists the other cards the player may choose instead ("an Armor or Weapon Item"): each is a spec of its own, and the command names the scan chosen (GameCommand.CreatedCard).
 /// Count applies to a Personality too: that many are created together. HostIsPerformer attaches a created attachment to the action's performer ("attach them to him").
 /// ControllerClan gives the created Personality its creator's Stronghold Clan and Clan keyword, fixed when it is created ("with your Clan alignment"). Values set printed values of
-/// the one created card from another card ("the performer's title and base Gold Cost", "Force equal to the target's Personal Honor"); the scan is still what the card is.</summary>
+/// the one created card from another card ("the performer's title and base Gold Cost", "Force equal to the target's Personal Honor"); the scan is still what the card is.
+/// EntersBowed creates a Holding bowed ("Create a (bowed) Holding"); a Holding enters play at home, a Terrain (a Strategy with the Terrain keyword) at the current battlefield.</summary>
 public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi = null, int? PersonalHonor = null, string[]? Keywords = null,
     string? AbilityText = null, string? ProxyId = null, int Count = 1, bool PerHost = false, bool AtBattlefield = false, bool UntilBattleEnds = false, CreatedCardSpec[]? Or = null)
 {
     public bool HostIsPerformer { get; init; }
     public bool ControllerClan { get; init; }
+    public bool EntersBowed { get; init; }
     public CreatedValue[]? Values { get; init; }
 
     public bool HasInstanceValues => ControllerClan || Values is { Length: > 0 };
@@ -34,6 +36,7 @@ public sealed record CreatedCardSpec(CardType Type, int? Force = null, int? Chi 
         if (Count != 1) text.Append(PerHost ? $" x{Count} per host" : $" x{Count}");
         if (AtBattlefield) text.Append(" at the battlefield");
         if (UntilBattleEnds) text.Append(" until the battle ends");
+        if (EntersBowed) text.Append(" bowed");
         if (HostIsPerformer) text.Append(" attached to the performer");
         if (ControllerClan) text.Append(" with the controller's Clan");
         if (Values is { Length: > 0 } values) text.Append(" with ").Append(string.Join(", ", values.Select(v => v.Describe())));
@@ -70,7 +73,9 @@ public static class CreatedCards
 
     public static IEnumerable<CardDefinition> Scans => CardCatalog.Cards.Values.Where(c => c.CreatedOnly).OrderBy(c => c.Id, StringComparer.Ordinal);
 
-    public static bool Creatable(CardType type) => type is CardType.Personality or CardType.Item or CardType.Follower or CardType.Spell;
+    public static bool Creatable(CardType type) => type is CardType.Personality or CardType.Item or CardType.Follower or CardType.Spell or CardType.Holding or CardType.Strategy;
+
+    public static bool IsTerrain(CardDefinition scan) => scan.Type == CardType.Strategy && (scan.Keywords ?? []).Contains("Terrain");
 
     public static bool IsAttachment(CardType type) => type is CardType.Item or CardType.Follower or CardType.Spell;
 
@@ -140,7 +145,9 @@ public static class CreatedCards
             try
             {
                 var scan = Resolve(alternative, all);
-                if (!Creatable(scan.Type)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
+                if (!Creatable(scan.Type) || scan.Type == CardType.Strategy && !IsTerrain(scan)) problems.Add($"{abilityId}: {scan.Name} ({scan.Id}) is a {scan.Type}, which the engine cannot create yet");
+                if (alternative.Count > 1 && (scan.Type == CardType.Holding || IsTerrain(scan))) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, and only one Holding or Terrain is created at a time");
+                if (alternative.EntersBowed && scan.Type != CardType.Holding) problems.Add($"{abilityId}: {alternative.Describe()} enters {scan.Name} bowed, and only a Holding does");
                 if (alternative.Count < 1 || alternative.AtBattlefield && scan.Type != CardType.Personality) problems.Add($"{abilityId}: {alternative.Describe()} names a count or a place that {scan.Name} cannot have");
                 if (alternative.Count > 1 && IsSingleOfKind(scan)) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a card a Personality carries only one of");
                 if (alternative.Count > 1 && scan.Type == CardType.Personality && (scan.Keywords ?? []).Contains("Unique")) problems.Add($"{abilityId}: {alternative.Describe()} creates several {scan.Name}, a Unique card");

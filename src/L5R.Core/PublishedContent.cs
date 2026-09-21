@@ -2233,6 +2233,20 @@ public static class PublishedContent
         return snapshot;
     }
 
+    /// <summary>holding-wave-4 (issue #406).</summary>
+    public static PublishedSnapshot HoldingWave4 { get; } = LoadHoldingWave4();
+
+    private static PublishedSnapshot LoadHoldingWave4()
+    {
+        var snapshot = Load("L5R.Published.HoldingWave4.json", "holding-wave-4", requireDecks: false);
+        if(snapshot.Cards.Length != 2)
+            throw new InvalidOperationException("Unexpected holding-wave-4 card count.");
+        foreach(var card in snapshot.Cards)
+            if(card.Type != CardType.Holding)
+                throw new InvalidOperationException($"holding-wave-4 card is not a Holding: {card.Id}");
+        return snapshot;
+    }
+
     private static PublishedSnapshot Load(string resourceName, string profile, bool requireDecks)
     {
         using var stream = typeof(PublishedContent).Assembly.GetManifestResourceStream(resourceName)

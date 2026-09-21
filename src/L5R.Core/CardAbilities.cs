@@ -1649,6 +1649,12 @@ public static class AbilityCatalog
             { Values = [new(CreatedStat.Force, CreatedSubject.Target, CreatedStat.PersonalHonor, Keyword: "Paragon", PlusWithKeyword: 2), new(CreatedStat.Chi, CreatedSubject.Target), new(CreatedStat.PersonalHonor, CreatedSubject.Target, Plus: -1)] }),
         ["training-create-strong-scout"] = new("Open", "Training: target your Personality: create a Scout Follower attached to him whose Force is his Chi", "own-personality",
             Creates: new(CardType.Follower, ProxyId: "oracle-l5r-9714") { Values = [new(CreatedStat.Force, CreatedSubject.Target, CreatedStat.Chi)] }),
+        // Created Holdings and Terrains (issue #406): a Holding enters play at home (unbowed, or bowed as the text says), a Terrain at the current battlefield.
+        ["training-create-charter"] = new("Open", "Training: create an unbowed Charter Holding", "none", Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10806")),
+        ["training-create-charter-tax"] = new("Open", "Training: create an unbowed Charter Holding. Lose 2 Honor", "none", Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10806")),
+        ["training-create-bowed-holding"] = new("Open", "Training: create a bowed Questionable Resources Holding", "none", Creates: new(CardType.Holding, ProxyId: "oracle-l5r-10024") { EntersBowed = true }),
+        ["training-create-terrain"] = new("Battle", "Training: create a Terrain at the current battlefield", "none", Creates: new(CardType.Strategy, ProxyId: "training-created-terrain")),
+        ["training-create-terrain-open"] = new("Open", "Training: create a Terrain at the current battlefield (an Open action, which may be taken with none)", "none", Creates: new(CardType.Strategy, ProxyId: "training-created-terrain")),
         ["training-create-pair"] = new("Open", "Training: create two Personalities at home", "none", Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785", Count: 2)),
         ["training-create-titled"] = new("Open", "Training: choose your performing Personality: create a Personality with his title and one more than this card's Gold Cost", "none", Performer: "own-personality",
             Creates: new(CardType.Personality, ProxyId: "oracle-l5r-10202") { Values = [new(CreatedStat.Name, CreatedSubject.Performer), new(CreatedStat.GoldCost, CreatedSubject.Source, Plus: 1)] }),
@@ -5632,9 +5638,9 @@ public sealed partial class MatchEngine
                 SpendHandPlayedCard(player, source);
                 if (ExecuteAttach(command, ability.Attach!, player, source, target)) return;
                 break;
-            case "nakanu-technique-create": case "akumas-power-create":
+            case "nakanu-technique-create": case "akumas-power-create": case "training-create-charter-tax":
             {
-                var honorLost = id == "akumas-power-create" ? 3 : 1;
+                var honorLost = id switch { "akumas-power-create" => 3, "training-create-charter-tax" => 2, _ => 1 };
                 if (ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, -honorLost, Definition(source!).Name, source))) return;
                 break;
             }
