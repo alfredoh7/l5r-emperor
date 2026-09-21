@@ -172,6 +172,7 @@ internal static class CopyKataTargetingTests
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
         var old = Add(s, Puddle, 0, Zone.Home); var other = Add(s, "training-focus-strategy", 0, Zone.Hand); var enemyKata = Add(s, Puddle, 1, Zone.Home);
         var kata = Add(s, Puddle, 0, Zone.Hand);
+        var ring = Add(s, "training-ring-of-air", 0, Zone.Home);
         var e = MatchEngine.FromTestState(s);
         Check(!Options(e, 0, "skipping-the-puddle-enter", old.Id).Any(o => o.Enabled), "a Kata already in play is not put into play again");
         Accept(e, Enabled(e, 0, "skipping-the-puddle-enter", kata.Id).Command!);
@@ -180,6 +181,7 @@ internal static class CopyKataTargetingTests
         Eq(e.State.Cards[old.Id].Zone, Zone.FateDiscard, "his other Kata was discarded");
         Eq(e.State.Cards[enemyKata.Id].Zone, Zone.Home, "the other player's Kata stays");
         Eq(e.State.Cards[other.Id].Zone, Zone.Hand, "a card that is not a Kata stays");
+        Eq(e.State.Cards[ring.Id].Zone, Zone.Home, "and so does a Ring (or any card at home that is not a Kata)");
         Check(k.Zone == Zone.Home && CardCatalog.Get(kata.DefinitionId).Type == CardType.Strategy, "it stays in play as a Strategy: not discarded after resolving");
     }
 
@@ -203,6 +205,12 @@ internal static class CopyKataTargetingTests
         Check(w.Zone == Zone.Battlefield && w.ProvinceIndex == 0, "the Water Shugenja moved to the current battlefield");
         Check(e.State.AdditionalActions.Any(g => g.PlayerId == 0 && g.ScopeCardIds is { Length: 1 } ids && ids[0] == water.Id), "and its controller may take an additional Battle action that he must perform");
         Check(!CanUse(e, 0, "skipping-the-puddle-move", kata.Id, water.Id), "once per turn");
+        // Bowed is not excluded (the text says only "Water Shugenja"), and a movement that is refused still leaves the additional action granted.
+        var (bowedTable, kataB, waterB, _, _) = PuddleTable();
+        var bowed = Edit(bowedTable, st => { st.Cards[waterB.Id].Bowed = true; st.Cards[waterB.Id].MovementLocks.Add(new("test", st.TurnNumber, MovementKinds.ToBattlefield)); });
+        Accept(bowed, Enabled(bowed, 0, "skipping-the-puddle-move", kataB.Id, waterB.Id).Command!);
+        Eq(bowed.State.Cards[waterB.Id].Zone, Zone.Home, "a movement lock kept him at home");
+        Check(bowed.State.AdditionalActions.Any(g => g.PlayerId == 0 && g.ScopeCardIds is { Length: 1 } ids && ids[0] == waterB.Id), "and the additional action was still granted");
         // No enemy units at the battlefield: not usable at all.
         var (none, kata2, water2, _, _) = PuddleTable(enemyThere: false);
         Check(!Options(none, 0, "skipping-the-puddle-move", kata2.Id, water2.Id).Any(o => o.Enabled), "with no enemy units at the current battlefield it may not be taken");
@@ -223,33 +231,62 @@ internal static class CopyKataTargetingTests
         var target = Add(s, Kaido, 1, Zone.Battlefield, province: 0); var other = Add(s, Kaido, 1, Zone.Battlefield, province: 0);
         var armed = Add(s, "training-lion-samurai", 1, Zone.Battlefield, province: 0); Add(s, "training-weapon", 1, Zone.Attached, province: 0, parent: armed.Id);
         var card = Add(s, Reach, 0, Zone.Hand);
+        Add(s, "training-crane-veteran", 0, Zone.Battlefield, province: 0);
         return (MatchEngine.FromTestState(s), card, kensai, weapon, target, other);
     }
+
+    // Whether the Personality's own Kaido action is offered against the Kensai (the Kensai among the targets of an enabled option).
+    private static bool Targetable(MatchEngine e, string actorId, string kensaiId) =>
+        Options(e, 1, "kaido-force-zero", actorId).Any(o => o.Enabled && (o.TargetIds ?? []).Contains(kensaiId));
 
     private static void SuperiorReach()
     {
         var (e, card, kensai, weapon, target, other) = ReachTable();
         var offered = Options(e, 0, "superior-reach-zero", card.Id, kensai.Id).First(o => o.Enabled);
         var reachTargets = offered.TargetIds ?? [];
-        Check(reachTargets.Contains(target.Id) && reachTargets.Length == 2, "the enemy Personalities without Weapons are the targets (the armed one is not): " + string.Join(",", reachTargets));
+        Check(reachTargets.Contains(target.Id) && reachTargets.Length == 2, "the enemy Personalities without Weapons are the targets (the armed one is not, nor is his own): " + string.Join(",", reachTargets));
         var force = e.CardForceForTest(target.Id);
         Check(force > 0, "the target has Force to lose");
         Accept(e, Offer(e, 0, "superior-reach-zero", card.Id, target.Id, kensai.Id));
         Eq(e.CardForceForTest(target.Id), 0, "his Force is 0");
         Check(e.CardForceForTest(other.Id) > 0, "the other enemy Personality is untouched");
         // While the Kensai has a Weapon, the reduced Personality's actions may not target him; another Personality's may.
-        Check(!CanUse(e, 1, "kaido-force-zero", target.Id), "the Personality's own action is not offered against the Kensai");
+        Check(!Targetable(e, target.Id, kensai.Id), "the Personality's own action is not offered against the Kensai");
         var rejection = Rejection(e, new GameCommand("useAbility", 1, e.Version, target.Id, AbilityId: "kaido-force-zero", TargetId: kensai.Id));
         Check(rejection.Contains("may not be targeted"), "and is refused with the reason: " + rejection);
-        Check(CanUse(e, 1, "kaido-force-zero", other.Id), "another Personality's action may target him");
+        Check(Targetable(e, other.Id, kensai.Id), "another Personality's action may target him");
         // The bar depends on the Weapon live: with it gone the Personality may target him again; back again, the bar returns.
         var unarmed = Edit(e, st => { st.Cards[weapon.Id].Zone = Zone.FateDiscard; st.Cards[weapon.Id].AttachedTo = null; });
-        Check(CanUse(unarmed, 1, "kaido-force-zero", target.Id), "without a Weapon the Kensai may be targeted");
+        Check(Targetable(unarmed, target.Id, kensai.Id), "without a Weapon the Kensai may be targeted");
         var rearmed = Edit(unarmed, st => { st.Cards[weapon.Id].Zone = Zone.Attached; st.Cards[weapon.Id].AttachedTo = kensai.Id; });
-        Check(!CanUse(rearmed, 1, "kaido-force-zero", target.Id), "with a Weapon again it may not");
+        Check(!Targetable(rearmed, target.Id, kensai.Id), "with a Weapon again it may not");
         // Until the end of the turn: the next turn it is over.
         var nextTurn = Edit(e, st => st.TurnNumber++);
-        Check(CanUse(nextTurn, 1, "kaido-force-zero", target.Id), "after the turn ends the bar is over");
+        Check(Targetable(nextTurn, target.Id, kensai.Id), "after the turn ends the bar is over");
+        // Only a Weapon counts, not any attachment.
+        var follower = Edit(e, st => { st.Cards[weapon.Id].Zone = Zone.FateDiscard; st.Cards[weapon.Id].AttachedTo = null; Add(st, "training-follower", 0, Zone.Attached, province: 0, parent: kensai.Id); });
+        Check(Targetable(follower, target.Id, kensai.Id), "a Follower is not a Weapon: the bar does not hold");
+        // The action is the Personality's when he is the performer a Strategy names, and when it is an Item's action, carried by him as its wielder.
+        var acting = Edit(e, st =>
+        {
+            Add(st, "oracle-l5r-2865", 1, Zone.Hand);
+            Add(st, "training-weapon-with-attack", 1, Zone.Attached, province: 0, parent: target.Id);
+            st.Cards[kensai.Id].Modifiers.Add(new("test-source", "test", "GoldCost", -50));
+            st.PriorityPlayerId = 1;
+        });
+        var goldAndSteel = acting.State.Cards.Values.First(c => c.DefinitionId == "oracle-l5r-2865");
+        var barredPerformer = Rejection(acting, new GameCommand("useAbility", 1, acting.Version, CardId: goldAndSteel.Id, AbilityId: "gold-and-steel-bow", PerformerId: target.Id, TargetId: kensai.Id));
+        Check(barredPerformer.Contains("may not be targeted"), "a Strategy he performs may not target the Kensai either: " + barredPerformer);
+        var itemAction = acting.State.Cards.Values.First(c => c.DefinitionId == "training-weapon-with-attack");
+        var barredItem = Rejection(acting, new GameCommand("useAbility", 1, acting.Version, CardId: itemAction.Id, AbilityId: "training-weapon-attack", TargetId: kensai.Id));
+        Check(barredItem.Contains("may not be targeted"), "an Item he carries acts through him: " + barredItem);
+        var freePerformer = acting.Execute(new GameCommand("useAbility", 1, acting.Version, CardId: goldAndSteel.Id, AbilityId: "gold-and-steel-bow", PerformerId: other.Id, TargetId: kensai.Id));
+        Check(freePerformer.Accepted || !(freePerformer.Error ?? "").Contains("may not be targeted"), "the same Strategy performed by another Personality is not barred: " + freePerformer.Error);
+        // Played again on the same Personality, the bar is one bar.
+        var second = Edit(e, st => { Add(st, Reach, 0, Zone.Hand); st.PriorityPlayerId = 0; });
+        var reach2 = second.State.Cards.Values.First(c => c.DefinitionId == Reach && c.Zone == Zone.Hand);
+        Accept(second, Offer(second, 0, "superior-reach-zero", reach2.Id, target.Id, kensai.Id));
+        Eq(second.State.Cards[kensai.Id].TargetBars.Count, 1, "the same Personality barred twice is one bar");
         // It applies to the acting Personality only when the action is that Personality's: a bar leaves the Kensai targetable by the rest of the game's actions.
         Check(e.State.Cards[kensai.Id].TargetBars.Count == 1 && e.State.Cards[kensai.Id].TargetBars[0].ActorCardId == target.Id, "the bar sits on the Kensai, naming the Personality");
     }
@@ -289,7 +326,7 @@ internal static class CopyKataTargetingTests
     {
         var s = Table(Phase.Action, 0); s.PriorityPlayerId = 0; s.Players[0].TurnsTaken = 3; s.Players[1].TurnsTaken = 3;
         var card = Add(s, Scavenging, 0, Zone.Hand);
-        var dead = Add(s, "training-crane-samurai", 0, Zone.Dead); GiveKeyword(dead, "Berserker"); dead.Tokens.Add(new CardToken("t1", "Fire", "test", "Force", 1)); dead.Bowed = true; dead.Dishonorable = true;
+        var dead = Add(s, "training-crane-samurai", 0, Zone.Dead); GiveKeyword(dead, "Berserker"); dead.FaceUp = false; dead.Tokens.Add(new CardToken("t1", "Fire", "test", "Force", 1)); dead.Bowed = true; dead.Dishonorable = true;
         var discarded = Add(s, "training-lion-samurai", 0, Zone.DynastyDiscard);
         var enemyDead = Add(s, "training-lion-veteran", 1, Zone.Dead);
         var inPlay = Add(s, "training-crane-veteran", 0, Zone.Home);
@@ -303,6 +340,8 @@ internal static class CopyKataTargetingTests
         // Refill province 2 with the dead Personality.
         var command = Offer(e, 0, "scavenging-party-refill", card.Id, dead.Id) with { Province = 1 };
         Reject(e, command with { Province = null });
+        Reject(e, command with { TargetId = enemyDead.Id });
+        Reject(e, command with { TargetId = inPlay.Id });
         Reject(e, Offer(e, 0, "scavenging-party-refill", card.Id, discarded.Id) with { Province = 7 });
         Accept(e, command);
         var d = e.State.Cards[dead.Id];
@@ -312,6 +351,8 @@ internal static class CopyKataTargetingTests
         Check(!e.State.Players[0].Hand.Contains(card.Id) && e.State.Cards[card.Id].Zone == Zone.FateDiscard, "the Strategy was spent");
         // A destroyed province or an empty one is not a choice.
         var g = Edit(e, st => { st.Players[0].Provinces[2].Destroyed = true; st.Players[0].Provinces[3].CardId = null; st.Cards[card.Id].Zone = Zone.Hand; st.Cards[card.Id].AbilityUses.Clear(); st.Players[0].Hand.Add(card.Id); st.Players[0].Provinces[0].CardId = st.Players[0].Provinces[0].CardId; st.PriorityPlayerId = 0; });
+        Reject(g, Offer(g, 0, "scavenging-party-refill", card.Id, discarded.Id) with { Province = 2 });
+        Reject(g, Offer(g, 0, "scavenging-party-refill", card.Id, discarded.Id) with { Province = 3 });
         var narrowed = Options(g, 0, "scavenging-party-refill", card.Id).Where(o => o.Enabled).SelectMany(o => o.Provinces ?? []).Distinct().OrderBy(x => x).ToArray();
         Check(narrowed.SequenceEqual(new[] { 0, 1 }), "only provinces that hold a card and are not destroyed: " + string.Join(",", narrowed));
         Check(enemyDead.Id != inPlay.Id);
