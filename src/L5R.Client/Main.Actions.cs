@@ -7,6 +7,7 @@ public partial class Main
 {
     private void RenderInspector()
     {
+        var cardActionsRendered=false;
         Palette.Clear(_sidebarHeader); Palette.Clear(_inspector); Palette.Clear(_decisionActions); _paymentConfirm = null;
         RenderEitherOrNotice();
         _guide.Text = View.PendingChoice?.Prompt ?? (_chosen is { Type: "attack" or "assignDefense" } ? "Select a unit, then its destination province. Review the arrows and confirm assignments." : _chosen is { Type: "purchase" or "recruitReserve" } ? "Choose ready Gold sources. Confirm pays the cost and brings the card into play." : _chosen is not null && QuoteFor(_chosen) is not null ? "Review the cost and its basis, then choose ready Gold sources. Confirm pays and resolves; cancel changes your plan." : _chosen is not null ? "Review the highlighted target. Confirm to resolve, or cancel to change your plan." : View.PriorityPlayerId != View.ViewerId ? "Your opponent is deciding. You can hover over visible cards to read them while you wait." : RulesHelp.PhaseGuide(View.Phase));
@@ -15,6 +16,7 @@ public partial class Main
         if (RenderSearchDecision()) return;
         if (RenderEventDecision()) return;
         if (RenderEitherOr()) return;
+        if (RenderCopyTray()) return;
         if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
         if (RenderBattleFlow()) { AddDecisionReviewNavigation(); return; }
         if (PresentationBusy)
@@ -61,6 +63,12 @@ public partial class Main
             if(CardChanges.Entries(_selected).Length>0)
                 details.AddChild(CardChangePanel.Create(_selected,id=>FindCard(id)?.Definition?.Name,compact:true,
                     inspectSource:id=> { if(FindCard(id) is { } source)SelectCard(source); }));
+            // Copies use ordinary engine actions; keep those controls near their result summary.
+            if(_chosen is null&&View.PendingChoice is null&&CardChanges.Entries(_selected).Any(e=>e.Copied))
+            {
+                foreach(var action in Actions.Where(a=>a.CardId==_selected.Id&&a.Type is not "proclaim"))AddAction(details,action);
+                cardActionsRendered=true;
+            }
             var artwork = CardTile.Artwork(def);
             if (artwork is not null)
             {
@@ -99,7 +107,8 @@ public partial class Main
         }
         if (_selected is { } supportCard && IsSupportCard(supportCard) && View.PendingChoice is null)
         { RenderSupportActions(supportCard); return; }
-        foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
+        if(!cardActionsRendered)
+            foreach (var action in Actions.Where(a => a.CardId == _selected?.Id && a.CardId is not null && a.Type is not "proclaim")) AddAction(_inspector, action);
         if(_selected is {ActionLocked:true,Definition:not null} inspected)
             _inspector.AddChild(SidebarSkin.Button("Inspect card",()=>InspectLockedCard(inspected)));
         if (View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
@@ -396,7 +405,7 @@ public partial class Main
         Palette.Clear(_phaseActions);
         if (_session.Snapshot is null) return;
         if (View.WinnerId is not null) return;
-        if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive) return;
+        if (_chosen is not null || EventDecisionActive || GenericDecisionActive || EitherOrActive || CopyDecisionActive) return;
         _phaseActions.AddChild(new HSeparator());
         if (_session.Online && !_session.Connected)
         {

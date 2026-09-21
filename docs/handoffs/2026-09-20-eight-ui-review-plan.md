@@ -11,7 +11,7 @@ Alfredo approved these concept combinations. Implementation completion means a t
 | 3 | #347 | A restriction seal | Ready for individual review; [PR #395](https://github.com/alfredoh7/l5r-emperor/pull/395), native Mac checks and dedicated launcher; no merge |
 | 4 | #314 | B full-card gallery inside A search panel | Ready for individual review; [PR #396](https://github.com/alfredoh7/l5r-emperor/pull/396), native Mac checks and dedicated launcher; no merge |
 | 5 | #343 | A sidebar + B explicit consequences | Ready for individual review; [PR #401](https://github.com/alfredoh7/l5r-emperor/pull/401), native Mac cases and dedicated launcher; no merge |
-| 6 | #342 | B copy tray + A compact result summary | Pending |
+| 6 | #342 | B copy tray + A compact result summary | Implemented; [PR #403](https://github.com/alfredoh7/l5r-emperor/pull/403), native Mac checks passed and launcher prepared; final desktop launcher click-through awaits unlocked Mac; no merge |
 | 7 | #346 | A; reuse current battle assignment arrows and province placement | Pending |
 | 8 | #355 | A explicit target choices + B full-card previews | Pending |
 

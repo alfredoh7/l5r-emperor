@@ -7,22 +7,25 @@ namespace L5R.Client;
 /// token quantities never become grants. Missing source identity is never guessed.</summary>
 public static class CardChanges
 {
-    public sealed record Entry(string Kind, string Name, string Text, string Source, string Duration);
+    public sealed record Entry(string Kind, string Name, string Text, string Source, string Duration, bool Copied=false, string? SourceLabel=null);
     public static bool IsPermanent(string duration) => duration.Equals("Permanent", StringComparison.OrdinalIgnoreCase);
     public static Entry[] Entries(CardView card) => card.Definition is null ? [] :
-        (card.GrantedKeywords ?? []).Select(g=>new Entry("Keyword",g.Keyword,"",g.Source,g.Duration))
+        (card.GrantedKeywords ?? []).Select(g=>new Entry("Keyword",g.Keyword,"",g.CopiedFrom??g.Source,g.Duration,g.CopiedFrom is not null,g.CopiedFromName))
+        .Concat((card.GrantedAbilities??[]).Select(g=>new Entry("Ability",g.Timing,g.Label,g.CopiedFrom??g.Source,g.Duration,g.CopiedFrom is not null,g.CopiedFromName)))
         .Concat((card.GrantedEffects ?? []).Select(g=>new Entry(g.Kind,g.Name,g.Text,g.Source,g.Duration)))
         // AppliedModifier currently has turn duration in the engine. Never infer a permanent
         // bonus from the difference between printed and current Force (tokens/attachments also alter it).
         .Concat((card.Modifiers ?? []).Select(m=>new Entry("Stat",$"{m.Amount:+0;-0;0} {m.Stat}","",m.Source,"Turn")))
         .ToArray();
     public static Entry[] Permanent(CardView card) => Entries(card).Where(e=>IsPermanent(e.Duration)).ToArray();
+    public static Entry[] Marked(CardView card) => Entries(card).Where(e=>IsPermanent(e.Duration)||e.Copied).ToArray();
     public static bool HasSeal(CardView card) => card.FaceUp && card.Zone is Zone.Home or Zone.Battlefield or Zone.Attached
-        && Permanent(card).Length > 0;
+        && Marked(card).Length > 0;
     public static string DurationLabel(string duration) => duration switch
     {
         "Permanent" => "Permanent", "Turn" => "Until turn ends", "Attachment" => "While attached",
-        "Battle" => "Until battle ends", _ => string.IsNullOrWhiteSpace(duration) ? "Duration not supplied" : duration
+        "Battle" => "Until battle ends", "Copy" => "Until the copying ability is used again",
+        _ => string.IsNullOrWhiteSpace(duration) ? "Duration not supplied" : duration
     };
     public static string SourceName(string source, Func<string,string?>? resolve)
     {
@@ -31,7 +34,7 @@ public static class CardChanges
         return CardCatalog.Cards.TryGetValue(source,out var definition) ? definition.Name : "Source unavailable";
     }
     public static string Summary(CardView card,Func<string,string?>? resolve) => string.Join("\n",Entries(card)
-        .Select(e=>$"{e.Name} · {DurationLabel(e.Duration)}"+(e.Text.Length>0?$"\n{e.Text}":"")+$"\nSource: {SourceName(e.Source,resolve)}"));
+        .Select(e=>$"{(e.Copied?"Copied ":"")}{e.Name} · {DurationLabel(e.Duration)}"+(e.Text.Length>0?$"\n{e.Text}":"")+$"\n{(e.Copied?"Copied from":"Source")}: {e.SourceLabel??SourceName(e.Source,resolve)}"));
 }
 
 /// <summary>Exact source pixels from approved A/B; values and typography are live controls.</summary>

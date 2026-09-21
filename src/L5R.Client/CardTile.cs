@@ -201,7 +201,7 @@ public partial class CardTile : Button
     }
 
     public string[] PublicStatusLabels => Card.Definition is null || Card.Zone is not (Zone.Home or Zone.Battlefield or Zone.Attached) ? [] :
-        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)).Select(k => "+ " + k.Keyword).Distinct().ToArray();
+        (Card.GrantedKeywords ?? []).Where(k => !CardChanges.IsPermanent(k.Duration)&&k.CopiedFrom is null).Select(k => "+ " + k.Keyword).Distinct().ToArray();
     private void DrawDishonorMarker()
     {
         if(UprightPreview||!FallenArt.TurnsOnTable(Card))return;

@@ -122,6 +122,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-copy",StringComparison.Ordinal)) { ProcessCopyCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
@@ -311,6 +312,8 @@ public partial class Main : Node
         FitShownCards();
         FitSearchPanel();
         FitEitherReviewControls();
+        FitCopyPanel();
+        FitCopyReviewControls();
         FitEventDecisions();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
@@ -416,6 +419,7 @@ public partial class Main : Node
             _eitherOrKey=null;_eitherNoticeMatch=null;_eitherNotice=null;
             if(_chosen?.Type=="chooseEitherOr"){_chosen=null;_sources.Clear();}
             ClearSearchPanel();
+            ClearCopyPanel(true);_copyNoticeMatch=null;_copyNotice=null;
             ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
             _status.Text = _session.Busy ? "Connecting to your private match…" : "Disconnected · use Private match to reconnect";
@@ -440,6 +444,7 @@ public partial class Main : Node
         _status.Text = View.WinnerId is { } winner ? $"{View.Players[winner].Clan} wins · {View.VictoryReason}" : $"Turn {View.TurnNumber}  ·  {View.Players[View.ActivePlayerId].Clan}  ·  {(View.PriorityPlayerId == View.ViewerId ? "Your opportunity" : View.Players[View.PriorityPlayerId].Clan + " is deciding")}";
         if (View.Scenario is PublishedContent.Scenario or CustomPractice.Scenario) _status.Text += $"  ·  Favor: {(View.FavorPlayerId is int favor ? View.Players[favor].Clan : "unclaimed")}";
         if (_session.Online && _session.Snapshot.PlayersConnected is { } connected && connected.Any(p => !p)) _status.Text = $"Room {_session.Snapshot.RoomCode} · waiting for both players to connect";
+        ObserveCopyResults();
         RenderTimeline(); RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight(); FrameNewBattle();
         RenderBattleFeedback();
         ObserveShownCards();

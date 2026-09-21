@@ -10,14 +10,14 @@ public static class CardPreview
     {
         var face = new CardTile(card with { Bowed = false }, true, _ => { }, _ => { })
         {
-            CustomMinimumSize = new Vector2(width, height), ReducedMotion = true,
+            CustomMinimumSize = new Vector2(width, height), FaceHeight = height, ReducedMotion = true,
             ShowTokenRail = false, UprightPreview = true, Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
             FocusMode = Control.FocusModeEnum.None
         };
         face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };
         return face;
     }
-    public static Control Create(CardView card, string context, int? gold, float scale = 1, Func<string,string?>? sourceName = null, string? interactionHint = null)
+    public static Control Create(CardView card, string context, int? gold, float scale = 1, Func<string,string?>? sourceName = null, string? interactionHint = null, bool printedOnly = false)
     {
         // Fix the popup's measure independently of wrapped text. Godot measures a tooltip
         // before its first layout; a container alone can otherwise grow to thousands of pixels.
@@ -47,8 +47,8 @@ public static class CardPreview
             status.AddChild(ActionLockStatus.Icon(38));
             var words=ActionLockStatus.Explanation(card);words.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;status.AddChild(words);
         }
-        body.AddChild(Palette.Text(def.Type + " · " + (card.Bowed ? "BOWED" : "UNBOWED"), 12, Palette.Gold));
-        if (def.Type == CardType.Personality)
+        body.AddChild(Palette.Text(printedOnly?"PRINTED CARD · "+def.Type:def.Type + " · " + (card.Bowed ? "BOWED" : "UNBOWED"), 12, Palette.Gold));
+        if (def.Type == CardType.Personality && !printedOnly)
             body.AddChild(Palette.Wrapped($"Current: {card.Force} Force · {card.Chi} Chi\n{def.PersonalHonor} Personal Honor", 14));
         if (gold > 0) body.AddChild(Palette.Text($"{gold} Gold" + (card.Bowed ? " · bowed" : " · ready"), 14, Palette.Gold));
         var rules = new ScrollContainer { SizeFlagsVertical = Control.SizeFlags.ExpandFill, HorizontalScrollMode = ScrollContainer.ScrollMode.Disabled };

@@ -151,7 +151,7 @@ public partial class Main
         ApplyTableCamera();
     }
 
-    private bool CameraBlocked => SearchPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
+    private bool CameraBlocked => SearchPanelOpen || CopyPanelOpen || PracticeVisible || MenuVisible || !GetWindow().HasFocus() || (_fullscreenGate?.Visible ?? false)
         || GetChildren().OfType<Window>().Any(w => w.Visible)
         || _expandedUnits.Count > 0;
 

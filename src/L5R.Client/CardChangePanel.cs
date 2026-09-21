@@ -11,16 +11,18 @@ public partial class CardChangePanel : PanelContainer
     public override void _Process(double delta) { if(FixedSize is { } fixedSize && Size!=fixedSize) Size=fixedSize; }
     public override void _Draw()=>CardChangeArt.Frame(this,new Rect2(Vector2.Zero,Size));
     public override void _Ready()=>Resized+=QueueRedraw;
-    public static CardChangePanel Create(CardView card,Func<string,string?>? sourceName=null,bool compact=false,Action<string>? inspectSource=null)
+    public static CardChangePanel Create(CardView card,Func<string,string?>? sourceName=null,bool compact=false,Action<string>? inspectSource=null,bool copiedOnly=false)
     {
         var panel=new CardChangePanel { Theme=SidebarSkin.Theme(),SizeFlagsHorizontal=SizeFlags.ExpandFill };
         var margin=new StyleBoxEmpty { ContentMarginLeft=compact?22:52,ContentMarginRight=compact?22:34,
             ContentMarginTop=compact?25:24,ContentMarginBottom=compact?25:22 };
         panel.AddThemeStyleboxOverride("panel",margin);
         var body=new VBoxContainer();body.AddThemeConstantOverride("separation",compact?14:8);panel.AddChild(body);
-        var entries=CardChanges.Entries(card).OrderBy(e=>CardChanges.IsPermanent(e.Duration)?0:1).ToArray();
+        var entries=CardChanges.Entries(card).Where(e=>!copiedOnly||e.Copied).OrderBy(e=>CardChanges.IsPermanent(e.Duration)?0:1).ToArray();
         var permanent=entries.Count(e=>CardChanges.IsPermanent(e.Duration));
-        var heading=Palette.Text(permanent>0?"PERMANENT CHANGES":"CARD EFFECTS",compact?19:27,Palette.Gold,true);
+        var copies=entries.Count(e=>e.Copied);
+        var commonCopyDuration=copies>0&&copies==entries.Length&&entries.Select(e=>e.Duration).Distinct().Count()==1;
+        var heading=Palette.Text(copies>0&&copies==entries.Length?"CURRENTLY COPIED":copies>0?"CARD CHANGES":permanent>0?"PERMANENT CHANGES":"CARD EFFECTS",compact?19:27,Palette.Gold,true);
         heading.AutowrapMode=TextServer.AutowrapMode.WordSmart;heading.SizeFlagsHorizontal=SizeFlags.ExpandFill;
         heading.HorizontalAlignment=HorizontalAlignment.Center;body.AddChild(heading);body.AddChild(Divider(ornament:true));
         var name=Palette.Wrapped(card.Definition?.Name??"Card",compact?21:28);
@@ -32,26 +34,26 @@ public partial class CardChangePanel : PanelContainer
         // A fixed-height tooltip scrolls when necessary; in the inspector the panel grows with
         // content, using the inspector's existing scroll container instead.
         scroll.VerticalScrollMode=compact?ScrollContainer.ScrollMode.Disabled:ScrollContainer.ScrollMode.Auto;
-        var commonSource=entries.Select(e=>e.Source).Distinct().Count()==1;
+        var commonSource=entries.Select(e=>(e.Source,e.Copied,e.SourceLabel)).Distinct().Count()==1;
         for(var i=0;i<entries.Length;i++)
         {
             var entry=entries[i];
             if(i==permanent&&permanent>0&&i<entries.Length)
-                rows.AddChild(Palette.Text("TEMPORARY / ATTACHED",compact?14:19,Palette.PaperDim,true));
+                rows.AddChild(Palette.Text(copies>0?"COPIED / TEMPORARY":"TEMPORARY / ATTACHED",compact?14:19,Palette.PaperDim,true));
             var row=new HBoxContainer();row.AddThemeConstantOverride("separation",compact?12:32);rows.AddChild(row);
             var diameter=compact?42:78;
             row.AddChild(new CardChangeMedallion { Kind=entry.Kind,CustomMinimumSize=new Vector2(diameter,diameter),
                 SizeFlagsVertical=SizeFlags.ShrinkBegin,MouseFilter=MouseFilterEnum.Ignore });
             var words=new VBoxContainer { SizeFlagsHorizontal=SizeFlags.ExpandFill };words.AddThemeConstantOverride("separation",compact?6:6);row.AddChild(words);
             var ability=entry.Kind is not ("Keyword" or "Stat");
-            var title=Palette.Wrapped(entry.Name+(ability?" · "+CardChanges.DurationLabel(entry.Duration):""),compact?19:27);title.AddThemeFontOverride("font",SidebarSkin.Bold);words.AddChild(title);
-            var kind=entry.Kind=="Keyword"?"Granted keyword":entry.Kind=="Stat"?"Stat bonus":"Granted effect";
-            if(!ability)words.AddChild(Palette.Wrapped(kind+" · "+CardChanges.DurationLabel(entry.Duration),compact?14:20,Palette.Paper));
+            var title=Palette.Wrapped(entry.Name+(ability&&!commonCopyDuration?" · "+CardChanges.DurationLabel(entry.Duration):""),compact?19:27);title.AddThemeFontOverride("font",SidebarSkin.Bold);words.AddChild(title);
+            var kind=entry.Kind=="Keyword"?(entry.Copied?"Copied keyword":"Granted keyword"):entry.Kind=="Stat"?"Stat bonus":entry.Copied?"Copied ability":"Granted effect";
+            if(!ability&&!commonCopyDuration)words.AddChild(Palette.Wrapped(kind+" · "+CardChanges.DurationLabel(entry.Duration),compact?14:20,Palette.Paper));
             if(!string.IsNullOrWhiteSpace(entry.Text))
             {
                 var text=Palette.Wrapped(entry.Text,compact?17:20);text.AddThemeConstantOverride("line_spacing",compact?3:0);words.AddChild(text);
             }
-            if(!commonSource)words.AddChild(Source(entry.Source,sourceName,compact?14:17,inspectSource));
+            if(!commonSource)words.AddChild(Source(entry,sourceName,compact?14:17,inspectSource));
             if(i<entries.Length-1)rows.AddChild(Divider());
         }
         if(entries.Length==0)rows.AddChild(Palette.Wrapped("No granted changes.",compact?16:21,Palette.PaperDim));
@@ -59,8 +61,9 @@ public partial class CardChangePanel : PanelContainer
         {
             body.AddChild(Divider());
             var footer=new MarginContainer();footer.AddThemeConstantOverride("margin_left",compact?0:110);
-            footer.AddChild(Source(entries[0].Source,sourceName,compact?15:20,inspectSource));body.AddChild(footer);
+            footer.AddChild(Source(entries[0],sourceName,compact?15:20,inspectSource));body.AddChild(footer);
         }
+        if(commonCopyDuration)body.AddChild(Palette.Wrapped(CardChanges.DurationLabel(entries[0].Duration),compact?15:20,Palette.PaperDim));
         return panel;
     }
     private static Control Divider(bool ornament=false)
@@ -69,17 +72,17 @@ public partial class CardChangePanel : PanelContainer
         var line=new HSeparator { CustomMinimumSize=new Vector2(0,3),MouseFilter=MouseFilterEnum.Ignore };
         line.AddThemeStyleboxOverride("separator",new StyleBoxLine { Color=new Color("8e7443"),Thickness=1 });return line;
     }
-    private static Control Source(string id,Func<string,string?>? resolve,int size,Action<string>? inspect)
+    private static Control Source(CardChanges.Entry entry,Func<string,string?>? resolve,int size,Action<string>? inspect)
     {
-        var name=CardChanges.SourceName(id,resolve);
+        var id=entry.Source;var name=entry.SourceLabel??CardChanges.SourceName(id,resolve);var prefix=entry.Copied?"Copied from: ":"Source: ";
         if(inspect is not null&&resolve?.Invoke(id) is not null)
         {
-            var button=new LinkButton { Text="Source: "+name,TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis,
+            var button=new LinkButton { Text=prefix+name,TextOverrunBehavior=TextServer.OverrunBehavior.TrimEllipsis,
                 SizeFlagsHorizontal=SizeFlags.ExpandFill,TooltipText="Inspect "+name };
             button.AddThemeFontOverride("font",Palette.Body);button.AddThemeColorOverride("font_color",Palette.Crane);button.AddThemeFontSizeOverride("font_size",size);
             button.Pressed+=()=>inspect(id);return button;
         }
-        return Palette.Wrapped("Source: "+name,size,Palette.Paper);
+        return Palette.Wrapped(prefix+name,size,Palette.Paper);
     }
     public static Control Tooltip(CardView card,Func<string,string?>? resolve,Vector2 viewport,float? maxHeight=null)
     {
@@ -125,8 +128,9 @@ public partial class PermanentGrantSeal : Button
     }
     public override void _Ready()
     {
-        var count=CardChanges.Permanent(CardAnchor.Card).Length;
-        TooltipText=$"{CardAnchor.Card.Definition?.Name} · {count} permanent change{(count==1?"":"s")}";
+        var count=CardChanges.Marked(CardAnchor.Card).Length;
+        var kind=CardChanges.Entries(CardAnchor.Card).Any(e=>e.Copied)?"granted/copied":"permanent";
+        TooltipText=$"{CardAnchor.Card.Definition?.Name} · {count} {kind} change{(count==1?"":"s")}";
         Pressed+=()=>{CloseFocusPanel();CardAnchor.EmitSignal(BaseButton.SignalName.Pressed);};
         FocusEntered+=ShowFocusPanel;
     }
@@ -139,7 +143,7 @@ public partial class PermanentGrantSeal : Button
         // Approved A's single-grant cap contains no baked quantity. Crop the original art,
         // not a hand-drawn approximation; add the current aggregate count separately.
         DrawTextureRectRegion(CardChangeArt.A,new Rect2(Vector2.Zero,Size),new Rect2(95,719,88,86));
-        var count=CardChanges.Permanent(CardAnchor.Card).Length;
+        var count=CardChanges.Marked(CardAnchor.Card).Length;
         if(count>1)
         {
             // Use just the source's knot on the left, leaving a lacquer field for the live numeral.
