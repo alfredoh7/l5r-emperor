@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "PAUSED at Mendon request. Permanent per-card grant helper and Spirit of the Monk are on draft PR #388. Additional local work adds attachment cleanup, attack-Reaction usage correction, public hover fixture, updated inventory and decision record.",
-  "validation": "Core and client compile with zero warnings/errors. Latest focused grant/copy run completed; native fixture assets imported, graphical hover run and full check.sh not yet performed. See .cache/grant-tests.log and .cache/build.log for current results.",
-  "remaining": "User paused. Do not resume until requested. Local changes after 5881cc19 are not pushed. Review latest test log; run native AbilityGrantProbe, full checks, clean generated no-content import changes, integrate latest main, update PR/CI. Alfredo has NOT yet been notified: send the requested #213 handoff only after primitive and permanent-grant card are verified.",
+  "summary": "Permanent per-card ability grants (#386): GrantAbility helper with independent source/duration records and no usage reset, Battle/Attachment/Turn/Permanent duration cleanup, attack-Reaction usage checked by shared usage key, public SourceName/UsesPerTurn/UsesRemaining on GrantedAbilityView, mouseover and inspector text, Spirit of the Monk (oracle-l5r-7424, strategy-wave-30), showcase scenario and native probe. Other Spirit cards stay unwired.",
+  "validation": "Merged main; bash tools/check.sh --skip-client passed (9/9 ability-grants, 15/15 card-copy, 10/10 ring-grants, 59/59 published); client builds 0 warnings/0 errors; headless Godot import and smoke passed; native AbilityGrantProbe passed for both players and both mouseover screenshots were inspected. Not a human playtest.",
+  "remaining": "Post the #213 handoff to Alfredo (extend his approved indicator to granted abilities, coordinate with #342); remaining Spirit cards per docs/decisions/2026-09-20-permanent-ability-grants.md.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/386",
   "branch": "codex/386-ability-grants",
-  "updated": "2026-09-20T20:46:04.130296+00:00"
+  "updated": "2026-09-21T07:40:49.766732+00:00"
 }

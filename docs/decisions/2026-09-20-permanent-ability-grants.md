@@ -28,3 +28,10 @@ Mouseover (`CardPreview`) and the scrollable inspector (`Main.Actions`) use `Gra
 ## Remaining cards
 
 The other Spirit cards are still unwired. Their old ability-grant blocker is retired, and inventory notes name the remaining per-card behavior. Berserker's delayed destruction in particular is not implemented by granting an ability ID. No unsupported card is silently made playable.
+
+## Verification (resumed and completed)
+
+- Integrated current main (fce56814). Battle-duration ability grants now expire in `CompleteBattleTransition`, after main's after-battle recruit window closes (#379) and before another battlefield is chosen; turn-end cleanup keeps main's additional-action clearing. The `strategy-wave-30` wave manifest was pinned for the published-card guard.
+- `bash tools/check.sh --skip-client` passed on the merged tree, including 9/9 ability-grants, 15/15 card-copy, 10/10 ring-grants and 59/59 published tests. The client project builds with 0 warnings and 0 errors, the headless Godot import and startup smoke passed.
+- `AbilityGrantProbe.tscn` ran natively (Godot 4.7.2, NVIDIA GPU): the real "Play Spirit of the Monk" button, then mouseover of the receiving Togashi Meiyu as each player, and the unchanged second copy. Both screenshots were inspected: each player reads "Granted ability · Permanent", the Battle text, "Source: Spirit of the Monk" and "1 of 1 uses remaining this turn", beside printed and current stats.
+- This is an integration fixture, not a human playtest or a complete match. The on-card indicator remains Alfredo's work under #213, coordinated with #342.
