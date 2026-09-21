@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Implement #314 approved private search gallery and prepared Mac review; no merge authorized.",
-  "validation": "Client build zero warnings/errors; native Mac 1920x1080 normal and 1280x800 reduced pass: deck/entry confirmation, grouping, hover/focus, native typing and scrolling, private seat reset, busy reset, Region/Terrain follow-ups, no-match/empty/optional Pass, Imperial Gift and Gold payment. Core deck-search 23/23 and client transport 9/9 pass. Actual app launcher and desktop filter/seat switches verified; source/native comparison inspected.",
-  "remaining": "Alfredo UI acceptance, Mendon review and pushed-revision CI; no merge authorized. Native Windows/external multiplayer untested. Remaining batch tasks #343, #342, #346, #355.",
+  "summary": "Alfredo approved previews 1-4; deck buttons open the private gallery immediately. Include AlternativeCost wire forwarding so this batch is independent of unapproved previews 5-8.",
+  "validation": "bash tools/check-deck-search-ui.sh passed native Mac 1920x1080 normal and 1280x800 reduced; both decks advance exactly once and card confirmation remains explicit. Client compiled without warnings/errors. bash tools/check.sh --skip-client passed all requested checks including 10/10 transport and the new bow/destroy wire regression. Updated deck-step screenshot inspected; Mac launcher generated and its game process verified.",
+  "remaining": "Publish and validate the Windows 1-4 package; notify Mendon with Alfredo UI approval and request his review/feedback. No merge until Mendon approves and inherited dependencies are resolved. Demos 5-8 remain awaiting Alfredo; Windows graphical and external multiplayer acceptance pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/314",
   "branch": "codex/314-deck-search",
-  "updated": "2026-09-21T00:08:49.876234+00:00"
+  "updated": "2026-09-21T07:09:01.054780+00:00"
 }

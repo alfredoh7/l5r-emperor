@@ -1,4 +1,5 @@
 # Shown-card history (#315) — ready for individual review
+**Current acceptance (2026-09-21): Alfredo approved previews 1–4. Merge is contingent on Mendon approving and passing checks; his review is pending. Previews 5–8 remain unapproved.** See the [current decision](../decisions/2026-09-21-first-four-ui-review-approval.md), which supersedes earlier acceptance wording below.
 
 This is the second of eight approved UI previews; #339 is also ready for individual review. The remaining six are pending. **No merge into main is authorized.** PR [#393](https://github.com/alfredoh7/l5r-emperor/pull/393) remains a draft stacked on the isolated #339 preview. Completing checks or accepting the appearance does not grant merge permission.
 

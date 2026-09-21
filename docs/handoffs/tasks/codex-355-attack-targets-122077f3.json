@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Complete explicit Attack targets and all eight individual review launchers; include Tensin fixed-cost/performer regression and clean performer labels. No merge authorized.",
-  "validation": "Client build zero warnings/errors; final Attack normal and reduced-review native checks passed including Tensin; earlier reduced case passed; actual Mac app and Tensin click-through verified; Core targeted reactions 30/30; transport 11/11; Movement regression passed; source/native captures inspected; all eight app routes verified. CI tracked on final pushed revision.",
-  "remaining": "Alfredo individual UI acceptance, Mendon rules/shared-contract review, final CI, native Windows graphical play and external multiplayer. No merge authorized; inherited dependencies documented in eight-task review index.",
+  "summary": "Propagate Alfredo-approved 1-4 deck navigation into the combined eight-preview checkout; retain both Movement and AlternativeCost metadata. Previews 5-8 remain awaiting Alfredo.",
+  "validation": "Combined client build and native deck-search 1280x800 reduced pass; source change also passed 1920x1080 normal in #396. Combined client transport 12/12 pass, preserving movement/Attack and bow/destroy regressions. Full source check.sh --skip-client passed in #396; generated Mac launchers refreshed.",
+  "remaining": "Mendon review and approved 1-4 Windows delivery pending. No merge until his approval and dependency review; previews 5-8 still unapproved by Alfredo. Native Windows graphical and external multiplayer playtests pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T02:34:19.848926+00:00"
+  "updated": "2026-09-21T07:13:39.767371+00:00"
 }

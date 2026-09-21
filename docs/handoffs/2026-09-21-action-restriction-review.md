@@ -1,4 +1,5 @@
 # Action restriction (#347) — ready for individual review
+**Current acceptance (2026-09-21): Alfredo approved previews 1–4. Merge is contingent on Mendon approving and passing checks; his review is pending. Previews 5–8 remain unapproved.** See the [current decision](../decisions/2026-09-21-first-four-ui-review-approval.md), which supersedes earlier acceptance wording below.
 
 This is the third of eight approved UI previews. #339 and #315 are also available; five tasks remain. **No merge into main is authorized.** [PR #395](https://github.com/alfredoh7/l5r-emperor/pull/395) is a draft stacked on #393. UI acceptance and passing checks do not imply merge permission.
 

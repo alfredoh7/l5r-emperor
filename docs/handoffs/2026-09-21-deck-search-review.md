@@ -1,4 +1,5 @@
 # Deck search (#314) — ready for individual review
+**Current acceptance (2026-09-21): Alfredo approved previews 1–4. Merge is contingent on Mendon approving and passing checks; his review is pending. Previews 5–8 remain unapproved.** See the [current decision](../decisions/2026-09-21-first-four-ui-review-approval.md), which supersedes earlier acceptance wording below.
 
 Fourth of eight approved UI previews. **No merge into main is authorized.** [PR #396](https://github.com/alfredoh7/l5r-emperor/pull/396) is a draft stacked on #395. Completion means a tested review candidate; UI acceptance and passing checks do not grant merge permission.
 
@@ -18,7 +19,7 @@ The launcher neither fetches another branch nor merges main. Artwork uses the in
 
 ## Short review checklist
 
-1. Select Dynasty or Fate and confirm. The source’s full scan is available during deck selection; neither deck’s contents appear before confirmation.
+1. Click Dynasty or Fate once to open its private card list. There is no bottom-right deck confirmation. The source’s full scan is visible before choosing a deck; the other deck remains private.
 2. Read the private-search note. Candidates are grouped by card/type with counts; eligible type groups appear first. Scroll or type in **Find a card**. The list never represents deck order.
 3. Hover or keyboard-focus cards to inspect their complete scan inside the panel. Ineligible cards are dim and marked unavailable; their engine-provided reason appears in inspection. Clicking one does not select it.
 4. Select an eligible card. Its border/check and the footer identify the pending choice. Nothing is submitted until **Confirm selection**. The selected card is then publicly shown.
@@ -33,7 +34,7 @@ The launcher neither fetches another branch nor merges main. Artwork uses the in
 
 Uses B’s full-card gallery inside A’s panel, context column, private note and internal inspection. Reuses the approved lacquer atlas and existing Caudex/WeatheredQuill fonts; real period scans replace illustrative concept faces. Full card faces and printed statistics remain clear. Comparison verifies this combined direction, not identical whole-screen pixels.
 
-All candidates, eligibility, reasons, deck choices, Pass availability and commands come from `MatchView.PendingSearch` / `ActionOption`. The UI has no hidden deck-instance lookup and computes no eligibility. The existing quoted Gold panel handles costed Region follow-ups. After choosing a province or discard, the sidebar shows the chosen option and confirmation details together; Clear selection returns to all choices. No Core, server, card definition or wire format changes are introduced. The gallery disappears on seat/view change or loss of the snapshot; changed version/session/readiness resets local selection. Inspection and filtering submit no game command.
+All candidates, eligibility, reasons, deck choices, Pass availability and commands come from `MatchView.PendingSearch` / `ActionOption`. The UI has no hidden deck-instance lookup and computes no eligibility. The existing quoted Gold panel handles costed Region follow-ups. After choosing a province or discard, the sidebar shows the chosen option and confirmation details together; Clear selection returns to all choices. The search interaction change adds no Core or card-definition behavior. For the standalone 1–4 package, the server also forwards existing AlternativeCost metadata required by #1; the later movement UI is not included. A transport regression verifies both cost options reach the client and return unchanged. The gallery disappears on seat/view change or loss of the snapshot; changed version/session/readiness resets local selection. Inspection and filtering submit no game command.
 
 ## Verified evidence
 
@@ -55,6 +56,14 @@ All candidates, eligibility, reasons, deck choices, Pass availability and comman
 
 ## Remaining acceptance
 
-Alfredo’s UI acceptance, Mendon’s review, and CI on this PR revision remain outstanding. Native Windows graphical play and external multiplayer acceptance have not been performed. Four UI tasks remain: #343 Either/Or, #342 Copy, #346 Movement and #355 Attack targets.
+Alfredo’s UI acceptance is recorded above. Mendon’s review, CI on this updated revision, native Windows graphical play and external multiplayer acceptance remain pending. Previews 5–8 are implemented in separate review branches but still await Alfredo’s review.
 
-The isolated preview stack includes current main plus previously unmerged UI work. Inherited stabilization rules candidates remain unapproved, as described in the eight-task plan. Root checkout and main are unchanged. **Do not merge without Alfredo’s explicit go-ahead.**
+The isolated preview stack includes current main plus previously unmerged UI work. Inherited stabilization rules candidates remain unapproved, as described in the eight-task plan. Root checkout and main are unchanged. **Do not merge before Mendon approves these four tasks and their dependencies are resolved.**
+
+## Single-click update (2026-09-21)
+
+The deck step has no selection footer or confirm button. One enabled deck click submits exactly one existing engine command, disables repeat deck clicks while waiting, and opens the selected private gallery. The changed version/readiness guards remain in place. Card and Pass confirmations are unchanged.
+
+Native Mac checks passed at 1920×1080 normal motion and 1280×800 reduced motion, including both deck paths and the existing privacy, filter, payment and follow-up checks. The probe now asserts one click advances exactly one version, selects the correct deck and leaves card confirmation visible but disabled until a card is selected.
+
+![Deck choice without redundant confirmation](../screenshots/deck-search/decks-direct.png)
