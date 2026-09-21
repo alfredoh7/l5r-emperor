@@ -16,12 +16,13 @@ public partial class Main
         _sidebarHeader.AddChild(new BattleTracker { Snapshot=View, ReducedMotion=_reducedMotion,
             PresentationInProgress=PresentationBusy, ActionOutcome=PresentationBusy && _actionOutcome,
             ResolutionMessage=PresentationBusy ? _actionOutcome?null:_battleOutcomeText : _resolutionMessage });
+        RenderBattleFacts();
         if(!PresentationBusy && View.PendingChoice is { } pending)
         {
             FlowText(pending.Prompt,22,Palette.Paper);
             RenderReactionTarget();
             if(View.PriorityPlayerId==View.ViewerId)
-                foreach(var option in Actions.Where(a=>a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector,option);
+                foreach(var option in Actions.Where(a=>a.Enabled && a.Command is not null && a.Type is not ("pass" or "declineReaction" or "proclaim" or "chooseShinden" or "concede"))) AddAction(_inspector, BattleWindowOption(option));
             return true;
         }
         if (PresentationBusy || _resolutionMessage is not null)
@@ -42,7 +43,7 @@ public partial class Main
         if(View.PriorityPlayerId!=View.ViewerId)
         {
             var clan=View.Players.Single(p=>p.Id==View.PriorityPlayerId).Clan;
-            FlowText(clan+(View.Phase==Phase.Battle?" is choosing a Battle action.":View.Phase==Phase.BattleSelection?" is choosing the next battle.":" is making assignments."),20,Palette.Paper);
+            FlowText(clan+(View.Phase==Phase.Battle?" is choosing a Battle action.":View.Phase==Phase.BattleSelection?" is choosing the next battle.":View.Phase==Phase.AttackDeclaration?" is deciding whether to attack.":" is making assignments."),20,Palette.Paper);
             RenderBattleExchanges(); return true;
         }
         if(View.Phase==Phase.BattleSelection)
@@ -55,7 +56,6 @@ public partial class Main
         else if(View.Phase==Phase.AttackDeclaration)
         {
             FlowText("Declare an attack, or pass to your Dynasty Phase.",22,Palette.Paper);
-            foreach(var option in Actions.Where(a=>a.Type=="declareAttack")) AddAction(_inspector,option);
         }
         else if(View.Phase is Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense)
         {
@@ -87,6 +87,13 @@ public partial class Main
             if(options.Length==0) FlowText("No Battle action is currently available.",17,Palette.PaperDim);
         }
         return true;
+    }
+
+    private ActionOption BattleWindowOption(ActionOption option)
+    {
+        // Preserve the complete engine command; hide a debug identifier in its displayed performer suffix.
+        if (option.Command?.PerformerId is not { } id || FindCard(id)?.Definition is null) return option;
+        return option with { Label = option.Label.Replace(" (" + id + ")", "", StringComparison.Ordinal) };
     }
 
     private void AddBattleAction(ActionOption option)
@@ -125,8 +132,9 @@ public partial class Main
     }
     private void RenderBattleExchanges(int count=3)
     {
-        var start=_journal.Exchanges.FindLastIndex(e=>e.Events.Any(x=>x.Type=="battleStarted"));
-        var recent=_journal.Exchanges.Skip(Math.Max(0,start)).TakeLast(count).ToArray();
+        var start=_journal.Exchanges.FindLastIndex(e=>e.Events.Any(x=>x.Type is "battleStarted" or "attackDeclared"));
+        if(start<0)return;
+        var recent=_journal.Exchanges.Skip(start).TakeLast(count).ToArray();
         if(recent.Length==0)return;
         _inspector.AddChild(new HSeparator());FlowText("Recent exchanges",17,Palette.PaperDim);
         foreach(var exchange in recent)

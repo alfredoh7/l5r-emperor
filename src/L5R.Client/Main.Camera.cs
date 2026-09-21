@@ -61,7 +61,7 @@ public partial class Main
         _tableViewport.Position = new Vector2(left, 148);
         // Leave the fitted mat clear of the resting hand, including the small
         // upward reach of its fan. Hover can still deliberately lift a hand card.
-        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - left - 44,
+        _tableViewport.Size = new Vector2(_layoutWidth - SidebarWidth - BattleStripReserve - left - 44,
             Math.Min(666, 1060 - HandCardSide - _tableViewport.Position.Y - 30));
         _tableSurface.ResizePlane(_tableViewport.Size, _root.Scale.X);
         ApplyTableCamera();
@@ -95,12 +95,12 @@ public partial class Main
     private Vector2 _cameraFrom, _cameraTo;
     private float _zoomFrom, _zoomTo;
     private double _cameraGlideTime;
-    private (int Turn, int Owner, int Province)? _framedBattle;
+    private (string Match, int Viewer, int Turn, int Owner, int Province)? _framedBattle;
     private void FrameNewBattle()
     {
-        if (_capturePath is not null || PresentationBusy) return;
+        if (_capturePath is not null && !_captureMode.StartsWith("published-battle-sequence", StringComparison.Ordinal) || PresentationBusy) return;
         if (View.CurrentBattleProvince is not int province || !BattleActive) { _framedBattle = null; return; }
-        var key = (View.TurnNumber, View.ActivePlayerId, province);
+        var key = (_session.MatchKey, View.ViewerId, View.TurnNumber, View.ActivePlayerId, province);
         if (_framedBattle == key) return;
         _framedBattle = key;
         var from = _cameraCenter; var zoom = _cameraZoom;

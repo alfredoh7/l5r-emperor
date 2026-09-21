@@ -121,6 +121,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-shown",StringComparison.Ordinal)) { ProcessShownCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-action-lock",StringComparison.Ordinal)) { ProcessActionLockCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-search",StringComparison.Ordinal)) { ProcessSearchCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-battle-sequence", StringComparison.Ordinal)) { ProcessBattleSequenceCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-multi-targets", StringComparison.Ordinal)) { ProcessMultiCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-top-cards", StringComparison.Ordinal)) { ProcessLookCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-opponent-payment",StringComparison.Ordinal)) { ProcessOpponentPaymentCapture(delta); return; }
@@ -290,7 +291,7 @@ public partial class Main : Node
 
     private Vector2 DesignSize => new(_layoutWidth, 1080);
     private float _layoutWidth = 1920;
-    private float BoardWidth => _layoutWidth - 238 - SidebarWidth - 44;
+    private float BoardWidth => _layoutWidth - 238 - SidebarWidth - BattleStripReserve - 44;
     private const float SidebarWidth = 400;
     private const float HandCardSide = 284;
     private HBoxContainer _menu = null!;
@@ -315,6 +316,7 @@ public partial class Main : Node
         _inspectorPanel.Position = new Vector2(_layoutWidth - SidebarWidth - 22, 94);
         _inspectorPanel.Size = new Vector2(SidebarWidth, 960);
         FitShownCards();
+        FitBattleSequence();
         FitSearchPanel();
         FitLookPanel();
         FitLookReviewControls();
@@ -391,6 +393,7 @@ public partial class Main : Node
         BuildCameraControls();
         BuildShownCards();
         BuildBattleFeedback();
+        BuildBattleSequence();
         BuildFullscreenGate();
         GetViewport().SizeChanged += FitPresentation; FitPresentation();
     }
@@ -415,6 +418,8 @@ public partial class Main : Node
         else if (MenuVisible || PracticeVisible) return;
         else if (key.Keycode == Key.Escape && _shownPreview is not null) { HideShownPreview(); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _shownOpen) { ToggleShownCards(false); GetViewport().SetInputAsHandled(); }
+        else if (key.Keycode == Key.Escape && _battleSequenceOpen)
+        { _battleSequenceOpen = false; RenderInspector(); _battleProgressStrip?.Present(ProgressSegment, false); GetViewport().SetInputAsHandled(); }
         else if (key.Keycode == Key.Escape && _expandedUnits.Count > 0)
         {
             _expandedUnits.Clear(); RenderBoard(); GetViewport().SetInputAsHandled();
@@ -434,6 +439,7 @@ public partial class Main : Node
             ClearSearchPanel();
             ClearLookPanel();
             ClearMultiTargets();
+            _battleSequenceOpen = false; if (_battleProgressStrip is not null) _battleProgressStrip.Hide();
             ClearCopyPanel(true);_copyNoticeMatch=null;_copyNotice=null;
             ObserveShownCards();
             _eventSidebar.Visible=false;_eventHandBar.Visible=false;_eventDiscardId=null;
@@ -445,8 +451,10 @@ public partial class Main : Node
         ObserveBattleJournal();
         PrepareBattlePresentation();
         RenderBattleFeedback();
-        FitTableViewport();
         ObserveBattleResolution();
+        FitBattleSequence();
+        FitTableViewport();
+        _hand.Size = new Vector2(BoardWidth - 12, HandCardSide);
         if (_displayedVersion != View.Version)
         {
             _displayedVersion = View.Version;

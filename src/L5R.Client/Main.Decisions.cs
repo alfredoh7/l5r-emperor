@@ -11,7 +11,7 @@ public partial class Main
     private bool _reviewingAlternativeCost;
     private bool _alternativeCostConfirmed;
     private bool GenericDecisionActive => View.WinnerId is null && !EventDecisionActive &&
-        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard";
+        View.PendingChoice?.Type is "effectChoice" or "preservingHonor" or "rinShame" or "conqueror" or "declineStraighten" or "forcedDiscard" or "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect";
     private bool DecisionCanSubmit => !_session.Busy && !PresentationBusy && (!_session.Online ||
         _session.Connected && !(_session.Snapshot?.PlayersConnected?.Any(p=>!p)??false));
 
@@ -37,6 +37,7 @@ public partial class Main
         var heading=Palette.Text(pending is null?(_reviewingAlternativeCost||_alternativeCostConfirmed?"HOW DO YOU PAY?":"CHOOSE A TARGET"):own?"YOUR CHOICE":"OPPONENT’S CHOICE",27,title:true);
         heading.HorizontalAlignment=HorizontalAlignment.Center;_sidebarHeader.AddChild(heading);
         _sidebarHeader.AddChild(new HSeparator());
+        if (pending?.Type is "beforeBattleOrder" or "beforeBattleOptional" or "encircledOrder" or "encircledSelect") RenderBattleFacts(true);
         var sourceId=pending?.CardId??_chosen?.CardId;
         var source=sourceId is null?null:FindCard(sourceId);
         var prompt=pending?.Prompt;

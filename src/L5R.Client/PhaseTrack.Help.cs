@@ -12,7 +12,7 @@ public partial class PhaseTrack
     public Button HelpButton { get; private set; } = null!;
     private static readonly Phase[] Phases = [Phase.Straighten,Phase.Events,Phase.Action,Phase.AttackDeclaration,Phase.Dynasty,Phase.End];
     private static string SegmentHelp(int index) => index==3
-        ? "Resolve the attack: attacker assignments, defender assignments, battle selection, Battle actions and resolution. The game presents each required decision in order."
+        ? "Declaration; Infantry Maneuvers, then Cavalry Maneuvers (attacker first, defender second); choose a battlefield; Engage and the first Battle opportunity; alternating Battle actions; before-resolution effects and the result. The game presents each required decision in order."
         : RulesHelp.PhaseGuide(Phases[index]);
     private void CreateHelp()
     {
