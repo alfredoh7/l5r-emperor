@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Start approved explicit Attack target choices with full-card previews (#355).",
-  "validation": "Read live issue, accepted rules note, engine contract and approved A/B concepts.",
-  "remaining": "Implementation, native and transport verification, prepared launcher and human review. No merge authorized.",
+  "summary": "Implement explicit Attack choices with full target faces, engine-offered No target/province/card selection, separate confirmation and prepared individual launcher; deliver the eight-task review index. No merge authorized.",
+  "validation": "Client build zero warnings/errors; Godot import; Attack native 1920x1080 normal, 1280x800 reduced and reduced-review-check passed; actual Mac app click-through and source/native comparison inspected; Core targeted reactions 30/30; transport 11/11; Movement native regression passed. All eight generated app routes checked. Final CI pending on push.",
+  "remaining": "Alfredo individual UI acceptance; Mendon rules/shared-contract review; final CI; native Windows graphical play and external multiplayer acceptance. No merge authorized. See eight-task review index for inherited dependencies.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/355",
   "branch": "codex/355-attack-targets",
-  "updated": "2026-09-21T01:55:05.104453+00:00"
+  "updated": "2026-09-21T02:19:34.567870+00:00"
 }

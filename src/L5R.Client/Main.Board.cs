@@ -270,6 +270,7 @@ public partial class Main
     private void SelectProvince(int owner, int province)
     {
         if (PresentationBusy) return;
+        if(AttackTargetActive){if(AttackProvinceTarget(owner,province))ChooseAttackTarget(AttackChoice.Province,province:province);return;}
         if(MovementActive){ChooseMovementProvince(owner,province);return;}
         if (_chosen is { Type: "attack" or "assignDefense" } action)
         {
@@ -311,6 +312,10 @@ public partial class Main
         foreach(var (id,origin) in MovementActive?_movementPlacements:[])
             if(_tiles.FirstOrDefault(t=>t.Card.Id==id) is {} mover&&TileVisible(mover))
                 yield return new(ScreenCenter(mover),WorldToScreen(origin+new Vector2(70,100)),Palette.Gold,true,clip);
+        if(AttackTargetActive&&_attackChoice==AttackChoice.Province&&_chosen!.Command!.Province is {} attackProvince
+            &&_provinceButtons.TryGetValue((1-View.ActivePlayerId,attackProvince),out var provinceTarget)
+            &&_tiles.FirstOrDefault(t=>t.Card.Id==(_chosen.Command.PerformerId??_chosen.CardId)) is {} attackSource&&TileVisible(attackSource))
+            yield return new(ScreenCenter(attackSource),ScreenCenter(provinceTarget),Palette.Gold,false,clip);
         if (!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));

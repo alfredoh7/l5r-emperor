@@ -22,6 +22,7 @@ try
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
         ("movement destinations/movers and alternative costs survive the server envelope", () => { MovementActionProjection(); return Task.CompletedTask; }),
+        ("Attack choices preserve NoTarget, card targets, province targets and explicit nulls through both wire directions", () => { AttackTargetProjection(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
         ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
     };
@@ -41,6 +42,31 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static void AttackTargetProjection()
+{
+    var engine=MatchEngine.CreateEconomyScenario();var view=engine.GetView(0);
+    var offered=new ActionOption("useAbility","Attack",true,null,
+        new GameCommand("useAbility",0,view.Version,"source",TargetId:"card",AbilityId:"attack"),
+        "source",["card"],[2],NoTarget:true);
+    var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(offered)],[true,true]);
+    using var document=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+    var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    var received=document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+    Check(received.NoTarget&&received.TargetIds!.SequenceEqual(["card"])&&received.Provinces!.SequenceEqual([2])&&received.Movement is null,
+        "The Attack's three choices were lost or confused with a movement");
+    foreach(var command in new[]{
+        offered.Command! with {TargetId=null,Province=null},
+        offered.Command! with {TargetId="card",Province=null},
+        offered.Command! with {TargetId=null,Province=2}})
+    {
+        var json=JsonSerializer.Serialize(MatchSession.ToWire(command),web);
+        var bound=JsonSerializer.Deserialize<WireGameCommand>(json,Protocol.Json)!.BindToSeat(0,view.Version);
+        Check(bound.TargetId==command.TargetId&&bound.Province==command.Province&&bound.AbilityId==command.AbilityId&&bound.CardId==command.CardId,
+            "No target/card/province command was changed during submission");
+        Check(bound.Assignments is null,"An Attack target was encoded as an army assignment");
+    }
+}
 
 static void MovementActionProjection()
 {

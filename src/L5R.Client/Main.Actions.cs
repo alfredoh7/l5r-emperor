@@ -19,6 +19,7 @@ public partial class Main
         if (RenderCopyTray()) return;
         if (RenderDecisionChooser()) { AddDecisionReviewNavigation(); return; }
         if (RenderMovement()) return;
+        if (RenderAttackTargets()) return;
         if (RenderBattleFlow()) { AddDecisionReviewNavigation(); return; }
         if (PresentationBusy)
         {
@@ -180,6 +181,7 @@ public partial class Main
     // the suggested sources all follow, instantly and without a round trip.
     private void ChooseTarget(string id)
     {
+        if(AttackTargetActive){ChooseAttackTarget(AttackChoice.Card,id);return;}
         _alternativeCostConfirmed=false;
         if (_chosen?.Command is not { } command) return;
         var priced = _chosen.TargetGold?.ContainsKey(id) == true;

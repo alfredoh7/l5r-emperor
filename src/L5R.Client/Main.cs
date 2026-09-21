@@ -124,6 +124,7 @@ public partial class Main : Node
         if (_capturePath is not null && _captureMode.StartsWith("published-either-or",StringComparison.Ordinal)) { ProcessEitherCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-copy",StringComparison.Ordinal)) { ProcessCopyCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-movement",StringComparison.Ordinal)) { ProcessMovementCapture(delta); return; }
+        if (_capturePath is not null && _captureMode.StartsWith("published-attack-targets",StringComparison.Ordinal)) { ProcessAttackTargetCapture(delta); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-supports",StringComparison.Ordinal)) { ProcessSupportCapture(delta); return; }
         if (_capturePath is not null && _captureMode == "published-ink-film") { ProcessInkFilm(); return; }
         if (_capturePath is not null && _captureMode.StartsWith("published-stabilization",StringComparison.Ordinal)) { ProcessStabilizationCapture(delta); return; }
@@ -316,6 +317,7 @@ public partial class Main : Node
         FitCopyPanel();
         FitCopyReviewControls();
         FitMovementReviewControls();
+        FitAttackReviewControls();
         FitEventDecisions();
         _status.Visible = false;
         _timeline.Position = new Vector2(344, 12); _timeline.Size = new Vector2(_layoutWidth - SidebarWidth - 404, 100);
@@ -441,6 +443,7 @@ public partial class Main : Node
         }
         if (_chosen?.Command?.ExpectedVersion != View.Version) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         if(_chosen?.Movement is not null&&_chosen.Command?.PlayerId!=View.ViewerId){_chosen=null;_sources.Clear();}
+        if(HasAttackTargets(_chosen)&&_chosen!.Command!.PlayerId!=View.ViewerId){_chosen=null;_sources.Clear();}
         if (_session.Online && (!_session.Connected || (_session.Snapshot.PlayersConnected?.Any(p => !p) ?? false))) { _chosen = null; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null; }
         if (_selected is not null) _selected = FindCard(_selected.Id);
         _seatLabel.Text = _session.Online ? $"ROOM {_session.Snapshot.RoomCode} · {Self.Clan}" : $"PRACTICE · {Self.Clan}";
@@ -492,6 +495,8 @@ public partial class Main : Node
         if(_shownOpen)ToggleShownCards(false);
         if (_session.Busy || PresentationBusy) return;
         if (SelectEventCard(card)) return;
+        if(AttackTargetActive&&card.Zone is Zone.Province or Zone.Region&&card.ProvinceIndex is {} attackProvince)
+        {if(AttackProvinceTarget(card.OwnerId,attackProvince))ChooseAttackTarget(AttackChoice.Province,province:attackProvince);return;}
         if(MovementActive&&card.Zone is Zone.Province or Zone.Region&&card.ProvinceIndex is {} destination)
         {ChooseMovementProvince(card.OwnerId,destination);return;}
         if (_chosen is { Type: "attack" or "assignDefense" } assignment)
@@ -547,10 +552,11 @@ public partial class Main : Node
         foreach (var (key, button) in _provinceButtons)
         {
             var legal = _chosen is { Type: "attack" or "assignDefense" } && key.Owner == 1 - View.ActivePlayerId && _chosen.Provinces?.Contains(key.Province) == true
-                ||MovementDestination(key.Owner,key.Province);
+                ||MovementDestination(key.Owner,key.Province)||AttackProvinceTarget(key.Owner,key.Province);
             button.Modulate = legal ? new Color(1.2f, 1.15f, .85f) : Colors.White;
             var provinceState = View.Players.Single(p => p.Id == key.Owner).Provinces.Single(p => p.Index == key.Province);
-            button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal ? MovementActive?"Choose this movement destination. Nothing moves until you confirm.\n":"Assign the selected unit here. Nothing moves until you confirm.\n" : "Inspect this province.\n") + RulesHelp.Topic("province"));
+            var instruction=AttackTargetActive?"Target this battlefield’s province. Confirm separately.\n":MovementActive?"Choose this movement destination. Nothing moves until you confirm.\n":"Assign the selected unit here. Nothing moves until you confirm.\n";
+            button.TooltipText = RulesHelp.Tooltip($"Province {key.Province + 1} · {provinceState.Strength} province strength\n" + (legal?instruction:"Inspect this province.\n") + RulesHelp.Topic("province"));
         }
         foreach (var (province, label) in _laneSummaries)
         {
@@ -564,15 +570,18 @@ public partial class Main : Node
     {
         if(_shownOpen)ToggleShownCards(false);
         if (!option.Enabled || _session.Busy || PresentationBusy) return;
-        if (option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
+        if (!HasAttackTargets(option)&&option.Type is "equip" or "playStrategy" or "useAbility" && option.Command is { CardIds: null, TargetId: null } command && option.TargetIds?.FirstOrDefault() is string target)
             option = option with { Command = command with { TargetId = target } };
         ResetDecisionSelection();
         if(option.Movement is not null&&option.Command is {} moveCommand)option=option with {Command=moveCommand with {Province=null}};
+        _attackChoice=AttackChoice.Unselected;
+        if(HasAttackTargets(option))option=option with {Command=option.Command! with {TargetId=null,Province=null}};
         _chosen = option; _sources.Clear(); _assignments.Clear(); _assignmentUnit = null;
         foreach (var id in option.Command?.SourceIds ?? []) _sources.Add(id);
         if (option.Type is "attack" or "assignDefense") _assignmentUnit = option.TargetIds?.FirstOrDefault();
         RenderBoard(); RenderInspector(); RenderPhaseActions(); Highlight();
         if(MovementActive)FocusMovement();
+        if(AttackTargetActive)FocusAttackTargets();
     }
 
     private async void Submit(GameCommand command)

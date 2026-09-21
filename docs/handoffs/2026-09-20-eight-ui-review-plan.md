@@ -13,7 +13,9 @@ Alfredo approved these concept combinations. Implementation completion means a t
 | 5 | #343 | A sidebar + B explicit consequences | Ready for individual review; [PR #401](https://github.com/alfredoh7/l5r-emperor/pull/401), native Mac cases and dedicated launcher; no merge |
 | 6 | #342 | B copy tray + A compact result summary | Ready for individual review; [PR #403](https://github.com/alfredoh7/l5r-emperor/pull/403), native Mac checks and actual prepared-app click-through passed; no merge |
 | 7 | #346 | A; reuse current battle assignment arrows and province placement | Ready for individual review; [PR #404](https://github.com/alfredoh7/l5r-emperor/pull/404), native Mac cases and actual prepared-app click-through passed; no merge |
-| 8 | #355 | A explicit target choices + B full-card previews | Pending |
+| 8 | #355 | A explicit target choices + B full-card previews | Ready for individual review; [PR #410](https://github.com/alfredoh7/l5r-emperor/pull/410), native Mac checks and actual prepared-app click-through passed; no merge |
+
+All eight prepared Mac launchers and individual checklists are collected in the [review index](2026-09-21-eight-ui-review-index.md). Each opens its own scenario in the combined review checkout. The stack remains separate from main; human acceptance and explicit merge permission are outstanding.
 
 Approved concepts and prompts are in the local `artifacts/ui-eight-design-review-2026-09-20` gallery in the parent checkout. No new concept approval is required for these combinations. Preserve full card scans, lacquer/Caudex/WeatheredQuill presentation, reduced motion, and sparse table labels. Do not use Impeccable.
 
