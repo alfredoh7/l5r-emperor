@@ -14,7 +14,7 @@ public static class CardPreview
             ShowTokenRail = false, UprightPreview = true, Material = CardPaper.Reading, MouseFilter = Control.MouseFilterEnum.Ignore,
             FocusMode = Control.FocusModeEnum.None
         };
-        face.Resized += () => { face.FaceHeight = Math.Min(height, face.Size.X * 1.4f); face.QueueRedraw(); };
+        face.Resized += () => { face.FaceHeight = Math.Min(height, Math.Max(1,face.Size.X-(CreatedCopyStatus.VisibleOn(card)?72:0)) * 1.4f); face.QueueRedraw(); };
         return face;
     }
     public static Control Create(CardView card, string context, int? gold, float scale = 1, Func<string,string?>? sourceName = null, string? interactionHint = null, bool printedOnly = false)
@@ -41,6 +41,7 @@ public static class CardPreview
         }
         var body = new VBoxContainer { SizeFlagsHorizontal = Control.SizeFlags.ExpandFill }; row.AddChild(body);
         body.AddChild(Palette.Wrapped(def.Name, 22, Palette.Paper));
+        if(CreatedCopyStatus.VisibleOn(card)) body.AddChild(CreatedCopyStatus.Explanation(card));
         if(card.ActionLocked)
         {
             var status=new HBoxContainer();status.AddThemeConstantOverride("separation",10);body.AddChild(status);

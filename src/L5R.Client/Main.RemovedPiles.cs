@@ -58,9 +58,9 @@ public partial class Main
             foreach(var card in player.RemovedFromGame)
             {
                 var column=new VBoxContainer();grid.AddChild(column);column.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;
-                var tile=new CardTile(card,true,_=>{},_=>{}) {CustomMinimumSize=new Vector2(230,328),FaceHeight=322,ReducedMotion=true,SizeFlagsHorizontal=Control.SizeFlags.ShrinkCenter,ContextHelp=player.Clan+" · Removed from the Game · Inspection only"};column.AddChild(tile);
+                var tile=new CardTile(card,true,_=>{},_=>{}) {CustomMinimumSize=new Vector2(230,328),FaceHeight=CreatedCopyStatus.VisibleOn(card)?266:322,ReducedMotion=true,SizeFlagsHorizontal=Control.SizeFlags.ShrinkCenter,ContextHelp=player.Clan+" · Removed from the Game · Inspection only"};column.AddChild(tile);
                 var family=card.Definition?.Type is CardType.Personality or CardType.Holding or CardType.Event?"Dynasty":"Fate";
-                var caption=Palette.Text(family,18,Palette.PaperDim);caption.HorizontalAlignment=HorizontalAlignment.Center;column.AddChild(caption);
+                var caption=Palette.Text(CreatedCopyStatus.VisibleOn(card)?"Created copy · "+family:family,18,Palette.PaperDim);caption.HorizontalAlignment=HorizontalAlignment.Center;column.AddChild(caption);
             }
         }
         foreach(var player in View.Players)

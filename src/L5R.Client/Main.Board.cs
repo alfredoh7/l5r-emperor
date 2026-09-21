@@ -97,7 +97,8 @@ public partial class Main
     private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        var rail = CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        var rail = (CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0)
+            + (CreatedCopyStatus.VisibleOn(card) ? height * .32f : 0);
         if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();

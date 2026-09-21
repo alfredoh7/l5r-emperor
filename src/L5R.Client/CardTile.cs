@@ -55,6 +55,7 @@ public partial class CardTile : Button
         Material = CardPaper.Table;
         MouseDefaultCursorShape = CursorShape.PointingHand;
         TooltipText = card.Definition is null ? "Face-down card. Its identity is hidden." : $"{card.Definition.Name}\n{card.Definition.Type} · {card.Definition.GoldCost} Gold\n{card.Definition.Text}";
+        if(CreatedCopyStatus.VisibleOn(card)) TooltipText += "\n" + CreatedCopyStatus.Description(card);
         Pressed += () => clicked(Card);
         MouseEntered += () => { _hover = true; QueueRedraw(); inspected(Card); };
         MouseExited += () => { _hover = false; QueueRedraw(); };
@@ -65,6 +66,7 @@ public partial class CardTile : Button
 
     public override void _Ready()
     {
+        if(CreatedCopyStatus.VisibleOn(Card)) { CopySeal=new CreatedCopySeal {CardAnchor=this};AddChild(CopySeal); }
         if(!UprightPreview && ActionLockStatus.VisibleOn(Card))
         {
             RestrictionSeal=new ActionLockSeal {CardAnchor=this};AddChild(RestrictionSeal);
@@ -85,7 +87,7 @@ public partial class CardTile : Button
         AdvanceStatFeedback(delta);
         // The rail cap must stay under the pointer. Enlarging its parent moves this
         // small target into/out of the card face and repeatedly restarts the tooltip.
-        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered()!=true && RestrictionSeal?.IsHovered()!=true;
+        var inspecting = (_hover || HasFocus() && !DecisionSelected) && TokenRail?.GrantSeal?.IsHovered()!=true && RestrictionSeal?.IsHovered()!=true && CopySeal?.IsHovered()!=true;
         var targetLift = inspecting ? Card.Zone == Zone.Hand ? 40f : ProjectToScreen is null ? 4f : 0f : DecisionSelected ? 18f : 0f;
         var targetScale = inspecting ? Card.Zone == Zone.Hand ? 1.22f : 1.06f : 1f;
         ZIndex = _hover ? 30 : HasFocus() ? 20 : IsSelected ? 10 : 0;
@@ -112,6 +114,7 @@ public partial class CardTile : Button
     public CardTile[] TokenRailCompanions { get; set; } = [];
     public Func<string,string?>? TokenSourceName { get; set; }
     public CardTokenRail? TokenRail { get; private set; }
+    public CreatedCopySeal? CopySeal { get; private set; }
     public ActionLockSeal? RestrictionSeal { get; private set; }
 
     private Vector2 ProjectFacePoint(Vector2 point, Vector2 face)

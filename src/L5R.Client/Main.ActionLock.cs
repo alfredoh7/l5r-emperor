@@ -12,6 +12,7 @@ public partial class Main
         var name=Palette.Wrapped(card.Definition!.Name,27);name.AddThemeFontOverride("font",SidebarSkin.Bold);
         name.SizeFlagsHorizontal=Control.SizeFlags.ExpandFill;title.AddChild(name);title.AddChild(ActionLockStatus.Icon(56));
         _inspector.AddChild(Palette.Wrapped($"{card.Definition.Clan} · {card.Definition.Type}",18,Palette.PaperDim));
+        if(CreatedCopyStatus.VisibleOn(card))_inspector.AddChild(CreatedCopyStatus.Explanation(card));
         _inspector.AddChild(new HSeparator());_inspector.AddChild(ActionLockStatus.Explanation(card));
         if(card.StraightenBlocked)_inspector.AddChild(Palette.Wrapped("Straightening is prevented for this turn.",16,Palette.Gold));
         if(card.Dishonorable)_inspector.AddChild(Palette.Wrapped("Dishonorable",20,new Color("efaa9a")));

@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Begin approved created-copy seal preview #400 on isolated UI review stack; inherited shared changes remain unmerged.",
-  "validation": "Live issue and open PRs inspected; origin/main 97d8e407 included. Implementation not started.",
-  "remaining": "Implement approved seal, native checks, launchable demo, review and CI. No main merge authorized.",
+  "summary": "Implement approved A created-copy seal in native card/hover/inspector/removed views; inherited isolated preview stack remains unmerged.",
+  "validation": "Client build 0 warnings/errors; Godot import; native 1920x1080 normal and 1280x800 reduced passed; actual launcher/scenario picker verified; current catalogue art verified. No authored rules changes; inherited #430 deterministic baseline passed.",
+  "remaining": "Final-head CI; combined Windows review delivery; Alfredo hands-on acceptance and Mendon review. No main merge authorized.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/400",
   "branch": "codex/400-created-copy-seal",
-  "updated": "2026-09-21T22:44:40.338379+00:00"
+  "updated": "2026-09-21T22:58:31.459810+00:00"
 }
