@@ -377,7 +377,8 @@ public sealed partial class MatchEngine
     // currently self-performer duel-issuing ability is already documented as an "Iaijutsu duel"
     // (issue #207); extend this list as a future ability is wired with an explicit "Iaijutsu"
     // Timing prefix (e.g. "Iaijutsu Open").
-    private static bool IsIaijutsuAction(string abilityId) => abilityId is "daisuke-duel" or "ichizo-exp-duel" or "shikei-duel";
+    private static bool IsIaijutsuAction(string abilityId) => abilityId is "daisuke-duel" or "ichizo-exp-duel" or "shikei-duel"
+        || AbilityCatalog.All.TryGetValue(abilityId, out var ability) && ability.ActionKeywords?.Contains("Iaijutsu") == true;
 
     // Each duel-issuing ability's own printed win/loss text. loserIds has two entries only on a
     // double-loss tie; winnerId is null in that same case.
@@ -391,7 +392,7 @@ public sealed partial class MatchEngine
             case "steel-on-steel-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             case "training-duel-challenge": foreach (var id in loserIds) ApplyModifier(Card(id), id, abilityId, "Force", -1); break;
             // Dragon Clan review (issue #207): three real self-performer Iaijutsu duels.
-            case "daisuke-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
+            case "daisuke-duel": case "spirit-duelist-duel": foreach (var id in loserIds) MoveHome(Card(id), false); break;
             case "ichizo-exp-duel": case "shikei-duel": DestroyUnits(loserIds.Select(Card).ToArray(), actingPlayerId: challengerPlayerId); break;
             // Second City unwired-card audit (issue #264): "she won" is exactly "the challenger's own
             // side won" in a self-performer 1v1 duel -- there is no ally on that side to conflate her

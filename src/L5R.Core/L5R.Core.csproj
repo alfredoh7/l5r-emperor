@@ -125,5 +125,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../content/published/strategy-wave-30.json" LogicalName="L5R.Published.StrategyWave30.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-33.json" LogicalName="L5R.Published.StrategyWave33.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-42.json" LogicalName="L5R.Published.PersonalityWave42.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-34.json" LogicalName="L5R.Published.StrategyWave34.json" />
+    <EmbeddedResource Include="../../content/published/spell-wave-12.json" LogicalName="L5R.Published.SpellWave12.json" />
+    <EmbeddedResource Include="../../content/published/item-wave-7.json" LogicalName="L5R.Published.ItemWave7.json" />
+    <EmbeddedResource Include="../../content/published/celestial-wave-3.json" LogicalName="L5R.Published.CelestialWave3.json" />
   </ItemGroup>
 </Project>

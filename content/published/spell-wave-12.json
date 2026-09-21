@@ -1,0 +1,84 @@
+{
+  "Profile": "spell-wave-12",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-1489",
+      "Name": "Control Your Destiny",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Bow this Shugenja unless he is Void: Look at the top three cards of your Fate or Dynasty deck. You may put one or two of these cards on the bottom of your deck. Put the remaining cards on the top of your deck in any order.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-1489.jpg",
+      "Keywords": [
+        "Void"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "control-your-destiny-look"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-4291",
+      "Name": "Katana of Fire",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 4,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Once per game: Create a +3F/+1C Fire • Weapon Item with the ability, \"Battle: Bow this card unless this Personality is Fire, and target an enemy card without attachments: Destroy it\" and attach it to one of your Personalities.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-4291.jpg",
+      "Keywords": [
+        "Experienced",
+        "Fire"
+      ],
+      "Focus": 2,
+      "Abilities": [
+        "katana-of-fire-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7767",
+      "Name": "Taming the Beast",
+      "Type": "Spell",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Reaction: After another player's action targets your defending Personality, if this Shugenja is Earth, destroy this card: Negate the Personality's destruction from the action's effects.\nBattle/Open: Even if this unit is not at the current battlefield, bow this Shugenja and target your Nonhuman: Straighten it.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7767.jpg",
+      "Keywords": [
+        "Earth"
+      ],
+      "Focus": 1,
+      "Abilities": [
+        "taming-beast-negate",
+        "taming-beast-straighten"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

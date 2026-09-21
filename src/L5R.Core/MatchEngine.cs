@@ -2190,6 +2190,7 @@ public sealed partial class MatchEngine
                 Emit("destructionNegated",$"{Definition(card).Name}'s destruction was negated before it resolved.",card.OwnerId,card.Id);
                 continue;
             }
+            if(DestructionDelayed(card)) continue;
             foreach(var attachment in Attachments(card.Id).ToArray())
             {
                 RemoveAttachmentGrants(card, attachment.Id);
@@ -2318,6 +2319,10 @@ public sealed partial class MatchEngine
         foreach(var check in _state.PendingTamokoHonorChecks)
             if(Card(check.TargetId).AssignedToAttackTurn != _state.TurnNumber) GainHonor(check.BeneficiaryPlayerId,1,"Tamori Tamoko",Card(check.TargetId));
         _state.PendingTamokoHonorChecks.Clear();
+        // Spirit of the Berserker: a destruction put off "until before this turn ends" happens now.
+        ResolveDelayedDestructions();
+        // A window a delayed destruction opened (Overconfident's draw) is answered first; the turn then ends when the player ends the phase again.
+        if(_state.WinnerId is not null || OpenOverconfidentDrawWindow(_state.ActivePlayerId)) return;
         // Lady Matsu's Rage: "this turn" (its own printed parenthetical) -- any watch that never fired
         // (the target never straightened) simply expires here, with no further consequence.
         _state.PendingLadyMatsusRageWatches.Clear();
@@ -2340,7 +2345,7 @@ public sealed partial class MatchEngine
     {
         // A Ring's recruit grant made for a battle that was never fought (issue #379) does not carry into another turn; no other grant outlives its battle.
         _state.AdditionalActions.Clear();
-        foreach(var card in _state.Cards.Values) { card.Modifiers.Clear(); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
+        foreach(var card in _state.Cards.Values) { card.Modifiers.RemoveAll(m=>!m.Permanent); card.GrantedKeywords.RemoveAll(g=>g.Duration=="Turn"); card.GrantedAbilities.RemoveAll(g=>g.Duration is GrantDuration.Turn or GrantDuration.Battle); card.Protections.RemoveAll(p=>p.Duration=="Turn"); card.ActionLocks.RemoveAll(l=>l.Duration==ActionLockUntilTurnEnd); }
         // Ohsuki's Sparrow (issue #299): "since your last turn ended" -- the turn that is ending right
         // now is the ACTIVE player's own, so it restarts that one player's window; the other player's
         // flag (which may already be set by destruction during this very turn) is left untouched until

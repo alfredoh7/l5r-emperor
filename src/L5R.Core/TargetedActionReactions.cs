@@ -204,6 +204,18 @@ public sealed partial class MatchEngine
                 return YojimboRedirectApplies(card, subject, affected, "Shugenja");
             case "blade-of-champions-redirect":
                 return IsBattleAction(command) && UnitHostId(affected) == UnitHostId(card) && RedirectCandidates(card, subject).Any();
+            // Spirit of the Yojimbo's granted Reaction: Ezuno's shape without his Shugenja restriction -- any of the reactor's own Personalities at his location.
+            case "spirit-yojimbo-redirect":
+                return YojimboRedirectApplies(card, subject, affected, null);
+            // Spirit of the Berserker's: another player's action targets HIM and could destroy him (an Attack always could, a Personality-destroying ability is on the list).
+            case "spirit-berserker-delay":
+                return command.PlayerId != card.OwnerId && affected.Id == card.Id && Definition(affected).Type == CardType.Personality && (subject.IsAttack || DestroysTarget(command.AbilityId));
+            // Taming the Beast (a Spell): another player's action targets one of its controller's DEFENDING Personalities at the battle, its Shugenja is Earth, and the action could destroy him.
+            case "taming-beast-negate":
+                return command.PlayerId != card.OwnerId && affected.OwnerId == card.OwnerId && Definition(affected).Type == CardType.Personality
+                    && AtBattle(affected) && affected.OwnerId != _state.ActivePlayerId
+                    && card is { Zone: Zone.Attached, AttachedTo: { } tamedHostId } && Keyword(Card(tamedHostId), "Earth")
+                    && (subject.IsAttack || DestroysTarget(command.AbilityId));
             case "yurishi-disappear":
                 return command.PlayerId != card.OwnerId && affected.Id == card.Id && IsBattleAction(command) && card.Zone == Zone.Battlefield;
             case "jinn-kuen-negate":

@@ -123,8 +123,9 @@ public sealed record CardDefinition(string Id, string Name, CardType Type, strin
     string? AttachGrantsEliteEffectWhileWielderHas = null);
 
 /// <summary>One applied Force/Chi change, in application order, so a future card can negate a
-/// specific prior effect instead of only ever resetting a flat running total.</summary>
-public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount);
+/// specific prior effect instead of only ever resetting a flat running total. Permanent: "permanently give him +2F" (Spirit of the Berserker) -- kept when the
+/// turn ends (FinishTurn), unlike every other modifier, and reset with the card when it goes back to a hand or a deck.</summary>
+public sealed record AppliedModifier(string Source, string Effect, string Stat, int Amount, bool Permanent = false);
 
 /// <summary>One negation a "before an action resolves" reaction has set on a card for the deferred command:
 /// Kind is "destroy", "move", "straighten", "bow" (each consumed by its first match) or "all" (Champion of
@@ -741,6 +742,9 @@ public sealed class MatchState
     // LadyMatsusRageWatch's own doc comment. Cleared unconditionally in EndTurn (same call site as
     // PendingTamokoHonorChecks above) for whichever entries never fired this turn.
     public List<LadyMatsusRageWatch> PendingLadyMatsusRageWatches { get; set; } = [];
+    // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
+    // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
+    public List<string> PendingDelayedDestructions { get; set; } = [];
     // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy
     // Infantry Personality to this card's battlefield" -- MoveToBattlefield itself (the sole "an
     // action moved a card to a battlefield" primitive; ordinary Attack/Defense assignment goes

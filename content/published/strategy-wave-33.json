@@ -1,0 +1,124 @@
+{
+  "Profile": "strategy-wave-33",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-7420",
+      "Name": "Spirit of the Berserker",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Berserker, permanently give him +2F and the ability, \"Reaction: After another player's action targets this Personality: Delay his destruction from the action's effects until before this turn ends.\" Otherwise, permanently give him Berserker.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7420.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-berserker"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7423",
+      "Name": "Spirit of the Duelist",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Duelist, permanently give him the ability, \"Iaijutsu Battle: Target an enemy Personality: This Personality duels him. Move the duel's loser home.\" Otherwise, permanently give him Duelist.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7423.jpg",
+      "Keywords": [
+        "Iaijutsu"
+      ],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-duelist"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7425",
+      "Name": "Spirit of the Paragon",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Paragon, permanently give him the ability, \"Battle: Target an enemy Personality with either equal or lower Force, or equal or lower Personal Honor: Bow him.\" Otherwise, permanently give him Paragon.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7425.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-paragon"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7426",
+      "Name": "Spirit of the Scout",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Scout, permanently give him the ability, \"Battle: Bow this Personality unless you have Reconnaissance: Ranged 4 Attack.\" Otherwise, permanently give him Scout.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7426.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-scout"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-7430",
+      "Name": "Spirit of the Yojimbo",
+      "Type": "Strategy",
+      "Clan": "Unaligned",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 0,
+      "Chi": 0,
+      "PersonalHonor": 0,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Choose your performing unbowed Personality: If he is a Yojimbo, permanently give him the ability, \"Reaction: After another player's action targets one of your Personalities at this Personality's location: The action targets this Personality instead, if legal.\" Otherwise, permanently give him Yojimbo.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-7430.jpg",
+      "Keywords": [],
+      "Focus": 4,
+      "Abilities": [
+        "spirit-of-the-yojimbo"
+      ],
+      "Effect": "none"
+    }
+  ],
+  "Decks": []
+}

@@ -2285,4 +2285,16 @@ public static class PublishedContent
     }
     /// <summary>Spirit of the Monk: first permanent, predefined ability grant (#386).</summary>
     public static PublishedSnapshot StrategyWave30 { get; } = Load("L5R.Published.StrategyWave30.json", "strategy-wave-30", requireDecks: false);
+    /// <summary>Second City pass (#264): the other five Spirit Strategies -- Berserker, Duelist, Paragon, Scout, Yojimbo.</summary>
+    public static PublishedSnapshot StrategyWave33 { get; } = Load("L5R.Published.StrategyWave33.json", "strategy-wave-33", requireDecks: false);
+    /// <summary>Second City pass (#264): Yoritomo Emoto, whose Battle action bows any of his controller's Followers at the battlefield to destroy an enemy card.</summary>
+    public static PublishedSnapshot PersonalityWave42 { get; } = Load("L5R.Published.PersonalityWave42.json", "personality-wave-42", requireDecks: false);
+    /// <summary>Second City pass (#264): Interference.</summary>
+    public static PublishedSnapshot StrategyWave34 { get; } = Load("L5R.Published.StrategyWave34.json", "strategy-wave-34", requireDecks: false);
+    /// <summary>Second City pass (#264): Control Your Destiny, Katana of Fire and Taming the Beast.</summary>
+    public static PublishedSnapshot SpellWave12 { get; } = Load("L5R.Published.SpellWave12.json", "spell-wave-12", requireDecks: false);
+    /// <summary>Second City pass (#264): Flame Katana, the Item Katana of Fire creates.</summary>
+    public static PublishedSnapshot ItemWave7 { get; } = Load("L5R.Published.ItemWave7.json", "item-wave-7", requireDecks: false);
+    /// <summary>Second City pass (#264): Jurojin's Blessing.</summary>
+    public static PublishedSnapshot CelestialWave3 { get; } = Load("L5R.Published.CelestialWave3.json", "celestial-wave-3", requireDecks: false);
 }
