@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Start approved Copy tray and result-summary preview #342; no merge authorized.",
+  "validation": "Read current issue, engine view and rules decisions; inspected overlap with PR388 grant display.",
+  "remaining": "Implement independent pickers, copied-card display, real-engine preview launcher and native/regression checks.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/342",
+  "branch": "codex/342-copy-wizard",
+  "updated": "2026-09-21T00:44:44.362051+00:00"
+}
