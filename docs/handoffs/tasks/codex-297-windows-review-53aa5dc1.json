@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Deliver approved 5-8 Windows batch pinned to reviewed PR410 source; isolate launcher probes from immutable exported binaries and reconcile delivery tooling with main bbea0141.",
-  "validation": "Packaging/publication tests 9/9 pass; prior Windows run passed 5-8 runtime and every launcher before an older package rename lock. Real export stays intact in the corrected probe; every hash/runtime/launcher check remains required. Actual package, SHA/size and all local source/native/Mac app evidence verified. New main Second City work is preserved in tooling checkout but intentionally excluded from the pinned reviewed game package.",
-  "remaining": "Await Windows package validation on final tooling revision, then deliver Mendon notification. Expert review, native Windows graphical play and future main integration remain pending.",
+  "summary": "Refresh all approved demo 5-8 Windows launchers to PR410 source 6b6908d7, including sequenced spear clearance and working attack-review buttons; preserve prior immutable release and main 485320af.",
+  "validation": "Packaging/publication regressions9/9 pass. All four native demo suites passed on the pinned source; Mac launcher targets verified. Windows export validates bundled runtime/resources and source omission. Actual new ZIP SHA/size, six launcher modes/profiles, isolated override and approval/merge/feedback instructions verified. Upload and exact Windows package gate must finish before notification.",
+  "remaining": "Finish candidate staging, pass the exact Windows review package check and source bootstrap retry, then notify Mendon. Human review/Windows graphical play remain separate; nothing merges into main.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T11:38:44.803302+00:00"
+  "updated": "2026-09-21T12:22:58.832614+00:00"
 }
