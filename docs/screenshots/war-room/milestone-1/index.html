@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Command chamber — architecture review</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#10100f;color:#e7dbc4;font:17px/1.5 Georgia,serif}
+header,main,footer{max-width:1900px;margin:auto;padding:22px 30px}header{border-bottom:1px solid #6f5938}
+h1{font-size:28px;font-weight:normal;margin:0 0 7px}p{margin:6px 0;color:#bcb6aa}strong{color:#e5c78e;font-weight:normal}
+nav{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:18px}button,a{font:inherit;color:inherit}
+button{border:1px solid #66553b;border-radius:3px;background:#1c1b18;padding:8px 16px;cursor:pointer}
+button[aria-pressed=true]{background:#574328;border-color:#b4945f;color:#fff1d6}button:hover{border-color:#c5ab78}
+button:focus-visible,a:focus-visible{outline:2px solid #e9ca89;outline-offset:3px}.spacer{flex:1}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:18px}.single{grid-template-columns:1fr}.single #source{display:none}
+figure{margin:0;min-width:0;background:#080908;border:1px solid #494032}figcaption{padding:10px 14px;border-bottom:1px solid #494032;font-size:14px;letter-spacing:.035em}
+img{display:block;width:100%;height:auto}footer{border-top:1px solid #494032;font-size:15px}a{color:#dfc18e;text-underline-offset:3px}
+@media(max-width:900px){.pair{grid-template-columns:1fr}header,main,footer{padding:16px}}
+</style>
+<header>
+  <h1>Candlelit command chamber · Architecture milestone</h1>
+  <p><strong>Revised larger room:</strong> wider aisles, rear wall moved back and furnishings arranged at the perimeter. Table dimensions remain unchanged. Review the doorway, walls and furnishing positions; detailed Meshy props and final distressed materials follow your feedback.</p>
+</header>
+<main>
+  <nav aria-label="Review views">
+    <button data-view="composition" aria-pressed="true">Composition</button>
+    <button data-view="overview" aria-pressed="false">Room overview</button>
+    <button data-view="joinery" aria-pressed="false">Table &amp; joinery</button>
+    <span class="spacer"></span>
+    <button id="solo" aria-pressed="false">Large preview</button>
+    <a href="../../../../tools/blender/Review%20War%20Room.command">Open native review</a>
+  </nav>
+  <div class="pair" id="pair">
+    <figure id="source"><figcaption>APPROVED IMAGE · visual target</figcaption><img src="../../../../assets/table/war-room/approved-command-chamber.png" alt="Approved candlelit war room with the navy game board and interface"></figure>
+    <figure><figcaption id="caption">GODOT CAPTURE · architecture and original mat/frame · composition</figcaption><a id="image-link" href="composition.png"><img id="render" src="composition.png" alt="Actual native Godot render of the Blender room architecture"></a></figure>
+  </div>
+  <p style="margin-top:16px">These are native captures of an isolated room review scene. Live match integration, the reference’s props, weathering and candle animation remain later milestones. The approved mat and frame artwork are retained.</p>
+</main>
+<footer>
+  <a href="../../../../assets/table/war-room/command-chamber-m1.blend">Editable Blender model</a> ·
+  <a href="blender-composition.png">Blender render</a> ·
+  <a href="../../../../assets/table/war-room/README.md">Scope and validation</a> ·
+  <a href="https://github.com/alfredoh7/l5r-emperor/pull/234">Draft PR #234</a>
+  <p>Milestone paused for Alfredo’s review. No Meshy credits spent in this architecture pass.</p>
+</footer>
+<script>
+document.querySelectorAll('[data-view]').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('[data-view]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+ const file=b.dataset.view+'.png';document.getElementById('render').src=file;document.getElementById('image-link').href=file;
+ document.getElementById('caption').textContent='GODOT CAPTURE · architecture and original mat/frame · '+b.textContent.toLowerCase();
+}));
+document.getElementById('solo').addEventListener('click',e=>{
+ const on=document.getElementById('pair').classList.toggle('single');e.currentTarget.setAttribute('aria-pressed',String(on));
+ e.currentTarget.textContent=on?'Side by side':'Large preview';
+});
+</script>
+</html>

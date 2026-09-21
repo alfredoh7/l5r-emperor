@@ -18,6 +18,17 @@ public sealed record MoveSpec(string Movers, string Destination)
 
 public sealed partial class MatchEngine
 {
+    private MoveDestinationView? MovementPreview(string abilityId, AbilityDefinition ability, CardInstance? source, string? performer)
+    {
+        // Hawado's target pays the removal cost; only Hawado moves. Her existing effect and validation are unchanged.
+        if(abilityId=="hawado-move-battlefield")return new(1-_state.ActivePlayerId,source is null?[]:[source.Id],false);
+        if(ability.Move is not {ChoosesBattlefield:true} move)return null;
+        var fixedId=move.Movers is MoveSpec.Source or MoveSpec.SourceAndTarget?source?.Id:
+            move.Movers is MoveSpec.Performer or MoveSpec.PerformerAndTarget?performer:null;
+        return new(1-_state.ActivePlayerId,fixedId is null?[]:[fixedId],
+            move.Movers is MoveSpec.Target or MoveSpec.SourceAndTarget or MoveSpec.PerformerAndTarget);
+    }
+
     // The battlefields next to `current` (Mendon's ruling, issue #336): a battlefield is identified by the DEFENDER's province it is fought over, so
     // adjacency follows the DEFENDER's province line -- never the line of whichever player happens to own the card or take the action. Destroyed
     // provinces slide their neighbours together (AdjacentProvinces). The one place adjacency between battlefields is decided.

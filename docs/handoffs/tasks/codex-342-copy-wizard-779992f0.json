@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Implement approved Copy tray and compact copied-effects summary for issue #342; isolated draft review, no merge authorized.",
+  "validation": "Client build 0 warnings/errors; native normal/reduced/review-navigation cases passed; card-copy 15/15; transport 9/9; permanent small/long and bowed token/attachment regressions passed; screenshots and source comparison inspected.",
+  "remaining": "Actual Mac app desktop click-through awaits unlocked Mac. Alfredo individual UI acceptance, Mendon presentation review, final CI; no merge authorized. Native Windows/external multiplayer untested. Coordinate grant display with PR388. Movement #346 and Attack #355 still pending.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/342",
+  "branch": "codex/342-copy-wizard",
+  "updated": "2026-09-21T01:07:41.044623+00:00"
+}

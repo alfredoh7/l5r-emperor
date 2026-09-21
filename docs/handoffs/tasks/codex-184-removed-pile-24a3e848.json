@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Approved contextual removed-card piles with small source-art wax seals, existing gold ink borders and public read-only gallery.",
+  "validation": "Client builds clean. tools/check.sh --skip-client passed all requested checks including Discipline visibility/terminal removal. Native 1672x941 and 1280x800 fixtures verify empty absence, two mixed owner piles, stable bounds, owner tabs and unchanged session. Combined Play Latest.command launch passed; 2486-image WebP pack verified.",
+  "remaining": "CI and mdornbrook review pending. Native screenshots use explicit public-card visual fixtures; actual Discipline removal is covered by Core tests, not an end-to-end native playtest. Windows graphical test not performed.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/188",
+  "branch": "codex/184-removed-pile",
+  "updated": "2026-09-11T12:15:27.001580+00:00"
+}

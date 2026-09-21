@@ -12,7 +12,7 @@ public sealed record SessionSnapshot(MatchView View, ActionOption[] Actions, str
 public sealed record RoomSeat(string RoomCode, int PlayerId, string SeatToken, int ProtocolVersion, string ContentVersion);
 
 /// <summary>The presentation submits intentions here. It never changes engine state.</summary>
-public sealed class MatchSession : IDisposable
+public sealed partial class MatchSession : IDisposable
 {
     public event Action? Changed;
     public event Action<string>? Notice;
@@ -21,6 +21,8 @@ public sealed class MatchSession : IDisposable
     public bool Online => _socket is not null;
     public bool Connected => _socket?.State == WebSocketState.Open;
     public bool Busy { get; private set; }
+    // Presentation identity only: a fresh practice clears inspection state; reconnecting to the same room preserves it.
+    public string MatchKey { get; private set; } = Guid.NewGuid().ToString("N");
     public RoomSeat? Seat { get; private set; }
     private MatchEngine? _engine;
     private ClientWebSocket? _socket;
@@ -39,6 +41,7 @@ public sealed class MatchSession : IDisposable
         // even though the shuffle itself was correct. Match the server's per-match randomness (RoomManager.cs).
         var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
         _engine = published ? MatchEngine.CreatePublishedMatch(seed) : economy ? MatchEngine.CreateEconomyScenario(seed) : MatchEngine.CreateStarterMatch(seed);
+        MatchKey = Guid.NewGuid().ToString("N");
         _localSeat = published ? seat : _engine.State.ActivePlayerId;
         _practiceNameSeat = _localSeat;
         RefreshLocal();
@@ -50,6 +53,7 @@ public sealed class MatchSession : IDisposable
     {
         Disconnect();
         _engine = MatchEngine.CreateGoldPaymentShowcase(kind);
+        MatchKey = Guid.NewGuid().ToString("N");
         _localSeat = 0; _practiceNameSeat = 0;
         RefreshLocal();
     }
@@ -59,6 +63,14 @@ public sealed class MatchSession : IDisposable
         if (_engine is null || Online) return;
         _localSeat = 1 - _localSeat;
         RefreshLocal();
+    }
+
+    public void StartCustomPractice(Deck yourDeck, Deck opponentDeck)
+    {
+        // Construct and validate before disconnecting/replacing a running session.
+        var seed = BitConverter.ToUInt64(RandomNumberGenerator.GetBytes(sizeof(ulong)));
+        var engine = MatchEngine.CreateCustomMatch(seed, yourDeck, opponentDeck);
+        Disconnect(); _engine = engine; MatchKey = Guid.NewGuid().ToString("N"); _localSeat = 0; _practiceNameSeat = 0; RefreshLocal();
     }
 
     public void FollowPracticePriority()
@@ -183,6 +195,7 @@ public sealed class MatchSession : IDisposable
         _engine = null;
         Snapshot = null;
         Seat = seat;
+        MatchKey = server.AbsoluteUri + seat.RoomCode;
         var connection = new CancellationTokenSource();
         var token = connection.Token;
         var socket = new ClientWebSocket();

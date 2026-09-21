@@ -1,0 +1,26 @@
+[
+  {
+    "id": "A",
+    "title": "Two decks, one decision",
+    "initialSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-58db8827-7847-4440-b6b2-e13431108aaf.png",
+    "finalSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-e03ffdc1-3a04-40e6-919e-eadb7dfa5520.png",
+    "savedFile": "A-practice-setup.png",
+    "refinementPrompt": "Use case: precise-object-edit. Edit the supplied Practice setup concept screenshot.\nChange only the summary count rows inside the two deck panels: remove the gold folding-fan icon next to Dynasty and remove the gold circular coin/swirl icon next to Fate, in BOTH panels. These could be confused with Honor and Gold. Keep the exact labels and counts \"Dynasty 40\" and \"Fate 40\" but center each label/count pair gracefully in its existing half of the row. Do not replace them with any other icon.\nPreserve EVERYTHING else exactly: composition, title, all other text, crane and lion medallions, Stronghold artwork, gold border/corners, black lacquer material, navy background, buttons, readiness checks, spacing, and resolution. Make no other changes."
+  },
+  {
+    "id": "B",
+    "title": "Library and match summary",
+    "initialSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-f6e52631-bd40-4901-bc83-82077082fa96.png",
+    "finalSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-f6e52631-bd40-4901-bc83-82077082fa96.png",
+    "savedFile": "B-practice-setup.png",
+    "refinementPrompt": null
+  },
+  {
+    "id": "C",
+    "title": "War-room setup",
+    "initialSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-6bcdadf5-962d-467f-b9cc-f60cfbf58fc8.png",
+    "finalSource": "/Users/alfredo/.codex/generated_images/01a0768d-37dc-7cd1-917d-c69c30ba2ab1/exec-05c70e97-6a4a-44ff-8fb6-dee78b98e438.png",
+    "savedFile": "C-practice-setup.png",
+    "refinementPrompt": "Use case: precise-object-edit. Edit the supplied Practice setup overlay screenshot.\nChange only the two Dynasty/Fate count rows: remove the small gold folding-fan icons immediately before \"Dynasty\", and remove the small circular gold coin icons immediately before \"Fate\" in BOTH the player and opponent slots. These resemble Honor and Gold so they are incorrect here. Retain clean text-only rows \"Dynasty 36 · Fate 40\" and \"Dynasty 40 · Fate 40\" respectively, aligned with the deck names above. Do not replace them with other icons.\nPreserve ALL remaining image content exactly: large clan medallions, composition, typography, text, numeric values, art thumbnails, frame, black lacquer material, error inset and Edit button, dimmed Start button, war-room background and resolution. No other changes."
+  }
+]

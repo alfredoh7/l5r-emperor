@@ -16,6 +16,17 @@ public partial class UnitStandard : StatTokens
     public IEnumerable<Vector2[]> ArtworkPolygonsOnViewport() => Silhouettes.Select(shape=>shape.Select(p=>ToViewport(FromSource(p))).ToArray());
 
     private Rect2 _body;
+    private Rect2? _attackSlot;
+    private float _attackClearance;
+    public Func<Vector2, Vector2>? Unprojection { get; set; }
+    public float AttackSlidePixels { get; private set; }
+
+    public void ReserveAttackSpace(Rect2? slot, float progress)
+    {
+        _attackSlot = slot; _attackClearance = progress;
+        PositionAtCard();
+    }
+
     public Vector2 MountOnViewport => ToViewport(Vector2.Zero);
     private Vector2 ToViewport(Vector2 p) => Projection?.Invoke(GetGlobalTransform() * p) ?? GetGlobalTransform() * p;
     public Vector2[] BodyCornersOnViewport() => new[] { _body.Position, new Vector2(_body.End.X, _body.Position.Y), _body.End, new Vector2(_body.Position.X, _body.End.Y) }.Select(ToViewport).ToArray();
@@ -44,6 +55,23 @@ public partial class UnitStandard : StatTokens
         // C is a short card-mounted tab; its top is flush with the card corner.
         _body = new Rect2(new Vector2(bodyX-mount.X, 0), new Vector2(h*.31f*41/145,h*.31f));
         Size = new Vector2(_body.End.X, _body.Size.Y);
+        AttackSlidePixels = 0;
+        if (_attackSlot is { } slot && _attackClearance > 0 && Unprojection is not null)
+        {
+            var resting = BodyRectOnViewport();
+            var clearance = Math.Max(0, slot.End.Y - resting.Position.Y);
+            if (clearance > 0)
+            {
+                // Move along the card's actual edge, then inverse-project back into
+                // the table. Cloth, spears, value and input all move as one fitting.
+                var start = ToViewport(Vector2.Zero);
+                var alongEdge = ToViewport(Vector2.Down * h) - start;
+                var target = start + alongEdge * (clearance / Math.Max(1, alongEdge.Y));
+                var travel = inverse * Unprojection(target) - inverse * Unprojection(start);
+                Position += travel * _attackClearance;
+                AttackSlidePixels = BodyRectOnViewport().Position.Y - resting.Position.Y;
+            }
+        }
         QueueRedraw();
     }
 

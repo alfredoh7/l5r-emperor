@@ -1132,7 +1132,7 @@ public static class AbilityCatalog
         // The Weakness of Man (issue #267): the proof case for the general Battle/Open presence
         // primitive -- Open half performed from Home with no presence check, Battle half needing the
         // performer's own AtBattle presence exactly like an ordinary Battle ability.
-        ["weakness-of-man-toggle"] = new("BattleOrOpen", "Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him", "personality-force-neq-performer-base", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
+        ["weakness-of-man-toggle"] = new("BattleOrOpen", "Choose your performing unbowed Monk and target a Personality whose Force is different from his own base Force: Bow or straighten him", "personality-force-neq-own-base", Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Monk"]),
         // Improved Defenses (issue #267): the proof case for the "at any location" presence
         // exemption -- an ordinary "Battle"-Timing ability whose own printed Performer text softens
         // the usual at-this-battlefield requirement without removing it outright.
@@ -3212,6 +3212,8 @@ public sealed partial class MatchEngine
             Require(_state.FavorPlayerId == player.Id, "You must control the Imperial Favor to discard it.");
         // Bonds of Coin (issue #336): "Bow your Stronghold" is a cost of the action, so a bowed Stronghold cannot pay it.
         if (id == "bonds-of-coin-draw") Require(!Card(player.StrongholdId).Bowed, "Your Stronghold is already bowed.");
+        if (id == "overgrown-grove-move") Require(player.FateDeck.Count >= 3,"Discarding three Fate cards is a required cost.");
+        if (id == "improved-defenses-strength") Require(player.FateDeck.Count >= 1,"Discarding a Fate card is a required cost.");
         if (id is "lobby" or "dainagon-lobby") Require(player.Honor > Player(1-player.Id).Honor, "Lobby requires strictly higher Family Honor than your opponent.");
         if (id == "dainagon-lobby") Require(CardPersonalHonor(source!) >= 1, "Lobby needs a Personality with at least 1 Personal Honor.");
         // Barred Passage: "the only Personality in his army" -- none of the acting player's other Personalities stands at this battlefield.
@@ -4085,13 +4087,9 @@ public sealed partial class MatchEngine
                         // lookup false-ring-of-water-recruit's own Require already uses.
                         "force-lte-province-strength" => type is CardType.Personality or CardType.Follower &&
                             CardForce(target) <= EffectiveProvinceStrength(Player(1 - _state.ActivePlayerId).Provinces.Single(p => p.Index == _state.CurrentBattleProvince!.Value)),
-                        // The Weakness of Man (issue #267): "Force is different from his [the
-                        // performer's] own BASE Force" -- the performer's side of the comparison is
-                        // its own printed Force (Definition(...).Force), not CardForce's live value, so
-                        // a Force-modifying effect on the performer never changes who is a legal target
-                        // mid-battle. The target's own side is its live Force, same as every other
-                        // Force-comparison Target category here.
-                        "personality-force-neq-performer-base" => personality && CardForce(target) != Definition(Card(command.PerformerId!)).Force,
+                        // The Weakness of Man compares the target with its own printed Force;
+                        // the performing Monk's Force does not affect target eligibility.
+                        "personality-force-neq-own-base" => personality && CardForce(target) != Definition(target).Force,
                         // Mirumoto Hatsuto: an enemy Personality or Follower without the Cavalry
                         // keyword -- "Infantry" (core rules Glossary) has no printed keyword of its
                         // own, it just means not Cavalry, the same convention Cavalry Maneuvers uses.
@@ -4576,7 +4574,7 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id))
                 {
                     target!.Bowed = true;
-                    if (HasClanAffiliation(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
+                    if (Keyword(Card(command.PerformerId!), "Shadowlands")) target.StraightenBlockedTurn = _state.TurnNumber;
                 }
                 GainHonor(player.Id, -2, "Bow Before My Will", source);
                 break;
@@ -6786,7 +6784,7 @@ public sealed partial class MatchEngine
         catch (RuleViolation e) { return e.Message; }
     }
 
-    private IEnumerable<ActionOption> AbilityActions(int playerId)
+    private IEnumerable<ActionOption> AbilityActions(int playerId,bool reactionsOnly=false)
     {
         var player = Player(playerId);
         // Discipline (issue #184; a flag since #331): a discard-pile card is only a candidate source at all if it
@@ -6821,7 +6819,8 @@ public sealed partial class MatchEngine
             // "Bow this card:" with no hand alternative is offered only from play (issue #370): from a hand or a discard pile it is not even listed.
             if (source is not null && RequiresSourceInPlay(ability) && !InPlay(source)) continue;
             if ((beforeResolutionCard is not null) != IsBeforeResolutionReaction(ability) || beforeResolutionCard is not null && source?.Id != beforeResolutionCard) continue;
-            var phaseOk = inEngageWindow || inAfterResolutionWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
+            if (reactionsOnly && ability.Timing != "Reaction") continue;
+            var phaseOk = reactionsOnly && ability.Timing == "Reaction" ? _state.PendingChoice is not null : inEngageWindow || inAfterResolutionWindow || beforeResolutionCard is not null ? true : ability.Timing switch { "Battle" => _state.Phase == Phase.Battle, "BattleOrOpen" => _state.Phase is Phase.Action or Phase.Battle, "BeforeResolution" => false, _ => _state.Phase == Phase.Action };
             if (!phaseOk) continue;
             if (ability.Timing == "Limited" && playerId != _state.ActivePlayerId) continue;
             // Battle/Open presence primitive (issue #267): the same actingAsBattle generalization
@@ -6975,11 +6974,14 @@ public sealed partial class MatchEngine
                     // province indices the assignment flow already draws. An ability has one shape or the other (a Move ability is never an Attack), so the
                     // same field never means both; ActionOption.Type/Slots/NoTarget say which.
                     Provinces: ability.Target is "any-province" or "enemy-province" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
-                        : ability.Move is { ChoosesBattlefield: true } ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
+                        : ability.Move is { ChoosesBattlefield: true } || id == "hawado-move-battlefield" ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray()
                         : ability.Target == "attack" && legal.Any(c => c.Province is not null) ? legal.Where(c => c.Province is not null).Select(c => c.Province!.Value).Distinct().ToArray() : null,
                     Gold: firstQuote, TargetGold: targetQuotes,
                     // An Attack may always be taken with no target (or on the province where the ability allows it): the client must be able to say so.
-                    NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null));
+                    NoTarget: ability.Target == "attack" && legal.Any(c => c.TargetId is null && c.Province is null),
+                    AlternativeCost: costOption is null ? null : new(id,performer,costOption.Id,costOption.Label,ability.Label),
+                    Movement: MovementPreview(id,ability,source,performer),
+                    Attack: legal.Count > 0 ? AttackCue(legal[0]) : null);
                 }
             }
         }

@@ -9,7 +9,7 @@ public partial class Main
     private IEnumerable<StatTokens> UnitBadges => _statTokenLayer?.GetChildren().OfType<StatTokens>() ?? [];
     private IEnumerable<StatTokens> TokenPairs => UnitBadges.Where(t => t is not UnitStandard);
     private bool OverStatToken(Vector2 point) => _tableViewport.GetGlobalRect().HasPoint(point) && UnitBadges.Any(t => t.Visible && t._HasPoint(t.GetGlobalTransform().AffineInverse() * point));
-    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.BattleSelection or Phase.Battle;
+    private bool BattleActive => View.Phase is Phase.AttackDeclaration or Phase.InfantryDeclaration or Phase.DefenseAssignment or Phase.CavalryDeclaration or Phase.CavalryDefense or Phase.BattleSelection or Phase.Battle;
 
     private void RenderBoard()
     {
@@ -22,7 +22,7 @@ public partial class Main
             _previousBows.Clear(); foreach (var pair in _currentBows) _previousBows[pair.Key] = pair.Value;
             _bowVersion = View.Version; _bowChangedAt = Time.GetTicksMsec();
         }
-        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear();
+        Palette.Clear(_board); Palette.Clear(_hand); Palette.Clear(_unitDetail); _tiles.Clear(); _provinceButtons.Clear(); _laneSummaries.Clear(); _homeReminders.Clear();
         // A removed unit must not leave its inspection tray holding camera input.
         _expandedUnits.RemoveWhere(id => !View.Players.SelectMany(p => p.Home.Concat(p.Army)).Any(c => c.Id == id && c.AttachedTo is null));
         _matSections.Emphasize(null, hover:true);
@@ -30,6 +30,7 @@ public partial class Main
         SyncMatSections();
         var enemy = View.Players.Single(p => p.Id != View.ViewerId);
         AddHoldings(enemy); AddHome(enemy); AddProvinces(enemy); AddBattlefields(); AddProvinces(Self); AddHome(Self); AddHoldings(Self);
+        AddPersistentHome(enemy); AddPersistentHome(Self); HighlightHomeReminders();
         // A shallow physical fan, with complete scans and space for a modest hover lift.
         var step = Math.Min(204, Math.Max(22, (_hand.Size.X - HandCardSide - 84) / Math.Max(1, Self.Hand.Length - 1)));
         var start = (_hand.Size.X - (Math.Max(0, Self.Hand.Length - 1) * step + HandCardSide)) / 2;
@@ -76,27 +77,27 @@ public partial class Main
     private float SlotX(PlayerView player, int slot) =>
         _playLeft + (player.Id == View.ViewerId ? _slotCenters[slot] : _playWidth - _slotCenters[slot]) - CardHeight / 2;
     private CardView[] HomeCards(PlayerView player) => player.Home
-        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding).ToArray();
+        .Where(c => c.AttachedTo is null && c.Definition?.Type != CardType.Holding && !IsPersistentHomeCard(c)).ToArray();
     private CardView[] HoldingCards(PlayerView player) => new[] { player.Stronghold }
         .Concat(player.Home.Where(c => c.AttachedTo is null && c.Definition?.Type == CardType.Holding)).ToArray();
     private static int AttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id);
-    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasTokens(c));
+    private static int TokenAttachmentCount(CardView card, PlayerView owner) => owner.Home.Concat(owner.Army).Count(c => c.AttachedTo == card.Id && CardTokenRail.HasRail(c));
     private float UnitWidth(CardView card, PlayerView owner) => Math.Max(CardFootprint(card, CardHeight), owner.Home.Concat(owner.Army)
         .Where(c => c.AttachedTo == card.Id).Select(c => CardFootprint(c, CardHeight)).DefaultIfEmpty(0).Max()) + (card.UnitForce.HasValue ? UnitStandard.ReservedWidth : 0) + TokenAttachmentCount(card, owner) * CardTokenRail.Width;
     private float TokenBottomPadding(CardView card, PlayerView owner)
     {
         var attachments=owner.Home.Concat(owner.Army).Where(c=>c.AttachedTo==card.Id).ToArray();
-        var padding=card.Bowed&&CardTokenRail.HasTokens(card)?CardTokenRail.Width:0f;
+        var padding=card.Bowed&&CardTokenRail.HasRail(card)?CardTokenRail.Width:0f;
         for(var i=0;i<attachments.Length;i++)
-            if(attachments[i].Bowed&&CardTokenRail.HasTokens(attachments[i]))
-                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasTokens))*CardTokenRail.Width*1.02f);
+            if(attachments[i].Bowed&&CardTokenRail.HasRail(attachments[i]))
+                padding=Math.Max(padding,(2+attachments.Take(i).Count(CardTokenRail.HasRail))*CardTokenRail.Width*1.02f);
         return padding;
     }
     private float StackHeight(CardView card, PlayerView owner) => PlaneHeight(CardHeight) + AttachmentCount(card, owner) * 24 + (AttachmentCount(card, owner) > 0 ? 24 : 0) + TokenBottomPadding(card,owner);
     private int ArmyColumns(int province) => Math.Clamp((int)Math.Ceiling(Math.Sqrt(View.Players.Max(p => CourtUnits(p, province).Count()))), 1, 4);
     private static float CardFootprint(CardView card, float height)
     {
-        var rail = CardTokenRail.HasTokens(card) ? CardTokenRail.Width * height / CardHeight : 0;
+        var rail = CardTokenRail.HasRail(card) ? CardTokenRail.Width * height / CardHeight : 0;
         if (card.Bowed) return height + rail;
         var art = card.Definition is { ScenarioOnly: false } definition ? CardTile.Artwork(definition) : null;
         var ratio = art is null ? .7142857f : art.GetWidth() / (float)art.GetHeight();
@@ -136,8 +137,8 @@ public partial class Main
         {
             // Inspect the whole unit at useful size, instead of forcing six cards into
             // one narrow battlefield. These are the actual live tiles, not extra copies.
-            var panel = Place(_unitDetail, new LacquerPanel(), 238, 342, BoardWidth, 320);
-            panel.AddThemeStyleboxOverride("panel", Palette.Box(new Color(.04f, .037f, .025f, .98f), Palette.Gold, 16, 3));
+            var panel = Place(_unitDetail, new PanelContainer { Theme = SidebarSkin.Theme() }, 238, 342, BoardWidth, 320);
+            panel.AddThemeStyleboxOverride("panel", SidebarSkin.Inset());
             panel.SetMeta("battle_province", personality.ProvinceIndex ?? -1);
             panel.SetMeta("home_owner", personality.OwnerId);
             var content = new VBoxContainer(); content.AddThemeConstantOverride("separation", 6); panel.AddChild(content);
@@ -169,7 +170,7 @@ public partial class Main
         for (var i = attachments.Length - 1; i >= 0; i--)
         {
             var child = Tile(attachments[i], true, faceWidth, side);
-            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasTokens)) * CardTokenRail.Width * (side-12)/198f;
+            child.TokenRailOffset = expanded ? 0 : (1 + attachments.Take(i).Count(CardTokenRail.HasRail)) * CardTokenRail.Width * (side-12)/198f;
             if (detail) { child.ProjectToScreen = null; child.CustomMinimumSize = new Vector2(faceWidth, side); }
             Place(stack, child, expanded ? faceWidth + bannerWidth + i * step : 0, expanded ? 4 : (attachments.Length - 1 - i) * step, faceWidth, tileHeight);
         }
@@ -186,6 +187,7 @@ public partial class Main
                 CardAnchor = front, Card = personality,
                 Companions = detail ? [] : stack.GetChildren().OfType<CardTile>().Where(t => t != front).ToArray(),
                 Projection = detail ? null : _tableSurface.ProjectCanvas,
+                Unprojection = detail ? null : _tableSurface.ScreenToCanvas,
                 Inline = detail, Explanation = UnitStandard.ExplainUnit(personality),
                 Allowed = () => detail || (_expandedUnits.Count == 0 && _tableViewport.GetGlobalRect().HasPoint(ScreenCenter(front)))
             };
@@ -219,15 +221,28 @@ public partial class Main
             }
             // Province positions remain stable after destruction: an absent province
             // must never renumber or shift another battlefield's physical destination.
-            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore }, SlotX(owner, 2 + province.Index), ProvinceRowY(owner), CardHeight, PlaneHeight(CardHeight));
+            var provinceWidth = ProvinceCardWidth(province);
+            var area = Place(_board, new Control { MouseFilter = Control.MouseFilterEnum.Ignore },
+                SlotX(owner, 2 + province.Index) + (CardHeight - provinceWidth) / 2, ProvinceRowY(owner), provinceWidth, PlaneHeight(CardHeight));
+            area.SetMeta("province_pair", $"{owner.Id}:{province.Index}");
             var button = new Button { Text = "", Flat = true };
             CompactButton(button);
             button.Pressed += () => SelectProvince(owner.Id, province.Index);
-            Place(area, button, 28, 0, CardHeight - 56, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
+            Place(area, button, 8, 0, provinceWidth - 16, PlaneHeight(CardHeight)); _provinceButtons[(owner.Id, province.Index)] = button;
+            var dynastyX = 0f;
+            var dynastyWidth = CardHeight;
+            if (province.Region is { } region)
+            {
+                var regionWidth = RegionSlotWidth(region);
+                var tile = Tile(region, true, regionWidth, CardHeight);
+                Place(area, tile, 8, 0, regionWidth, PlaneHeight(CardHeight));
+                dynastyX = 8 + regionWidth + RegionCardGap;
+                dynastyWidth = provinceWidth - dynastyX - 8;
+            }
             if (province.Card is { } card)
             {
-                var tile = Tile(card, true, CardHeight, CardHeight);
-                Place(area, tile, 0, 0, CardHeight, PlaneHeight(CardHeight));
+                var tile = Tile(card, true, dynastyWidth, CardHeight);
+                Place(area, tile, dynastyX, 0, dynastyWidth, PlaneHeight(CardHeight));
             }
 
         }
@@ -256,6 +271,8 @@ public partial class Main
     private void SelectProvince(int owner, int province)
     {
         if (PresentationBusy) return;
+        if(AttackTargetActive){if(AttackProvinceTarget(owner,province))ChooseAttackTarget(AttackChoice.Province,province:province);return;}
+        if(MovementActive){ChooseMovementProvince(owner,province);return;}
         if (_chosen is { Type: "attack" or "assignDefense" } action)
         {
             if (owner != 1 - View.ActivePlayerId || action.Provinces?.Contains(province) != true || _assignmentUnit is null) return;
@@ -293,12 +310,19 @@ public partial class Main
                     yield return new(ScreenCenter(tile), ScreenCenter(target), Palette.Crane, true, clip);
             }
         }
-        if (_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
+        foreach(var (id,origin) in MovementActive?_movementPlacements:[])
+            if(_tiles.FirstOrDefault(t=>t.Card.Id==id) is {} mover&&TileVisible(mover))
+                yield return new(ScreenCenter(mover),WorldToScreen(origin+new Vector2(70,100)),Palette.Gold,true,clip);
+        if(AttackTargetActive&&_attackChoice==AttackChoice.Province&&_chosen!.Command!.Province is {} attackProvince
+            &&_provinceButtons.TryGetValue((1-View.ActivePlayerId,attackProvince),out var provinceTarget)
+            &&_tiles.FirstOrDefault(t=>t.Card.Id==(_chosen.Command.PerformerId??_chosen.CardId)) is {} attackSource&&TileVisible(attackSource))
+            yield return new(ScreenCenter(attackSource),ScreenCenter(provinceTarget),Palette.Gold,false,clip,Attack:true);
+        if (!MovementActive&&_chosen is { Type: "equip" or "useAbility" or "playStrategy", Command: { TargetId: string targetId } command })
         {
             var from = _tiles.FirstOrDefault(t => t.Card.Id == (command.PerformerId ?? command.CardId));
             var to = _tiles.FirstOrDefault(t => t.Card.Id == targetId);
             if (from is not null && to is not null && from != to && TileVisible(from) && TileVisible(to))
-                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip);
+                yield return new(ScreenCenter(from), ScreenCenter(to), Palette.Gold, false, from.Card.Zone == Zone.Hand ? clip.Merge(_hand.GetGlobalRect()) : clip,Attack:AttackTargetActive);
         }
     }
 

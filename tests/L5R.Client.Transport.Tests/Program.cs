@@ -14,11 +14,16 @@ try
     var url = app.Urls.Single();
     var cases = new (string Name, Func<Task> Test)[]
     {
+        ("custom Practice keeps selected seat, rejects invalid replacement and exports replay", CustomPlay),
         ("client create/join, typed actions, commands and authenticated actor", () => LivePlay(url)),
         ("published match transmits Border Keep ability and restores it on reconnect", () => PublishedPlay(url)),
         ("client disconnect/resume and overlapping reconnects", () => Reconnect(url)),
+        ("shown-card history arrives on both seats and survives live reconnect without exposing other deck cards", ShownHistoryReconnect),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
+        ("movement destinations/movers and alternative costs survive the server envelope", () => { MovementActionProjection(); return Task.CompletedTask; }),
+        ("Attack choices preserve NoTarget, card targets, province targets and explicit nulls through both wire directions", () => { AttackTargetProjection(); return Task.CompletedTask; }),
+        ("alternative costs survive the server envelope and selected cost submission for the first four previews", () => { AlternativeCostProjection(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
         ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
     };
@@ -38,6 +43,78 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static void AttackTargetProjection()
+{
+    var engine=MatchEngine.CreateEconomyScenario();var view=engine.GetView(0);
+    var offered=new ActionOption("useAbility","Attack",true,null,
+        new GameCommand("useAbility",0,view.Version,"source",TargetId:"card",AbilityId:"attack"),
+        "source",["card"],[2],NoTarget:true,Attack:new("Ranged","source"));
+    view = view with { PendingAttack = new("Melee","performer") };
+    var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(offered)],[true,true]);
+    using var document=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+    var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    var received=document.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+    Check(received.Attack == offered.Attack, "The server dropped the attack type/source");
+    var receivedView=document.RootElement.GetProperty("view").Deserialize<MatchView>(web)!;
+    Check(receivedView.PendingAttack == view.PendingAttack, "A pending reaction lost its attack cue");
+    var olderAction=JsonSerializer.SerializeToNode(offered,web)!;olderAction.AsObject().Remove("attack");
+    Check(olderAction.Deserialize<ActionOption>(web)!.Attack is null,"Older servers must not imply an attack type");
+    var olderView=JsonSerializer.SerializeToNode(view,web)!;olderView.AsObject().Remove("pendingAttack");
+    Check(olderView.Deserialize<MatchView>(web)!.PendingAttack is null,"Older views must omit the pending cue safely");
+    Check(received.NoTarget&&received.TargetIds!.SequenceEqual(["card"])&&received.Provinces!.SequenceEqual([2])&&received.Movement is null,
+        "The Attack's three choices were lost or confused with a movement");
+    foreach(var command in new[]{
+        offered.Command! with {TargetId=null,Province=null},
+        offered.Command! with {TargetId="card",Province=null},
+        offered.Command! with {TargetId=null,Province=2}})
+    {
+        var json=JsonSerializer.Serialize(MatchSession.ToWire(command),web);
+        var bound=JsonSerializer.Deserialize<WireGameCommand>(json,Protocol.Json)!.BindToSeat(0,view.Version);
+        Check(bound.TargetId==command.TargetId&&bound.Province==command.Province&&bound.AbilityId==command.AbilityId&&bound.CardId==command.CardId,
+            "No target/card/province command was changed during submission");
+        Check(bound.Assignments is null,"An Attack target was encoded as an army assignment");
+    }
+}
+
+static void MovementActionProjection()
+{
+    var engine=MatchEngine.CreateEconomyScenario();var view=engine.GetView(0);
+    var option=new ActionOption("useAbility","Movement preview",true,null,
+        new GameCommand("useAbility",0,view.Version,"source",TargetId:"target",Province:2,AbilityId:"move",CostOption:"bow"),
+        "source",["target"],[0,2],AlternativeCost:new("move","performer","bow","Bow performer","Movement preview"),
+        Movement:new(1,["performer"],true));
+    var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(option)],[true,true]);
+    using var json=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+    var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+    var received=json.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+    received=received with {Command=received.Command! with {PlayerId=0,ExpectedVersion=view.Version}};
+    Check(JsonSerializer.Serialize(received,web)==JsonSerializer.Serialize(option,web),"The server projection dropped or altered action metadata");
+    var command=received.Command! with {Province=0};
+    var wire=JsonSerializer.Serialize(MatchSession.ToWire(command),web);
+    var bound=JsonSerializer.Deserialize<WireGameCommand>(wire,Protocol.Json)!.BindToSeat(0,view.Version);
+    Check(JsonSerializer.Serialize(bound)==JsonSerializer.Serialize(command),"The selected province/target did not survive the submitted command");
+    Check(bound.Assignments is null,"A movement must not submit attack assignments");
+}
+
+static void AlternativeCostProjection()
+{
+    var view=MatchEngine.CreateEconomyScenario().GetView(0);
+    foreach(var cost in new[]{"bow","destroy"})
+    {
+        var offered=new ActionOption("useAbility","Choose a cost",true,null,
+            new GameCommand("useAbility",0,view.Version,"source",AbilityId:"ability",CostOption:cost),
+            "source",AlternativeCost:new("ability","source",cost,cost+" this card","Choose a cost"));
+        var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(offered)],[true,true]);
+        using var json=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+        var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var received=json.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+        Check(received.AlternativeCost==offered.AlternativeCost,"The server dropped the authoritative alternative-cost presentation");
+        var wire=JsonSerializer.Serialize(MatchSession.ToWire(received.Command!),web);
+        var bound=JsonSerializer.Deserialize<WireGameCommand>(wire,Protocol.Json)!.BindToSeat(0,view.Version);
+        Check(bound.CostOption==cost&&bound.CardId=="source"&&bound.AbilityId=="ability","The selected cost changed during submission");
+    }
+}
 
 static async Task LivePlay(string url)
 {
@@ -91,6 +168,7 @@ static async Task Reconnect(string url)
     await host.CreateOrJoin(url, null);
     await WaitFor(() => host.Snapshot is not null && !host.Busy);
     var saved = host.Seat!;
+    var matchKey = host.MatchKey;
     await guest.CreateOrJoin(url, saved.RoomCode);
     await WaitFor(() => guest.Snapshot is not null && !guest.Busy);
     var actor = host.Snapshot!.View.PriorityPlayerId == 0 ? host : guest;
@@ -101,6 +179,7 @@ static async Task Reconnect(string url)
     await host.Resume(url, saved);
     await WaitFor(() => host.Snapshot?.View.Version == 1 && !host.Busy);
     Check(host.Seat == saved && host.Snapshot!.View.ViewerId == saved.PlayerId, "Resume retains identity and authoritative state.");
+    Check(host.MatchKey == matchKey, "Reconnect keeps the inspection identity.");
 
     // A canceled older Connect/Receive must never disconnect or overwrite the latest session.
     var old = host.Resume(url, saved);
@@ -111,6 +190,50 @@ static async Task Reconnect(string url)
     await host.Submit(new GameCommand("concede", saved.PlayerId, 1));
     await WaitFor(() => host.Snapshot?.View.Version == 2 && !host.Busy);
     Check(host.Snapshot!.View.WinnerId == 1, "The latest connection remains usable after overlapping reconnects.");
+}
+
+static async Task ShownHistoryReconnect()
+{
+    var directory=Path.Combine(Path.GetTempPath(),"l5r-shown-history-"+Guid.NewGuid().ToString("N"));
+    const string room="SHWNTEST";
+    var tokens=new[]{Guid.NewGuid().ToString("N"),Guid.NewGuid().ToString("N")};
+    static string Hash(string value)=>Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(value)));
+    var engine=MatchEngine.CreateDeckSearchShowcase(315);
+    var source=engine.State.Cards.Values.Single(c=>c.OwnerId==0&&c.DefinitionId=="oracle-l5r-10292").Id;
+    foreach(var command in new[]{new GameCommand("useAbility",0,0,source,AbilityId:"shizuka-search"),new GameCommand("chooseSearchDeck",0,1,Choice:"Fate")})
+        Check(engine.Execute(command).Accepted,"Prepare private search");
+    await new RoomStore(directory).SaveAsync(new PersistedRoom(1,room,DateTimeOffset.UtcNow,
+        tokens.Select((token,seat)=>new SeatCredential(seat,Hash(token))).ToArray(),engine.ExportReplay(),[]));
+    var server=await ServerApplication.BuildAsync(["--urls","http://127.0.0.1:0","--L5R:StoragePath",directory,"--Logging:LogLevel:Default","Critical"]);
+    try
+    {
+        await server.StartAsync();var address=server.Urls.Single();
+        using var first=new MatchSession();using var other=new MatchSession();
+        var seats=tokens.Select((token,seat)=>new RoomSeat(room,seat,token,1,Protocol.ContentVersion)).ToArray();
+        await first.Resume(address,seats[0]);await other.Resume(address,seats[1]);
+        await WaitFor(()=>first.Snapshot?.PlayersConnected?.All(x=>x)==true&&other.Snapshot?.PlayersConnected?.All(x=>x)==true);
+        Check(other.Snapshot!.View.PendingSearch is null&&(other.Snapshot.View.ShownCards?.Length??0)==0,"No private search contents reach the opponent before the reveal");
+        await first.Submit(first.Snapshot!.Actions.Single(a=>a.Type=="selectSearchCard"&&a.Command?.Choice=="training-terrain").Command!);
+        await WaitFor(()=>first.Snapshot?.View.ShownCards?.Length==1&&other.Snapshot?.View.ShownCards?.Length==1);
+        var before=JsonSerializer.Serialize(other.Snapshot!.View.ShownCards);
+        Check(before==JsonSerializer.Serialize(first.Snapshot!.View.ShownCards),"Both sessions receive exactly the same public show");
+        var key=other.MatchKey;other.Disconnect();await other.Resume(address,seats[1]);
+        await WaitFor(()=>other.Connected&&!other.Busy&&other.Snapshot?.View.ShownCards?.Length==1);
+        Check(other.MatchKey==key&&JsonSerializer.Serialize(other.Snapshot!.View.ShownCards)==before,"Reconnect restores the history with stable inspection identity");
+        var visible=other.Snapshot!.View;
+        Check(visible.Players[0].Hand.Length==0&&visible.PendingSearch is null,"Reconnect cannot expose the searcher's hidden hand or viewer");
+        Check(!before.Contains("training-costed-region"),"An unshown deck card is absent from history");
+        using var fresh=new MatchSession();await fresh.Resume(address,seats[1]);
+        await WaitFor(()=>fresh.Snapshot?.View.ShownCards?.Length==1);
+        Check(JsonSerializer.Serialize(fresh.Snapshot!.View.ShownCards)==before,"A fresh client reconstructs history entirely from the server");
+        var oldKey=fresh.MatchKey;fresh.StartPractice(false,true);
+        Check(fresh.MatchKey!=oldKey&&(fresh.Snapshot!.View.ShownCards?.Length??0)==0,"A new match cannot inherit the old inspection history");
+    }
+    finally
+    {
+        await server.StopAsync();await server.DisposeAsync();
+        if(Directory.Exists(directory))Directory.Delete(directory,true);
+    }
 }
 
 // The outgoing mapping is an explicit field list, so a new GameCommand field is silently dropped online unless it is
@@ -347,4 +470,16 @@ static async Task PublishedPlay(string url)
     var wire = WireGameCommand.FromCore(new GameCommand("useAbility",1,1,"source",TargetId:"target",AbilityId:"shinden-choice",PerformerId:"performer",Choice:"honor"));
     var bound = wire.BindToSeat(0,7);
     Check(bound.AbilityId=="shinden-choice" && bound.PerformerId=="performer" && bound.Choice=="honor" && bound.PlayerId==0 && bound.ExpectedVersion==7,"New fields survive wire conversion while actor/version remain authenticated.");
+}
+
+static async Task CustomPlay()
+{
+    using var session=new MatchSession{LocalDisplayName="Custom player"};
+    session.StartCustomPractice(CustomPractice.Preset("Lion"),CustomPractice.Preset("Crane"));
+    var initial=session.Snapshot!;
+    Check(initial.View.ViewerId==0&&initial.View.Players[0].Clan=="Lion"&&initial.View.Players[0].Name=="Custom player","Chosen deck belongs to local seat zero.");
+    try{session.StartCustomPractice(new Deck("Emperor",[]),CustomPractice.Preset("Crane"));throw new Exception("Invalid deck accepted");}catch(ArgumentException){}
+    Check(ReferenceEquals(session.Snapshot,initial),"Invalid selection must not discard a running Practice.");
+    await session.Submit(new GameCommand("concede",0,initial.View.Version));
+    Check(session.Snapshot!.View.WinnerId==1,"Custom commands execute in the authoritative local engine.");
 }

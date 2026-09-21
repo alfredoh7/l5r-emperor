@@ -1,0 +1,63 @@
+{
+  "asset": "brazier-v2",
+  "task_id": "01a0a75f-ef87-7167-b855-805ec52011cf",
+  "approval": "Latest user explicitly requests imagegen, Meshy and Blender polish of the existing approved-room brazier. Dedicated reference is a faithful isolated reconstruction, not added inventory. Native result pending user milestone review.",
+  "generator": "Built-in imagegen",
+  "reference": "source.png",
+  "reference_sha256": "d5e632b328cb59a627403f2c68a0f5298fd9b83e6a14b9a0f2ee48fd6f7727db",
+  "settings": {
+    "model_type": "standard",
+    "ultra_mode": true,
+    "should_texture": true,
+    "enable_pbr": true,
+    "texture_resolution": "4k",
+    "remove_lighting": true,
+    "image_enhancement": false,
+    "target_formats": "glb"
+  },
+  "texture_prompt": "Aged blackened forged iron brazier. Preserve the open basket, eight flat curved ribs, circular rims, riveted joints and sturdy four splayed legs. EMPTY shallow fire pan. Charcoal-black iron with fine hammer marks, soot inside and restrained rubbed iron edges. Matte oxidized iron, subtle rust-brown patina. No gold, no bronze, no chrome, no fire, no embers, no wood, no smoke. Neutral lighting, no baked orange light. Clear open air between ribs.",
+  "cli": "@meshy-ai/cli 0.3.0",
+  "estimated_credits": 35,
+  "consumed_credits_reported_by_task": 35,
+  "balance_before": 1655,
+  "pricing_checked": "https://docs.meshy.ai/en/api/pricing",
+  "returned_model_version": "Not supplied in task response; standard route requests Meshy-7.",
+  "timestamps_ms": {
+    "created_at": 1789514481913,
+    "started_at": 1789514481919,
+    "finished_at": 1789514658713
+  },
+  "downloads": [
+    {
+      "file": "model.glb",
+      "bytes": 37992396,
+      "sha256": "9063f46431fd0dc2f4af4775d886ea15e35604452b0bf511d77472922db16a34"
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "bytes": 26832138,
+      "sha256": "1e06765251275da13b05155665517922d157a90b8ebc2ca2d67538ac3093d4dd"
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "bytes": 1899209,
+      "sha256": "3ee5f07470e4268d8e607a2e292371525b0a50452c6fc9298a01b43172b7e038"
+    },
+    {
+      "file": "texture_0_normal.png",
+      "bytes": 23083015,
+      "sha256": "78f88d9c187da897aaa07a5d0a2a8b339ce7eeea6524ee69688eafdbcd45faf9"
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "bytes": 1792303,
+      "sha256": "07d27dae6630808cee1d1c0d6b1671a67d654d68165936c8423b15fcd05b4a4f"
+    },
+    {
+      "file": "thumbnail.png",
+      "bytes": 154861,
+      "sha256": "97a5fcd664ad84b0e5c07270d453debfb90bcdc9672ee5c88870096ad1cad67a"
+    }
+  ],
+  "balance_after": 1620
+}

@@ -169,6 +169,10 @@ public sealed record GrantedKeyword(string Keyword, string Source, string Durati
 /// ability id for a copy. See AbilityGrants.cs and CardCopy.cs.</summary>
 public sealed record GrantedAbility(string AbilityId, string Source, string Duration, string? CopiedFrom = null, string? CopiedFromName = null);
 
+/// <summary>Read-only explanation of an already enforced granted effect. This is not an
+/// executable ability definition. Older snapshots may omit it; the client must not invent one.</summary>
+public sealed record GrantedEffectView(string Name, string Text, string Source, string Duration, string Kind = "Ability");
+
 /// <summary>"Protection" (issue #212: Tamori Takeshi's "Effects of actions the target performs
 /// will not be negated") -- while any Protection sits in a card's own list, no card of the
 /// opposing kind (Effortless Counterattack's own Additional-Action negation, Attack-strength
@@ -900,6 +904,8 @@ public sealed record OverlayQuote(string CardId, string TargetId, int HigherLeve
 /// amount without a round trip. Error, when set, means this quote cannot be paid or used as it stands.</summary>
 public sealed record GoldQuote(int Cost, string Kind, string Basis, string? Error, PaymentOption[] Payments,
     int? MinAmount = null, int? MaxAmount = null, Dictionary<int, PaymentOption[]>? PaymentsByAmount = null);
+// Presentation metadata survives a disabled option's null Command. No executable command is invented for it.
+public sealed record AlternativeCostView(string AbilityId, string? PerformerId, string Id, string Label, string ActionLabel);
 /// <param name="Gold">The quote for this option's own command (its first legal target when the cost is
 /// target-derived). Null when the action costs no Gold.</param>
 /// <param name="TargetGold">Per-target quotes (target id to quote) for a target-derived cost: the cost
@@ -912,7 +918,14 @@ public sealed record ActionOption(string Type, string Label, bool Enabled, strin
     // Multi-target actions (issue #336): the slots of a Slots ability with the legal candidates of each, so a viewer can
     // collect the whole selection. Null for every ability with a single Target.
     TargetSlotOption[]? Slots = null,
-    bool NoTarget = false);
+    bool NoTarget = false, AlternativeCostView? AlternativeCost = null,
+    MoveDestinationView? Movement = null, AttackCueView? Attack = null);
+/// <summary>Read-only attack presentation. SourceId is the explicitly selected performer or the ability source;
+/// it identifies the card to mark, not a new legality or damage calculation.</summary>
+public sealed record AttackCueView(string Kind, string SourceId);
+/// <summary>Proposed movement only: reactions may prevent each arrival independently. FixedMoverIds names the source/performer units;
+/// TargetMoves adds the command's selected target. Destinations remain in ActionOption.Provinces. No card-rule inference belongs in the UI.</summary>
+public sealed record MoveDestinationView(int DefenderId, string[] FixedMoverIds, bool TargetMoves);
 /// <param name="UnitForce">Authoritative effective unit contribution, including qualifying Followers.
 /// Null for hidden/non-unit/out-of-play cards and older payloads; never substitute a client calculation.</param>
 public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId, Zone Zone, bool FaceUp,
@@ -925,8 +938,8 @@ public sealed record CardView(string Id, CardDefinition? Definition, int OwnerId
     // while a cost is being paid: Yoritomo Sakuma); null when it cannot. The client shows this and never derives it.
     int? GoldProduced = null,
     // "May not perform actions" (issue #336): true while the card, or the Personality it is attached to, is action-locked.
-    bool ActionLocked = false,
-    // A created copy of another card (issue #398): its Definition is the copied card's own; this says it is a created card, for the client's marker.
+    bool ActionLocked = false, GrantedEffectView[]? GrantedEffects = null,
+    // Created copies keep the copied definition; this authoritative marker distinguishes the instance.
     bool CreatedCopy = false);
 /// <summary>One granted ability as the client shows it: the id, the engine's label for it, and where it came from.</summary>
 public sealed record GrantedAbilityView(string AbilityId, string Label, string Timing, string Source, string Duration, string? CopiedFrom, string? CopiedFromName,
@@ -946,7 +959,12 @@ public sealed record PlayerView(int Id, string Name, string Clan, int Honor, int
     // Zone.EventInPlay (Suspicions): public, like RemovedFromGame -- no visibility gate needed.
     CardView[]? EventsInPlay = null,
     // Zone.Celestial (Lady Matsu's Rage): also public -- no visibility gate needed.
-    CardView[]? Celestials = null);
+    CardView[]? Celestials = null)
+{
+    public HandLimitView? HandLimit { get; init; }
+}
+public sealed record HandLimitModifier(string CardId, string CardName, int Amount);
+public sealed record HandLimitView(int Base, int Maximum, HandLimitModifier[] Modifiers);
 /// <summary>Nothing here is hidden information -- both players already know who challenged whom, on
 /// what stat, and whose turn it is; a focused card's own identity is still gated the normal way,
 /// through PlayerView.Focused's own per-viewer visibility.</summary>
@@ -1013,5 +1031,5 @@ public sealed record MatchView(string ContentVersion, string Scenario, long Vers
     EitherOrView? PendingEitherOr = null,
     // The opposing player's variable payment (issue #373, see OpponentPayment.cs): PUBLIC -- both players see the first player's amount, the card and the
     // Honor at stake; only the paying player's view carries the payment quote and what each amount would do.
-    OpponentPaymentView? PendingOpponentPayment = null);
-public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands);
+    OpponentPaymentView? PendingOpponentPayment = null, AttackCueView? PendingAttack = null);
+public sealed record ReplayRecord(string ContentVersion, string Scenario, ulong Seed, GameCommand[] Commands, Deck[]? CustomDecks = null);

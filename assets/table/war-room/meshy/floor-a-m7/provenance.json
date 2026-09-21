@@ -1,0 +1,71 @@
+{
+  "asset": "floor-a-m7",
+  "task_id": "01a0a78f-f6fa-775c-88ac-039c2e449a84",
+  "resource": "retexture",
+  "request": {
+    "resource": "retexture",
+    "arguments": [
+      "retexture",
+      "create",
+      "--model-url",
+      "assets/table/war-room/polish-m7/floor-panel.glb",
+      "--image-style-url",
+      "assets/table/war-room/polish-m7/floor-reference.png",
+      "--enable-pbr",
+      "true",
+      "--texture-resolution",
+      "4k",
+      "--remove-lighting",
+      "true",
+      "--target-formats",
+      "glb",
+      "--operation-id",
+      "l5r-floor-a-m7",
+      "--async",
+      "--save-json",
+      "artifacts/meshy/floor-a-m7/submission.json"
+    ]
+  },
+  "texture_prompt_returned": "",
+  "source_reference": "assets/table/war-room/polish-m7/floor-reference.png",
+  "status": "SUCCEEDED",
+  "consumed_credits": 10,
+  "timestamps": {
+    "created_at": 1789517626102,
+    "started_at": 1789517626106,
+    "finished_at": 1789517716544
+  },
+  "raw_downloads": [
+    {
+      "file": "model.glb",
+      "bytes": 7017328,
+      "sha256": "c03dea9f719d5c7902df8e0cac2d8198d7852605f0f7f9249c86725bbc00cc87"
+    },
+    {
+      "file": "texture_0_base_color.png",
+      "bytes": 7396348,
+      "sha256": "e9f7494301b3a62be430472f46883382b23735a125a02cd742682ab9df85ac4f"
+    },
+    {
+      "file": "texture_0_metallic.png",
+      "bytes": 21853,
+      "sha256": "f3db7542de0c2b88b10f41549b8e3108d817c399d3179014b9d74b01364aa401"
+    },
+    {
+      "file": "texture_0_normal.png",
+      "bytes": 5346020,
+      "sha256": "48933b52f57da7e2d0368a8ee6c6cd52f4fb18d699dca9d38017b16db296c765"
+    },
+    {
+      "file": "texture_0_roughness.png",
+      "bytes": 440121,
+      "sha256": "111e929db92ad01022cc6c1144e867ff1f796eb722a0fe5142a3099024f393cd"
+    },
+    {
+      "file": "thumbnail.png",
+      "bytes": 17782,
+      "sha256": "387448cd75f424f353c871ba8fc2a016369d6eef4b45041232ae0ea23f02b83e"
+    }
+  ],
+  "disposition": "Inspected original, then prepared in Blender for native review."
+}
