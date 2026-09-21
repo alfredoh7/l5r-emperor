@@ -195,6 +195,9 @@ public sealed class CardInstance
 {
     public string Id { get; set; } = "";
     public string DefinitionId { get; set; } = "";
+    // A created card whose printed values belong to this one instance (Venerated Sensei's Clan, Your Name is Mine's title and Gold Cost): the definition every rule reads
+    // through MatchEngine.Definition, instead of the catalogue's. Null for every card whose printed values are the catalogue's, which is nearly all of them.
+    public CardDefinition? Printed { get; set; }
     public int OwnerId { get; set; }
     // Control follows the Personality (issue #352): a card attached to a Personality is controlled by that Personality's controller, and a card
     // brought into play from an ENEMY discard or dead pile is controlled by the player who brought it. While such a card is in play OwnerId is

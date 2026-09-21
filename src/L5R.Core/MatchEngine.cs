@@ -601,13 +601,16 @@ public sealed partial class MatchEngine
     // card's own entry (Singh Remnants-style watchers) -- a documented limit, since neither published
     // token has an entering-play Reaction of its own and no watcher is known to matter here.
     // battlefield (issue #394, "at this battlefield"): the province whose battle the card is created at, on its controller's side; null is home.
-    // createdCopy (issue #398): the card is a created copy of another card, marked per instance (CardInstance.CreatedCopy).
-    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, bool createdCopy = false)
+    // printed (issue #402): the card's own printed values when they are not the scan's; beforeWindow: the rest of the creating action, run before any entry window opens.
+    // createdCopy (issue #398): the card is a created copy of another card, marked per instance (CardInstance.CreatedCopy); a copy of a card with printed values keeps them.
+    private bool CreatePersonality(int ownerId, CardDefinition definition, bool duringEntryReaction, int? battlefield, out CardInstance card, CardDefinition? printed = null, Action? beforeWindow = null, bool createdCopy = false)
     {
-        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true,CreatedCopy=createdCopy};
+        card=new CardInstance{Id=$"created-{++_state.CreatedCardSequence:D4}",DefinitionId=definition.Id,Printed=printed,OwnerId=ownerId,Zone=battlefield is null?Zone.Home:Zone.Battlefield,ProvinceIndex=battlefield,FaceUp=true,CreatedCopy=createdCopy};
         _state.Cards.Add(card.Id,card);
-        Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {definition.Name}{(battlefield is null?"":" at the battlefield")}.":$"{Player(ownerId).Name} created {definition.Name}{(battlefield is null?"":" at the battlefield")}.",ownerId,card.Id);
+        var title=(printed??definition).Name; var where=battlefield is null?"":" at the battlefield";
+        Emit("cardCreated",createdCopy?$"{Player(ownerId).Name} created a copy of {title}{where}.":$"{Player(ownerId).Name} created {title}{where}.",ownerId,card.Id);
         QueueOverconfidentDraw(card);
+        beforeWindow?.Invoke();
         if(duringEntryReaction) { ApplyMandatoryEntryEffects(ownerId,card); return false; }
         return OpenEntryReactionWindow(ownerId,card) || OpenOverconfidentDrawWindow(ownerId);
     }
@@ -947,9 +950,11 @@ public sealed partial class MatchEngine
     }
 
     private IEnumerable<CardInstance> Producers(int playerId) => _state.Cards.Values.Where(c=>c.OwnerId==playerId && !c.Bowed && c.Zone is Zone.Home or Zone.Stronghold or Zone.Battlefield && (Definition(c).GoldProduction>0 || AlternateGoldSource(c) is not null));
-    private void ValidatePayment(int playerId,int cost,string[]? sourceIds)
+    // exclude: cards the paying action bows or destroys as another of its costs (AbilityCosts.CostPaidCards) -- a card cannot be bowed twice, so it produces no Gold for the same action.
+    private void ValidatePayment(int playerId,int cost,string[]? sourceIds,IReadOnlySet<string>? exclude=null)
     {
         var ids=sourceIds??[];
+        Require(exclude is null || !ids.Any(exclude.Contains),"A card bowed or destroyed as part of the action's cost cannot also be bowed for its Gold.");
         Require(ids.Distinct(StringComparer.Ordinal).Count()==ids.Length,"A Gold source cannot be used twice in one payment.");
         Require(cost>0 || ids.Length==0,"No Gold sources are needed for this free action.");
         var producers=Producers(playerId).Select(c=>c.Id).ToHashSet(StringComparer.Ordinal);
@@ -957,9 +962,9 @@ public sealed partial class MatchEngine
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         Require(produced>=cost,$"This payment needs {cost} Gold; selected sources produce {produced}.");
     }
-    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null)
+    private void Pay(int playerId,CardInstance target,int cost,string[]? sourceIds,string? part=null,IReadOnlySet<string>? exclude=null)
     {
-        ValidatePayment(playerId,cost,sourceIds);
+        ValidatePayment(playerId,cost,sourceIds,exclude);
         var ids=sourceIds??[];
         var produced=ids.Sum(id=>GoldProduced(id,playerId));
         // A card bowed for Gold through its own ability (Yoritomo Sakuma, issue #338) has used that Reaction: spent for the turn, and named
@@ -2779,7 +2784,7 @@ public sealed partial class MatchEngine
     private void Emit(string type,string message,int? playerId=null,string? cardId=null,int? Amount=null) => _state.Events.Add(new(_state.Events.Count+1,type,message,playerId,cardId,Amount));
     private PlayerState Player(int id) => _state.Players[id];
     private CardInstance Card(string? id) { Require(id is not null && _state.Cards.ContainsKey(id),"Unknown card."); return _state.Cards[id!]; }
-    private static CardDefinition Definition(CardInstance card) => CardCatalog.Get(card.DefinitionId);
+    private static CardDefinition Definition(CardInstance card) => card.Printed ?? CardCatalog.Get(card.DefinitionId);
     private static void Require(bool condition,string message) { if(!condition) throw new RuleViolation(message); }
     private sealed class RuleViolation(string message):Exception(message);
     private static T Copy<T>(T value) => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value))!;

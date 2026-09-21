@@ -116,6 +116,11 @@
     <EmbeddedResource Include="../../content/published/personality-wave-39.json" LogicalName="L5R.Published.PersonalityWave39.json" />
     <EmbeddedResource Include="../../content/published/follower-wave-18.json" LogicalName="L5R.Published.FollowerWave18.json" />
     <EmbeddedResource Include="../../content/published/item-wave-6.json" LogicalName="L5R.Published.ItemWave6.json" />
+    <EmbeddedResource Include="../../content/published/holding-wave-3.json" LogicalName="L5R.Published.HoldingWave3.json" />
+    <EmbeddedResource Include="../../content/published/personality-wave-40.json" LogicalName="L5R.Published.PersonalityWave40.json" />
+    <EmbeddedResource Include="../../content/published/celestial-wave-2.json" LogicalName="L5R.Published.CelestialWave2.json" />
+    <EmbeddedResource Include="../../content/published/strategy-wave-31.json" LogicalName="L5R.Published.StrategyWave31.json" />
+    <EmbeddedResource Include="../../content/published/follower-wave-19.json" LogicalName="L5R.Published.FollowerWave19.json" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="../../content/published/strategy-wave-30.json" LogicalName="L5R.Published.StrategyWave30.json" />

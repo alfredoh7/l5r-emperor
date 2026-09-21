@@ -1629,6 +1629,34 @@ public static class AbilityCatalog
         // Force, Chi, Personal Honor, and keywords." The False Nimuro (oracle-l5r-10807) prints exactly Nimuro's stats and keywords and no text.
         ["nimuro-create"] = new("Limited", "Once per game: create a Personality titled The False Nimuro with Nimuro's printed Force, Chi, Personal Honor and keywords", "none", OncePerGame: true, NotCopyable: true,
             Creates: new(CardType.Personality, Force: 5, Chi: 5, PersonalHonor: 4, Keywords: ["Lion Clan", "Clan Champion", "Samurai", "Duelist", "Experienced 2", "Loyal", "Tactician", "Unique"])),
+        // Per-instance printed values and counts (issue #402, Mendon's answers 6, 7 and 12). Venerable Master (oracle-l5r-9131): "Open: Bow and destroy this card, and pay 2 Gold: Create a
+        // 3F/3C/3PH Samurai Personality with your Clan alignment." The created Venerated Sensei (oracle-l5r-10017) has its creator's Stronghold Clan and Clan keyword, fixed at creation.
+        ["venerable-master-create"] = new("Open", "Bow and destroy this card, and pay 2 Gold: create a 3F/3C/3PH Samurai Personality with your Clan alignment", "none", Cost: GoldCostRule.Fixed(2),
+            Costs: [new(CostVerb.Bow), new(CostVerbs.Sacrifice)],
+            Creates: new(CardType.Personality, Force: 3, Chi: 3, PersonalHonor: 3, Keywords: ["Samurai"]) { ControllerClan = true }),
+        // Akuma's Power (oracle-l5r-10027): "Limited: Destroy your performing unbowed Shugenja, destroy your leftmost province, and discard this card: Create a 9F/5C/0PH Shadowlands * Nonhuman *
+        // Oni Personality with the performer's title and base Gold cost; it enters play ignoring costs. Lose 3 Honor." The created Your Name is Mine takes the performer's name and printed Gold Cost.
+        ["akumas-power-create"] = new("Limited", "Destroy your performing unbowed Shugenja, destroy your leftmost province, and discard this card: create a 9F/5C/0PH Shadowlands · Nonhuman · Oni Personality with the performer's title and base Gold cost. Lose 3 Honor",
+            "none", Performer: "shugenja", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer), new(CostVerbs.DestroyLeftmostProvince), new(CostVerbs.DiscardFromPlay)],
+            Creates: new(CardType.Personality, Force: 9, Chi: 5, PersonalHonor: 0, Keywords: ["Shadowlands", "Nonhuman", "Oni"])
+            { Values = [new(CreatedStat.Name, CreatedSubject.Performer), new(CreatedStat.GoldCost, CreatedSubject.Performer)] }),
+        // Nakanu Technique (oracle-l5r-5506): "Reaction: After engaging, choose your performing unbowed opposed Personality at the current battlefield: Create two 1F Shadowlands * Undead Followers and
+        // attach them to him. Lose 1 Honor." Both Followers are Nakanu's Creations (oracle-l5r-10011), attached to the performer.
+        ["nakanu-technique-create"] = new("Reaction", "After engaging, choose your performing unbowed opposed Personality at the current battlefield: create two 1F Shadowlands · Undead Followers and attach them to him. Lose 1 Honor",
+            "none", Performer: "own-unbowed-personality-opposed-at-battle", Trigger: "after-engaging",
+            Creates: new(CardType.Follower, Force: 1, Keywords: ["Shadowlands", "Undead"], Count: 2) { HostIsPerformer = true }),
+        // Synthetic fixtures for the values and counts (issue #402): a Personality whose Force is the target's Personal Honor (plus 2 when the target is a Paragon), a pair of created Personalities, and
+        // a copy of the source's own printed Gold Cost; every one takes an existing created-only scan, so the fixtures create nothing the catalogue lacks.
+        ["training-create-computed"] = new("Open", "Training: target your Personality: create a Personality whose Force is his Personal Honor, plus 2 if he is a Paragon", "own-personality",
+            Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785")
+            { Values = [new(CreatedStat.Force, CreatedSubject.Target, CreatedStat.PersonalHonor, Keyword: "Paragon", PlusWithKeyword: 2), new(CreatedStat.Chi, CreatedSubject.Target), new(CreatedStat.PersonalHonor, CreatedSubject.Target, Plus: -1)] }),
+        ["training-create-strong-scout"] = new("Open", "Training: target your Personality: create a Scout Follower attached to him whose Force is his Chi", "own-personality",
+            Creates: new(CardType.Follower, ProxyId: "oracle-l5r-9714") { Values = [new(CreatedStat.Force, CreatedSubject.Target, CreatedStat.Chi)] }),
+        ["training-create-pair"] = new("Open", "Training: create two Personalities at home", "none", Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785", Count: 2)),
+        ["training-create-titled"] = new("Open", "Training: choose your performing Personality: create a Personality with his title and one more than this card's Gold Cost", "none", Performer: "own-personality",
+            Creates: new(CardType.Personality, ProxyId: "oracle-l5r-10202") { Values = [new(CreatedStat.Name, CreatedSubject.Performer), new(CreatedStat.GoldCost, CreatedSubject.Source, Plus: 1)] }),
+        ["training-create-from-wielder"] = new("Open", "Training: create a Personality with the title and Force of the Personality this card is attached to", "none",
+            Creates: new(CardType.Personality, ProxyId: "oracle-l5r-9785") { Values = [new(CreatedStat.Name, CreatedSubject.Wielder), new(CreatedStat.Force, CreatedSubject.Wielder)] }),
         // Gates of Chikushudo (oracle-l5r-10707, issue #398): "Open: Target your created Spirit Personality. Create a Personality that permanently copies the target's printed keywords, traits,
         // abilities, and stats. Destroy this Spell." Mendon's ruling: the created Personality is a real copy of the target (its definition is the target's own, marked as a created copy).
         ["gates-of-chikushudo-copy"] = new("Open", "Target your created Spirit Personality: Create a Personality that permanently copies the target's printed keywords, traits, abilities and stats. Destroy this Spell", "own-created-personality",
@@ -3191,6 +3219,9 @@ public sealed partial class MatchEngine
                 // the Shugenja trait is excluded by the Type check, matching the printed restriction.
                 "own-unbowed-shugenja-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
                     Keyword(performer, "Shugenja") && Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
+                // Nakanu Technique (issue #402): "your performing unbowed opposed Personality at the current battlefield".
+                "own-unbowed-personality-opposed-at-battle" => Definition(performer).Type == CardType.Personality && !performer.Bowed && AtBattle(performer) &&
+                    Army(1 - player.Id, _state.CurrentBattleProvince!.Value).Any(),
                 // Not a "performer" in the rules sense (Carpenter Castle names no performing card) --
                 // reused for the same "select one more card, separately from the effect's target" shape.
                 "own-castle-or-siege" => !performer.Bowed && (Keyword(performer, "Castle") || Keyword(performer, "Siege")),
@@ -5631,6 +5662,12 @@ public sealed partial class MatchEngine
                 SpendHandPlayedCard(player, source);
                 if (ExecuteAttach(command, ability.Attach!, player, source, target)) return;
                 break;
+            case "nakanu-technique-create": case "akumas-power-create":
+            {
+                var honorLost = id == "akumas-power-create" ? 3 : 1;
+                if (ExecuteCreate(ability, ability.Creates!, command, player, () => GainHonor(player.Id, -honorLost, Definition(source!).Name, source))) return;
+                break;
+            }
             case "kyuden-hida-exp-scouts":
             {
                 GrantReconnaissanceAtCurrentBattlefield(player.Id);
@@ -6368,6 +6405,8 @@ public sealed partial class MatchEngine
                 "own-unbowed-follower-in-source-unit" => source is null ? [] : Attachments(UnitHostId(source)).Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Follower && !c.Bowed).Select(c => (string?)c.Id).ToArray(),
                 "own-unbowed-shugenja-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
                     _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c) && Keyword(c, "Shugenja")).Select(c => (string?)c.Id).ToArray(),
+                "own-unbowed-personality-opposed-at-battle" => !Army(1 - playerId, _state.CurrentBattleProvince ?? -1).Any() ? [] :
+                    _state.Cards.Values.Where(c => c.OwnerId == playerId && Definition(c).Type == CardType.Personality && !c.Bowed && AtBattle(c)).Select(c => (string?)c.Id).ToArray(),
                 _ => [null]
             };
             // Unlike every other Performer-based ability (still offered, disabled, with no eligible
