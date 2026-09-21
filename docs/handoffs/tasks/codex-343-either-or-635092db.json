@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Start Either/Or UI review candidate #343 on isolated stacked branch; no merge authorized.",
+  "validation": "Read live issue, engine contract and accepted rules decisions; implementation checks pending.",
+  "remaining": "Implement and validate sidebar, source inspection, payment, waiting view, auto-resolution feedback, and prepared launcher.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/343",
+  "branch": "codex/343-either-or",
+  "updated": "2026-09-21T00:21:13.697200+00:00"
+}
