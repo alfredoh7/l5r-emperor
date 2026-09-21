@@ -122,7 +122,10 @@ public partial class Main
             _preferences.ReducedMotion = _captureMode.Contains("reduced"); ApplyPreferences(false);
             await PrepareSequenceReview();
             if (_captureMode.EndsWith("-review", StringComparison.Ordinal)) { GD.Print("BATTLE_SEQUENCE_REVIEW_READY: prepared engine decisions; starred scenarios use synthetic fixtures."); return; }
-            CheckSequenceLayout(); await SupportCapture("-engage");
+            if (!GetWindow().HasFocus()) GD.Print("BATTLE_SEQUENCE_FOCUS_REQUIRED: activate the game window for native input and camera motion.");
+            for (var i = 0; i < 18000 && !GetWindow().HasFocus(); i++) await EventFrames(1);
+            SupportRequire(GetWindow().HasFocus(), "Native window did not receive focus");
+            await EventFrames(60); CheckSequenceLayout(); await SupportCapture("-engage");
             var version = View.Version;
             _battleProgressStrip!.StepButton(3).GrabFocus(); await LookKey(Key.Enter);
             SupportRequire(_battleSequenceOpen && View.Version == version, "Keyboard sequence inspection changed game"); await SupportCapture("-sequence");
