@@ -93,7 +93,7 @@ internal static class BattleAbsentMovesTests
     private static void MarkedInventoryPinned()
     {
         var marked = string.Join(",", AbilityCatalog.All.Where(p => p.Value.MovesToBattle).Select(p => p.Key).OrderBy(k => k, StringComparer.Ordinal));
-        Eq(marked, "charge-into-danger-move,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
+        Eq(marked, "charge-into-danger-move,dislodge-the-foe,earth-flows-move,hawado-move-battlefield,houken-exp-straighten,intervening-spirit-move,mai-move-force-penalty,michi-move,return-to-action-move,rikyou-move,sanctuary-of-the-waves-move,takasho-move,training-move-current,training-move-to-battle,trusting-instinct-move,your-clan-needs-you");
         foreach (var (id, ability) in AbilityCatalog.All.Where(p => p.Value.MovesToBattle))
             Check(ability.Timing is "Battle" or "BattleOrOpen", $"{id}: a move to the battle is a Battle action");
     }
@@ -173,6 +173,8 @@ internal static class BattleAbsentMovesTests
         else if (definition.Type == CardType.Spell) card = Add(s, definition.Id, actor, Zone.Attached, parent: host.Id);
         else card = Add(s, definition.Id, actor, Zone.Hand);
         Add(s, "training-lion-samurai", actor, Zone.DynastyDiscard);
+        // Dislodge the Foe (issue #264): the performing Tacticians stand at ANOTHER battlefield, with the Personality who opposes them there.
+        if (ability == "dislodge-the-foe") { s.UnresolvedBattlefields = [0, 1]; Add(s, "training-tactician", actor, Zone.Battlefield, province: 1); Add(s, "training-lion-samurai", 1 - actor, Zone.Battlefield, province: 1); }
         return (s, card);
     }
 
@@ -187,7 +189,7 @@ internal static class BattleAbsentMovesTests
             {
                 var (s, card) = RigFor(ability, actor);
                 var e = MatchEngine.FromTestState(s);
-                Eq(s.Cards.Values.Count(c => c.OwnerId == actor && c.Zone == Zone.Battlefield), 0, "precondition: the actor has no unit at the battlefield");
+                Eq(s.Cards.Values.Count(c => c.OwnerId == actor && c.Zone == Zone.Battlefield && c.ProvinceIndex == 0), 0, "precondition: the actor has no unit at the battlefield");
                 var offer = Offer(e, actor, ability, card.Id);
                 if (offer is { Enabled: true }) offeredTo.Add(actor); else reasons.Add($"player {actor}: {(offer is null ? "not offered" : offer.Reason)}");
             }

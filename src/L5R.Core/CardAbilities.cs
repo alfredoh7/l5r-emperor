@@ -908,7 +908,7 @@ public static class AbilityCatalog
         // Iaijutsu Personality below. Simplified from its own printed text: "if he is dishonorable,
         // this movement will not be negated" is dropped -- nothing in the engine negates movement
         // yet, so the clause is currently unobservable regardless.
-        ["daisuke-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Move the duel's loser home.", "enemy-personality", IssuesDuel: true),
+        ["daisuke-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Move the duel's loser home.", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Iaijutsu"]),
         ["fujimura-expose"] = new("Limited", "Bow Fujimura and target a Dishonorable Personality: his controller loses 2 Honor", "dishonorable-personality", Costs: ActionCost.BowSource),
         ["kinaro-exp-bow"] = new("Open", "Iaijutsu, bow: Bow a target Personality with lower Personal Honor; gain 1 Honor if you control Kakita Ichigiku", "personality-lower-honor-than-self", Costs: ActionCost.BowSource),
         ["nakai-exp-weaken"] = new("Open", "Give a target Personality -2F, or -3F if he is dishonorable", "personality"),
@@ -921,7 +921,7 @@ public static class AbilityCatalog
         // BattleOrOpen carries none of the shared Battle-timing presence checks (matching every other
         // BattleOrOpen ability already in the catalog), so no new exception is needed here.
         ["houken-exp-straighten"] = new("BattleOrOpen", "Even if bowed: straighten Houken's unit. Move him home, or to the current battlefield if he would be opposed there.", "none", MovesToBattle: true),
-        ["ichizo-exp-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true),
+        ["ichizo-exp-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Iaijutsu"]),
         // Mirumoto Kojinrue: simplified cost -- always bows Kojinrue himself rather than offering a
         // choice between him and one of his Weapons, the same "drop the choice among several eligible
         // own cards" simplification used a few more times below (no generic cost-choice mechanism
@@ -958,7 +958,7 @@ public static class AbilityCatalog
         ["mitoshi-bow"] = new("Battle", "Target a Personality with lower Force than Mitoshi: bow him", "personality-force-lt-self", UsageKey: "mitoshi-bow-straighten"),
         ["mitoshi-straighten"] = new("Battle", "Target a Personality with lower Force than Mitoshi: straighten him", "personality-force-lt-self", UsageKey: "mitoshi-bow-straighten"),
         ["shikei-draw"] = new("Limited", "Shikei meditates: draw a card", "none"),
-        ["shikei-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true),
+        ["shikei-duel"] = new("Battle", "Iaijutsu: Target an enemy Personality: duel him. Destroy the duel's loser.", "enemy-personality", IssuesDuel: true, ActionKeywords: ["Iaijutsu"]),
         // Mirumoto Yozo, Experienced: reuses the exact existing enemy-card-without-attachments
         // category verbatim (a Follower, or a Personality without attachments).
         ["yozo-exp-destroy"] = new("Battle", "Iaijutsu: Target an enemy Follower or Personality without attachments: destroy it (remove it from the game instead if it is a Lion Clan Personality)", "enemy-card-without-attachments"),
@@ -1666,6 +1666,23 @@ public static class AbilityCatalog
         // Barred Passage (oracle-l5r-708): a Hero alone in his army bows an enemy Personality's unit.
         ["barred-passage-bow"] = new("Battle", "Heroic Battle: Target your performing unbowed Hero, who must be the only Personality in his army, to target an enemy Personality and bow his unit", "enemy-personality",
             Performer: "own-unbowed-personality-at-battle-with-keyword", RequiredKeywords: ["Hero"]),
+        // A Fugitive Apprehended (oracle-l5r-24): the performer is "target your performing unbowed Personality"; the first target is bowed, and -- Mendon -- a Magistrate's optional SECOND target, taken after the
+        // first, has its Gold Cost reduced to 0 (never a way round the first target's "lower Gold Cost").
+        ["fugitive-apprehended"] = new("Battle", "Target your performing unbowed Personality. Bow a target enemy card without attachments and with lower Gold Cost. If your Personality is a Magistrate, you may target an enemy card and reduce its Gold Cost to 0", "slots",
+            Performer: "own-unbowed-personality-at-battle", Slots: [new("bow", "enemy-bare-card-lower-gold-than-performer", "Enemy card without attachments and with lower Gold Cost to bow"),
+                new("cost", "enemy-card-for-magistrate", "A Magistrate's optional enemy card: its Gold Cost becomes 0", 0, 1)]),
+        // Dislodge the Foe (oracle-l5r-2024): Mendon: "N Tacticians may be designated as performers and there is one opposing personality". The Tacticians are a performing slot (not targets);
+        // they stand at one non-current battlefield with the Personality who opposes them there, and move to the current battlefield.
+        ["dislodge-the-foe"] = new("Battle", "Target one or more of your performing Tacticians at the same, non-current battlefield to target a Personality opposing them: Move the Tacticians to the current battlefield", "slots", MovesToBattle: true,
+            Slots: [new("tacticians", "own-tactician-away-from-battle", "Your performing Tacticians at one other battlefield", 1, 8, Performing: true), new("opposing", "enemy-personality-where-performers-stand", "The Personality opposing them")],
+            Move: new(MoveSpec.PerformingSlot, MoveSpec.CurrentBattlefield)),
+        // Kyuden Kitsune (oracle-l5r-4642, Stronghold): Limited, bow one of your Forests to gain 1 Honor. ("Your forests are maddening" is flavor -- Mendon.) Its static movement negation is the Effect.
+        ["kitsune-forest-honor"] = new("Limited", "Bow your target Forest to gain 1 Honor", "own-unbowed-card-with-keyword", RequiredKeywords: ["Forest"], Costs: ActionCost.BowTarget),
+        // Know No Fear (oracle-l5r-4481) and To First Blood (oracle-l5r-8500): Strategies whose Reactions are played from a hand when another player's action targets your card.
+        ["know-no-fear-negate-move"] = new("Reaction", "After another player's action targets your performing Samurai: Negate his bowing and movement from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        ["know-no-fear-negate-fear"] = new("Reaction", "After a Fear action targets your performing Samurai: Negate its effects", "none", Trigger: ReactionTriggers.TargetedByAction),
+        ["to-first-blood-focus"] = new("FocusEffect", "As a Focus Effect: Negate any destruction for losing this duel. After this duel ends, its winner's controller gains 2 Honor.", "none"),
+        ["to-first-blood-negate"] = new("Reaction", "After another player's Iaijutsu action targets your Personality: Negate his destruction from the action's effects", "none", Trigger: ReactionTriggers.TargetedByAction),
         // Great Sacrifice (oracle-l5r-2900): destroy your performing Personality (the cost) to destroy an enemy unit whose total Force does not exceed the performer's Force plus Personal Honor (plus one if he is defending).
         ["great-sacrifice-destroy"] = new("Battle", "Destroy your performing unbowed Personality and target an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending: Destroy the enemy unit", "enemy-unit-within-performer-sacrifice",
             Performer: "own-unbowed-personality-at-battle", Costs: [new(CostVerbs.Sacrifice, CostSubject.Performer)]),
@@ -2154,7 +2171,7 @@ public sealed partial class MatchEngine
     // otherwise have applied, via the NegatesEffect check StalwartNegatesBow now performs first).
     private static bool BowsTarget(string abilityId) => abilityId is "paid-bow" or "unorthodox-attack" or "chokehold" or "immovable-object-bow"
         or "naga-remnants-bow" or "costly-feud" or "block-supply" or "bow-before-my-will" or "surety-of-purpose" or "unexpected-support" or "spirit-monk-bow" or "spirit-paragon-bow"
-        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow"
+        or "discovering-conspiracy-expose" or "insulting-gesture-shame" or "barred-passage-bow" or "silent-terror-bow" or "fugitive-apprehended"
         or "strategic-sacrifice-toggle" or "weakness-of-man-toggle" or "shosuro-ritoru-bow" or "nightingale-blade-bow" or "law-of-darkness-weaken"
         or "training-bow-enemy" or "training-bow-at-battle" or "training-bow-enemy-card-at-battle" or "training-bow-enemy-card-open" or "training-bow-any" or "horibe-bow" or "dairuko-exp-bow" or "furu-bow"
         or "tsudoken-exp-bow" or "masumi-bow" or "tsukasa-bow" or "atsumichi-bow" or "bounty-hunter-bow" or "brothers-great-lake-bow"
@@ -3779,7 +3796,7 @@ public sealed partial class MatchEngine
                     // Return to Action (issue #331): "your Personality at HOME" is by definition not at the battlefield
                     // -- own-personality-at-home is exempt for the same reason.
                     if (actingAsBattle && ability.Target is not ("personality-at-adjacent-battlefield" or "own-unbowed-farm" or "region-or-terrain" or "own-personality-at-home")
-                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
+                        && id is not ("intervening-spirit-move" or "earth-flows-move" or "sanctuary-of-the-waves-move" or "dislodge-the-foe")) Require(AtBattle(target), "Target or performer must be at the current battlefield.");
                     var personality = type == CardType.Personality;
                     var own = target.OwnerId == player.Id;
                     // TargetMustBe (P2): a target-status legality condition layered onto whichever category
@@ -3817,6 +3834,19 @@ public sealed partial class MatchEngine
                         // dishonorable-personality below, either side.
                         "honorable-personality" => MatchesTargetStatus(target, TargetStatus.IsHonorable),
                         "own-personality" => personality && own,
+                        // A Fugitive Apprehended: an enemy card with no attachments whose Gold Cost is lower than the performing Personality's.
+                        "enemy-bare-card-lower-gold-than-performer" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                            && !HasAttachments(target) && CardGoldCost(target) < CardGoldCost(Card(command.PerformerId!)),
+                        // ...and the Magistrate's optional second target: any enemy card, but only when the performer is a Magistrate.
+                        "enemy-card-for-magistrate" => !own && (personality || target.Zone == Zone.Attached && type is CardType.Follower or CardType.Item or CardType.Spell)
+                            && command.PerformerId is not null && Keyword(Card(command.PerformerId), "Magistrate"),
+                        // Dislodge the Foe: one of your Tacticians at a battlefield other than the current one (all of them at one; ValidatePerformersTogether).
+                        "own-tactician-away-from-battle" => personality && own && Keyword(target, "Tactician") && target.Zone == Zone.Battlefield && target.ProvinceIndex != _state.CurrentBattleProvince,
+                        // Dislodge the Foe: the enemy Personality who opposes the chosen Tacticians -- at the battlefield they stand at (any enemy Personality until one is chosen, so the default offer is judged from the first).
+                        "enemy-personality-where-performers-stand" => personality && !own && (SlotCards(command, "tacticians").FirstOrDefault() is not { } standing
+                            || target.Zone == Zone.Battlefield && target.ProvinceIndex == standing.ProvinceIndex),
+                        // Kyuden Kitsune: "your target Forest" -- an unbowed card of the acting player's with the keyword.
+                        "own-unbowed-card-with-keyword" => own && !target.Bowed && HasKeywords(target, ability.RequiredKeywords),
                         // Great Sacrifice: "an enemy unit with total Force equal to or lower than your performer's Force, plus Personal Honor, plus one if he is defending".
                         "enemy-unit-within-performer-sacrifice" => personality && !own && BattleForce(target) <= SacrificeReach(Card(command.PerformerId!)),
                         // Rage of the Spirits: an enemy Personality or Follower with Force lower than or equal to the performing Spirit's.
@@ -5394,6 +5424,17 @@ public sealed partial class MatchEngine
                 if (!StalwartNegatesBow(target!, player.Id)) target!.Bowed = true;
                 foreach (var attached in Attachments(target!.Id)) attached.Bowed = true;
                 break;
+            // A Fugitive Apprehended: the first target is bowed, then the Magistrate's second target (if he named one) is reduced to a Gold Cost of 0.
+            case "fugitive-apprehended":
+                foreach (var toBow in SlotCards(command, "bow").ToArray()) if (!StalwartNegatesBow(toBow, player.Id)) toBow.Bowed = true;
+                foreach (var toZero in SlotCards(command, "cost").ToArray()) ReduceGoldCostToZero(toZero, source!.Id, id);
+                break;
+            case "dislodge-the-foe": ExecuteMove(command, ability, source, target); break;
+            case "kitsune-forest-honor": GainHonor(player.Id, 1, "Kyuden Kitsune", source); break;
+            // Know No Fear: the targeted Samurai's bowing and movement from the held action are negated, or the Fear action as a whole. To First Blood: his destruction.
+            case "know-no-fear-negate-move": NegateEffects(Card(HeldAction().TargetId!), "bow", "move"); break;
+            case "know-no-fear-negate-fear": NegateHeldAction(source!); break;
+            case "to-first-blood-negate": NegateEffects(Card(HeldAction().TargetId!), "destroy"); break;
             // Great Sacrifice: the performer's destruction was its cost; the enemy unit is destroyed.
             case "great-sacrifice-destroy": DestroyUnits([target!], false, player.Id); break;
             // Rage of the Spirits: both bows were paid as costs (the Shugenja's and the Spirit's); the enemy card is destroyed, and Earth pays a bonus.
@@ -6367,7 +6408,7 @@ public sealed partial class MatchEngine
             Emit("moveNegated", $"{Definition(card).Name}'s movement was negated before it resolved.", card.OwnerId, card.Id);
             return false;
         }
-        MoveToBattlefield(card, province);
+        if (!MoveToBattlefield(card, province)) return false;
         Emit("unitMovedToBattlefield", $"{Definition(card).Name}'s unit moved to the battlefield at province {province + 1}.", card.OwnerId, card.Id);
         return true;
     }

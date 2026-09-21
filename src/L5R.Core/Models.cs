@@ -486,6 +486,8 @@ public sealed class FieldsOfMercyWatch
 /// Focus-Effect-bearing focused cards) -> resolved (PendingDuel set back to null).</summary>
 public sealed class PendingDuel
 {
+    // Negations a Reaction set on the issuing action (To First Blood's "negate his destruction from the action's effects"): the duel's own outcome is one of that action's effects.
+    public List<NegatedEffect> NegatedEffects { get; set; } = [];
     public string AbilityId { get; set; } = "";
     // The card the challenge-issuing ability is printed on (an Attack keeps it in PendingAttack.Command.CardId); null for a player ability.
     public string? SourceCardId { get; set; }
@@ -752,6 +754,8 @@ public sealed class MatchState
     // Spirit of the Berserker (Second City): "Delay his destruction from the action's effects until before this turn ends" -- the Personalities whose destruction a
     // reaction has put off, destroyed for real at the top of EndTurn if they are still in play (DelayedDestruction.cs).
     public List<string> PendingDelayedDestructions { get; set; } = [];
+    // Kyuden Kitsune: the battles ("turn:province") whose one negated movement has been used.
+    public List<string> KitsuneNegatedBattles { get; set; } = [];
     // Legion of the Bat (issue #279): "after the resolution of an action that moved a target enemy
     // Infantry Personality to this card's battlefield" -- MoveToBattlefield itself (the sole "an
     // action moved a card to a battlefield" primitive; ordinary Attack/Defense assignment goes

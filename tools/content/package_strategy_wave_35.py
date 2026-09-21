@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build Strategy wave 35 (issue #264, Second City pass): Great Sacrifice (2900), On the Hunt (5704), Tireless Efforts (8496), Costly Opportunity (1522), Silent Terror (7261), Goju Plot (2856), Discovering a Conspiracy (2011), Insulting Gesture (3779) and Barred Passage (708).
+"""Build Strategy wave 35 (issue #264, Second City pass): Great Sacrifice (2900), On the Hunt (5704), Tireless Efforts (8496), Costly Opportunity (1522), Silent Terror (7261), Goju Plot (2856), Discovering a Conspiracy (2011), Insulting Gesture (3779), Barred Passage (708), and -- after Mendon's rulings -- A Fugitive Apprehended (24), Dislodge the Foe (2024), Know No Fear (4481) and To First Blood (8500).
 
 Every scan was read by eye and its source receipt (with the working copy's sha256) is recorded next to the wave.
 """
@@ -24,6 +24,10 @@ ABILITIES: dict[int, list[str]] = {
     2011: ["discovering-conspiracy-focus", "discovering-conspiracy-expose"],
     3779: ["insulting-gesture-take", "insulting-gesture-shame"],
     708: ["barred-passage-bow"],
+    24: ["fugitive-apprehended"],
+    2024: ["dislodge-the-foe"],
+    4481: ["know-no-fear-negate-move", "know-no-fear-negate-fear"],
+    8500: ["to-first-blood-focus", "to-first-blood-negate"],
 }
 OVERRIDE: dict[int, dict] = {
 }
