@@ -1,0 +1,159 @@
+{
+  "Profile": "personality-wave-39",
+  "Rules": "Emperor Edition core rules; curated Effect/Ability IDs, never inferred from prose.",
+  "Cards": [
+    {
+      "Id": "oracle-l5r-6867",
+      "Name": "Shinjo Dak-ho",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 8,
+      "GoldProduction": 0,
+      "Force": 3,
+      "Chi": 3,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Battle: Create a 2F/2C/2PH Unicorn Clan • Samurai • Cavalry • Scout Personality at this battlefield. Remove him from the game after this battle ends.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-6867.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Scout",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "dak-ho-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-3091",
+      "Name": "Hida Fubatsu",
+      "Type": "Personality",
+      "Clan": "Crab",
+      "GoldCost": 10,
+      "GoldProduction": 0,
+      "Force": 6,
+      "Chi": 3,
+      "PersonalHonor": 3,
+      "HonorRequirement": 3,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Limited: Target your Personality: Create a +1F Armor or Weapon Item and attach it to him.\nBattle: Target an enemy card without attachments: Bow it. If it is an attachment, remove it from the game.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-3091.jpg",
+      "Keywords": [
+        "Tactician",
+        "Unique",
+        "Artisan",
+        "Blacksmith",
+        "Crab Clan",
+        "Experienced",
+        "Hero",
+        "Naga",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "fubatsu-create",
+        "fubatsu-bow"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10463",
+      "Name": "Matsu Nimuro",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 14,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": 15,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "Nimuro's printed ability will not be copied.\nLimited: Once per game, create a Personality titled The False Nimuro with Nimuro's printed Force, Chi, Personal Honor, and keywords.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10463.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [
+        "nimuro-create"
+      ],
+      "Effect": "none"
+    },
+    {
+      "Id": "oracle-l5r-10001",
+      "Name": "Dak-ho's Men",
+      "Type": "Personality",
+      "Clan": "Unicorn",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 2,
+      "Chi": 2,
+      "PersonalHonor": 2,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "May not be included in decks.",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10001.jpg",
+      "Keywords": [
+        "Cavalry",
+        "Samurai",
+        "Scout",
+        "Unicorn Clan"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    },
+    {
+      "Id": "oracle-l5r-10807",
+      "Name": "The False Nimuro",
+      "Type": "Personality",
+      "Clan": "Lion",
+      "GoldCost": 0,
+      "GoldProduction": 0,
+      "Force": 5,
+      "Chi": 5,
+      "PersonalHonor": 4,
+      "HonorRequirement": null,
+      "ProvinceStrength": 0,
+      "StartingHonor": 0,
+      "Text": "",
+      "ScenarioOnly": false,
+      "ArtworkKey": "res://Content/Published/oracle-l5r-10807.jpg",
+      "Keywords": [
+        "Duelist",
+        "Experienced 2",
+        "Loyal",
+        "Tactician",
+        "Unique",
+        "Clan Champion",
+        "Lion Clan",
+        "Samurai"
+      ],
+      "Focus": 0,
+      "Abilities": [],
+      "Effect": "none",
+      "CreatedOnly": true
+    }
+  ],
+  "Decks": []
+}

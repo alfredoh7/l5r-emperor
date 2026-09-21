@@ -6,7 +6,7 @@ using L5R.Core;
 // (Rebuilding Kyuden Hida, 6200). Every position is played through the commands the engine offers.
 internal static class KyudenHidaExpTests
 {
-    private const string KyudenHida = "oracle-l5r-4638", Ebizo = "oracle-l5r-1629", Scout = "created-scout-follower";
+    private const string KyudenHida = "oracle-l5r-4638", Ebizo = "oracle-l5r-1629", Scout = "oracle-l5r-9714";
 
     public static void Run(TestRunner runner)
     {
@@ -15,7 +15,7 @@ internal static class KyudenHidaExpTests
             ("Engage Reaction: Reconnaissance at the battlefield and a 0F Scout Follower attached to each of one to three chosen Personalities of the current army, removed from the game when the battle ends", ScoutsAreCreatedAndRemoved),
             ("The choice is exactly one to three DIFFERENT Personalities of your own current army: none, four, a repeat, an enemy, a Personality at home are all rejected, and the offer lists the army", ChoiceRules),
             ("A Recon Reaction like any other: Ebizo gets his +1F, and a Defender's own Kyuden Hida works for the Defender's army (Reconnaissance is theirs)", ReconActionAndDefender),
-            ("A Scout whose host is destroyed is still removed from the game (not left in a discard pile); the created card is scenario-only, so it is no published card", RemovedEvenWhenHostDies),
+            ("A Scout whose host is destroyed is still removed from the game (not left in a discard pile); the created card is Kyuden Hida Survivor, a published created-only scan (Mendon, issue #394)", RemovedEvenWhenHostDies),
             ("With no Personality in your army the Reaction is not offered and no Engage window opens for it", NeedsAnArmy),
         ];
         runner.Run("kyuden-hida-exp", tests);
@@ -70,8 +70,10 @@ internal static class KyudenHidaExpTests
         var ev = CardCatalog.Get("oracle-l5r-6200");
         Eq(ev.Type, CardType.Event); Check(ev.Id != c.Id && ev.Effect == "rebuilding-kyuden-hida");
         var scout = CardCatalog.Get(Scout);
-        Check(scout.ScenarioOnly && scout.Type == CardType.Follower && scout.Force == 0 && scout.Keywords!.Contains("Scout"), "the created Follower: 0F, Scout, scenario-only");
-        Check(!CardCatalog.Cards.Values.Where(x => !x.ScenarioOnly).Any(x => x.Id == Scout), "not a published card");
+        Check(!scout.ScenarioOnly && scout.CreatedOnly && scout.Name == "Kyuden Hida Survivor" && scout.Type == CardType.Follower && scout.Force == 0 && scout.Keywords!.Contains("Scout"), "the created Follower: 0F, Scout, the created-only Survivor scan");
+        Check(!CardCatalog.PlayableFromDecks.Any(x => x.Id == Scout) && Support337.ArtShipped(Scout), "never playable from a deck, art shipped");
+        Check(!CardCatalog.Cards.ContainsKey("created-scout-follower"), "the synthetic scenario-only Scout is gone");
+        Check(CreatedCards.Resolve(AbilityCatalog.All["kyuden-hida-exp-scouts"].Creates!).Id == Scout, "resolved by the spec: a 0F Scout Follower, naming the Survivor (the Kyuden Hida Scout scan prints the same card)");
     }
 
     private static void ScoutsAreCreatedAndRemoved()
