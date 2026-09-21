@@ -1,9 +1,9 @@
 {
   "lane": "shared",
-  "summary": "Package Alfredo-approved demos 5-8 as four named self-contained Windows launchers pinned to PR410 552b54a4; stage verified private release and prepare Mendon approval/feedback notification. Tolerate delayed GitHub draft listings without duplicate creation.",
-  "validation": "Source native/engine/transport checks and four actual Mac launches pass; Windows export resources/runtime/source exclusion validated. Inspected every launcher and embedded README/spec plus new tab asset inside actual ZIP; package SHA-256 and size verified locally and on GitHub. Packaging/publication regressions 9/9 pass including delayed-listing resume. Main 828f1bb7 integrated; unrelated untracked comments file preserved.",
-  "remaining": "Exact uploaded package must pass Windows review package CI on this delivery commit before publish.py deliver posts Mendon notification. Human Windows graphical/rules review and main merge remain pending.",
+  "summary": "Deliver approved Windows demos 5-8 pinned to PR410 552b54a4; keep real exported binaries untouched during launcher routing checks and tolerate delayed draft listing.",
+  "validation": "Local packaging/publication tests 9/9 pass; archive and upload SHA/size verified. Windows run c87d3b13 passed new 5-8 runtime and all six launchers, then an older package hit a post-exit executable rename lock. Routing now tests hash-identical launcher copies in separate scratch storage while real export/resource checks remain intact. Source Mac/native/engine and four actual app launches pass.",
+  "remaining": "Await complete Windows package check on the new delivery revision, then publish.py deliver must notify Mendon. Human graphical/rules review and main merge remain pending.",
   "issue": "https://github.com/alfredoh7/l5r-emperor/issues/297",
   "branch": "codex/297-windows-review",
-  "updated": "2026-09-21T11:31:30.431421+00:00"
+  "updated": "2026-09-21T11:37:30.926506+00:00"
 }
