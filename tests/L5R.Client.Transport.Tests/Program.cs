@@ -21,6 +21,7 @@ try
         ("shown-card history arrives on both seats and survives live reconnect without exposing other deck cards", ShownHistoryReconnect),
         ("client rejects insecure remote URLs and invalid room reservations", () => InvalidConnections(url)),
         ("client command payload carries every GameCommand field the server accepts (issue #303)", () => { OutgoingPayload(); return Task.CompletedTask; }),
+        ("alternative costs survive the server envelope and selected cost submission for the first four previews", () => { AlternativeCostProjection(); return Task.CompletedTask; }),
         ("deck search: the searcher's deck viewer, the public shown-cards record and every search action survive the server envelope and the client's deserialization (issue #312)", () => { SearchViewsCrossTheWire(); return Task.CompletedTask; }),
         ("look at the top cards: the viewer's ordered cards, the deck choice over any of four decks (the opponent's included) and every look action survive the server envelope and the client's deserialization (issue #322)", () => { LookViewsCrossTheWire(); return Task.CompletedTask; })
     };
@@ -40,6 +41,25 @@ finally
     if (Directory.Exists(storage)) Directory.Delete(storage, recursive: true);
 }
 return failures == 0 ? 0 : 1;
+
+static void AlternativeCostProjection()
+{
+    var view=MatchEngine.CreateEconomyScenario().GetView(0);
+    foreach(var cost in new[]{"bow","destroy"})
+    {
+        var offered=new ActionOption("useAbility","Choose a cost",true,null,
+            new GameCommand("useAbility",0,view.Version,"source",AbilityId:"ability",CostOption:cost),
+            "source",AlternativeCost:new("ability","source",cost,cost+" this card","Choose a cost"));
+        var message=new StateMessage("state","ABCDEFGH",0,view.Version,view,[AvailableAction.FromCore(offered)],[true,true]);
+        using var json=JsonDocument.Parse(JsonSerializer.Serialize(message,Protocol.Json));
+        var web=new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var received=json.RootElement.GetProperty("actions").Deserialize<ActionOption[]>(web)!.Single();
+        Check(received.AlternativeCost==offered.AlternativeCost,"The server dropped the authoritative alternative-cost presentation");
+        var wire=JsonSerializer.Serialize(MatchSession.ToWire(received.Command!),web);
+        var bound=JsonSerializer.Deserialize<WireGameCommand>(wire,Protocol.Json)!.BindToSeat(0,view.Version);
+        Check(bound.CostOption==cost&&bound.CardId=="source"&&bound.AbilityId=="ability","The selected cost changed during submission");
+    }
+}
 
 static async Task LivePlay(string url)
 {

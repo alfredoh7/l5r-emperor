@@ -1,5 +1,7 @@
 # Eight UI previews — Alfredo's review batch
 
+**2026-09-21 update:** Alfredo approved previews 1–4, with direct deck navigation for #4. Mendon approval and passing checks are required before their merge. Previews 5–8 await Alfredo. See the [current acceptance decision](../decisions/2026-09-21-first-four-ui-review-approval.md), which supersedes earlier acceptance wording below.
+
 ## Delivery and acceptance
 
 Alfredo approved these concept combinations. Implementation completion means a tested, launchable review candidate. **No merge into main is authorized.** Each task needs its own clickable Mac launcher opening a prepared real-engine scenario, a short test checklist, native screenshots, and honest limitations. Alfredo may approve or request changes independently. Rules acceptance and native Windows testing are separate from automated checks.

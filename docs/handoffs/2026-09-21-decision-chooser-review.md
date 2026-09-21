@@ -1,4 +1,5 @@
 # Decision chooser (#339) — ready for individual review
+**Current acceptance (2026-09-21): Alfredo approved previews 1–4. Merge is contingent on Mendon approving and passing checks; his review is pending. Previews 5–8 remain unapproved.** See the [current decision](../decisions/2026-09-21-first-four-ui-review-approval.md), which supersedes earlier acceptance wording below.
 
 This is **1 of 8** approved UI previews. **No merge into main is authorized.** PR [#392](https://github.com/alfredoh7/l5r-emperor/pull/392) remains a draft against the isolated `codex/ui-eight-preview-base`; the other seven tasks remain pending. Test success and human acceptance do not authorize a merge.
 

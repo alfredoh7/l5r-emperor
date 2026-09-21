@@ -67,9 +67,13 @@ public partial class Main
     private async Task PickSearchDeck(string deck)
     {
         var version=View.Version;
+        SupportRequire(!_searchPanel!.ConfirmButton.IsVisibleInTree(),"Deck choice must not show a second confirmation");
         await SupportClick(StabilizationButtons(_searchPanel!).Single(b=>b.HasMeta("deck")&&b.GetMeta("deck").AsString()==deck));
-        SupportRequire(View.Version==version,"Choosing a deck must wait for confirmation");
-        await SupportClick(_searchPanel!.ConfirmButton);await WaitDecisionPresentation();await EventFrames(12);
+        await WaitDecisionPresentation();await EventFrames(12);
+        SupportRequire(View.Version==version+1&&View.PendingSearch is {Stage:SearchStage.Select} search&&search.Deck==deck,
+            "One deck click must open the chosen private gallery with exactly one command");
+        SupportRequire(_searchPanel!.ConfirmButton.IsVisibleInTree()&&_searchPanel.ConfirmButton.Disabled,
+            "Card choices must retain explicit confirmation and start without a selection");
     }
     private async Task SearchFilter(string text)
     {
@@ -108,7 +112,7 @@ public partial class Main
             _preferences.ReducedMotion=_captureMode.Contains("reduced");ApplyPreferences(false);
             await PrepareSearchReview();
             if(_captureMode.Contains("review")){GD.Print("DECK_SEARCH_REVIEW_READY: choose Dynasty or Fate; other prepared scenarios are above the panel.");return;}
-            SupportRequire(_searchPanel is not null&&View.PendingSearch?.Entries is null&&_searchPanel.ConfirmButton.Disabled,"Deck step must not disclose candidates or preselect a deck");
+            SupportRequire(_searchPanel is not null&&View.PendingSearch?.Entries is null&&!_searchPanel.ConfirmButton.IsVisibleInTree(),"Deck step must not disclose candidates or show a redundant confirmation");
             await SupportCapture("-decks");await PickSearchDeck("Dynasty");
             await SupportCapture("-gallery");
             SupportRequire(_searchPanel!.Cards.Count==View.PendingSearch!.Entries!.Length&&!StabilizationButtons(_searchPanel).Any(b=>b.Text.StartsWith("Pass",StringComparison.Ordinal)),"Mandatory search lost candidates or offered Pass");
@@ -156,7 +160,7 @@ public partial class Main
             SupportRequire(View.PendingSearch!.Optional&&View.PendingSearch.CanPass&&_searchPanel!.Cards.Any(c=>c.Entry.Eligible),"Optional fixture missing legal cards or Pass");
             await SupportClick(StabilizationButtons(_searchPanel!).Single(b=>b.Text.StartsWith("Pass",StringComparison.Ordinal)));await SupportCapture("-optional");
             await SupportClick(_searchPanel!.ConfirmButton);await WaitDecisionPresentation();SupportRequire(View.PendingSearch is null&&View.ShownCards!.Length==0,"Optional pass revealed a card or failed to finish");
-            GD.Print("DECK_SEARCH_PASS: native deck/entry confirmation, full-card inspection, grouping, filter, ineligible reasons, both seats, Region, Terrain discard, no-match Pass, Imperial Gift and quoted payment");GetTree().Quit();
+            GD.Print("DECK_SEARCH_PASS: single-click deck navigation, explicit card confirmation, full-card inspection, grouping, filter, ineligible reasons, both seats, Region, Terrain discard, no-match Pass, Imperial Gift and quoted payment");GetTree().Quit();
         }
         catch(Exception e){await SupportCapture("-failure");GD.PushError(e.ToString());GetTree().Quit(1);}
     }

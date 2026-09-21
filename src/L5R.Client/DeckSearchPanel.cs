@@ -49,7 +49,7 @@ public sealed partial class DeckSearchPanel : PanelContainer
         context.AddChild(Palette.Wrapped("Private search",19,Palette.PaperDim));context.AddChild(new HSeparator());
         context.AddChild(Palette.Wrapped(search.Criteria is null?search.Prompt:"Choose: "+search.Criteria,21));
         if(search.Deck is not null)context.AddChild(Palette.Wrapped(search.CardsRemaining+" cards remaining\nGrouped by type and name",17,Palette.PaperDim));
-        context.AddChild(Palette.Wrapped("Select one option, then confirm.",17,Palette.PaperDim));
+        context.AddChild(Palette.Wrapped(search.Stage==SearchStage.ChooseDeck?"Choose a deck to open its card list.":"Select one card, then confirm.",17,Palette.PaperDim));
         var center=new VBoxContainer {SizeFlagsHorizontal=SizeFlags.ExpandFill};center.AddThemeConstantOverride("separation",12);row.AddChild(center);
         _filter=new LineEdit {PlaceholderText="Find a card…",ClearButtonEnabled=true,CustomMinimumSize=new(0,44),Visible=search.Stage==SearchStage.Select};
         _filter.AccessibilityName="Filter the private card list by name";center.AddChild(_filter);
@@ -58,11 +58,11 @@ public sealed partial class DeckSearchPanel : PanelContainer
         _gallery.SizeFlagsHorizontal=SizeFlags.ExpandFill;_gallery.AddThemeConstantOverride("separation",14);_scroll.AddChild(_gallery);
         var previewFrame=new PanelContainer {CustomMinimumSize=new(336,0)};previewFrame.AddThemeStyleboxOverride("panel",SidebarSkin.Inset());row.AddChild(previewFrame);
         _preview.AddThemeConstantOverride("separation",8);previewFrame.AddChild(_preview);
-        _body.AddChild(new HSeparator());
-        var footer=new HBoxContainer();footer.AddThemeConstantOverride("separation",20);_body.AddChild(footer);
-        _selection=Palette.Wrapped(search.Stage==SearchStage.ChooseDeck?"Choose which deck to search.":"Your selection will be shown to your opponent.",18,Palette.PaperDim);
+        _body.AddChild(new HSeparator {Visible=search.Stage==SearchStage.Select});
+        var footer=new HBoxContainer {Visible=search.Stage==SearchStage.Select};footer.AddThemeConstantOverride("separation",20);_body.AddChild(footer);
+        _selection=Palette.Wrapped("Your selection will be shown to your opponent.",18,Palette.PaperDim);
         _selection.SizeFlagsHorizontal=SizeFlags.ExpandFill;footer.AddChild(_selection);
-        _confirm=SidebarSkin.Button(search.Stage==SearchStage.ChooseDeck?"Search selected deck":"Confirm selection",()=>
+        _confirm=SidebarSkin.Button("Confirm selection",()=>
         {if(_canSubmit&&_selected is {Enabled:true,Command:not null} chosen)Confirmed?.Invoke(chosen);},true);
         _confirm.CustomMinimumSize=new(300,56);_confirm.Disabled=true;footer.AddChild(_confirm);
         if(search.CanPass&&actions.FirstOrDefault(a=>a.Type=="passSearch"&&a.Enabled&&a.Command is not null) is {} pass)
@@ -89,9 +89,9 @@ public sealed partial class DeckSearchPanel : PanelContainer
             var button=SidebarSkin.Button(deck.Label+"\n"+deck.Criteria+" · "+deck.CardsRemaining+" cards",()=>
             {
                 if(action is not {Enabled:true,Command:not null}||!_canSubmit)return;
-                _selected=action;_confirm.Disabled=false;_selection.Text="Selected: "+deck.Label;
-                foreach(var b in _gallery.GetChildren().OfType<Button>())b.Text=b.Text.TrimStart('✓',' ');
-                ((Button)_gallery.GetChildren().OfType<Button>().Single(b=>b.GetMeta("deck").AsString()==deck.Deck)).Text="✓  "+deck.Label+"\n"+deck.Criteria+" · "+deck.CardsRemaining+" cards";
+                _canSubmit=false;
+                foreach(var b in _gallery.GetChildren().OfType<Button>())b.Disabled=true;
+                Confirmed?.Invoke(action);
             });
             button.SetMeta("deck",deck.Deck);button.CustomMinimumSize=new(0,126);button.Disabled=!_canSubmit||action?.Enabled!=true;_gallery.AddChild(button);
         }
