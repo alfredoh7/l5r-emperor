@@ -57,6 +57,8 @@ public static class CardPreview
         if (card.Dishonorable) details.AddChild(Palette.Wrapped("Dishonorable", 20, new Color("efaa9a")));
         foreach (var grant in card.GrantedKeywords ?? [])
             details.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}", 16, Palette.Gold));
+        foreach (var grant in card.GrantedAbilities ?? [])
+            details.AddChild(Palette.Wrapped(GrantedAbilityText.Describe(grant), 16, Palette.Gold));
         details.AddChild(Palette.Wrapped(string.IsNullOrWhiteSpace(def.Text) ? "No activated ability is printed on this card. Its statistics and traits can still be used by the game and other card effects." : def.Text, 16, Palette.PaperDim));
         details.AddChild(Palette.Wrapped(context, 15, Palette.Crane)); body.AddChild(rules);
         body.AddChild(Palette.Wrapped("Click to select. Read longer rules in the inspector.\n? Rules explains the table and turn sequence.", 12, Palette.Muted));

@@ -46,6 +46,8 @@ public partial class Main
             if (_selected.Dishonorable) _inspector.AddChild(Palette.Wrapped("Dishonorable", 21, new Color("efaa9a")));
             foreach (var grant in _selected.GrantedKeywords ?? [])
                 _inspector.AddChild(Palette.Wrapped($"Granted {grant.Keyword} · {grant.Duration}\nSource: {grant.Source}",16,Palette.Gold));
+            foreach (var grant in _selected.GrantedAbilities ?? [])
+                _inspector.AddChild(Palette.Wrapped(GrantedAbilityText.Describe(grant),16,Palette.Gold));
             if (_selected.StraightenBlocked) _inspector.AddChild(Palette.Wrapped("Straightening is prevented for this turn.", 13, Palette.Gold));
             if (!string.IsNullOrWhiteSpace(def.Text)) _inspector.AddChild(Palette.Wrapped(def.Text, 16, Palette.PaperDim));
             if (def.Type == CardType.Personality && (_selected.Force != def.Force || _selected.Chi != def.Chi)) _inspector.AddChild(Palette.Wrapped($"Current: {_selected.Force} Force · {_selected.Chi} Chi", 16, Palette.Gold));
