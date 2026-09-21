@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved top-card viewer A without duplicate thumbnails or footer text (#323)",
+  "validation": "Planning and engine contract review only; implementation/native checks pending.",
+  "remaining": "Implement and validate the private viewer and prepared launcher; human reviews and no-merge gate remain.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/323",
+  "branch": "codex/323-top-card-viewer",
+  "updated": "2026-09-21T21:06:19.373446+00:00"
+}
