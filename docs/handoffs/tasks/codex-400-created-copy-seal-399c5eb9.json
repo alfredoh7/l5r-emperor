@@ -1,0 +1,9 @@
+{
+  "lane": "shared",
+  "summary": "Begin approved created-copy seal preview #400 on isolated UI review stack; inherited shared changes remain unmerged.",
+  "validation": "Live issue and open PRs inspected; origin/main 97d8e407 included. Implementation not started.",
+  "remaining": "Implement approved seal, native checks, launchable demo, review and CI. No main merge authorized.",
+  "issue": "https://github.com/alfredoh7/l5r-emperor/issues/400",
+  "branch": "codex/400-created-copy-seal",
+  "updated": "2026-09-21T22:44:40.338379+00:00"
+}
