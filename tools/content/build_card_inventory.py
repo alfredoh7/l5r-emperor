@@ -336,7 +336,7 @@ BLOCKERS: dict[str, str] = {
     # override (Assign's own new isDefender parameter, gated on Effect=="cavalry-if-defender") rather
     # than broadening the shared IsCavalryUnit logic itself. No remaining blocker note for him.
 
-    # Second City pass 2 (issue #264, 2026-09-21): every Second City card still unwired was re-checked against the engine as it now stands. 25 were wired (the list is in
+    # Second City pass 2 (issue #264, 2026-09-21): every Second City card still unwired was re-checked against the engine as it now stands. 24 were wired (the list is in
     # docs/decisions/2026-09-21-second-city-pass.md) and their notes removed; the rest were rewritten, because several old blockers named gaps that later work closed (Open-timed
     # keyword Performers, #322 look, #336 Gold-cost stat and action lock, #337 alternative costs, #387/#399 created cards and copies, #388 grants). What is left falls into six
     # families: (1) a decision made by the OTHER player inside your action (Dragon's Breath Castle, Know Their Minds, Scandalous Rumors); (2) a Reaction played from a hand to an
