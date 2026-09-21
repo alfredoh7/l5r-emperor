@@ -258,6 +258,8 @@ internal static partial class SecondCityRulingTests
         // Battlefield 0 is current. Player 0's Tacticians stand together at battlefield 1 with the enemy Personality who opposes them there.
         var s = Table(Phase.Battle, 0); s.PriorityPlayerId = 0; s.UnresolvedBattlefields = [0, 1];
         var t1 = Add(s, "training-tactician", 0, Zone.Battlefield, province: 1); var t2 = Add(s, "training-tactician", 0, Zone.Battlefield, province: 1);
+        // A Merchant Tactician whose own reactor would open a window if he were a TARGET of the action: as a performer he is not one.
+        var guard = Add(s, "training-merchant-free-guard", 0, Zone.Battlefield, province: 1); GiveKeyword(guard, "Tactician");
         var elsewhere = Add(s, "training-tactician", 0, Zone.Battlefield, province: 2);
         var here = Add(s, "training-tactician", 0, Zone.Battlefield, province: 0);
         var plain = Add(s, "training-crane-samurai", 0, Zone.Battlefield, province: 1);
@@ -275,8 +277,9 @@ internal static partial class SecondCityRulingTests
         Reject(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", t1.Id, t2.Id), Pick("opposing", foeElsewhere.Id)]));
         Reject(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", here.Id), Pick("opposing", foeHere.Id)]));
         Reject(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", plain.Id), Pick("opposing", foe.Id)]));
-        Accept(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", t1.Id, t2.Id), Pick("opposing", foe.Id)]));
-        Check(e.State.PendingChoice is null, "the Tacticians are performers, not targets: no reaction window opens for them");
+        Accept(e, Use(e, 0, "dislodge-the-foe", card.Id, selections: [Pick("tacticians", guard.Id, t1.Id, t2.Id), Pick("opposing", foe.Id)]));
+        Check(e.State.PendingChoice is null, "the Tacticians are performers, not targets: no reaction window opens for them, not even for one with a reactor of his own");
+        Check(e.State.Cards[guard.Id].ProvinceIndex == 0, "the first-named performer moved too");
         Check(e.State.Cards[t1.Id].ProvinceIndex == 0 && e.State.Cards[t2.Id].ProvinceIndex == 0 && e.State.Cards[t1.Id].Zone == Zone.Battlefield, "both Tacticians moved to the current battlefield");
         Check(e.State.Cards[foe.Id].ProvinceIndex == 1, "the opposing Personality stays where he was");
         Check(e.State.Cards[elsewhere.Id].ProvinceIndex == 2 && e.State.Cards[plain.Id].ProvinceIndex == 1, "nobody else moved");
@@ -293,6 +296,15 @@ internal static partial class SecondCityRulingTests
         var e3 = MatchEngine.FromTestState(s3);
         Accept(e3, Use(e3, 0, "dislodge-the-foe", c3.Id, selections: [Pick("tacticians", one.Id), Pick("opposing", f3.Id)]));
         Eq(e3.State.Cards[one.Id].ProvinceIndex, 0, "one Tactician is enough");
+        // The one TARGET is the opposing Personality, not the first Tactician named: Akodo Kakihara's "after an action targets him" is answered when he is that Personality.
+        var s4 = Table(Phase.Battle, 0); s4.PriorityPlayerId = 0; s4.UnresolvedBattlefields = [0, 1];
+        var first = Add(s4, "training-tactician", 0, Zone.Battlefield, province: 1); var c4 = Add(s4, Dislodge, 0, Zone.Hand);
+        var kakihara = Add(s4, "oracle-l5r-223", 1, Zone.Battlefield, province: 1);
+        var e4 = MatchEngine.FromTestState(s4);
+        Accept(e4, Use(e4, 0, "dislodge-the-foe", c4.Id, selections: [Pick("tacticians", first.Id), Pick("opposing", kakihara.Id)]));
+        Eq(e4.State.PendingChoice?.Type, "beforeActionReaction", "the window opens for the opposing Personality");
+        Eq(e4.State.ReactionWindowTargetId, kakihara.Id, "and it is his window");
+        Check(ReactionOffered(e4, 1, "kakihara-force-bonus"), "Kakihara's Reaction to being targeted is offered");
     }
 
     // ---- Kyuden Kitsune ---------------------------------------------------------------------------------------------------------------------------
